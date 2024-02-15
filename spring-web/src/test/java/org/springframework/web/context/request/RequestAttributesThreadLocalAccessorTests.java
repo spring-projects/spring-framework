@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import io.micrometer.context.ContextRegistry;
 import io.micrometer.context.ContextSnapshot;
+import io.micrometer.context.ContextSnapshot.Scope;
 import io.micrometer.context.ContextSnapshotFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,6 +52,7 @@ class RequestAttributesThreadLocalAccessorTests {
 
 	@ParameterizedTest
 	@MethodSource
+	@SuppressWarnings({ "try", "unused" })
 	void propagation(@Nullable RequestAttributes previous, RequestAttributes current) throws Exception {
 		RequestContextHolder.setRequestAttributes(current);
 		ContextSnapshot snapshot = ContextSnapshotFactory.builder()
@@ -64,7 +66,7 @@ class RequestAttributesThreadLocalAccessorTests {
 		CountDownLatch latch = new CountDownLatch(1);
 		new Thread(() -> {
 			RequestContextHolder.setRequestAttributes(previous);
-			try (ContextSnapshot.Scope scope = snapshot.setThreadLocals()) {
+			try (Scope scope = snapshot.setThreadLocals()) {
 				currentHolder.set(RequestContextHolder.getRequestAttributes());
 			}
 			previousHolder.set(RequestContextHolder.getRequestAttributes());

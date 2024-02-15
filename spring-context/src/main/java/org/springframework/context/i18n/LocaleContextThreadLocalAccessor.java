@@ -19,8 +19,10 @@ package org.springframework.context.i18n;
 import io.micrometer.context.ThreadLocalAccessor;
 
 /**
- * Adapt {@link LocaleContextHolder} to the {@link ThreadLocalAccessor} contract to assist
- * the Micrometer Context Propagation library with {@link LocaleContext} propagation.
+ * Adapt {@link LocaleContextHolder} to the {@link ThreadLocalAccessor} contract
+ * to assist the Micrometer Context Propagation library with {@link LocaleContext}
+ * propagation.
+ *
  * @author Tadaya Tsuyukubo
  * @since 6.2
  */

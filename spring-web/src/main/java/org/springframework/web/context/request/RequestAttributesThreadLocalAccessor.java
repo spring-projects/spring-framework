@@ -19,8 +19,10 @@ package org.springframework.web.context.request;
 import io.micrometer.context.ThreadLocalAccessor;
 
 /**
- * Adapt {@link RequestContextHolder} to the {@link ThreadLocalAccessor} contract to assist
- * the Micrometer Context Propagation library with {@link RequestAttributes} propagation.
+ * Adapt {@link RequestContextHolder} to the {@link ThreadLocalAccessor} contract
+ * to assist the Micrometer Context Propagation library with
+ * {@link RequestAttributes} propagation.
+ *
  * @author Tadaya Tsuyukubo
  * @since 6.2
  */
