@@ -37,6 +37,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.testfixture.env.MockPropertySource;
 import org.springframework.mock.env.MockEnvironment;
+import org.springframework.util.PlaceholderResolutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -170,7 +171,7 @@ class PropertySourcesPlaceholderConfigurerTests {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class)
 			.isThrownBy(() -> ppc.postProcessBeanFactory(bf))
 			.havingCause()
-				.isExactlyInstanceOf(IllegalArgumentException.class)
+				.isExactlyInstanceOf(PlaceholderResolutionException.class)
 				.withMessage("Could not resolve placeholder 'my.name' in value \"${my.name}\"");
 	}
 
@@ -201,8 +202,8 @@ class PropertySourcesPlaceholderConfigurerTests {
 		assertThatExceptionOfType(BeanCreationException.class)
 			.isThrownBy(context::refresh)
 			.havingCause()
-				.isExactlyInstanceOf(IllegalArgumentException.class)
-				.withMessage("Could not resolve placeholder 'enigma' in value \"${enigma}\"");
+				.isExactlyInstanceOf(PlaceholderResolutionException.class)
+				.withMessage("Could not resolve placeholder 'enigma' in value \"${enigma}\" <-- \"${my.key}\"");
 	}
 
 	@Test

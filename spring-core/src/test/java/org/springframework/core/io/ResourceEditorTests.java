@@ -21,8 +21,10 @@ import java.beans.PropertyEditor;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.util.PlaceholderResolutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
@@ -96,7 +98,7 @@ class ResourceEditorTests {
 		PropertyEditor editor = new ResourceEditor(new DefaultResourceLoader(), new StandardEnvironment(), false);
 		System.setProperty("test.prop", "foo");
 		try {
-			assertThatIllegalArgumentException().isThrownBy(() -> {
+			assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() -> {
 					editor.setAsText("${test.prop}-${bar}");
 					editor.getValue();
 			});

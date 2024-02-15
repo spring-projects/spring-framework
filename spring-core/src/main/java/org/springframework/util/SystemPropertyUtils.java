@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,17 @@ public abstract class SystemPropertyUtils {
 	/** Value separator for system property placeholders: {@value}. */
 	public static final String VALUE_SEPARATOR = ":";
 
+	/** Default escape character: {@value}. */
+	public static final Character ESCAPE_CHARACTER = '\\';
+
 
 	private static final PropertyPlaceholderHelper strictHelper =
-			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, false);
+			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR,
+					false, ESCAPE_CHARACTER);
 
 	private static final PropertyPlaceholderHelper nonStrictHelper =
-			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR, true);
+			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR,
+					true, ESCAPE_CHARACTER);
 
 
 	/**
