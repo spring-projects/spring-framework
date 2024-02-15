@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,13 @@ package org.springframework.core.env;
  * <em>without spaces</em> by an equals sign ("="). The value may optionally be
  * an empty string.
  *
+ * <p>This parser supports the POSIX "end of options" delimiter, meaning that
+ * any {@code "--"} (empty option name) in the command signals that all remaining
+ * arguments will non-optional. For example, here {@code "--opt=ignored"} is considered
+ * as a non-optional argument.
+ * <pre class="code">
+ * --foo=bar -- --opt=ignored</pre>
+ *
  * <h4>Valid examples of option arguments</h4>
  * <pre class="code">
  * --foo
@@ -53,6 +60,7 @@ package org.springframework.core.env;
  *
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 3.1
  */
 class SimpleCommandLineArgsParser {
@@ -65,23 +73,26 @@ class SimpleCommandLineArgsParser {
 	 */
 	public CommandLineArgs parse(String... args) {
 		CommandLineArgs commandLineArgs = new CommandLineArgs();
+		boolean endOfOptions = false;
 		for (String arg : args) {
-			if (arg.startsWith("--")) {
+			if (!endOfOptions && arg.startsWith("--")) {
 				String optionText = arg.substring(2);
-				String optionName;
-				String optionValue = null;
 				int indexOfEqualsSign = optionText.indexOf('=');
 				if (indexOfEqualsSign > -1) {
-					optionName = optionText.substring(0, indexOfEqualsSign);
-					optionValue = optionText.substring(indexOfEqualsSign + 1);
+					String optionName = optionText.substring(0, indexOfEqualsSign);
+					String optionValue = optionText.substring(indexOfEqualsSign + 1);
+					if (optionName.isEmpty()) {
+						throw new IllegalArgumentException("Invalid argument syntax: " + arg);
+					}
+					commandLineArgs.addOptionArg(optionName, optionValue);
+				}
+				else if (!optionText.isEmpty()){
+					commandLineArgs.addOptionArg(optionText, null);
 				}
 				else {
-					optionName = optionText;
+					// '--' End of options delimiter, all remaining args must be non-optional
+					endOfOptions = true;
 				}
-				if (optionName.isEmpty()) {
-					throw new IllegalArgumentException("Invalid argument syntax: " + arg);
-				}
-				commandLineArgs.addOptionArg(optionName, optionValue);
 			}
 			else {
 				commandLineArgs.addNonOptionArg(arg);
