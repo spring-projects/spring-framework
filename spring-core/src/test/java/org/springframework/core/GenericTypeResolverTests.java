@@ -393,11 +393,9 @@ class GenericTypeResolverTests {
 	public interface ListOfListSupplier<T> {
 
 		List<List<T>> get();
-
 	}
 
 	public interface StringListOfListSupplier extends ListOfListSupplier<String> {
-
 	}
 
 }
