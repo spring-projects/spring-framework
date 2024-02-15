@@ -28,11 +28,11 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.7"
-			mavenBom "io.netty:netty-bom:4.1.101.Final"
-			mavenBom "io.projectreactor:reactor-bom:2020.0.38"
+			mavenBom "io.netty:netty-bom:4.1.107.Final"
+			mavenBom "io.projectreactor:reactor-bom:2020.0.41"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR13"
 			mavenBom "io.rsocket:rsocket-bom:1.1.3"
-			mavenBom "org.eclipse.jetty:jetty-bom:9.4.53.v20231009"
+			mavenBom "org.eclipse.jetty:jetty-bom:9.4.54.v20240208"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.5.32"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.5.2"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.2.2"
@@ -139,7 +139,7 @@ configure(allprojects) { project ->
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.28.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.29.Final') {
 				entry 'undertow-core'
 				entry('undertow-servlet') {
 					exclude group: "org.jboss.spec.javax.servlet", name: "jboss-servlet-api_4.0_spec"
