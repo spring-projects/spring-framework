@@ -19,7 +19,6 @@ package org.springframework.core.env;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
@@ -69,7 +68,7 @@ public class MutablePropertySources implements PropertySources {
 
 	@Override
 	public Spliterator<PropertySource<?>> spliterator() {
-		return Spliterators.spliterator(this.propertySourceList, 0);
+		return this.propertySourceList.spliterator();
 	}
 
 	@Override
