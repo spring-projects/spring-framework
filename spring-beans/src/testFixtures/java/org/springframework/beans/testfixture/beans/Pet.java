@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,26 +36,24 @@ public class Pet {
 		return name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	@Override
 	public String toString() {
 		return getName();
 	}
 
 	@Override
-	public boolean equals(@Nullable Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		Pet pet = (Pet) o;
-		return Objects.equals(this.name, pet.name);
+	public boolean equals(@Nullable Object obj) {
+		return (this == obj) ||
+				(obj instanceof Pet that && Objects.equals(this.name, that.name));
 	}
 
 	@Override
 	public int hashCode() {
-		return (name != null ? name.hashCode() : 0);
+		return (this.name != null ? this.name.hashCode() : 0);
 	}
 
 }

@@ -26,8 +26,11 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 
 
 /**
- * Documented {@link io.micrometer.common.KeyValue KeyValues} for {@link ClientHttpRequestFactory HTTP client} observations.
- * <p>This class is used by automated tools to document KeyValues attached to the HTTP client observations.
+ * Documented {@link io.micrometer.common.KeyValue KeyValues} for
+ * {@link ClientHttpRequestFactory HTTP client} observations.
+ *
+ * <p>This class is used by automated tools to document KeyValues attached to the
+ * HTTP client observations.
  *
  * @author Brian Clozel
  * @since 6.0
@@ -52,25 +55,26 @@ public enum ClientHttpObservationDocumentation implements ObservationDocumentati
 		public KeyName[] getHighCardinalityKeyNames() {
 			return new KeyName[] {HighCardinalityKeyNames.HTTP_URL};
 		}
-
 	};
+
 
 	public enum LowCardinalityKeyNames implements KeyName {
 
 		/**
-		 * Name of HTTP request method or {@value KeyValue#NONE_VALUE} if the request could not be created.
+		 * Name of HTTP request method or {@value KeyValue#NONE_VALUE} if the
+		 * request could not be created.
 		 */
 		METHOD {
 			@Override
 			public String asString() {
 				return "method";
 			}
-
 		},
 
 		/**
-		 * URI template used for HTTP request, or {@value KeyValue#NONE_VALUE} if none was provided.
-		 * Only the path part of the URI is considered.
+		 * URI template used for HTTP request, or {@value KeyValue#NONE_VALUE} if
+		 * none was provided.
+		 * <p>Only the path part of the URI is considered.
 		 */
 		URI {
 			@Override
@@ -90,7 +94,6 @@ public enum ClientHttpObservationDocumentation implements ObservationDocumentati
 			}
 		},
 
-
 		/**
 		 * Client name derived from the request URI host.
 		 * @since 6.0.5
@@ -103,7 +106,8 @@ public enum ClientHttpObservationDocumentation implements ObservationDocumentati
 		},
 
 		/**
-		 * Name of the exception thrown during the exchange, or {@value KeyValue#NONE_VALUE} if no exception happened.
+		 * Name of the exception thrown during the exchange, or
+		 * {@value KeyValue#NONE_VALUE} if no exception happened.
 		 */
 		EXCEPTION {
 			@Override
