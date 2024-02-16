@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,7 +204,7 @@ class ConfigurationClassProcessingTests {
 		BeanFactory factory = initBeanFactory(ConfigWithNullReference.class);
 
 		TestBean foo = factory.getBean("foo", TestBean.class);
-		assertThat(factory.getBean("bar").equals(null)).isTrue();
+		assertThat(factory.getBean("bar")).isEqualTo(null);
 		assertThat(foo.getSpouse()).isNull();
 	}
 
@@ -426,7 +426,7 @@ class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithFinalBean {
 
-		public final @Bean TestBean testBean() {
+		@Bean public final TestBean testBean() {
 			return new TestBean();
 		}
 	}
@@ -435,7 +435,7 @@ class ConfigurationClassProcessingTests {
 	@Configuration
 	static class SimplestPossibleConfig {
 
-		public @Bean String stringBean() {
+		@Bean public String stringBean() {
 			return "foo";
 		}
 	}
@@ -444,11 +444,11 @@ class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithNonSpecificReturnTypes {
 
-		public @Bean Object stringBean() {
+		@Bean public Object stringBean() {
 			return "foo";
 		}
 
-		public @Bean FactoryBean<?> factoryBean() {
+		@Bean public FactoryBean<?> factoryBean() {
 			ListFactoryBean fb = new ListFactoryBean();
 			fb.setSourceList(Arrays.asList("element1", "element2"));
 			return fb;
@@ -459,13 +459,13 @@ class ConfigurationClassProcessingTests {
 	@Configuration
 	static class ConfigWithPrototypeBean {
 
-		public @Bean TestBean foo() {
+		@Bean public TestBean foo() {
 			TestBean foo = new SpousyTestBean("foo");
 			foo.setSpouse(bar());
 			return foo;
 		}
 
-		public @Bean TestBean bar() {
+		@Bean public TestBean bar() {
 			TestBean bar = new SpousyTestBean("bar");
 			bar.setSpouse(baz());
 			return bar;
@@ -605,15 +605,15 @@ class ConfigurationClassProcessingTests {
 		void register(GenericApplicationContext ctx) {
 			ctx.registerBean("spouse", TestBean.class,
 					() -> new TestBean("functional"));
-			Supplier<TestBean> testBeanSupplier = () -> new TestBean(ctx.getBean("spouse", TestBean.class));
-			ctx.registerBean(TestBean.class,
-					testBeanSupplier,
+			Supplier<TestBean> testBeanSupplier =
+					() -> new TestBean(ctx.getBean("spouse", TestBean.class));
+			ctx.registerBean(TestBean.class, testBeanSupplier,
 					bd -> bd.setPrimary(true));
 		}
 
 		@Bean
-		public NestedTestBean nestedTestBean(TestBean testBean) {
-			return new NestedTestBean(testBean.getSpouse().getName());
+		public NestedTestBean nestedTestBean(TestBean spouse) {
+			return new NestedTestBean(spouse.getSpouse().getName());
 		}
 	}
 
