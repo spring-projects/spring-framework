@@ -66,7 +66,6 @@ import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -1089,7 +1088,7 @@ class ConfigurationClassPostProcessorTests {
 	void testMapInjectionFromSameConfigurationClass() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MapInjectionConfiguration.class);
 		MapInjectionConfiguration bean = ctx.getBean(MapInjectionConfiguration.class);
-		assertThat(bean.testBeans).containsOnly(entry("testBean", ctx.getBean(Runnable.class)));
+		assertThat(bean.testBeans).containsOnly(Map.entry("testBean", ctx.getBean(Runnable.class)));
 		ctx.close();
 	}
 
