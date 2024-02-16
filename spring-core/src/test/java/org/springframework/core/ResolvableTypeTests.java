@@ -1322,6 +1322,18 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void hasUnresolvableGenericsWhenSelfReferring() {
+		ResolvableType type = ResolvableType.forInstance(new Bar());
+		assertThat(type.hasUnresolvableGenerics()).isFalse();
+	}
+
+	@Test
+	void hasUnresolvableGenericsWithEnum() {
+		ResolvableType type = ResolvableType.forType(SimpleEnum.class.getGenericSuperclass());
+		assertThat(type.hasUnresolvableGenerics()).isFalse();
+	}
+
+	@Test
 	void spr11219() throws Exception {
 		ResolvableType type = ResolvableType.forField(BaseProvider.class.getField("stuff"), BaseProvider.class);
 		assertThat(type.getNested(2).isAssignableFrom(ResolvableType.forClass(BaseImplementation.class))).isTrue();
@@ -1624,11 +1636,21 @@ class ResolvableTypeTests {
 	}
 
 
-	public interface ListOfListSupplier<T> {
+	interface ListOfListSupplier<T> {
 
 		List<List<T>> get();
-
 	}
+
+
+	class Foo<T extends Foo<T>> {
+	}
+
+	class Bar extends Foo<Bar> {
+	}
+
+
+	enum SimpleEnum { VALUE }
+
 
 	static class EnclosedInParameterizedType<T> {
 

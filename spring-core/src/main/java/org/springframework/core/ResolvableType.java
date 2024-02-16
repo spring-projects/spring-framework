@@ -28,8 +28,10 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 
 import org.springframework.core.SerializableTypeWrapper.FieldTypeProvider;
@@ -588,18 +590,28 @@ public class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return false;
 		}
+		return hasUnresolvableGenerics(null);
+	}
+
+	private boolean hasUnresolvableGenerics(@Nullable Set<Type> alreadySeen) {
 		Boolean unresolvableGenerics = this.unresolvableGenerics;
 		if (unresolvableGenerics == null) {
-			unresolvableGenerics = determineUnresolvableGenerics();
+			unresolvableGenerics = determineUnresolvableGenerics(alreadySeen);
 			this.unresolvableGenerics = unresolvableGenerics;
 		}
 		return unresolvableGenerics;
 	}
 
-	private boolean determineUnresolvableGenerics() {
+	private boolean determineUnresolvableGenerics(@Nullable Set<Type> alreadySeen) {
+		if (alreadySeen != null && alreadySeen.contains(this.type)) {
+			// Self-referencing generic -> not unresolvable
+			return false;
+		}
+
 		ResolvableType[] generics = getGenerics();
 		for (ResolvableType generic : generics) {
-			if (generic.isUnresolvableTypeVariable() || generic.isWildcardWithoutBounds() || generic.hasUnresolvableGenerics()) {
+			if (generic.isUnresolvableTypeVariable() || generic.isWildcardWithoutBounds() ||
+					generic.hasUnresolvableGenerics(currentTypeSeen(alreadySeen))) {
 				return true;
 			}
 		}
@@ -619,10 +631,18 @@ public class ResolvableType implements Serializable {
 			}
 			Class<?> superclass = resolved.getSuperclass();
 			if (superclass != null && superclass != Object.class) {
-				return getSuperType().hasUnresolvableGenerics();
+				return getSuperType().hasUnresolvableGenerics(currentTypeSeen(alreadySeen));
 			}
 		}
 		return false;
+	}
+
+	private Set<Type> currentTypeSeen(@Nullable Set<Type> alreadySeen) {
+		if (alreadySeen == null) {
+			alreadySeen = new HashSet<>(4);
+		}
+		alreadySeen.add(this.type);
+		return alreadySeen;
 	}
 
 	/**
