@@ -59,6 +59,16 @@ public class JsonPathExpectationsHelper {
 	private final Configuration configuration;
 
 	/**
+	 * Construct a new {@code JsonPathExpectationsHelper} using the
+	 * {@linkplain Configuration#defaultConfiguration() default configuration}.
+	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
+	 * @since 6.2
+	 */
+	public JsonPathExpectationsHelper(String expression) {
+		this(expression, (Configuration) null);
+	}
+
+	/**
 	 * Construct a new {@code JsonPathExpectationsHelper}.
 	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
 	 * @param configuration the {@link Configuration} to use or {@code null} to use the
@@ -70,16 +80,6 @@ public class JsonPathExpectationsHelper {
 		this.expression = expression;
 		this.jsonPath = JsonPath.compile(this.expression);
 		this.configuration = (configuration != null) ? configuration : Configuration.defaultConfiguration();
-	}
-
-	/**
-	 * Construct a new {@code JsonPathExpectationsHelper} using the
-	 * {@linkplain Configuration#defaultConfiguration() default configuration}.
-	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
-	 * @since 6.2
-	 */
-	public JsonPathExpectationsHelper(String expression) {
-		this(expression, (Configuration) null);
 	}
 
 	/**

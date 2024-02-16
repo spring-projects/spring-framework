@@ -32,11 +32,11 @@ import org.springframework.lang.Nullable;
 
 /**
  * {@link Encoder} and {@link Decoder} that is able to handle a map to and from
- * json. Used to configure the jsonpath infrastructure without having a hard
+ * JSON. Used to configure the jsonpath infrastructure without having a hard
  * dependency on the library.
  *
- * @param encoder the json encoder
- * @param decoder the json decoder
+ * @param encoder the JSON encoder
+ * @param decoder the JSON decoder
  * @author Stephane Nicoll
  * @author Rossen Stoyanchev
  * @since 6.2
@@ -69,9 +69,9 @@ record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 
 	/**
 	 * Find the first suitable {@link Encoder} that can encode a {@link Map}
-	 * to json.
+	 * to JSON.
 	 * @param writers the writers to inspect
-	 * @return a suitable json {@link Encoder} or {@code null}
+	 * @return a suitable JSON {@link Encoder} or {@code null}
 	 */
 	@Nullable
 	private static Encoder<?> findJsonEncoder(Collection<HttpMessageWriter<?>> writers) {
@@ -90,9 +90,9 @@ record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 
 	/**
 	 * Find the first suitable {@link Decoder} that can decode a {@link Map} to
-	 * json.
+	 * JSON.
 	 * @param readers the readers to inspect
-	 * @return a suitable json {@link Decoder} or {@code null}
+	 * @return a suitable JSON {@link Decoder} or {@code null}
 	 */
 	@Nullable
 	private static Decoder<?> findJsonDecoder(Collection<HttpMessageReader<?>> readers) {

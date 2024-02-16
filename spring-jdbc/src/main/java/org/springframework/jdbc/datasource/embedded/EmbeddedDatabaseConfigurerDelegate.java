@@ -17,7 +17,7 @@
 package org.springframework.jdbc.datasource.embedded;
 
 /**
- * A {@link EmbeddedDatabaseConfigurer} delegate that can be used to customize
+ * An {@link EmbeddedDatabaseConfigurer} delegate that can be used to customize
  * the embedded database.
  *
  * @author Stephane Nicoll

@@ -293,7 +293,8 @@ class NamedParameterUtilsTests {
 			"SELECT /*:doo*/':foo', :xxx FROM DUAL",
 			"SELECT ':foo'/*:doo*/, :xxx FROM DUAL",
 			"SELECT \":foo\"\":doo\", :xxx FROM DUAL",
-			"SELECT `:foo``:doo`, :xxx FROM DUAL",})
+			"SELECT `:foo``:doo`, :xxx FROM DUAL"
+		})
 	void parseSqlStatementWithParametersInsideQuote(String sql) {
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);

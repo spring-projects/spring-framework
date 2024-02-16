@@ -36,33 +36,32 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
  */
 class EmbeddedDatabaseBuilderTests {
 
-	private final EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(
-		getClass()));
+	private final EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
 
 
 	@Test
 	void addDefaultScripts() {
 		doTwice(() -> {
-			EmbeddedDatabase db = new EmbeddedDatabaseBuilder()//
-			.addDefaultScripts()//
-			.build();
+			EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
+					.addDefaultScripts()
+					.build();
 			assertDatabaseCreatedAndShutdown(db);
 		});
 	}
 
 	@Test
 	void addScriptWithBogusFileName() {
-		assertThatExceptionOfType(CannotReadScriptException.class).isThrownBy(
-				new EmbeddedDatabaseBuilder().addScript("bogus.sql")::build);
+		assertThatExceptionOfType(CannotReadScriptException.class)
+				.isThrownBy(new EmbeddedDatabaseBuilder().addScript("bogus.sql")::build);
 	}
 
 	@Test
 	void addScript() {
 		doTwice(() -> {
-			EmbeddedDatabase db = builder//
-			.addScript("db-schema.sql")//
-			.addScript("db-test-data.sql")//
-			.build();
+			EmbeddedDatabase db = builder
+					.addScript("db-schema.sql")
+					.addScript("db-test-data.sql")
+					.build();
 			assertDatabaseCreatedAndShutdown(db);
 		});
 	}
@@ -70,9 +69,9 @@ class EmbeddedDatabaseBuilderTests {
 	@Test
 	void addScripts() {
 		doTwice(() -> {
-			EmbeddedDatabase db = builder//
-			.addScripts("db-schema.sql", "db-test-data.sql")//
-			.build();
+			EmbeddedDatabase db = builder
+					.addScripts("db-schema.sql", "db-test-data.sql")
+					.build();
 			assertDatabaseCreatedAndShutdown(db);
 		});
 	}
@@ -80,9 +79,9 @@ class EmbeddedDatabaseBuilderTests {
 	@Test
 	void addScriptsWithDefaultCommentPrefix() {
 		doTwice(() -> {
-			EmbeddedDatabase db = builder//
-			.addScripts("db-schema-comments.sql", "db-test-data.sql")//
-			.build();
+			EmbeddedDatabase db = builder
+					.addScripts("db-schema-comments.sql", "db-test-data.sql")
+					.build();
 			assertDatabaseCreatedAndShutdown(db);
 		});
 	}
@@ -90,10 +89,10 @@ class EmbeddedDatabaseBuilderTests {
 	@Test
 	void addScriptsWithCustomCommentPrefix() {
 		doTwice(() -> {
-			EmbeddedDatabase db = builder//
-			.addScripts("db-schema-custom-comments.sql", "db-test-data.sql")//
-			.setCommentPrefix("~")//
-			.build();
+			EmbeddedDatabase db = builder
+					.addScripts("db-schema-custom-comments.sql", "db-test-data.sql")
+					.setCommentPrefix("~")
+					.build();
 			assertDatabaseCreatedAndShutdown(db);
 		});
 	}
@@ -101,11 +100,11 @@ class EmbeddedDatabaseBuilderTests {
 	@Test
 	void addScriptsWithCustomBlockComments() {
 		doTwice(() -> {
-			EmbeddedDatabase db = builder//
-			.addScripts("db-schema-block-comments.sql", "db-test-data.sql")//
-			.setBlockCommentStartDelimiter("{*")//
-			.setBlockCommentEndDelimiter("*}")//
-			.build();
+			EmbeddedDatabase db = builder
+					.addScripts("db-schema-block-comments.sql", "db-test-data.sql")
+					.setBlockCommentStartDelimiter("{*")
+					.setBlockCommentEndDelimiter("*}")
+					.build();
 			assertDatabaseCreatedAndShutdown(db);
 		});
 	}
@@ -113,10 +112,10 @@ class EmbeddedDatabaseBuilderTests {
 	@Test
 	void setTypeToH2() {
 		doTwice(() -> {
-			EmbeddedDatabase db = builder//
-			.setType(H2)//
-			.addScripts("db-schema.sql", "db-test-data.sql")//
-			.build();
+			EmbeddedDatabase db = builder
+					.setType(H2)
+					.addScripts("db-schema.sql", "db-test-data.sql")
+					.build();
 			assertDatabaseCreatedAndShutdown(db);
 		});
 	}
@@ -132,7 +131,7 @@ class EmbeddedDatabaseBuilderTests {
 									super.configureConnectionProperties(properties, databaseName);
 								}
 							}))
-					.addScripts("db-schema.sql", "db-test-data.sql")//
+					.addScripts("db-schema.sql", "db-test-data.sql")
 					.build();
 			assertDatabaseCreatedAndShutdown(db);
 		});
@@ -141,18 +140,17 @@ class EmbeddedDatabaseBuilderTests {
 	@Test
 	void setTypeToDerbyAndIgnoreFailedDrops() {
 		doTwice(() -> {
-			EmbeddedDatabase db = builder//
-			.setType(DERBY)//
-			.ignoreFailedDrops(true)//
-			.addScripts("db-schema-derby-with-drop.sql", "db-test-data.sql").build();
+			EmbeddedDatabase db = builder
+					.setType(DERBY)
+					.ignoreFailedDrops(true)
+					.addScripts("db-schema-derby-with-drop.sql", "db-test-data.sql").build();
 			assertDatabaseCreatedAndShutdown(db);
 		});
 	}
 
 	@Test
 	void createSameSchemaTwiceWithoutUniqueDbNames() {
-		EmbeddedDatabase db1 = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))
-				.addScripts("db-schema-without-dropping.sql").build();
+		EmbeddedDatabase db1 = builder.addScripts("db-schema-without-dropping.sql").build();
 		try {
 			assertThatExceptionOfType(ScriptStatementFailedException.class).isThrownBy(() ->
 					new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass())).addScripts("db-schema-without-dropping.sql").build());
@@ -164,20 +162,20 @@ class EmbeddedDatabaseBuilderTests {
 
 	@Test
 	void createSameSchemaTwiceWithGeneratedUniqueDbNames() {
-		EmbeddedDatabase db1 = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))//
-		.addScripts("db-schema-without-dropping.sql", "db-test-data.sql")//
-		.generateUniqueName(true)//
-		.build();
+		EmbeddedDatabase db1 = builder
+				.addScripts("db-schema-without-dropping.sql", "db-test-data.sql")
+				.generateUniqueName(true)
+				.build();
 
 		JdbcTemplate template1 = new JdbcTemplate(db1);
 		assertNumRowsInTestTable(template1, 1);
 		template1.update("insert into T_TEST (NAME) values ('Sam')");
 		assertNumRowsInTestTable(template1, 2);
 
-		EmbeddedDatabase db2 = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))//
-		.addScripts("db-schema-without-dropping.sql", "db-test-data.sql")//
-		.generateUniqueName(true)//
-		.build();
+		EmbeddedDatabase db2 = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))
+				.addScripts("db-schema-without-dropping.sql", "db-test-data.sql")
+				.generateUniqueName(true)
+				.build();
 		assertDatabaseCreated(db2);
 
 		db1.shutdown();

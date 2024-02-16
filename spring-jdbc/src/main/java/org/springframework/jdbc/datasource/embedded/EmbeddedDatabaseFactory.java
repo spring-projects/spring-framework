@@ -45,11 +45,11 @@ import org.springframework.util.Assert;
  * for the database.
  * <li>Call {@link #setDatabaseName} to set an explicit name for the database.
  * <li>Call {@link #setDatabaseType} to set the database type if you wish to
- * use one of the supported types with their default settings.
+ * use one of the pre-supported types with its default settings.
  * <li>Call {@link #setDatabaseConfigurer} to configure support for a custom
  * embedded database type, or
  * {@linkplain EmbeddedDatabaseConfigurers#customizeConfigurer customize} the
- * default of a supported types.
+ * defaults for one of the pre-supported types.
  * <li>Call {@link #setDatabasePopulator} to change the algorithm used to
  * populate the database.
  * <li>Call {@link #setDataSourceFactory} to change the type of
@@ -128,7 +128,7 @@ public class EmbeddedDatabaseFactory {
 	/**
 	 * Set the type of embedded database to use.
 	 * <p>Call this when you wish to configure one of the pre-supported types
-	 * with their default settings.
+	 * with its default settings.
 	 * <p>Defaults to HSQL.
 	 * @param type the database type
 	 */

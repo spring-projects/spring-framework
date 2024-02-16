@@ -53,8 +53,8 @@ public abstract class EmbeddedDatabaseConfigurers {
 	}
 
 	/**
-	 * Customize the default configurer for the given embedded database type. The
-	 * {@code customizer} operator typically uses
+	 * Customize the default configurer for the given embedded database type.
+	 * <p>The {@code customizer} typically uses
 	 * {@link EmbeddedDatabaseConfigurerDelegate} to customize things as necessary.
 	 * @param type the {@linkplain EmbeddedDatabaseType embedded database type}
 	 * @param customizer the customizer to return based on the default
