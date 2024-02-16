@@ -37,11 +37,11 @@ import org.springframework.util.ObjectUtils;
 /**
  * Represents selection over a map or collection.
  *
- * <p>For example, <code>{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this)}</code> evaluates
+ * <p>For example, <code>{1,2,3,4,5,6,7,8,9,10}.?[#isEven(#this)]</code> evaluates
  * to {@code [2, 4, 6, 8, 10]}.
  *
- * <p>Basically a subset of the input data is returned based on the
- * evaluation of the expression supplied as selection criteria.
+ * <p>Basically a subset of the input data is returned based on the evaluation of
+ * the expression supplied as selection criteria.
  *
  * @author Andy Clement
  * @author Mark Fisher
