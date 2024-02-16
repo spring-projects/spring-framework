@@ -41,7 +41,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindException;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.method.MethodValidationException;
 import org.springframework.validation.method.MethodValidationResult;
@@ -290,11 +289,6 @@ class ResponseEntityExceptionHandlerTests {
 	@Test
 	void missingServletRequestPart() {
 		testException(new MissingServletRequestPartException("partName"));
-	}
-
-	@Test
-	void bindException() {
-		testException(new BindException(new Object(), "name"));
 	}
 
 	@Test

@@ -31,8 +31,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
-import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -42,7 +40,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
@@ -239,9 +236,6 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof MethodValidationException theEx) {
 				return handleMethodValidationException(theEx, request, response, handler);
-			}
-			else if (ex instanceof BindException theEx) {
-				return handleBindException(theEx, request, response, handler);
 			}
 		}
 		catch (Exception handlerEx) {
@@ -637,27 +631,6 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		sendServerError(ex, request, response);
-		return new ModelAndView();
-	}
-
-	/**
-	 * Handle the case where an {@linkplain ModelAttribute @ModelAttribute} method
-	 * argument has binding or validation errors and is not followed by another
-	 * method argument of type {@link BindingResult}.
-	 * <p>By default, an HTTP 400 error is sent back to the client.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @param handler the executed handler
-	 * @return an empty {@code ModelAndView} indicating the exception was handled
-	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
-	 * @deprecated as of 6.0 since {@link org.springframework.web.method.annotation.ModelAttributeMethodProcessor}
-	 * now raises the {@link MethodArgumentNotValidException} subclass instead.
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	protected ModelAndView handleBindException(BindException ex, HttpServletRequest request,
-			HttpServletResponse response, @Nullable Object handler) throws IOException {
-
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();
 	}
 

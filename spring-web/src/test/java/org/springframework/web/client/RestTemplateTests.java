@@ -768,7 +768,6 @@ class RestTemplateTests {
 		given(request.execute()).willReturn(response);
 		given(errorHandler.hasError(response)).willReturn(responseStatus.isError());
 		given(response.getStatusCode()).willReturn(responseStatus);
-		given(response.getRawStatusCode()).willReturn(responseStatus.value());
 		given(response.getStatusText()).willReturn(responseStatus.getReasonPhrase());
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,20 +131,6 @@ public enum ClientHttpObservationDocumentation implements ObservationDocumentati
 			@Override
 			public String asString() {
 				return "http.url";
-			}
-		},
-
-		/**
-		 * Client name derived from the request URI host.
-		 * @deprecated in favor of {@link LowCardinalityKeyNames#CLIENT_NAME};
-		 * scheduled for removal in 6.2. This will be available both as a low and
-		 * high cardinality key value.
-		 */
-		@Deprecated(since = "6.0.5", forRemoval = true)
-		CLIENT_NAME {
-			@Override
-			public String asString() {
-				return "client.name";
 			}
 		}
 
