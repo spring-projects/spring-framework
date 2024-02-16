@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,14 @@ import org.springframework.util.ErrorHandler;
 @SuppressWarnings("serial")
 public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements TaskScheduler,
 		ApplicationContextAware, SmartLifecycle, ApplicationListener<ContextClosedEvent> {
+
+	/**
+	 * The default phase for an executor {@link SmartLifecycle}: {@code Integer.MAX_VALUE / 2}.
+	 * @since 6.2
+	 * @see #getPhase()
+	 * @see ExecutorConfigurationSupport#DEFAULT_PHASE
+	 */
+	public static final int DEFAULT_PHASE = ExecutorConfigurationSupport.DEFAULT_PHASE;
 
 	private static final TimeUnit NANO = TimeUnit.NANOSECONDS;
 
