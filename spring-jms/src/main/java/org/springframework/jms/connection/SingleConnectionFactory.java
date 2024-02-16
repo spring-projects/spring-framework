@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
@@ -116,8 +118,8 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	/** Whether the shared Connection has been started. */
 	private int startedCount = 0;
 
-	/** Synchronization monitor for the shared Connection. */
-	private final Object connectionMonitor = new Object();
+	/** Lifecycle lock for the shared Connection. */
+	private final Lock connectionLock = new ReentrantLock();
 
 
 	/**
@@ -252,9 +254,13 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	@Override
 	public QueueConnection createQueueConnection() throws JMSException {
 		Connection con;
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			this.pubSubMode = Boolean.FALSE;
 			con = createConnection();
+		}
+		finally {
+			this.connectionLock.unlock();
 		}
 		if (!(con instanceof QueueConnection queueConnection)) {
 			throw new jakarta.jms.IllegalStateException(
@@ -272,9 +278,13 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
 		Connection con;
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			this.pubSubMode = Boolean.TRUE;
 			con = createConnection();
+		}
+		finally {
+			this.connectionLock.unlock();
 		}
 		if (!(con instanceof TopicConnection topicConnection)) {
 			throw new jakarta.jms.IllegalStateException(
@@ -323,11 +333,15 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * @see #initConnection()
 	 */
 	protected Connection getConnection() throws JMSException {
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			if (this.connection == null) {
 				initConnection();
 			}
 			return this.connection;
+		}
+		finally {
+			this.connectionLock.unlock();
 		}
 	}
 
@@ -386,8 +400,12 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 */
 	@Override
 	public boolean isRunning() {
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			return (this.connection != null);
+		}
+		finally {
+			this.connectionLock.unlock();
 		}
 	}
 
@@ -404,7 +422,8 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			throw new IllegalStateException(
 					"'targetConnectionFactory' is required for lazily initializing a Connection");
 		}
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			if (this.connection != null) {
 				closeConnection(this.connection);
 			}
@@ -432,6 +451,9 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			if (logger.isDebugEnabled()) {
 				logger.debug("Established shared JMS Connection: " + this.connection);
 			}
+		}
+		finally {
+			this.connectionLock.unlock();
 		}
 	}
 
@@ -531,11 +553,15 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 * @see #closeConnection
 	 */
 	public void resetConnection() {
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			if (this.connection != null) {
 				closeConnection(this.connection);
 			}
 			this.connection = null;
+		}
+		finally {
+			this.connectionLock.unlock();
 		}
 	}
 
@@ -634,7 +660,8 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 				}
 				case "setExceptionListener" -> {
 					// Handle setExceptionListener method: add to the chain.
-					synchronized (connectionMonitor) {
+					connectionLock.lock();
+					try {
 						if (aggregatedExceptionListener != null) {
 							ExceptionListener listener = (ExceptionListener) args[0];
 							if (listener != this.localExceptionListener) {
@@ -656,15 +683,22 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 									"which will allow for registering further ExceptionListeners to the recovery chain.");
 						}
 					}
+					finally {
+						connectionLock.unlock();
+					}
 				}
 				case "getExceptionListener" -> {
-					synchronized (connectionMonitor) {
+					connectionLock.lock();
+					try {
 						if (this.localExceptionListener != null) {
 							return this.localExceptionListener;
 						}
 						else {
 							return getExceptionListener();
 						}
+					}
+					finally {
+						connectionLock.unlock();
 					}
 				}
 				case "start" -> {
@@ -677,13 +711,17 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 				}
 				case "close" -> {
 					localStop();
-					synchronized (connectionMonitor) {
+					connectionLock.lock();
+					try {
 						if (this.localExceptionListener != null) {
 							if (aggregatedExceptionListener != null) {
 								aggregatedExceptionListener.delegates.remove(this.localExceptionListener);
 							}
 							this.localExceptionListener = null;
 						}
+					}
+					finally {
+						connectionLock.unlock();
 					}
 					return null;
 				}
@@ -727,7 +765,8 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 		}
 
 		private void localStart() throws JMSException {
-			synchronized (connectionMonitor) {
+			connectionLock.lock();
+			try {
 				if (!this.locallyStarted) {
 					this.locallyStarted = true;
 					if (startedCount == 0 && connection != null) {
@@ -736,10 +775,14 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 					startedCount++;
 				}
 			}
+			finally {
+				connectionLock.unlock();
+			}
 		}
 
 		private void localStop() throws JMSException {
-			synchronized (connectionMonitor) {
+			connectionLock.lock();
+			try {
 				if (this.locallyStarted) {
 					this.locallyStarted = false;
 					if (startedCount == 1 && connection != null) {
@@ -749,6 +792,9 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 						startedCount--;
 					}
 				}
+			}
+			finally {
+				connectionLock.unlock();
 			}
 		}
 
@@ -771,8 +817,12 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			// Iterate over temporary copy in order to avoid ConcurrentModificationException,
 			// since listener invocations may in turn trigger registration of listeners...
 			Set<ExceptionListener> copy;
-			synchronized (connectionMonitor) {
+			connectionLock.lock();
+			try {
 				copy = new LinkedHashSet<>(this.delegates);
+			}
+			finally {
+				connectionLock.unlock();
 			}
 			for (ExceptionListener listener : copy) {
 				listener.onException(ex);

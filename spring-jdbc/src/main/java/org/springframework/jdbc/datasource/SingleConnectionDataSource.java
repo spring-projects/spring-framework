@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.lang.Nullable;
@@ -73,8 +75,8 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	@Nullable
 	private Connection connection;
 
-	/** Synchronization monitor for the shared Connection. */
-	private final Object connectionMonitor = new Object();
+	/** Lifecycle lock for the shared Connection. */
+	private final Lock connectionLock = new ReentrantLock();
 
 
 	/**
@@ -181,7 +183,8 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 
 	@Override
 	public Connection getConnection() throws SQLException {
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			if (this.connection == null) {
 				// No underlying Connection -> lazy init via DriverManager.
 				initConnection();
@@ -192,6 +195,9 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 						"shouldClose() before closing Connections, or set 'suppressClose' to 'true'");
 			}
 			return this.connection;
+		}
+		finally {
+			this.connectionLock.unlock();
 		}
 	}
 
@@ -216,8 +222,12 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 */
 	@Override
 	public boolean shouldClose(Connection con) {
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			return (con != this.connection && con != this.target);
+		}
+		finally {
+			this.connectionLock.unlock();
 		}
 	}
 
@@ -241,10 +251,14 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 */
 	@Override
 	public void destroy() {
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			if (this.target != null) {
 				closeConnection(this.target);
 			}
+		}
+		finally {
+			this.connectionLock.unlock();
 		}
 	}
 
@@ -256,7 +270,8 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 		if (getUrl() == null) {
 			throw new IllegalStateException("'url' property is required for lazily initializing a Connection");
 		}
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			if (this.target != null) {
 				closeConnection(this.target);
 			}
@@ -267,18 +282,25 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 			}
 			this.connection = (isSuppressClose() ? getCloseSuppressingConnectionProxy(this.target) : this.target);
 		}
+		finally {
+			this.connectionLock.unlock();
+		}
 	}
 
 	/**
 	 * Reset the underlying shared Connection, to be reinitialized on next access.
 	 */
 	public void resetConnection() {
-		synchronized (this.connectionMonitor) {
+		this.connectionLock.lock();
+		try {
 			if (this.target != null) {
 				closeConnection(this.target);
 			}
 			this.target = null;
 			this.connection = null;
+		}
+		finally {
+			this.connectionLock.unlock();
 		}
 	}
 
