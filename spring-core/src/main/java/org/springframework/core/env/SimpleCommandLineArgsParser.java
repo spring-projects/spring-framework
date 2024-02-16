@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,6 @@ package org.springframework.core.env;
  * <em>without spaces</em> by an equals sign ("="). The value may optionally be
  * an empty string.
  *
- * <p>This parser supports the POSIX "end of options" delimiter, meaning that
- * any {@code "--"} (empty option name) in the command signals that all remaining
- * arguments will non-optional. For example, here {@code "--opt=ignored"} is considered
- * as a non-optional argument.
- * <pre class="code">
- * --foo=bar -- --opt=ignored</pre>
- *
  * <h4>Valid examples of option arguments</h4>
  * <pre class="code">
  * --foo
@@ -53,15 +46,26 @@ package org.springframework.core.env;
  * --foo = bar
  * --foo=bar --foo=baz --foo=biz</pre>
  *
+ * <h3>End of option arguments</h3>
+ * <p>This parser supports the POSIX "end of options" delimiter, meaning that any
+ * {@code "--"} (empty option name) in the command line signals that all remaining
+ * arguments are non-option arguments. For example, {@code "--opt1=ignored"},
+ * {@code "--opt2"}, and {@code "filename"} in the following command line are
+ * considered non-option arguments.
+ * <pre class="code">
+ * --foo=bar -- --opt1=ignored -opt2 filename</pre>
+ *
  * <h3>Working with non-option arguments</h3>
- * <p>Any and all arguments specified at the command line without the "{@code --}"
- * option prefix will be considered as "non-option arguments" and made available
- * through the {@link CommandLineArgs#getNonOptionArgs()} method.
+ * <p>Any arguments following the "end of options" delimiter ({@code --}) or
+ * specified without the "{@code --}" option prefix will be considered as
+ * "non-option arguments" and made available through the
+ * {@link CommandLineArgs#getNonOptionArgs()} method.
  *
  * @author Chris Beams
  * @author Sam Brannen
  * @author Brian Clozel
  * @since 3.1
+ * @see SimpleCommandLinePropertySource
  */
 class SimpleCommandLineArgsParser {
 
@@ -90,7 +94,7 @@ class SimpleCommandLineArgsParser {
 					commandLineArgs.addOptionArg(optionText, null);
 				}
 				else {
-					// '--' End of options delimiter, all remaining args must be non-optional
+					// '--' End of options delimiter, all remaining args are non-option arguments
 					endOfOptions = true;
 				}
 			}
