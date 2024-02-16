@@ -89,15 +89,15 @@ final class PlaceholderParser {
 	 * Create an instance using the specified input for the parser.
 	 * @param prefix the prefix that denotes the start of a placeholder
 	 * @param suffix the suffix that denotes the end of a placeholder
-	 * @param ignoreUnresolvablePlaceholders whether unresolvable placeholders
-	 * should be ignored ({@code true}) or cause an exception ({@code false})
 	 * @param separator the separating character between the placeholder
 	 * variable and the associated default value, if any
 	 * @param escape the character to use at the beginning of a placeholder
 	 * prefix or separator to escape it and render it as is
+	 * @param ignoreUnresolvablePlaceholders whether unresolvable placeholders
+	 * should be ignored ({@code true}) or cause an exception ({@code false})
 	 */
-	PlaceholderParser(String prefix, String suffix, boolean ignoreUnresolvablePlaceholders,
-			@Nullable String separator, @Nullable Character escape) {
+	PlaceholderParser(String prefix, String suffix, @Nullable String separator,
+			@Nullable Character escape, boolean ignoreUnresolvablePlaceholders) {
 		this.prefix = prefix;
 		this.suffix = suffix;
 		String simplePrefixForSuffix = wellKnownSimplePrefixes.get(this.suffix);

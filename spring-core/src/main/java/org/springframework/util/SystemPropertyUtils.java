@@ -50,11 +50,11 @@ public abstract class SystemPropertyUtils {
 
 	private static final PropertyPlaceholderHelper strictHelper =
 			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR,
-					false, ESCAPE_CHARACTER);
+					ESCAPE_CHARACTER, false);
 
 	private static final PropertyPlaceholderHelper nonStrictHelper =
 			new PropertyPlaceholderHelper(PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX, VALUE_SEPARATOR,
-					true, ESCAPE_CHARACTER);
+					ESCAPE_CHARACTER, true);
 
 
 	/**

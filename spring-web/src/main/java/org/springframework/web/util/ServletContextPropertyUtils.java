@@ -40,12 +40,12 @@ public abstract class ServletContextPropertyUtils {
 	private static final PropertyPlaceholderHelper strictHelper =
 			new PropertyPlaceholderHelper(SystemPropertyUtils.PLACEHOLDER_PREFIX,
 					SystemPropertyUtils.PLACEHOLDER_SUFFIX, SystemPropertyUtils.VALUE_SEPARATOR,
-					false, SystemPropertyUtils.ESCAPE_CHARACTER);
+					SystemPropertyUtils.ESCAPE_CHARACTER, false);
 
 	private static final PropertyPlaceholderHelper nonStrictHelper =
 			new PropertyPlaceholderHelper(SystemPropertyUtils.PLACEHOLDER_PREFIX,
 					SystemPropertyUtils.PLACEHOLDER_SUFFIX, SystemPropertyUtils.VALUE_SEPARATOR,
-					true, SystemPropertyUtils.ESCAPE_CHARACTER);
+					SystemPropertyUtils.ESCAPE_CHARACTER, true);
 
 
 	/**

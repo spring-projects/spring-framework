@@ -115,7 +115,7 @@ class PropertyPlaceholderHelperTests {
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");
 
-		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", null, false, null);
+		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", null, null, false);
 		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
 				helper.replacePlaceholders(text, props));
 	}
@@ -123,7 +123,7 @@ class PropertyPlaceholderHelperTests {
 	@Nested
 	class DefaultValueTests {
 
-		private final PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", ":", true, null);
+		private final PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", ":", null, true);
 
 		@ParameterizedTest(name = "{0} -> {1}")
 		@MethodSource("defaultValues")

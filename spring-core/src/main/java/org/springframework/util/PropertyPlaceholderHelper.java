@@ -46,7 +46,7 @@ public class PropertyPlaceholderHelper {
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix) {
-		this(placeholderPrefix, placeholderSuffix, null, true, null);
+		this(placeholderPrefix, placeholderSuffix, null, null, true);
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class PropertyPlaceholderHelper {
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
 			@Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders) {
 
-		this(placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders, null);
+		this(placeholderPrefix, placeholderSuffix, valueSeparator, null, ignoreUnresolvablePlaceholders);
 	}
 
 	/**
@@ -73,20 +73,20 @@ public class PropertyPlaceholderHelper {
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
 	 * @param valueSeparator the separating character between the placeholder variable
 	 * and the associated default value, if any
-	 * @param ignoreUnresolvablePlaceholders indicates whether unresolvable placeholders should
-	 * be ignored ({@code true}) or cause an exception ({@code false})
 	 * @param escapeCharacter the escape character to use to ignore placeholder prefix
 	 * or value separator, if any
+	 * @param ignoreUnresolvablePlaceholders indicates whether unresolvable placeholders should
+	 * be ignored ({@code true}) or cause an exception ({@code false})
 	 * @since 6.2
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
-			@Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders,
-			@Nullable Character escapeCharacter) {
+			@Nullable String valueSeparator, @Nullable Character escapeCharacter,
+			boolean ignoreUnresolvablePlaceholders) {
 
 		Assert.notNull(placeholderPrefix, "'placeholderPrefix' must not be null");
 		Assert.notNull(placeholderSuffix, "'placeholderSuffix' must not be null");
 		this.parser = new PlaceholderParser(placeholderPrefix, placeholderSuffix,
-				ignoreUnresolvablePlaceholders, valueSeparator, escapeCharacter);
+				valueSeparator, escapeCharacter, ignoreUnresolvablePlaceholders);
 	}
 
 

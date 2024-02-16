@@ -68,7 +68,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	private String defaultUserDestinationPrefix = "/queue";
 
-	private final PropertyPlaceholderHelper placeholderHelper = new PropertyPlaceholderHelper("{", "}", null, false, null);
+	private final PropertyPlaceholderHelper placeholderHelper = new PropertyPlaceholderHelper("{", "}", null, null, false);
 
 	@Nullable
 	private MessageHeaderInitializer headerInitializer;

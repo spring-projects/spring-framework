@@ -47,7 +47,7 @@ class PlaceholderParserTests {
 	@Nested // Tests with only the basic placeholder feature enabled
 	class OnlyPlaceholderTests {
 
-		private final PlaceholderParser parser = new PlaceholderParser("${", "}", true, null, null);
+		private final PlaceholderParser parser = new PlaceholderParser("${", "}", null, null, true);
 
 		@ParameterizedTest(name = "{0} -> {1}")
 		@MethodSource("placeholders")
@@ -169,7 +169,7 @@ class PlaceholderParserTests {
 	@Nested // Tests with the use of a separator
 	class DefaultValueTests {
 
-		private final PlaceholderParser parser = new PlaceholderParser("${", "}", true, ":", null);
+		private final PlaceholderParser parser = new PlaceholderParser("${", "}", ":", null, true);
 
 		@ParameterizedTest(name = "{0} -> {1}")
 		@MethodSource("placeholders")
@@ -247,7 +247,7 @@ class PlaceholderParserTests {
 	@Nested // Tests with the use of the escape character
 	class EscapedTests {
 
-		private final PlaceholderParser parser = new PlaceholderParser("${", "}", true, ":", '\\');
+		private final PlaceholderParser parser = new PlaceholderParser("${", "}", ":", '\\', true);
 
 		@ParameterizedTest(name = "{0} -> {1}")
 		@MethodSource("escapedPlaceholders")
@@ -301,7 +301,7 @@ class PlaceholderParserTests {
 	@Nested
 	class ExceptionTests {
 
-		private final PlaceholderParser parser = new PlaceholderParser("${", "}", false, ":", null);
+		private final PlaceholderParser parser = new PlaceholderParser("${", "}", ":", null, false);
 
 		@Test
 		void textWithCircularReference() {

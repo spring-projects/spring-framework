@@ -586,7 +586,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		private final PlaceholderResolver resolver;
 
 		public StaticStringValueResolver(Map<String, String> values) {
-			this.helper = new PropertyPlaceholderHelper("${", "}", ":", false, null);
+			this.helper = new PropertyPlaceholderHelper("${", "}", ":", null, false);
 			this.resolver = values::get;
 		}
 
