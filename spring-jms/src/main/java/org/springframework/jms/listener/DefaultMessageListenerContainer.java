@@ -662,8 +662,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			if (this.taskExecutor == null) {
 				this.taskExecutor = createDefaultTaskExecutor();
 			}
-			else if (this.taskExecutor instanceof SchedulingTaskExecutor ste &&
-					ste.prefersShortLivedTasks() &&
+			else if (this.taskExecutor instanceof SchedulingTaskExecutor ste && ste.prefersShortLivedTasks() &&
 					this.maxMessagesPerTask == Integer.MIN_VALUE) {
 				// TaskExecutor indicated a preference for short-lived tasks. According to
 				// setMaxMessagesPerTask javadoc, we'll use 10 message per task in this case
