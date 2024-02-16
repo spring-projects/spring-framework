@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,15 +47,15 @@ import org.springframework.javapoet.CodeBlock;
 abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 
 	/**
-	 * Return the {@link Delegate} implementations for common bean definition
-	 * property value types. These are:
+	 * A list of {@link Delegate} implementations for the following common bean
+	 * definition property value types.
 	 * <ul>
-	 * <li>{@link ManagedList},</li>
-	 * <li>{@link ManagedSet},</li>
-	 * <li>{@link ManagedMap},</li>
-	 * <li>{@link LinkedHashMap},</li>
-	 * <li>{@link BeanReference},</li>
-	 * <li>{@link TypedStringValue}.</li>
+	 * <li>{@link ManagedList}</li>
+	 * <li>{@link ManagedSet}</li>
+	 * <li>{@link ManagedMap}</li>
+	 * <li>{@link LinkedHashMap}</li>
+	 * <li>{@link BeanReference}</li>
+	 * <li>{@link TypedStringValue}</li>
 	 * </ul>
 	 * When combined with {@linkplain ValueCodeGeneratorDelegates#INSTANCES the
 	 * delegates for common value types}, this should be added first as they have

@@ -79,8 +79,8 @@ public abstract class RouterFunctions {
 			RouterFunctions.class.getName() + ".uriTemplateVariables";
 
 	/**
-	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
-	 * contains the matching pattern, as a {@link org.springframework.web.util.pattern.PathPattern}.
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that contains
+	 * the matching pattern, as an {@link org.springframework.web.util.pattern.PathPattern}.
 	 */
 	public static final String MATCHING_PATTERN_ATTRIBUTE =
 			RouterFunctions.class.getName() + ".matchingPattern";
@@ -263,42 +263,43 @@ public abstract class RouterFunctions {
 	}
 
 	/**
-	 * Convert the given {@linkplain RouterFunction router function} into a {@link HttpHandler}.
-	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
-	 * <p>The returned handler can be adapted to run in
+	 * Convert the given {@linkplain RouterFunction router function} into an
+	 * {@link HttpHandler}, using the {@linkplain HandlerStrategies#builder()
+	 * default strategies}.
+	 * <p>The returned handler can be adapted to run in the following environments.
 	 * <ul>
 	 * <li>Servlet environments using the
-	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
+	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}</li>
 	 * <li>Reactor using the
-	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
+	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter}
 	 * <li>Undertow using the
-	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
+	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}</li>
 	 * </ul>
-	 * <p>Note that {@code HttpWebHandlerAdapter} also implements {@link WebHandler}, allowing
-	 * for additional filter and exception handler registration through
+	 * <p>Note that {@code HttpWebHandlerAdapter} also implements {@link WebHandler},
+	 * allowing for additional filter and exception handler registration through
 	 * {@link WebHttpHandlerBuilder}.
 	 * @param routerFunction the router function to convert
-	 * @return an HTTP handler that handles HTTP request using the given router function
+	 * @return an HTTP handler that handles HTTP requests using the given router function
 	 */
 	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction) {
 		return toHttpHandler(routerFunction, HandlerStrategies.withDefaults());
 	}
 
 	/**
-	 * Convert the given {@linkplain RouterFunction router function} into a {@link HttpHandler},
-	 * using the given strategies.
-	 * <p>The returned {@code HttpHandler} can be adapted to run in
+	 * Convert the given {@linkplain RouterFunction router function} into an
+	 * {@link HttpHandler}, using the given strategies.
+	 * <p>The returned handler can be adapted to run in the following environments.
 	 * <ul>
 	 * <li>Servlet environments using the
-	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
+	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}</li>
 	 * <li>Reactor using the
-	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
+	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter}</li>
 	 * <li>Undertow using the
-	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
+	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}</li>
 	 * </ul>
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
-	 * @return an HTTP handler that handles HTTP request using the given router function
+	 * @return an HTTP handler that handles HTTP requests using the given router function
 	 */
 	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
 		WebHandler webHandler = toWebHandler(routerFunction, strategies);

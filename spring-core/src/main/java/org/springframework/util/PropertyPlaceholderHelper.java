@@ -22,7 +22,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * Utility class for working with Strings that have placeholder values in them.
- * A placeholder takes the form {@code ${name}}. Using {@code PropertyPlaceholderHelper}
+ *
+ * <p>A placeholder takes the form {@code ${name}}. Using {@code PropertyPlaceholderHelper}
  * these placeholders can be substituted for user-supplied values.
  *
  * <p>Values for substitution can be supplied using a {@link Properties} instance or
@@ -39,7 +40,7 @@ public class PropertyPlaceholderHelper {
 
 
 	/**
-	 * Creates a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
+	 * Create a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
 	 * Unresolvable placeholders are ignored.
 	 * @param placeholderPrefix the prefix that denotes the start of a placeholder
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
@@ -49,14 +50,15 @@ public class PropertyPlaceholderHelper {
 	}
 
 	/**
-	 * Creates a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
+	 * Create a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
 	 * @param placeholderPrefix the prefix that denotes the start of a placeholder
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
 	 * @param valueSeparator the separating character between the placeholder variable
 	 * and the associated default value, if any
 	 * @param ignoreUnresolvablePlaceholders indicates whether unresolvable placeholders should
 	 * be ignored ({@code true}) or cause an exception ({@code false})
-	 * @deprecated in favor of {@link PropertyPlaceholderHelper#PropertyPlaceholderHelper(String, String, String, boolean, Character)}
+	 * @deprecated as of 6.2, in favor of
+	 * {@link PropertyPlaceholderHelper#PropertyPlaceholderHelper(String, String, String, Character, boolean)}
 	 */
 	@Deprecated(since = "6.2", forRemoval = true)
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
@@ -66,7 +68,7 @@ public class PropertyPlaceholderHelper {
 	}
 
 	/**
-	 * Creates a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
+	 * Create a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
 	 * @param placeholderPrefix the prefix that denotes the start of a placeholder
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
 	 * @param valueSeparator the separating character between the placeholder variable
@@ -89,7 +91,7 @@ public class PropertyPlaceholderHelper {
 
 
 	/**
-	 * Replaces all placeholders of format {@code ${name}} with the corresponding
+	 * Replace all placeholders of format {@code ${name}} with the corresponding
 	 * property from the supplied {@link Properties}.
 	 * @param value the value containing the placeholders to be replaced
 	 * @param properties the {@code Properties} to use for replacement
@@ -101,7 +103,7 @@ public class PropertyPlaceholderHelper {
 	}
 
 	/**
-	 * Replaces all placeholders of format {@code ${name}} with the value returned
+	 * Replace all placeholders of format {@code ${name}} with the value returned
 	 * from the supplied {@link PlaceholderResolver}.
 	 * @param value the value containing the placeholders to be replaced
 	 * @param placeholderResolver the {@code PlaceholderResolver} to use for replacement

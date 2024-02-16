@@ -1019,10 +1019,10 @@ public abstract class ClassUtils {
 		}
 		Class<?> clazz = value.getClass();
 		if (Proxy.isProxyClass(clazz)) {
-			String prefix = clazz.getName() + " implementing ";
+			String prefix = clazz.getTypeName() + " implementing ";
 			StringJoiner result = new StringJoiner(",", prefix, "");
 			for (Class<?> ifc : clazz.getInterfaces()) {
-				result.add(ifc.getName());
+				result.add(ifc.getTypeName());
 			}
 			return result.toString();
 		}

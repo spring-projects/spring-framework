@@ -336,7 +336,7 @@ class PlaceholderParserTests {
 		if (pairs.length % 2 == 1) {
 			throw new IllegalArgumentException("size must be even, it is a set of key=value pairs");
 		}
-		PlaceholderResolver resolver = mock(PlaceholderResolver.class);
+		PlaceholderResolver resolver = mock();
 		for (int i = 0; i < pairs.length; i += 2) {
 			String key = pairs[i];
 			String value = pairs[i + 1];

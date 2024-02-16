@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,19 +47,19 @@ import org.springframework.util.ObjectUtils;
 public abstract class ValueCodeGeneratorDelegates {
 
 	/**
-	 * Return the {@link Delegate} implementations for common value types.
-	 * These are:
+	 * A list of {@link Delegate} implementations for the following common value
+	 * types.
 	 * <ul>
-	 * <li>Primitive types,</li>
-	 * <li>String,</li>
-	 * <li>Charset,</li>
-	 * <li>Enum,</li>
-	 * <li>Class,</li>
-	 * <li>{@link ResolvableType},</li>
-	 * <li>Array,</li>
-	 * <li>List via {@code List.of},</li>
-	 * <li>Set via {@code Set.of} and support of {@link LinkedHashSet},</li>
-	 * <li>Map via {@code Map.of} or {@code Map.ofEntries}.</li>
+	 * <li>Primitive types</li>
+	 * <li>String</li>
+	 * <li>Charset</li>
+	 * <li>Enum</li>
+	 * <li>Class</li>
+	 * <li>{@link ResolvableType}</li>
+	 * <li>Array</li>
+	 * <li>List via {@code List.of}</li>
+	 * <li>Set via {@code Set.of} and support for {@link LinkedHashSet}</li>
+	 * <li>Map via {@code Map.of} or {@code Map.ofEntries}</li>
 	 * </ul>
 	 * Those implementations do not require the {@link ValueCodeGenerator} to be
 	 * {@linkplain ValueCodeGenerator#scoped(GeneratedMethods) scoped}.

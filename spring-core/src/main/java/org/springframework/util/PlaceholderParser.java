@@ -46,13 +46,13 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
  * a given key can involve the resolution of nested placeholders. Default values
  * can also have placeholders.
  *
- * <p>For situations where the syntax of a valid placeholder match a String that
+ * <p>For situations where the syntax of a valid placeholder matches a String that
  * must be rendered as is, the placeholder can be escaped using an {@code escape}
  * character. For instance {@code \${name}} resolves as {@code ${name}}.
  *
  * <p>The prefix, suffix, separator, and escape characters are configurable. Only
- * the prefix and suffix are mandatory and the support of default values or
- * escaping are conditional on providing a non-null value for them.
+ * the prefix and suffix are mandatory, and the support for default values or
+ * escaping is conditional on providing non-null values for them.
  *
  * <p>This parser makes sure to resolves placeholders as lazily as possible.
  *
@@ -64,7 +64,11 @@ final class PlaceholderParser {
 	private static final Log logger = LogFactory.getLog(PlaceholderParser.class);
 
 	private static final Map<String, String> wellKnownSimplePrefixes = Map.of(
-			"}", "{", "]", "[", ")", "(");
+			"}", "{",
+			"]", "[",
+			")", "("
+		);
+
 
 	private final String prefix;
 
@@ -80,9 +84,9 @@ final class PlaceholderParser {
 	@Nullable
 	private final Character escape;
 
+
 	/**
 	 * Create an instance using the specified input for the parser.
-	 *
 	 * @param prefix the prefix that denotes the start of a placeholder
 	 * @param suffix the suffix that denotes the end of a placeholder
 	 * @param ignoreUnresolvablePlaceholders whether unresolvable placeholders
@@ -90,7 +94,7 @@ final class PlaceholderParser {
 	 * @param separator the separating character between the placeholder
 	 * variable and the associated default value, if any
 	 * @param escape the character to use at the beginning of a placeholder
-	 * to escape it and render it as is
+	 * prefix or separator to escape it and render it as is
 	 */
 	PlaceholderParser(String prefix, String suffix, boolean ignoreUnresolvablePlaceholders,
 			@Nullable String separator, @Nullable Character escape) {
@@ -109,7 +113,7 @@ final class PlaceholderParser {
 	}
 
 	/**
-	 * Replaces all placeholders of format {@code ${name}} with the value returned
+	 * Replace all placeholders of format {@code ${name}} with the value returned
 	 * from the supplied {@link PlaceholderResolver}.
 	 * @param value the value containing the placeholders to be replaced
 	 * @param placeholderResolver the {@code PlaceholderResolver} to use for replacement
@@ -138,8 +142,7 @@ final class PlaceholderParser {
 		LinkedList<Part> parts = new LinkedList<>();
 		int startIndex = nextStartPrefix(value, 0);
 		if (startIndex == -1) {
-			Part part = inPlaceholder ? createSimplePlaceholderPart(value)
-					: new TextPart(value);
+			Part part = (inPlaceholder ? createSimplePlaceholderPart(value) : new TextPart(value));
 			parts.add(part);
 			return parts;
 		}
@@ -168,13 +171,13 @@ final class PlaceholderParser {
 		}
 		// Add rest of text if necessary
 		addText(value, position, value.length(), parts);
-		return inPlaceholder ? List.of(createNestedPlaceholderPart(value, parts)) : parts;
+		return (inPlaceholder ? List.of(createNestedPlaceholderPart(value, parts)) : parts);
 	}
 
 	private SimplePlaceholderPart createSimplePlaceholderPart(String text) {
 		String[] keyAndDefault = splitKeyAndDefault(text);
-		return (keyAndDefault != null) ? new SimplePlaceholderPart(text, keyAndDefault[0], keyAndDefault[1])
-				: new SimplePlaceholderPart(text, text, null);
+		return ((keyAndDefault != null) ? new SimplePlaceholderPart(text, keyAndDefault[0], keyAndDefault[1]) :
+				new SimplePlaceholderPart(text, text, null));
 	}
 
 	private NestedPlaceholderPart createNestedPlaceholderPart(String text, List<Part> parts) {
@@ -291,7 +294,7 @@ final class PlaceholderParser {
 	}
 
 	/**
-	 * Provide the necessary to handle and resolve underlying placeholders.
+	 * Provide the necessary context to handle and resolve underlying placeholders.
 	 */
 	static class PartResolutionContext implements PlaceholderResolver {
 
@@ -307,6 +310,7 @@ final class PlaceholderParser {
 
 		@Nullable
 		private Set<String> visitedPlaceholders;
+
 
 		PartResolutionContext(PlaceholderResolver resolver, String prefix, String suffix,
 				boolean ignoreUnresolvablePlaceholders, Function<String, List<Part>> parser) {
