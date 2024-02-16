@@ -217,7 +217,9 @@ public class ExpressionState {
 	 * name/value pair.
 	 * @param name the name of the local variable
 	 * @param value the value of the local variable
+	 * @deprecated as of 6.2 with no replacement; to be removed in 7.0
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public void enterScope(String name, Object value) {
 		initVariableScopes().push(new VariableScope(name, value));
 		initScopeRootObjects().push(getActiveContextObject());
@@ -228,7 +230,9 @@ public class ExpressionState {
 	 * context object} and a new local variable scope containing the supplied
 	 * name/value pairs.
 	 * @param variables a map containing name/value pairs for local variables
+	 * @deprecated as of 6.2 with no replacement; to be removed in 7.0
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public void enterScope(@Nullable Map<String, Object> variables) {
 		initVariableScopes().push(new VariableScope(variables));
 		initScopeRootObjects().push(getActiveContextObject());
@@ -246,7 +250,9 @@ public class ExpressionState {
 	 * overwritten.
 	 * @param name the name of the local variable
 	 * @param value the value of the local variable
+	 * @deprecated as of 6.2 with no replacement; to be removed in 7.0
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public void setLocalVariable(String name, Object value) {
 		initVariableScopes().element().setVariable(name, value);
 	}
@@ -256,7 +262,9 @@ public class ExpressionState {
 	 * @param name the name of the local variable
 	 * @return the value of the local variable, or {@code null} if the variable
 	 * does not exist in the current scope
+	 * @deprecated as of 6.2 with no replacement; to be removed in 7.0
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	@Nullable
 	public Object lookupLocalVariable(String name) {
 		for (VariableScope scope : initVariableScopes()) {

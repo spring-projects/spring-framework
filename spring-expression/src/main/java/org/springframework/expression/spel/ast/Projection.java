@@ -93,7 +93,7 @@ public class Projection extends SpelNodeImpl {
 			for (Object element : data) {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
-					state.enterScope("index", result.size());
+					state.enterScope();
 					Object value = this.children[0].getValueInternal(state).getValue();
 					if (value != null && operandIsArray) {
 						arrayElementType = determineCommonType(arrayElementType, value.getClass());

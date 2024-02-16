@@ -139,11 +139,10 @@ public class Selection extends SpelNodeImpl {
 					Arrays.asList(ObjectUtils.toObjectArray(operand)));
 
 			List<Object> result = new ArrayList<>();
-			int index = 0;
 			for (Object element : data) {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
-					state.enterScope("index", index);
+					state.enterScope();
 					Object val = selectionCriteria.getValueInternal(state).getValue();
 					if (val instanceof Boolean b) {
 						if (b) {
@@ -157,7 +156,6 @@ public class Selection extends SpelNodeImpl {
 						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
 								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 					}
-					index++;
 				}
 				finally {
 					state.exitScope();
