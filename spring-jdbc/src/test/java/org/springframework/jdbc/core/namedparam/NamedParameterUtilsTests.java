@@ -153,7 +153,7 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-4789
-	public void parseSqlContainingComments() {
+	void parseSqlContainingComments() {
 		String sql1 = "/*+ HINT */ xxx /* comment ? */ :a yyyy :b :c :a zzzzz -- :xx XX\n";
 		ParsedSql parsedSql1 = NamedParameterUtils.parseSqlStatement(sql1);
 		assertThat(NamedParameterUtils.substituteNamedParameters(parsedSql1, null)).isEqualTo("/*+ HINT */ xxx /* comment ? */ ? yyyy ? ? ? zzzzz -- :xx XX\n");
@@ -179,7 +179,7 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-4612
-	public void parseSqlStatementWithPostgresCasting() {
+	void parseSqlStatementWithPostgresCasting() {
 		String expectedSql = "select 'first name' from artists where id = ? and birth_date=?::timestamp";
 		String sql = "select 'first name' from artists where id = :id and birth_date=:birthDate::timestamp";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
@@ -187,7 +187,7 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-13582
-	public void parseSqlStatementWithPostgresContainedOperator() {
+	void parseSqlStatementWithPostgresContainedOperator() {
 		String expectedSql = "select 'first name' from artists where info->'stat'->'albums' = ?? ? and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
 		String sql = "select 'first name' from artists where info->'stat'->'albums' = ?? :album and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
@@ -196,7 +196,7 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-15382
-	public void parseSqlStatementWithPostgresAnyArrayStringsExistsOperator() {
+	void parseSqlStatementWithPostgresAnyArrayStringsExistsOperator() {
 		String expectedSql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
 		String sql = "select '[\"3\", \"11\"]'::jsonb ?| '{1,3,11,12,17}'::text[]";
 
@@ -206,7 +206,7 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-15382
-	public void parseSqlStatementWithPostgresAllArrayStringsExistsOperator() {
+	void parseSqlStatementWithPostgresAllArrayStringsExistsOperator() {
 		String expectedSql = "select '[\"3\", \"11\"]'::jsonb ?& '{1,3,11,12,17}'::text[] AND ? = 'Back in Black'";
 		String sql = "select '[\"3\", \"11\"]'::jsonb ?& '{1,3,11,12,17}'::text[] AND :album = 'Back in Black'";
 
@@ -216,7 +216,7 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-7476
-	public void parseSqlStatementWithEscapedColon() {
+	void parseSqlStatementWithEscapedColon() {
 		String expectedSql = "select '0\\:0' as a, foo from bar where baz < DATE(? 23:59:59) and baz = ?";
 		String sql = "select '0\\:0' as a, foo from bar where baz < DATE(:p1 23\\:59\\:59) and baz = :p2";
 
@@ -227,7 +227,7 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-7476
-	public void parseSqlStatementWithBracketDelimitedParameterNames() {
+	void parseSqlStatementWithBracketDelimitedParameterNames() {
 		String expectedSql = "select foo from bar where baz = b??z";
 		String sql = "select foo from bar where baz = b:{p1}:{p2}z";
 
@@ -238,7 +238,7 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-7476
-	public void parseSqlStatementWithEmptyBracketsOrBracketsInQuotes() {
+	void parseSqlStatementWithEmptyBracketsOrBracketsInQuotes() {
 		String expectedSql = "select foo from bar where baz = b:{}z";
 		String sql = "select foo from bar where baz = b:{}z";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
@@ -267,21 +267,21 @@ class NamedParameterUtilsTests {
 	}
 
 	@Test  // SPR-2544
-	public void parseSqlStatementWithLogicalAnd() {
+	void parseSqlStatementWithLogicalAnd() {
 		String expectedSql = "xxx & yyyy";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(expectedSql);
 		assertThat(substituteNamedParameters(parsedSql)).isEqualTo(expectedSql);
 	}
 
 	@Test  // SPR-2544
-	public void substituteNamedParametersWithLogicalAnd() {
+	void substituteNamedParametersWithLogicalAnd() {
 		String expectedSql = "xxx & yyyy";
 		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
 		assertThat(newSql).isEqualTo(expectedSql);
 	}
 
 	@Test  // SPR-3173
-	public void variableAssignmentOperator() {
+	void variableAssignmentOperator() {
 		String expectedSql = "x := 1";
 		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
 		assertThat(newSql).isEqualTo(expectedSql);
@@ -295,14 +295,14 @@ class NamedParameterUtilsTests {
 			"SELECT \":foo\"\":doo\", :xxx FROM DUAL",
 			"SELECT `:foo``:doo`, :xxx FROM DUAL"
 		})
-	void parseSqlStatementWithParametersInsideQuote(String sql) {
+	void parseSqlStatementWithParametersInsideQuotesAndComments(String sql) {
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
 		assertThat(parsedSql.getParameterNames()).containsExactly("xxx");
 	}
 
 	@Test  // gh-27716
-	public void parseSqlStatementWithSquareBracket() {
+	void parseSqlStatementWithSquareBracket() {
 		String sql = "SELECT ARRAY[:ext]";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertThat(parsedSql.getNamedParameterCount()).isEqualTo(1);

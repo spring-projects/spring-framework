@@ -24,6 +24,8 @@ import java.util.Map;
 
 import io.r2dbc.spi.Parameters;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindTarget;
@@ -243,40 +245,40 @@ class NamedParameterUtilsTests {
 		assertThat(expand(expectedSql)).isEqualTo(expectedSql);
 	}
 
-	@Test
-	void parseSqlStatementWithQuotedSingleQuote() {
-		String sql = "SELECT ':foo'':doo', :xxx FROM DUAL";
-
-		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(psql.getTotalParameterCount()).isEqualTo(1);
-		assertThat(psql.getParameterNames()).containsExactly("xxx");
-	}
-
-	@Test
-	void parseSqlStatementWithQuotesAndCommentBefore() {
-		String sql = "SELECT /*:doo*/':foo', :xxx FROM DUAL";
-
-		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(psql.getTotalParameterCount()).isEqualTo(1);
-		assertThat(psql.getParameterNames()).containsExactly("xxx");
-	}
-
-	@Test
-	void parseSqlStatementWithQuotesAndCommentAfter() {
-		String sql2 = "SELECT ':foo'/*:doo*/, :xxx FROM DUAL";
-
-		ParsedSql psql2 = NamedParameterUtils.parseSqlStatement(sql2);
-		assertThat(psql2.getTotalParameterCount()).isEqualTo(1);
-		assertThat(psql2.getParameterNames()).containsExactly("xxx");
+	@ParameterizedTest // SPR-8280 and others
+	@ValueSource(strings = {
+			"SELECT ':foo'':doo', :xxx FROM DUAL",
+			"SELECT /*:doo*/':foo', :xxx FROM DUAL",
+			"SELECT ':foo'/*:doo*/, :xxx FROM DUAL",
+			"SELECT \":foo\"\":doo\", :xxx FROM DUAL",
+		})
+	void parseSqlStatementWithParametersInsideQuotesAndComments(String sql) {
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertThat(parsedSql.getTotalParameterCount()).isEqualTo(1);
+		assertThat(parsedSql.getParameterNames()).containsExactly("xxx");
 	}
 
 	@Test  // gh-27716
-	public void parseSqlStatementWithSquareBracket() {
+	void parseSqlStatementWithSquareBracket() {
 		String sql = "SELECT ARRAY[:ext]";
 
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
 		assertThat(psql.getNamedParameterCount()).isEqualTo(1);
 		assertThat(psql.getParameterNames()).containsExactly("ext");
+
+		assertThat(expand(psql)).isEqualTo("SELECT ARRAY[$1]");
+	}
+
+	@Test  // gh-31596
+	void paramNameWithNestedSquareBrackets() {
+		String sql = "insert into GeneratedAlways (id, first_name, last_name) values " +
+				"(:records[0].id, :records[0].firstName, :records[0].lastName), " +
+				"(:records[1].id, :records[1].firstName, :records[1].lastName)";
+
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertThat(parsedSql.getParameterNames()).containsOnly(
+				"records[0].id", "records[0].firstName", "records[0].lastName",
+				"records[1].id", "records[1].firstName", "records[1].lastName");
 	}
 
 	@Test  // gh-27925
