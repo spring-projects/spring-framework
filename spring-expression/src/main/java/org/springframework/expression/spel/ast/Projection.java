@@ -65,10 +65,9 @@ public class Projection extends SpelNodeImpl {
 		TypedValue op = state.getActiveContextObject();
 		Object operand = op.getValue();
 
-		// When the input is a map, we push a special context object on the stack
-		// before calling the specified operation. This special context object
-		// has two fields 'key' and 'value' that refer to the map entry's key
-		// and value, and they can be referenced in the operation -- for example,
+		// When the input is a map, we push a Map.Entry on the stack before calling
+		// the specified operation. Map.Entry has two properties 'key' and 'value'
+		// that can be referenced in the operation -- for example,
 		// {'a':'y', 'b':'n'}.![value == 'y' ? key : null] evaluates to ['a', null].
 		if (operand instanceof Map<?, ?> mapData) {
 			List<Object> result = new ArrayList<>();
