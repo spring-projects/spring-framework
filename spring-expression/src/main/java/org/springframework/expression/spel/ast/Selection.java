@@ -90,7 +90,6 @@ public class Selection extends SpelNodeImpl {
 		SpelNodeImpl selectionCriteria = this.children[0];
 
 		if (operand instanceof Map<?, ?> mapdata) {
-			// TODO don't lose generic info for the new map
 			Map<Object, Object> result = new HashMap<>();
 			Object lastKey = null;
 

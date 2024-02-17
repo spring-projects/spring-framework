@@ -233,7 +233,6 @@ public abstract class ReflectionHelper {
 		return (match != null ? new ArgumentsMatchInfo(match) : null);
 	}
 
-	// TODO could do with more refactoring around argument handling and varargs
 	/**
 	 * Convert the supplied set of arguments into the parameter types specified
 	 * by the supplied {@link Method}.
