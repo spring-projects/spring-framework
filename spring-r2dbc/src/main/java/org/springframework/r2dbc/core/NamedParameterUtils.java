@@ -56,12 +56,12 @@ abstract class NamedParameterUtils {
 	/**
 	 * Set of characters that qualify as comment or quote starting characters.
 	 */
-	private static final String[] START_SKIP = {"'", "\"", "--", "/*"};
+	private static final String[] START_SKIP = {"'", "\"", "--", "/*", "`"};
 
 	/**
 	 * Set of characters that are the corresponding comment or quote ending characters.
 	 */
-	private static final String[] STOP_SKIP = {"'", "\"", "\n", "*/"};
+	private static final String[] STOP_SKIP = {"'", "\"", "\n", "*/", "`"};
 
 	/**
 	 * Set of characters that qualify as parameter separators,
