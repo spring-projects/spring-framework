@@ -410,7 +410,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
 
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
-		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
+		Set<ConfigurationClass> alreadyParsed = CollectionUtils.newHashSet(configCandidates.size());
 		do {
 			StartupStep processConfig = this.applicationStartup.start("spring.context.config-classes.parse");
 			parser.parse(candidates);
@@ -433,7 +433,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			if (registry.getBeanDefinitionCount() > candidateNames.length) {
 				String[] newCandidateNames = registry.getBeanDefinitionNames();
 				Set<String> oldCandidateNames = Set.of(candidateNames);
-				Set<String> alreadyParsedClasses = new HashSet<>();
+				Set<String> alreadyParsedClasses = CollectionUtils.newHashSet(alreadyParsed.size());
 				for (ConfigurationClass configurationClass : alreadyParsed) {
 					alreadyParsedClasses.add(configurationClass.getMetadata().getClassName());
 				}

@@ -27,6 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Abstract base class implementing the common {@link CacheManager} methods.
@@ -64,7 +65,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		synchronized (this.cacheMap) {
 			this.cacheNames = Collections.emptySet();
 			this.cacheMap.clear();
-			Set<String> cacheNames = new LinkedHashSet<>(caches.size());
+			Set<String> cacheNames = CollectionUtils.newLinkedHashSet(caches.size());
 			for (Cache cache : caches) {
 				String name = cache.getName();
 				this.cacheMap.put(name, decorateCache(cache));

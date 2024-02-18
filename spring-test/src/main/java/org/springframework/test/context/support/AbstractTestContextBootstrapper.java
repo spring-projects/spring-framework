@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +52,7 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.util.TestContextSpringFactoriesUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -355,7 +355,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			List<ContextConfigurationAttributes> configAttributes) {
 
 		List<ContextCustomizerFactory> factories = getContextCustomizerFactories(testClass);
-		Set<ContextCustomizer> customizers = new LinkedHashSet<>(factories.size());
+		Set<ContextCustomizer> customizers = CollectionUtils.newLinkedHashSet(factories.size());
 		for (ContextCustomizerFactory factory : factories) {
 			ContextCustomizer customizer = factory.createContextCustomizer(testClass, configAttributes);
 			if (customizer != null) {

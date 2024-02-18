@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.io.Resource;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author Juergen Hoeller
@@ -266,7 +267,7 @@ public class GenericBean<T> {
 	}
 
 	public void setCustomEnumSetMismatch(Set<String> customEnumSet) {
-		this.customEnumSet = new HashSet<>(customEnumSet.size());
+		this.customEnumSet = CollectionUtils.newHashSet(customEnumSet.size());
 		for (String customEnumName : customEnumSet) {
 			this.customEnumSet.add(CustomEnum.valueOf(customEnumName));
 		}

@@ -363,7 +363,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		}
 
 		public void checkInitDestroyMethods(RootBeanDefinition beanDefinition) {
-			Set<LifecycleMethod> checkedInitMethods = new LinkedHashSet<>(this.initMethods.size());
+			Set<LifecycleMethod> checkedInitMethods = CollectionUtils.newLinkedHashSet(this.initMethods.size());
 			for (LifecycleMethod lifecycleMethod : this.initMethods) {
 				String methodIdentifier = lifecycleMethod.getIdentifier();
 				if (!beanDefinition.isExternallyManagedInitMethod(methodIdentifier)) {
@@ -374,7 +374,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 					}
 				}
 			}
-			Set<LifecycleMethod> checkedDestroyMethods = new LinkedHashSet<>(this.destroyMethods.size());
+			Set<LifecycleMethod> checkedDestroyMethods = CollectionUtils.newLinkedHashSet(this.destroyMethods.size());
 			for (LifecycleMethod lifecycleMethod : this.destroyMethods) {
 				String methodIdentifier = lifecycleMethod.getIdentifier();
 				if (!beanDefinition.isExternallyManagedDestroyMethod(methodIdentifier)) {

@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,7 +162,7 @@ public final class HttpComponentsHeadersAdapter implements MultiValueMap<String,
 
 	@Override
 	public Set<String> keySet() {
-		Set<String> keys = new LinkedHashSet<>(size());
+		Set<String> keys = CollectionUtils.newLinkedHashSet(size());
 		for (Header header : this.message.getHeaders()) {
 			keys.add(header.getName());
 		}

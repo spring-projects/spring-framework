@@ -414,7 +414,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			this.id = session.getId();
 			this.user = new TransferSimpUser();
 			Set<SimpSubscription> subscriptions = session.getSubscriptions();
-			this.subscriptions = new HashSet<>(subscriptions.size());
+			this.subscriptions = CollectionUtils.newHashSet(subscriptions.size());
 			for (SimpSubscription subscription : subscriptions) {
 				this.subscriptions.add(new TransferSimpSubscription(subscription));
 			}

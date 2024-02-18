@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -752,7 +751,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String value = getFirst(ALLOW);
 		if (StringUtils.hasLength(value)) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-			Set<HttpMethod> result = new LinkedHashSet<>(tokens.length);
+			Set<HttpMethod> result = CollectionUtils.newLinkedHashSet(tokens.length);
 			for (String token : tokens) {
 				HttpMethod method = HttpMethod.valueOf(token);
 				result.add(method);

@@ -86,7 +86,7 @@ public class DestinationPatternsMessageCondition
 
 	private static Set<String> prependLeadingSlash(String[] patterns, RouteMatcher routeMatcher) {
 		boolean slashSeparator = routeMatcher.combine("a", "a").equals("a/a");
-		Set<String> result = new LinkedHashSet<>(patterns.length);
+		Set<String> result = CollectionUtils.newLinkedHashSet(patterns.length);
 		for (String pattern : patterns) {
 			if (slashSeparator && StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
 				pattern = "/" + pattern;

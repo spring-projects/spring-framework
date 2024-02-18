@@ -24,6 +24,7 @@ import java.util.Set;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.CorsUtils;
@@ -67,7 +68,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 				if ("Accept".equalsIgnoreCase(expr.name) || "Content-Type".equalsIgnoreCase(expr.name)) {
 					continue;
 				}
-				result = (result != null ? result : new LinkedHashSet<>(headers.length));
+				result = (result != null ? result : CollectionUtils.newLinkedHashSet(headers.length));
 				result.add(expr);
 			}
 		}

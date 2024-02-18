@@ -16,13 +16,13 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Simple factory for shared Set instances. Allows for central setup
@@ -85,7 +85,7 @@ public class SetFactoryBean extends AbstractFactoryBean<Set<Object>> {
 			result = BeanUtils.instantiateClass(this.targetSetClass);
 		}
 		else {
-			result = new LinkedHashSet<>(this.sourceSet.size());
+			result = CollectionUtils.newLinkedHashSet(this.sourceSet.size());
 		}
 		Class<?> valueType = null;
 		if (this.targetSetClass != null) {

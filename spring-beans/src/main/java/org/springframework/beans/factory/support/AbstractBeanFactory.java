@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -73,6 +72,7 @@ import org.springframework.core.metrics.StartupStep;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
@@ -1152,7 +1152,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			this.prototypesCurrentlyInCreation.set(beanName);
 		}
 		else if (curVal instanceof String strValue) {
-			Set<String> beanNameSet = new HashSet<>(2);
+			Set<String> beanNameSet = CollectionUtils.newHashSet(2);
 			beanNameSet.add(strValue);
 			beanNameSet.add(beanName);
 			this.prototypesCurrentlyInCreation.set(beanNameSet);
