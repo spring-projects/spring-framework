@@ -25,6 +25,7 @@ import java.util.Set;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.WebUtils;
@@ -55,7 +56,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 		if (ObjectUtils.isEmpty(params)) {
 			return Collections.emptySet();
 		}
-		Set<ParamExpression> expressions = new LinkedHashSet<>(params.length);
+		Set<ParamExpression> expressions = CollectionUtils.newLinkedHashSet(params.length);
 		for (String param : params) {
 			expressions.add(new ParamExpression(param));
 		}

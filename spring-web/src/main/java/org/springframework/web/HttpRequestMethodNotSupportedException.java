@@ -17,7 +17,6 @@
 package org.springframework.web;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import jakarta.servlet.ServletException;
@@ -28,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -107,7 +107,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 		if (this.supportedMethods == null) {
 			return null;
 		}
-		Set<HttpMethod> supportedMethods = new LinkedHashSet<>(this.supportedMethods.length);
+		Set<HttpMethod> supportedMethods = CollectionUtils.newLinkedHashSet(this.supportedMethods.length);
 		for (String value : this.supportedMethods) {
 			HttpMethod method = HttpMethod.valueOf(value);
 			supportedMethods.add(method);

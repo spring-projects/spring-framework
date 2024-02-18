@@ -17,11 +17,11 @@
 package org.springframework.cache.interceptor;
 
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Base class for cache operations.
@@ -158,7 +158,7 @@ public abstract class CacheOperation implements BasicOperation {
 		}
 
 		public void setCacheNames(String... cacheNames) {
-			this.cacheNames = new LinkedHashSet<>(cacheNames.length);
+			this.cacheNames = CollectionUtils.newLinkedHashSet(cacheNames.length);
 			for (String cacheName : cacheNames) {
 				Assert.hasText(cacheName, "Cache name must be non-empty if specified");
 				this.cacheNames.add(cacheName);

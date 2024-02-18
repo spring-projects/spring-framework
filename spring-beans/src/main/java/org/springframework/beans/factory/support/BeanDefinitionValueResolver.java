@@ -466,7 +466,7 @@ public class BeanDefinitionValueResolver {
 	 * For each element in the managed set, resolve reference if necessary.
 	 */
 	private Set<?> resolveManagedSet(Object argName, Set<?> ms) {
-		Set<Object> resolved = new LinkedHashSet<>(ms.size());
+		Set<Object> resolved = CollectionUtils.newLinkedHashSet(ms.size());
 		int i = 0;
 		for (Object m : ms) {
 			resolved.add(resolveValueIfNecessary(new KeyedArgName(argName, i), m));

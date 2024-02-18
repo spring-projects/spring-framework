@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
@@ -51,7 +52,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 		if (ObjectUtils.isEmpty(params)) {
 			return Collections.emptySet();
 		}
-		Set<ParamExpression> result = new LinkedHashSet<>(params.length);
+		Set<ParamExpression> result = CollectionUtils.newLinkedHashSet(params.length);
 		for (String param : params) {
 			result.add(new ParamExpression(param));
 		}

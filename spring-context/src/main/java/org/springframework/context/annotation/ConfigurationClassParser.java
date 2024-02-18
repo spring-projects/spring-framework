@@ -421,7 +421,7 @@ class ConfigurationClassParser {
 				Set<MethodMetadata> asmMethods = asm.getAnnotatedMethods(Bean.class.getName());
 				if (asmMethods.size() >= beanMethods.size()) {
 					Set<MethodMetadata> candidateMethods = new LinkedHashSet<>(beanMethods);
-					Set<MethodMetadata> selectedMethods = new LinkedHashSet<>(asmMethods.size());
+					Set<MethodMetadata> selectedMethods = CollectionUtils.newLinkedHashSet(asmMethods.size());
 					for (MethodMetadata asmMethod : asmMethods) {
 						for (Iterator<MethodMetadata> it = candidateMethods.iterator(); it.hasNext();) {
 							MethodMetadata beanMethod = it.next();

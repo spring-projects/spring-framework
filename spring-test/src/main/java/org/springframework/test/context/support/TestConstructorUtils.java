@@ -19,7 +19,6 @@ package org.springframework.test.context.support;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -33,6 +32,7 @@ import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestConstructor.AutowireMode;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Utility methods for working with {@link TestConstructor @TestConstructor}.
@@ -49,7 +49,7 @@ public abstract class TestConstructorUtils {
 
 	private static final Log logger = LogFactory.getLog(TestConstructorUtils.class);
 
-	private static final Set<Class<? extends Annotation>> autowiredAnnotationTypes = new LinkedHashSet<>(2);
+	private static final Set<Class<? extends Annotation>> autowiredAnnotationTypes = CollectionUtils.newLinkedHashSet(2);
 
 	static {
 		autowiredAnnotationTypes.add(Autowired.class);

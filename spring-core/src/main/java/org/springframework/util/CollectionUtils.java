@@ -22,8 +22,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -85,7 +87,7 @@ public abstract class CollectionUtils {
 	 * @see #newLinkedHashMap(int)
 	 */
 	public static <K, V> HashMap<K, V> newHashMap(int expectedSize) {
-		return new HashMap<>(computeMapInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
+		return new HashMap<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
 	}
 
 	/**
@@ -102,10 +104,34 @@ public abstract class CollectionUtils {
 	 * @see #newHashMap(int)
 	 */
 	public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(int expectedSize) {
-		return new LinkedHashMap<>(computeMapInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
+		return new LinkedHashMap<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
 	}
 
-	private static int computeMapInitialCapacity(int expectedSize) {
+	/**
+	 * Instantiate a new {@link HashSet} with an initial capacity
+	 * that can accommodate the specified number of elements without
+	 * any immediate resize/rehash operations to be expected.
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @see #newLinkedHashSet(int)
+	 */
+	public static <E> HashSet<E> newHashSet(int expectedSize) {
+		return new HashSet<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
+	}
+
+	/**
+	 * Instantiate a new {@link LinkedHashSet} with an initial capacity
+	 * that can accommodate the specified number of elements without
+	 * any immediate resize/rehash operations to be expected.
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @see #newHashSet(int)
+	 */
+	public static <E> LinkedHashSet<E> newLinkedHashSet(int expectedSize) {
+		return new LinkedHashSet<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
+	}
+
+	private static int computeInitialCapacity(int expectedSize) {
 		return (int) Math.ceil(expectedSize / (double) DEFAULT_LOAD_FACTOR);
 	}
 
