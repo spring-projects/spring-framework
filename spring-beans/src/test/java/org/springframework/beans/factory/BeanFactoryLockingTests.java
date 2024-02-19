@@ -22,6 +22,9 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 /**
  * @author Juergen Hoeller
  * @since 6.2
@@ -31,8 +34,10 @@ class BeanFactoryLockingTests {
 	@Test
 	void fallbackForThreadDuringInitialization() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerBeanDefinition("bean1", new RootBeanDefinition(ThreadDuringInitialization.class));
-		beanFactory.registerBeanDefinition("bean2", new RootBeanDefinition(TestBean.class));
+		beanFactory.registerBeanDefinition("bean1",
+				new RootBeanDefinition(ThreadDuringInitialization.class));
+		beanFactory.registerBeanDefinition("bean2",
+				new RootBeanDefinition(TestBean.class, () -> new TestBean("tb")));
 		beanFactory.getBean(ThreadDuringInitialization.class);
 	}
 
@@ -51,7 +56,12 @@ class BeanFactoryLockingTests {
 		@Override
 		public void afterPropertiesSet() throws Exception {
 			Thread thread = new Thread(() -> {
-				beanFactory.getBean(TestBean.class);
+				// Fail for circular reference from other thread
+				assertThatExceptionOfType(BeanCurrentlyInCreationException.class).isThrownBy(() ->
+						beanFactory.getBean(ThreadDuringInitialization.class));
+				// Leniently create unrelated other bean outside of singleton lock
+				assertThat(beanFactory.getBean(TestBean.class).getName()).isEqualTo("tb");
+				// Creation attempt in other thread was successful
 				initialized = true;
 			});
 			thread.start();

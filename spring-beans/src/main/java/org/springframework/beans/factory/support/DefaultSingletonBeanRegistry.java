@@ -188,7 +188,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			singletonObject = this.earlySingletonObjects.get(beanName);
 			if (singletonObject == null && allowEarlyReference) {
-				this.singletonLock.lock();
+				if (!this.singletonLock.tryLock()) {
+					// Avoid early singleton inference outside of original creation thread
+					return null;
+				}
 				try {
 					// Consistent creation of early reference within full singleton lock
 					singletonObject = this.singletonObjects.get(beanName);
