@@ -282,7 +282,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 			}
 			if (actualValue == null && attributeName.equals(AutowireCandidateQualifier.VALUE_KEY) &&
 					expectedValue instanceof String name && bdHolder.matchesName(name)) {
-				// Fall back on bean name (or alias) match
+				// Finally, check bean name (or alias) match
 				continue;
 			}
 			if (actualValue == null && qualifier != null) {
@@ -333,12 +333,26 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 */
 	@Override
 	public boolean hasQualifier(DependencyDescriptor descriptor) {
-		for (Annotation ann : descriptor.getAnnotations()) {
-			if (isQualifier(ann.annotationType())) {
+		for (Annotation annotation : descriptor.getAnnotations()) {
+			if (isQualifier(annotation.annotationType())) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	@Override
+	@Nullable
+	public String getSuggestedName(DependencyDescriptor descriptor) {
+		for (Annotation annotation : descriptor.getAnnotations()) {
+			if (isQualifier(annotation.annotationType())) {
+				Object value = AnnotationUtils.getValue(annotation);
+				if (value instanceof String str) {
+					return str;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,18 @@ public interface AutowireCandidateResolver {
 	 */
 	default boolean hasQualifier(DependencyDescriptor descriptor) {
 		return false;
+	}
+
+	/**
+	 * Determine whether a target bean name is suggested for the given dependency
+	 * (typically - but not necessarily - declared with a single-value qualifier).
+	 * @param descriptor the descriptor for the target method parameter or field
+	 * @return the qualifier value, if any
+	 * @since 6.2
+	 */
+	@Nullable
+	default String getSuggestedName(DependencyDescriptor descriptor) {
+		return null;
 	}
 
 	/**

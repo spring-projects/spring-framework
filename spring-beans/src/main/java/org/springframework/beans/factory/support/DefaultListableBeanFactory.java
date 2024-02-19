@@ -1400,9 +1400,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 
-			// Step 3: shortcut for declared dependency name matching target bean name
+			// Step 3: shortcut for declared dependency name or qualifier-suggested name matching target bean name
 			String dependencyName = descriptor.getDependencyName();
-			if (dependencyName != null && containsBean(dependencyName) &&
+			if (dependencyName == null || !containsBean(dependencyName)) {
+				String suggestedName = getAutowireCandidateResolver().getSuggestedName(descriptor);
+				dependencyName = (suggestedName != null && containsBean(suggestedName) ? suggestedName : null);
+			}
+			if (dependencyName != null &&
 					isTypeMatch(dependencyName, type) && isAutowireCandidate(dependencyName, descriptor) &&
 					!hasPrimaryConflict(dependencyName, type) && !isSelfReference(beanName, dependencyName)) {
 				if (autowiredBeanNames != null) {
@@ -1747,10 +1751,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (primaryCandidate != null) {
 			return primaryCandidate;
 		}
-		// Step 2: check bean name match
-		for (String candidateName : candidates.keySet()) {
-			if (matchesBeanName(candidateName, descriptor.getDependencyName())) {
-				return candidateName;
+		// Step 2a: match bean name against declared dependency name
+		String dependencyName = descriptor.getDependencyName();
+		if (dependencyName != null) {
+			for (String beanName : candidates.keySet()) {
+				if (matchesBeanName(beanName, dependencyName)) {
+					return beanName;
+				}
+			}
+		}
+		// Step 2b: match bean name against qualifier-suggested name
+		String suggestedName = getAutowireCandidateResolver().getSuggestedName(descriptor);
+		if (suggestedName != null) {
+			for (String beanName : candidates.keySet()) {
+				if (matchesBeanName(beanName, suggestedName)) {
+					return beanName;
+				}
 			}
 		}
 		// Step 3: check highest priority candidate
