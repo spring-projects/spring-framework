@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
@@ -77,7 +76,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	/**
 	 * Contains names of beans that have overrides.
 	 */
-	private final Set<String> beanNames = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+	private final Set<String> beanNames = ConcurrentHashMap.newKeySet(16);
 
 
 	/**

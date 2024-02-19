@@ -229,7 +229,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	void stopForRestart() {
 		if (this.running) {
-			this.stoppedBeans = Collections.newSetFromMap(new ConcurrentHashMap<>());
+			this.stoppedBeans = ConcurrentHashMap.newKeySet();
 			stopBeans();
 			this.running = false;
 		}
