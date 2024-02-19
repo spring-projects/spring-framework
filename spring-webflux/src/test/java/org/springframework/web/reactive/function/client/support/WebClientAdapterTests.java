@@ -145,7 +145,7 @@ class WebClientAdapterTests {
 		initService().postForm(map);
 
 		RecordedRequest request = this.server.takeRequest();
-		assertThat(request.getHeaders().get("Content-Type")).isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
+		assertThat(request.getHeaders().get("Content-Type")).isEqualTo("application/x-www-form-urlencoded");
 		assertThat(request.getBody().readUtf8()).isEqualTo("param1=value+1&param2=value+2");
 	}
 

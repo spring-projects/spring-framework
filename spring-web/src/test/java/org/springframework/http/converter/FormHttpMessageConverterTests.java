@@ -47,6 +47,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.http.MockHttpInputMessage;
 import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -93,7 +94,7 @@ class FormHttpMessageConverterTests {
 		assertCanWrite(MULTIPART_FORM_DATA);
 		assertCanWrite(MULTIPART_MIXED);
 		assertCanWrite(MULTIPART_RELATED);
-		assertCanWrite(new MediaType("multipart", "form-data", StandardCharsets.UTF_8));
+		assertCanWrite(new MediaType("multipart", "form-data", UTF_8));
 		assertCanWrite(MediaType.ALL);
 		assertCanWrite(null);
 	}
@@ -141,10 +142,10 @@ class FormHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.write(body, APPLICATION_FORM_URLENCODED, outputMessage);
 
-		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8))
+		assertThat(outputMessage.getBodyAsString(UTF_8))
 				.as("Invalid result").isEqualTo("name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3");
-		assertThat(outputMessage.getHeaders().getContentType().toString())
-				.as("Invalid content-type").isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
+		assertThat(outputMessage.getHeaders().getContentType())
+				.as("Invalid content-type").isEqualTo(APPLICATION_FORM_URLENCODED);
 		assertThat(outputMessage.getHeaders().getContentLength())
 				.as("Invalid content-length").isEqualTo(outputMessage.getBodyAsBytes().length);
 	}
@@ -178,7 +179,7 @@ class FormHttpMessageConverterTests {
 		parts.add("json", entity);
 
 		Map<String, String> parameters = new LinkedHashMap<>(2);
-		parameters.put("charset", StandardCharsets.UTF_8.name());
+		parameters.put("charset", UTF_8.name());
 		parameters.put("foo", "bar");
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
@@ -260,7 +261,7 @@ class FormHttpMessageConverterTests {
 		parts.add("xml", entity);
 
 		Map<String, String> parameters = new LinkedHashMap<>(2);
-		parameters.put("charset", StandardCharsets.UTF_8.name());
+		parameters.put("charset", UTF_8.name());
 		parameters.put("foo", "bar");
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
@@ -323,8 +324,8 @@ class FormHttpMessageConverterTests {
 		parts.add("part2", entity);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.setMultipartCharset(StandardCharsets.UTF_8);
-		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
+		this.converter.setMultipartCharset(UTF_8);
+		this.converter.write(parts, new MediaType("multipart", "form-data", UTF_8), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
 		assertThat(contentType.getParameter("boundary")).as("No boundary found").isNotNull();
