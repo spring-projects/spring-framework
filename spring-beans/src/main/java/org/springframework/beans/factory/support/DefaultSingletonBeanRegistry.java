@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -91,12 +90,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private final Lock singletonLock = new ReentrantLock();
 
 	/** Names of beans that are currently in creation. */
-	private final Set<String> singletonsCurrentlyInCreation =
-			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+	private final Set<String> singletonsCurrentlyInCreation = ConcurrentHashMap.newKeySet(16);
 
 	/** Names of beans currently excluded from in creation checks. */
-	private final Set<String> inCreationCheckExclusions =
-			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+	private final Set<String> inCreationCheckExclusions = ConcurrentHashMap.newKeySet(16);
 
 	@Nullable
 	private volatile Thread singletonCreationThread;

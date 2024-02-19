@@ -18,7 +18,6 @@ package org.springframework.context.event;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,7 +81,7 @@ public class EventListenerMethodProcessor
 	@Nullable
 	private final EventExpressionEvaluator evaluator;
 
-	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
+	private final Set<Class<?>> nonAnnotatedClasses = ConcurrentHashMap.newKeySet(64);
 
 
 	public EventListenerMethodProcessor() {

@@ -20,7 +20,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -136,7 +135,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	@Nullable
 	private BeanFactory beanFactory;
 
-	private final Set<String> targetSourcedBeans = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+	private final Set<String> targetSourcedBeans = ConcurrentHashMap.newKeySet(16);
 
 	private final Map<Object, Object> earlyBeanReferences = new ConcurrentHashMap<>(16);
 

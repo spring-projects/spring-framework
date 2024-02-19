@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.security.ProtectionDomain;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -88,7 +87,7 @@ public final class CachedIntrospectionResults {
 	 * accept classes from, even if the classes do not qualify as cache-safe.
 	 */
 	static final Set<ClassLoader> acceptedClassLoaders =
-			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+			ConcurrentHashMap.newKeySet(16);
 
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, strongly held.
