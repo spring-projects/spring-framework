@@ -94,7 +94,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	private void setNativeBuffer(ByteBuffer byteBuffer) {
 		this.byteBuffer = byteBuffer;
-		this.capacity = byteBuffer.remaining();
+		this.capacity = byteBuffer.capacity();
 	}
 
 
