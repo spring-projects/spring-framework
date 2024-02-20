@@ -760,6 +760,73 @@ Kotlin::
 ======
 
 
+[[webmvc-fn-serving-resources]]
+== Serving Resources
+
+WebMvc.fn provides built-in support for serving resources.
+
+NOTE: In addition to the capabilities described below, it is possible to implement even more flexible resource handling thanks to
+{spring-framework-api}++/web/servlet/function/RouterFunctions.html#resources(java.util.function.Function)++[`RouterFunctions#resource(java.util.function.Function)`].
+
+[[webmvc-fn-resource]]
+=== Redirecting to a resource
+
+It is possible to redirect requests matching a specified predicate to a resource. This can be useful, for example,
+for handling redirects in Single Page Applications.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+    ClassPathResource index = new ClassPathResource("static/index.html");
+	List<String> extensions = List.of("js", "css", "ico", "png", "jpg", "gif");
+	RequestPredicate spaPredicate = path("/api/**").or(path("/error")).or(pathExtension(extensions::contains)).negate();
+	RouterFunction<ServerResponse> redirectToIndex = route()
+		.resource(spaPredicate, index)
+		.build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+    val redirectToIndex = router {
+		val index = ClassPathResource("static/index.html")
+		val extensions = listOf("js", "css", "ico", "png", "jpg", "gif")
+		val spaPredicate = !(path("/api/**") or path("/error") or
+			pathExtension(extensions::contains))
+		resource(spaPredicate, index)
+	}
+----
+======
+
+[[webmvc-fn-resources]]
+=== Serving resources from a root location
+
+It is also possible to route requests that match a given pattern to resources relative to a given root location.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+    Resource location = new FileSystemResource("public-resources/");
+    RouterFunction<ServerResponse> resources = RouterFunctions.resources("/resources/**", location);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+    val location = FileSystemResource("public-resources/")
+    val resources = router { resources("/resources/**", location) }
+----
+======
+
+
 [[webmvc-fn-running]]
 == Running a Server
 [.small]#xref:web/webflux-functional.adoc#webflux-fn-running[See equivalent in the Reactive stack]#

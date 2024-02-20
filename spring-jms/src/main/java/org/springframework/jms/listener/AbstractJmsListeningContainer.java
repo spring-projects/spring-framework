@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package org.springframework.jms.listener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
@@ -77,7 +80,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private boolean sharedConnectionStarted = false;
 
-	protected final Object sharedConnectionMonitor = new Object();
+	protected final Lock sharedConnectionLock = new ReentrantLock();
 
 	private boolean active = false;
 
@@ -85,7 +88,9 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private final List<Object> pausedTasks = new ArrayList<>();
 
-	protected final Object lifecycleMonitor = new Object();
+	protected final Lock lifecycleLock = new ReentrantLock();
+
+	protected final Condition lifecycleCondition = this.lifecycleLock.newCondition();
 
 
 	/**
@@ -199,9 +204,13 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	public void initialize() throws JmsException {
 		try {
-			synchronized (this.lifecycleMonitor) {
+			this.lifecycleLock.lock();
+			try {
 				this.active = true;
-				this.lifecycleMonitor.notifyAll();
+				this.lifecycleCondition.signalAll();
+			}
+			finally {
+				this.lifecycleLock.unlock();
 			}
 			doInitialize();
 		}
@@ -218,13 +227,18 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	public void shutdown() throws JmsException {
 		logger.debug("Shutting down JMS listener container");
+
 		boolean wasRunning;
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			wasRunning = this.running;
 			this.running = false;
 			this.active = false;
 			this.pausedTasks.clear();
-			this.lifecycleMonitor.notifyAll();
+			this.lifecycleCondition.signalAll();
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 
 		// Stop shared Connection early, if necessary.
@@ -256,8 +270,12 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * that is, whether it has been set up but not shut down yet.
 	 */
 	public final boolean isActive() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return this.active;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -288,10 +306,14 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		}
 
 		// Reschedule paused tasks, if any.
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			this.running = true;
-			this.lifecycleMonitor.notifyAll();
+			this.lifecycleCondition.signalAll();
 			resumePausedTasks();
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 
 		// Start the shared Connection, if any.
@@ -321,9 +343,13 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see #stopSharedConnection
 	 */
 	protected void doStop() throws JMSException {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			this.running = false;
-			this.lifecycleMonitor.notifyAll();
+			this.lifecycleCondition.signalAll();
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 
 		if (sharedConnectionEnabled()) {
@@ -370,11 +396,15 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected void establishSharedConnection() throws JMSException {
-		synchronized (this.sharedConnectionMonitor) {
+		this.sharedConnectionLock.lock();
+		try {
 			if (this.sharedConnection == null) {
 				this.sharedConnection = createSharedConnection();
 				logger.debug("Established shared JMS Connection");
 			}
+		}
+		finally {
+			this.sharedConnectionLock.unlock();
 		}
 	}
 
@@ -385,12 +415,16 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected final void refreshSharedConnection() throws JMSException {
-		synchronized (this.sharedConnectionMonitor) {
+		this.sharedConnectionLock.lock();
+		try {
 			releaseSharedConnection();
 			this.sharedConnection = createSharedConnection();
 			if (this.sharedConnectionStarted) {
 				this.sharedConnection.start();
 			}
+		}
+		finally {
+			this.sharedConnectionLock.unlock();
 		}
 	}
 
@@ -435,7 +469,8 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see jakarta.jms.Connection#start()
 	 */
 	protected void startSharedConnection() throws JMSException {
-		synchronized (this.sharedConnectionMonitor) {
+		this.sharedConnectionLock.lock();
+		try {
 			this.sharedConnectionStarted = true;
 			if (this.sharedConnection != null) {
 				try {
@@ -446,6 +481,9 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 				}
 			}
 		}
+		finally {
+			this.sharedConnectionLock.unlock();
+		}
 	}
 
 	/**
@@ -454,7 +492,8 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see jakarta.jms.Connection#start()
 	 */
 	protected void stopSharedConnection() throws JMSException {
-		synchronized (this.sharedConnectionMonitor) {
+		this.sharedConnectionLock.lock();
+		try {
 			this.sharedConnectionStarted = false;
 			if (this.sharedConnection != null) {
 				try {
@@ -465,6 +504,9 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 				}
 			}
 		}
+		finally {
+			this.sharedConnectionLock.unlock();
+		}
 	}
 
 	/**
@@ -473,10 +515,14 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see ConnectionFactoryUtils#releaseConnection
 	 */
 	protected final void releaseSharedConnection() {
-		synchronized (this.sharedConnectionMonitor) {
+		this.sharedConnectionLock.lock();
+		try {
 			ConnectionFactoryUtils.releaseConnection(
 					this.sharedConnection, getConnectionFactory(), this.sharedConnectionStarted);
 			this.sharedConnection = null;
+		}
+		finally {
+			this.sharedConnectionLock.unlock();
 		}
 	}
 
@@ -493,12 +539,16 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			throw new IllegalStateException(
 					"This listener container does not maintain a shared Connection");
 		}
-		synchronized (this.sharedConnectionMonitor) {
+		this.sharedConnectionLock.lock();
+		try {
 			if (this.sharedConnection == null) {
 				throw new SharedConnectionNotInitializedException(
 						"This listener container's shared Connection has not been initialized yet");
 			}
 			return this.sharedConnection;
+		}
+		finally {
+			this.sharedConnectionLock.unlock();
 		}
 	}
 
@@ -543,7 +593,8 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Tasks for which rescheduling failed simply remain in paused mode.
 	 */
 	protected void resumePausedTasks() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			if (!this.pausedTasks.isEmpty()) {
 				for (Iterator<?> it = this.pausedTasks.iterator(); it.hasNext();) {
 					Object task = it.next();
@@ -561,14 +612,21 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 				}
 			}
 		}
+		finally {
+			this.lifecycleLock.unlock();
+		}
 	}
 
 	/**
 	 * Determine the number of currently paused tasks, if any.
 	 */
 	public int getPausedTaskCount() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return this.pausedTasks.size();
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 

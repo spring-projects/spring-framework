@@ -84,6 +84,15 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 
 	/**
+	 * Determine whether this factory has been configured with a base URI.
+	 * @since 6.1.4
+	 * @see #DefaultUriBuilderFactory()
+	 */
+	public final boolean hasBaseUri() {
+		return (this.baseUri != null);
+	}
+
+	/**
 	 * Set the {@link EncodingMode encoding mode} to use.
 	 * <p>By default this is set to {@link EncodingMode#TEMPLATE_AND_VALUES
 	 * EncodingMode.TEMPLATE_AND_VALUES}.
@@ -155,20 +164,6 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 */
 	public boolean shouldParsePath() {
 		return this.parsePath;
-	}
-
-	/**
-	 * Indicates whether this {@code DefaultUriBuilderFactory} uses the default
-	 * {@link org.springframework.web.client.RestTemplate RestTemplate}
-	 * settings.
-	 * @since 6.1.4
-	 */
-	public boolean hasRestTemplateDefaults() {
-		// see RestTemplate::initUriTemplateHandler
-		return this.baseUri == null &&
-				this.encodingMode == EncodingMode.URI_COMPONENT &&
-				CollectionUtils.isEmpty(this.defaultUriVariables) &&
-				this.parsePath;
 	}
 
 

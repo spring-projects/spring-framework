@@ -302,7 +302,9 @@ class WebSocketStompClientTests {
 		tcpConnection.onReadInactivity(mock(), 2L);
 		tcpConnection.onWriteInactivity(mock(), 2L);
 
-		this.webSocketHandlerCaptor.getValue().afterConnectionClosed(this.webSocketSession, CloseStatus.NORMAL);
+		WebSocketHandler handler = this.webSocketHandlerCaptor.getValue();
+		TcpConnection<?> connection = (TcpConnection<?>) WebSocketHandlerDecorator.unwrap(handler);
+		connection.close();
 
 		verify(future, times(2)).cancel(true);
 		verifyNoMoreInteractions(future);

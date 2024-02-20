@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,8 +109,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private final Map<String, ReceiptHandler> receiptHandlers = new ConcurrentHashMap<>(4);
 
-	/* Whether the client is willfully closing the connection */
-	private volatile boolean closing;
+	private volatile boolean clientSideClose;
 
 
 	/**
@@ -368,7 +367,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	@Override
 	public void disconnect(@Nullable StompHeaders headers) {
-		this.closing = true;
+		this.clientSideClose = true;
 		try {
 			StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.DISCONNECT);
 			if (headers != null) {
@@ -519,7 +518,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Connection closed in session id=" + this.sessionId);
 		}
-		if (!this.closing) {
+		if (!this.clientSideClose) {
 			resetConnection();
 			handleFailure(new ConnectionLostException("Connection closed"));
 		}
@@ -715,9 +714,14 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		public void run() {
 			TcpConnection<byte[]> conn = connection;
 			if (conn != null) {
-				conn.sendAsync(HEARTBEAT).whenComplete((unused, throwable) -> {
-					if (throwable != null) {
-						handleFailure(throwable);
+				conn.sendAsync(HEARTBEAT).whenComplete((unused, ex) -> {
+					if (ex != null) {
+						String msg = "Heartbeat write failure. Closing connection in session id=" + sessionId + ".";
+						if (logger.isDebugEnabled()) {
+							logger.debug(msg);
+						}
+						resetConnection();
+						handleFailure(new ConnectionLostException(msg, ex));
 					}
 				});
 			}
@@ -729,13 +733,13 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 		@Override
 		public void run() {
-			closing = true;
-			String error = "Server has gone quiet. Closing connection in session id=" + sessionId + ".";
+			String msg = "Read inactivity. Closing connection in session id=" + sessionId + ".";
 			if (logger.isDebugEnabled()) {
-				logger.debug(error);
+				logger.debug(msg);
 			}
+			clientSideClose = true;
 			resetConnection();
-			handleFailure(new IllegalStateException(error));
+			handleFailure(new ConnectionLostException(msg));
 		}
 	}
 

@@ -85,7 +85,7 @@ public class WeavingTransformer {
 	 * @param className the full qualified name of the class in dot format (i.e. some.package.SomeClass)
 	 * @param internalName class name internal name in / format (i.e. some/package/SomeClass)
 	 * @param bytes class byte definition
-	 * @param pd protection domain to be used (can be null)
+	 * @param pd protection domain to be used (can be {@code null})
 	 * @return (possibly transformed) class byte definition
 	 */
 	public byte[] transformIfNecessary(String className, String internalName, byte[] bytes, @Nullable ProtectionDomain pd) {

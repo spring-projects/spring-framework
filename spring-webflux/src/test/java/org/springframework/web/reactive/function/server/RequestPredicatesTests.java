@@ -219,11 +219,10 @@ class RequestPredicatesTests {
 
 
 	@Test
-	void contentType() {
-		MediaType json = MediaType.APPLICATION_JSON;
-		RequestPredicate predicate = RequestPredicates.contentType(json);
+	void singleContentType() {
+		RequestPredicate predicate = RequestPredicates.contentType(MediaType.APPLICATION_JSON);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com")
-				.header(HttpHeaders.CONTENT_TYPE, json.toString())
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		assertThat(predicate.test(request)).isTrue();
@@ -236,13 +235,56 @@ class RequestPredicatesTests {
 	}
 
 	@Test
-	void accept() {
-		MediaType json = MediaType.APPLICATION_JSON;
-		RequestPredicate predicate = RequestPredicates.accept(json);
+	void multipleContentTypes() {
+		RequestPredicate predicate = RequestPredicates.contentType(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com")
-				.header(HttpHeaders.ACCEPT, json.toString())
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isTrue();
+
+		mockRequest = MockServerHttpRequest.get("https://example.com")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
+				.build();
+		request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isTrue();
+
+		mockRequest = MockServerHttpRequest.get("https://example.com")
+				.header(HttpHeaders.CONTENT_TYPE, "foo/bar")
+				.build();
+		request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isFalse();
+	}
+
+	@Test
+	void singleAccept() {
+		RequestPredicate predicate = RequestPredicates.accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com")
+				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+				.build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isTrue();
+
+		mockRequest = MockServerHttpRequest.get("https://example.com")
+				.header(HttpHeaders.ACCEPT, "foo/bar")
+				.build();
+		request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isFalse();
+	}
+
+	@Test
+	void multipleAccepts() {
+		RequestPredicate predicate = RequestPredicates.accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com")
+				.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+				.build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isTrue();
+
+		mockRequest = MockServerHttpRequest.get("https://example.com")
+				.header(HttpHeaders.ACCEPT, MediaType.TEXT_PLAIN_VALUE)
+				.build();
+		request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		assertThat(predicate.test(request)).isTrue();
 
 		mockRequest = MockServerHttpRequest.get("https://example.com")

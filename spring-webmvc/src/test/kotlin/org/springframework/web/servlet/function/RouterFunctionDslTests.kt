@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,14 +75,6 @@ class RouterFunctionDslTests {
 	}
 
 	@Test
-	fun resourceByPath() {
-		val servletRequest = PathPatternsTestUtils.initRequest(
-				"GET", "/org/springframework/web/servlet/function/response.txt", true)
-		val request = DefaultServerRequest(servletRequest, emptyList())
-		assertThat(sampleRouter().route(request).isPresent).isTrue()
-	}
-
-	@Test
 	fun method() {
 		val servletRequest = PathPatternsTestUtils.initRequest("PATCH", "/", true)
 		val request = DefaultServerRequest(servletRequest, emptyList())
@@ -97,7 +89,28 @@ class RouterFunctionDslTests {
 	}
 
 	@Test
+	fun pathExtension() {
+		val servletRequest = PathPatternsTestUtils.initRequest("GET", "/test.properties", true)
+		val request = DefaultServerRequest(servletRequest, emptyList())
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
+	}
+
+	@Test
 	fun resource() {
+		val servletRequest = PathPatternsTestUtils.initRequest("GET","/response2.txt", true)
+		val request = DefaultServerRequest(servletRequest, emptyList())
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
+	}
+
+	@Test
+	fun resources() {
+		val servletRequest = PathPatternsTestUtils.initRequest("GET", "/resources/response.txt", true)
+		val request = DefaultServerRequest(servletRequest, emptyList())
+		assertThat(sampleRouter().route(request).isPresent).isTrue()
+	}
+
+	@Test
+	fun resourcesLookupFunction() {
 		val servletRequest = PathPatternsTestUtils.initRequest("GET", "/response.txt", true)
 		val request = DefaultServerRequest(servletRequest, emptyList())
 		assertThat(sampleRouter().route(request).isPresent).isTrue()
@@ -168,8 +181,9 @@ class RouterFunctionDslTests {
 			GET("/api/foo/", ::handle)
 		}
 		headers({ it.header("bar").isNotEmpty() }, ::handle)
-		resources("/org/springframework/web/servlet/function/**",
-				ClassPathResource("/org/springframework/web/servlet/function/response.txt"))
+		resource(path("/response2.txt"), ClassPathResource("/org/springframework/web/servlet/function/response.txt"))
+		resources("/resources/**",
+			ClassPathResource("/org/springframework/web/servlet/function/"))
 		resources {
 			if (it.path() == "/response.txt") {
 				ClassPathResource("/org/springframework/web/servlet/function/response.txt")
@@ -177,6 +191,9 @@ class RouterFunctionDslTests {
 			else {
 				null
 			}
+		}
+		GET(pathExtension { it == "properties" }) {
+			ok().body("foo=bar")
 		}
 		path("/baz", ::handle)
 		GET("/rendering") { RenderingResponse.create("index").build() }

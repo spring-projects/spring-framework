@@ -23,8 +23,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.core.testfixture.env.MockPropertySource;
+import org.springframework.util.PlaceholderResolutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
 import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME;
@@ -207,9 +209,9 @@ class StandardEnvironmentTests {
 	void defaultProfileWithCircularPlaceholder() {
 		try {
 			System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "${spring.profiles.default}");
-			assertThatIllegalArgumentException()
+			assertThatExceptionOfType(PlaceholderResolutionException.class)
 				.isThrownBy(environment::getDefaultProfiles)
-				.withMessage("Circular placeholder reference 'spring.profiles.default' in property definitions");
+				.withMessageContaining("Circular placeholder reference 'spring.profiles.default'");
 		}
 		finally {
 			System.clearProperty(DEFAULT_PROFILES_PROPERTY_NAME);

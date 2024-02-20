@@ -4,7 +4,7 @@
 <beans>
 
 	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-		<property name="beanNames" value="*"/>
+		<property name="beanNames" value="pet*"/>
 		<property name="proxyTargetClass" value="true"/>
 		<property name="interceptorNames" value="checker"/>
 	</bean>
@@ -17,13 +17,15 @@
 			<bean class="org.springframework.beans.factory.config.ListFactoryBean">
 				<property name="sourceList">
 					<list>
-						<value>.*\.set[a-zA-Z]*(.*)</value>
-				 </list>
+						<value>.*\.setName*(.*)</value>
+					</list>
 				</property>
 			</bean>
 		</property>
 	</bean>
 
-	<bean id="bean" class="org.springframework.beans.testfixture.beans.TestBean"/>
+	<bean id="pet" class="org.springframework.beans.testfixture.beans.Pet">
+		<constructor-arg value="Simba" />
+	</bean>
 
 </beans>	

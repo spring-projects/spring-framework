@@ -22,6 +22,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -65,7 +66,7 @@ class ModelFactoryTests {
 
 
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 		this.attributeStore = new DefaultSessionAttributeStore();
 		this.attributeHandler = new SessionAttributesHandler(TestController.class, this.attributeStore);
@@ -155,9 +156,31 @@ class ModelFactoryTests {
 
 		// Now add attribute and try again
 		this.attributeStore.storeAttribute(this.webRequest, "sessionAttr", "sessionAttrValue");
-
 		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
 		assertThat(this.mavContainer.getModel().get("sessionAttr")).isEqualTo("sessionAttrValue");
+	}
+
+	@Test
+	void sessionAttributeByType() throws Exception {
+		ModelFactory modelFactory = new ModelFactory(null, null, this.attributeHandler);
+		HandlerMethod handlerMethod = createHandlerMethod("handleTestBean", TestBean.class);
+		assertThatExceptionOfType(HttpSessionRequiredException.class).isThrownBy(() ->
+				modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod));
+
+		// Now add attribute and try again
+		this.attributeStore.storeAttribute(this.webRequest, "testBean", new TestBean("tb"));
+		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
+		assertThat(this.mavContainer.getModel().get("testBean")).isEqualTo(new TestBean("tb"));
+		this.mavContainer.setRequestHandled(true);
+		modelFactory.updateModel(this.webRequest, this.mavContainer);
+
+		// Simulate switch to distributed session on different server
+		SessionAttributesHandler newHandler = new SessionAttributesHandler(TestController.class, this.attributeStore);
+		ModelFactory newFactory = new ModelFactory(null, null, newHandler);
+		ModelAndViewContainer newContainer = new ModelAndViewContainer();
+		HandlerMethod modelMethod = createHandlerMethod("handleModel", Model.class);
+		newFactory.initModel(this.webRequest, newContainer, modelMethod);
+		assertThat(newContainer.getModel().get("testBean")).isEqualTo(new TestBean("tb"));
 	}
 
 	@Test
@@ -221,7 +244,7 @@ class ModelFactoryTests {
 	}
 
 	@Test  // SPR-12542
-	public void updateModelWhenRedirecting() throws Exception {
+	void updateModelWhenRedirecting() throws Exception {
 		String attributeName = "sessionAttr";
 		String attribute = "value";
 		ModelAndViewContainer container = new ModelAndViewContainer();
@@ -263,7 +286,7 @@ class ModelFactoryTests {
 	}
 
 
-	@SessionAttributes({"sessionAttr", "foo"})
+	@SessionAttributes(names = {"sessionAttr", "foo"}, types = TestBean.class)
 	static class TestController {
 
 		@ModelAttribute
@@ -286,7 +309,7 @@ class ModelFactoryTests {
 			return null;
 		}
 
-		@ModelAttribute(name="foo", binding=false)
+		@ModelAttribute(name = "foo", binding = false)
 		public Foo modelAttrWithBindingDisabled() {
 			return new Foo();
 		}
@@ -295,6 +318,12 @@ class ModelFactoryTests {
 		}
 
 		public void handleSessionAttr(@ModelAttribute("sessionAttr") String sessionAttr) {
+		}
+
+		public void handleTestBean(@ModelAttribute TestBean testBean) {
+		}
+
+		public void handleModel(Model model) {
 		}
 	}
 

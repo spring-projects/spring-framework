@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 
 	public ReflectiveMethodResolver() {
-		this.useDistance = true;
+		this(true);
 	}
 
 	/**
@@ -100,12 +100,15 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	}
 
 	/**
-	 * Locate a method on a type. There are three kinds of match that might occur:
+	 * Locate a method on the type.
+	 * <p>There are three kinds of matches that might occur:
 	 * <ol>
-	 * <li>an exact match where the types of the arguments match the types of the constructor
-	 * <li>an in-exact match where the types we are looking for are subtypes of those defined on the constructor
-	 * <li>a match where we are able to convert the arguments into those expected by the constructor,
-	 * according to the registered type converter
+	 * <li>An exact match where the types of the arguments match the types of the
+	 * method.</li>
+	 * <li>An inexact match where the types we are looking for are subtypes of
+	 * those defined on the method.</li>
+	 * <li>A match where we are able to convert the arguments into those expected
+	 * by the method, according to the registered type converter.</li>
 	 * </ol>
 	 */
 	@Override

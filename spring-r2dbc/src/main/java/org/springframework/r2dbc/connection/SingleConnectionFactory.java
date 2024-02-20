@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,13 +70,15 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	private boolean suppressClose;
 
 	/** Override auto-commit state?. */
-	private @Nullable Boolean autoCommit;
+	@Nullable
+	private Boolean autoCommit;
 
 	/** Wrapped Connection. */
 	private final AtomicReference<Connection> target = new AtomicReference<>();
 
 	/** Proxy Connection. */
-	private @Nullable Connection connection;
+	@Nullable
+	private Connection connection;
 
 	private final Mono<? extends Connection> connectionEmitter;
 

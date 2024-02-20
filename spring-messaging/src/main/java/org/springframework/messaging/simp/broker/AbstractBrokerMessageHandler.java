@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,9 @@ public abstract class AbstractBrokerMessageHandler
 	private final BrokerAvailabilityEvent notAvailableEvent = new BrokerAvailabilityEvent(false, this);
 
 	private boolean autoStartup = true;
+
+	@Nullable
+	private Integer phase;
 
 	private volatile boolean running;
 
@@ -195,6 +198,20 @@ public abstract class AbstractBrokerMessageHandler
 	@Override
 	public boolean isAutoStartup() {
 		return this.autoStartup;
+	}
+
+	/**
+	 * Set the phase that this handler should run in.
+	 * <p>By default, this is {@link SmartLifecycle#DEFAULT_PHASE}.
+	 * @since 6.1.4
+	 */
+	public void setPhase(int phase) {
+		this.phase = phase;
+	}
+
+	@Override
+	public int getPhase() {
+		return (this.phase != null ? this.phase : SmartLifecycle.super.getPhase());
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,10 @@ public interface SingletonBeanRegistry {
 	 * Return the singleton mutex used by this registry (for external collaborators).
 	 * @return the mutex object (never {@code null})
 	 * @since 4.2
+	 * @deprecated as of 6.2, in favor of lenient singleton locking
+	 * (with this method returning an arbitrary object to lock on)
 	 */
+	@Deprecated(since = "6.2")
 	Object getSingletonMutex();
 
 }

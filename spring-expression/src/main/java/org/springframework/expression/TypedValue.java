@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Encapsulates an object and a {@link TypeDescriptor} that describes it.
- * The type descriptor can contain generic declarations that would not
+ *
+ * <p>The type descriptor can contain generic declarations that would not
  * be accessible through a simple {@code getClass()} call on the object.
  *
  * @author Andy Clement

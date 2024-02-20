@@ -31,7 +31,6 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.MediaType.TEXT_XML_VALUE;
 
 /**
  * @author Arjen Poutsma
@@ -179,22 +178,46 @@ class RequestPredicatesTests {
 	}
 
 	@Test
-	void contentType() {
-		MediaType json = MediaType.APPLICATION_JSON;
-		RequestPredicate predicate = RequestPredicates.contentType(json);
-		ServerRequest request = initRequest("GET", "/path", req -> req.setContentType(json.toString()));
+	void singleContentType() {
+		RequestPredicate predicate = RequestPredicates.contentType(MediaType.APPLICATION_JSON);
+		ServerRequest request = initRequest("GET", "/path", r -> r.setContentType(MediaType.APPLICATION_JSON_VALUE));
 		assertThat(predicate.test(request)).isTrue();
-		assertThat(predicate.test(initRequest("GET", ""))).isFalse();
+
+		assertThat(predicate.test(initRequest("GET", "", r -> r.setContentType(MediaType.TEXT_XML_VALUE)))).isFalse();
 	}
 
 	@Test
-	void accept() {
-		MediaType json = MediaType.APPLICATION_JSON;
-		RequestPredicate predicate = RequestPredicates.accept(json);
-		ServerRequest request = initRequest("GET", "/path", req -> req.addHeader("Accept", json.toString()));
+	void multipleContentTypes() {
+		RequestPredicate predicate = RequestPredicates.contentType(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN);
+		ServerRequest request = initRequest("GET", "/path", r -> r.setContentType(MediaType.APPLICATION_JSON_VALUE));
 		assertThat(predicate.test(request)).isTrue();
 
-		request = initRequest("GET", "", req -> req.addHeader("Accept", TEXT_XML_VALUE));
+		request = initRequest("GET", "/path", r -> r.setContentType(MediaType.TEXT_PLAIN_VALUE));
+		assertThat(predicate.test(request)).isTrue();
+
+		assertThat(predicate.test(initRequest("GET", "", r -> r.setContentType(MediaType.TEXT_XML_VALUE)))).isFalse();
+	}
+
+	@Test
+	void singleAccept() {
+		RequestPredicate predicate = RequestPredicates.accept(MediaType.APPLICATION_JSON);
+		ServerRequest request = initRequest("GET", "/path", r -> r.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE));
+		assertThat(predicate.test(request)).isTrue();
+
+		request = initRequest("GET", "", req -> req.addHeader("Accept", MediaType.TEXT_XML_VALUE));
+		assertThat(predicate.test(request)).isFalse();
+	}
+
+	@Test
+	void multipleAccepts() {
+		RequestPredicate predicate = RequestPredicates.accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN);
+		ServerRequest request = initRequest("GET", "/path", r -> r.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE));
+		assertThat(predicate.test(request)).isTrue();
+
+		request = initRequest("GET", "/path", r -> r.addHeader("Accept", MediaType.TEXT_PLAIN_VALUE));
+		assertThat(predicate.test(request)).isTrue();
+
+		request = initRequest("GET", "", req -> req.addHeader("Accept", MediaType.TEXT_XML_VALUE));
 		assertThat(predicate.test(request)).isFalse();
 	}
 

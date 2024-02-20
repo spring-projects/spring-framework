@@ -51,9 +51,9 @@ val defaultClient = RestClient.create()
 
 val customClient = RestClient.builder()
   .requestFactory(HttpComponentsClientHttpRequestFactory())
-  .messageConverters(converters -> converters.add(MyCustomMessageConverter()))
+  .messageConverters { converters -> converters.add(MyCustomMessageConverter()) }
   .baseUrl("https://example.com")
-  .defaultUriVariables(Map.of("variable", "foo"))
+  .defaultUriVariables(mapOf("variable" to "foo"))
   .defaultHeader("My-Header", "Foo")
   .requestInterceptor(myCustomInterceptor)
   .requestInitializer(myCustomInitializer)
@@ -972,6 +972,9 @@ method parameters:
 | Add a variable for expand a placeholder in the request URL. The argument may be a
   `Map<String, ?>` with multiple variables, or an individual value. Type conversion
   is supported for non-String values.
+
+| `@RequestAttribute`
+| Provide an `Object` to add as a request attribute. Only supported by `WebClient`.
 
 | `@RequestBody`
 | Provide the body of the request either as an Object to be serialized, or a

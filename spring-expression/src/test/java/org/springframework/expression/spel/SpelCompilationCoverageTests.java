@@ -64,7 +64,7 @@ import static org.springframework.expression.spel.standard.SpelExpressionTestUti
 public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	/*
-	 * Further TODOs for compilation:
+	 * TODO Potential optimizations for SpEL compilation:
 	 *
 	 * - OpMinus with a single literal operand could be treated as a negative literal. Will save a
 	 *   pointless loading of 0 and then a subtract instruction in code gen.
@@ -1205,12 +1205,12 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertThat(expression.getValue(context, new SomeCompareMethod2()).toString()).isEqualTo("xyz");
 
-		// TODO fails due to conversionservice handling of String[] to Object...
-		//	expression = parser.parseExpression("#append2(#stringArray)");
-		//	assertEquals("xyz", expression.getValue(context).toString());
-		//	assertTrue(((SpelNodeImpl)((SpelExpression) expression).getAST()).isCompilable());
-		//	assertCanCompile(expression);
-		//	assertEquals("xyz", expression.getValue(context).toString());
+		// TODO Determine why the String[] is passed as the first element of the Object... varargs array instead of the entire varargs array.
+		// expression = parser.parseExpression("#append2(#stringArray)");
+		// assertThat(expression.getValue(context)).hasToString("xyz");
+		// assertThat(((SpelNodeImpl) ((SpelExpression) expression).getAST()).isCompilable()).isTrue();
+		// assertCanCompile(expression);
+		// assertThat(expression.getValue(context)).hasToString("xyz");
 
 		expression = parser.parseExpression("#sum(1,2,3)");
 		assertThat(expression.getValue(context)).isEqualTo(6);
@@ -3703,16 +3703,16 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(tc.s).isEqualTo("aaabbbccc");
 		tc.reset();
 
-		// TODO Fails related to conversion service converting a String[] to satisfy Object...
-//		expression = parser.parseExpression("sixteen(stringArray)");
-//		assertCantCompile(expression);
-//		expression.getValue(tc);
-//		assertEquals("aaabbbccc", tc.s);
-//		assertCanCompile(expression);
-//		tc.reset();
-//		expression.getValue(tc);
-//		assertEquals("aaabbbccc", tc.s);
-//		tc.reset();
+		// TODO Determine why the String[] is passed as the first element of the Object... varargs array instead of the entire varargs array.
+		// expression = parser.parseExpression("sixteen(stringArray)");
+		// assertCantCompile(expression);
+		// expression.getValue(tc);
+		// assertThat(tc.s).isEqualTo("aaabbbccc");
+		// assertCanCompile(expression);
+		// tc.reset();
+		// expression.getValue(tc);
+		// assertThat(tc.s).isEqualTo("aaabbbccc");
+		// tc.reset();
 
 		// varargs int
 		expression = parser.parseExpression("twelve(1,2,3)");

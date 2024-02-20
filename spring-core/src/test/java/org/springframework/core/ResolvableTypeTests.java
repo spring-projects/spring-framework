@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  */
 @SuppressWarnings("rawtypes")
 @ExtendWith(MockitoExtension.class)
@@ -1315,6 +1316,24 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void hasUnresolvableGenericsWhenNested() throws Exception {
+		ResolvableType type = ResolvableType.forMethodReturnType(ListOfListSupplier.class.getMethod("get"));
+		assertThat(type.hasUnresolvableGenerics()).isTrue();
+	}
+
+	@Test
+	void hasUnresolvableGenericsWhenSelfReferring() {
+		ResolvableType type = ResolvableType.forInstance(new Bar());
+		assertThat(type.hasUnresolvableGenerics()).isFalse();
+	}
+
+	@Test
+	void hasUnresolvableGenericsWithEnum() {
+		ResolvableType type = ResolvableType.forType(SimpleEnum.class.getGenericSuperclass());
+		assertThat(type.hasUnresolvableGenerics()).isFalse();
+	}
+
+	@Test
 	void spr11219() throws Exception {
 		ResolvableType type = ResolvableType.forField(BaseProvider.class.getField("stuff"), BaseProvider.class);
 		assertThat(type.getNested(2).isAssignableFrom(ResolvableType.forClass(BaseImplementation.class))).isTrue();
@@ -1615,6 +1634,22 @@ class ResolvableTypeTests {
 
 	interface ListOfGenericArray extends List<List<String>[]> {
 	}
+
+
+	interface ListOfListSupplier<T> {
+
+		List<List<T>> get();
+	}
+
+
+	class Foo<T extends Foo<T>> {
+	}
+
+	class Bar extends Foo<Bar> {
+	}
+
+
+	enum SimpleEnum { VALUE }
 
 
 	static class EnclosedInParameterizedType<T> {

@@ -56,6 +56,7 @@ class ExpressionStateTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void localVariables() {
 		Object value = state.lookupLocalVariable("foo");
 		assertThat(value).isNull();
@@ -86,6 +87,7 @@ class ExpressionStateTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void noVariableInterference() {
 		TypedValue typedValue = state.lookupVariable("foo");
 		assertThat(typedValue).isEqualTo(TypedValue.NULL);
@@ -99,6 +101,7 @@ class ExpressionStateTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void localVariableNestedScopes() {
 		assertThat(state.lookupLocalVariable("foo")).isNull();
 
@@ -157,6 +160,7 @@ class ExpressionStateTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void populatedNestedScopes() {
 		assertThat(state.lookupLocalVariable("foo")).isNull();
 
@@ -186,6 +190,7 @@ class ExpressionStateTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void populatedNestedScopesMap() {
 		assertThat(state.lookupLocalVariable("foo")).isNull();
 		assertThat(state.lookupLocalVariable("goo")).isNull();

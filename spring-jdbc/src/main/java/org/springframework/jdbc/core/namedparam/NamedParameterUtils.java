@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,14 +42,14 @@ import org.springframework.util.Assert;
 public abstract class NamedParameterUtils {
 
 	/**
-	 * Set of characters that qualify as comment or quotes starting characters.
+	 * Set of characters that qualify as comment or quote starting characters.
 	 */
-	private static final String[] START_SKIP = new String[] {"'", "\"", "--", "/*"};
+	private static final String[] START_SKIP = {"'", "\"", "--", "/*", "`"};
 
 	/**
-	 * Set of characters that at are the corresponding comment or quotes ending characters.
+	 * Set of characters that are the corresponding comment or quote ending characters.
 	 */
-	private static final String[] STOP_SKIP = new String[] {"'", "\"", "\n", "*/"};
+	private static final String[] STOP_SKIP = {"'", "\"", "\n", "*/", "`"};
 
 	/**
 	 * Set of characters that qualify as parameter separators,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,13 +165,16 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	}
 
 	/**
-	 * Specify a timeout for task termination when closing this executor.
-	 * The default is 0, not waiting for task termination at all.
+	 * Specify a timeout (in milliseconds) for task termination when closing
+	 * this executor. The default is 0, not waiting for task termination at all.
 	 * <p>Note that a concrete >0 timeout specified here will lead to the
 	 * wrapping of every submitted task into a task-tracking runnable which
 	 * involves considerable overhead in case of a high number of tasks.
 	 * However, for a modest level of submissions with longer-running
 	 * tasks, this is feasible in order to arrive at a graceful shutdown.
+	 * <p>Note that {@code SimpleAsyncTaskExecutor} does not participate in
+	 * a coordinated lifecycle stop but rather just awaits task termination
+	 * on {@link #close()}.
 	 * @param timeout the timeout in milliseconds
 	 * @since 6.1
 	 * @see #close()
@@ -181,18 +184,6 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		Assert.isTrue(timeout >= 0, "Timeout value must be >=0");
 		this.taskTerminationTimeout = timeout;
 		this.activeThreads = (timeout > 0 ? Collections.newSetFromMap(new ConcurrentHashMap<>()) : null);
-	}
-
-	/**
-	 * Return whether this executor is still active, i.e. not closed yet,
-	 * and therefore accepts further task submissions. Otherwise, it is
-	 * either in the task termination phase or entirely shut down already.
-	 * @since 6.1
-	 * @see #setTaskTerminationTimeout
-	 * @see #close()
-	 */
-	public boolean isActive() {
-		return this.active;
 	}
 
 	/**
@@ -222,6 +213,18 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 */
 	public final boolean isThrottleActive() {
 		return this.concurrencyThrottle.isThrottleActive();
+	}
+
+	/**
+	 * Return whether this executor is still active, i.e. not closed yet,
+	 * and therefore accepts further task submissions. Otherwise, it is
+	 * either in the task termination phase or entirely shut down already.
+	 * @since 6.1
+	 * @see #setTaskTerminationTimeout
+	 * @see #close()
+	 */
+	public boolean isActive() {
+		return this.active;
 	}
 
 

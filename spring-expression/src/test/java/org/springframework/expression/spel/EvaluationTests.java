@@ -234,7 +234,7 @@ class EvaluationTests extends AbstractExpressionTests {
 
 		@Test
 		void stringType() {
-			evaluateAndAskForReturnType("getPlaceOfBirth().getCity()", "SmilJan", String.class);
+			evaluateAndAskForReturnType("getPlaceOfBirth().getCity()", "Smiljan", String.class);
 		}
 
 		@Test
@@ -594,7 +594,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			// nested properties
 			@Test
 			void propertiesNested01() {
-				evaluate("placeOfBirth.city", "SmilJan", String.class, true);
+				evaluate("placeOfBirth.city", "Smiljan", String.class, true);
 			}
 
 			@Test

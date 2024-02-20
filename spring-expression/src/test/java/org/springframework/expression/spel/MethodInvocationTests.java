@@ -49,7 +49,7 @@ class MethodInvocationTests extends AbstractExpressionTests {
 
 	@Test
 	void testSimpleAccess01() {
-		evaluate("getPlaceOfBirth().getCity()", "SmilJan", String.class);
+		evaluate("getPlaceOfBirth().getCity()", "Smiljan", String.class);
 	}
 
 	@Test

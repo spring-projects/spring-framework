@@ -221,7 +221,7 @@ public class DefaultStompSessionTests {
 
 		reset(this.sessionHandler);
 		readTask.run();
-		verify(this.sessionHandler).handleTransportError(same(this.session), any(IllegalStateException.class));
+		verify(this.sessionHandler).handleTransportError(same(this.session), any(ConnectionLostException.class));
 		verifyNoMoreInteractions(this.sessionHandler);
 	}
 

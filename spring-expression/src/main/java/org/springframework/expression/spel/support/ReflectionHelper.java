@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.util.MethodInvoker;
 
 /**
  * Utility methods used by the reflection resolver code to discover the appropriate
- * methods/constructors and fields that should be used in expressions.
+ * methods, constructors, and fields that should be used in expressions.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -49,7 +49,7 @@ public abstract class ReflectionHelper {
 
 	/**
 	 * Compare argument arrays and return information about whether they match.
-	 * A supplied type converter and conversionAllowed flag allow for matches to take
+	 * <p>A supplied type converter and conversionAllowed flag allow for matches to take
 	 * into account that a type may be transformed into a different type by the converter.
 	 * @param expectedArgTypes the types the method/constructor is expecting
 	 * @param suppliedArgTypes the types that are being supplied at the point of invocation
@@ -68,7 +68,7 @@ public abstract class ReflectionHelper {
 		for (int i = 0; i < expectedArgTypes.size() && match != null; i++) {
 			TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
 			TypeDescriptor expectedArg = expectedArgTypes.get(i);
-			// The user may supply null - and that will be ok unless a primitive is expected
+			// The user may supply null, and that will be OK unless a primitive is expected.
 			if (suppliedArg == null) {
 				if (expectedArg.isPrimitive()) {
 					match = null;
@@ -136,9 +136,9 @@ public abstract class ReflectionHelper {
 
 	/**
 	 * Compare argument arrays and return information about whether they match.
-	 * A supplied type converter and conversionAllowed flag allow for matches to
+	 * <p>A supplied type converter and conversionAllowed flag allow for matches to
 	 * take into account that a type may be transformed into a different type by the
-	 * converter. This variant of compareArguments also allows for a varargs match.
+	 * converter. This variant of {@link #compareArguments} also allows for a varargs match.
 	 * @param expectedArgTypes the types the method/constructor is expecting
 	 * @param suppliedArgTypes the types that are being supplied at the point of invocation
 	 * @param typeConverter a registered type converter
@@ -233,19 +233,25 @@ public abstract class ReflectionHelper {
 		return (match != null ? new ArgumentsMatchInfo(match) : null);
 	}
 
-
-	// TODO could do with more refactoring around argument handling and varargs
 	/**
-	 * Convert a supplied set of arguments into the requested types. If the parameterTypes are related to
-	 * a varargs method then the final entry in the parameterTypes array is going to be an array itself whose
-	 * component type should be used as the conversion target for extraneous arguments. (For example, if the
-	 * parameterTypes are {Integer, String[]} and the input arguments are {Integer, boolean, float} then both
-	 * the boolean and float must be converted to strings). This method does *not* repackage the arguments
-	 * into a form suitable for the varargs invocation - a subsequent call to setupArgumentsForVarargsInvocation handles that.
+	 * Convert the supplied set of arguments into the parameter types specified
+	 * by the supplied {@link Method}.
+	 * <p>The arguments are converted 'in-place' in the input array.
+	 * <p>If the method accepts varargs, the final entry in its parameterTypes
+	 * array is going to be an array itself whose component type will be used as
+	 * the conversion target for any additional arguments. For example, if the
+	 * parameterTypes are {Integer, String[]} and the input arguments are
+	 * {Integer, boolean, float}, then both the boolean and float must be converted
+	 * to strings.
+	 * <p>This method does <strong>not</strong> repackage the arguments into a
+	 * form suitable for the varargs invocation. A subsequent call to
+	 * {@link #setupArgumentsForVarargsInvocation(Class[], Object...)} must be
+	 * used for that.
 	 * @param converter the converter to use for type conversions
-	 * @param arguments the arguments to convert to the requested parameter types
-	 * @param method the target Method
-	 * @return true if some kind of conversion occurred on the argument
+	 * @param arguments the arguments to convert to the parameter types of the
+	 * target method
+	 * @param method the target method
+	 * @return true if some kind of conversion occurred on an argument
 	 * @throws SpelEvaluationException if there is a problem with conversion
 	 */
 	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)
@@ -256,8 +262,9 @@ public abstract class ReflectionHelper {
 	}
 
 	/**
-	 * Takes an input set of argument values and converts them to the types specified as the
-	 * required parameter types. The arguments are converted 'in-place' in the input array.
+	 * Takes an input set of argument values and converts them to the parameter
+	 * types of the supplied {@link Executable} (i.e., constructor or method).
+	 * <p>The arguments are converted 'in-place' in the input array.
 	 * @param converter the type converter to use for attempting conversions
 	 * @param arguments the actual arguments that need conversion
 	 * @param executable the target Method or Constructor
@@ -334,8 +341,9 @@ public abstract class ReflectionHelper {
 	}
 
 	/**
-	 * Takes an input set of argument values and converts them to the types specified as the
-	 * required parameter types. The arguments are converted 'in-place' in the input array.
+	 * Takes an input set of argument values and converts them to the parameter
+	 * types of the supplied {@link MethodHandle}.
+	 * <p>The arguments are converted 'in-place' in the input array.
 	 * @param converter the type converter to use for attempting conversions
 	 * @param arguments the actual arguments that need conversion
 	 * @param methodHandle the target MethodHandle
@@ -503,14 +511,10 @@ public abstract class ReflectionHelper {
 	 * and the set that are being supplied at the point of invocation. If the kind
 	 * indicates that conversion is required for some of the arguments then the arguments
 	 * that require conversion are listed in the argsRequiringConversion array.
+	 *
+	 * @param kind the kind of match that was achieved
 	 */
-	static class ArgumentsMatchInfo {
-
-		private final ArgumentsMatchKind kind;
-
-		ArgumentsMatchInfo(ArgumentsMatchKind kind) {
-			this.kind = kind;
-		}
+	record ArgumentsMatchInfo(ArgumentsMatchKind kind) {
 
 		public boolean isExactMatch() {
 			return (this.kind == ArgumentsMatchKind.EXACT);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -372,7 +371,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	private class WebSocketTcpConnectionHandlerAdapter implements BiConsumer<WebSocketSession, Throwable>,
 			WebSocketHandler, TcpConnection<byte[]> {
 
-		private final TcpConnectionHandler<byte[]> connectionHandler;
+		private final TcpConnectionHandler<byte[]> stompSession;
 
 		private final StompWebSocketMessageCodec codec = new StompWebSocketMessageCodec(getInboundMessageSizeLimit());
 
@@ -383,11 +382,15 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private volatile long lastWriteTime = -1;
 
-		private final List<ScheduledFuture<?>> inactivityTasks = new ArrayList<>(2);
+		@Nullable
+		private ScheduledFuture<?> readInactivityFuture;
 
-		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> connectionHandler) {
-			Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
-			this.connectionHandler = connectionHandler;
+		@Nullable
+		private ScheduledFuture<?> writeInactivityFuture;
+
+		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> stompSession) {
+			Assert.notNull(stompSession, "TcpConnectionHandler must not be null");
+			this.stompSession = stompSession;
 		}
 
 		// CompletableFuture callback implementation: handshake outcome
@@ -395,7 +398,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		@Override
 		public void accept(@Nullable WebSocketSession webSocketSession, @Nullable Throwable throwable) {
 			if (throwable != null) {
-				this.connectionHandler.afterConnectFailure(throwable);
+				this.stompSession.afterConnectFailure(throwable);
 			}
 		}
 
@@ -404,7 +407,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		@Override
 		public void afterConnectionEstablished(WebSocketSession session) {
 			this.session = session;
-			this.connectionHandler.afterConnected(this);
+			this.stompSession.afterConnected(this);
 		}
 
 		@Override
@@ -415,37 +418,22 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 				messages = this.codec.decode(webSocketMessage);
 			}
 			catch (Throwable ex) {
-				this.connectionHandler.handleFailure(ex);
+				this.stompSession.handleFailure(ex);
 				return;
 			}
 			for (Message<byte[]> message : messages) {
-				this.connectionHandler.handleMessage(message);
+				this.stompSession.handleMessage(message);
 			}
 		}
 
 		@Override
-		public void handleTransportError(WebSocketSession session, Throwable ex) throws Exception {
-			this.connectionHandler.handleFailure(ex);
+		public void handleTransportError(WebSocketSession session, Throwable ex) {
+			this.stompSession.handleFailure(ex);
 		}
 
 		@Override
-		public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-			cancelInactivityTasks();
-			this.connectionHandler.afterConnectionClosed();
-		}
-
-		private void cancelInactivityTasks() {
-			for (ScheduledFuture<?> task : this.inactivityTasks) {
-				try {
-					task.cancel(true);
-				}
-				catch (Throwable ex) {
-					// Ignore
-				}
-			}
-			this.lastReadTime = -1;
-			this.lastWriteTime = -1;
-			this.inactivityTasks.clear();
+		public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
+			this.stompSession.afterConnectionClosed();
 		}
 
 		@Override
@@ -486,7 +474,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastReadTime = System.currentTimeMillis();
 			Duration delay = Duration.ofMillis(duration / 2);
-			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
+			this.readInactivityFuture = getTaskScheduler().scheduleWithFixedDelay(() -> {
 				if (System.currentTimeMillis() - this.lastReadTime > duration) {
 					try {
 						runnable.run();
@@ -497,7 +485,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 						}
 					}
 				}
-			}, delay));
+			}, delay);
 		}
 
 		@Override
@@ -505,7 +493,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastWriteTime = System.currentTimeMillis();
 			Duration delay = Duration.ofMillis(duration / 2);
-			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(() -> {
+			this.writeInactivityFuture = getTaskScheduler().scheduleWithFixedDelay(() -> {
 				if (System.currentTimeMillis() - this.lastWriteTime > duration) {
 					try {
 						runnable.run();
@@ -516,11 +504,12 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 						}
 					}
 				}
-			}, delay));
+			}, delay);
 		}
 
 		@Override
 		public void close() {
+			cancelInactivityTasks();
 			WebSocketSession session = this.session;
 			if (session != null) {
 				try {
@@ -533,6 +522,31 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 				}
 			}
 		}
+
+		private void cancelInactivityTasks() {
+			ScheduledFuture<?> readFuture = this.readInactivityFuture;
+			this.readInactivityFuture = null;
+			cancelFuture(readFuture);
+
+			ScheduledFuture<?> writeFuture = this.writeInactivityFuture;
+			this.writeInactivityFuture = null;
+			cancelFuture(writeFuture);
+
+			this.lastReadTime = -1;
+			this.lastWriteTime = -1;
+		}
+
+		private static void cancelFuture(@Nullable ScheduledFuture<?> future) {
+			if (future != null) {
+				try {
+					future.cancel(true);
+				}
+				catch (Throwable ex) {
+					// Ignore
+				}
+			}
+		}
+
 	}
 
 

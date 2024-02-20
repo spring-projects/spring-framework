@@ -20,6 +20,13 @@ characters.
 * dollar sign: `$`
 ====
 
+[WARNING]
+====
+Since variables share a common namespace with
+xref:core/expressions/language-ref/functions.adoc[functions] in the evaluation context,
+care must be taken to ensure that variable names and functions names do not overlap.
+====
+
 The following example shows how to use variables.
 
 [tabs]

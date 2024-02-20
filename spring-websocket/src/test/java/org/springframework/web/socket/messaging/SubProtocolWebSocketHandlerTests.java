@@ -182,13 +182,18 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.start();
 		this.webSocketHandler.handleMessage(session1, new TextMessage("foo"));
 
+		TestWebSocketSession session3 = new TestWebSocketSession("id3");
+		session3.setOpen(true);
+		session3.setAcceptedProtocol("v12.stomp");
+		this.webSocketHandler.afterConnectionEstablished(session1);
+
 		assertThat(session1.isOpen()).isTrue();
 		assertThat(session1.getCloseStatus()).isNull();
 
 		assertThat(session2.isOpen()).isFalse();
 		assertThat(session2.getCloseStatus()).isEqualTo(CloseStatus.SESSION_NOT_RELIABLE);
 
-		assertThat(handlerAccessor.getPropertyValue("lastSessionCheckTime")).as("lastSessionCheckTime not updated").isNotEqualTo(sixtyOneSecondsAgo);
+		assertThat(handlerAccessor.getPropertyValue("lastSessionCheckTime")).isNotEqualTo(sixtyOneSecondsAgo);
 	}
 
 }

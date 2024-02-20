@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -733,7 +733,6 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	/**
 	 * Eat an identifier, possibly qualified (meaning that it is dotted).
-	 * TODO AndyC Could create complete identifiers (a.b.c) here rather than a sequence of them? (a, b, c)
 	 */
 	private SpelNodeImpl eatPossiblyQualifiedId() {
 		Deque<SpelNodeImpl> qualifiedIdPieces = new ArrayDeque<>();
@@ -783,7 +782,6 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			// method reference
 			push(new MethodReference(nullSafeNavigation, methodOrPropertyName.stringValue(),
 					methodOrPropertyName.startPos, methodOrPropertyName.endPos, args));
-			// TODO what is the end position for a method reference? the name or the last arg?
 			return true;
 		}
 		return false;
@@ -811,6 +809,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 						dimensions.add(eatExpression());
 					}
 					else {
+						// A missing array dimension is tracked as null and will be
+						// rejected later during evaluation.
 						dimensions.add(null);
 					}
 					eatToken(TokenKind.RSQUARE);
@@ -824,7 +824,6 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			else {
 				// regular constructor invocation
 				eatConstructorArgs(nodes);
-				// TODO correct end position?
 				push(new ConstructorReference(newToken.startPos, newToken.endPos, nodes.toArray(new SpelNodeImpl[0])));
 			}
 			return true;

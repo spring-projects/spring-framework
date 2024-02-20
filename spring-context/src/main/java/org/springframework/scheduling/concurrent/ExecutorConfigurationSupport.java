@@ -33,6 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.lang.Nullable;
@@ -57,6 +58,20 @@ import org.springframework.lang.Nullable;
 public abstract class ExecutorConfigurationSupport extends CustomizableThreadFactory
 		implements BeanNameAware, ApplicationContextAware, InitializingBean, DisposableBean,
 		SmartLifecycle, ApplicationListener<ContextClosedEvent> {
+
+	/**
+	 * The default phase for an executor {@link SmartLifecycle}: {@code Integer.MAX_VALUE / 2}.
+	 * <p>This is different from the default phase {@code Integer.MAX_VALUE} associated with
+	 * other {@link SmartLifecycle} implementations, putting the typically auto-started
+	 * executor/scheduler beans into an earlier startup phase and a later shutdown phase while
+	 * still leaving room for regular {@link Lifecycle} components with the common phase 0.
+	 * @since 6.2
+	 * @see #getPhase()
+	 * @see SmartLifecycle#DEFAULT_PHASE
+	 * @see org.springframework.context.support.DefaultLifecycleProcessor#setTimeoutPerShutdownPhase
+	 */
+	public static final int DEFAULT_PHASE = Integer.MAX_VALUE / 2;
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -139,7 +154,11 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * the executor's destruction step, with individual awaiting according to the
 	 * {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"} property.
 	 * <p>This flag will only have effect when the executor is running in a Spring
-	 * application context and able to receive the {@link ContextClosedEvent}.
+	 * application context and able to receive the {@link ContextClosedEvent}. Also,
+	 * note that {@link ThreadPoolTaskExecutor} effectively accepts tasks after context
+	 * close by default, in combination with a coordinated lifecycle stop, unless
+	 * {@link ThreadPoolTaskExecutor#setStrictEarlyShutdown "strictEarlyShutdown"}
+	 * has been specified.
 	 * @since 6.1
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 * @see DisposableBean#destroy()
@@ -214,7 +233,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	/**
 	 * Specify the lifecycle phase for pausing and resuming this executor.
-	 * The default is {@link #DEFAULT_PHASE}.
+	 * <p>The default for executors/schedulers is {@link #DEFAULT_PHASE} as of 6.2,
+	 * for stopping after other {@link SmartLifecycle} implementations.
 	 * @since 6.1
 	 * @see SmartLifecycle#getPhase()
 	 */
@@ -294,6 +314,9 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * scheduling of periodic tasks, letting existing tasks complete still.
 	 * This step is non-blocking and can be applied as an early shutdown signal
 	 * before following up with a full {@link #shutdown()} call later on.
+	 * <p>Automatically called for early shutdown signals on
+	 * {@link #onApplicationEvent(ContextClosedEvent) context close}.
+	 * Can be manually called as well, in particular outside a container.
 	 * @since 6.1
 	 * @see #shutdown()
 	 * @see java.util.concurrent.ExecutorService#shutdown()
@@ -463,11 +486,29 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 				this.lateShutdown = true;
 			}
 			else {
-				// Early shutdown signal: accept no further tasks, let existing tasks complete
-				// before hitting the actual destruction step in the shutdown() method above.
-				initiateShutdown();
+				if (this.lifecycleDelegate != null) {
+					this.lifecycleDelegate.markShutdown();
+				}
+				initiateEarlyShutdown();
 			}
 		}
+	}
+
+	/**
+	 * Early shutdown signal: do not trigger further tasks, let existing tasks complete
+	 * before hitting the actual destruction step in the {@link #shutdown()} method.
+	 * This goes along with a {@link #stop(Runnable) coordinated lifecycle stop phase}.
+	 * <p>Called from {@link #onApplicationEvent(ContextClosedEvent)} if no
+	 * indications for a late shutdown have been determined, that is, if the
+	 * {@link #setAcceptTasksAfterContextClose "acceptTasksAfterContextClose} and
+	 * {@link #setWaitForTasksToCompleteOnShutdown "waitForTasksToCompleteOnShutdown"}
+	 * flags have not been set.
+	 * <p>The default implementation calls {@link #initiateShutdown()}.
+	 * @since 6.1.4
+	 * @see #initiateShutdown()
+	 */
+	protected void initiateEarlyShutdown() {
+		initiateShutdown();
 	}
 
 }

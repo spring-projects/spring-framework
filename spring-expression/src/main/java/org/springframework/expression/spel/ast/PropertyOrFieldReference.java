@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	@Override
 	public ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		return new AccessorLValue(this, state.getActiveContextObject(), state.getEvaluationContext(),
+		return new AccessorValueRef(this, state.getActiveContextObject(), state.getEvaluationContext(),
 				state.getConfiguration().isAutoGrowNullReferences());
 	}
 
@@ -391,7 +391,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 
-	private static class AccessorLValue implements ValueRef {
+	private static class AccessorValueRef implements ValueRef {
 
 		private final PropertyOrFieldReference ref;
 
@@ -401,7 +401,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		private final boolean autoGrowNullReferences;
 
-		public AccessorLValue(PropertyOrFieldReference propertyOrFieldReference, TypedValue activeContextObject,
+		public AccessorValueRef(PropertyOrFieldReference propertyOrFieldReference, TypedValue activeContextObject,
 				EvaluationContext evalContext, boolean autoGrowNullReferences) {
 
 			this.ref = propertyOrFieldReference;

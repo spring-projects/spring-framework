@@ -195,7 +195,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		UriTemplateHandler uriTemplateHandler = restTemplate.getUriTemplateHandler();
 		if (uriTemplateHandler instanceof DefaultUriBuilderFactory builderFactory) {
 			// only reuse the DefaultUriBuilderFactory if it has been customized
-			if (builderFactory.hasRestTemplateDefaults()) {
+			if (hasRestTemplateDefaults(builderFactory)) {
 				return null;
 			}
 			else {
@@ -208,6 +208,19 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		else {
 			return null;
 		}
+	}
+
+
+	/**
+	 * Indicate whether this {@code DefaultUriBuilderFactory} uses the default
+	 * {@link org.springframework.web.client.RestTemplate RestTemplate} settings.
+	 */
+	private static boolean hasRestTemplateDefaults(DefaultUriBuilderFactory factory) {
+		// see RestTemplate::initUriTemplateHandler
+		return (!factory.hasBaseUri() &&
+				factory.getEncodingMode() == DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT &&
+				CollectionUtils.isEmpty(factory.getDefaultUriVariables()) &&
+				factory.shouldParsePath());
 	}
 
 	private static ClientHttpRequestFactory getRequestFactory(RestTemplate restTemplate) {

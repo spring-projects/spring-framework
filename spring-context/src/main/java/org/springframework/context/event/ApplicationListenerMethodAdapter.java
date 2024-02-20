@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 4.2
  */
 public class ApplicationListenerMethodAdapter implements GenericApplicationListener {
@@ -177,11 +178,12 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 				return true;
 			}
 			if (PayloadApplicationEvent.class.isAssignableFrom(eventType.toClass())) {
-				if (eventType.hasUnresolvableGenerics()) {
-					return true;
-				}
 				ResolvableType payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();
 				if (declaredEventType.isAssignableFrom(payloadType)) {
+					return true;
+				}
+				if (payloadType.resolve() == null) {
+					// Always accept such event when the type is erased
 					return true;
 				}
 			}

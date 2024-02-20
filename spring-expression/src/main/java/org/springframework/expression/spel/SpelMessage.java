@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.text.MessageFormat;
 
 /**
  * Contains all the messages that can be produced by the Spring Expression Language.
- * Each message has a kind (info, warn, error) and a code number. Tests can be written to
+ *
+ * <p>Each message has a kind (info, warn, error) and a code number. Tests can be written to
  * expect particular code numbers rather than particular text, enabling the message text
  * to more easily be modified and the tests to run successfully in different locales.
  *
@@ -76,7 +77,7 @@ public enum SpelMessage {
 			"Cannot compare instances of {0} and {1}"),
 
 	INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION(Kind.ERROR, 1014,
-			"Incorrect number of arguments for function, {0} supplied but function takes {1}"),
+			"Incorrect number of arguments for function ''{0}'': {1} supplied but function takes {2}"),
 
 	INVALID_TYPE_FOR_SELECTION(Kind.ERROR, 1015,
 			"Cannot perform selection on input data of type ''{0}''"),
@@ -100,7 +101,7 @@ public enum SpelMessage {
 			"A problem occurred whilst attempting to access the property ''{0}'': ''{1}''"),
 
 	FUNCTION_REFERENCE_CANNOT_BE_INVOKED(Kind.ERROR, 1022,
-			"The function ''{0}'' mapped to an object of type ''{1}'' which cannot be invoked"),
+			"The function ''{0}'' mapped to an object of type ''{1}'' cannot be invoked"),
 
 	EXCEPTION_DURING_FUNCTION_CALL(Kind.ERROR, 1023,
 			"A problem occurred whilst attempting to invoke the function ''{0}'': ''{1}''"),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ import java.util.Set;
 import org.springframework.lang.Nullable;
 
 /**
- * A simple representation of command line arguments, broken into "option arguments" and
- * "non-option arguments".
+ * A simple representation of command line arguments, broken into
+ * {@linkplain #addOptionArg(String, String) option arguments} and
+ * {@linkplain #addNonOptionArg(String) non-option arguments}.
  *
  * @author Chris Beams
  * @since 3.1
@@ -39,10 +40,10 @@ class CommandLineArgs {
 	private final List<String> nonOptionArgs = new ArrayList<>();
 
 	/**
-	 * Add an option argument for the given option name and add the given value to the
+	 * Add an option argument for the given option name, and add the given value to the
 	 * list of values associated with this option (of which there may be zero or more).
-	 * The given value may be {@code null}, indicating that the option was specified
-	 * without an associated value (e.g. "--foo" vs. "--foo=bar").
+	 * <p>The given value may be {@code null}, indicating that the option was specified
+	 * without an associated value &mdash; for example, "--foo" vs. "--foo=bar".
 	 */
 	public void addOptionArg(String optionName, @Nullable String optionValue) {
 		if (!this.optionArgs.containsKey(optionName)) {
@@ -54,7 +55,7 @@ class CommandLineArgs {
 	}
 
 	/**
-	 * Return the set of all option arguments present on the command line.
+	 * Return the set of the names of all option arguments present on the command line.
 	 */
 	public Set<String> getOptionNames() {
 		return Collections.unmodifiableSet(this.optionArgs.keySet());
@@ -68,9 +69,9 @@ class CommandLineArgs {
 	}
 
 	/**
-	 * Return the list of values associated with the given option. {@code null} signifies
-	 * that the option was not present; empty list signifies that no values were associated
-	 * with this option.
+	 * Return the list of values associated with the given option.
+	 * <p>{@code null} signifies that the option was not present on the command
+	 * line. An empty list signifies that no values were associated with this option.
 	 */
 	@Nullable
 	public List<String> getOptionValues(String optionName) {

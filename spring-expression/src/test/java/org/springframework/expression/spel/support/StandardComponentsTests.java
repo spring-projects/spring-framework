@@ -16,8 +16,6 @@
 
 package org.springframework.expression.spel.support;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -31,14 +29,14 @@ import org.springframework.expression.TypeLocator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class StandardComponentsTests {
+class StandardComponentsTests {
 
 	@Test
-	void testStandardEvaluationContext() {
+	void standardEvaluationContext() {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		assertThat(context.getTypeComparator()).isNotNull();
 
-		TypeComparator tc = new StandardTypeComparator();
+		TypeComparator tc = StandardTypeComparator.INSTANCE;
 		context.setTypeComparator(tc);
 		assertThat(context.getTypeComparator()).isEqualTo(tc);
 
@@ -48,28 +46,25 @@ public class StandardComponentsTests {
 	}
 
 	@Test
-	void testStandardOperatorOverloader() throws EvaluationException {
-		OperatorOverloader oo = new StandardOperatorOverloader();
-		assertThat(oo.overridesOperation(Operation.ADD, null, null)).isFalse();
-		assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
-				oo.operate(Operation.ADD, 2, 3));
+	void standardOperatorOverloader() {
+		OperatorOverloader overloader = new StandardOperatorOverloader();
+		assertThat(overloader.overridesOperation(Operation.ADD, null, null)).isFalse();
+		assertThatExceptionOfType(EvaluationException.class)
+				.isThrownBy(() -> overloader.operate(Operation.ADD, 2, 3));
 	}
 
 	@Test
-	void testStandardTypeLocator() {
+	void standardTypeLocator() {
 		StandardTypeLocator tl = new StandardTypeLocator();
-		List<String> prefixes = tl.getImportPrefixes();
-		assertThat(prefixes).hasSize(1);
+		assertThat(tl.getImportPrefixes()).hasSize(1);
 		tl.registerImport("java.util");
-		prefixes = tl.getImportPrefixes();
-		assertThat(prefixes).hasSize(2);
+		assertThat(tl.getImportPrefixes()).hasSize(2);
 		tl.removeImport("java.util");
-		prefixes = tl.getImportPrefixes();
-		assertThat(prefixes).hasSize(1);
+		assertThat(tl.getImportPrefixes()).hasSize(1);
 	}
 
 	@Test
-	void testStandardTypeConverter() throws EvaluationException {
+	void standardTypeConverter() {
 		TypeConverter tc = new StandardTypeConverter();
 		tc.convertValue(3, TypeDescriptor.forObject(3), TypeDescriptor.valueOf(Double.class));
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * function.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.2
  */
 public abstract class RouterFunctions {
@@ -126,6 +127,40 @@ public abstract class RouterFunctions {
 			RequestPredicate predicate, RouterFunction<T> routerFunction) {
 
 		return new DefaultNestedRouterFunction<>(predicate, routerFunction);
+	}
+
+	/**
+	 * Route requests that match the given predicate to the given resource.
+	 * For instance
+	 * <pre class="code">
+	 * Resource resource = new ClassPathResource("static/index.html")
+	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
+	 * </pre>
+	 * @param predicate predicate to match
+	 * @param resource the resources to serve
+	 * @return a router function that routes to a resource
+	 * @since 6.1.4
+	 */
+	public static RouterFunction<ServerResponse> resource(RequestPredicate predicate, Resource resource) {
+		return resources(new PredicateResourceLookupFunction(predicate, resource), (consumerResource, httpHeaders) -> {});
+	}
+
+	/**
+	 * Route requests that match the given predicate to the given resource.
+	 * For instance
+	 * <pre class="code">
+	 * Resource resource = new ClassPathResource("static/index.html")
+	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
+	 * </pre>
+	 * @param predicate predicate to match
+	 * @param resource the resources to serve
+	 * @param headersConsumer provides access to the HTTP headers for served resources
+	 * @return a router function that routes to a resource
+	 * @since 6.1.4
+	 */
+	public static RouterFunction<ServerResponse> resource(RequestPredicate predicate, Resource resource,
+			BiConsumer<Resource, HttpHeaders> headersConsumer) {
+		return resources(new PredicateResourceLookupFunction(predicate, resource), headersConsumer);
 	}
 
 	/**
@@ -601,6 +636,35 @@ public abstract class RouterFunctions {
 		 * @see RequestPredicates
 		 */
 		Builder add(RouterFunction<ServerResponse> routerFunction);
+
+		/**
+		 * Route requests that match the given predicate to the given resource.
+		 * For instance
+		 * <pre class="code">
+		 * Resource resource = new ClassPathResource("static/index.html")
+		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
+		 * </pre>
+		 * @param predicate predicate to match
+		 * @param resource the resources to serve
+		 * @return a router function that routes to a resource
+		 * @since 6.1.4
+		 */
+		Builder resource(RequestPredicate predicate, Resource resource);
+
+		/**
+		 * Route requests that match the given predicate to the given resource.
+		 * For instance
+		 * <pre class="code">
+		 * Resource resource = new ClassPathResource("static/index.html")
+		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
+		 * </pre>
+		 * @param predicate predicate to match
+		 * @param resource the resources to serve
+		 * @param headersConsumer provides access to the HTTP headers for served resources
+		 * @return a router function that routes to a resource
+		 * @since 6.1.4
+		 */
+		Builder resource(RequestPredicate predicate, Resource resource, BiConsumer<Resource, HttpHeaders> headersConsumer);
 
 		/**
 		 * Route requests that match the given pattern to resources relative to the given root location.

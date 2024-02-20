@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -569,7 +569,7 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 	 * Route to the given handler function if the given pathExtension predicate applies.
 	 * @see RouterFunctions.route
 	 */
-	fun pathExtension(predicate: (String) -> Boolean, f: (ServerRequest) -> Mono<out ServerResponse>) {
+	fun pathExtension(predicate: (String?) -> Boolean, f: (ServerRequest) -> Mono<out ServerResponse>) {
 		builder.add(RouterFunctions.route(RequestPredicates.pathExtension(predicate), HandlerFunction { f(it).cast(ServerResponse::class.java) }))
 	}
 
@@ -578,7 +578,7 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 	 * predicate.
 	 * @see RequestPredicates.pathExtension
 	 */
-	fun pathExtension(predicate: (String) -> Boolean): RequestPredicate =
+	fun pathExtension(predicate: (String?) -> Boolean): RequestPredicate =
 			RequestPredicates.pathExtension(predicate)
 
 	/**
@@ -615,6 +615,15 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 	 */
 	operator fun String.invoke(f: (ServerRequest) -> Mono<out ServerResponse>) {
 		builder.add(RouterFunctions.route(RequestPredicates.path(this),  HandlerFunction { f(it).cast(ServerResponse::class.java) }))
+	}
+
+	/**
+	 * Route requests that match the given predicate to the given resource.
+	 * @since 6.1.4
+	 * @see RouterFunctions.resource
+	 */
+	fun resource(predicate: RequestPredicate, resource: Resource) {
+		builder.resource(predicate, resource)
 	}
 
 	/**

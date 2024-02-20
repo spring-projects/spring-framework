@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Observation tests for {@link AbstractMessageListenerContainer} implementations.
+ *
  * @author Brian Clozel
  */
 class MessageListenerContainerObservationTests {
@@ -75,8 +76,8 @@ class MessageListenerContainerObservationTests {
 		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
 				.that()
 				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation");
-		listenerContainer.shutdown();
 		listenerContainer.stop();
+		listenerContainer.shutdown();
 	}
 
 	@ParameterizedTest(name = "[{index}] {0}")
@@ -103,8 +104,8 @@ class MessageListenerContainerObservationTests {
 		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
 				.that()
 				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation");
-		listenerContainer.shutdown();
 		listenerContainer.stop();
+		listenerContainer.shutdown();
 	}
 
 	static Stream<Arguments> listenerContainers() {

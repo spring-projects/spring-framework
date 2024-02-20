@@ -80,7 +80,7 @@ public class CompositeStringExpression implements Expression {
 	@Override
 	@Nullable
 	public <T> T getValue(@Nullable Class<T> expectedResultType) throws EvaluationException {
-		Object value = getValue();
+		String value = getValue();
 		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), expectedResultType);
 	}
 
@@ -99,7 +99,7 @@ public class CompositeStringExpression implements Expression {
 	@Override
 	@Nullable
 	public <T> T getValue(@Nullable Object rootObject, @Nullable Class<T> desiredResultType) throws EvaluationException {
-		Object value = getValue(rootObject);
+		String value = getValue(rootObject);
 		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), desiredResultType);
 	}
 
@@ -120,7 +120,7 @@ public class CompositeStringExpression implements Expression {
 	public <T> T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType)
 			throws EvaluationException {
 
-		Object value = getValue(context);
+		String value = getValue(context);
 		return ExpressionUtils.convertTypedValue(context, new TypedValue(value), expectedResultType);
 	}
 
@@ -141,7 +141,7 @@ public class CompositeStringExpression implements Expression {
 	public <T> T getValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Class<T> desiredResultType)
 			throws EvaluationException {
 
-		Object value = getValue(context,rootObject);
+		String value = getValue(context,rootObject);
 		return ExpressionUtils.convertTypedValue(context, new TypedValue(value), desiredResultType);
 	}
 

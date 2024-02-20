@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.server;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -46,9 +47,9 @@ import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
@@ -88,7 +89,8 @@ public abstract class RequestPredicates {
 	 * @return a predicate that tests against the given HTTP method
 	 */
 	public static RequestPredicate method(HttpMethod httpMethod) {
-		return new HttpMethodPredicate(httpMethod);
+		Assert.notNull(httpMethod, "HttpMethod must not be null");
+		return new SingleHttpMethodPredicate(httpMethod);
 	}
 
 	/**
@@ -99,7 +101,13 @@ public abstract class RequestPredicates {
 	 * @since 5.1
 	 */
 	public static RequestPredicate methods(HttpMethod... httpMethods) {
-		return new HttpMethodPredicate(httpMethods);
+		Assert.notEmpty(httpMethods, "HttpMethods must not be empty");
+		if (httpMethods.length == 1) {
+			return new SingleHttpMethodPredicate(httpMethods[0]);
+		}
+		else {
+			return new MultipleHttpMethodsPredicate(httpMethods);
+		}
 	}
 
 	/**
@@ -149,7 +157,12 @@ public abstract class RequestPredicates {
 	 */
 	public static RequestPredicate contentType(MediaType... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
-		return new ContentTypePredicate(mediaTypes);
+		if (mediaTypes.length == 1) {
+			return new SingleContentTypePredicate(mediaTypes[0]);
+		}
+		else {
+			return new MultipleContentTypesPredicate(mediaTypes);
+		}
 	}
 
 	/**
@@ -161,7 +174,12 @@ public abstract class RequestPredicates {
 	 */
 	public static RequestPredicate accept(MediaType... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
-		return new AcceptPredicate(mediaTypes);
+		if (mediaTypes.length == 1) {
+			return new SingleAcceptPredicate(mediaTypes[0]);
+		}
+		else {
+			return new MultipleAcceptsPredicate(mediaTypes);
+		}
 	}
 
 	/**
@@ -325,7 +343,7 @@ public abstract class RequestPredicates {
 				return left;
 			}
 			else {
-				Map<K, V> result = new LinkedHashMap<>(left.size() + right.size());
+				Map<K, V> result = CollectionUtils.newLinkedHashMap(left.size() + right.size());
 				result.putAll(left);
 				result.putAll(right);
 				return result;
@@ -527,29 +545,23 @@ public abstract class RequestPredicates {
 	}
 
 
-	private static class HttpMethodPredicate implements RequestPredicate {
+	private static class SingleHttpMethodPredicate implements RequestPredicate {
 
-		private final Set<HttpMethod> httpMethods;
+		private final HttpMethod httpMethod;
 
-		public HttpMethodPredicate(HttpMethod httpMethod) {
-			Assert.notNull(httpMethod, "HttpMethod must not be null");
-			this.httpMethods = Set.of(httpMethod);
-		}
-
-		public HttpMethodPredicate(HttpMethod... httpMethods) {
-			Assert.notEmpty(httpMethods, "HttpMethods must not be empty");
-			this.httpMethods = new LinkedHashSet<>(Arrays.asList(httpMethods));
+		public SingleHttpMethodPredicate(HttpMethod httpMethod) {
+			this.httpMethod = httpMethod;
 		}
 
 		@Override
 		public boolean test(ServerRequest request) {
 			HttpMethod method = method(request);
-			boolean match = this.httpMethods.contains(method);
-			traceMatch("Method", this.httpMethods, method, match);
+			boolean match = this.httpMethod.equals(method);
+			traceMatch("Method", this.httpMethod, method, match);
 			return match;
 		}
 
-		private static HttpMethod method(ServerRequest request) {
+		static HttpMethod method(ServerRequest request) {
 			if (CorsUtils.isPreFlightRequest(request.exchange().getRequest())) {
 				String accessControlRequestMethod =
 						request.headers().firstHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
@@ -562,17 +574,40 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void accept(Visitor visitor) {
+			visitor.method(Set.of(this.httpMethod));
+		}
+
+		@Override
+		public String toString() {
+			return this.httpMethod.toString();
+		}
+	}
+
+
+	private static class MultipleHttpMethodsPredicate implements RequestPredicate {
+
+		private final Set<HttpMethod> httpMethods;
+
+		public MultipleHttpMethodsPredicate(HttpMethod[] httpMethods) {
+			this.httpMethods = new LinkedHashSet<>(Arrays.asList(httpMethods));
+		}
+
+		@Override
+		public boolean test(ServerRequest request) {
+			HttpMethod method = SingleHttpMethodPredicate.method(request);
+			boolean match = this.httpMethods.contains(method);
+			traceMatch("Method", this.httpMethods, method, match);
+			return match;
+		}
+
+		@Override
+		public void accept(Visitor visitor) {
 			visitor.method(Collections.unmodifiableSet(this.httpMethods));
 		}
 
 		@Override
 		public String toString() {
-			if (this.httpMethods.size() == 1) {
-				return this.httpMethods.iterator().next().toString();
-			}
-			else {
-				return this.httpMethods.toString();
-			}
+			return this.httpMethods.toString();
 		}
 	}
 
@@ -667,20 +702,46 @@ public abstract class RequestPredicates {
 	}
 
 
-	private static class ContentTypePredicate extends HeadersPredicate {
+	private static class SingleContentTypePredicate extends HeadersPredicate {
 
-		private final Set<MediaType> mediaTypes;
+		private final MediaType mediaType;
 
-		public ContentTypePredicate(MediaType... mediaTypes) {
-			this(Set.of(mediaTypes));
+		public SingleContentTypePredicate(MediaType mediaType) {
+			super(headers -> {
+				MediaType contentType = headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
+				boolean match = mediaType.includes(contentType);
+				traceMatch("Content-Type", mediaType, contentType, match);
+				return match;
+			});
+			this.mediaType = mediaType;
 		}
 
-		private ContentTypePredicate(Set<MediaType> mediaTypes) {
+		@Override
+		public void accept(Visitor visitor) {
+			visitor.header(HttpHeaders.CONTENT_TYPE, this.mediaType.toString());
+		}
+
+		@Override
+		public String toString() {
+			return "Content-Type: " + this.mediaType;
+		}
+	}
+
+
+	private static class MultipleContentTypesPredicate extends HeadersPredicate {
+
+		private final MediaType[] mediaTypes;
+
+		public MultipleContentTypesPredicate(MediaType[] mediaTypes) {
 			super(headers -> {
-				MediaType contentType =
-						headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
-				boolean match = mediaTypes.stream()
-						.anyMatch(mediaType -> mediaType.includes(contentType));
+				MediaType contentType = headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
+				boolean match = false;
+				for (MediaType mediaType : mediaTypes) {
+					if (mediaType.includes(contentType)) {
+						match = true;
+						break;
+					}
+				}
 				traceMatch("Content-Type", mediaTypes, contentType, match);
 				return match;
 			});
@@ -689,44 +750,37 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void accept(Visitor visitor) {
-			visitor.header(HttpHeaders.CONTENT_TYPE,
-					(this.mediaTypes.size() == 1) ?
-							this.mediaTypes.iterator().next().toString() :
-							this.mediaTypes.toString());
+			visitor.header(HttpHeaders.CONTENT_TYPE, Arrays.toString(this.mediaTypes));
 		}
 
 		@Override
 		public String toString() {
-			return String.format("Content-Type: %s",
-					(this.mediaTypes.size() == 1) ?
-							this.mediaTypes.iterator().next().toString() :
-							this.mediaTypes.toString());
+			return "Content-Type: " + Arrays.toString(this.mediaTypes);
 		}
 	}
 
 
-	private static class AcceptPredicate extends HeadersPredicate {
+	private static class SingleAcceptPredicate extends HeadersPredicate {
 
-		private final Set<MediaType> mediaTypes;
+		private final MediaType mediaType;
 
-		public AcceptPredicate(MediaType... mediaTypes) {
-			this(Set.of(mediaTypes));
-		}
-
-		private AcceptPredicate(Set<MediaType> mediaTypes) {
+		public SingleAcceptPredicate(MediaType mediaType) {
 			super(headers -> {
 				List<MediaType> acceptedMediaTypes = acceptedMediaTypes(headers);
-				boolean match = acceptedMediaTypes.stream()
-						.anyMatch(acceptedMediaType -> mediaTypes.stream()
-								.anyMatch(acceptedMediaType::isCompatibleWith));
-				traceMatch("Accept", mediaTypes, acceptedMediaTypes, match);
+				boolean match = false;
+				for (MediaType acceptedMediaType : acceptedMediaTypes) {
+					if (acceptedMediaType.isCompatibleWith(mediaType)) {
+						match = true;
+						break;
+					}
+				}
+				traceMatch("Accept", mediaType, acceptedMediaTypes, match);
 				return match;
 			});
-			this.mediaTypes = mediaTypes;
+			this.mediaType = mediaType;
 		}
 
-		@NonNull
-		private static List<MediaType> acceptedMediaTypes(ServerRequest.Headers headers) {
+		static List<MediaType> acceptedMediaTypes(ServerRequest.Headers headers) {
 			List<MediaType> acceptedMediaTypes = headers.accept();
 			if (acceptedMediaTypes.isEmpty()) {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
@@ -739,18 +793,47 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void accept(Visitor visitor) {
-			visitor.header(HttpHeaders.ACCEPT,
-					(this.mediaTypes.size() == 1) ?
-							this.mediaTypes.iterator().next().toString() :
-							this.mediaTypes.toString());
+			visitor.header(HttpHeaders.ACCEPT, this.mediaType.toString());
 		}
 
 		@Override
 		public String toString() {
-			return String.format("Accept: %s",
-					(this.mediaTypes.size() == 1) ?
-							this.mediaTypes.iterator().next().toString() :
-							this.mediaTypes.toString());
+			return "Accept: " + this.mediaType;
+		}
+	}
+
+
+	private static class MultipleAcceptsPredicate extends HeadersPredicate {
+
+		private final MediaType[] mediaTypes;
+
+		public MultipleAcceptsPredicate(MediaType[] mediaTypes) {
+			super(headers -> {
+				List<MediaType> acceptedMediaTypes = SingleAcceptPredicate.acceptedMediaTypes(headers);
+				boolean match = false;
+				outer:
+				for (MediaType acceptedMediaType : acceptedMediaTypes) {
+					for (MediaType mediaType : mediaTypes) {
+						if (acceptedMediaType.isCompatibleWith(mediaType)) {
+							match = true;
+							break outer;
+						}
+					}
+				}
+				traceMatch("Accept", mediaTypes, acceptedMediaTypes, match);
+				return match;
+			});
+			this.mediaTypes = mediaTypes;
+		}
+
+		@Override
+		public void accept(Visitor visitor) {
+			visitor.header(HttpHeaders.ACCEPT, Arrays.toString(this.mediaTypes));
+		}
+
+		@Override
+		public String toString() {
+			return "Accept: " + Arrays.toString(this.mediaTypes);
 		}
 	}
 
@@ -1086,6 +1169,22 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public String path() {
+			return this.delegate.path();
+		}
+
+		@Override
+		@Deprecated
+		public PathContainer pathContainer() {
+			return this.delegate.pathContainer();
+		}
+
+		@Override
+		public RequestPath requestPath() {
+			return this.delegate.requestPath();
+		}
+
+		@Override
 		public Headers headers() {
 			return this.delegate.headers();
 		}
@@ -1141,8 +1240,18 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public <T> Mono<T> bind(Class<T> bindType) {
+			return this.delegate.bind(bindType);
+		}
+
+		@Override
 		public <T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) {
 			return this.delegate.bind(bindType, dataBinderCustomizer);
+		}
+
+		@Override
+		public Optional<Object> attribute(String name) {
+			return this.delegate.attribute(name);
 		}
 
 		@Override
@@ -1151,8 +1260,18 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public Optional<String> queryParam(String name) {
+			return this.delegate.queryParam(name);
+		}
+
+		@Override
 		public MultiValueMap<String, String> queryParams() {
 			return this.delegate.queryParams();
+		}
+
+		@Override
+		public String pathVariable(String name) {
+			return this.delegate.pathVariable(name);
 		}
 
 		@Override
@@ -1186,8 +1305,23 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public Mono<ServerResponse> checkNotModified(Instant lastModified) {
+			return this.delegate.checkNotModified(lastModified);
+		}
+
+		@Override
+		public Mono<ServerResponse> checkNotModified(String etag) {
+			return this.delegate.checkNotModified(etag);
+		}
+
+		@Override
+		public Mono<ServerResponse> checkNotModified(Instant lastModified, String etag) {
+			return this.delegate.checkNotModified(lastModified, etag);
+		}
+
+		@Override
 		public String toString() {
-			return this.delegate.toString();
+			return String.format("HTTP %s %s", method(), path());
 		}
 	}
 
@@ -1203,10 +1337,25 @@ public abstract class RequestPredicates {
 			this.attributes = mergeMaps(delegate.attributes(), newAttributes);
 		}
 
+		@Override
+		public Optional<Object> attribute(String name) {
+			return Optional.ofNullable(this.attributes.get(name));
+		}
 
 		@Override
 		public Map<String, Object> attributes() {
 			return this.attributes;
+		}
+
+		@Override
+		public String pathVariable(String name) {
+			Map<String, String> pathVariables = pathVariables();
+			if (pathVariables.containsKey(name)) {
+				return pathVariables().get(name);
+			}
+			else {
+				throw new IllegalArgumentException("No path variable with name \"" + name + "\" available");
+			}
 		}
 
 		@Override
@@ -1256,6 +1405,17 @@ public abstract class RequestPredicates {
 
 		@Override
 		public RequestPath requestPath() {
+			return this.requestPath;
+		}
+
+		@Override
+		public String path() {
+			return this.requestPath.pathWithinApplication().value();
+		}
+
+		@Override
+		@Deprecated
+		public PathContainer pathContainer() {
 			return this.requestPath;
 		}
 	}

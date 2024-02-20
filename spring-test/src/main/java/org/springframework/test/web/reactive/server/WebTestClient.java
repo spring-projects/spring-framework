@@ -1039,11 +1039,22 @@ public interface WebTestClient {
 		 * Access to response body assertions using a
 		 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression
 		 * to inspect a specific subset of the body.
+		 * @param expression the JsonPath expression
+		 * @since 6.2
+		 */
+		JsonPathAssertions jsonPath(String expression);
+
+		/**
+		 * Access to response body assertions using a
+		 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression
+		 * to inspect a specific subset of the body.
 		 * <p>The JSON path expression can be a parameterized string using
 		 * formatting specifiers as defined in {@link String#format}.
 		 * @param expression the JsonPath expression
 		 * @param args arguments to parameterize the expression
+		 * @deprecated in favor of calling {@link String#formatted(Object...)} upfront
 		 */
+		@Deprecated(since = "6.2", forRemoval = true)
 		JsonPathAssertions jsonPath(String expression, Object... args);
 
 		/**

@@ -24,7 +24,6 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 import org.springframework.asm.MethodVisitor;
@@ -54,8 +53,6 @@ import org.springframework.util.ReflectionUtils;
  * @author Sam Brannen
  * @since 3.0
  */
-// TODO support multidimensional arrays
-// TODO support correct syntax for multidimensional [][][] and not [,,,]
 public class Indexer extends SpelNodeImpl {
 
 	private enum IndexedType {ARRAY, LIST, MAP, STRING, OBJECT}
@@ -180,12 +177,11 @@ public class Indexer extends SpelNodeImpl {
 			}
 			else {
 				this.indexedType = IndexedType.STRING;
-				return new StringIndexingLValue((String) target, idx, targetDescriptor);
+				return new StringIndexingValueRef((String) target, idx, targetDescriptor);
 			}
 		}
 
 		// Try and treat the index value as a property of the context object
-		// TODO: could call the conversion service to convert the value to a String
 		TypeDescriptor valueType = indexValue.getTypeDescriptor();
 		if (valueType != null && String.class == valueType.getType()) {
 			this.indexedType = IndexedType.OBJECT;
@@ -209,7 +205,7 @@ public class Indexer extends SpelNodeImpl {
 			return (this.children[0] instanceof PropertyOrFieldReference || this.children[0].isCompilable());
 		}
 		else if (this.indexedType == IndexedType.OBJECT) {
-			// If the string name is changing the accessor is clearly going to change (so no compilation possible)
+			// If the string name is changing, the accessor is clearly going to change (so no compilation possible)
 			return (this.cachedReadAccessor != null &&
 					this.cachedReadAccessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor &&
 					getChild(0) instanceof StringLiteral);
@@ -226,41 +222,42 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		if (this.indexedType == IndexedType.ARRAY) {
-			int insn;
-			if ("D".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[D");
-				insn = DALOAD;
-			}
-			else if ("F".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[F");
-				insn = FALOAD;
-			}
-			else if ("J".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[J");
-				insn = LALOAD;
-			}
-			else if ("I".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[I");
-				insn = IALOAD;
-			}
-			else if ("S".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[S");
-				insn = SALOAD;
-			}
-			else if ("B".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[B");
-				insn = BALOAD;
-			}
-			else if ("C".equals(this.exitTypeDescriptor)) {
-				mv.visitTypeInsn(CHECKCAST, "[C");
-				insn = CALOAD;
-			}
-			else {
-				mv.visitTypeInsn(CHECKCAST, "["+ this.exitTypeDescriptor +
-						(CodeFlow.isPrimitiveArray(this.exitTypeDescriptor) ? "" : ";"));
-						//depthPlusOne(exitTypeDescriptor)+"Ljava/lang/Object;");
-				insn = AALOAD;
-			}
+			int insn = switch (this.exitTypeDescriptor) {
+				case "D" -> {
+					mv.visitTypeInsn(CHECKCAST, "[D");
+					yield DALOAD;
+				}
+				case "F" -> {
+					mv.visitTypeInsn(CHECKCAST, "[F");
+					yield FALOAD;
+				}
+				case "J" -> {
+					mv.visitTypeInsn(CHECKCAST, "[J");
+					yield LALOAD;
+				}
+				case "I" -> {
+					mv.visitTypeInsn(CHECKCAST, "[I");
+					yield IALOAD;
+				}
+				case "S" -> {
+					mv.visitTypeInsn(CHECKCAST, "[S");
+					yield SALOAD;
+				}
+				case "B" -> {
+					mv.visitTypeInsn(CHECKCAST, "[B");
+					yield BALOAD;
+				}
+				case "C" -> {
+					mv.visitTypeInsn(CHECKCAST, "[C");
+					yield CALOAD;
+				}
+				default -> {
+					mv.visitTypeInsn(CHECKCAST, "["+ this.exitTypeDescriptor +
+							(CodeFlow.isPrimitiveArray(this.exitTypeDescriptor) ? "" : ";"));
+					yield AALOAD;
+				}
+			};
+
 			SpelNodeImpl index = this.children[0];
 			cf.enterCompilationScope();
 			index.generateCode(mv, cf);
@@ -325,11 +322,7 @@ public class Indexer extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringJoiner sj = new StringJoiner(",", "[", "]");
-		for (int i = 0; i < getChildCount(); i++) {
-			sj.add(getChild(i).toStringAST());
-		}
-		return sj.toString();
+		return "[" + getChild(0).toStringAST() + "]";
 	}
 
 
@@ -744,7 +737,7 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 
-	private class StringIndexingLValue implements ValueRef {
+	private class StringIndexingValueRef implements ValueRef {
 
 		private final String target;
 
@@ -752,7 +745,7 @@ public class Indexer extends SpelNodeImpl {
 
 		private final TypeDescriptor typeDescriptor;
 
-		public StringIndexingLValue(String target, int index, TypeDescriptor typeDescriptor) {
+		public StringIndexingValueRef(String target, int index, TypeDescriptor typeDescriptor) {
 			this.target = target;
 			this.index = index;
 			this.typeDescriptor = typeDescriptor;

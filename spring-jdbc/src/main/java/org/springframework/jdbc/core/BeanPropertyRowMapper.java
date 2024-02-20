@@ -242,6 +242,9 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/**
 	 * Initialize the mapping meta-data for the given class.
 	 * @param mappedClass the mapped class
+	 * @see #setMappedClass
+	 * @see BeanUtils#getPropertyDescriptors
+	 * @see #mappedNames(PropertyDescriptor)
 	 */
 	protected void initialize(Class<T> mappedClass) {
 		this.mappedClass = mappedClass;
@@ -280,17 +283,14 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * @param pd the property descriptor discovered on initialization
 	 * @return a set of mapped names
 	 * @since 6.1.4
+	 * @see #initialize
 	 * @see #lowerCaseName
 	 * @see #underscoreName
 	 */
 	protected Set<String> mappedNames(PropertyDescriptor pd) {
 		Set<String> mappedNames = new HashSet<>(4);
-		String lowerCaseName = lowerCaseName(pd.getName());
-		mappedNames.add(lowerCaseName);
-		String underscoreName = underscoreName(pd.getName());
-		if (!lowerCaseName.equals(underscoreName)) {
-			mappedNames.add(underscoreName);
-		}
+		mappedNames.add(lowerCaseName(pd.getName()));
+		mappedNames.add(underscoreName(pd.getName()));
 		return mappedNames;
 	}
 

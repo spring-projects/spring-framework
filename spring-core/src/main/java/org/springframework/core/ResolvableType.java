@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,10 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 
 import org.springframework.core.SerializableTypeWrapper.FieldTypeProvider;
@@ -70,6 +72,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  * @since 4.0
  * @see #forField(Field)
  * @see #forMethodParameter(Method, int)
@@ -264,7 +267,7 @@ public class ResolvableType implements Serializable {
 	public boolean isAssignableFrom(Class<?> other) {
 		// As of 6.1: shortcut assignability check for top-level Class references
 		return (this.type instanceof Class<?> clazz ? ClassUtils.isAssignable(clazz, other) :
-				isAssignableFrom(forClass(other), false, null));
+				isAssignableFrom(forClass(other), false, null, false));
 	}
 
 	/**
@@ -279,10 +282,24 @@ public class ResolvableType implements Serializable {
 	 * {@code ResolvableType}; {@code false} otherwise
 	 */
 	public boolean isAssignableFrom(ResolvableType other) {
-		return isAssignableFrom(other, false, null);
+		return isAssignableFrom(other, false, null, false);
 	}
 
-	private boolean isAssignableFrom(ResolvableType other, boolean strict, @Nullable Map<Type, Type> matchedBefore) {
+	/**
+	 * Determine whether this {@code ResolvableType} is assignable from the
+	 * specified other type, as far as the other type is actually resolvable.
+	 * @param other the type to be checked against (as a {@code ResolvableType})
+	 * @return {@code true} if the specified other type can be assigned to this
+	 * {@code ResolvableType} as far as it is resolvable; {@code false} otherwise
+	 * @since 6.2
+	 */
+	public boolean isAssignableFromResolvedPart(ResolvableType other) {
+		return isAssignableFrom(other, false, null, true);
+	}
+
+	private boolean isAssignableFrom(ResolvableType other, boolean strict,
+			@Nullable Map<Type, Type> matchedBefore, boolean upUntilUnresolvable) {
+
 		Assert.notNull(other, "ResolvableType must not be null");
 
 		// If we cannot resolve types, we are not assignable
@@ -304,7 +321,12 @@ public class ResolvableType implements Serializable {
 
 		// Deal with array by delegating to the component type
 		if (isArray()) {
-			return (other.isArray() && getComponentType().isAssignableFrom(other.getComponentType(), true, matchedBefore));
+			return (other.isArray() && getComponentType().isAssignableFrom(
+					other.getComponentType(), true, matchedBefore, upUntilUnresolvable));
+		}
+
+		if (upUntilUnresolvable && other.isUnresolvableTypeVariable()) {
+			return true;
 		}
 
 		// Deal with wildcard bounds
@@ -313,8 +335,15 @@ public class ResolvableType implements Serializable {
 
 		// In the form X is assignable to <? extends Number>
 		if (typeBounds != null) {
-			return (ourBounds != null && ourBounds.isSameKind(typeBounds) &&
-					ourBounds.isAssignableFrom(typeBounds.getBounds()));
+			if (ourBounds != null) {
+				return (ourBounds.isSameKind(typeBounds) && ourBounds.isAssignableFrom(typeBounds.getBounds()));
+			}
+			else if (upUntilUnresolvable) {
+				return typeBounds.isAssignableFrom(this);
+			}
+			else {
+				return false;
+			}
 		}
 
 		// In the form <? extends Number> is assignable to X...
@@ -375,7 +404,7 @@ public class ResolvableType implements Serializable {
 				}
 				matchedBefore.put(this.type, other.type);
 				for (int i = 0; i < ourGenerics.length; i++) {
-					if (!ourGenerics[i].isAssignableFrom(typeGenerics[i], true, matchedBefore)) {
+					if (!ourGenerics[i].isAssignableFrom(typeGenerics[i], true, matchedBefore, upUntilUnresolvable)) {
 						return false;
 					}
 				}
@@ -561,18 +590,28 @@ public class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return false;
 		}
+		return hasUnresolvableGenerics(null);
+	}
+
+	private boolean hasUnresolvableGenerics(@Nullable Set<Type> alreadySeen) {
 		Boolean unresolvableGenerics = this.unresolvableGenerics;
 		if (unresolvableGenerics == null) {
-			unresolvableGenerics = determineUnresolvableGenerics();
+			unresolvableGenerics = determineUnresolvableGenerics(alreadySeen);
 			this.unresolvableGenerics = unresolvableGenerics;
 		}
 		return unresolvableGenerics;
 	}
 
-	private boolean determineUnresolvableGenerics() {
+	private boolean determineUnresolvableGenerics(@Nullable Set<Type> alreadySeen) {
+		if (alreadySeen != null && alreadySeen.contains(this.type)) {
+			// Self-referencing generic -> not unresolvable
+			return false;
+		}
+
 		ResolvableType[] generics = getGenerics();
 		for (ResolvableType generic : generics) {
-			if (generic.isUnresolvableTypeVariable() || generic.isWildcardWithoutBounds()) {
+			if (generic.isUnresolvableTypeVariable() || generic.isWildcardWithoutBounds() ||
+					generic.hasUnresolvableGenerics(currentTypeSeen(alreadySeen))) {
 				return true;
 			}
 		}
@@ -592,10 +631,18 @@ public class ResolvableType implements Serializable {
 			}
 			Class<?> superclass = resolved.getSuperclass();
 			if (superclass != null && superclass != Object.class) {
-				return getSuperType().hasUnresolvableGenerics();
+				return getSuperType().hasUnresolvableGenerics(currentTypeSeen(alreadySeen));
 			}
 		}
 		return false;
+	}
+
+	private Set<Type> currentTypeSeen(@Nullable Set<Type> alreadySeen) {
+		if (alreadySeen == null) {
+			alreadySeen = new HashSet<>(4);
+		}
+		alreadySeen.add(this.type);
+		return alreadySeen;
 	}
 
 	/**
@@ -1122,7 +1169,8 @@ public class ResolvableType implements Serializable {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(generics, "Generics array must not be null");
 		TypeVariable<?>[] variables = clazz.getTypeParameters();
-		Assert.isTrue(variables.length == generics.length, () -> "Mismatched number of generics specified for " + clazz.toGenericString());
+		Assert.isTrue(variables.length == generics.length,
+				() -> "Mismatched number of generics specified for " + clazz.toGenericString());
 
 		Type[] arguments = new Type[generics.length];
 		for (int i = 0; i < generics.length; i++) {

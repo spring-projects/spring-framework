@@ -18,9 +18,7 @@ package org.springframework.beans.factory;
 
 import java.io.Closeable;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -81,7 +79,6 @@ import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
@@ -120,20 +117,6 @@ import static org.mockito.Mockito.verify;
 class DefaultListableBeanFactoryTests {
 
 	private final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-
-	{
-		// No parameter name discovery expected unless named arguments are used
-		lbf.setParameterNameDiscoverer(new ParameterNameDiscoverer() {
-			@Override
-			public String[] getParameterNames(Method method) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public String[] getParameterNames(Constructor<?> ctor) {
-				throw new UnsupportedOperationException();
-			}
-		});
-	}
 
 
 	@Test

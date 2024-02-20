@@ -28,13 +28,14 @@ Kotlin::
 ======
 
 Selection is supported for arrays and anything that implements `java.lang.Iterable` or
-`java.util.Map`. For a list or array, the selection criteria is evaluated against each
-individual element. Against a map, the selection criteria is evaluated against each map
-entry (objects of the Java type `Map.Entry`). Each map entry has its `key` and `value`
-accessible as properties for use in the selection.
+`java.util.Map`. For an array or `Iterable`, the selection expression is evaluated
+against each individual element. Against a map, the selection expression is evaluated
+against each map entry (objects of the Java type `Map.Entry`). Each map entry has its
+`key` and `value` accessible as properties for use in the selection.
 
-The following expression returns a new map that consists of those elements of the
-original map where the entry's value is less than 27:
+Given a `Map` stored in a variable named `#map`, the following expression returns a new
+map that consists of those elements of the original map where the entry's value is less
+than 27:
 
 [tabs]
 ======
@@ -42,21 +43,28 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
-	Map newMap = parser.parseExpression("map.?[value<27]").getValue();
+	Map newMap = parser.parseExpression("#map.?[value < 27]").getValue(Map.class);
 ----
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	val newMap = parser.parseExpression("map.?[value<27]").getValue()
+	val newMap = parser.parseExpression("#map.?[value < 27]").getValue() as Map
 ----
 ======
 
 In addition to returning all the selected elements, you can retrieve only the first or
-the last element. To obtain the first element matching the selection, the syntax is
-`.^[selectionExpression]`. To obtain the last matching selection, the syntax is
-`.$[selectionExpression]`.
+the last element. To obtain the first element matching the selection expression, the
+syntax is `.^[selectionExpression]`. To obtain the last element matching the selection
+expression, the syntax is `.$[selectionExpression]`.
 
+[NOTE]
+====
+The Spring Expression Language also supports safe navigation for collection selection.
 
+See
+xref:core/expressions/language-ref/operator-safe-navigation.adoc#expressions-operator-safe-navigation-selection-and-projection[Safe Collection Selection and Projection]
+for details.
+====
 

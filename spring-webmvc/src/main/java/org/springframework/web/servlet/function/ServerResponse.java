@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -569,6 +569,15 @@ public interface ServerResponse {
 		 * @throws IOException in case of I/O errors
 		 */
 		void send(Object object) throws IOException;
+
+		/**
+		 * Sends the buffered content as a server-sent event, without data.
+		 * Only the {@link #event(String) events} and {@link #comment(String) comments}
+		 * will be sent.
+		 * @throws IOException in case of I/O errors
+		 * @since 6.1.4
+		 */
+		void send() throws IOException;
 
 		/**
 		 * Add an SSE "id" line.

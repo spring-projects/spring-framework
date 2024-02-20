@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,21 +62,6 @@ public class ServerWebExchangeContextFilter implements WebFilter {
 	 */
 	public static Optional<ServerWebExchange> getExchange(ContextView contextView) {
 		return contextView.getOrEmpty(EXCHANGE_CONTEXT_ATTRIBUTE);
-	}
-
-	/**
-	 * Access the {@link ServerWebExchange} from a Reactor {@link Context},
-	 * if available, which is generally the case when
-	 * {@link ServerWebExchangeContextFilter} is present in the filter chain.
-	 * @param context the context to get the exchange from
-	 * @return an {@link Optional} with the exchange if found
-	 * @deprecated in favor of using {@link #getExchange(ContextView)} which
-	 * accepts a {@link ContextView} instead of {@link Context}, reflecting the
-	 * fact that the {@code ContextView} is needed only for reading.
-	 */
-	@Deprecated(since = "6.0.6", forRemoval = true)
-	public static Optional<ServerWebExchange> get(Context context) {
-		return context.getOrEmpty(EXCHANGE_CONTEXT_ATTRIBUTE);
 	}
 
 }

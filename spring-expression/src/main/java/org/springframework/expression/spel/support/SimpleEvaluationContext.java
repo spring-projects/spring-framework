@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,14 @@ import org.springframework.lang.Nullable;
  * {@code EvaluationContext} and a root object as arguments:
  * {@link org.springframework.expression.Expression#getValue(EvaluationContext, Object)}.
  *
+ * <p>In addition to support for setting and looking up variables as defined in
+ * the {@link EvaluationContext} API, {@code SimpleEvaluationContext} also
+ * provides support for {@linkplain #setVariable(String, Object) registering} and
+ * {@linkplain #lookupVariable(String) looking up} functions as variables. Since
+ * functions share a common namespace with the variables in this evaluation
+ * context, care must be taken to ensure that function names and variable names
+ * do not overlap.
+ *
  * <p>For more power and flexibility, in particular for internal configuration
  * scenarios, consider using {@link StandardEvaluationContext} instead.
  *
@@ -87,6 +95,7 @@ import org.springframework.lang.Nullable;
  * @see StandardEvaluationContext
  * @see StandardTypeConverter
  * @see DataBindingPropertyAccessor
+ * @see DataBindingMethodResolver
  */
 public final class SimpleEvaluationContext implements EvaluationContext {
 
@@ -103,9 +112,9 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 
 	private final TypeConverter typeConverter;
 
-	private final TypeComparator typeComparator = new StandardTypeComparator();
+	private final TypeComparator typeComparator = StandardTypeComparator.INSTANCE;
 
-	private final OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
+	private final OperatorOverloader operatorOverloader = StandardOperatorOverloader.INSTANCE;
 
 	private final Map<String, Object> variables = new HashMap<>();
 
@@ -168,7 +177,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	/**
 	 * {@code SimpleEvaluationContext} does not support use of type references.
 	 * @return {@code TypeLocator} implementation that raises a
-	 * {@link SpelEvaluationException} with {@link SpelMessage#TYPE_NOT_FOUND}.
+	 * {@link SpelEvaluationException} with {@link SpelMessage#TYPE_NOT_FOUND}
 	 */
 	@Override
 	public TypeLocator getTypeLocator() {
@@ -213,11 +222,31 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 		throw new SpelEvaluationException(SpelMessage.VARIABLE_ASSIGNMENT_NOT_SUPPORTED, "#" + name);
 	}
 
+	/**
+	 * Set a named variable or function in this evaluation context to the specified
+	 * value.
+	 * <p>A function can be registered as a {@link java.lang.reflect.Method} or
+	 * a {@link java.lang.invoke.MethodHandle}.
+	 * <p>Note that variables and functions share a common namespace in this
+	 * evaluation context. See the {@linkplain SimpleEvaluationContext
+	 * class-level documentation} for details.
+	 * @param name the name of the variable or function to set
+	 * @param value the value to be placed in the variable or function
+	 * @see #lookupVariable(String)
+	 */
 	@Override
 	public void setVariable(String name, @Nullable Object value) {
 		this.variables.put(name, value);
 	}
 
+	/**
+	 * Look up a named variable or function within this evaluation context.
+	 * <p>Note that variables and functions share a common namespace in this
+	 * evaluation context. See the {@linkplain SimpleEvaluationContext
+	 * class-level documentation} for details.
+	 * @param name the name of the variable or function to look up
+	 * @return the value of the variable or function, or {@code null} if not found
+	 */
 	@Override
 	@Nullable
 	public Object lookupVariable(String name) {
@@ -268,7 +297,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	/**
 	 * Builder for {@code SimpleEvaluationContext}.
 	 */
-	public static class Builder {
+	public static final class Builder {
 
 		private final List<PropertyAccessor> accessors;
 
@@ -280,7 +309,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 		@Nullable
 		private TypedValue rootObject;
 
-		public Builder(PropertyAccessor... accessors) {
+		private Builder(PropertyAccessor... accessors) {
 			this.accessors = Arrays.asList(accessors);
 		}
 
@@ -315,7 +344,6 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 			return this;
 		}
 
-
 		/**
 		 * Register a custom {@link ConversionService}.
 		 * <p>By default a {@link StandardTypeConverter} backed by a
@@ -327,6 +355,7 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 			this.typeConverter = new StandardTypeConverter(conversionService);
 			return this;
 		}
+
 		/**
 		 * Register a custom {@link TypeConverter}.
 		 * <p>By default a {@link StandardTypeConverter} backed by a

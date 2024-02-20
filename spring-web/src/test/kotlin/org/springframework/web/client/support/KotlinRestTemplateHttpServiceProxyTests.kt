@@ -136,8 +136,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
         testService.postForm(map)
 
         val request = server.takeRequest()
-        assertThat(request.headers["Content-Type"])
-                .isEqualTo("application/x-www-form-urlencoded;charset=UTF-8")
+        assertThat(request.headers["Content-Type"]).isEqualTo("application/x-www-form-urlencoded")
         assertThat(request.body.readUtf8()).isEqualTo("param1=value+1&param2=value+2")
     }
 

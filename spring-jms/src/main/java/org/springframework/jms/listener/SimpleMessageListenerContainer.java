@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.jms.listener;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
@@ -80,7 +82,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	@Nullable
 	private Set<MessageConsumer> consumers;
 
-	private final Object consumersMonitor = new Object();
+	private final Lock consumersLock = new ReentrantLock();
 
 
 	/**
@@ -261,9 +263,13 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 				logger.debug("Trying to recover from JMS Connection exception: " + ex);
 			}
 			try {
-				synchronized (this.consumersMonitor) {
+				this.consumersLock.lock();
+				try {
 					this.sessions = null;
 					this.consumers = null;
+				}
+				finally {
+					this.consumersLock.unlock();
 				}
 				refreshSharedConnection();
 				initializeConsumers();
@@ -282,7 +288,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 */
 	protected void initializeConsumers() throws JMSException {
 		// Register Sessions and MessageConsumers.
-		synchronized (this.consumersMonitor) {
+		this.consumersLock.lock();
+		try {
 			if (this.consumers == null) {
 				this.sessions = new HashSet<>(this.concurrentConsumers);
 				this.consumers = new HashSet<>(this.concurrentConsumers);
@@ -294,6 +301,9 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 					this.consumers.add(consumer);
 				}
 			}
+		}
+		finally {
+			this.consumersLock.unlock();
 		}
 	}
 
@@ -355,7 +365,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 */
 	@Override
 	protected void doShutdown() throws JMSException {
-		synchronized (this.consumersMonitor) {
+		this.consumersLock.lock();
+		try {
 			if (this.consumers != null) {
 				logger.debug("Closing JMS MessageConsumers");
 				for (MessageConsumer consumer : this.consumers) {
@@ -368,6 +379,9 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 					}
 				}
 			}
+		}
+		finally {
+			this.consumersLock.unlock();
 		}
 	}
 
