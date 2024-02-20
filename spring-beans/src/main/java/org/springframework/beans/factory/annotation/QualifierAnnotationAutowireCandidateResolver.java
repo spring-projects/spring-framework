@@ -167,12 +167,14 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 		if (ObjectUtils.isEmpty(annotationsToSearch)) {
 			return true;
 		}
+		boolean qualifierFound = false;
 		SimpleTypeConverter typeConverter = new SimpleTypeConverter();
 		for (Annotation annotation : annotationsToSearch) {
 			Class<? extends Annotation> type = annotation.annotationType();
 			boolean checkMeta = true;
 			boolean fallbackToMeta = false;
 			if (isQualifier(type)) {
+				qualifierFound = true;
 				if (!checkQualifier(bdHolder, annotation, typeConverter)) {
 					fallbackToMeta = true;
 				}
@@ -185,6 +187,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 				for (Annotation metaAnn : type.getAnnotations()) {
 					Class<? extends Annotation> metaType = metaAnn.annotationType();
 					if (isQualifier(metaType)) {
+						qualifierFound = true;
 						foundMeta = true;
 						// Only accept fallback match if @Qualifier annotation has a value...
 						// Otherwise, it is just a marker for a custom qualifier annotation.
@@ -199,7 +202,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 				}
 			}
 		}
-		return true;
+		return (qualifierFound || ((RootBeanDefinition) bdHolder.getBeanDefinition()).isDefaultCandidate());
 	}
 
 	/**

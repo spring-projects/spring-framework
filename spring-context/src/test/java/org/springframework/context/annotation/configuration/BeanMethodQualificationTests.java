@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,7 @@ class BeanMethodQualificationTests {
 		assertThat(BeanFactoryAnnotationUtils.isQualifierMatch(value -> value.equals("boring"),
 		"testBean2", ctx.getDefaultListableBeanFactory())).isTrue();
 		CustomPojo pojo = ctx.getBean(CustomPojo.class);
+		assertThat(pojo.plainBean).isNull();
 		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 		TestBean testBean2 = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
 				ctx.getDefaultListableBeanFactory(), TestBean.class, "boring");
@@ -132,7 +133,9 @@ class BeanMethodQualificationTests {
 				new AnnotationConfigApplicationContext(CustomConfigWithAttributeOverride.class, CustomPojo.class);
 		assertThat(ctx.getBeanFactory().containsSingleton("testBeanX")).isFalse();
 		CustomPojo pojo = ctx.getBean(CustomPojo.class);
+		assertThat(pojo.plainBean).isNull();
 		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
+		assertThat(pojo.nestedTestBean).isNull();
 		ctx.close();
 	}
 
@@ -219,7 +222,7 @@ class BeanMethodQualificationTests {
 			return new TestBean("interesting");
 		}
 
-		@Bean @Qualifier("boring") @Lazy
+		@Bean(defaultCandidate=false) @Qualifier("boring") @Lazy
 		public TestBean testBean2(@Lazy TestBean testBean1) {
 			TestBean tb = new TestBean("boring");
 			tb.setSpouse(testBean1);
@@ -235,7 +238,7 @@ class BeanMethodQualificationTests {
 			return new TestBean("interesting");
 		}
 
-		@Bean @Qualifier("boring")
+		@Bean(defaultCandidate=false) @Qualifier("boring")
 		public TestBean testBean2(@Lazy TestBean testBean1) {
 			TestBean tb = new TestBean("boring");
 			tb.setSpouse(testBean1);
@@ -246,17 +249,19 @@ class BeanMethodQualificationTests {
 	@InterestingPojo
 	static class CustomPojo {
 
+		@Autowired(required=false) TestBean plainBean;
+
 		@InterestingNeed TestBean testBean;
 
 		@InterestingNeedWithRequiredOverride(required=false) NestedTestBean nestedTestBean;
 	}
 
-	@Bean @Lazy @Qualifier("interesting")
+	@Bean(defaultCandidate=false) @Lazy @Qualifier("interesting")
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface InterestingBean {
 	}
 
-	@Bean @Lazy @Qualifier("interesting")
+	@Bean(defaultCandidate=false) @Lazy @Qualifier("interesting")
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface InterestingBeanWithName {
 
