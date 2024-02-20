@@ -18,6 +18,7 @@ package org.springframework.context.annotation.configuration;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -85,20 +86,26 @@ class BeanMethodQualificationTests {
 	@Test
 	void primary() {
 		AnnotationConfigApplicationContext ctx =
-				new AnnotationConfigApplicationContext(PrimaryConfig.class, StandardPojo.class);
+				new AnnotationConfigApplicationContext(PrimaryConfig.class, StandardPojo.class, ConstructorPojo.class);
 		StandardPojo pojo = ctx.getBean(StandardPojo.class);
 		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
+		ConstructorPojo pojo2 = ctx.getBean(ConstructorPojo.class);
+		assertThat(pojo2.testBean.getName()).isEqualTo("interesting");
+		assertThat(pojo2.testBean2.getName()).isEqualTo("boring");
 		ctx.close();
 	}
 
 	@Test
 	void fallback() {
 		AnnotationConfigApplicationContext ctx =
-				new AnnotationConfigApplicationContext(FallbackConfig.class, StandardPojo.class);
+				new AnnotationConfigApplicationContext(FallbackConfig.class, StandardPojo.class, ConstructorPojo.class);
 		StandardPojo pojo = ctx.getBean(StandardPojo.class);
 		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
+		ConstructorPojo pojo2 = ctx.getBean(ConstructorPojo.class);
+		assertThat(pojo2.testBean.getName()).isEqualTo("interesting");
+		assertThat(pojo2.testBean2.getName()).isEqualTo("boring");
 		ctx.close();
 	}
 
@@ -233,7 +240,7 @@ class BeanMethodQualificationTests {
 
 		@Bean @Qualifier("interesting")
 		public static TestBean testBean1x() {
-			return new TestBean("interesting");
+			return new TestBean("");
 		}
 
 		@Bean @Boring @Primary
@@ -245,7 +252,7 @@ class BeanMethodQualificationTests {
 
 		@Bean @Boring
 		public TestBean testBean2x() {
-			return new TestBean("boring");
+			return new TestBean("");
 		}
 	}
 
@@ -259,7 +266,7 @@ class BeanMethodQualificationTests {
 
 		@Bean @Qualifier("interesting") @Fallback
 		public static TestBean testBean1x() {
-			return new TestBean("interesting");
+			return new TestBean("");
 		}
 
 		@Bean @Boring
@@ -271,7 +278,7 @@ class BeanMethodQualificationTests {
 
 		@Bean @Boring @Fallback
 		public TestBean testBean2x() {
-			return new TestBean("boring");
+			return new TestBean("");
 		}
 	}
 
@@ -281,6 +288,19 @@ class BeanMethodQualificationTests {
 		@Autowired @Qualifier("interesting") TestBean testBean;
 
 		@Autowired @Boring TestBean testBean2;
+	}
+
+	@Component @Lazy
+	static class ConstructorPojo {
+
+		TestBean testBean;
+
+		TestBean testBean2;
+
+		ConstructorPojo(@Qualifier("interesting") TestBean testBean, @Boring TestBean testBean2) {
+			this.testBean = testBean;
+			this.testBean2 = testBean2;
+		}
 	}
 
 	@Qualifier
@@ -323,11 +343,15 @@ class BeanMethodQualificationTests {
 	@InterestingPojo
 	static class CustomPojo {
 
-		@Autowired(required=false) TestBean plainBean;
+		TestBean plainBean;
 
 		@InterestingNeed TestBean testBean;
 
 		@InterestingNeedWithRequiredOverride(required=false) NestedTestBean nestedTestBean;
+
+		public CustomPojo(Optional<TestBean> plainBean) {
+			this.plainBean = plainBean.orElse(null);
+		}
 	}
 
 	@Bean(defaultCandidate=false) @Lazy @Qualifier("interesting")

@@ -164,41 +164,40 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * Match the given qualifier annotations against the candidate bean definition.
 	 */
 	protected boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch) {
-		if (ObjectUtils.isEmpty(annotationsToSearch)) {
-			return true;
-		}
 		boolean qualifierFound = false;
-		SimpleTypeConverter typeConverter = new SimpleTypeConverter();
-		for (Annotation annotation : annotationsToSearch) {
-			Class<? extends Annotation> type = annotation.annotationType();
-			boolean checkMeta = true;
-			boolean fallbackToMeta = false;
-			if (isQualifier(type)) {
-				qualifierFound = true;
-				if (!checkQualifier(bdHolder, annotation, typeConverter)) {
-					fallbackToMeta = true;
-				}
-				else {
-					checkMeta = false;
-				}
-			}
-			if (checkMeta) {
-				boolean foundMeta = false;
-				for (Annotation metaAnn : type.getAnnotations()) {
-					Class<? extends Annotation> metaType = metaAnn.annotationType();
-					if (isQualifier(metaType)) {
-						qualifierFound = true;
-						foundMeta = true;
-						// Only accept fallback match if @Qualifier annotation has a value...
-						// Otherwise, it is just a marker for a custom qualifier annotation.
-						if ((fallbackToMeta && ObjectUtils.isEmpty(AnnotationUtils.getValue(metaAnn))) ||
-								!checkQualifier(bdHolder, metaAnn, typeConverter)) {
-							return false;
-						}
+		if (!ObjectUtils.isEmpty(annotationsToSearch)) {
+			SimpleTypeConverter typeConverter = new SimpleTypeConverter();
+			for (Annotation annotation : annotationsToSearch) {
+				Class<? extends Annotation> type = annotation.annotationType();
+				boolean checkMeta = true;
+				boolean fallbackToMeta = false;
+				if (isQualifier(type)) {
+					qualifierFound = true;
+					if (!checkQualifier(bdHolder, annotation, typeConverter)) {
+						fallbackToMeta = true;
+					}
+					else {
+						checkMeta = false;
 					}
 				}
-				if (fallbackToMeta && !foundMeta) {
-					return false;
+				if (checkMeta) {
+					boolean foundMeta = false;
+					for (Annotation metaAnn : type.getAnnotations()) {
+						Class<? extends Annotation> metaType = metaAnn.annotationType();
+						if (isQualifier(metaType)) {
+							qualifierFound = true;
+							foundMeta = true;
+							// Only accept fallback match if @Qualifier annotation has a value...
+							// Otherwise, it is just a marker for a custom qualifier annotation.
+							if ((fallbackToMeta && ObjectUtils.isEmpty(AnnotationUtils.getValue(metaAnn))) ||
+									!checkQualifier(bdHolder, metaAnn, typeConverter)) {
+								return false;
+							}
+						}
+					}
+					if (fallbackToMeta && !foundMeta) {
+						return false;
+					}
 				}
 			}
 		}
