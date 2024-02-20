@@ -192,7 +192,7 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 	}
 
 	private Runnable scheduledTask(Runnable task) {
-		return () -> execute(task);
+		return () -> execute(new DelegatingErrorHandlingRunnable(task, TaskUtils.LOG_AND_PROPAGATE_ERROR_HANDLER));
 	}
 
 	private Runnable taskOnSchedulerThread(Runnable task) {
