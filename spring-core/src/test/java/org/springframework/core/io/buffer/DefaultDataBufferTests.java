@@ -36,20 +36,23 @@ class DefaultDataBufferTests {
 
 	@Test // gh-30967
 	void getNativeBuffer() {
-		DefaultDataBuffer buffer = bufferFactory.allocateBuffer(256);
-		buffer.write("0123456789", StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = this.bufferFactory.allocateBuffer(256);
+		dataBuffer.write("0123456789", StandardCharsets.UTF_8);
 
 		byte[] result = new byte[7];
-		buffer.read(result);
+		dataBuffer.read(result);
 		assertThat(result).isEqualTo("0123456".getBytes(StandardCharsets.UTF_8));
 
-		ByteBuffer nativeBuffer = buffer.getNativeBuffer();
+		ByteBuffer nativeBuffer = dataBuffer.getNativeBuffer();
 		assertThat(nativeBuffer.position()).isEqualTo(7);
-		assertThat(buffer.readPosition()).isEqualTo(7);
+		assertThat(dataBuffer.readPosition()).isEqualTo(7);
 		assertThat(nativeBuffer.limit()).isEqualTo(10);
-		assertThat(buffer.writePosition()).isEqualTo(10);
+		assertThat(dataBuffer.writePosition()).isEqualTo(10);
+		assertThat(nativeBuffer.capacity()).isEqualTo(256);
+		assertThat(dataBuffer.capacity()).isEqualTo(256);
 
-		release(buffer);
+
+		release(dataBuffer);
 	}
 
 }
