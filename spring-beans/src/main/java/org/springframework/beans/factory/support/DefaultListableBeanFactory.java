@@ -1408,7 +1408,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			if (dependencyName != null &&
 					isTypeMatch(dependencyName, type) && isAutowireCandidate(dependencyName, descriptor) &&
-					!hasPrimaryConflict(dependencyName, type) && !isSelfReference(beanName, dependencyName)) {
+					!isFallback(dependencyName) && !hasPrimaryConflict(dependencyName, type) &&
+					!isSelfReference(beanName, dependencyName)) {
 				if (autowiredBeanNames != null) {
 					autowiredBeanNames.add(dependencyName);
 				}
@@ -1819,10 +1820,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		// Second pass: identify unique non-fallback candidate
 		if (primaryBeanName == null) {
-			for (Map.Entry<String, Object> entry : candidates.entrySet()) {
-				String candidateBeanName = entry.getKey();
-				Object beanInstance = entry.getValue();
-				if (!isFallback(candidateBeanName, beanInstance)) {
+			for (String candidateBeanName : candidates.keySet()) {
+				if (!isFallback(candidateBeanName)) {
 					if (primaryBeanName != null) {
 						return null;
 					}
@@ -1896,17 +1895,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Return whether the bean definition for the given bean name has been
 	 * marked as a fallback bean.
 	 * @param beanName the name of the bean
-	 * @param beanInstance the corresponding bean instance (can be {@code null})
-	 * @return whether the given bean qualifies as fallback
 	 * @since 6.2
 	 */
-	protected boolean isFallback(String beanName, Object beanInstance) {
+	private boolean isFallback(String beanName) {
 		String transformedBeanName = transformedBeanName(beanName);
 		if (containsBeanDefinition(transformedBeanName)) {
 			return getMergedLocalBeanDefinition(transformedBeanName).isFallback();
 		}
 		return (getParentBeanFactory() instanceof DefaultListableBeanFactory parent &&
-				parent.isFallback(transformedBeanName, beanInstance));
+				parent.isFallback(transformedBeanName));
 	}
 
 	/**
@@ -1954,7 +1951,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Determine whether there is a primary bean registered for the given dependency type,
 	 * not matching the given bean name.
 	 */
-	@Nullable
 	private boolean hasPrimaryConflict(String beanName, Class<?> dependencyType) {
 		for (String candidate : this.primaryBeanNames) {
 			if (isTypeMatch(candidate, dependencyType) && !candidate.equals(beanName)) {
