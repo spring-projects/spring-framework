@@ -30,7 +30,9 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Fallback;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.annotation.AliasFor;
@@ -74,6 +76,26 @@ class BeanMethodQualificationTests {
 		AnnotationConfigApplicationContext ctx =
 				new AnnotationConfigApplicationContext(ScopedProxyConfig.class, StandardPojo.class);
 		assertThat(ctx.getBeanFactory().containsSingleton("testBean1")).isTrue();  // a shared scoped proxy
+		StandardPojo pojo = ctx.getBean(StandardPojo.class);
+		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
+		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
+		ctx.close();
+	}
+
+	@Test
+	void primary() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(PrimaryConfig.class, StandardPojo.class);
+		StandardPojo pojo = ctx.getBean(StandardPojo.class);
+		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
+		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
+		ctx.close();
+	}
+
+	@Test
+	void fallback() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(FallbackConfig.class, StandardPojo.class);
 		StandardPojo pojo = ctx.getBean(StandardPojo.class);
 		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
@@ -198,6 +220,58 @@ class BeanMethodQualificationTests {
 			TestBean tb = new TestBean("boring");
 			tb.setSpouse(testBean1);
 			return tb;
+		}
+	}
+
+	@Configuration
+	static class PrimaryConfig {
+
+		@Bean @Qualifier("interesting") @Primary
+		public static TestBean testBean1() {
+			return new TestBean("interesting");
+		}
+
+		@Bean @Qualifier("interesting")
+		public static TestBean testBean1x() {
+			return new TestBean("interesting");
+		}
+
+		@Bean @Boring @Primary
+		public TestBean testBean2(TestBean testBean1) {
+			TestBean tb = new TestBean("boring");
+			tb.setSpouse(testBean1);
+			return tb;
+		}
+
+		@Bean @Boring
+		public TestBean testBean2x() {
+			return new TestBean("boring");
+		}
+	}
+
+	@Configuration
+	static class FallbackConfig {
+
+		@Bean @Qualifier("interesting")
+		public static TestBean testBean1() {
+			return new TestBean("interesting");
+		}
+
+		@Bean @Qualifier("interesting") @Fallback
+		public static TestBean testBean1x() {
+			return new TestBean("interesting");
+		}
+
+		@Bean @Boring
+		public TestBean testBean2(TestBean testBean1) {
+			TestBean tb = new TestBean("boring");
+			tb.setSpouse(testBean1);
+			return tb;
+		}
+
+		@Bean @Boring @Fallback
+		public TestBean testBean2x() {
+			return new TestBean("boring");
 		}
 	}
 

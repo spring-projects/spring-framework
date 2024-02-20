@@ -1796,6 +1796,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Nullable
 	protected String determinePrimaryCandidate(Map<String, Object> candidates, Class<?> requiredType) {
 		String primaryBeanName = null;
+		// First pass: identify unique primary candidate
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateBeanName = entry.getKey();
 			Object beanInstance = entry.getValue();
@@ -1812,6 +1813,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 				}
 				else {
+					primaryBeanName = candidateBeanName;
+				}
+			}
+		}
+		// Second pass: identify unique non-fallback candidate
+		if (primaryBeanName == null) {
+			for (Map.Entry<String, Object> entry : candidates.entrySet()) {
+				String candidateBeanName = entry.getKey();
+				Object beanInstance = entry.getValue();
+				if (!isFallback(candidateBeanName, beanInstance)) {
+					if (primaryBeanName != null) {
+						return null;
+					}
 					primaryBeanName = candidateBeanName;
 				}
 			}
@@ -1876,6 +1890,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		return (getParentBeanFactory() instanceof DefaultListableBeanFactory parent &&
 				parent.isPrimary(transformedBeanName, beanInstance));
+	}
+
+	/**
+	 * Return whether the bean definition for the given bean name has been
+	 * marked as a fallback bean.
+	 * @param beanName the name of the bean
+	 * @param beanInstance the corresponding bean instance (can be {@code null})
+	 * @return whether the given bean qualifies as fallback
+	 * @since 6.2
+	 */
+	protected boolean isFallback(String beanName, Object beanInstance) {
+		String transformedBeanName = transformedBeanName(beanName);
+		if (containsBeanDefinition(transformedBeanName)) {
+			return getMergedLocalBeanDefinition(transformedBeanName).isFallback();
+		}
+		return (getParentBeanFactory() instanceof DefaultListableBeanFactory parent &&
+				parent.isFallback(transformedBeanName, beanInstance));
 	}
 
 	/**

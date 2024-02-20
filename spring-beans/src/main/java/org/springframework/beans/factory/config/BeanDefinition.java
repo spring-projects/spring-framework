@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,6 +178,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Set whether this bean is a primary autowire candidate.
 	 * <p>If this value is {@code true} for exactly one bean among multiple
 	 * matching candidates, it will serve as a tie-breaker.
+	 * @see #setFallback
 	 */
 	void setPrimary(boolean primary);
 
@@ -185,6 +186,21 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return whether this bean is a primary autowire candidate.
 	 */
 	boolean isPrimary();
+
+	/**
+	 * Set whether this bean is a fallback autowire candidate.
+	 * <p>If this value is {@code true} for all beans but one among multiple
+	 * matching candidates, the remaining bean will be selected.
+	 * @since 6.2
+	 * @see #setPrimary
+	 */
+	void setFallback(boolean fallback);
+
+	/**
+	 * Return whether this bean is a fallback autowire candidate.
+	 * @since 6.2
+	 */
+	boolean isFallback();
 
 	/**
 	 * Specify the factory bean to use, if any.

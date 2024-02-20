@@ -189,6 +189,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean primary = false;
 
+	private boolean fallback = false;
+
 	private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>();
 
 	@Nullable
@@ -288,6 +290,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setAutowireCandidate(originalAbd.isAutowireCandidate());
 			setDefaultCandidate(originalAbd.isDefaultCandidate());
 			setPrimary(originalAbd.isPrimary());
+			setFallback(originalAbd.isFallback());
 			copyQualifiersFrom(originalAbd);
 			setInstanceSupplier(originalAbd.getInstanceSupplier());
 			setNonPublicAccessAllowed(originalAbd.isNonPublicAccessAllowed());
@@ -365,6 +368,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			setAutowireCandidate(otherAbd.isAutowireCandidate());
 			setDefaultCandidate(otherAbd.isDefaultCandidate());
 			setPrimary(otherAbd.isPrimary());
+			setFallback(otherAbd.isFallback());
 			copyQualifiersFrom(otherAbd);
 			setInstanceSupplier(otherAbd.getInstanceSupplier());
 			setNonPublicAccessAllowed(otherAbd.isNonPublicAccessAllowed());
@@ -742,6 +746,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Set whether this bean is a primary autowire candidate.
 	 * <p>Default is {@code false}. If this value is {@code true} for exactly one
 	 * bean among multiple matching candidates, it will serve as a tie-breaker.
+	 * @see #setFallback
 	 */
 	@Override
 	public void setPrimary(boolean primary) {
@@ -754,6 +759,25 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Override
 	public boolean isPrimary() {
 		return this.primary;
+	}
+
+	/**
+	 * Set whether this bean is a fallback autowire candidate.
+	 * <p>Default is {@code false}. If this value is {@code true} for all beans but
+	 * one among multiple matching candidates, the remaining bean will be selected.
+	 * @since 6.2
+	 * @see #setPrimary
+	 */
+	public void setFallback(boolean fallback) {
+		this.fallback = fallback;
+	}
+
+	/**
+	 * Return whether this bean is a fallback autowire candidate.
+	 * @since 6.2
+	 */
+	public boolean isFallback() {
+		return this.fallback;
 	}
 
 	/**
