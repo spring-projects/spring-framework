@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,12 +86,10 @@ public final class ResourceFile extends DynamicFile implements AssertProvider<Re
 	}
 
 	/**
-	 * AssertJ {@code assertThat} support.
-	 * @deprecated use {@code assertThat(sourceFile)} rather than calling this
-	 * method directly.
+	 * Use {@code assertThat(sourceFile)} rather than calling this method
+	 * directly.
 	 */
 	@Override
-	@Deprecated
 	public ResourceFileAssert assertThat() {
 		return new ResourceFileAssert(this);
 	}
