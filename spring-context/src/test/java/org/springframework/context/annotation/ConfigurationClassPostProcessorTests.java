@@ -35,6 +35,8 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -944,8 +946,8 @@ class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfig.class));
 		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
-		beanFactory.preInstantiateSingletons();
 
+		beanFactory.preInstantiateSingletons();
 		beanFactory.getBean(ServiceBean.class);
 	}
 
@@ -958,8 +960,8 @@ class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfigWithDefaultMethods.class));
 		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
-		beanFactory.preInstantiateSingletons();
 
+		beanFactory.preInstantiateSingletons();
 		beanFactory.getBean(ServiceBean.class);
 	}
 
@@ -972,9 +974,23 @@ class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfigWithDefaultMethods.class.getName()));
 		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class.getName()));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
-		beanFactory.preInstantiateSingletons();
 
+		beanFactory.preInstantiateSingletons();
 		beanFactory.getBean(ServiceBean.class);
+	}
+
+	@Test
+	void testConfigWithFailingInit() {  // gh-23343
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfigWithFailingInit.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(beanFactory::preInstantiateSingletons);
+		assertThat(beanFactory.containsSingleton("configClass")).isFalse();
+		assertThat(beanFactory.containsSingleton("provider")).isFalse();
 	}
 
 	@Test
@@ -985,6 +1001,7 @@ class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("configClass1", new RootBeanDefinition(A.class));
 		beanFactory.registerBeanDefinition("configClass2", new RootBeanDefinition(AStrich.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+
 		assertThatExceptionOfType(BeanCreationException.class)
 				.isThrownBy(beanFactory::preInstantiateSingletons)
 				.withMessageContaining("Circular reference");
@@ -1765,6 +1782,29 @@ class ConfigurationClassPostProcessorTests {
 		@PostConstruct
 		public void validate() {
 			Assert.notNull(provider, "No ServiceBeanProvider injected");
+		}
+	}
+
+	@Configuration
+	public static class ConcreteConfigWithFailingInit implements DefaultMethodsConfig, BeanFactoryAware {
+
+		private BeanFactory beanFactory;
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+
+		@Bean
+		@Override
+		public ServiceBeanProvider provider() {
+			return new ServiceBeanProvider();
+		}
+
+		@PostConstruct
+		public void validate() {
+			beanFactory.getBean("provider");
+			throw new IllegalStateException();
 		}
 	}
 

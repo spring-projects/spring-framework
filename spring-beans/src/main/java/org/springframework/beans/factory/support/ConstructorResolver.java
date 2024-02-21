@@ -611,13 +611,10 @@ class ConstructorResolver {
 				String argDesc = StringUtils.collectionToCommaDelimitedString(argTypes);
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"No matching factory method found on class [" + factoryClass.getName() + "]: " +
-						(mbd.getFactoryBeanName() != null ?
-								"factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
+						(mbd.getFactoryBeanName() != null ? "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
 						"factory method '" + mbd.getFactoryMethodName() + "(" + argDesc + ")'. " +
-						"Check that a method with the specified name " +
-						(minNrOfArgs > 0 ? "and arguments " : "") +
-						"exists and that it is " +
-						(isStatic ? "static" : "non-static") + ".");
+						"Check that a method with the specified name " + (minNrOfArgs > 0 ? "and arguments " : "") +
+						"exists and that it is " + (isStatic ? "static" : "non-static") + ".");
 			}
 			else if (void.class == factoryMethodToUse.getReturnType()) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
@@ -1197,8 +1194,7 @@ class ConstructorResolver {
 	}
 
 	private Predicate<ResolvableType> isAssignable(ResolvableType valueType) {
-		return parameterType -> (valueType == ResolvableType.NONE
-				|| parameterType.isAssignableFrom(valueType));
+		return parameterType -> (valueType == ResolvableType.NONE || parameterType.isAssignableFrom(valueType));
 	}
 
 	private ResolvableType extractElementType(ResolvableType parameterType) {
