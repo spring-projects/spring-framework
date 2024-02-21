@@ -62,7 +62,6 @@ class IndexingTests {
 		assertThat(expression.getValue(this)).isEqualTo(4);
 	}
 
-
 	@Test
 	@SuppressWarnings("unchecked")
 	void indexIntoGenericPropertyContainingMap() {
@@ -302,7 +301,7 @@ class IndexingTests {
 
 	@Test
 	void indexIntoGenericPropertyContainingArray() {
-		String[] property = new String[] { "bar" };
+		String[] property = { "bar" };
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
@@ -357,17 +356,17 @@ class IndexingTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void testListOfScalar() {
+	void listOfScalars() {
 		listOfScalarNotGeneric = new ArrayList(1);
 		listOfScalarNotGeneric.add("5");
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listOfScalarNotGeneric[0]");
-		assertThat(expression.getValue(this, Integer.class)).isEqualTo(Integer.valueOf(5));
+		assertThat(expression.getValue(this, Integer.class)).isEqualTo(5);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void testListsOfMap() {
+	void listOfMaps() {
 		listOfMapsNotGeneric = new ArrayList();
 		Map map = new HashMap();
 		map.put("fruit", "apple");
