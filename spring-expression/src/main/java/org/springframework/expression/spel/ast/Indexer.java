@@ -768,7 +768,7 @@ public class Indexer extends SpelNodeImpl {
 
 		@Override
 		public boolean isWritable() {
-			return true;
+			return false;
 		}
 	}
 
