@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.annotation;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
@@ -27,6 +29,7 @@ import org.springframework.lang.Nullable;
  * about its bean class - without requiring the class to be loaded yet.
  *
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 2.5
  * @see AnnotatedGenericBeanDefinition
  * @see org.springframework.core.type.AnnotationMetadata
@@ -48,4 +51,15 @@ public interface AnnotatedBeanDefinition extends BeanDefinition {
 	@Nullable
 	MethodMetadata getFactoryMethodMetadata();
 
+	/**
+	 * Configure this bean definition with metadata.
+	 * @since 6.2
+	 */
+	default void configureWithMetadata() {
+		Map<String, Object> attributes = getMetadata().getAnnotationAttributes("org.springframework.stereotype.Component");
+		if (attributes != null) {
+			setAutowireCandidate((Boolean) attributes.get("autowireCandidate"));
+			setDefaultCandidate((Boolean) attributes.get("defaultCandidate"));
+		}
+	}
 }

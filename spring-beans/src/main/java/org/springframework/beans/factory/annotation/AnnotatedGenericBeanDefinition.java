@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Yanming Zhou
  * @since 2.5
  * @see AnnotatedBeanDefinition#getMetadata()
  * @see org.springframework.core.type.StandardAnnotationMetadata
@@ -56,6 +57,7 @@ public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implem
 	public AnnotatedGenericBeanDefinition(Class<?> beanClass) {
 		setBeanClass(beanClass);
 		this.metadata = AnnotationMetadata.introspect(beanClass);
+		configureWithMetadata();
 	}
 
 	/**
@@ -77,6 +79,7 @@ public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implem
 			setBeanClassName(metadata.getClassName());
 		}
 		this.metadata = metadata;
+		configureWithMetadata();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import java.lang.annotation.Target;
  *
  * @author Mark Fisher
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 2.5
  * @see Repository
  * @see Service
@@ -75,5 +76,27 @@ public @interface Component {
 	 * @return the suggested component name, if any (or empty String otherwise)
 	 */
 	String value() default "";
+
+	/**
+	 * Is this bean a candidate for getting autowired into some other bean at all?
+	 * <p>Default is {@code true}; set this to {@code false} for internal delegates
+	 * that are not meant to get in the way of beans of the same type in other places.
+	 * @since 6.2
+	 * @see #defaultCandidate()
+	 */
+	boolean autowireCandidate() default true;
+
+	/**
+	 * Is this bean a candidate for getting autowired into some other bean based on
+	 * the plain type, without any further indications such as a qualifier match?
+	 * <p>Default is {@code true}; set this to {@code false} for restricted delegates
+	 * that are supposed to be injectable in certain areas but are not meant to get
+	 * in the way of beans of the same type in other places.
+	 * <p>This is a variation of {@link #autowireCandidate()} which does not disable
+	 * injection in general, just enforces an additional indication such as a qualifier.
+	 * @since 6.2
+	 * @see #autowireCandidate()
+	 */
+	boolean defaultCandidate() default true;
 
 }

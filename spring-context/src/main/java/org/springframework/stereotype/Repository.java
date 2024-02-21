@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.core.annotation.AliasFor;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 2.0
  * @see Component
  * @see Service
@@ -65,5 +66,19 @@ public @interface Repository {
 	 */
 	@AliasFor(annotation = Component.class)
 	String value() default "";
+
+	/**
+	 * Alias for {@link Component#autowireCandidate}.
+	 * @since 6.2
+	 */
+	@AliasFor(annotation = Component.class)
+	boolean autowireCandidate() default true;
+
+	/**
+	 * Alias for {@link Component#defaultCandidate}.
+	 * @since 6.2
+	 */
+	@AliasFor(annotation = Component.class)
+	boolean defaultCandidate() default true;
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.stereotype.NonDefaultComponent;
+import org.springframework.context.annotation.stereotype.NonDefaultRepository;
+import org.springframework.context.annotation.stereotype.NonDefaultService;
 import org.springframework.context.testfixture.index.CandidateComponentsTestClassLoader;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
@@ -78,6 +81,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Yanming Zhou
  */
 class ClassPathScanningCandidateComponentProviderTests {
 
@@ -536,6 +540,35 @@ class ClassPathScanningCandidateComponentProviderTests {
 		assertThat(components.iterator().next().getBeanClassName()).isEqualTo(AnnotatedComponent.class.getName());
 	}
 
+	@Test
+	void annotatedGenericBeanDefinitionShouldBeConfiguredWithStereotypeAnnotation() {
+		try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext()) {
+			ctx.register(NonDefaultComponent.class);
+			ctx.register(NonDefaultService.class);
+			ctx.register(NonDefaultRepository.class);
+			ctx.refresh();
+			assertBeanDefinitionsAreConfiguredWithStereotypeAnnotation(ctx);
+		}
+	}
+
+	@Test
+	void scannedGenericBeanDefinitionShouldBeConfiguredWithStereotypeAnnotation() {
+		try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(NonDefaultComponent.class.getPackage().getName())) {
+			assertBeanDefinitionsAreConfiguredWithStereotypeAnnotation(ctx);
+		}
+	}
+
+	private static void assertBeanDefinitionsAreConfiguredWithStereotypeAnnotation(AnnotationConfigApplicationContext ctx) {
+		BeanDefinition bd = ctx.getBeanDefinition(NonDefaultComponent.BEAN_NAME);
+		assertThat(bd.isAutowireCandidate()).isFalse();
+		assertThat(bd.isDefaultCandidate()).isFalse();
+		bd = ctx.getBeanDefinition(NonDefaultService.BEAN_NAME);
+		assertThat(bd.isAutowireCandidate()).isFalse();
+		assertThat(bd.isDefaultCandidate()).isFalse();
+		bd = ctx.getBeanDefinition(NonDefaultRepository.BEAN_NAME);
+		assertThat(bd.isAutowireCandidate()).isFalse();
+		assertThat(bd.isDefaultCandidate()).isFalse();
+	}
 
 	private static void assertBeanTypes(Set<BeanDefinition> candidates, Class<?>... expectedTypes) {
 		assertBeanTypes(candidates, Arrays.stream(expectedTypes));
