@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
