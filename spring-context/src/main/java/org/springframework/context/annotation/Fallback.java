@@ -29,7 +29,10 @@ import java.lang.annotation.Target;
  * <p>If all beans but one among multiple matching candidates are marked
  * as a fallback, the remaining bean will be selected.
  *
+ * <p>Fallback beans are included for autowiring Arrays, Collections, and Maps.
+ *
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 6.2
  * @see Primary
  * @see Lazy

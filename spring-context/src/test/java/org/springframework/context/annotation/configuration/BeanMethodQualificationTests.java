@@ -18,6 +18,8 @@ package org.springframework.context.annotation.configuration;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -47,6 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  */
 class BeanMethodQualificationTests {
 
@@ -91,11 +94,12 @@ class BeanMethodQualificationTests {
 		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
 		ConstructorPojo pojo2 = ctx.getBean(ConstructorPojo.class);
-		assertThat(pojo2.testBean.getName()).isEqualTo("interesting");
-		assertThat(pojo2.testBean2.getName()).isEqualTo("boring");
+		assertThat(pojo2.testBean).isSameAs(pojo.testBean);
+		assertThat(pojo2.testBean2).isSameAs(pojo.testBean2);
 		ctx.close();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	void fallback() {
 		AnnotationConfigApplicationContext ctx =
@@ -103,9 +107,13 @@ class BeanMethodQualificationTests {
 		StandardPojo pojo = ctx.getBean(StandardPojo.class);
 		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
+		assertThat(pojo.testBean2.getSpouse().getName()).isEqualTo("interesting");
+		assertThat(pojo.testBean2.getFriends()).contains(ctx.getBean("testBean1x", TestBean.class), ctx.getBean("testBean2x", TestBean.class)); // array injection
+		assertThat((List<TestBean>) pojo.testBean2.getSomeList()).contains(ctx.getBean("testBean1x", TestBean.class), ctx.getBean("testBean2x", TestBean.class)); // list injection
+		assertThat((Map<String, TestBean>) pojo.testBean2.getSomeMap()).containsKeys("testBean1x", "testBean2x"); // map injection
 		ConstructorPojo pojo2 = ctx.getBean(ConstructorPojo.class);
-		assertThat(pojo2.testBean.getName()).isEqualTo("interesting");
-		assertThat(pojo2.testBean2.getName()).isEqualTo("boring");
+		assertThat(pojo2.testBean).isSameAs(pojo.testBean);
+		assertThat(pojo2.testBean2).isSameAs(pojo.testBean2);
 		ctx.close();
 	}
 
@@ -270,9 +278,12 @@ class BeanMethodQualificationTests {
 		}
 
 		@Bean @Boring
-		public TestBean testBean2(TestBean testBean1) {
+		public TestBean testBean2(TestBean testBean1, TestBean[] testBeanArray, List<TestBean> testBeanList, Map<String, TestBean> testBeanMap) {
 			TestBean tb = new TestBean("boring");
 			tb.setSpouse(testBean1);
+			tb.setFriends(List.of((Object[]) testBeanArray)); // add cast to avoid varargs warning
+			tb.setSomeList(testBeanList);
+			tb.setSomeMap(testBeanMap);
 			return tb;
 		}
 
