@@ -313,8 +313,7 @@ class ConfigurationClassParser {
 					ComponentScan.class, ComponentScans.class, MergedAnnotation::isMetaPresent);
 		}
 
-		if (!componentScans.isEmpty() &&
-				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+		if (!componentScans.isEmpty()) {
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
