@@ -223,13 +223,12 @@ final class ConfigurationClass {
 		Map<String, Object> attributes = this.metadata.getAnnotationAttributes(Configuration.class.getName());
 
 		// A configuration class may not be final (CGLIB limitation) unless it declares proxyBeanMethods=false
-		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods")) {
-			if (this.metadata.isFinal()) {
-				problemReporter.error(new FinalConfigurationProblem());
-			}
-			for (BeanMethod beanMethod : this.beanMethods) {
-				beanMethod.validate(problemReporter);
-			}
+		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods") && this.metadata.isFinal()) {
+			problemReporter.error(new FinalConfigurationProblem());
+		}
+
+		for (BeanMethod beanMethod : this.beanMethods) {
+			beanMethod.validate(problemReporter);
 		}
 
 		// A configuration class may not contain overloaded bean methods unless it declares enforceUniqueMethods=false

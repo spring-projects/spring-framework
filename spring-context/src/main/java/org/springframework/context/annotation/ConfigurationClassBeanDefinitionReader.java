@@ -53,6 +53,7 @@ import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.StandardMethodMetadata;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -229,8 +230,12 @@ class ConfigurationClassBeanDefinitionReader {
 			beanDef.setUniqueFactoryMethodName(methodName);
 		}
 
-		if (metadata instanceof StandardMethodMetadata sam) {
-			beanDef.setResolvedFactoryMethod(sam.getIntrospectedMethod());
+		if (metadata instanceof StandardMethodMetadata smm &&
+				configClass.getMetadata() instanceof StandardAnnotationMetadata sam) {
+			Method method = ClassUtils.getMostSpecificMethod(smm.getIntrospectedMethod(), sam.getIntrospectedClass());
+			if (method == smm.getIntrospectedMethod()) {
+				beanDef.setResolvedFactoryMethod(method);
+			}
 		}
 
 		beanDef.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
