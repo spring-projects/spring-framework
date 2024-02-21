@@ -68,6 +68,8 @@ public class Indexer extends SpelNodeImpl {
 	private enum IndexedType {ARRAY, LIST, MAP, STRING, OBJECT}
 
 
+	private final boolean nullSafe;
+
 	@Nullable
 	private IndexedType indexedType;
 
@@ -103,11 +105,24 @@ public class Indexer extends SpelNodeImpl {
 	private PropertyAccessor cachedWriteAccessor;
 
 
-	private final boolean nullSafe;
+	/**
+	 * Create an {@code Indexer} with the given start position, end position, and
+	 * index expression.
+	 * @see #Indexer(boolean, int, int, SpelNodeImpl)
+	 * @deprecated as of Spring Framework 6.2, in favor of {@link #Indexer(boolean, int, int, SpelNodeImpl)}
+	 */
+	@Deprecated(since = "6.2", forRemoval = true)
+	public Indexer(int startPos, int endPos, SpelNodeImpl indexExpression) {
+		this(false, startPos, endPos, indexExpression);
+	}
 
-
-	public Indexer(boolean nullSafe, int startPos, int endPos, SpelNodeImpl expr) {
-		super(startPos, endPos, expr);
+	/**
+	 * Create an {@code Indexer} with the given null-safe flag, start position,
+	 * end position, and index expression.
+	 * @since 6.2
+	 */
+	public Indexer(boolean nullSafe, int startPos, int endPos, SpelNodeImpl indexExpression) {
+		super(startPos, endPos, indexExpression);
 		this.nullSafe = nullSafe;
 	}
 
@@ -136,6 +151,15 @@ public class Indexer extends SpelNodeImpl {
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		TypedValue context = state.getActiveContextObject();
 		Object target = context.getValue();
+
+		if (target == null) {
+			if (this.nullSafe) {
+				return ValueRef.NullValueRef.INSTANCE;
+			}
+			// Raise a proper exception in case of a null target
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
+		}
+
 		TypeDescriptor targetDescriptor = context.getTypeDescriptor();
 		TypedValue indexValue;
 		Object index;
@@ -157,14 +181,6 @@ public class Indexer extends SpelNodeImpl {
 			finally {
 				state.popActiveContextObject();
 			}
-		}
-
-		// Raise a proper exception in case of a null target
-		if (target == null) {
-			if (this.nullSafe) {
-				return ValueRef.NullValueRef.INSTANCE;
-			}
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 
 		// At this point, we need a TypeDescriptor for a non-null target object

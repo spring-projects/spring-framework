@@ -26,7 +26,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationContext;
@@ -35,6 +37,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.testresources.Person;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -376,18 +379,74 @@ class IndexingTests {
 		assertThat(expression.getValue(this, String.class)).isEqualTo("apple");
 	}
 
-	@Test
-	void nullSafeIndex() {
-		ContextWithNullCollections testContext = new ContextWithNullCollections();
-		StandardEvaluationContext context = new StandardEvaluationContext(testContext);
-		Expression expr = new SpelExpressionParser().parseRaw("nullList?.[4]");
-		assertThat(expr.getValue(context)).isNull();
+	@Nested
+	class NullSafeIndexTests {  // gh-29847
 
-		expr = new SpelExpressionParser().parseRaw("nullArray?.[4]");
-		assertThat(expr.getValue(context)).isNull();
+		private final RootContextWithIndexedProperties rootContext = new RootContextWithIndexedProperties();
 
-		expr = new SpelExpressionParser().parseRaw("nullMap:?.[4]");
-		assertThat(expr.getValue(context)).isNull();
+		private final StandardEvaluationContext context = new StandardEvaluationContext(rootContext);
+
+		private final SpelExpressionParser parser = new SpelExpressionParser();
+
+		private Expression expression;
+
+		@Test
+		void nullSafeIndexIntoArray() {
+			expression = parser.parseExpression("array?.[0]");
+			assertThat(expression.getValue(context)).isNull();
+			rootContext.array = new int[] {42};
+			assertThat(expression.getValue(context)).isEqualTo(42);
+		}
+
+		@Test
+		void nullSafeIndexIntoList() {
+			expression = parser.parseExpression("list?.[0]");
+			assertThat(expression.getValue(context)).isNull();
+			rootContext.list = List.of(42);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+		}
+
+		@Test
+		void nullSafeIndexIntoSet() {
+			expression = parser.parseExpression("set?.[0]");
+			assertThat(expression.getValue(context)).isNull();
+			rootContext.set = Set.of(42);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+		}
+
+		@Test
+		void nullSafeIndexIntoString() {
+			expression = parser.parseExpression("string?.[0]");
+			assertThat(expression.getValue(context)).isNull();
+			rootContext.string = "XYZ";
+			assertThat(expression.getValue(context)).isEqualTo("X");
+		}
+
+		@Test
+		void nullSafeIndexIntoMap() {
+			expression = parser.parseExpression("map?.['enigma']");
+			assertThat(expression.getValue(context)).isNull();
+			rootContext.map = Map.of("enigma", 42);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+		}
+
+		@Test
+		void nullSafeIndexIntoObject() {
+			expression = parser.parseExpression("person?.['name']");
+			assertThat(expression.getValue(context)).isNull();
+			rootContext.person = new Person("Jane");
+			assertThat(expression.getValue(context)).isEqualTo("Jane");
+		}
+
+		static class RootContextWithIndexedProperties {
+			public int[] array;
+			public List<Integer> list;
+			public Set<Integer> set;
+			public String string;
+			public Map<String, Integer> map;
+			public Person person;
+		}
+
 	}
 
 
@@ -448,13 +507,6 @@ class IndexingTests {
 			return new Class<?>[] {Map.class};
 		}
 
-	}
-
-
-	static class ContextWithNullCollections {
-		public List nullList = null;
-		public String[] nullArray = null;
-		public Map nullMap = null;
 	}
 
 }

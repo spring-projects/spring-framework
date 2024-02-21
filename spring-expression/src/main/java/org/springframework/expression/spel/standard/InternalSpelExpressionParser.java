@@ -538,8 +538,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		else if (maybeEatBeanReference()) {
 			return pop();
 		}
-		else if (maybeEatProjection(false) || maybeEatSelection(false) ||
-				maybeEatIndexer(false)) {
+		else if (maybeEatProjection(false) || maybeEatSelection(false) || maybeEatIndexer(false)) {
 			return pop();
 		}
 		else if (maybeEatInlineListOrMap()) {
