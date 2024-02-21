@@ -471,22 +471,27 @@ class HttpHeadersTests {
 
 	@Test
 	void acceptLanguage() {
-		String headerValue = "fr-ch, fr;q=0.9, en-*;q=0.8, de;q=0.7, *;q=0.5";
+		String headerValue = "fr-ch, fr;q=0.9, en-*;q=0.8, de;q=0.7, *-us;q=0.6, *;q=0.5";
 		headers.setAcceptLanguage(Locale.LanguageRange.parse(headerValue));
 		assertThat(headers.getFirst(HttpHeaders.ACCEPT_LANGUAGE)).isEqualTo(headerValue);
 
-		List<Locale.LanguageRange> expectedRanges = Arrays.asList(
+		List<Locale.LanguageRange> expectedRanges = List.of(
 				new Locale.LanguageRange("fr-ch"),
 				new Locale.LanguageRange("fr", 0.9),
 				new Locale.LanguageRange("en-*", 0.8),
 				new Locale.LanguageRange("de", 0.7),
+				new Locale.LanguageRange("*-us", 0.6),
 				new Locale.LanguageRange("*", 0.5)
 		);
 		assertThat(headers.getAcceptLanguage()).isEqualTo(expectedRanges);
-		assertThat(headers.getAcceptLanguageAsLocales()).element(0).isEqualTo(Locale.forLanguageTag("fr-ch"));
+		assertThat(headers.getAcceptLanguageAsLocales()).isEqualTo(List.of(
+				Locale.forLanguageTag("fr-ch"),
+				Locale.forLanguageTag("fr"),
+				Locale.forLanguageTag("en"),
+				Locale.forLanguageTag("de")));
 
 		headers.setAcceptLanguageAsLocales(Collections.singletonList(Locale.FRANCE));
-		assertThat(headers.getAcceptLanguageAsLocales()).element(0).isEqualTo(Locale.FRANCE);
+		assertThat(headers.getAcceptLanguageAsLocales()).first().isEqualTo(Locale.FRANCE);
 	}
 
 	@Test // SPR-15603
