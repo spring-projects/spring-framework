@@ -27,6 +27,10 @@ import java.lang.annotation.Target;
  * are qualified to autowire a single-valued dependency. If exactly one
  * 'primary' bean exists among the candidates, it will be the autowired value.
  *
+ * <p>Primary beans only have an effect when finding multiple candidates
+ * for single injection points. All type-matching beans are included when
+ * autowiring arrays, collections, maps, or ObjectProvider streams.
+ *
  * <p>This annotation is semantically equivalent to the {@code <bean>} element's
  * {@code primary} attribute in Spring XML.
  *

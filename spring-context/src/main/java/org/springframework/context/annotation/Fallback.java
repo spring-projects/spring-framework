@@ -29,6 +29,11 @@ import java.lang.annotation.Target;
  * <p>If all beans but one among multiple matching candidates are marked
  * as a fallback, the remaining bean will be selected.
  *
+ * <p>Just like primary beans, fallback beans only have an effect when
+ * finding multiple candidates for single injection points.
+ * All type-matching beans are included when autowiring arrays,
+ * collections, maps, or ObjectProvider streams.
+ *
  * @author Juergen Hoeller
  * @since 6.2
  * @see Primary
