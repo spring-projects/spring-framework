@@ -728,6 +728,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * effectively enforcing an additional indication such as a qualifier match.
 	 * @since 6.2
 	 */
+	@Override
 	public void setDefaultCandidate(boolean defaultCandidate) {
 		this.defaultCandidate = defaultCandidate;
 	}
@@ -738,6 +739,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * qualifier match?
 	 * @since 6.2
 	 */
+	@Override
 	public boolean isDefaultCandidate() {
 		return this.defaultCandidate;
 	}

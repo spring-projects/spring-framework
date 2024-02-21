@@ -33,6 +33,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Yanming Zhou
  * @since 19.03.2004
  * @see ConfigurableListableBeanFactory#getBeanDefinition
  * @see org.springframework.beans.factory.support.RootBeanDefinition
@@ -173,6 +174,25 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * Return whether this bean is a candidate for getting autowired into some other bean.
 	 */
 	boolean isAutowireCandidate();
+
+	/**
+	 * Set whether this bean is a candidate for getting autowired into some other
+	 * bean based on the plain type, without any further indications such as a
+	 * qualifier match.
+	 * <p>Default is {@code true}, allowing injection by type at any injection point.
+	 * Switch this to {@code false} in order to restrict injection by default,
+	 * effectively enforcing an additional indication such as a qualifier match.
+	 * @since 6.2
+	 */
+	void setDefaultCandidate(boolean defaultCandidate);
+
+	/**
+	 * Return whether this bean is a candidate for getting autowired into some other
+	 * bean based on the plain type, without any further indications such as a
+	 * qualifier match?
+	 * @since 6.2
+	 */
+	boolean isDefaultCandidate();
 
 	/**
 	 * Set whether this bean is a primary autowire candidate.
