@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,11 +108,12 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Instantiate a new {@link HashSet} with an initial capacity
-	 * that can accommodate the specified number of elements without
-	 * any immediate resize/rehash operations to be expected.
+	 * Instantiate a new {@link HashSet} with an initial capacity that can
+	 * accommodate the specified number of elements without any immediate
+	 * resize/rehash operations to be expected.
 	 * @param expectedSize the expected number of elements (with a corresponding
 	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @since 6.2
 	 * @see #newLinkedHashSet(int)
 	 */
 	public static <E> HashSet<E> newHashSet(int expectedSize) {
@@ -120,11 +121,12 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Instantiate a new {@link LinkedHashSet} with an initial capacity
-	 * that can accommodate the specified number of elements without
-	 * any immediate resize/rehash operations to be expected.
+	 * Instantiate a new {@link LinkedHashSet} with an initial capacity that can
+	 * accommodate the specified number of elements without any immediate
+	 * resize/rehash operations to be expected.
 	 * @param expectedSize the expected number of elements (with a corresponding
 	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @since 6.2
 	 * @see #newHashSet(int)
 	 */
 	public static <E> LinkedHashSet<E> newLinkedHashSet(int expectedSize) {
