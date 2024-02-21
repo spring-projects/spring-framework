@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -494,12 +495,11 @@ class ConfigurationClassParser {
 	}
 
 	/**
-	 * Returns {@code @Import} class, considering all meta-annotations.
+	 * Returns {@code @Import} classes, considering all meta-annotations.
 	 */
 	private Set<SourceClass> getImports(SourceClass sourceClass) throws IOException {
 		Set<SourceClass> imports = new LinkedHashSet<>();
-		Set<SourceClass> visited = new LinkedHashSet<>();
-		collectImports(sourceClass, imports, visited);
+		collectImports(sourceClass, imports, new HashSet<>());
 		return imports;
 	}
 
@@ -1038,7 +1038,7 @@ class ConfigurationClassParser {
 				return Collections.emptySet();
 			}
 			String[] classNames = (String[]) annotationAttributes.get(attribute);
-			Set<SourceClass> result = new LinkedHashSet<>();
+			Set<SourceClass> result = CollectionUtils.newLinkedHashSet(classNames.length);
 			for (String className : classNames) {
 				result.add(getRelated(className));
 			}

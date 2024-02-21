@@ -93,7 +93,7 @@ public class MockServletContext implements ServletContext {
 
 	private static final String TEMP_DIR_SYSTEM_PROPERTY = "java.io.tmpdir";
 
-	private static final Set<SessionTrackingMode> DEFAULT_SESSION_TRACKING_MODES = new LinkedHashSet<>(4);
+	private static final Set<SessionTrackingMode> DEFAULT_SESSION_TRACKING_MODES = CollectionUtils.newLinkedHashSet(3);
 
 	static {
 		DEFAULT_SESSION_TRACKING_MODES.add(SessionTrackingMode.COOKIE);
