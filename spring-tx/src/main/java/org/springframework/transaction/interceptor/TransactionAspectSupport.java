@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,8 +153,15 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Return the transaction status of the current method invocation.
 	 * Mainly intended for code that wants to set the current transaction
 	 * rollback-only but not throw an application exception.
+	 * <p>This exposes the locally declared transaction boundary with its declared name
+	 * and characteristics, as managed by the aspect. Ar runtime, the local boundary may
+	 * participate in an outer transaction: If you need transaction metadata from such
+	 * an outer transaction (the actual resource transaction) instead, consider using
+	 * {@link org.springframework.transaction.support.TransactionSynchronizationManager}.
 	 * @throws NoTransactionException if the transaction info cannot be found,
 	 * because the method was invoked outside an AOP invocation context
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionName()
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
 	 */
 	public static TransactionStatus currentTransactionStatus() throws NoTransactionException {
 		TransactionInfo info = currentTransactionInfo();
