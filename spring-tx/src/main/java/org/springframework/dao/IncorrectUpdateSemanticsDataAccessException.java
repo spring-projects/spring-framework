@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,11 @@ public class IncorrectUpdateSemanticsDataAccessException extends InvalidDataAcce
 		super(msg, cause);
 	}
 
+
 	/**
 	 * Return whether data was updated.
-	 * If this method returns false, there's nothing to roll back.
-	 * <p>The default implementation always returns true.
+	 * If this method returns {@code false}, there is nothing to roll back.
+	 * <p>The default implementation always returns {@code true}.
 	 * This can be overridden in subclasses.
 	 */
 	public boolean wasDataUpdated() {
