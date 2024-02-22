@@ -219,7 +219,7 @@ public abstract class JdbcUtils {
 				return NumberUtils.convertNumberToTargetClass(number, Integer.class);
 			}
 			else {
-				// e.g. on Postgres: getObject returns a PGObject but we need a String
+				// e.g. on Postgres: getObject returns a PGObject, but we need a String
 				return rs.getString(index);
 			}
 		}

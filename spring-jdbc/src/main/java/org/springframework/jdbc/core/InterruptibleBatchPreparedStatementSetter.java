@@ -22,7 +22,7 @@ package org.springframework.jdbc.core;
  *
  * <p>This interface allows you to signal the end of a batch rather than
  * having to determine the exact batch size upfront. Batch size is still
- * being honored but it is now the maximum size of the batch.
+ * being honored, but it is now the maximum size of the batch.
  *
  * <p>The {@link #isBatchExhausted} method is called after each call to
  * {@link #setValues} to determine whether there were some values added,
