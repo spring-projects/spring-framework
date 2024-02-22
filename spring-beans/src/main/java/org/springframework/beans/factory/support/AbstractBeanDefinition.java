@@ -744,6 +744,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * {@inheritDoc}
 	 * <p>Default is {@code false}.
 	 */
+	@Override
 	public void setFallback(boolean fallback) {
 		this.fallback = fallback;
 	}
@@ -751,6 +752,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isFallback() {
 		return this.fallback;
 	}
