@@ -175,7 +175,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	public void setUpdatableResults(boolean updatableResults) {
 		if (isCompiled()) {
 			throw new InvalidDataAccessApiUsageException(
-					"The updateableResults flag must be set before the operation is compiled");
+					"The updatableResults flag must be set before the operation is compiled");
 		}
 		this.updatableResults = updatableResults;
 	}
