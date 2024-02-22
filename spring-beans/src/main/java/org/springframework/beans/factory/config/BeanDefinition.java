@@ -151,6 +151,9 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Set the names of the beans that this bean depends on being initialized.
 	 * The bean factory will guarantee that these beans get initialized first.
+	 * <p>Note that dependencies are normally expressed through bean properties or
+	 * constructor arguments. This property should just be necessary for other kinds
+	 * of dependencies like statics (*ugh*) or database preparation on startup.
 	 */
 	void setDependsOn(@Nullable String... dependsOn);
 
@@ -350,7 +353,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	boolean isPrototype();
 
 	/**
-	 * Return whether this bean is "abstract", that is, not meant to be instantiated.
+	 * Return whether this bean is "abstract", that is, not meant to be instantiated
+	 * itself but rather just serving as parent for concrete child bean definitions.
 	 */
 	boolean isAbstract();
 
