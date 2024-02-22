@@ -20,7 +20,7 @@ import org.springframework.dao.DataRetrievalFailureException;
 
 /**
  * Data access exception thrown when a result set did not have the correct column count,
- * for example when expecting a single column but getting 0 or more than 1 columns.
+ * for example when expecting a single column but getting 0 or more than 1 column.
  *
  * @author Juergen Hoeller
  * @since 2.0

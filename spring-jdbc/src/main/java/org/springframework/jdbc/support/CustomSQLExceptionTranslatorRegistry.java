@@ -38,7 +38,7 @@ public final class CustomSQLExceptionTranslatorRegistry {
 	private static final Log logger = LogFactory.getLog(CustomSQLExceptionTranslatorRegistry.class);
 
 	/**
-	 * Keep track of a single instance so we can return it to classes that request it.
+	 * Keep track of a single instance, so we can return it to classes that request it.
 	 */
 	private static final CustomSQLExceptionTranslatorRegistry instance = new CustomSQLExceptionTranslatorRegistry();
 
