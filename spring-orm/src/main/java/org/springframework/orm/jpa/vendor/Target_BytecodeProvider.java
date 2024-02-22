@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa.vendor;
 
 import java.util.Map;
+import java.util.function.Predicate;
 
 import com.oracle.svm.core.annotate.Substitute;
 import com.oracle.svm.core.annotate.TargetClass;
@@ -31,11 +32,27 @@ import org.hibernate.property.access.spi.PropertyAccess;
  * @since 6.1
  * @see <a href="https://hibernate.atlassian.net/browse/HHH-17568">HHH-17568</a>
  */
-@TargetClass(className = "org.hibernate.bytecode.internal.none.BytecodeProviderImpl", onlyWith = SubstituteOnlyIfPresent.class)
+@TargetClass(className = "org.hibernate.bytecode.internal.none.BytecodeProviderImpl", onlyWith = Target_BytecodeProvider.SubstituteOnlyIfPresent.class)
 final class Target_BytecodeProvider {
 
 	@Substitute
 	public ReflectionOptimizer getReflectionOptimizer(Class<?> clazz, Map<String, PropertyAccess> propertyAccessMap) {
 		return null;
 	}
+
+	static class SubstituteOnlyIfPresent implements Predicate<String> {
+
+		@Override
+		public boolean test(String type) {
+			try {
+				Class<?> clazz = Class.forName(type, false, getClass().getClassLoader());
+				clazz.getDeclaredMethod("getReflectionOptimizer", Class.class, Map.class);
+				return true;
+			}
+			catch (ClassNotFoundException | NoClassDefFoundError | NoSuchMethodException ex) {
+				return false;
+			}
+		}
+	}
+
 }
