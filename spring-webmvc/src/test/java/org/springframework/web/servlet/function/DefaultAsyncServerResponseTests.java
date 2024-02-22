@@ -28,9 +28,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DefaultAsyncServerResponseTests {
 
 	@Test
-	void block() {
+	void blockCompleted() {
 		ServerResponse wrappee = ServerResponse.ok().build();
 		CompletableFuture<ServerResponse> future = CompletableFuture.completedFuture(wrappee);
+		AsyncServerResponse response = AsyncServerResponse.create(future);
+
+		assertThat(response.block()).isSameAs(wrappee);
+	}
+
+	@Test
+	void blockNotCompleted() {
+		ServerResponse wrappee = ServerResponse.ok().build();
+		CompletableFuture<ServerResponse> future = CompletableFuture.supplyAsync(() -> {
+			try {
+				Thread.sleep(500);
+				return wrappee;
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
+		});
 		AsyncServerResponse response = AsyncServerResponse.create(future);
 
 		assertThat(response.block()).isSameAs(wrappee);
