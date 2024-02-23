@@ -107,7 +107,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	/**
 	 * Manually configure the resource mappings.
 	 * <p><strong>Note:</strong> by default resource mappings are auto-detected
-	 * from the Spring {@code ApplicationContext}. However if this property is
+	 * from the Spring {@code ApplicationContext}. However, if this property is
 	 * used, the auto-detection is turned off.
 	 */
 	public void setHandlerMap(@Nullable Map<String, ResourceHttpRequestHandler> handlerMap) {
