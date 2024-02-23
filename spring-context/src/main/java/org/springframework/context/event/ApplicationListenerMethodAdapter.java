@@ -91,6 +91,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	@Nullable
 	private final String condition;
 
+	private final boolean defaultExecution;
+
 	private final int order;
 
 	@Nullable
@@ -119,6 +121,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		EventListener ann = AnnotatedElementUtils.findMergedAnnotation(this.targetMethod, EventListener.class);
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);
+		this.defaultExecution = (ann == null || ann.defaultExecution());
 		this.order = resolveOrder(this.targetMethod);
 		String id = (ann != null ? ann.id() : "");
 		this.listenerId = (!id.isEmpty() ? id : null);
@@ -166,7 +169,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		processEvent(event);
+		if (isDefaultExecution()) {
+			processEvent(event);
+		}
 	}
 
 	@Override
@@ -225,6 +230,16 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 			sj.add(paramType.getName());
 		}
 		return ClassUtils.getQualifiedMethodName(method) + sj;
+	}
+
+	/**
+	 * Return whether default execution is applicable for the target listener.
+	 * @since 6.2
+	 * @see #onApplicationEvent
+	 * @see EventListener#defaultExecution()
+	 */
+	protected boolean isDefaultExecution() {
+		return this.defaultExecution;
 	}
 
 

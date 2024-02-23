@@ -269,8 +269,7 @@ class TransactionalEventListenerTests {
 
 	@Test
 	void noTransaction() {
-		load(BeforeCommitTestListener.class, AfterCompletionTestListener.class,
-				AfterCompletionExplicitTestListener.class);
+		load(BeforeCommitTestListener.class, AfterCompletionTestListener.class, AfterCompletionExplicitTestListener.class);
 		this.context.publishEvent("test");
 		getEventCollector().assertTotalEventsCount(0);
 	}
@@ -316,6 +315,24 @@ class TransactionalEventListenerTests {
 		this.eventCollector.assertEvents(EventCollector.AFTER_ROLLBACK, "test");
 		this.eventCollector.assertEvents(EventCollector.AFTER_COMPLETION, "test");
 		getEventCollector().assertTotalEventsCount(4);
+	}
+
+	@Test
+	void noTransactionManagementWithFallbackExecution() {
+		doLoad(PlainConfiguration.class, FallbackExecutionTestListener.class);
+		this.context.publishEvent("test");
+		this.eventCollector.assertEvents(EventCollector.BEFORE_COMMIT, "test");
+		this.eventCollector.assertEvents(EventCollector.AFTER_COMMIT, "test");
+		this.eventCollector.assertEvents(EventCollector.AFTER_ROLLBACK, "test");
+		this.eventCollector.assertEvents(EventCollector.AFTER_COMPLETION, "test");
+		getEventCollector().assertTotalEventsCount(4);
+	}
+
+	@Test
+	void noTransactionManagementWithoutFallbackExecution() {
+		doLoad(PlainConfiguration.class, BeforeCommitTestListener.class, AfterCommitMetaAnnotationTestListener.class);
+		this.context.publishEvent("test");
+		this.eventCollector.assertNoEventReceived();
 	}
 
 	@Test
@@ -378,6 +395,31 @@ class TransactionalEventListenerTests {
 	@Configuration
 	@EnableTransactionManagement
 	static class BasicConfiguration {
+
+		@Bean
+		public EventCollector eventCollector() {
+			return new EventCollector();
+		}
+
+		@Bean
+		public TestBean testBean(ApplicationEventPublisher eventPublisher) {
+			return new TestBean(eventPublisher);
+		}
+
+		@Bean
+		public CallCountingTransactionManager transactionManager() {
+			return new CallCountingTransactionManager();
+		}
+
+		@Bean
+		public TransactionTemplate transactionTemplate() {
+			return new TransactionTemplate(transactionManager());
+		}
+	}
+
+
+	@Configuration
+	static class PlainConfiguration {
 
 		@Bean
 		public EventCollector eventCollector() {
