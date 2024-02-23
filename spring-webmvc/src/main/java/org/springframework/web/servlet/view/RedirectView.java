@@ -554,7 +554,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	/**
 	 * Determine whether the given model element value is eligible for exposure.
 	 * <p>The default implementation considers primitives, strings, numbers, dates,
-	 * URIs, URLs etc as eligible, according to {@link BeanUtils#isSimpleValueType}.
+	 * URIs, URLs etc. as eligible, according to {@link BeanUtils#isSimpleValueType}.
 	 * This can be overridden in subclasses.
 	 * @param value the model element value
 	 * @return whether the element value is eligible

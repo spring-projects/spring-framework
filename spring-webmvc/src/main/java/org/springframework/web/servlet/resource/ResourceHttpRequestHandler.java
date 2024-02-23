@@ -164,7 +164,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * {@code /META-INF/public-web-resources/} directory, with resources in the
 	 * web application root taking precedence.
 	 * <p>For {@link org.springframework.core.io.UrlResource URL-based resources}
-	 * (e.g. files, HTTP URLs, etc) this method supports a special prefix to
+	 * (e.g. files, HTTP URLs, etc.) this method supports a special prefix to
 	 * indicate the charset associated with the URL so that relative paths
 	 * appended to it can be encoded correctly, for example
 	 * {@code "[charset=Windows-31J]https://example.org/path"}.

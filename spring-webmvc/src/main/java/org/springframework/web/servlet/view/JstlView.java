@@ -50,9 +50,9 @@ import org.springframework.web.servlet.support.RequestContext;
  * resource (for example: "myView" &rarr; "/WEB-INF/jsp/myView.jsp"), using
  * this view class to enable explicit JSTL support.
  *
- * <p>The specified MessageSource loads messages from "messages.properties" etc
+ * <p>The specified MessageSource loads messages from "messages.properties" etc.
  * files in the class path. This will automatically be exposed to views as
- * JSTL localization context, which the JSTL fmt tags (message etc) will use.
+ * JSTL localization context, which the JSTL fmt tags (message etc.) will use.
  * Consider using Spring's ReloadableResourceBundleMessageSource instead of
  * the standard ResourceBundleMessageSource for more sophistication.
  * Of course, any other Spring components can share the same MessageSource.
