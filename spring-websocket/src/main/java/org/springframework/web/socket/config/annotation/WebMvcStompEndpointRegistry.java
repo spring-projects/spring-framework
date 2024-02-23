@@ -142,6 +142,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		return this;
 	}
 
+	@Override
 	public WebMvcStompEndpointRegistry setPreserveReceiveOrder(boolean preserveReceiveOrder) {
 		this.stompHandler.setPreserveReceiveOrder(preserveReceiveOrder);
 		return this;

@@ -395,6 +395,7 @@ public interface Errors {
 	 * e.g. for inclusion in an exception message.
 	 * @see #failOnError(Function)
 	 */
+	@Override
 	String toString();
 
 }

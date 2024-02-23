@@ -546,6 +546,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		Map<String, Object> arguments = new LinkedHashMap<>();
 
+		@Override
 		@MessageMapping("/binding/id/{id}")
 		public void simpleBinding(Long id) {
 			this.method = "simpleBinding";

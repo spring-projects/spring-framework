@@ -625,6 +625,7 @@ class ClassUtilsTests {
 
 		}
 
+		@Override
 		public void packageAccessiblePrint() {
 
 		}

@@ -127,10 +127,12 @@ class RSocketServiceIntegrationTests {
 	@Controller
 	static class ServerController implements Service {
 
+		@Override
 		public Mono<String> echoAsync(String payload) {
 			return Mono.delay(Duration.ofMillis(10)).map(aLong -> payload + " async");
 		}
 
+		@Override
 		public Flux<String> echoStream(String payload) {
 			return Flux.interval(Duration.ofMillis(10)).map(aLong -> payload + " " + aLong);
 		}

@@ -500,6 +500,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @since 4.1
 	 * @see UriComponents#toUriString()
 	 */
+	@Override
 	public String toUriString() {
 		return (this.uriVariables.isEmpty() ?
 				build().encode().toUriString() :

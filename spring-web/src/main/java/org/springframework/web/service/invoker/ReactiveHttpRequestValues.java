@@ -85,6 +85,7 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 	 * <p>This is mutually exclusive with {@link #getBodyValue()}.
 	 * Only one of the two or neither is set.
 	 */
+	@Override
 	@SuppressWarnings("removal")
 	@Nullable
 	public Publisher<?> getBody() {
@@ -94,6 +95,7 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 	/**
 	 * Return the element type for a {@linkplain #getBodyPublisher() body publisher}.
 	 */
+	@Override
 	@SuppressWarnings("removal")
 	@Nullable
 	public ParameterizedTypeReference<?> getBodyElementType() {
