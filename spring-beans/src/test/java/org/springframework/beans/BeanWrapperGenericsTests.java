@@ -42,6 +42,7 @@ import org.springframework.util.MultiValueMap;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 /**
  * @author Juergen Hoeller
@@ -201,7 +202,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", 5);
 		assertThat(bw.getPropertyValue("listOfLists[0][0]")).isEqualTo(5);
-		assertThat(gb.getListOfLists()).singleElement().asList().containsExactly(5);
+		assertThat(gb.getListOfLists()).singleElement().asInstanceOf(LIST).containsExactly(5);
 	}
 
 	@Test
@@ -213,7 +214,7 @@ class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", "5");
 		assertThat(bw.getPropertyValue("listOfLists[0][0]")).isEqualTo(5);
-		assertThat(gb.getListOfLists()).singleElement().asList().containsExactly(5);
+		assertThat(gb.getListOfLists()).singleElement().asInstanceOf(LIST).containsExactly(5);
 	}
 
 	@Test

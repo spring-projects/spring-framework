@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 /**
  * Tests for {@link CustomCollectionEditor}.
@@ -60,7 +61,7 @@ class CustomCollectionEditorTests {
 		Object value = editor.getValue();
 		assertThat(value).isNotNull();
 		assertThat(value).isInstanceOf(ArrayList.class);
-		assertThat(value).asList().containsExactly(0, 1, 2);
+		assertThat(value).asInstanceOf(LIST).containsExactly(0, 1, 2);
 	}
 
 	@Test
