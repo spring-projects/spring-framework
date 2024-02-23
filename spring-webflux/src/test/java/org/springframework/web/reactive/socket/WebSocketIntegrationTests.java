@@ -69,7 +69,7 @@ class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTest
 
 		if (server instanceof TomcatHttpServer) {
 			Mono.fromRunnable(this::testEcho)
-					.retryWhen(Retry.max(3).filter(ex -> ex instanceof IllegalStateException))
+					.retryWhen(Retry.max(3).filter(IllegalStateException.class::isInstance))
 					.block();
 		}
 		else {

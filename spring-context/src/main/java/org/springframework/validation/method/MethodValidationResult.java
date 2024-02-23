@@ -98,7 +98,7 @@ public interface MethodValidationResult {
 	 */
 	default List<ParameterErrors> getBeanResults() {
 		return getAllValidationResults().stream()
-				.filter(result -> result instanceof ParameterErrors)
+				.filter(ParameterErrors.class::isInstance)
 				.map(result -> (ParameterErrors) result)
 				.toList();
 	}

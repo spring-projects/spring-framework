@@ -114,7 +114,7 @@ class ExchangeMutatorTests {
 
 			Assert.notNull(httpHandlerBuilder, "Not a mock server");
 			httpHandlerBuilder.filters(filters -> {
-				filters.removeIf(filter -> filter instanceof IdentityFilter);
+				filters.removeIf(IdentityFilter.class::isInstance);
 				filters.add(0, this.filter);
 			});
 		}

@@ -76,7 +76,7 @@ record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 	@Nullable
 	private static Encoder<?> findJsonEncoder(Collection<HttpMessageWriter<?>> writers) {
 		return findJsonEncoder(writers.stream()
-				.filter(writer -> writer instanceof EncoderHttpMessageWriter)
+				.filter(EncoderHttpMessageWriter.class::isInstance)
 				.map(writer -> ((EncoderHttpMessageWriter<?>) writer).getEncoder()));
 	}
 
@@ -97,7 +97,7 @@ record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 	@Nullable
 	private static Decoder<?> findJsonDecoder(Collection<HttpMessageReader<?>> readers) {
 		return findJsonDecoder(readers.stream()
-				.filter(reader -> reader instanceof DecoderHttpMessageReader)
+				.filter(DecoderHttpMessageReader.class::isInstance)
 				.map(reader -> ((DecoderHttpMessageReader<?>) reader).getDecoder()));
 	}
 

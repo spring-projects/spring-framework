@@ -175,7 +175,7 @@ class WebMvcConfigurationSupportTests {
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
 		assertThat(converters).hasSizeGreaterThanOrEqualTo(14);
 		converters.stream()
-				.filter(converter -> converter instanceof AbstractJackson2HttpMessageConverter)
+				.filter(AbstractJackson2HttpMessageConverter.class::isInstance)
 				.forEach(converter -> {
 					ObjectMapper mapper = ((AbstractJackson2HttpMessageConverter) converter).getObjectMapper();
 					assertThat(mapper.getDeserializationConfig().isEnabled(DEFAULT_VIEW_INCLUSION)).isFalse();
