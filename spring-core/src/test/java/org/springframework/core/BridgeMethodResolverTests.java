@@ -30,6 +30,7 @@ import java.util.concurrent.Delayed;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.ide.IdeUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -120,7 +121,14 @@ class BridgeMethodResolverTests {
 	void isBridgeMethodFor() throws Exception {
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
-		Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
+		Method bridge;
+
+		if (IdeUtils.runningInEclipse()) {
+			bridge = InterBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
+		}
+		else {
+			bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
+		}
 
 		assertThat(BridgeMethodResolver.isBridgeMethodFor(bridge, bridged, MyBar.class)).as("Should be bridge method").isTrue();
 		assertThat(BridgeMethodResolver.isBridgeMethodFor(bridge, other, MyBar.class)).as("Should not be bridge method").isFalse();
