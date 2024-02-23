@@ -413,6 +413,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see #setBeanClass(Class)
 	 */
 	@Override
 	public void setBeanClassName(@Nullable String beanClassName) {
@@ -421,6 +422,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see #getBeanClass()
 	 */
 	@Override
 	@Nullable
@@ -525,6 +527,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is {@link #SCOPE_DEFAULT}.
 	 */
 	@Override
 	@Nullable
@@ -534,6 +537,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is {@code true}.
 	 */
 	@Override
 	public boolean isSingleton() {
@@ -542,6 +546,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is {@code false}.
 	 */
 	@Override
 	public boolean isPrototype() {
@@ -551,8 +556,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Set if this bean is "abstract", i.e. not meant to be instantiated itself but
 	 * rather just serving as parent for concrete child bean definitions.
-	 * <p>Default is "false". Specify true to tell the bean factory to not try to
-	 * instantiate that particular bean in any case.
+	 * <p>The default is "false". Specify {@code true} to tell the bean factory to
+	 * not try to instantiate that particular bean in any case.
 	 */
 	public void setAbstract(boolean abstractFlag) {
 		this.abstractFlag = abstractFlag;
@@ -560,6 +565,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is {@code false}.
 	 */
 	@Override
 	public boolean isAbstract() {
@@ -568,6 +574,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is {@code false}.
 	 */
 	@Override
 	public void setLazyInit(boolean lazyInit) {
@@ -576,7 +583,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
-	 * @return whether to apply lazy-init semantics ({@code false} by default)
+	 * <p>The default is {@code false}.
 	 */
 	@Override
 	public boolean isLazyInit() {
@@ -596,7 +603,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Set the autowire mode. This determines whether any automagical detection
-	 * and setting of bean references will happen. Default is AUTOWIRE_NO
+	 * and setting of bean references will happen. The default is AUTOWIRE_NO
 	 * which means there won't be convention-based autowiring by name or type
 	 * (however, there may still be explicit annotation-driven autowiring).
 	 * @param autowireMode the autowire mode to set.
@@ -665,6 +672,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is no beans to explicitly depend on.
 	 */
 	@Override
 	public void setDependsOn(@Nullable String... dependsOn) {
@@ -673,6 +681,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is no beans to explicitly depend on.
 	 */
 	@Override
 	@Nullable
@@ -682,7 +691,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Default is {@code true}, allowing injection by type at any injection point.
+	 * <p>The default is {@code true}, allowing injection by type at any injection point.
 	 * Switch this to {@code false} in order to disable autowiring by type for this bean.
 	 * @see #AUTOWIRE_BY_TYPE
 	 * @see #AUTOWIRE_BY_NAME
@@ -694,6 +703,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is {@code true}.
 	 */
 	@Override
 	public boolean isAutowireCandidate() {
@@ -704,7 +714,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Set whether this bean is a candidate for getting autowired into some other
 	 * bean based on the plain type, without any further indications such as a
 	 * qualifier match.
-	 * <p>Default is {@code true}, allowing injection by type at any injection point.
+	 * <p>The default is {@code true}, allowing injection by type at any injection point.
 	 * Switch this to {@code false} in order to restrict injection by default,
 	 * effectively enforcing an additional indication such as a qualifier match.
 	 * @since 6.2
@@ -717,6 +727,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return whether this bean is a candidate for getting autowired into some other
 	 * bean based on the plain type, without any further indications such as a
 	 * qualifier match?
+	 * <p>The default is {@code true}.
 	 * @since 6.2
 	 */
 	public boolean isDefaultCandidate() {
@@ -725,7 +736,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Default is {@code false}.
+	 * <p>The default is {@code false}.
 	 */
 	@Override
 	public void setPrimary(boolean primary) {
@@ -734,6 +745,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is {@code false}.
 	 */
 	@Override
 	public boolean isPrimary() {
@@ -742,7 +754,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Default is {@code false}.
+	 * <p>The default is {@code false}.
 	 */
 	@Override
 	public void setFallback(boolean fallback) {
@@ -751,6 +763,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is {@code false}.
 	 */
 	@Override
 	public boolean isFallback() {
@@ -862,6 +875,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see #setBeanClass
 	 */
 	@Override
 	public void setFactoryBeanName(@Nullable String factoryBeanName) {
@@ -870,6 +884,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see #getBeanClass()
 	 */
 	@Override
 	@Nullable
@@ -879,6 +894,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see RootBeanDefinition#setUniqueFactoryMethodName
+	 * @see RootBeanDefinition#setNonUniqueFactoryMethodName
+	 * @see RootBeanDefinition#setResolvedFactoryMethod
 	 */
 	@Override
 	public void setFactoryMethodName(@Nullable String factoryMethodName) {
@@ -887,6 +905,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see RootBeanDefinition#getResolvedFactoryMethod()
 	 */
 	@Override
 	@Nullable
@@ -903,6 +922,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see #setConstructorArgumentValues
 	 */
 	@Override
 	public ConstructorArgumentValues getConstructorArgumentValues() {
@@ -916,6 +936,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see #setConstructorArgumentValues
 	 */
 	@Override
 	public boolean hasConstructorArgumentValues() {
@@ -931,6 +952,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see #setPropertyValues
 	 */
 	@Override
 	public MutablePropertyValues getPropertyValues() {
@@ -944,6 +966,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see #setPropertyValues
 	 */
 	@Override
 	public boolean hasPropertyValues() {
@@ -1113,6 +1136,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is {@link #ROLE_APPLICATION}.
 	 */
 	@Override
 	public void setRole(int role) {
@@ -1121,6 +1145,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is {@link #ROLE_APPLICATION}.
 	 */
 	@Override
 	public int getRole() {
@@ -1129,6 +1154,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is no description.
 	 */
 	@Override
 	public void setDescription(@Nullable String description) {
@@ -1137,6 +1163,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * <p>The default is no description.
 	 */
 	@Override
 	@Nullable
@@ -1170,6 +1197,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see #setResourceDescription
 	 */
 	@Override
 	@Nullable
@@ -1186,6 +1214,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * {@inheritDoc}
+	 * @see #setOriginatingBeanDefinition
 	 */
 	@Override
 	@Nullable
