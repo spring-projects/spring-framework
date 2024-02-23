@@ -60,7 +60,6 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * @see #setName
 	 */
 	public DefaultTransactionAttribute() {
-		super();
 	}
 
 	/**

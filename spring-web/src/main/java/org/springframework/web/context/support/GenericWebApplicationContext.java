@@ -96,7 +96,6 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 * @see #refresh
 	 */
 	public GenericWebApplicationContext() {
-		super();
 	}
 
 	/**

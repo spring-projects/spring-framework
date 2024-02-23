@@ -60,7 +60,6 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	 * @see #setRollbackRules
 	 */
 	public RuleBasedTransactionAttribute() {
-		super();
 	}
 
 	/**

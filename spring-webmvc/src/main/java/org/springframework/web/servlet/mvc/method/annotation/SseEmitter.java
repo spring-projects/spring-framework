@@ -54,7 +54,6 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * Create a new SseEmitter instance.
 	 */
 	public SseEmitter() {
-		super();
 	}
 
 	/**

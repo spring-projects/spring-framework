@@ -368,7 +368,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see #DispatcherServlet(WebApplicationContext)
 	 */
 	public DispatcherServlet() {
-		super();
 		setDispatchOptionsRequest(true);
 	}
 
