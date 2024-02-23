@@ -20,11 +20,10 @@ import java.util.function.Predicate;
 
 import com.oracle.svm.core.annotate.Alias;
 import com.oracle.svm.core.annotate.RecomputeFieldValue;
+import com.oracle.svm.core.annotate.RecomputeFieldValue.Kind;
 import com.oracle.svm.core.annotate.Substitute;
 import com.oracle.svm.core.annotate.TargetClass;
 import org.hibernate.bytecode.spi.BytecodeProvider;
-
-import static com.oracle.svm.core.annotate.RecomputeFieldValue.Kind;
 
 /**
  * Hibernate substitution designed to prevent ByteBuddy reachability on native, and to enforce the

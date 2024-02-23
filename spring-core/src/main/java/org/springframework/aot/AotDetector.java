@@ -17,9 +17,8 @@
 package org.springframework.aot;
 
 import org.springframework.core.NativeDetector;
+import org.springframework.core.NativeDetector.Context;
 import org.springframework.core.SpringProperties;
-
-import static org.springframework.core.NativeDetector.Context;
 
 /**
  * Utility for determining if AOT-processed optimizations must be used rather
