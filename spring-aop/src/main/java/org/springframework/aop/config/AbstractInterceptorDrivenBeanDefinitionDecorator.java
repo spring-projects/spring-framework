@@ -89,7 +89,7 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 			proxyDefinition.setDecoratedDefinition(targetHolder);
 			proxyDefinition.getPropertyValues().add("target", targetHolder);
 			// create the interceptor names list
-			proxyDefinition.getPropertyValues().add("interceptorNames", new ManagedList<String>());
+			proxyDefinition.getPropertyValues().add("interceptorNames", new ManagedList<>());
 			// copy autowire settings from original bean definition.
 			proxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
 			proxyDefinition.setPrimary(targetDefinition.isPrimary());

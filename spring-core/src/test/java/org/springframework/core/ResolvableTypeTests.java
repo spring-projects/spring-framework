@@ -170,7 +170,7 @@ class ResolvableTypeTests {
 
 	@Test
 	void forInstanceProviderNull() {
-		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<String>(null));
+		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<>(null));
 		assertThat(type.getType()).isEqualTo(MyGenericInterfaceType.class);
 		assertThat(type.resolve()).isEqualTo(MyGenericInterfaceType.class);
 	}

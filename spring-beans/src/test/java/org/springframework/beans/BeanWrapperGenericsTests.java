@@ -144,7 +144,7 @@ class BeanWrapperGenericsTests {
 	@Test
 	void testGenericMapElementWithKeyType() {
 		GenericBean<?> gb = new GenericBean<>();
-		gb.setLongMap(new HashMap<Long, Integer>());
+		gb.setLongMap(new HashMap<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("longMap[4]", "5");
 		assertThat(gb.getLongMap().get(Long.valueOf("4"))).isEqualTo("5");

@@ -485,7 +485,7 @@ class GenericConversionServiceTests {
 	void enumWithInterfaceToStringConversion() {
 		// SPR-9692
 		conversionService.addConverter(new EnumToStringConverter(conversionService));
-		conversionService.addConverter(new MyEnumInterfaceToStringConverter<MyEnum>());
+		conversionService.addConverter(new MyEnumInterfaceToStringConverter<>());
 		assertThat(conversionService.convert(MyEnum.A, String.class)).isEqualTo("1");
 	}
 

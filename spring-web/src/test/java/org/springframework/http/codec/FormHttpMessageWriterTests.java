@@ -52,7 +52,7 @@ class FormHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 		// No generic information
 		assertThat(this.writer.canWrite(
-				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
+				ResolvableType.forInstance(new LinkedMultiValueMap<>()),
 				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
 		assertThat(this.writer.canWrite(

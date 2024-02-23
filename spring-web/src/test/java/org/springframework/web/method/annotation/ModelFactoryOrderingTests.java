@@ -67,7 +67,7 @@ class ModelFactoryOrderingTests {
 
 	@BeforeEach
 	void setup() {
-		this.mavContainer.addAttribute("methods", new ArrayList<String>());
+		this.mavContainer.addAttribute("methods", new ArrayList<>());
 	}
 
 	@Test

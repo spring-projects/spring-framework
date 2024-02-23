@@ -75,8 +75,8 @@ class HttpEntityTests {
 		assertThat(new HttpEntity<>(map1).equals(new HttpEntity<>(map1))).isTrue();
 		assertThat(new HttpEntity<>(map1).equals(new HttpEntity<>(map2))).isFalse();
 
-		assertThat(new HttpEntity<String>(null, null).equals(new HttpEntity<String>(null, null))).isTrue();
-		assertThat(new HttpEntity<>("foo", null).equals(new HttpEntity<String>(null, null))).isFalse();
+		assertThat(new HttpEntity<String>(null, null).equals(new HttpEntity<>(null, null))).isTrue();
+		assertThat(new HttpEntity<>("foo", null).equals(new HttpEntity<>(null, null))).isFalse();
 		assertThat(new HttpEntity<String>(null, null).equals(new HttpEntity<>("bar", null))).isFalse();
 
 		assertThat(new HttpEntity<>("foo", map1).equals(new HttpEntity<>("foo", map1))).isTrue();

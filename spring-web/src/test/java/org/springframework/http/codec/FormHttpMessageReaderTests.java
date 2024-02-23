@@ -53,7 +53,7 @@ class FormHttpMessageReaderTests extends AbstractLeakCheckingTests {
 				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
 		assertThat(this.reader.canRead(
-				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
+				ResolvableType.forInstance(new LinkedMultiValueMap<>()),
 				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
 		assertThat(this.reader.canRead(
