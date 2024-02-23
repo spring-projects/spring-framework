@@ -308,15 +308,13 @@ abstract class NamedParameterUtils {
 			if (paramSource.hasValue(paramName)) {
 				Parameter parameter = paramSource.getValue(paramName);
 				if (parameter.getValue() instanceof Collection<?> collection) {
-					Iterator<?> entryIter = collection.iterator();
 					int k = 0;
 					int counter = 0;
-					while (entryIter.hasNext()) {
+					for (Object entryItem : collection) {
 						if (k > 0) {
 							actualSql.append(", ");
 						}
 						k++;
-						Object entryItem = entryIter.next();
 						if (entryItem instanceof Object[] expressionList) {
 							actualSql.append('(');
 							for (int m = 0; m < expressionList.length; m++) {

@@ -18,7 +18,6 @@ package org.springframework.jdbc.core.namedparam;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -304,14 +303,12 @@ public abstract class NamedParameterUtils {
 					value = sqlParameterValue.getValue();
 				}
 				if (value instanceof Iterable<?> iterable) {
-					Iterator<?> entryIter = iterable.iterator();
 					int k = 0;
-					while (entryIter.hasNext()) {
+					for (Object entryItem : iterable) {
 						if (k > 0) {
 							actualSql.append(", ");
 						}
 						k++;
-						Object entryItem = entryIter.next();
 						if (entryItem instanceof Object[] expressionList) {
 							actualSql.append('(');
 							for (int m = 0; m < expressionList.length; m++) {
