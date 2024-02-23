@@ -129,6 +129,7 @@ class BridgeMethodResolverTests {
 		else {
 			bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
 		}
+		assertThat(bridge.isBridge()).isTrue();
 
 		assertThat(BridgeMethodResolver.isBridgeMethodFor(bridge, bridged, MyBar.class)).as("Should be bridge method").isTrue();
 		assertThat(BridgeMethodResolver.isBridgeMethodFor(bridge, other, MyBar.class)).as("Should not be bridge method").isFalse();
