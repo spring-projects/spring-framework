@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class MappingJackson2CborHttpMessageConverter extends AbstractJackson2Htt
 
 	/**
 	 * {@inheritDoc}
-	 * The {@code ObjectMapper} must be configured with a {@code CBORFactory} instance.
+	 * <p>The {@code ObjectMapper} must be configured with a {@code CBORFactory} instance.
 	 */
 	@Override
 	public void setObjectMapper(ObjectMapper objectMapper) {

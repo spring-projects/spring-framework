@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class MappingJackson2SmileHttpMessageConverter extends AbstractJackson2Ht
 
 	/**
 	 * {@inheritDoc}
-	 * The {@code ObjectMapper} must be configured with a {@code SmileFactory} instance.
+	 * <p>The {@code ObjectMapper} must be configured with a {@code SmileFactory} instance.
 	 */
 	@Override
 	public void setObjectMapper(ObjectMapper objectMapper) {
