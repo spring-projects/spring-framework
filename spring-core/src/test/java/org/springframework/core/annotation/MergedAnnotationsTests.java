@@ -46,6 +46,7 @@ import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.Search;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
+import org.springframework.core.testfixture.ide.IdeUtils;
 import org.springframework.core.testfixture.stereotype.Component;
 import org.springframework.core.testfixture.stereotype.Indexed;
 import org.springframework.lang.Nullable;
@@ -891,15 +892,15 @@ class MergedAnnotationsTests {
 		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
 				Order.class).getDistance()).isEqualTo(0);
-		boolean runningInEclipse = StackWalker.getInstance().walk(stream ->
-				stream.anyMatch(stackFrame -> stackFrame.getClassName().startsWith("org.eclipse.jdt")));
 		// As of JDK 8, invoking getAnnotation() on a bridge method actually finds an
-		// annotation on its 'bridged' method [1]; however, the Eclipse compiler
-		// does not support this [2]. Thus, we effectively ignore the following
+		// annotation on its 'bridged' method [1]; however, the Eclipse compiler does
+		// not support this [2]. Thus, we effectively ignore the following
 		// assertion if the test is currently executing within the Eclipse IDE.
+		//
 		// [1] https://bugs.openjdk.java.net/browse/JDK-6695379
 		// [2] https://bugs.eclipse.org/bugs/show_bug.cgi?id=495396
-		if (!runningInEclipse) {
+		//
+		if (!IdeUtils.runningInEclipse()) {
 			assertThat(method.getAnnotation(Transactional.class)).isNotNull();
 		}
 		assertThat(MergedAnnotations.from(method).get(
