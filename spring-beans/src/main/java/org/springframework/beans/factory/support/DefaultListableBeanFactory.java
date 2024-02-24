@@ -1400,20 +1400,24 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 
 			// Step 3: shortcut for declared dependency name or qualifier-suggested name matching target bean name
-			String dependencyName = descriptor.getDependencyName();
-			if (dependencyName == null || !containsBean(dependencyName)) {
-				String suggestedName = getAutowireCandidateResolver().getSuggestedName(descriptor);
-				dependencyName = (suggestedName != null && containsBean(suggestedName) ? suggestedName : null);
-			}
-			if (dependencyName != null &&
-					isTypeMatch(dependencyName, type) && isAutowireCandidate(dependencyName, descriptor) &&
-					!isFallback(dependencyName) && !hasPrimaryConflict(dependencyName, type) &&
-					!isSelfReference(beanName, dependencyName)) {
-				if (autowiredBeanNames != null) {
-					autowiredBeanNames.add(dependencyName);
+			if (descriptor.usesStandardBeanLookup()) {
+				String dependencyName = descriptor.getDependencyName();
+				if (dependencyName == null || !containsBean(dependencyName)) {
+					String suggestedName = getAutowireCandidateResolver().getSuggestedName(descriptor);
+					dependencyName = (suggestedName != null && containsBean(suggestedName) ? suggestedName : null);
 				}
-				Object dependencyBean = getBean(dependencyName);
-				return resolveInstance(dependencyBean, descriptor, type, dependencyName);
+				if (dependencyName != null) {
+					dependencyName = canonicalName(dependencyName);  // dependency name can be alias of target name
+					if (isTypeMatch(dependencyName, type) && isAutowireCandidate(dependencyName, descriptor) &&
+							!isFallback(dependencyName) && !hasPrimaryConflict(dependencyName, type) &&
+							!isSelfReference(beanName, dependencyName)) {
+						if (autowiredBeanNames != null) {
+							autowiredBeanNames.add(dependencyName);
+						}
+						Object dependencyBean = getBean(dependencyName);
+						return resolveInstance(dependencyBean, descriptor, type, dependencyName);
+					}
+				}
 			}
 
 			// Step 4a: multiple beans as stream / array / standard collection / plain map
@@ -2020,6 +2024,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return (!ObjectUtils.isEmpty(args) ? beanFactory.getBean(beanName, args) :
 						super.resolveCandidate(beanName, requiredType, beanFactory));
 			}
+			@Override
+			public boolean usesStandardBeanLookup() {
+				return ObjectUtils.isEmpty(args);
+			}
 		};
 		Object result = doResolveDependency(descriptorToUse, beanName, null, null);
 		return (result instanceof Optional<?> optional ? optional : Optional.ofNullable(result));
@@ -2100,6 +2108,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		public NestedDependencyDescriptor(DependencyDescriptor original) {
 			super(original);
 			increaseNestingLevel();
+		}
+
+		@Override
+		public boolean usesStandardBeanLookup() {
+			return true;
 		}
 	}
 
@@ -2202,6 +2215,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						public boolean isRequired() {
 							return false;
 						}
+						@Override
+						public boolean usesStandardBeanLookup() {
+							return true;
+						}
 					};
 					return doResolveDependency(descriptorToUse, this.beanName, null, null);
 				}
@@ -2232,6 +2249,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				@Override
 				public boolean isRequired() {
 					return false;
+				}
+				@Override
+				public boolean usesStandardBeanLookup() {
+					return true;
 				}
 				@Override
 				@Nullable
