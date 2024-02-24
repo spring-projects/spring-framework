@@ -38,7 +38,7 @@ import org.springframework.util.FastByteArrayOutputStream;
 /**
  * {@link javax.servlet.http.HttpServletResponse} wrapper that caches all content written to
  * the {@linkplain #getOutputStream() output stream} and {@linkplain #getWriter() writer},
- * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
+ * and allows this content to be retrieved via a {@linkplain #getContentAsByteArray() byte array}.
  *
  * <p>Used e.g. by {@link org.springframework.web.filter.ShallowEtagHeaderFilter}.
  * Note: As of Spring Framework 5.0, this wrapper is built on the Servlet 3.1 API.
@@ -122,9 +122,16 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		return this.writer;
 	}
 
+	/**
+	 * This method neither flushes content to the client nor commits the underlying
+	 * response, since the content has not yet been copied to the response.
+	 * <p>Invoke {@link #copyBodyToResponse()} to copy the cached body content to
+	 * the wrapped response object and flush its buffer.
+	 * @see javax.servlet.ServletResponseWrapper#flushBuffer()
+	 */
 	@Override
 	public void flushBuffer() throws IOException {
-		// do not flush the underlying response as the content has not been copied to it yet
+		// no-op
 	}
 
 	@Override
@@ -142,15 +149,11 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 			throw new IllegalArgumentException("Content-Length exceeds ContentCachingResponseWrapper's maximum (" +
 					Integer.MAX_VALUE + "): " + len);
 		}
-		int lenInt = (int) len;
-		if (lenInt > this.content.size()) {
-			this.content.resize(lenInt);
-		}
-		this.contentLength = lenInt;
+		setContentLength((int) len);
 	}
 
 	@Override
-	public void setContentType(String type) {
+	public void setContentType(@Nullable String type) {
 		this.contentType = type;
 	}
 
