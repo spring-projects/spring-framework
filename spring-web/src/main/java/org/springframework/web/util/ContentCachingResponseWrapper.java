@@ -38,11 +38,12 @@ import org.springframework.util.FastByteArrayOutputStream;
 /**
  * {@link jakarta.servlet.http.HttpServletResponse} wrapper that caches all content written to
  * the {@linkplain #getOutputStream() output stream} and {@linkplain #getWriter() writer},
- * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
+ * and allows this content to be retrieved via a {@linkplain #getContentAsByteArray() byte array}.
  *
  * <p>Used e.g. by {@link org.springframework.web.filter.ShallowEtagHeaderFilter}.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.1.3
  * @see ContentCachingRequestWrapper
  */
@@ -120,9 +121,16 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		return this.writer;
 	}
 
+	/**
+	 * This method neither flushes content to the client nor commits the underlying
+	 * response, since the content has not yet been copied to the response.
+	 * <p>Invoke {@link #copyBodyToResponse()} to copy the cached body content to
+	 * the wrapped response object and flush its buffer.
+	 * @see jakarta.servlet.ServletResponseWrapper#flushBuffer()
+	 */
 	@Override
 	public void flushBuffer() throws IOException {
-		// do not flush the underlying response as the content has not been copied to it yet
+		// no-op
 	}
 
 	@Override
@@ -139,31 +147,30 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 			throw new IllegalArgumentException("Content-Length exceeds ContentCachingResponseWrapper's maximum (" +
 					Integer.MAX_VALUE + "): " + len);
 		}
-		int lenInt = (int) len;
-		if (lenInt > this.content.size()) {
-			this.content.resize(lenInt);
-		}
-		this.contentLength = lenInt;
+		setContentLength((int) len);
 	}
 
 	@Override
-	public void setContentType(String type) {
+	public void setContentType(@Nullable String type) {
 		this.contentType = type;
 	}
 
 	@Override
 	@Nullable
 	public String getContentType() {
-		return this.contentType;
+		if (this.contentType != null) {
+			return this.contentType;
+		}
+		return super.getContentType();
 	}
 
 	@Override
 	public boolean containsHeader(String name) {
-		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return this.contentLength != null;
+		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return true;
 		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.contentType != null;
+		else if (this.contentType != null && HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
+			return true;
 		}
 		else {
 			return super.containsHeader(name);
@@ -219,10 +226,10 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	@Nullable
 	public String getHeader(String name) {
-		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return (this.contentLength != null) ? this.contentLength.toString() : null;
+		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return this.contentLength.toString();
 		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
+		else if (this.contentType != null && HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
 			return this.contentType;
 		}
 		else {
@@ -232,12 +239,11 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public Collection<String> getHeaders(String name) {
-		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return this.contentLength != null ? Collections.singleton(this.contentLength.toString()) :
-					Collections.emptySet();
+		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return Collections.singleton(this.contentLength.toString());
 		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.contentType != null ? Collections.singleton(this.contentType) : Collections.emptySet();
+		else if (this.contentType != null && HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
+			return Collections.singleton(this.contentType);
 		}
 		else {
 			return super.getHeaders(name);
@@ -327,7 +333,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 					}
 					this.contentLength = null;
 				}
-				if (complete || this.contentType != null) {
+				if (this.contentType != null) {
 					rawResponse.setContentType(this.contentType);
 					this.contentType = null;
 				}
