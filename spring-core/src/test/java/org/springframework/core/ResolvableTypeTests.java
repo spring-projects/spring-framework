@@ -1367,6 +1367,18 @@ class ResolvableTypeTests {
 		assertThat(type.resolveGeneric()).isEqualTo(Integer.class);
 	}
 
+	@Test
+	void gh32327() throws Exception {
+		ResolvableType repository1 = ResolvableType.forField(Fields.class.getField("repository"));
+		ResolvableType repository2 = ResolvableType.forMethodReturnType(Methods.class.getMethod("repository"));
+		assertThat(repository1.hasUnresolvableGenerics());
+		assertThat(repository1.isAssignableFrom(repository2)).isFalse();
+		assertThat(repository1.isAssignableFromResolvedPart(repository2)).isTrue();
+		assertThat(repository2.hasUnresolvableGenerics());
+		assertThat(repository2.isAssignableFrom(repository1)).isTrue();
+		assertThat(repository2.isAssignableFromResolvedPart(repository1)).isTrue();
+	}
+
 
 	private ResolvableType testSerialization(ResolvableType type) throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1407,7 +1419,7 @@ class ResolvableTypeTests {
 	}
 
 
-	interface SomeRepository {
+	interface SomeRepository<S extends Serializable> {
 
 		<T> T someMethod(Class<T> arg0, Class<?> arg1, Class<Object> arg2);
 	}
@@ -1458,6 +1470,8 @@ class ResolvableTypeTests {
 		public Integer[] integerArray;
 
 		public int[] intArray;
+
+		public SomeRepository<? extends Serializable> repository;
 	}
 
 
@@ -1486,6 +1500,8 @@ class ResolvableTypeTests {
 		List<String> list1();
 
 		List<String> list2();
+
+		SomeRepository<?> repository();
 	}
 
 
