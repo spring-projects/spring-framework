@@ -1625,7 +1625,7 @@ content types that a controller method produces, as the following example shows:
 ----
 	@GetMapping("/pets/{petId}", produces = ["application/json"])
 	@ResponseBody
-	fun getPet(@PathVariable String petId): Pet {
+	fun getPet(@PathVariable petId: String): Pet {
 		// ...
 	}
 ----
@@ -1674,7 +1674,7 @@ You can also use the same with request header conditions, as the following examp
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@GetMapping(path = "/pets", headers = "myHeader=myValue") // <1>
+	@GetMapping(path = "/pets/{petId}", headers = "myHeader=myValue") // <1>
 	public void findPet(@PathVariable String petId) {
 		// ...
 	}
@@ -1684,7 +1684,7 @@ You can also use the same with request header conditions, as the following examp
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@GetMapping("/pets", headers = ["myHeader=myValue"]) // <1>
+	@GetMapping("/pets/{petId}", headers = ["myHeader=myValue"]) // <1>
 	fun findPet(@PathVariable petId: String) {
 		// ...
 	}
