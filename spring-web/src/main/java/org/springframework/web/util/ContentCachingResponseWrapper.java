@@ -43,6 +43,7 @@ import org.springframework.util.FastByteArrayOutputStream;
  * <p>Used e.g. by {@link org.springframework.web.filter.ShallowEtagHeaderFilter}.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.1.3
  * @see ContentCachingRequestWrapper
  */
@@ -157,16 +158,19 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	@Nullable
 	public String getContentType() {
-		return this.contentType;
+		if (this.contentType != null) {
+			return this.contentType;
+		}
+		return super.getContentType();
 	}
 
 	@Override
 	public boolean containsHeader(String name) {
-		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return this.contentLength != null;
+		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return true;
 		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.contentType != null;
+		else if (this.contentType != null && HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
+			return true;
 		}
 		else {
 			return super.containsHeader(name);
@@ -222,10 +226,10 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	@Nullable
 	public String getHeader(String name) {
-		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return (this.contentLength != null) ? this.contentLength.toString() : null;
+		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return this.contentLength.toString();
 		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
+		else if (this.contentType != null && HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
 			return this.contentType;
 		}
 		else {
@@ -235,12 +239,11 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public Collection<String> getHeaders(String name) {
-		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return this.contentLength != null ? Collections.singleton(this.contentLength.toString()) :
-					Collections.emptySet();
+		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return Collections.singleton(this.contentLength.toString());
 		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.contentType != null ? Collections.singleton(this.contentType) : Collections.emptySet();
+		else if (this.contentType != null && HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
+			return Collections.singleton(this.contentType);
 		}
 		else {
 			return super.getHeaders(name);
@@ -330,7 +333,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 					}
 					this.contentLength = null;
 				}
-				if (complete || this.contentType != null) {
+				if (this.contentType != null) {
 					rawResponse.setContentType(this.contentType);
 					this.contentType = null;
 				}
