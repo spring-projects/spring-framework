@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
@@ -254,7 +254,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	public Collection<String> getHeaderNames() {
 		Collection<String> headerNames = super.getHeaderNames();
 		if (this.contentLength != null || this.contentType != null) {
-			List<String> result = new ArrayList<>(headerNames);
+			Set<String> result = new LinkedHashSet<>(headerNames);
 			if (this.contentLength != null) {
 				result.add(HttpHeaders.CONTENT_LENGTH);
 			}
