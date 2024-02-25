@@ -1370,13 +1370,19 @@ class ResolvableTypeTests {
 	@Test
 	void gh32327() throws Exception {
 		ResolvableType repository1 = ResolvableType.forField(Fields.class.getField("repository"));
-		ResolvableType repository2 = ResolvableType.forMethodReturnType(Methods.class.getMethod("repository"));
-		assertThat(repository1.hasUnresolvableGenerics());
+		ResolvableType repository2 = ResolvableType.forMethodReturnType(Methods.class.getMethod("someRepository"));
+		ResolvableType repository3 = ResolvableType.forMethodReturnType(Methods.class.getMethod("subRepository"));
+		assertThat(repository1.hasUnresolvableGenerics()).isFalse();
 		assertThat(repository1.isAssignableFrom(repository2)).isFalse();
 		assertThat(repository1.isAssignableFromResolvedPart(repository2)).isTrue();
-		assertThat(repository2.hasUnresolvableGenerics());
+		assertThat(repository1.isAssignableFrom(repository3)).isFalse();
+		assertThat(repository1.isAssignableFromResolvedPart(repository3)).isTrue();
+		assertThat(repository2.hasUnresolvableGenerics()).isTrue();
 		assertThat(repository2.isAssignableFrom(repository1)).isTrue();
 		assertThat(repository2.isAssignableFromResolvedPart(repository1)).isTrue();
+		assertThat(repository3.hasUnresolvableGenerics()).isTrue();
+		assertThat(repository3.isAssignableFrom(repository1)).isFalse();
+		assertThat(repository3.isAssignableFromResolvedPart(repository1)).isFalse();
 	}
 
 
@@ -1422,6 +1428,9 @@ class ResolvableTypeTests {
 	interface SomeRepository<S extends Serializable> {
 
 		<T> T someMethod(Class<T> arg0, Class<?> arg1, Class<Object> arg2);
+	}
+
+	interface SubRepository<S extends Serializable> extends SomeRepository {
 	}
 
 
@@ -1501,7 +1510,9 @@ class ResolvableTypeTests {
 
 		List<String> list2();
 
-		SomeRepository<?> repository();
+		SomeRepository<?> someRepository();
+
+		SubRepository<?> subRepository();
 	}
 
 

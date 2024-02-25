@@ -655,7 +655,7 @@ public class ResolvableType implements Serializable {
 				return true;
 			}
 			ResolvableType resolved = this.variableResolver.resolveVariable(variable);
-			if (resolved == null || resolved.isUnresolvableTypeVariable()) {
+			if (resolved == null || resolved.isUnresolvableTypeVariable() || resolved.isWildcardWithoutBounds()) {
 				return true;
 			}
 		}
