@@ -239,6 +239,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * managed in a specific fashion, for example within a Jakarta EE environment.
 	 * A plain thread pool does not add much value, as this listener container
 	 * will occupy a number of threads for its entire lifetime.
+	 * <p>If the specified executor is a {@link SchedulingTaskExecutor} indicating
+	 * {@link SchedulingTaskExecutor#prefersShortLivedTasks() a preference for
+	 * short-lived tasks}, a {@link #setMaxMessagesPerTask} default of 10 will be
+	 * applied in order to provide dynamic scaling at runtime. With the default
+	 * task executor or a similarly non-pooling external executor specified,
+	 * a {@link #setIdleReceivesPerTaskLimit} default of 10 will apply instead.
 	 * @see #setConcurrentConsumers
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
 	 */
@@ -257,6 +263,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * listener container's bean name, just like with default platform threads.
 	 * <p>Alternatively, pass in a virtual threads based executor through
 	 * {@link #setTaskExecutor} (with externally defined thread naming).
+	 * <p>Consider specifying concurrency limits through {@link #setConcurrency}
+	 * or {@link #setConcurrentConsumers}/{@link #setMaxConcurrentConsumers},
+	 * for potential dynamic scaling. This works fine with the default executor;
+	 * see {@link #setIdleReceivesPerTaskLimit} with its effective default of 10.
 	 * @since 6.2
 	 * @see #setTaskExecutor
 	 * @see SimpleAsyncTaskExecutor#setVirtualThreads
@@ -369,7 +379,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Specify the number of concurrent consumers to create. Default is 1.
+	 * Specify the number of core concurrent consumers to create. Default is 1.
 	 * <p>Specifying a higher value for this setting will increase the standard
 	 * level of scheduled concurrent consumers at runtime: This is effectively
 	 * the minimum number of concurrent consumers which will be scheduled
@@ -420,7 +430,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	/**
 	 * Specify the maximum number of concurrent consumers to create. Default is 1.
 	 * <p>If this setting is higher than "concurrentConsumers", the listener container
-	 * will dynamically schedule new consumers at runtime, provided that enough
+	 * will dynamically schedule surplus consumers at runtime, provided that enough
 	 * incoming messages are encountered. Once the load goes down again, the number of
 	 * consumers will be reduced to the standard level ("concurrentConsumers") again.
 	 * <p>Raising the number of concurrent consumers is recommendable in order
@@ -614,6 +624,16 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * idle messages received, the task would be marked as idle and released. This also
 	 * means that after the last message was processed, the task would be released after
 	 * 60 seconds as long as no new messages appear.
+	 * <p><b>NOTE: On its own, this idle limit does not apply to core consumers within
+	 * {@link #setConcurrentConsumers} but rather just to surplus consumers up until
+	 * {@link #setMaxConcurrentConsumers} (as of 6.2).</b> Only in combination with
+	 * {@link #setMaxMessagesPerTask} does it have an effect on core consumers as well,
+	 * as inferred for an external thread pool indicating a preference for short-lived
+	 * tasks, leading to dynamic rescheduling of all consumer tasks in the thread pool.
+	 * <p><b>The default for surplus consumers on a default/simple executor is 10,
+	 * leading to a removal of surplus tasks after 10 idle receives in each task.</b>
+	 * In combination with the default {@link #setReceiveTimeout} of 1000 ms (1 second),
+	 * a surplus task will be scaled down after 10 seconds of idle receives by default.
 	 * @since 5.3.5
 	 * @see #setMaxMessagesPerTask
 	 * @see #setReceiveTimeout
@@ -656,18 +676,24 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			this.cacheLevel = (getTransactionManager() != null ? CACHE_NONE : CACHE_CONSUMER);
 		}
 
-		// Prepare taskExecutor and maxMessagesPerTask.
+		// Prepare taskExecutor and maxMessagesPerTask/idleReceivesPerTaskLimit.
 		this.lifecycleLock.lock();
 		try {
 			if (this.taskExecutor == null) {
 				this.taskExecutor = createDefaultTaskExecutor();
 			}
-			else if (this.taskExecutor instanceof SchedulingTaskExecutor ste && ste.prefersShortLivedTasks() &&
-					this.maxMessagesPerTask == Integer.MIN_VALUE) {
-				// TaskExecutor indicated a preference for short-lived tasks. According to
-				// setMaxMessagesPerTask javadoc, we'll use 10 message per task in this case
-				// unless the user specified a custom value.
-				this.maxMessagesPerTask = 10;
+			if (this.taskExecutor instanceof SchedulingTaskExecutor ste && ste.prefersShortLivedTasks()) {
+				if (this.maxMessagesPerTask == Integer.MIN_VALUE) {
+					// TaskExecutor indicated a preference for short-lived tasks. According to
+					// setMaxMessagesPerTask javadoc, we'll use 10 message per task in this case
+					// unless the user specified a custom value.
+					this.maxMessagesPerTask = 10;
+				}
+			}
+			else if (this.idleReceivesPerTaskLimit == Integer.MIN_VALUE) {
+				// A simple non-pooling executor: unlimited core consumer tasks
+				// whereas surplus consumer tasks terminate after 10 idle receives.
+				this.idleReceivesPerTaskLimit = 10;
 			}
 		}
 		finally {
@@ -966,7 +992,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Determine whether this listener container currently has more
+	 * Used to determine whether this listener container currently has more
 	 * than one idle instance among its scheduled invokers.
 	 */
 	private int getIdleInvokerCount() {
@@ -1240,8 +1266,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		@Override
 		public void run() {
+			boolean surplus;
 			lifecycleLock.lock();
 			try {
+				surplus = (scheduledInvokers.size() > concurrentConsumers);
 				activeInvokerCount++;
 				lifecycleCondition.signalAll();
 			}
@@ -1250,9 +1278,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			boolean messageReceived = false;
 			try {
+				// For core consumers without maxMessagesPerTask, no idle limit applies since they
+				// will always get rescheduled immediately anyway. Whereas for surplus consumers
+				// between concurrentConsumers and maxConcurrentConsumers, an idle limit does apply.
 				int messageLimit = maxMessagesPerTask;
 				int idleLimit = idleReceivesPerTaskLimit;
-				if (messageLimit < 0 && idleLimit < 0) {
+				if (messageLimit < 0 && (!surplus || idleLimit < 0)) {
 					messageReceived = executeOngoingLoop();
 				}
 				else {
