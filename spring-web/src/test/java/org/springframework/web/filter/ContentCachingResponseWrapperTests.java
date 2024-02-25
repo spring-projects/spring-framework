@@ -16,21 +16,32 @@
 
 package org.springframework.web.filter;
 
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
+
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpHeaders.TRANSFER_ENCODING;
 
 /**
  * Unit tests for {@link ContentCachingResponseWrapper}.
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class ContentCachingResponseWrapperTests {
 
@@ -50,6 +61,124 @@ public class ContentCachingResponseWrapperTests {
 	}
 
 	@Test
+	void copyBodyToResponseWithPresetHeaders() throws Exception {
+		String PUZZLE = "puzzle";
+		String ENIGMA = "enigma";
+		String NUMBER = "number";
+		String MAGIC = "42";
+
+		byte[] responseBody = "Hello World".getBytes(UTF_8);
+		int responseLength = responseBody.length;
+		int originalContentLength = 999;
+		String contentType = MediaType.APPLICATION_JSON_VALUE;
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.setContentType(contentType);
+		response.setContentLength(originalContentLength);
+		response.setHeader(PUZZLE, ENIGMA);
+		response.setIntHeader(NUMBER, 42);
+
+		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+		responseWrapper.setStatus(HttpServletResponse.SC_CREATED);
+
+		assertThat(responseWrapper.getStatus()).isEqualTo(HttpServletResponse.SC_CREATED);
+		assertThat(responseWrapper.getContentSize()).isZero();
+		assertThat(responseWrapper.getHeaderNames())
+				.containsExactlyInAnyOrder(PUZZLE, NUMBER, CONTENT_TYPE, CONTENT_LENGTH);
+
+		assertHeader(responseWrapper, PUZZLE, ENIGMA);
+		assertHeader(responseWrapper, NUMBER, MAGIC);
+		assertHeader(responseWrapper, CONTENT_LENGTH, originalContentLength);
+		assertContentTypeHeader(responseWrapper, contentType);
+
+		FileCopyUtils.copy(responseBody, responseWrapper.getOutputStream());
+		assertThat(responseWrapper.getContentSize()).isEqualTo(responseLength);
+
+		responseWrapper.copyBodyToResponse();
+
+		assertThat(responseWrapper.getStatus()).isEqualTo(HttpServletResponse.SC_CREATED);
+		assertThat(responseWrapper.getContentSize()).isZero();
+		assertThat(responseWrapper.getHeaderNames())
+				.containsExactlyInAnyOrder(PUZZLE, NUMBER, CONTENT_TYPE, CONTENT_LENGTH);
+
+		assertHeader(responseWrapper, PUZZLE, ENIGMA);
+		assertHeader(responseWrapper, NUMBER, MAGIC);
+		assertHeader(responseWrapper, CONTENT_LENGTH, responseLength);
+		assertContentTypeHeader(responseWrapper, contentType);
+
+		assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_CREATED);
+		assertThat(response.getContentLength()).isEqualTo(responseLength);
+		assertThat(response.getContentAsByteArray()).isEqualTo(responseBody);
+		assertThat(response.getHeaderNames())
+				.containsExactlyInAnyOrder(PUZZLE, NUMBER, CONTENT_TYPE, CONTENT_LENGTH);
+
+		assertHeader(response, PUZZLE, ENIGMA);
+		assertHeader(response, NUMBER, MAGIC);
+		assertHeader(response, CONTENT_LENGTH, responseLength);
+		assertContentTypeHeader(response, contentType);
+	}
+
+	@ParameterizedTest(name = "[{index}] {0}")
+	@MethodSource("setContentTypeFunctions")
+	void copyBodyToResponseWithOverridingHeaders(BiConsumer<HttpServletResponse, String> setContentType) throws Exception {
+		byte[] responseBody = "Hello World".getBytes(UTF_8);
+		int responseLength = responseBody.length;
+		int originalContentLength = 11;
+		int overridingContentLength = 22;
+		String originalContentType = MediaType.TEXT_PLAIN_VALUE;
+		String overridingContentType = MediaType.APPLICATION_JSON_VALUE;
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.setContentLength(originalContentLength);
+		response.setContentType(originalContentType);
+
+		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+		responseWrapper.setStatus(HttpServletResponse.SC_CREATED);
+		responseWrapper.setContentLength(overridingContentLength);
+		setContentType.accept(responseWrapper, overridingContentType);
+
+		assertThat(responseWrapper.getStatus()).isEqualTo(HttpServletResponse.SC_CREATED);
+		assertThat(responseWrapper.getContentSize()).isZero();
+		assertThat(responseWrapper.getHeaderNames()).containsExactlyInAnyOrder(CONTENT_TYPE, CONTENT_LENGTH);
+
+		assertHeader(response, CONTENT_LENGTH, originalContentLength);
+		assertHeader(responseWrapper, CONTENT_LENGTH, overridingContentLength);
+		assertContentTypeHeader(response, originalContentType);
+		assertContentTypeHeader(responseWrapper, overridingContentType);
+
+		FileCopyUtils.copy(responseBody, responseWrapper.getOutputStream());
+		assertThat(responseWrapper.getContentSize()).isEqualTo(responseLength);
+
+		responseWrapper.copyBodyToResponse();
+
+		assertThat(responseWrapper.getStatus()).isEqualTo(HttpServletResponse.SC_CREATED);
+		assertThat(responseWrapper.getContentSize()).isZero();
+		assertThat(responseWrapper.getHeaderNames()).containsExactlyInAnyOrder(CONTENT_TYPE, CONTENT_LENGTH);
+
+		assertHeader(response, CONTENT_LENGTH, responseLength);
+		assertHeader(responseWrapper, CONTENT_LENGTH, responseLength);
+		assertContentTypeHeader(response, overridingContentType);
+		assertContentTypeHeader(responseWrapper, overridingContentType);
+
+		assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_CREATED);
+		assertThat(response.getContentLength()).isEqualTo(responseLength);
+		assertThat(response.getContentAsByteArray()).isEqualTo(responseBody);
+		assertThat(response.getHeaderNames()).containsExactlyInAnyOrder(CONTENT_TYPE, CONTENT_LENGTH);
+	}
+
+	private static Stream<Arguments> setContentTypeFunctions() {
+		return Stream.of(
+				namedArguments("setContentType()", HttpServletResponse::setContentType),
+				namedArguments("setHeader()", (response, contentType) -> response.setHeader(CONTENT_TYPE, contentType)),
+				namedArguments("addHeader()", (response, contentType) -> response.addHeader(CONTENT_TYPE, contentType))
+			);
+	}
+
+	private static Arguments namedArguments(String name, BiConsumer<HttpServletResponse, String> setContentTypeFunction) {
+		return arguments(named(name, setContentTypeFunction));
+	}
+
+	@Test
 	void copyBodyToResponseWithTransferEncoding() throws Exception {
 		byte[] responseBody = "6\r\nHello 5\r\nWorld0\r\n\r\n".getBytes(UTF_8);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -66,6 +195,10 @@ public class ContentCachingResponseWrapperTests {
 		assertThat(response.getContentAsByteArray()).isEqualTo(responseBody);
 	}
 
+	private void assertHeader(HttpServletResponse response, String header, int value) {
+		assertHeader(response, header, Integer.toString(value));
+	}
+
 	private void assertHeader(HttpServletResponse response, String header, String value) {
 		if (value == null) {
 			assertThat(response.containsHeader(header)).as(header).isFalse();
@@ -77,6 +210,11 @@ public class ContentCachingResponseWrapperTests {
 			assertThat(response.getHeader(header)).as(header).isEqualTo(value);
 			assertThat(response.getHeaders(header)).as(header).containsExactly(value);
 		}
+	}
+
+	private void assertContentTypeHeader(HttpServletResponse response, String contentType) {
+		assertHeader(response, CONTENT_TYPE, contentType);
+		assertThat(response.getContentType()).as(CONTENT_TYPE).isEqualTo(contentType);
 	}
 
 }
