@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1122,7 +1122,8 @@ public class ResolvableType implements Serializable {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(generics, "Generics array must not be null");
 		TypeVariable<?>[] variables = clazz.getTypeParameters();
-		Assert.isTrue(variables.length == generics.length, () -> "Mismatched number of generics specified for " + clazz.toGenericString());
+		Assert.isTrue(variables.length == generics.length,
+				() -> "Mismatched number of generics specified for " + clazz.toGenericString());
 
 		Type[] arguments = new Type[generics.length];
 		for (int i = 0; i < generics.length; i++) {

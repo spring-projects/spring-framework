@@ -856,7 +856,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Determine whether this listener container currently has more
+	 * Called to determine whether this listener container currently has more
 	 * than one idle instance among its scheduled invokers.
 	 */
 	private int getIdleInvokerCount() {

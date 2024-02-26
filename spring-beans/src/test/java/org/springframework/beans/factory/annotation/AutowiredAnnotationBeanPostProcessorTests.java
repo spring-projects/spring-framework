@@ -2542,23 +2542,21 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(mixedOptionalInjectionBean.nullableBean).isNull();
 	}
 
-	private <E extends UnsatisfiedDependencyException> Consumer<E> methodParameterDeclaredOn(
-			Class<?> expected) {
+
+	private <E extends UnsatisfiedDependencyException> Consumer<E> methodParameterDeclaredOn(Class<?> expected) {
 		return declaredOn(
 				injectionPoint -> injectionPoint.getMethodParameter().getDeclaringClass(),
 				expected);
 	}
 
-	private <E extends UnsatisfiedDependencyException> Consumer<E> fieldDeclaredOn(
-			Class<?> expected) {
+	private <E extends UnsatisfiedDependencyException> Consumer<E> fieldDeclaredOn(Class<?> expected) {
 		return declaredOn(
 				injectionPoint -> injectionPoint.getField().getDeclaringClass(),
 				expected);
 	}
 
 	private <E extends UnsatisfiedDependencyException> Consumer<E> declaredOn(
-			Function<InjectionPoint, Class<?>> declaringClassExtractor,
-			Class<?> expected) {
+			Function<InjectionPoint, Class<?>> declaringClassExtractor, Class<?> expected) {
 		return ex -> {
 			InjectionPoint injectionPoint = ex.getInjectionPoint();
 			Class<?> declaringClass = declaringClassExtractor.apply(injectionPoint);
