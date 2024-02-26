@@ -16,14 +16,13 @@
 
 package org.springframework.web.filter;
 
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.http.MediaType;
@@ -34,7 +33,6 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpHeaders.TRANSFER_ENCODING;
@@ -45,7 +43,7 @@ import static org.springframework.http.HttpHeaders.TRANSFER_ENCODING;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class ContentCachingResponseWrapperTests {
+class ContentCachingResponseWrapperTests {
 
 	@Test
 	void copyBodyToResponse() throws Exception {
@@ -121,31 +119,76 @@ public class ContentCachingResponseWrapperTests {
 	}
 
 	@ParameterizedTest(name = "[{index}] {0}")
-	@MethodSource("setContentTypeFunctions")
-	void copyBodyToResponseWithOverridingHeaders(BiConsumer<HttpServletResponse, String> setContentType) throws Exception {
+	@MethodSource("setContentLengthFunctions")
+	void copyBodyToResponseWithOverridingContentLength(SetContentLength setContentLength) throws Exception {
 		byte[] responseBody = "Hello World".getBytes(UTF_8);
 		int responseLength = responseBody.length;
 		int originalContentLength = 11;
 		int overridingContentLength = 22;
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.setContentLength(originalContentLength);
+
+		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+		responseWrapper.setContentLength(overridingContentLength);
+
+		setContentLength.invoke(responseWrapper, overridingContentLength);
+
+		assertThat(responseWrapper.getContentSize()).isZero();
+		assertThat(responseWrapper.getHeaderNames()).containsExactlyInAnyOrder(CONTENT_LENGTH);
+
+		assertHeader(response, CONTENT_LENGTH, originalContentLength);
+		assertHeader(responseWrapper, CONTENT_LENGTH, overridingContentLength);
+
+		FileCopyUtils.copy(responseBody, responseWrapper.getOutputStream());
+		assertThat(responseWrapper.getContentSize()).isEqualTo(responseLength);
+
+		responseWrapper.copyBodyToResponse();
+
+		assertThat(responseWrapper.getContentSize()).isZero();
+		assertThat(responseWrapper.getHeaderNames()).containsExactlyInAnyOrder(CONTENT_LENGTH);
+
+		assertHeader(response, CONTENT_LENGTH, responseLength);
+		assertHeader(responseWrapper, CONTENT_LENGTH, responseLength);
+
+		assertThat(response.getContentLength()).isEqualTo(responseLength);
+		assertThat(response.getContentAsByteArray()).isEqualTo(responseBody);
+		assertThat(response.getHeaderNames()).containsExactlyInAnyOrder(CONTENT_LENGTH);
+	}
+
+	private static Stream<Named<SetContentLength>> setContentLengthFunctions() {
+		return Stream.of(
+				named("setContentLength()", HttpServletResponse::setContentLength),
+				named("setContentLengthLong()", HttpServletResponse::setContentLengthLong),
+				named("setIntHeader()", (response, contentLength) -> response.setIntHeader(CONTENT_LENGTH, contentLength)),
+				named("addIntHeader()", (response, contentLength) -> response.addIntHeader(CONTENT_LENGTH, contentLength)),
+				named("setHeader()", (response, contentLength) -> response.setHeader(CONTENT_LENGTH, "" + contentLength)),
+				named("addHeader()", (response, contentLength) -> response.addHeader(CONTENT_LENGTH, "" + contentLength))
+			);
+	}
+
+	@ParameterizedTest(name = "[{index}] {0}")
+	@MethodSource("setContentTypeFunctions")
+	void copyBodyToResponseWithOverridingContentType(SetContentType setContentType) throws Exception {
+		byte[] responseBody = "Hello World".getBytes(UTF_8);
+		int responseLength = responseBody.length;
 		String originalContentType = MediaType.TEXT_PLAIN_VALUE;
 		String overridingContentType = MediaType.APPLICATION_JSON_VALUE;
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		response.setContentLength(originalContentLength);
 		response.setContentType(originalContentType);
 
 		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
-		responseWrapper.setStatus(HttpServletResponse.SC_CREATED);
-		responseWrapper.setContentLength(overridingContentLength);
-		setContentType.accept(responseWrapper, overridingContentType);
 
-		assertThat(responseWrapper.getStatus()).isEqualTo(HttpServletResponse.SC_CREATED);
-		assertThat(responseWrapper.getContentSize()).isZero();
-		assertThat(responseWrapper.getHeaderNames()).containsExactlyInAnyOrder(CONTENT_TYPE, CONTENT_LENGTH);
-
-		assertHeader(response, CONTENT_LENGTH, originalContentLength);
-		assertHeader(responseWrapper, CONTENT_LENGTH, overridingContentLength);
 		assertContentTypeHeader(response, originalContentType);
+		assertContentTypeHeader(responseWrapper, originalContentType);
+
+		setContentType.invoke(responseWrapper, overridingContentType);
+
+		assertThat(responseWrapper.getContentSize()).isZero();
+		assertThat(responseWrapper.getHeaderNames()).containsExactlyInAnyOrder(CONTENT_TYPE);
+
+		assertContentTypeHeader(response, overridingContentType);
 		assertContentTypeHeader(responseWrapper, overridingContentType);
 
 		FileCopyUtils.copy(responseBody, responseWrapper.getOutputStream());
@@ -153,7 +196,6 @@ public class ContentCachingResponseWrapperTests {
 
 		responseWrapper.copyBodyToResponse();
 
-		assertThat(responseWrapper.getStatus()).isEqualTo(HttpServletResponse.SC_CREATED);
 		assertThat(responseWrapper.getContentSize()).isZero();
 		assertThat(responseWrapper.getHeaderNames()).containsExactlyInAnyOrder(CONTENT_TYPE, CONTENT_LENGTH);
 
@@ -162,22 +204,17 @@ public class ContentCachingResponseWrapperTests {
 		assertContentTypeHeader(response, overridingContentType);
 		assertContentTypeHeader(responseWrapper, overridingContentType);
 
-		assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_CREATED);
 		assertThat(response.getContentLength()).isEqualTo(responseLength);
 		assertThat(response.getContentAsByteArray()).isEqualTo(responseBody);
 		assertThat(response.getHeaderNames()).containsExactlyInAnyOrder(CONTENT_TYPE, CONTENT_LENGTH);
 	}
 
-	private static Stream<Arguments> setContentTypeFunctions() {
+	private static Stream<Named<SetContentType>> setContentTypeFunctions() {
 		return Stream.of(
-				namedArguments("setContentType()", HttpServletResponse::setContentType),
-				namedArguments("setHeader()", (response, contentType) -> response.setHeader(CONTENT_TYPE, contentType)),
-				namedArguments("addHeader()", (response, contentType) -> response.addHeader(CONTENT_TYPE, contentType))
+				named("setContentType()", HttpServletResponse::setContentType),
+				named("setHeader()", (response, contentType) -> response.setHeader(CONTENT_TYPE, contentType)),
+				named("addHeader()", (response, contentType) -> response.addHeader(CONTENT_TYPE, contentType))
 			);
-	}
-
-	private static Arguments namedArguments(String name, BiConsumer<HttpServletResponse, String> setContentTypeFunction) {
-		return arguments(named(name, setContentTypeFunction));
 	}
 
 	@Test
@@ -217,6 +254,17 @@ public class ContentCachingResponseWrapperTests {
 	private void assertContentTypeHeader(HttpServletResponse response, String contentType) {
 		assertHeader(response, CONTENT_TYPE, contentType);
 		assertThat(response.getContentType()).as(CONTENT_TYPE).isEqualTo(contentType);
+	}
+
+
+	@FunctionalInterface
+	private interface SetContentLength {
+		void invoke(HttpServletResponse response, int contentLength);
+	}
+
+	@FunctionalInterface
+	private interface SetContentType {
+		void invoke(HttpServletResponse response, String contentType);
 	}
 
 }

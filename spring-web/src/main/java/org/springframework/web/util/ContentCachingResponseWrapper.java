@@ -61,9 +61,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Nullable
 	private Integer contentLength;
 
-	@Nullable
-	private String contentType;
-
 
 	/**
 	 * Create a new ContentCachingResponseWrapper for the given servlet response.
@@ -154,25 +151,8 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	public void setContentType(@Nullable String type) {
-		this.contentType = type;
-	}
-
-	@Override
-	@Nullable
-	public String getContentType() {
-		if (this.contentType != null) {
-			return this.contentType;
-		}
-		return super.getContentType();
-	}
-
-	@Override
 	public boolean containsHeader(String name) {
 		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return true;
-		}
-		else if (this.contentType != null && HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
 			return true;
 		}
 		else {
@@ -185,9 +165,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
 			this.contentLength = Integer.valueOf(value);
 		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			this.contentType = value;
-		}
 		else {
 			super.setHeader(name, value);
 		}
@@ -197,9 +174,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	public void addHeader(String name, String value) {
 		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
 			this.contentLength = Integer.valueOf(value);
-		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			this.contentType = value;
 		}
 		else {
 			super.addHeader(name, value);
@@ -232,9 +206,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
 			return this.contentLength.toString();
 		}
-		else if (this.contentType != null && HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.contentType;
-		}
 		else {
 			return super.getHeader(name);
 		}
@@ -245,9 +216,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
 			return Collections.singleton(this.contentLength.toString());
 		}
-		else if (this.contentType != null && HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return Collections.singleton(this.contentType);
-		}
 		else {
 			return super.getHeaders(name);
 		}
@@ -256,14 +224,9 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	public Collection<String> getHeaderNames() {
 		Collection<String> headerNames = super.getHeaderNames();
-		if (this.contentLength != null || this.contentType != null) {
+		if (this.contentLength != null) {
 			Set<String> result = new LinkedHashSet<>(headerNames);
-			if (this.contentLength != null) {
-				result.add(HttpHeaders.CONTENT_LENGTH);
-			}
-			if (this.contentType != null) {
-				result.add(HttpHeaders.CONTENT_TYPE);
-			}
+			result.add(HttpHeaders.CONTENT_LENGTH);
 			return result;
 		}
 		else {
@@ -344,10 +307,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 						rawResponse.setContentLength(complete ? this.content.size() : this.contentLength);
 					}
 					this.contentLength = null;
-				}
-				if (this.contentType != null) {
-					rawResponse.setContentType(this.contentType);
-					this.contentType = null;
 				}
 			}
 			this.content.writeTo(rawResponse.getOutputStream());

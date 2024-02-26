@@ -28,6 +28,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 /**
@@ -36,6 +37,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
  * @author Arjen Poutsma
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 class ShallowEtagHeaderFilterTests {
 
@@ -123,7 +125,7 @@ class ShallowEtagHeaderFilterTests {
 		assertThat(response.getStatus()).as("Invalid status").isEqualTo(304);
 		assertThat(response.getHeader("ETag")).as("Invalid ETag").isEqualTo("\"0b10a8db164e0754105b7a99be72e3fe5\"");
 		assertThat(response.containsHeader("Content-Length")).as("Response has Content-Length header").isFalse();
-		assertThat(response.containsHeader("Content-Type")).as("Response has Content-Type header").isFalse();
+		assertThat(response.getContentType()).as("Invalid Content-Type header").isEqualTo(TEXT_PLAIN_VALUE);
 		assertThat(response.getContentAsByteArray()).as("Invalid content").isEmpty();
 	}
 
@@ -173,11 +175,13 @@ class ShallowEtagHeaderFilterTests {
 	void filterWriterWithDisabledCaching() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.setContentType(TEXT_PLAIN_VALUE);
 
 		byte[] responseBody = "Hello World".getBytes(UTF_8);
 		FilterChain filterChain = (filterRequest, filterResponse) -> {
 			assertThat(filterRequest).as("Invalid request passed").isEqualTo(request);
 			((HttpServletResponse) filterResponse).setStatus(HttpServletResponse.SC_OK);
+			filterResponse.setContentType(APPLICATION_JSON_VALUE);
 			FileCopyUtils.copy(responseBody, filterResponse.getOutputStream());
 		};
 
@@ -186,6 +190,7 @@ class ShallowEtagHeaderFilterTests {
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getHeader("ETag")).isNull();
+		assertThat(response.getContentType()).as("Invalid Content-Type header").isEqualTo(APPLICATION_JSON_VALUE);
 		assertThat(response.getContentAsByteArray()).isEqualTo(responseBody);
 	}
 
