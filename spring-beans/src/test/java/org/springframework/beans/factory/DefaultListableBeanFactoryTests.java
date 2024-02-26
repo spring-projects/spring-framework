@@ -1325,6 +1325,11 @@ class DefaultListableBeanFactoryTests {
 		rbd.getPropertyValues().add("value", Duration.ofSeconds(1000));
 		lbf.registerBeanDefinition("overloaded", rbd);
 		assertThat(lbf.getBean(SetterOverload.class).getObject()).isEqualTo("1000s");
+
+		rbd = new RootBeanDefinition(SetterOverload.class);
+		rbd.getPropertyValues().add("value", "1000");
+		lbf.registerBeanDefinition("overloaded", rbd);
+		assertThat(lbf.getBean(SetterOverload.class).getObject()).isEqualTo("1000i");
 	}
 
 	@Test
@@ -3382,12 +3387,12 @@ class DefaultListableBeanFactoryTests {
 			return this.value;
 		}
 
-		public void setValue(int length) {
-			this.value = length + "i";
-		}
-
 		public void setValue(Duration duration) {
 			this.value = duration.getSeconds() + "s";
+		}
+
+		public void setValue(int length) {
+			this.value = length + "i";
 		}
 	}
 
