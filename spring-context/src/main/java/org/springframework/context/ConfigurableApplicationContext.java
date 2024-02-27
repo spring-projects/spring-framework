@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.context;
 
 import java.io.Closeable;
+import java.util.concurrent.Executor;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -52,6 +53,16 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see org.springframework.web.servlet.FrameworkServlet#setContextConfigLocation
 	 */
 	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
+
+	/**
+	 * The name of the {@link Executor bootstrap executor} bean in the context.
+	 * If none is supplied, no background bootstrapping will be active.
+	 * @since 6.2
+	 * @see java.util.concurrent.Executor
+	 * @see org.springframework.core.task.TaskExecutor
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setBootstrapExecutor
+	 */
+	String BOOTSTRAP_EXECUTOR_BEAN_NAME = "bootstrapExecutor";
 
 	/**
 	 * Name of the ConversionService bean in the factory.

@@ -173,6 +173,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean abstractFlag = false;
 
+	private boolean backgroundInit = false;
+
 	@Nullable
 	private Boolean lazyInit;
 
@@ -280,6 +282,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			if (originalAbd.hasMethodOverrides()) {
 				setMethodOverrides(new MethodOverrides(originalAbd.getMethodOverrides()));
 			}
+			setBackgroundInit(originalAbd.isBackgroundInit());
 			Boolean lazyInit = originalAbd.getLazyInit();
 			if (lazyInit != null) {
 				setLazyInit(lazyInit);
@@ -358,6 +361,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			if (otherAbd.hasMethodOverrides()) {
 				getMethodOverrides().addOverrides(otherAbd.getMethodOverrides());
 			}
+			setBackgroundInit(otherAbd.isBackgroundInit());
 			Boolean lazyInit = otherAbd.getLazyInit();
 			if (lazyInit != null) {
 				setLazyInit(lazyInit);
@@ -570,6 +574,37 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Override
 	public boolean isAbstract() {
 		return this.abstractFlag;
+	}
+
+	/**
+	 * Specify the bootstrap mode for this bean: default is {@code false} for using
+	 * the main pre-instantiation thread for non-lazy singleton beans and the caller
+	 * thread for prototype beans.
+	 * <p>Set this flag to {@code true} to allow for instantiating this bean on a
+	 * background thread. For a non-lazy singleton, a background pre-instantiation
+	 * thread can be used then, while still enforcing the completion at the end of
+	 * {@link DefaultListableBeanFactory#preInstantiateSingletons()}.
+	 * For a lazy singleton, a background pre-instantiation thread can be used as well
+	 * - with completion allowed at a later point, enforcing it when actually accessed.
+	 * <p>Note that this flag may be ignored by bean factories not set up for
+	 * background bootstrapping, always applying single-threaded bootstrapping
+	 * for non-lazy singleton beans.
+	 * @since 6.2
+	 * @see #setLazyInit
+	 * @see DefaultListableBeanFactory#setBootstrapExecutor
+	 */
+	public void setBackgroundInit(boolean backgroundInit) {
+		this.backgroundInit = backgroundInit;
+	}
+
+	/**
+	 * Return the bootstrap mode for this bean: default is {@code false} for using
+	 * the main pre-instantiation thread for non-lazy singleton beans and the caller
+	 * thread for prototype beans.
+	 * @since 6.2
+	 */
+	public boolean isBackgroundInit() {
+		return this.backgroundInit;
 	}
 
 	/**

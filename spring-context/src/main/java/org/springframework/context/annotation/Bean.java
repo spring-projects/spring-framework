@@ -261,6 +261,20 @@ public @interface Bean {
 	boolean defaultCandidate() default true;
 
 	/**
+	 * The bootstrap mode for this bean: default is the main pre-instantiation thread
+	 * for non-lazy singleton beans and the caller thread for prototype beans.
+	 * <p>Set {@link Bootstrap#BACKGROUND} to allow for instantiating this bean on a
+	 * background thread. For a non-lazy singleton, a background pre-instantiation
+	 * thread can be used then, while still enforcing the completion at the end of
+	 * {@link org.springframework.context.ConfigurableApplicationContext#refresh()}.
+	 * For a lazy singleton, a background pre-instantiation thread can be used as well
+	 * - with completion allowed at a later point, enforcing it when actually accessed.
+	 * @since 6.2
+	 * @see Lazy
+	 */
+	Bootstrap bootstrap() default Bootstrap.DEFAULT;
+
+	/**
 	 * The optional name of a method to call on the bean instance during initialization.
 	 * Not commonly used, given that the method may be called programmatically directly
 	 * within the body of a Bean-annotated method.
@@ -298,5 +312,29 @@ public @interface Bean {
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	String destroyMethod() default AbstractBeanDefinition.INFER_METHOD;
+
+
+	/**
+	 * Local enumeration for the bootstrap mode.
+	 * @since 6.2
+	 * @see #bootstrap()
+	 */
+	enum Bootstrap {
+
+		/**
+		 * Constant to indicate the main pre-instantiation thread for non-lazy
+		 * singleton beans and the caller thread for prototype beans.
+		 */
+		DEFAULT,
+
+		/**
+		 * Allow for instantiating a bean on a background thread.
+		 * <p>For a non-lazy singleton, a background pre-instantiation thread
+		 * can be used while still enforcing the completion on context refresh.
+		 * For a lazy singleton, a background pre-instantiation thread can be used
+		 * with completion allowed at a later point (when actually accessed).
+		 */
+		BACKGROUND,
+	}
 
 }

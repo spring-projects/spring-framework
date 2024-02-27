@@ -125,11 +125,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		Assert.notNull(singletonObject, "Singleton object must not be null");
 		this.singletonLock.lock();
 		try {
-			Object oldObject = this.singletonObjects.get(beanName);
-			if (oldObject != null) {
-				throw new IllegalStateException("Could not register object [" + singletonObject +
-						"] under bean name '" + beanName + "': there is already object [" + oldObject + "] bound");
-			}
 			addSingleton(beanName, singletonObject);
 		}
 		finally {
@@ -144,7 +139,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param singletonObject the singleton object
 	 */
 	protected void addSingleton(String beanName, Object singletonObject) {
-		this.singletonObjects.put(beanName, singletonObject);
+		Object oldObject = this.singletonObjects.putIfAbsent(beanName, singletonObject);
+		if (oldObject != null) {
+			throw new IllegalStateException("Could not register object [" + singletonObject +
+					"] under bean name '" + beanName + "': there is already object [" + oldObject + "] bound");
+		}
 		this.singletonFactories.remove(beanName);
 		this.earlySingletonObjects.remove(beanName);
 		this.registeredSingletons.add(beanName);
@@ -181,17 +180,17 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
-		// Quick check for existing instance without full singleton lock
+		// Quick check for existing instance without full singleton lock.
 		Object singletonObject = this.singletonObjects.get(beanName);
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			singletonObject = this.earlySingletonObjects.get(beanName);
 			if (singletonObject == null && allowEarlyReference) {
 				if (!this.singletonLock.tryLock()) {
-					// Avoid early singleton inference outside of original creation thread
+					// Avoid early singleton inference outside of original creation thread.
 					return null;
 				}
 				try {
-					// Consistent creation of early reference within full singleton lock
+					// Consistent creation of early reference within full singleton lock.
 					singletonObject = this.singletonObjects.get(beanName);
 					if (singletonObject == null) {
 						singletonObject = this.earlySingletonObjects.get(beanName);
@@ -199,8 +198,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
 								singletonObject = singletonFactory.getObject();
-								this.earlySingletonObjects.put(beanName, singletonObject);
-								this.singletonFactories.remove(beanName);
+								// Singleton could have been added or removed in the meantime.
+								if (this.singletonFactories.remove(beanName) != null) {
+									this.earlySingletonObjects.put(beanName, singletonObject);
+								}
+								else {
+									singletonObject = this.singletonObjects.get(beanName);
+								}
 							}
 						}
 					}
@@ -224,30 +228,36 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(beanName, "Bean name must not be null");
 
-		boolean locked = this.singletonLock.tryLock();
+		boolean acquireLock = isCurrentThreadAllowedToHoldSingletonLock();
+		boolean locked = (acquireLock && this.singletonLock.tryLock());
 		try {
 			Object singletonObject = this.singletonObjects.get(beanName);
 			if (singletonObject == null) {
-				if (locked) {
-					this.singletonCreationThread = Thread.currentThread();
-				}
-				else {
-					Thread otherThread = this.singletonCreationThread;
-					if (otherThread != null) {
+				if (acquireLock) {
+					if (locked) {
+						this.singletonCreationThread = Thread.currentThread();
+					}
+					else {
+						Thread threadWithLock = this.singletonCreationThread;
 						// Another thread is busy in a singleton factory callback, potentially blocked.
 						// Fallback as of 6.2: process given singleton bean outside of singleton lock.
 						// Thread-safe exposure is still guaranteed, there is just a risk of collisions
 						// when triggering creation of other beans as dependencies of the current bean.
-						if (logger.isInfoEnabled()) {
+						if (threadWithLock != null && logger.isInfoEnabled()) {
 							logger.info("Creating singleton bean '" + beanName + "' in thread \"" +
-									Thread.currentThread().getName() + "\" while thread \"" + otherThread.getName() +
+									Thread.currentThread().getName() + "\" while thread \"" + threadWithLock.getName() +
 									"\" holds singleton lock for other beans " + this.singletonsCurrentlyInCreation);
 						}
-					}
-					else {
-						// Singleton lock currently held by some other registration method -> wait.
-						this.singletonLock.lock();
-						locked = true;
+						else {
+							// Singleton lock currently held by some other registration method -> wait.
+							this.singletonLock.lock();
+							locked = true;
+							// Singleton object might have possibly appeared in the meantime.
+							singletonObject = this.singletonObjects.get(beanName);
+							if (singletonObject != null) {
+								return singletonObject;
+							}
+						}
 					}
 				}
 				if (this.singletonsCurrentlyInDestruction) {
@@ -303,6 +313,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				this.singletonLock.unlock();
 			}
 		}
+	}
+
+	/**
+	 * Determine whether the current thread is allowed to hold the singleton lock.
+	 * <p>By default, any thread may acquire and hold the singleton lock, except
+	 * background threads from {@link DefaultListableBeanFactory#setBootstrapExecutor}.
+	 * @since 6.2
+	 */
+	protected boolean isCurrentThreadAllowedToHoldSingletonLock() {
+		return true;
 	}
 
 	/**
