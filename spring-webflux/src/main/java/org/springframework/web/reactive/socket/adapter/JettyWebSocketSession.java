@@ -225,13 +225,13 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 						@Override
 						protected void onCompleteSuccess() {
 							iterator.close();
-							completable.complete(null);
+							completable.succeed();
 						}
 
 						@Override
 						protected void onCompleteFailure(Throwable cause) {
 							iterator.close();
-							completable.completeExceptionally(cause);
+							completable.fail(cause);
 						}
 					}.iterate();
 				}
