@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.config;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -44,6 +45,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
@@ -97,6 +99,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Nullable
 	private BlockingExecutionConfigurer blockingExecutionConfigurer;
+
+	@Nullable
+	private List<ErrorResponse.Interceptor> errorResponseInterceptors;
 
 	@Nullable
 	private ViewResolverRegistry viewResolverRegistry;
@@ -498,7 +503,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
 
 		return new ResponseEntityResultHandler(serverCodecConfigurer.getWriters(),
-				contentTypeResolver, reactiveAdapterRegistry);
+				contentTypeResolver, reactiveAdapterRegistry, getErrorResponseInterceptors());
 	}
 
 	@Bean
@@ -508,7 +513,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
 
 		return new ResponseBodyResultHandler(serverCodecConfigurer.getWriters(),
-				contentTypeResolver, reactiveAdapterRegistry);
+				contentTypeResolver, reactiveAdapterRegistry, getErrorResponseInterceptors());
 	}
 
 	@Bean
@@ -532,6 +537,29 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		handler.setMessageWriters(serverCodecConfigurer.getWriters());
 		handler.setViewResolvers(resolvers);
 		return handler;
+	}
+
+	/**
+	 * Provide access to the list of {@link ErrorResponse.Interceptor}'s to apply
+	 * in result handlers when rendering error responses.
+	 * <p>This method cannot be overridden; use {@link #configureErrorResponseInterceptors(List)} instead.
+	 * @since 6.2
+	 */
+	protected final List<ErrorResponse.Interceptor> getErrorResponseInterceptors() {
+		if (this.errorResponseInterceptors == null) {
+			this.errorResponseInterceptors = new ArrayList<>();
+			configureErrorResponseInterceptors(this.errorResponseInterceptors);
+		}
+		return this.errorResponseInterceptors;
+	}
+
+	/**
+	 * Override this method for control over the {@link ErrorResponse.Interceptor}'s
+	 * to apply in result handling when rendering error responses.
+	 * @param interceptors the list to add handlers to
+	 * @since 6.2
+	 */
+	protected void configureErrorResponseInterceptors(List<ErrorResponse.Interceptor> interceptors) {
 	}
 
 	/**

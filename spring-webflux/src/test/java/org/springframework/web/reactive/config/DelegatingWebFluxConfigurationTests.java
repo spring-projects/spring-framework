@@ -35,8 +35,10 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
 import org.springframework.web.reactive.socket.server.WebSocketService;
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 
@@ -151,6 +153,25 @@ public class DelegatingWebFluxConfigurationTests {
 
 		verify(webFluxConfigurer).configureHttpMessageCodecs(codecsConfigurer.capture());
 		verify(webFluxConfigurer).configureContentTypeResolver(any(RequestedContentTypeResolverBuilder.class));
+	}
+
+	@Test
+	void addErrorResponseInterceptors() {
+		ErrorResponse.Interceptor interceptor = (detail, errorResponse) -> {};
+		WebFluxConfigurer configurer = new WebFluxConfigurer() {
+			@Override
+			public void addErrorResponseInterceptors(List<ErrorResponse.Interceptor> interceptors) {
+				interceptors.add(interceptor);
+			}
+		};
+		delegatingConfig.setConfigurers(Collections.singletonList(configurer));
+
+		ResponseBodyResultHandler resultHandler = delegatingConfig.responseBodyResultHandler(
+				delegatingConfig.webFluxAdapterRegistry(),
+				delegatingConfig.serverCodecConfigurer(),
+				delegatingConfig.webFluxContentTypeResolver());
+
+		assertThat(resultHandler.getErrorResponseInterceptors()).containsExactly(interceptor);
 	}
 
 	@Test

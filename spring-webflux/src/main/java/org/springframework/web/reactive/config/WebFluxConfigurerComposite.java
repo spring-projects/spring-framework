@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.reactive.socket.server.WebSocketService;
@@ -93,6 +94,13 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	@Override
 	public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
 		this.delegates.forEach(delegate -> delegate.configureArgumentResolvers(configurer));
+	}
+
+	@Override
+	public void addErrorResponseInterceptors(List<ErrorResponse.Interceptor> interceptors) {
+		for (WebFluxConfigurer delegate : this.delegates) {
+			delegate.addErrorResponseInterceptors(interceptors);
+		}
 	}
 
 	@Override

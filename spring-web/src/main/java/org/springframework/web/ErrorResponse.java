@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -330,6 +330,26 @@ public interface ErrorResponse {
 			response.updateAndGetBody(messageSource, locale);
 			return response;
 		}
+
+	}
+
+
+	/**
+	 * Callback to perform an action before an RFC-7807 {@link ProblemDetail}
+	 * response is rendered.
+	 *
+	 * @author Rossen Stoyanchev
+	 * @since 6.2
+	 */
+	interface Interceptor {
+
+		/**
+		 * Handle the given {@code ProblemDetail} that's going to be rendered,
+		 * and the {@code ErrorResponse} it originates from, if applicable.
+		 * @param detail the {@code ProblemDetail} to be rendered
+		 * @param errorResponse the {@code ErrorResponse}, or {@code null} if there isn't one
+		 */
+		void handleError(ProblemDetail detail, @Nullable ErrorResponse errorResponse);
 
 	}
 

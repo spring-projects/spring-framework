@@ -44,6 +44,10 @@ has an `@ExceptionHandler` method that handles any `ErrorResponse` exception, wh
 includes all built-in web exceptions. You can add more exception handling methods, and
 use a protected method to map any exception to a `ProblemDetail`.
 
+You can register `ErrorResponse` interceptors through the
+xref:web/webmvc/mvc-config.adoc[MVC Config] with a `WebMvcConfigurer`. Use that to intercept
+any RFC 7807 response and take some action.
+
 
 
 [[mvc-ann-rest-exceptions-non-standard]]
