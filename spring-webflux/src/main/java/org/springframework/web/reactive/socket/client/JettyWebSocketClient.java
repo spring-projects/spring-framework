@@ -78,7 +78,7 @@ public class JettyWebSocketClient implements WebSocketClient {
 			public void onHandshakeResponse(Request request, Response response) {
 				String protocol = response.getHeaders().get(HttpHeader.SEC_WEBSOCKET_SUBPROTOCOL);
 				HttpHeaders responseHeaders = new HttpHeaders();
-				response.getHeaders().forEach(header -> responseHeaders.addAll(header.getName(), header.getValueList()));
+				response.getHeaders().forEach(header -> responseHeaders.add(header.getName(), header.getValue()));
 				handshakeInfo.set(new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol));
 			}
 		};
@@ -89,6 +89,8 @@ public class JettyWebSocketClient implements WebSocketClient {
 		try {
 			this.client.connect(handlerAdapter, url, upgradeRequest, jettyUpgradeListener)
 					.whenComplete((session, throwable) -> {
+						// Only fail the completion if we have an error
+						// as the JettyWebSocketSession will never be opened.
 						if (throwable != null) {
 							completion.tryEmitError(throwable);
 						}
