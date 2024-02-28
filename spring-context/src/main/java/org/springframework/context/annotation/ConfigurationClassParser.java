@@ -478,7 +478,7 @@ class ConfigurationClassParser {
 				if (entry.getValue().isEmpty()) {
 					it.remove();
 				}
-				else if (replace) {
+				else if (replace && replacingClass == null) {
 					replacedSuperclass = entry.getKey();
 					replacingClass = entry.getValue().get(0);
 				}
