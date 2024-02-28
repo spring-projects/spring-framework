@@ -13,12 +13,12 @@ The Spring Framework provides the following choices for making calls to REST end
 == `RestClient`
 
 The `RestClient` is a synchronous HTTP client that offers a modern, fluent API.
-It offers an abstraction over HTTP libraries that allows for convenient conversion from Java object to HTTP request, and creation of objects from the HTTP response.
+It offers an abstraction over HTTP libraries that allows for convenient conversion from a Java object to an HTTP request, and the creation of objects from an HTTP response.
 
 === Creating a `RestClient`
 
 The `RestClient` is created using one of the static `create` methods.
-You can also use `builder` to get a builder with further options, such as specifying which HTTP library to use (see <<rest-request-factories>>) and which message converters to use (see <<rest-message-conversion>>), setting a default URI, default path variables, a default request headers, or `uriBuilderFactory`, or registering interceptors and initializers.
+You can also use `builder()` to get a builder with further options, such as specifying which HTTP library to use (see <<rest-request-factories>>) and which message converters to use (see <<rest-message-conversion>>), setting a default URI, default path variables, default request headers, or `uriBuilderFactory`, or registering interceptors and initializers.
 
 Once created (or built), the `RestClient` can be used safely by multiple threads.
 
@@ -64,35 +64,36 @@ val customClient = RestClient.builder()
 === Using the `RestClient`
 
 When making an HTTP request with the `RestClient`, the first thing to specify is which HTTP method to use.
-This can be done with `method(HttpMethod)`, or with the convenience methods `get()`, `head()`, `post()`, and so on.
+This can be done with `method(HttpMethod)` or with the convenience methods `get()`, `head()`, `post()`, and so on.
 
 ==== Request URL
 
 Next, the request URI can be specified with the `uri` methods.
-This step is optional, and can be skipped if the `RestClient` is configured with a default URI.
-The URL is typically specified as `String`, with optional URI template variables.
+This step is optional and can be skipped if the `RestClient` is configured with a default URI.
+The URL is typically specified as a `String`, with optional URI template variables.
 String URLs are encoded by default, but this can be changed by building a client with a custom `uriBuilderFactory`.
 
-The URL can also be provided with a function, or as `java.net.URI`, both of which are not encoded.
+The URL can also be provided with a function or as a `java.net.URI`, both of which are not encoded.
 For more details on working with and encoding URIs, see xref:web/webmvc/mvc-uri-building.adoc[URI Links].
 
 ==== Request headers and body
 
-If necessary, the HTTP request can be manipulated, by adding request headers with `header(String, String)`, `headers(Consumer<HttpHeaders>`, or with the convenience methods `accept(MediaType...)`, `acceptCharset(Charset...)` and so on.
-For HTTP request that can contain a body (`POST`, `PUT`, and `PATCH`), additional methods are available: `contentType(MediaType)`, and `contentLength(long)`.
+If necessary, the HTTP request can be manipulated by adding request headers with `header(String, String)`, `headers(Consumer<HttpHeaders>`, or with the convenience methods `accept(MediaType...)`, `acceptCharset(Charset...)` and so on.
+For HTTP requests that can contain a body (`POST`, `PUT`, and `PATCH`), additional methods are available: `contentType(MediaType)`, and `contentLength(long)`.
 
 The request body itself can be set by `body(Object)`, which internally uses <<rest-message-conversion>>.
 Alternatively, the request body can be set using a `ParameterizedTypeReference`, allowing you to use generics.
 Finally, the body can be set to a callback function that writes to an `OutputStream`.
 
 ==== Retrieving the response
+
 Once the request has been set up, the HTTP response is accessed by invoking `retrieve()`.
-The response body can be accessed by using `body(Class)`, or `body(ParameterizedTypeReference)` for parameterized types like lists.
-The `body` method converts the response contents into various types, for instance bytes can be converted into a `String`, JSON into objects using Jackson, and so on (see <<rest-message-conversion>>).
+The response body can be accessed by using `body(Class)` or `body(ParameterizedTypeReference)` for parameterized types like lists.
+The `body` method converts the response contents into various types – for instance, bytes can be converted into a `String`, JSON can be converted into objects using Jackson, and so on (see <<rest-message-conversion>>).
 
 The response can also be converted into a `ResponseEntity`, giving access to the response headers as well as the body.
 
-This sample shows how `RestClient` can be used to perform a simple GET request.
+This sample shows how `RestClient` can be used to perform a simple `GET` request.
 
 [tabs]
 ======
@@ -171,7 +172,7 @@ println("Contents: " + result.body) <3>
 ======
 
 `RestClient` can convert JSON to objects, using the Jackson library.
-Note the usage of uri variables in this sample, and that the `Accept` header is set to JSON.
+Note the usage of URI variables in this sample and that the `Accept` header is set to JSON.
 
 [tabs]
 ======
@@ -248,8 +249,9 @@ val response = restClient.post() <2>
 ======
 
 ==== Error handling
+
 By default, `RestClient` throws a subclass of `RestClientException` when retrieving a response with a 4xx or 5xx status code.
-This behavior can be overriden using `onStatus`.
+This behavior can be overridden using `onStatus`.
 
 [tabs]
 ======
@@ -286,8 +288,9 @@ val result = restClient.get() <1>
 ======
 
 ==== Exchange
-For more advanced scenarios, the `RestClient` gives access to the underlying HTTP request and response through the `exchange` method, which can be used instead of `retrieve()`.
-Status handlers are not applied when you exchange, because the exchange function already provides access to the full response, allowing you to perform any error handling necessary.
+
+For more advanced scenarios, the `RestClient` gives access to the underlying HTTP request and response through the `exchange()` method, which can be used instead of `retrieve()`.
+Status handlers are not applied when use `exchange()`, because the exchange function already provides access to the full response, allowing you to perform any error handling necessary.
 
 [tabs]
 ======
@@ -336,6 +339,7 @@ val result = restClient.get()
 
 [[rest-message-conversion]]
 === HTTP Message Conversion
+
 [.small]#xref:web/webflux/reactive-spring.adoc#webflux-codecs[See equivalent in the Reactive stack]#
 
 The `spring-web` module contains the `HttpMessageConverter` interface for reading and writing the body of HTTP requests and responses through `InputStream` and `OutputStream`.
@@ -397,7 +401,7 @@ By default, this converter supports `text/xml` and `application/xml`.
 |===
 
 By default, `RestClient` and `RestTemplate` register all built-in message converters, depending on the availability of underlying libraries on the classpath.
-You can also set the message converters to use explicitly, by using `messageConverters` on the `RestClient` builder, or via the `messageConverters` property of `RestTemplate`.
+You can also set the message converters to use explicitly, by using the `messageConverters()` method on the `RestClient` builder, or via the `messageConverters` property of `RestTemplate`.
 
 ==== Jackson JSON Views
 
@@ -437,13 +441,13 @@ parts.add("xmlPart", new HttpEntity<>(myBean, headers));
 ----
 
 In most cases, you do not have to specify the `Content-Type` for each part.
-The content type is determined automatically based on the `HttpMessageConverter` chosen to serialize it or, in the case of a `Resource` based on the file extension.
+The content type is determined automatically based on the `HttpMessageConverter` chosen to serialize it or, in the case of a `Resource`, based on the file extension.
 If necessary, you can explicitly provide the `MediaType` with an `HttpEntity` wrapper.
 
-Once the `MultiValueMap` is ready, you can use it as the body of a POST request, using  `RestClient.post().body(parts)` (or `RestTemplate.postForObject`).
+Once the `MultiValueMap` is ready, you can use it as the body of a `POST` request, using  `RestClient.post().body(parts)` (or `RestTemplate.postForObject`).
 
 If the `MultiValueMap` contains at least one non-`String` value, the `Content-Type` is set to `multipart/form-data` by the `FormHttpMessageConverter`.
-If the `MultiValueMap` has `String` values the `Content-Type` defaults to `application/x-www-form-urlencoded`.
+If the `MultiValueMap` has `String` values, the `Content-Type` defaults to `application/x-www-form-urlencoded`.
 If necessary the `Content-Type` may also be set explicitly.
 
 [[rest-request-factories]]
@@ -453,11 +457,11 @@ To execute the HTTP request, `RestClient` uses a client HTTP library.
 These libraries are adapted via the `ClientRequestFactory` interface.
 Various implementations are available:
 
-* `JdkClientHttpRequestFactory` for Java's `HttpClient`,
-* `HttpComponentsClientHttpRequestFactory` for use with Apache HTTP Components `HttpClient`,
-* `JettyClientHttpRequestFactory` for Jetty's `HttpClient`,
-* `ReactorNettyClientRequestFactory` for Reactor Netty's `HttpClient`,
-* `SimpleClientHttpRequestFactory` as a simple default.
+* `JdkClientHttpRequestFactory` for Java's `HttpClient`
+* `HttpComponentsClientHttpRequestFactory` for use with Apache HTTP Components `HttpClient`
+* `JettyClientHttpRequestFactory` for Jetty's `HttpClient`
+* `ReactorNettyClientRequestFactory` for Reactor Netty's `HttpClient`
+* `SimpleClientHttpRequestFactory` as a simple default
 
 
 If no request factory is specified when the `RestClient` was built, it will use the Apache or Jetty `HttpClient` if they are available on the classpath.
@@ -473,12 +477,12 @@ synchronous, asynchronous, and streaming scenarios.
 
 `WebClient` supports the following:
 
-* Non-blocking I/O.
-* Reactive Streams back pressure.
-* High concurrency with fewer hardware resources.
-* Functional-style, fluent API that takes advantage of Java 8 lambdas.
-* Synchronous and asynchronous interactions.
-* Streaming up to or streaming down from a server.
+* Non-blocking I/O
+* Reactive Streams back pressure
+* High concurrency with fewer hardware resources
+* Functional-style, fluent API that takes advantage of Java 8 lambdas
+* Synchronous and asynchronous interactions
+* Streaming up to or streaming down from a server
 
 See xref:web/webflux-webclient.adoc[WebClient] for more details.
 
@@ -848,17 +852,17 @@ It can be used to migrate from the latter to the former.
 .toEntity(ParameterizedTypeReference)` footnote:request-entity[]
 
 
-| `execute(String, HttpMethod method, RequestCallback, ResponseExtractor, Object...)`
+| `execute(String, HttpMethod, RequestCallback, ResponseExtractor, Object...)`
 | `method(HttpMethod)
 .uri(String, Object...)
 .exchange(ExchangeFunction)`
 
-| `execute(String, HttpMethod method, RequestCallback, ResponseExtractor, Map)`
+| `execute(String, HttpMethod, RequestCallback, ResponseExtractor, Map)`
 | `method(HttpMethod)
 .uri(String, Map)
 .exchange(ExchangeFunction)`
 
-| `execute(URI, HttpMethod method, RequestCallback, ResponseExtractor)`
+| `execute(URI, HttpMethod, RequestCallback, ResponseExtractor)`
 | `method(HttpMethod)
 .uri(URI)
 .exchange(ExchangeFunction)`
