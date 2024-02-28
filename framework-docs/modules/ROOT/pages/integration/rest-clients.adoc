@@ -852,17 +852,17 @@ It can be used to migrate from the latter to the former.
 .toEntity(ParameterizedTypeReference)` footnote:request-entity[]
 
 
-| `execute(String, HttpMethod method, RequestCallback, ResponseExtractor, Object...)`
+| `execute(String, HttpMethod, RequestCallback, ResponseExtractor, Object...)`
 | `method(HttpMethod)
 .uri(String, Object...)
 .exchange(ExchangeFunction)`
 
-| `execute(String, HttpMethod method, RequestCallback, ResponseExtractor, Map)`
+| `execute(String, HttpMethod, RequestCallback, ResponseExtractor, Map)`
 | `method(HttpMethod)
 .uri(String, Map)
 .exchange(ExchangeFunction)`
 
-| `execute(URI, HttpMethod method, RequestCallback, ResponseExtractor)`
+| `execute(URI, HttpMethod, RequestCallback, ResponseExtractor)`
 | `method(HttpMethod)
 .uri(URI)
 .exchange(ExchangeFunction)`
