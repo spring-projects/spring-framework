@@ -253,8 +253,9 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
 	 * @see #setPersistenceUnitManager
 	 */
-	public void setDataSource(DataSource dataSource) {
-		this.internalPersistenceUnitManager.setDataSourceLookup(new SingleDataSourceLookup(dataSource));
+	public void setDataSource(@Nullable DataSource dataSource) {
+		this.internalPersistenceUnitManager.setDataSourceLookup(
+				dataSource != null ? new SingleDataSourceLookup(dataSource) : null);
 		this.internalPersistenceUnitManager.setDefaultDataSource(dataSource);
 	}
 
@@ -270,8 +271,9 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getJtaDataSource()
 	 * @see #setPersistenceUnitManager
 	 */
-	public void setJtaDataSource(DataSource jtaDataSource) {
-		this.internalPersistenceUnitManager.setDataSourceLookup(new SingleDataSourceLookup(jtaDataSource));
+	public void setJtaDataSource(@Nullable DataSource jtaDataSource) {
+		this.internalPersistenceUnitManager.setDataSourceLookup(
+				jtaDataSource != null ? new SingleDataSourceLookup(jtaDataSource) : null);
 		this.internalPersistenceUnitManager.setDefaultJtaDataSource(jtaDataSource);
 	}
 
@@ -416,6 +418,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	@Override
+	@Nullable
 	public DataSource getDataSource() {
 		if (this.persistenceUnitInfo != null) {
 			return (this.persistenceUnitInfo.getJtaDataSource() != null ?

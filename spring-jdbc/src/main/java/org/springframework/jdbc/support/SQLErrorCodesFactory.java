@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class SQLErrorCodesFactory {
 	private static final Log logger = LogFactory.getLog(SQLErrorCodesFactory.class);
 
 	/**
-	 * Keep track of a single instance so we can return it to classes that request it.
+	 * Keep track of a single instance, so we can return it to classes that request it.
 	 */
 	private static final SQLErrorCodesFactory instance = new SQLErrorCodesFactory();
 
@@ -101,6 +101,7 @@ public class SQLErrorCodesFactory {
 	 * @see #loadResource(String)
 	 */
 	protected SQLErrorCodesFactory() {
+
 		Map<String, SQLErrorCodes> errorCodes;
 
 		try {

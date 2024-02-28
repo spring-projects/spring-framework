@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -600,13 +600,10 @@ class ConstructorResolver {
 				String argDesc = StringUtils.collectionToCommaDelimitedString(argTypes);
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"No matching factory method found on class [" + factoryClass.getName() + "]: " +
-						(mbd.getFactoryBeanName() != null ?
-							"factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
+						(mbd.getFactoryBeanName() != null ? "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
 						"factory method '" + mbd.getFactoryMethodName() + "(" + argDesc + ")'. " +
-						"Check that a method with the specified name " +
-						(minNrOfArgs > 0 ? "and arguments " : "") +
-						"exists and that it is " +
-						(isStatic ? "static" : "non-static") + ".");
+						"Check that a method with the specified name " + (minNrOfArgs > 0 ? "and arguments " : "") +
+						"exists and that it is " + (isStatic ? "static" : "non-static") + ".");
 			}
 			else if (void.class == factoryMethodToUse.getReturnType()) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,

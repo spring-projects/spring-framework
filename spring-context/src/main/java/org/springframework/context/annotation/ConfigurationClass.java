@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,6 @@ final class ConfigurationClass {
 	 * Create a new {@link ConfigurationClass} with the given name.
 	 * @param metadataReader reader used to parse the underlying {@link Class}
 	 * @param beanName must not be {@code null}
-	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
 	ConfigurationClass(MetadataReader metadataReader, String beanName) {
 		Assert.notNull(beanName, "Bean name must not be null");
@@ -86,10 +85,10 @@ final class ConfigurationClass {
 	 * using the {@link Import} annotation or automatically processed as a nested
 	 * configuration class (if importedBy is not {@code null}).
 	 * @param metadataReader reader used to parse the underlying {@link Class}
-	 * @param importedBy the configuration class importing this one or {@code null}
+	 * @param importedBy the configuration class importing this one
 	 * @since 3.1.1
 	 */
-	ConfigurationClass(MetadataReader metadataReader, @Nullable ConfigurationClass importedBy) {
+	ConfigurationClass(MetadataReader metadataReader, ConfigurationClass importedBy) {
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
 		this.importedBy.add(importedBy);
@@ -99,7 +98,6 @@ final class ConfigurationClass {
 	 * Create a new {@link ConfigurationClass} with the given name.
 	 * @param clazz the underlying {@link Class} to represent
 	 * @param beanName name of the {@code @Configuration} class bean
-	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
 	ConfigurationClass(Class<?> clazz, String beanName) {
 		Assert.notNull(beanName, "Bean name must not be null");
@@ -113,10 +111,10 @@ final class ConfigurationClass {
 	 * using the {@link Import} annotation or automatically processed as a nested
 	 * configuration class (if imported is {@code true}).
 	 * @param clazz the underlying {@link Class} to represent
-	 * @param importedBy the configuration class importing this one (or {@code null})
+	 * @param importedBy the configuration class importing this one
 	 * @since 3.1.1
 	 */
-	ConfigurationClass(Class<?> clazz, @Nullable ConfigurationClass importedBy) {
+	ConfigurationClass(Class<?> clazz, ConfigurationClass importedBy) {
 		this.metadata = AnnotationMetadata.introspect(clazz);
 		this.resource = new DescriptiveResource(clazz.getName());
 		this.importedBy.add(importedBy);
@@ -126,7 +124,6 @@ final class ConfigurationClass {
 	 * Create a new {@link ConfigurationClass} with the given name.
 	 * @param metadata the metadata for the underlying class to represent
 	 * @param beanName name of the {@code @Configuration} class bean
-	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
 	ConfigurationClass(AnnotationMetadata metadata, String beanName) {
 		Assert.notNull(beanName, "Bean name must not be null");
@@ -148,12 +145,12 @@ final class ConfigurationClass {
 		return ClassUtils.getShortName(getMetadata().getClassName());
 	}
 
-	void setBeanName(String beanName) {
+	void setBeanName(@Nullable String beanName) {
 		this.beanName = beanName;
 	}
 
 	@Nullable
-	public String getBeanName() {
+	String getBeanName() {
 		return this.beanName;
 	}
 
@@ -163,7 +160,7 @@ final class ConfigurationClass {
 	 * @since 3.1.1
 	 * @see #getImportedBy()
 	 */
-	public boolean isImported() {
+	boolean isImported() {
 		return !this.importedBy.isEmpty();
 	}
 
@@ -197,16 +194,16 @@ final class ConfigurationClass {
 		this.importedResources.put(importedResource, readerClass);
 	}
 
+	Map<String, Class<? extends BeanDefinitionReader>> getImportedResources() {
+		return this.importedResources;
+	}
+
 	void addImportBeanDefinitionRegistrar(ImportBeanDefinitionRegistrar registrar, AnnotationMetadata importingClassMetadata) {
 		this.importBeanDefinitionRegistrars.put(registrar, importingClassMetadata);
 	}
 
 	Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> getImportBeanDefinitionRegistrars() {
 		return this.importBeanDefinitionRegistrars;
-	}
-
-	Map<String, Class<? extends BeanDefinitionReader>> getImportedResources() {
-		return this.importedResources;
 	}
 
 	void validate(ProblemReporter problemReporter) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -567,16 +567,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void destroyBean(String beanName, @Nullable DisposableBean bean) {
 		// Trigger destruction of dependent beans first...
-		Set<String> dependencies;
+		Set<String> dependentBeanNames;
 		synchronized (this.dependentBeanMap) {
 			// Within full synchronization in order to guarantee a disconnected Set
-			dependencies = this.dependentBeanMap.remove(beanName);
+			dependentBeanNames = this.dependentBeanMap.remove(beanName);
 		}
-		if (dependencies != null) {
+		if (dependentBeanNames != null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Retrieved dependent beans for bean '" + beanName + "': " + dependencies);
+				logger.trace("Retrieved dependent beans for bean '" + beanName + "': " + dependentBeanNames);
 			}
-			for (String dependentBeanName : dependencies) {
+			for (String dependentBeanName : dependentBeanNames) {
 				destroySingleton(dependentBeanName);
 			}
 		}
