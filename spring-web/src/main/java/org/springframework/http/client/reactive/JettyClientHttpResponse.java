@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.reactive.client.ReactiveResponse;
 import reactor.core.publisher.Flux;
 
@@ -55,23 +54,29 @@ class JettyClientHttpResponse extends AbstractClientHttpResponse {
 	}
 
 	private static HttpHeaders adaptHeaders(ReactiveResponse response) {
-		MultiValueMap<String, String> headers = new JettyHeadersAdapter(response.getHeaders());
+		MultiValueMap<String, String> headers = (Jetty10HttpFieldsHelper.jetty10Present() ?
+				Jetty10HttpFieldsHelper.getHttpHeaders(response.getResponse()) :
+				new JettyHeadersAdapter(response.getHeaders()));
 		return HttpHeaders.readOnlyHttpHeaders(headers);
 	}
+
 	private static MultiValueMap<String, ResponseCookie> adaptCookies(ReactiveResponse response) {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
-		List<HttpField> cookieHeaders = response.getHeaders().getFields(HttpHeaders.SET_COOKIE);
-		cookieHeaders.forEach(header ->
-					HttpCookie.parse(header.getValue()).forEach(cookie -> result.add(cookie.getName(),
+		MultiValueMap<String, String> headers = adaptHeaders(response);
+		List<String> cookieHeader = headers.get(HttpHeaders.SET_COOKIE);
+		if (!CollectionUtils.isEmpty(cookieHeader)) {
+			cookieHeader.forEach(header ->
+					HttpCookie.parse(header).forEach(cookie -> result.add(cookie.getName(),
 							ResponseCookie.fromClientResponse(cookie.getName(), cookie.getValue())
 									.domain(cookie.getDomain())
 									.path(cookie.getPath())
 									.maxAge(cookie.getMaxAge())
 									.secure(cookie.getSecure())
 									.httpOnly(cookie.isHttpOnly())
-									.sameSite(parseSameSite(header.getValue()))
+									.sameSite(parseSameSite(header))
 									.build()))
 			);
+		}
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 
