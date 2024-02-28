@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.2
  * @param <V> the value type
  */
@@ -37,18 +38,25 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 
 	private final Callable<V> callable;
 
-	private Long timeout;
+	@Nullable
+	private final Long timeout;
 
-	private AsyncTaskExecutor executor;
+	@Nullable
+	private final AsyncTaskExecutor executor;
 
-	private String executorName;
+	@Nullable
+	private final String executorName;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
+	@Nullable
 	private Callable<V> timeoutCallback;
 
+	@Nullable
 	private Callable<V> errorCallback;
 
+	@Nullable
 	private Runnable completionCallback;
 
 
@@ -59,6 +67,9 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	public WebAsyncTask(Callable<V> callable) {
 		Assert.notNull(callable, "Callable must not be null");
 		this.callable = callable;
+		this.timeout = null;
+		this.executor = null;
+		this.executorName = null;
 	}
 
 	/**
@@ -67,8 +78,11 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	 * @param callable the callable for concurrent handling
 	 */
 	public WebAsyncTask(long timeout, Callable<V> callable) {
-		this(callable);
+		Assert.notNull(callable, "Callable must not be null");
+		this.callable = callable;
 		this.timeout = timeout;
+		this.executor = null;
+		this.executorName = null;
 	}
 
 	/**
@@ -78,10 +92,12 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	 * @param callable the callable for concurrent handling
 	 */
 	public WebAsyncTask(@Nullable Long timeout, String executorName, Callable<V> callable) {
-		this(callable);
+		Assert.notNull(callable, "Callable must not be null");
 		Assert.notNull(executorName, "Executor name must not be null");
-		this.executorName = executorName;
+		this.callable = callable;
 		this.timeout = timeout;
+		this.executor = null;
+		this.executorName = executorName;
 	}
 
 	/**
@@ -91,10 +107,12 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	 * @param callable the callable for concurrent handling
 	 */
 	public WebAsyncTask(@Nullable Long timeout, AsyncTaskExecutor executor, Callable<V> callable) {
-		this(callable);
+		Assert.notNull(callable, "Callable must not be null");
 		Assert.notNull(executor, "Executor must not be null");
-		this.executor = executor;
+		this.callable = callable;
 		this.timeout = timeout;
+		this.executor = executor;
+		this.executorName = null;
 	}
 
 
