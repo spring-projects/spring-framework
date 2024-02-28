@@ -239,14 +239,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					}
 					else {
 						Thread threadWithLock = this.singletonCreationThread;
-						// Another thread is busy in a singleton factory callback, potentially blocked.
-						// Fallback as of 6.2: process given singleton bean outside of singleton lock.
-						// Thread-safe exposure is still guaranteed, there is just a risk of collisions
-						// when triggering creation of other beans as dependencies of the current bean.
-						if (threadWithLock != null && logger.isInfoEnabled()) {
-							logger.info("Creating singleton bean '" + beanName + "' in thread \"" +
-									Thread.currentThread().getName() + "\" while thread \"" + threadWithLock.getName() +
-									"\" holds singleton lock for other beans " + this.singletonsCurrentlyInCreation);
+						if (threadWithLock != null) {
+							// Another thread is busy in a singleton factory callback, potentially blocked.
+							// Fallback as of 6.2: process given singleton bean outside of singleton lock.
+							// Thread-safe exposure is still guaranteed, there is just a risk of collisions
+							// when triggering creation of other beans as dependencies of the current bean.
+							if (logger.isInfoEnabled()) {
+								logger.info("Creating singleton bean '" + beanName + "' in thread \"" +
+										Thread.currentThread().getName() + "\" while thread \"" + threadWithLock.getName() +
+										"\" holds singleton lock for other beans " + this.singletonsCurrentlyInCreation);
+							}
 						}
 						else {
 							// Singleton lock currently held by some other registration method -> wait.
