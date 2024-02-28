@@ -330,11 +330,17 @@ public class InvocableHandlerMethod extends HandlerMethod {
 						case INSTANCE -> argMap.put(parameter, target);
 						case VALUE, EXTENSION_RECEIVER -> {
 							if (!parameter.isOptional() || args[index] != null) {
-								if (parameter.getType().getClassifier() instanceof KClass<?> kClass && kClass.isValue()) {
+								if (parameter.getType().getClassifier() instanceof KClass<?> kClass) {
 									Class<?> javaClass = JvmClassMappingKt.getJavaClass(kClass);
-									Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(javaClass, boxImplFilter);
-									Assert.state(methods.length == 1, "Unable to find a single box-impl synthetic static method in " + javaClass.getName());
-									argMap.put(parameter, ReflectionUtils.invokeMethod(methods[0], null, args[index]));
+									if (KotlinDetector.isInlineClass(javaClass)) {
+										Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(javaClass, boxImplFilter);
+										Assert.state(methods.length == 1,
+												"Unable to find a single box-impl synthetic static method in " + javaClass.getName());
+										argMap.put(parameter, ReflectionUtils.invokeMethod(methods[0], null, args[index]));
+									}
+									else {
+										argMap.put(parameter, args[index]);
+									}
 								}
 								else {
 									argMap.put(parameter, args[index]);
