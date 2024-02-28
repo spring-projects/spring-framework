@@ -32,11 +32,9 @@ import java.util.Map;
 import java.util.Set;
 
 import kotlin.jvm.JvmClassMappingKt;
-import kotlin.jvm.JvmInline;
 import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
-import kotlin.reflect.full.KAnnotatedElements;
 import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -874,8 +872,7 @@ public abstract class BeanUtils {
 				if (primaryCtor == null) {
 					return null;
 				}
-				if (kClass.isValue() && !KAnnotatedElements
-						.findAnnotations(kClass, JvmClassMappingKt.getKotlinClass(JvmInline.class)).isEmpty()) {
+				if (KotlinDetector.isInlineClass(clazz)) {
 					Constructor<?>[] constructors = clazz.getDeclaredConstructors();
 					Assert.state(constructors.length == 1,
 							"Kotlin value classes annotated with @JvmInline are expected to have a single JVM constructor");
