@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Andy Wilkinson
+ * @author Juergen Hoeller
  * @since 6.2
  */
 class ConfigurationPhasesKnownSuperclassesTests {
@@ -40,6 +41,7 @@ class ConfigurationPhasesKnownSuperclassesTests {
 		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ParseConfigurationPhase.class)) {
 			assertThat(context.getBean("subclassBean")).isEqualTo("bravo");
 			assertThat(context.getBean("superclassBean")).isEqualTo("superclass");
+			assertThat(context.getBean("baseBean")).isEqualTo("base");
 		}
 	}
 
@@ -48,12 +50,22 @@ class ConfigurationPhasesKnownSuperclassesTests {
 		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(RegisterBeanPhase.class)) {
 			assertThat(context.getBean("subclassBean")).isEqualTo("bravo");
 			assertThat(context.getBean("superclassBean")).isEqualTo("superclass");
+			assertThat(context.getBean("baseBean")).isEqualTo("base");
 		}
 	}
 
 
 	@Configuration(proxyBeanMethods = false)
-	static class Example {
+	static class Base {
+
+		@Bean
+		String baseBean() {
+			return "base";
+		}
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class Example extends Base {
 
 		@Bean
 		String superclassBean() {

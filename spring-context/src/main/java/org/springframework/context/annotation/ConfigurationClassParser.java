@@ -468,6 +468,9 @@ class ConfigurationClassParser {
 	 * the superclass exposure on a different config class with the same superclass.
 	 */
 	private void removeKnownSuperclass(String removedClass, boolean replace) {
+		String replacedSuperclass = null;
+		ConfigurationClass replacingClass = null;
+
 		Iterator<Map.Entry<String, List<ConfigurationClass>>> it = this.knownSuperclasses.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<String, List<ConfigurationClass>> entry = it.next();
@@ -476,20 +479,27 @@ class ConfigurationClassParser {
 					it.remove();
 				}
 				else if (replace) {
-					try {
-						ConfigurationClass otherClass = entry.getValue().get(0);
-						SourceClass sourceClass = asSourceClass(otherClass, DEFAULT_EXCLUSION_FILTER).getSuperClass();
-						while (!sourceClass.getMetadata().getClassName().equals(entry.getKey()) &&
-								sourceClass.getMetadata().getSuperClassName() != null) {
-							sourceClass = sourceClass.getSuperClass();
-						}
-						doProcessConfigurationClass(otherClass, sourceClass, DEFAULT_EXCLUSION_FILTER);
-					}
-					catch (IOException ex) {
-						throw new BeanDefinitionStoreException(
-								"I/O failure while removing configuration class [" + removedClass + "]", ex);
-					}
+					replacedSuperclass = entry.getKey();
+					replacingClass = entry.getValue().get(0);
 				}
+			}
+		}
+
+		if (replacingClass != null) {
+			try {
+				SourceClass sourceClass = asSourceClass(replacingClass, DEFAULT_EXCLUSION_FILTER).getSuperClass();
+				while (!sourceClass.getMetadata().getClassName().equals(replacedSuperclass) &&
+						sourceClass.getMetadata().getSuperClassName() != null) {
+					sourceClass = sourceClass.getSuperClass();
+				}
+				do {
+					sourceClass = doProcessConfigurationClass(replacingClass, sourceClass, DEFAULT_EXCLUSION_FILTER);
+				}
+				while (sourceClass != null);
+			}
+			catch (IOException ex) {
+				throw new BeanDefinitionStoreException(
+						"I/O failure while removing configuration class [" + removedClass + "]", ex);
 			}
 		}
 	}
