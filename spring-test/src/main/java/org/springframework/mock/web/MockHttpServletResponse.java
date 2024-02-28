@@ -623,10 +623,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void sendRedirect(String url) throws IOException {
+		sendRedirect(url, HttpServletResponse.SC_MOVED_TEMPORARILY, true);
+	}
+
+	// @Override - on Servlet 6.1
+	public void sendRedirect(String url, int sc, boolean clearBuffer) throws IOException {
 		Assert.state(!isCommitted(), "Cannot send redirect - response is already committed");
 		Assert.notNull(url, "Redirect URL must not be null");
 		setHeader(HttpHeaders.LOCATION, url);
-		setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+		setStatus(sc);
 		setCommitted(true);
 	}
 
@@ -775,7 +780,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setStatus(int status) {
-		if (!this.isCommitted()) {
+		if (!isCommitted()) {
 			this.status = status;
 		}
 	}
