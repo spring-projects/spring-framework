@@ -443,8 +443,8 @@ public final class WebAsyncManager {
 			}
 		});
 
-		this.asyncWebRequest.addCompletionHandler(()
-				-> interceptorChain.triggerAfterCompletion(this.asyncWebRequest, deferredResult));
+		this.asyncWebRequest.addCompletionHandler(() ->
+				interceptorChain.triggerAfterCompletion(this.asyncWebRequest, deferredResult));
 
 		interceptorChain.applyBeforeConcurrentHandling(this.asyncWebRequest, deferredResult);
 		startAsyncProcessing(processingContext);
