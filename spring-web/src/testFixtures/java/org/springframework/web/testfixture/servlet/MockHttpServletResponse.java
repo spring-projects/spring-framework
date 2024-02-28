@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -775,7 +775,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setStatus(int status) {
-		if (!this.isCommitted()) {
+		if (!isCommitted()) {
 			this.status = status;
 		}
 	}
@@ -785,6 +785,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.status;
 	}
 
+	/**
+	 * Return the error message used when calling {@link HttpServletResponse#sendError(int, String)}.
+	 */
 	@Nullable
 	public String getErrorMessage() {
 		return this.errorMessage;
