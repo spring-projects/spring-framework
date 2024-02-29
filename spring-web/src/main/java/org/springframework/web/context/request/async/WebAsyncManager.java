@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
@@ -35,6 +34,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
+import org.springframework.web.util.DisconnectedClientHelper;
 
 /**
  * The central class for managing asynchronous request processing, mainly intended
@@ -67,6 +67,16 @@ public final class WebAsyncManager {
 			new SimpleAsyncTaskExecutor(WebAsyncManager.class.getSimpleName());
 
 	private static final Log logger = LogFactory.getLog(WebAsyncManager.class);
+
+	/**
+	 * Log category to use for network failure after a client has gone away.
+	 * @see DisconnectedClientHelper
+	 */
+	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
+			"org.springframework.web.server.DisconnectedClient";
+
+	private static final DisconnectedClientHelper disconnectedClientHelper =
+			new DisconnectedClientHelper(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
 	private static final CallableProcessingInterceptor timeoutCallableInterceptor =
 			new TimeoutCallableProcessingInterceptor();
@@ -350,10 +360,9 @@ public final class WebAsyncManager {
 			});
 			interceptorChain.setTaskFuture(future);
 		}
-		catch (RejectedExecutionException ex) {
+		catch (Throwable ex) {
 			Object result = interceptorChain.applyPostProcess(this.asyncWebRequest, callable, ex);
 			setConcurrentResultAndDispatch(result);
-			throw ex;
 		}
 	}
 
@@ -394,9 +403,12 @@ public final class WebAsyncManager {
 			return;
 		}
 
+		if (result instanceof Exception ex && disconnectedClientHelper.checkAndLogClientDisconnectedException(ex)) {
+			return;
+		}
+
 		if (logger.isDebugEnabled()) {
-			boolean isError = result instanceof Throwable;
-			logger.debug("Async " + (isError ? "error" : "result set") +
+			logger.debug("Async " + (this.errorHandlingInProgress ? "error" : "result set") +
 					", dispatch to " + formatUri(this.asyncWebRequest));
 		}
 		this.asyncWebRequest.dispatch();
