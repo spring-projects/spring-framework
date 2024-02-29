@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,12 @@ import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
- * A Servlet 3.0 implementation of {@link AsyncWebRequest}.
+ * A Servlet implementation of {@link AsyncWebRequest}.
  *
  * <p>The servlet and all filters involved in an async request must have async
  * support enabled using the Servlet API or by adding an
@@ -44,17 +45,19 @@ import org.springframework.web.context.request.ServletWebRequest;
  */
 public class StandardServletAsyncWebRequest extends ServletWebRequest implements AsyncWebRequest, AsyncListener {
 
-	private Long timeout;
-
-	private AsyncContext asyncContext;
-
-	private AtomicBoolean asyncCompleted = new AtomicBoolean();
+	private final AtomicBoolean asyncCompleted = new AtomicBoolean();
 
 	private final List<Runnable> timeoutHandlers = new ArrayList<>();
 
 	private final List<Consumer<Throwable>> exceptionHandlers = new ArrayList<>();
 
 	private final List<Runnable> completionHandlers = new ArrayList<>();
+
+	@Nullable
+	private Long timeout;
+
+	@Nullable
+	private AsyncContext asyncContext;
 
 
 	/**
