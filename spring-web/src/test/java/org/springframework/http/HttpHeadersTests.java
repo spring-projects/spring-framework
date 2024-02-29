@@ -484,11 +484,11 @@ class HttpHeadersTests {
 				new Locale.LanguageRange("*", 0.5)
 		);
 		assertThat(headers.getAcceptLanguage()).isEqualTo(expectedRanges);
-		assertThat(headers.getAcceptLanguageAsLocales()).isEqualTo(List.of(
+		assertThat(headers.getAcceptLanguageAsLocales()).containsExactly(
 				Locale.forLanguageTag("fr-ch"),
 				Locale.forLanguageTag("fr"),
 				Locale.forLanguageTag("en"),
-				Locale.forLanguageTag("de")));
+				Locale.forLanguageTag("de"));
 
 		headers.setAcceptLanguageAsLocales(Collections.singletonList(Locale.FRANCE));
 		assertThat(headers.getAcceptLanguageAsLocales()).first().isEqualTo(Locale.FRANCE);
