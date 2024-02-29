@@ -503,10 +503,42 @@ way, navigating `@Configuration` classes and their dependencies becomes no diffe
 than the usual process of navigating interface-based code.
 --
 
-TIP: If you want to influence the startup creation order of certain beans, consider
-declaring some of them as `@Lazy` (for creation on first access instead of on startup)
-or as `@DependsOn` certain other beans (making sure that specific other beans are
-created before the current bean, beyond what the latter's direct dependencies imply).
+
+[[beans-java-startup]]
+== Influencing the Startup of `@Bean`-defined Singletons
+
+If you want to influence the startup creation order of certain singleton beans, consider
+declaring some of them as `@Lazy` for creation on first access instead of on startup.
+
+`@DependsOn` forces certain other beans to be initialized first, making sure that
+the specified beans are created before the current bean, beyond what the latter's
+direct dependencies imply.
+
+[[beans-java-startup-background]]
+=== Background Initialization
+
+As of 6.2, there is a background initialization option: `@Bean(bootstrap=BACKGROUND)`
+allows for singling out specific beans for background initialization, covering the
+entire bean creation step for each such bean on context startup.
+
+Dependent beans with non-lazy injection points automatically wait for the bean instance
+to be completed. All regular background initializations are forced to complete at the
+end of context startup. Only for beans additionally marked as `@Lazy`, the completion
+is allowed to happen later (up until first actual access).
+
+Background initialization typically goes together with `@Lazy` (or `ObjectProvider`)
+injection points in dependent beans. Otherwise, the main bootstrap thread is going to
+block when an actual background-initialized bean instance needs to be injected early.
+
+This form of concurrent startup applies to individual beans: If such a bean depends on
+other beans, they need to have been initialized already, either simply through being
+declared earlier or through `@DependsOn` which is enforcing initialization in the main
+bootstrap thread before background initialization for the affected bean is triggered.
+
+Note that a `bootstrapExecutor` bean of type `Executor` needs to be declared for
+background bootstrapping to be actually active. Otherwise, the background markers are
+going to be ignored at runtime. The bootstrap executor may be a bounded executor just
+for startup purposes or a shared thread pool which serves for other purposes as well.
 
 
 [[beans-java-conditional]]
