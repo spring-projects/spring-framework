@@ -526,10 +526,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		if (ranges.isEmpty()) {
 			return Collections.emptyList();
 		}
-		return ranges.stream()
-				.map(range -> Locale.forLanguageTag(range.getRange()))
-				.filter(locale -> StringUtils.hasText(locale.getDisplayName()))
-				.toList();
+
+		List<Locale> locales = new ArrayList<>(ranges.size());
+		for (Locale.LanguageRange range : ranges) {
+			if (!range.getRange().startsWith("*")) {
+				locales.add(Locale.forLanguageTag(range.getRange()));
+			}
+		}
+		return locales;
 	}
 
 	/**
