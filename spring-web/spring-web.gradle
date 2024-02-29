@@ -15,6 +15,7 @@ dependencies {
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
 	optional("com.fasterxml.woodstox:woodstox-core")
 	optional("com.google.code.gson:gson")
 	optional("com.google.protobuf:protobuf-java-util")

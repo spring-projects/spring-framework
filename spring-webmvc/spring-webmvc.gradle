@@ -19,6 +19,7 @@ dependencies {
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
+	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
 	optional("com.github.librepdf:openpdf")
 	optional("com.rometools:rome")
 	optional("io.micrometer:context-propagation")
