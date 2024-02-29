@@ -116,6 +116,19 @@ class BeanMethodQualificationTests {
 		ctx.close();
 	}
 
+	/**
+	 * One regular bean along with fallback beans is considered effective primary
+	 */
+	@Test
+	void effectivePrimary() {
+		AnnotationConfigApplicationContext ctx = context(EffectivePrimaryConfig.class);
+
+		TestBean testBean = ctx.getBean(TestBean.class);
+		assertThat(testBean.getName()).isEqualTo("effective-primary");
+
+		ctx.close();
+	}
+
 	@Test
 	void customWithLazyResolution() {
 		AnnotationConfigApplicationContext ctx = context(CustomConfig.class, CustomPojo.class);
@@ -314,6 +327,24 @@ class BeanMethodQualificationTests {
 		}
 	}
 
+	@Configuration
+	static class EffectivePrimaryConfig {
+
+		@Bean
+		public TestBean effectivePrimary() {
+			return new TestBean("effective-primary");
+		}
+
+		@Bean @Fallback
+		public TestBean fallback1() {
+			return new TestBean("fallback1");
+		}
+
+		@Bean @Fallback
+		public TestBean fallback2() {
+			return new TestBean("fallback2");
+		}
+	}
 
 	@Component @Lazy
 	static class StandardPojo {
