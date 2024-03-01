@@ -36,7 +36,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
-import org.springframework.web.util.DisconnectedClientHelper;
 
 /**
  * The central class for managing asynchronous request processing, mainly intended
@@ -69,16 +68,6 @@ public final class WebAsyncManager {
 			new SimpleAsyncTaskExecutor(WebAsyncManager.class.getSimpleName());
 
 	private static final Log logger = LogFactory.getLog(WebAsyncManager.class);
-
-	/**
-	 * Log category to use for network failure after a client has gone away.
-	 * @see DisconnectedClientHelper
-	 */
-	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
-			"org.springframework.web.server.DisconnectedClient";
-
-	private static final DisconnectedClientHelper disconnectedClientHelper =
-			new DisconnectedClientHelper(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
 	private static final CallableProcessingInterceptor timeoutCallableInterceptor =
 			new TimeoutCallableProcessingInterceptor();
@@ -416,12 +405,6 @@ public final class WebAsyncManager {
 			this.concurrentResult = result;
 			if (logger.isDebugEnabled()) {
 				logger.debug("Async result set to: " + result + " for " + formatUri(this.asyncWebRequest));
-			}
-
-			if (result instanceof Exception) {
-				if (disconnectedClientHelper.checkAndLogClientDisconnectedException((Exception) result)) {
-					return;
-				}
 			}
 
 			if (this.asyncWebRequest.isAsyncComplete()) {

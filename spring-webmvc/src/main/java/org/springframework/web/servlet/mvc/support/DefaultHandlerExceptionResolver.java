@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -227,6 +228,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			else if (ex instanceof AsyncRequestTimeoutException) {
 				return handleAsyncRequestTimeoutException(
 						(AsyncRequestTimeoutException) ex, request, response, handler);
+			}
+			else if (ex instanceof AsyncRequestNotUsableException) {
+				return handleAsyncRequestNotUsableException(
+						(AsyncRequestNotUsableException) ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerEx) {
@@ -538,6 +543,24 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		else {
 			logger.warn("Async request timed out");
 		}
+		return new ModelAndView();
+	}
+
+	/**
+	 * Handle the case of an I/O failure from the ServletOutputStream.
+	 * <p>By default, do nothing since the response is not usable.
+	 * @param ex the {@link AsyncRequestTimeoutException} to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or {@code null} if none chosen
+	 * at the time of the exception (for example, if multipart resolution failed)
+	 * @return an empty ModelAndView indicating the exception was handled
+	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
+	 * @since 5.3.33
+	 */
+	protected ModelAndView handleAsyncRequestNotUsableException(AsyncRequestNotUsableException ex,
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) {
+
 		return new ModelAndView();
 	}
 

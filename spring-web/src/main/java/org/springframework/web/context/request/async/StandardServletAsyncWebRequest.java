@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.util.DisconnectedClientHelper;
 
 /**
  * A Servlet implementation of {@link AsyncWebRequest}.
@@ -184,13 +183,6 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 			transitionToErrorState();
 			Throwable ex = event.getThrowable();
 			this.exceptionHandlers.forEach(consumer -> consumer.accept(ex));
-
-			// We skip ASYNC dispatches for "disconnected client" errors,
-			// but can only complete from a Servlet container thread
-
-			if (DisconnectedClientHelper.isClientDisconnectedException(ex) && this.state != State.COMPLETED) {
-				this.asyncContext.complete();
-			}
 		}
 		finally {
 			this.stateLock.unlock();
