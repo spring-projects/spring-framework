@@ -96,7 +96,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		}
 
 		//noinspection DataFlowIssue
-		((LifecycleHttpServletResponse) getResponse()).setParent(this);
+		((LifecycleHttpServletResponse) getResponse()).setAsyncWebRequest(this);
 	}
 
 
@@ -207,23 +207,25 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	private static final class LifecycleHttpServletResponse extends HttpServletResponseWrapper {
 
 		@Nullable
-		private StandardServletAsyncWebRequest parent;
+		private StandardServletAsyncWebRequest asyncWebRequest;
 
+		@Nullable
 		private ServletOutputStream outputStream;
 
 		public LifecycleHttpServletResponse(HttpServletResponse response) {
 			super(response);
 		}
 
-		public void setParent(StandardServletAsyncWebRequest parent) {
-			this.parent = parent;
+		public void setAsyncWebRequest(StandardServletAsyncWebRequest asyncWebRequest) {
+			this.asyncWebRequest = asyncWebRequest;
 		}
 
 		@Override
 		public ServletOutputStream getOutputStream() {
 			if (this.outputStream == null) {
-				Assert.notNull(this.parent, "Not initialized");
-				this.outputStream = new LifecycleServletOutputStream((HttpServletResponse) getResponse(), this.parent);
+				Assert.notNull(this.asyncWebRequest, "Not initialized");
+				this.outputStream = new LifecycleServletOutputStream(
+						(HttpServletResponse) getResponse(), this.asyncWebRequest);
 			}
 			return this.outputStream;
 		}
@@ -236,13 +238,15 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	 */
 	private static final class LifecycleServletOutputStream extends ServletOutputStream {
 
-		private final HttpServletResponse response;
+		private final HttpServletResponse delegate;
 
-		private final StandardServletAsyncWebRequest parent;
+		private final StandardServletAsyncWebRequest asyncWebRequest;
 
-		private LifecycleServletOutputStream(HttpServletResponse response, StandardServletAsyncWebRequest parent) {
-			this.response = response;
-			this.parent = parent;
+		private LifecycleServletOutputStream(
+				HttpServletResponse delegate, StandardServletAsyncWebRequest asyncWebRequest) {
+
+			this.delegate = delegate;
+			this.asyncWebRequest = asyncWebRequest;
 		}
 
 		@Override
@@ -258,7 +262,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		public void write(int b) throws IOException {
 			checkState();
 			try {
-				this.response.getOutputStream().write(b);
+				this.delegate.getOutputStream().write(b);
 			}
 			catch (IOException ex) {
 				handleIOException(ex, "ServletOutputStream failed to write");
@@ -268,7 +272,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		public void write(byte[] buf, int offset, int len) throws IOException {
 			checkState();
 			try {
-				this.response.getOutputStream().write(buf, offset, len);
+				this.delegate.getOutputStream().write(buf, offset, len);
 			}
 			catch (IOException ex) {
 				handleIOException(ex, "ServletOutputStream failed to write");
@@ -279,7 +283,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		public void flush() throws IOException {
 			checkState();
 			try {
-				this.response.getOutputStream().flush();
+				this.delegate.getOutputStream().flush();
 			}
 			catch (IOException ex) {
 				handleIOException(ex, "ServletOutputStream failed to flush");
@@ -290,7 +294,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		public void close() throws IOException {
 			checkState();
 			try {
-				this.response.getOutputStream().close();
+				this.delegate.getOutputStream().close();
 			}
 			catch (IOException ex) {
 				handleIOException(ex, "ServletOutputStream failed to close");
@@ -298,15 +302,15 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		}
 
 		private void checkState() throws AsyncRequestNotUsableException {
-			if (this.parent.state.get() != State.ACTIVE) {
-				String reason = this.parent.state.get() == State.COMPLETED ?
-						"async request completion" : "Servlet container onError notification";
-				throw new AsyncRequestNotUsableException("Response not usable after " + reason + ".");
+			if (this.asyncWebRequest.state.get() != State.ACTIVE) {
+				throw new AsyncRequestNotUsableException("Response not usable after " +
+						(this.asyncWebRequest.state.get() == State.COMPLETED ?
+								"async request completion" : "onError notification") + ".");
 			}
 		}
 
 		private void handleIOException(IOException ex, String msg) throws AsyncRequestNotUsableException {
-			this.parent.transitionToErrorState();
+			this.asyncWebRequest.transitionToErrorState();
 			throw new AsyncRequestNotUsableException(msg, ex);
 		}
 
