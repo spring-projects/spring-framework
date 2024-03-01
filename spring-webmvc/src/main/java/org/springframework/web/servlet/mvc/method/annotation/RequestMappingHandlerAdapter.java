@@ -843,7 +843,21 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
-		ServletWebRequest webRequest = new ServletWebRequest(request, response);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
+		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
+
+		asyncManager.setTaskExecutor(this.taskExecutor);
+		asyncManager.setAsyncWebRequest(asyncWebRequest);
+		asyncManager.registerCallableInterceptors(this.callableInterceptors);
+		asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
+
+		// Obtain wrapped response to enforce lifecycle rule from Servlet spec, section 2.3.3.4
+		response = asyncWebRequest.getNativeResponse(HttpServletResponse.class);
+
+		ServletWebRequest webRequest = (asyncWebRequest instanceof ServletWebRequest ?
+				(ServletWebRequest) asyncWebRequest : new ServletWebRequest(request, response));
+
 		WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
 		ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
 
@@ -861,15 +875,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
 		modelFactory.initModel(webRequest, mavContainer, invocableMethod);
 		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
-
-		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
-		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
-
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		asyncManager.setTaskExecutor(this.taskExecutor);
-		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		asyncManager.registerCallableInterceptors(this.callableInterceptors);
-		asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
 
 		if (asyncManager.hasConcurrentResult()) {
 			Object result = asyncManager.getConcurrentResult();

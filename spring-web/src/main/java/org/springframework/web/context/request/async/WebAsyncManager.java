@@ -136,6 +136,15 @@ public final class WebAsyncManager {
 	}
 
 	/**
+	 * Return the current {@link AsyncWebRequest}.
+	 * @since 5.3.33
+	 */
+	@Nullable
+	public AsyncWebRequest getAsyncWebRequest() {
+		return this.asyncWebRequest;
+	}
+
+	/**
 	 * Configure an AsyncTaskExecutor for use with concurrent processing via
 	 * {@link #startCallableProcessing(Callable, Object...)}.
 	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used.
