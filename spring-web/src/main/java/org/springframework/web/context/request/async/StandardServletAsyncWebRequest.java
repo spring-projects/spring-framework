@@ -87,7 +87,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 		super(request, new LifecycleHttpServletResponse(response));
 
-		this.state = (previousRequest != null ? previousRequest.state : State.ACTIVE);
+		this.state = (previousRequest != null ? previousRequest.state : State.NEW);
 
 		//noinspection DataFlowIssue
 		((LifecycleHttpServletResponse) getResponse()).setAsyncWebRequest(this);
@@ -142,11 +142,17 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 				"or by adding \"<async-supported>true</async-supported>\" to servlet and " +
 				"filter declarations in web.xml.");
 
-		Assert.state(!isAsyncComplete(), "Async processing has already completed");
-
 		if (isAsyncStarted()) {
 			return;
 		}
+
+		if (this.state == State.NEW) {
+			this.state = State.ASYNC;
+		}
+		else {
+			Assert.state(this.state == State.ASYNC, "Cannot start async: [" + this.state + "]");
+		}
+
 		this.asyncContext = getRequest().startAsync(getRequest(), getResponse());
 		this.asyncContext.addListener(this);
 		if (this.timeout != null) {
@@ -190,7 +196,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	}
 
 	private void transitionToErrorState() {
-		if (this.state == State.ACTIVE) {
+		if (!isAsyncComplete()) {
 			this.state = State.ERROR;
 		}
 	}
@@ -323,15 +329,29 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		}
 
 		private void obtainLockAndCheckState() throws AsyncRequestNotUsableException {
-			if (!this.asyncWebRequest.stateLock.tryLock() || this.asyncWebRequest.state != State.ACTIVE) {
-				throw new AsyncRequestNotUsableException("Response not usable after " +
-						(this.asyncWebRequest.state == State.COMPLETED ?
-								"async request completion" : "onError notification") + ".");
+			if (state() != State.NEW) {
+				stateLock().lock();
+				if (state() != State.ASYNC) {
+					stateLock().unlock();
+					throw new AsyncRequestNotUsableException("Response not usable after " +
+							(state() == State.COMPLETED ?
+									"async request completion" : "onError notification") + ".");
+				}
 			}
 		}
 
 		private void releaseLock() {
-			this.asyncWebRequest.stateLock.unlock();
+			if (state() != State.NEW) {
+				stateLock().unlock();
+			}
+		}
+
+		private State state() {
+			return this.asyncWebRequest.state;
+		}
+
+		private ReentrantLock stateLock() {
+			return this.asyncWebRequest.stateLock;
 		}
 
 		private void handleIOException(IOException ex, String msg) throws AsyncRequestNotUsableException {
@@ -345,7 +365,10 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	/**
 	 * Represents a state for {@link StandardServletAsyncWebRequest} to be in.
 	 * <p><pre>
-	 *       ACTIVE ----+
+	 *        NEW
+	 *         |
+	 *         v
+	 *       ASYNC----> +
 	 *         |        |
 	 *         v        |
 	 *       ERROR      |
@@ -357,7 +380,17 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	 */
 	private enum State {
 
-		ACTIVE, ERROR, COMPLETED
+		/** New request (thas may not do async handling). */
+		NEW,
+
+		/** Async handling has started. */
+		ASYNC,
+
+		/** onError notification received, or ServletOutputStream failed. */
+		ERROR,
+
+		/** onComplete notification received. */
+		COMPLETED
 
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,9 +96,8 @@ public class StandardServletAsyncWebRequestTests {
 	@Test
 	public void startAsyncAfterCompleted() throws Exception {
 		this.asyncRequest.onComplete(new AsyncEvent(new MockAsyncContext(this.request, this.response)));
-		assertThatIllegalStateException().isThrownBy(
-				this.asyncRequest::startAsync)
-			.withMessage("Async processing has already completed");
+		assertThatIllegalStateException().isThrownBy(this.asyncRequest::startAsync)
+				.withMessage("Cannot start async: [COMPLETED]");
 	}
 
 	@Test
