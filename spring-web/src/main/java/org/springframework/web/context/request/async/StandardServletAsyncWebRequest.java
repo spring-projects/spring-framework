@@ -17,8 +17,11 @@
 package org.springframework.web.context.request.async;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
@@ -226,6 +229,9 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		@Nullable
 		private ServletOutputStream outputStream;
 
+		@Nullable
+		private PrintWriter writer;
+
 		public LifecycleHttpServletResponse(HttpServletResponse response) {
 			super(response);
 		}
@@ -242,6 +248,15 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 						(HttpServletResponse) getResponse(), this.asyncWebRequest);
 			}
 			return this.outputStream;
+		}
+
+		@Override
+		public PrintWriter getWriter() throws IOException {
+			if (this.writer == null) {
+				Assert.notNull(this.asyncWebRequest, "Not initialized");
+				this.writer = new LifecyclePrintWriter(getResponse().getWriter(), this.asyncWebRequest);
+			}
+			return this.writer;
 		}
 	}
 
@@ -340,6 +355,11 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 			}
 		}
 
+		private void handleIOException(IOException ex, String msg) throws AsyncRequestNotUsableException {
+			this.asyncWebRequest.transitionToErrorState();
+			throw new AsyncRequestNotUsableException(msg, ex);
+		}
+
 		private void releaseLock() {
 			if (state() != State.NEW) {
 				stateLock().unlock();
@@ -350,15 +370,262 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 			return this.asyncWebRequest.state;
 		}
 
-		private ReentrantLock stateLock() {
+		private Lock stateLock() {
 			return this.asyncWebRequest.stateLock;
 		}
 
-		private void handleIOException(IOException ex, String msg) throws AsyncRequestNotUsableException {
-			this.asyncWebRequest.transitionToErrorState();
-			throw new AsyncRequestNotUsableException(msg, ex);
+	}
+
+
+	/**
+	 * Wraps a PrintWriter to prevent use after Servlet container onError
+	 * notifications, and after async request completion.
+	 */
+	private static final class LifecyclePrintWriter extends PrintWriter {
+
+		private final PrintWriter delegate;
+
+		private final StandardServletAsyncWebRequest asyncWebRequest;
+
+		private LifecyclePrintWriter(PrintWriter delegate, StandardServletAsyncWebRequest asyncWebRequest) {
+			super(delegate);
+			this.delegate = delegate;
+			this.asyncWebRequest = asyncWebRequest;
 		}
 
+		@Override
+		public void flush() {
+			if (tryObtainLockAndCheckState()) {
+				try {
+					this.delegate.flush();
+				}
+				finally {
+					releaseLock();
+				}
+			}
+		}
+
+		@Override
+		public void close() {
+			if (tryObtainLockAndCheckState()) {
+				try {
+					this.delegate.close();
+				}
+				finally {
+					releaseLock();
+				}
+			}
+		}
+
+		@Override
+		public boolean checkError() {
+			return this.delegate.checkError();
+		}
+
+		@Override
+		public void write(int c) {
+			if (tryObtainLockAndCheckState()) {
+				try {
+					this.delegate.write(c);
+				}
+				finally {
+					releaseLock();
+				}
+			}
+		}
+
+		@Override
+		public void write(char[] buf, int off, int len) {
+			if (tryObtainLockAndCheckState()) {
+				try {
+					this.delegate.write(buf, off, len);
+				}
+				finally {
+					releaseLock();
+				}
+			}
+		}
+
+		@Override
+		public void write(char[] buf) {
+			this.delegate.write(buf);
+		}
+
+		@Override
+		public void write(String s, int off, int len) {
+			if (tryObtainLockAndCheckState()) {
+				try {
+					this.delegate.write(s, off, len);
+				}
+				finally {
+					releaseLock();
+				}
+			}
+		}
+
+		@Override
+		public void write(String s) {
+			this.delegate.write(s);
+		}
+
+		private boolean tryObtainLockAndCheckState() {
+			if (state() == State.NEW) {
+				return true;
+			}
+			if (stateLock().tryLock()) {
+				if (state() == State.ASYNC) {
+					return true;
+				}
+				stateLock().unlock();
+			}
+			return false;
+		}
+
+		private void releaseLock() {
+			if (state() != State.NEW) {
+				stateLock().unlock();
+			}
+		}
+
+		private State state() {
+			return this.asyncWebRequest.state;
+		}
+
+		private Lock stateLock() {
+			return this.asyncWebRequest.stateLock;
+		}
+
+		// Plain delegates
+
+		@Override
+		public void print(boolean b) {
+			this.delegate.print(b);
+		}
+
+		@Override
+		public void print(char c) {
+			this.delegate.print(c);
+		}
+
+		@Override
+		public void print(int i) {
+			this.delegate.print(i);
+		}
+
+		@Override
+		public void print(long l) {
+			this.delegate.print(l);
+		}
+
+		@Override
+		public void print(float f) {
+			this.delegate.print(f);
+		}
+
+		@Override
+		public void print(double d) {
+			this.delegate.print(d);
+		}
+
+		@Override
+		public void print(char[] s) {
+			this.delegate.print(s);
+		}
+
+		@Override
+		public void print(String s) {
+			this.delegate.print(s);
+		}
+
+		@Override
+		public void print(Object obj) {
+			this.delegate.print(obj);
+		}
+
+		@Override
+		public void println() {
+			this.delegate.println();
+		}
+
+		@Override
+		public void println(boolean x) {
+			this.delegate.println(x);
+		}
+
+		@Override
+		public void println(char x) {
+			this.delegate.println(x);
+		}
+
+		@Override
+		public void println(int x) {
+			this.delegate.println(x);
+		}
+
+		@Override
+		public void println(long x) {
+			this.delegate.println(x);
+		}
+
+		@Override
+		public void println(float x) {
+			this.delegate.println(x);
+		}
+
+		@Override
+		public void println(double x) {
+			this.delegate.println(x);
+		}
+
+		@Override
+		public void println(char[] x) {
+			this.delegate.println(x);
+		}
+
+		@Override
+		public void println(String x) {
+			this.delegate.println(x);
+		}
+
+		@Override
+		public void println(Object x) {
+			this.delegate.println(x);
+		}
+
+		@Override
+		public PrintWriter printf(String format, Object... args) {
+			return this.delegate.printf(format, args);
+		}
+
+		@Override
+		public PrintWriter printf(Locale l, String format, Object... args) {
+			return this.delegate.printf(l, format, args);
+		}
+
+		@Override
+		public PrintWriter format(String format, Object... args) {
+			return this.delegate.format(format, args);
+		}
+
+		@Override
+		public PrintWriter format(Locale l, String format, Object... args) {
+			return this.delegate.format(l, format, args);
+		}
+
+		@Override
+		public PrintWriter append(CharSequence csq) {
+			return this.delegate.append(csq);
+		}
+
+		@Override
+		public PrintWriter append(CharSequence csq, int start, int end) {
+			return this.delegate.append(csq, start, end);
+		}
+
+		@Override
+		public PrintWriter append(char c) {
+			return this.delegate.append(c);
+		}
 	}
 
 
