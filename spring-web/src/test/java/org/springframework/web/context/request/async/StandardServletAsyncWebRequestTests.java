@@ -94,9 +94,8 @@ class StandardServletAsyncWebRequestTests {
 	@Test
 	void startAsyncAfterCompleted() throws Exception {
 		this.asyncRequest.onComplete(new AsyncEvent(new MockAsyncContext(this.request, this.response)));
-		assertThatIllegalStateException().isThrownBy(
-				this.asyncRequest::startAsync)
-			.withMessage("Async processing has already completed");
+		assertThatIllegalStateException().isThrownBy(this.asyncRequest::startAsync)
+				.withMessage("Cannot start async: [COMPLETED]");
 	}
 
 	@Test

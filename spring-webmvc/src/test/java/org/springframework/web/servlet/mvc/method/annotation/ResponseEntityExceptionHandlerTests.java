@@ -108,6 +108,10 @@ class ResponseEntityExceptionHandlerTests {
 				.filter(method -> method.getName().startsWith("handle") && (method.getParameterCount() == 4))
 				.filter(method -> !method.getName().equals("handleErrorResponse"))
 				.map(method -> method.getParameterTypes()[0])
+				.filter(exceptionType -> {
+					String name = exceptionType.getSimpleName();
+					return !name.equals("AsyncRequestNotUsableException");
+				})
 				.forEach(exceptionType -> assertThat(annotation.value())
 						.as("@ExceptionHandler is missing declaration for " + exceptionType.getName())
 						.contains((Class<Exception>) exceptionType));
