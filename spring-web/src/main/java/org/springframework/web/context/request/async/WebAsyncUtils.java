@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,10 @@ public abstract class WebAsyncUtils {
 	 * @return an AsyncWebRequest instance (never {@code null})
 	 */
 	public static AsyncWebRequest createAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		return new StandardServletAsyncWebRequest(request, response);
+		AsyncWebRequest prev = getAsyncManager(request).getAsyncWebRequest();
+		return (prev instanceof StandardServletAsyncWebRequest ?
+				new StandardServletAsyncWebRequest(request, response, (StandardServletAsyncWebRequest) prev) :
+				new StandardServletAsyncWebRequest(request, response));
 	}
 
 }

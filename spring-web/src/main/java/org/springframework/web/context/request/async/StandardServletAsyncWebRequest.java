@@ -19,14 +19,17 @@ package org.springframework.web.context.request.async;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -45,8 +48,6 @@ import org.springframework.web.context.request.ServletWebRequest;
  */
 public class StandardServletAsyncWebRequest extends ServletWebRequest implements AsyncWebRequest, AsyncListener {
 
-	private final AtomicBoolean asyncCompleted = new AtomicBoolean();
-
 	private final List<Runnable> timeoutHandlers = new ArrayList<>();
 
 	private final List<Consumer<Throwable>> exceptionHandlers = new ArrayList<>();
@@ -59,6 +60,10 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	@Nullable
 	private AsyncContext asyncContext;
 
+	private final AtomicReference<State> state;
+
+	private volatile boolean hasError;
+
 
 	/**
 	 * Create a new instance for the given request/response pair.
@@ -66,7 +71,32 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	 * @param response current HTTP response
 	 */
 	public StandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		super(request, response);
+		this(request, response, null);
+	}
+
+	/**
+	 * Constructor to wrap the request and response for the current dispatch that
+	 * also picks up the state of the last (probably the REQUEST) dispatch.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param previousRequest the existing request from the last dispatch
+	 * @since 5.3.33
+	 */
+	StandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response,
+			@Nullable StandardServletAsyncWebRequest previousRequest) {
+
+		super(request, new LifecycleHttpServletResponse(response));
+
+		if (previousRequest != null) {
+			this.state = previousRequest.state;
+			this.hasError = previousRequest.hasError;
+		}
+		else {
+			this.state = new AtomicReference<>(State.ACTIVE);
+		}
+
+		//noinspection DataFlowIssue
+		((LifecycleHttpServletResponse) getResponse()).setParent(this);
 	}
 
 
@@ -107,7 +137,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	 */
 	@Override
 	public boolean isAsyncComplete() {
-		return this.asyncCompleted.get();
+		return (this.state.get() == State.COMPLETED);
 	}
 
 	@Override
@@ -117,6 +147,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 				"in async request processing. This is done in Java code using the Servlet API " +
 				"or by adding \"<async-supported>true</async-supported>\" to servlet and " +
 				"filter declarations in web.xml.");
+
 		Assert.state(!isAsyncComplete(), "Async processing has already completed");
 
 		if (isAsyncStarted()) {
@@ -131,8 +162,10 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	@Override
 	public void dispatch() {
-		Assert.state(this.asyncContext != null, "Cannot dispatch without an AsyncContext");
-		this.asyncContext.dispatch();
+		Assert.state(this.asyncContext != null, "AsyncContext not yet initialized");
+		if (!this.isAsyncComplete()) {
+			this.asyncContext.dispatch();
+		}
 	}
 
 
@@ -151,14 +184,152 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	@Override
 	public void onError(AsyncEvent event) throws IOException {
+		transitionToErrorState();
 		this.exceptionHandlers.forEach(consumer -> consumer.accept(event.getThrowable()));
+	}
+
+	private void transitionToErrorState() {
+		this.hasError = true;
+		this.state.compareAndSet(State.ACTIVE, State.ERROR);
 	}
 
 	@Override
 	public void onComplete(AsyncEvent event) throws IOException {
 		this.completionHandlers.forEach(Runnable::run);
 		this.asyncContext = null;
-		this.asyncCompleted.set(true);
+		this.state.set(State.COMPLETED);
+	}
+
+
+	/**
+	 * Response wrapper to wrap the output stream with {@link LifecycleServletOutputStream}.
+	 */
+	private static final class LifecycleHttpServletResponse extends HttpServletResponseWrapper {
+
+		@Nullable
+		private StandardServletAsyncWebRequest parent;
+
+		private ServletOutputStream outputStream;
+
+		public LifecycleHttpServletResponse(HttpServletResponse response) {
+			super(response);
+		}
+
+		public void setParent(StandardServletAsyncWebRequest parent) {
+			this.parent = parent;
+		}
+
+		@Override
+		public ServletOutputStream getOutputStream() {
+			if (this.outputStream == null) {
+				Assert.notNull(this.parent, "Not initialized");
+				this.outputStream = new LifecycleServletOutputStream((HttpServletResponse) getResponse(), this.parent);
+			}
+			return this.outputStream;
+		}
+	}
+
+
+	/**
+	 * Wraps a ServletOutputStream to prevent use after Servlet container onError
+	 * notifications, and after async request completion.
+	 */
+	private static final class LifecycleServletOutputStream extends ServletOutputStream {
+
+		private final HttpServletResponse response;
+
+		private final StandardServletAsyncWebRequest parent;
+
+		private LifecycleServletOutputStream(HttpServletResponse response, StandardServletAsyncWebRequest parent) {
+			this.response = response;
+			this.parent = parent;
+		}
+
+		@Override
+		public boolean isReady() {
+			return false;
+		}
+
+		@Override
+		public void setWriteListener(WriteListener writeListener) {
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			checkState();
+			try {
+				this.response.getOutputStream().write(b);
+			}
+			catch (IOException ex) {
+				handleIOException(ex, "ServletOutputStream failed to write");
+			}
+		}
+
+		public void write(byte[] buf, int offset, int len) throws IOException {
+			checkState();
+			try {
+				this.response.getOutputStream().write(buf, offset, len);
+			}
+			catch (IOException ex) {
+				handleIOException(ex, "ServletOutputStream failed to write");
+			}
+		}
+
+		@Override
+		public void flush() throws IOException {
+			checkState();
+			try {
+				this.response.getOutputStream().flush();
+			}
+			catch (IOException ex) {
+				handleIOException(ex, "ServletOutputStream failed to flush");
+			}
+		}
+
+		@Override
+		public void close() throws IOException {
+			checkState();
+			try {
+				this.response.getOutputStream().close();
+			}
+			catch (IOException ex) {
+				handleIOException(ex, "ServletOutputStream failed to close");
+			}
+		}
+
+		private void checkState() throws AsyncRequestNotUsableException {
+			if (this.parent.state.get() != State.ACTIVE) {
+				String reason = this.parent.state.get() == State.COMPLETED ?
+						"async request completion" : "Servlet container onError notification";
+				throw new AsyncRequestNotUsableException("Response not usable after " + reason + ".");
+			}
+		}
+
+		private void handleIOException(IOException ex, String msg) throws AsyncRequestNotUsableException {
+			this.parent.transitionToErrorState();
+			throw new AsyncRequestNotUsableException(msg, ex);
+		}
+
+	}
+
+
+	/**
+	 * Represents a state for {@link StandardServletAsyncWebRequest} to be in.
+	 * <p><pre>
+	 *       ACTIVE ----+
+	 *         |        |
+	 *         v        |
+	 *       ERROR      |
+	 *         |        |
+	 *         v        |
+	 *     COMPLETED <--+
+	 * </pre>
+	 * @since 5.3.33
+	 */
+	private enum State {
+
+		ACTIVE, ERROR, COMPLETED
+
 	}
 
 }

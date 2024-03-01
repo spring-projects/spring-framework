@@ -41,7 +41,8 @@ public class DisconnectedClientHelper {
 			new HashSet<>(Arrays.asList("broken pipe", "connection reset by peer"));
 
 	private static final Set<String> EXCEPTION_TYPE_NAMES =
-			new HashSet<>(Arrays.asList("AbortedException", "ClientAbortException", "EOFException", "EofException"));
+			new HashSet<>(Arrays.asList("AbortedException", "ClientAbortException",
+					"EOFException", "EofException", "AsyncRequestNotUsableException"));
 
 	private final Log logger;
 
