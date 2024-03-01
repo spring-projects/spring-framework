@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import reactor.core.publisher.Mono;
@@ -46,10 +46,8 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
@@ -73,9 +71,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private static final Class<?>[] EMPTY_GROUPS = new Class<?>[0];
 
 	private static final Object NO_ARG_VALUE = new Object();
-
-	private static final ReflectionUtils.MethodFilter boxImplFilter =
-			(method -> method.isSynthetic() && Modifier.isStatic(method.getModifiers()) && method.getName().equals("box-impl"));
 
 
 	private final HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
@@ -333,10 +328,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 								if (parameter.getType().getClassifier() instanceof KClass<?> kClass) {
 									Class<?> javaClass = JvmClassMappingKt.getJavaClass(kClass);
 									if (KotlinDetector.isInlineClass(javaClass)) {
-										Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(javaClass, boxImplFilter);
-										Assert.state(methods.length == 1,
-												"Unable to find a single box-impl synthetic static method in " + javaClass.getName());
-										argMap.put(parameter, ReflectionUtils.invokeMethod(methods[0], null, args[index]));
+										argMap.put(parameter, KClasses.getPrimaryConstructor(kClass).call(args[index]));
 									}
 									else {
 										argMap.put(parameter, args[index]);
@@ -354,6 +346,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return (result == Unit.INSTANCE ? null : result);
 			}
 		}
+
 	}
 
 }

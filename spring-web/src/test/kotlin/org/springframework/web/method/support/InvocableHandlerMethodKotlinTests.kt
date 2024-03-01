@@ -87,15 +87,22 @@ class InvocableHandlerMethodKotlinTests {
 	@Test
 	fun valueClass() {
 		composite.addResolver(StubArgumentResolver(Long::class.java, 1L))
-		val value = getInvocable(Handler::class.java, Long::class.java).invokeForRequest(request, null)
+		val value = getInvocable(ValueClassHandler::class.java, Long::class.java).invokeForRequest(request, null)
 		Assertions.assertThat(value).isEqualTo(1L)
 	}
 
 	@Test
 	fun valueClassDefaultValue() {
 		composite.addResolver(StubArgumentResolver(Double::class.java))
-		val value = getInvocable(Handler::class.java, Double::class.java).invokeForRequest(request, null)
+		val value = getInvocable(ValueClassHandler::class.java, Double::class.java).invokeForRequest(request, null)
 		Assertions.assertThat(value).isEqualTo(3.1)
+	}
+
+	@Test
+	fun valueClassWithInit() {
+		composite.addResolver(StubArgumentResolver(String::class.java, ""))
+		val invocable = getInvocable(ValueClassHandler::class.java, String::class.java)
+		Assertions.assertThatIllegalArgumentException().isThrownBy { invocable.invokeForRequest(request, null) }
 	}
 
 	@Test
@@ -153,11 +160,19 @@ class InvocableHandlerMethodKotlinTests {
 			return null
 		}
 
+	}
+
+	private class ValueClassHandler {
+
 		fun valueClass(limit: LongValueClass) =
 			limit.value
 
 		fun valueClass(limit: DoubleValueClass = DoubleValueClass(3.1)) =
 			limit.value
+
+		fun valueClassWithInit(valueClass: ValueClassWithInit) =
+			valueClass
+
 	}
 
 	private class PropertyAccessorHandler {
@@ -182,6 +197,15 @@ class InvocableHandlerMethodKotlinTests {
 
 	@JvmInline
 	value class DoubleValueClass(val value: Double)
+
+	@JvmInline
+	value class ValueClassWithInit(val value: String) {
+		init {
+			if (value.isEmpty()) {
+				throw IllegalArgumentException()
+			}
+		}
+	}
 
 	class CustomException(message: String) : Throwable(message)
 
