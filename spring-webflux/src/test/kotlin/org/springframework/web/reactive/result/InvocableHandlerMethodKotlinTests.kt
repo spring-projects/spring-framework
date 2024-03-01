@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
@@ -41,6 +42,7 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.lang.reflect.Method
 import java.time.Duration
+import kotlin.reflect.KClass
 import kotlin.reflect.jvm.javaMethod
 
 /**
@@ -198,6 +200,14 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun valueClassWithInit() {
+		this.resolvers.add(stubResolver("", String::class.java))
+		val method = ValueClassController::valueClassWithInit.javaMethod!!
+		val result = invoke(ValueClassController(), method)
+		assertExceptionThrown(result, IllegalArgumentException::class)
+	}
+
+	@Test
 	fun propertyAccessor() {
 		this.resolvers.add(stubResolver(null, String::class.java))
 		val method = PropertyAccessorController::prop.getter.javaMethod!!
@@ -254,6 +264,10 @@ class InvocableHandlerMethodKotlinTests {
 						assertThat(it.returnValue).isEqualTo(expected)
 					}
 				}.verifyComplete()
+	}
+
+	private fun assertExceptionThrown(mono: Mono<HandlerResult>, exceptionClass: KClass<out Throwable>) {
+		StepVerifier.create(mono).verifyError(exceptionClass.java)
 	}
 
 	class CoroutinesController {
@@ -320,6 +334,9 @@ class InvocableHandlerMethodKotlinTests {
 		fun valueClassWithDefault(limit: DoubleValueClass = DoubleValueClass(3.1)) =
 			"${limit.value}"
 
+		fun valueClassWithInit(valueClass: ValueClassWithInit) =
+			valueClass
+
 	}
 
 	class PropertyAccessorController {
@@ -345,6 +362,15 @@ class InvocableHandlerMethodKotlinTests {
 
 	@JvmInline
 	value class DoubleValueClass(val value: Double)
+
+	@JvmInline
+	value class ValueClassWithInit(val value: String) {
+		init {
+			if (value.isEmpty()) {
+				throw IllegalArgumentException()
+			}
+		}
+	}
 
 	class CustomException(message: String) : Throwable(message)
 }

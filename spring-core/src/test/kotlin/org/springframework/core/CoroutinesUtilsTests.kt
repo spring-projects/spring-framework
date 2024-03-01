@@ -155,6 +155,17 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithValueClassWithInitParameter() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassWithInit") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "", null) as Mono
+		Assertions.assertThatIllegalArgumentException().isThrownBy {
+			runBlocking {
+				mono.awaitSingle()
+			}
+		}
+	}
+
+	@Test
 	fun invokeSuspendingFunctionWithExtension() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithExtension",
 			CustomException::class.java, Continuation::class.java)
@@ -206,6 +217,11 @@ class CoroutinesUtilsTests {
 		return value.value
 	}
 
+	suspend fun suspendingFunctionWithValueClassWithInit(value: ValueClassWithInit): String {
+		delay(1)
+		return value.value
+	}
+
 	suspend fun CustomException.suspendingFunctionWithExtension(): String {
 		delay(1)
 		return "${this.message}"
@@ -218,6 +234,15 @@ class CoroutinesUtilsTests {
 
 	@JvmInline
 	value class ValueClass(val value: String)
+
+	@JvmInline
+	value class ValueClassWithInit(val value: String) {
+		 init {
+		     if (value.isEmpty()) {
+				 throw IllegalArgumentException()
+			 }
+		 }
+	}
 
 	class CustomException(message: String) : Throwable(message)
 
