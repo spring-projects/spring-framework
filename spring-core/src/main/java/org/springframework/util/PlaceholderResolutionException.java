@@ -31,7 +31,7 @@ import org.springframework.lang.Nullable;
  * @since 6.2
  */
 @SuppressWarnings("serial")
-public class PlaceholderResolutionException extends RuntimeException {
+public class PlaceholderResolutionException extends IllegalArgumentException {
 
 	private final String reason;
 
