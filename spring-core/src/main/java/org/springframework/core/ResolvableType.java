@@ -329,6 +329,8 @@ public class ResolvableType implements Serializable {
 			return true;
 		}
 
+		boolean exactMatch = (strict && matchedBefore != null);  // We're checking nested generic variables now...
+
 		// Deal with wildcard bounds
 		WildcardBounds ourBounds = WildcardBounds.get(this);
 		WildcardBounds typeBounds = WildcardBounds.get(other);
@@ -336,10 +338,14 @@ public class ResolvableType implements Serializable {
 		// In the form X is assignable to <? extends Number>
 		if (typeBounds != null) {
 			if (ourBounds != null) {
-				return (ourBounds.isSameKind(typeBounds) && ourBounds.isAssignableFrom(typeBounds.getBounds()));
+				return (ourBounds.isSameKind(typeBounds) &&
+						ourBounds.isAssignableFrom(typeBounds.getBounds(), matchedBefore));
 			}
 			else if (upUntilUnresolvable) {
-				return typeBounds.isAssignableFrom(this);
+				return typeBounds.isAssignableFrom(this, matchedBefore);
+			}
+			else if (!exactMatch) {
+				return typeBounds.isAssignableTo(this, matchedBefore);
 			}
 			else {
 				return false;
@@ -348,11 +354,10 @@ public class ResolvableType implements Serializable {
 
 		// In the form <? extends Number> is assignable to X...
 		if (ourBounds != null) {
-			return ourBounds.isAssignableFrom(other);
+			return ourBounds.isAssignableFrom(other, matchedBefore);
 		}
 
 		// Main assignability check about to follow
-		boolean exactMatch = (matchedBefore != null);  // We're checking nested generic variables now...
 		boolean checkGenerics = true;
 		Class<?> ourResolved = null;
 		if (this.type instanceof TypeVariable<?> variable) {
@@ -667,9 +672,9 @@ public class ResolvableType implements Serializable {
 	 * without specific bounds (i.e., equal to {@code ? extends Object}).
 	 */
 	private boolean isWildcardWithoutBounds() {
-		if (this.type instanceof WildcardType wt) {
-			if (wt.getLowerBounds().length == 0) {
-				Type[] upperBounds = wt.getUpperBounds();
+		if (this.type instanceof WildcardType wildcardType) {
+			if (wildcardType.getLowerBounds().length == 0) {
+				Type[] upperBounds = wildcardType.getUpperBounds();
 				if (upperBounds.length == 0 || (upperBounds.length == 1 && Object.class == upperBounds[0])) {
 					return true;
 				}
@@ -1693,30 +1698,60 @@ public class ResolvableType implements Serializable {
 		}
 
 		/**
-		 * Return {@code true} if this bounds is the same kind as the specified bounds.
+		 * Return {@code true} if these bounds are the same kind as the specified bounds.
 		 */
 		public boolean isSameKind(WildcardBounds bounds) {
 			return this.kind == bounds.kind;
 		}
 
 		/**
-		 * Return {@code true} if this bounds is assignable to all the specified types.
+		 * Return {@code true} if these bounds are assignable from all the specified types.
 		 * @param types the types to test against
-		 * @return {@code true} if this bounds is assignable to all types
+		 * @return {@code true} if these bounds are assignable from all types
 		 */
-		public boolean isAssignableFrom(ResolvableType... types) {
-			for (ResolvableType bound : this.bounds) {
-				for (ResolvableType type : types) {
-					if (!isAssignable(bound, type)) {
-						return false;
-					}
+		public boolean isAssignableFrom(ResolvableType[] types, @Nullable Map<Type, Type> matchedBefore) {
+			for (ResolvableType type : types) {
+				if (!isAssignableFrom(type, matchedBefore)) {
+					return false;
 				}
 			}
 			return true;
 		}
 
-		private boolean isAssignable(ResolvableType source, ResolvableType from) {
-			return (this.kind == Kind.UPPER ? source.isAssignableFrom(from) : from.isAssignableFrom(source));
+		/**
+		 * Return {@code true} if these bounds are assignable from the specified type.
+		 * @param type the type to test against
+		 * @return {@code true} if these bounds are assignable from the type
+		 * @since 6.2
+		 */
+		public boolean isAssignableFrom(ResolvableType type, @Nullable Map<Type, Type> matchedBefore) {
+			for (ResolvableType bound : this.bounds) {
+				if (this.kind == Kind.UPPER ? !bound.isAssignableFrom(type, false, matchedBefore, false) :
+						!type.isAssignableFrom(bound, false, matchedBefore, false)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * Return {@code true} if these bounds are assignable to the specified type.
+		 * @param type the type to test against
+		 * @return {@code true} if these bounds are assignable to the type
+		 * @since 6.2
+		 */
+		public boolean isAssignableTo(ResolvableType type, @Nullable Map<Type, Type> matchedBefore) {
+			if (this.kind == Kind.UPPER) {
+				for (ResolvableType bound : this.bounds) {
+					if (type.isAssignableFrom(bound, false, matchedBefore, false)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			else {
+				return (type.resolve() == Object.class);
+			}
 		}
 
 		/**
@@ -1728,21 +1763,30 @@ public class ResolvableType implements Serializable {
 
 		/**
 		 * Get a {@link WildcardBounds} instance for the specified type, returning
-		 * {@code null} if the specified type cannot be resolved to a {@link WildcardType}.
+		 * {@code null} if the specified type cannot be resolved to a {@link WildcardType}
+		 * or an equivalent unresolvable type variable.
 		 * @param type the source type
 		 * @return a {@link WildcardBounds} instance or {@code null}
 		 */
 		@Nullable
 		public static WildcardBounds get(ResolvableType type) {
-			ResolvableType resolveToWildcard = type;
-			while (!(resolveToWildcard.getType() instanceof WildcardType wildcardType)) {
-				if (resolveToWildcard == NONE) {
+			ResolvableType candidate = type;
+			while (!(candidate.getType() instanceof WildcardType || candidate.isUnresolvableTypeVariable())) {
+				if (candidate == NONE) {
 					return null;
 				}
-				resolveToWildcard = resolveToWildcard.resolveType();
+				candidate = candidate.resolveType();
 			}
-			Kind boundsType = (wildcardType.getLowerBounds().length > 0 ? Kind.LOWER : Kind.UPPER);
-			Type[] bounds = (boundsType == Kind.UPPER ? wildcardType.getUpperBounds() : wildcardType.getLowerBounds());
+			Kind boundsType;
+			Type[] bounds;
+			if (candidate.getType() instanceof WildcardType wildcardType) {
+				boundsType = (wildcardType.getLowerBounds().length > 0 ? Kind.LOWER : Kind.UPPER);
+				bounds = (boundsType == Kind.UPPER ? wildcardType.getUpperBounds() : wildcardType.getLowerBounds());
+			}
+			else {
+				boundsType = Kind.UPPER;
+				bounds = ((TypeVariable<?>) candidate.getType()).getBounds();
+			}
 			ResolvableType[] resolvableBounds = new ResolvableType[bounds.length];
 			for (int i = 0; i < bounds.length; i++) {
 				resolvableBounds[i] = ResolvableType.forType(bounds[i], type.variableResolver);

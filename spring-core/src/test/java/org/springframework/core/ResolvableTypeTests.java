@@ -1023,11 +1023,21 @@ class ResolvableTypeTests {
 	@Test
 	void isAssignableFromCannotBeResolved() throws Exception {
 		ResolvableType objectType = ResolvableType.forClass(Object.class);
-		ResolvableType unresolvableVariable = ResolvableType.forField(AssignmentBase.class.getField("o"));
+		ResolvableType unresolvableVariable1 = ResolvableType.forField(AssignmentBase.class.getField("o"));
+		ResolvableType unresolvableVariable2 = ResolvableType.forField(AssignmentBase.class.getField("c"));
+		ResolvableType unresolvableVariable3 = ResolvableType.forField(AssignmentBase.class.getField("s"));
 
-		assertThat(unresolvableVariable.resolve()).isNull();
-		assertThatResolvableType(objectType).isAssignableFrom(unresolvableVariable);
-		assertThatResolvableType(unresolvableVariable).isAssignableFrom(objectType);
+		assertThat(unresolvableVariable1.resolve()).isNull();
+		assertThatResolvableType(objectType).isAssignableFrom(unresolvableVariable1);
+		assertThatResolvableType(unresolvableVariable1).isAssignableFrom(objectType);
+
+		assertThat(unresolvableVariable2.resolve()).isNull();
+		assertThatResolvableType(objectType).isAssignableFrom(unresolvableVariable2);
+		assertThatResolvableType(unresolvableVariable2).isAssignableFrom(objectType);
+
+		assertThat(unresolvableVariable3.resolve()).isEqualTo(Serializable.class);
+		assertThatResolvableType(objectType).isAssignableFrom(unresolvableVariable3);
+		assertThatResolvableType(unresolvableVariable3).isNotAssignableFrom(objectType);
 	}
 
 	@Test
@@ -1157,7 +1167,7 @@ class ResolvableTypeTests {
 
 		// T <= ? extends T
 		assertThatResolvableType(extendsCharSequence).isAssignableFrom(charSequence, string).isNotAssignableFrom(object);
-		assertThatResolvableType(charSequence).isNotAssignableFrom(extendsObject, extendsCharSequence, extendsString);
+		assertThatResolvableType(charSequence).isAssignableFrom(extendsCharSequence, extendsString).isNotAssignableFrom(extendsObject);
 		assertThatResolvableType(extendsAnon).isAssignableFrom(object, charSequence, string);
 
 		// T <= ? super T
@@ -1368,6 +1378,14 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void gh22902() throws Exception {
+		ResolvableType ab = ResolvableType.forField(ABClient.class.getField("field"));
+		assertThat(ab.isAssignableFrom(Object.class)).isFalse();
+		assertThat(ab.isAssignableFrom(AwithB.class)).isTrue();
+		assertThat(ab.isAssignableFrom(AwithoutB.class)).isFalse();
+	}
+
+	@Test
 	void gh32327() throws Exception {
 		ResolvableType repository1 = ResolvableType.forField(Fields.class.getField("repository"));
 		ResolvableType repository2 = ResolvableType.forMethodReturnType(Methods.class.getMethod("someRepository"));
@@ -1375,7 +1393,7 @@ class ResolvableTypeTests {
 		assertThat(repository1.hasUnresolvableGenerics()).isFalse();
 		assertThat(repository1.isAssignableFrom(repository2)).isFalse();
 		assertThat(repository1.isAssignableFromResolvedPart(repository2)).isTrue();
-		assertThat(repository1.isAssignableFrom(repository3)).isFalse();
+		assertThat(repository1.isAssignableFrom(repository3)).isTrue();
 		assertThat(repository1.isAssignableFromResolvedPart(repository3)).isTrue();
 		assertThat(repository2.hasUnresolvableGenerics()).isTrue();
 		assertThat(repository2.isAssignableFrom(repository1)).isTrue();
@@ -1520,7 +1538,7 @@ class ResolvableTypeTests {
 	}
 
 
-	static class AssignmentBase<O, C, S> {
+	static class AssignmentBase<O, C, S extends Serializable> {
 
 		public O o;
 
@@ -1719,6 +1737,40 @@ class ResolvableTypeTests {
 	public abstract class UnresolvedWithGenerics {
 
 		Set<Integer> set;
+	}
+
+
+	interface A {
+
+		void doA();
+	}
+
+	interface B {
+
+		void doB();
+	}
+
+	static class ABClient<T extends A & B> {
+
+		public T field;
+	}
+
+	static class AwithB implements A, B {
+
+		@Override
+		public void doA() {
+		}
+
+		@Override
+		public void doB() {
+		}
+	}
+
+	static class AwithoutB implements A {
+
+		@Override
+		public void doA() {
+		}
 	}
 
 
