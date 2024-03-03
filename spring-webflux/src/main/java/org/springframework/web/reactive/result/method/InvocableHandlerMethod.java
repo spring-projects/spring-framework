@@ -324,18 +324,20 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					switch (parameter.getKind()) {
 						case INSTANCE -> argMap.put(parameter, target);
 						case VALUE, EXTENSION_RECEIVER -> {
-							if (!parameter.isOptional() || args[index] != null) {
+							Object arg = args[index];
+							if (!(parameter.isOptional() && arg == null)) {
 								if (parameter.getType().getClassifier() instanceof KClass<?> kClass) {
 									Class<?> javaClass = JvmClassMappingKt.getJavaClass(kClass);
-									if (KotlinDetector.isInlineClass(javaClass)) {
-										argMap.put(parameter, KClasses.getPrimaryConstructor(kClass).call(args[index]));
+									if (KotlinDetector.isInlineClass(javaClass)
+											&& !(parameter.getType().isMarkedNullable() && arg == null)) {
+										argMap.put(parameter, KClasses.getPrimaryConstructor(kClass).call(arg));
 									}
 									else {
-										argMap.put(parameter, args[index]);
+										argMap.put(parameter, arg);
 									}
 								}
 								else {
-									argMap.put(parameter, args[index]);
+									argMap.put(parameter, arg);
 								}
 							}
 							index++;

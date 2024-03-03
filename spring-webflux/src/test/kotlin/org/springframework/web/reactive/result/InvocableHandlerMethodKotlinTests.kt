@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
@@ -178,8 +177,16 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun nullReturnValue() {
-		val method = NullResultController::nullable.javaMethod!!
+		val method = NullResultController::nullableReturnValue.javaMethod!!
 		val result = invoke(NullResultController(), method)
+		assertHandlerResultValue(result, null)
+	}
+
+	@Test
+	fun nullParameter() {
+		this.resolvers.add(stubResolver(null, String::class.java))
+		val method = NullResultController::nullableParameter.javaMethod!!
+		val result = invoke(NullResultController(), method, null)
 		assertHandlerResultValue(result, null)
 	}
 
@@ -192,7 +199,7 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
-	fun valueClassDefaultValue() {
+	fun valueClassWithDefaultValue() {
 		this.resolvers.add(stubResolver(null, Double::class.java))
 		val method = ValueClassController::valueClassWithDefault.javaMethod!!
 		val result = invoke(ValueClassController(), method)
@@ -205,6 +212,14 @@ class InvocableHandlerMethodKotlinTests {
 		val method = ValueClassController::valueClassWithInit.javaMethod!!
 		val result = invoke(ValueClassController(), method)
 		assertExceptionThrown(result, IllegalArgumentException::class)
+	}
+
+	@Test
+	fun valueClassWithNullable() {
+		this.resolvers.add(stubResolver(null, LongValueClass::class.java))
+		val method = ValueClassController::valueClassWithNullable.javaMethod!!
+		val result = invoke(ValueClassController(), method, null)
+		assertHandlerResultValue(result, "null")
 	}
 
 	@Test
@@ -321,8 +336,12 @@ class InvocableHandlerMethodKotlinTests {
 		fun unit() {
 		}
 
-		fun nullable(): String? {
+		fun nullableReturnValue(): String? {
 			return null
+		}
+
+		fun nullableParameter(value: String?): String? {
+			return value
 		}
 	}
 
@@ -336,6 +355,9 @@ class InvocableHandlerMethodKotlinTests {
 
 		fun valueClassWithInit(valueClass: ValueClassWithInit) =
 			valueClass
+
+		fun valueClassWithNullable(limit: LongValueClass?) =
+			"${limit?.value}"
 
 	}
 
