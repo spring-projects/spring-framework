@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,7 +53,6 @@ import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.within;
 import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
@@ -124,7 +124,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	 * TODO Potential optimizations for SpEL compilation:
 	 *
 	 * - OpMinus with a single literal operand could be treated as a negative literal. Will save a
-	 *   pointless loading of 0 and then a subtract instruction in code geneneration.
+	 *   pointless loading of 0 and then a subtract instruction in code generation.
 	 *
 	 * - allow other accessors/resolvers to participate in compilation and create their own code.
 	 *
@@ -142,6 +142,84 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	private SpelNodeImpl ast;
 
+
+	@Nested
+	class VariableReferenceTests {
+
+		@ParameterizedTest  // gh-32356
+		@ValueSource(strings = { "#root", "#this" })
+		void rootVariableWithPublicType(String spel) {
+			String string = "hello";
+			expression = parser.parseExpression(spel);
+			Object result = expression.getValue(string, String.class);
+			assertThat(result).isEqualTo(string);
+			assertCanCompile(expression);
+			result = expression.getValue(string, String.class);
+			assertThat(result).isEqualTo(string);
+
+			Integer number = 42;
+			expression = parser.parseExpression(spel);
+			result = expression.getValue(number, Integer.class);
+			assertThat(result).isEqualTo(number);
+			assertCanCompile(expression);
+			result = expression.getValue(number, Integer.class);
+			assertThat(result).isEqualTo(number);
+		}
+
+		@ParameterizedTest  // gh-32356
+		@ValueSource(strings = {
+			"#root.empty ? 0 : #root.size",
+			"#this.empty ? 0 : #this.size"
+		})
+		void rootVariableWithNonPublicType(String spel) {
+			Map<String, Integer> map = Map.of("a", 13, "b", 42);
+
+			// Prerequisite: root type must not be public for this use case.
+			assertThat(Modifier.isPublic(map.getClass().getModifiers())).isFalse();
+
+			expression = parser.parseExpression(spel);
+			Integer result = expression.getValue(map, Integer.class);
+			assertThat(result).isEqualTo(2);
+			assertCanCompile(expression);
+			result = expression.getValue(map, Integer.class);
+			assertThat(result).isEqualTo(2);
+		}
+
+		@Test
+		void userDefinedVariable() {
+			EvaluationContext ctx = new StandardEvaluationContext();
+			ctx.setVariable("target", "abc");
+			expression = parser.parseExpression("#target");
+			assertThat(expression.getValue(ctx)).isEqualTo("abc");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(ctx)).isEqualTo("abc");
+			ctx.setVariable("target", "123");
+			assertThat(expression.getValue(ctx)).isEqualTo("123");
+
+			// Changing the variable type from String to Integer results in a
+			// ClassCastException in the compiled code.
+			ctx.setVariable("target", 42);
+			assertThatExceptionOfType(SpelEvaluationException.class)
+				.isThrownBy(() -> expression.getValue(ctx))
+				.withCauseInstanceOf(ClassCastException.class);
+
+			ctx.setVariable("target", "abc");
+			expression = parser.parseExpression("#target.charAt(0)");
+			assertThat(expression.getValue(ctx)).isEqualTo('a');
+			assertCanCompile(expression);
+			assertThat(expression.getValue(ctx)).isEqualTo('a');
+			ctx.setVariable("target", "1");
+			assertThat(expression.getValue(ctx)).isEqualTo('1');
+
+			// Changing the variable type from String to Integer results in a
+			// ClassCastException in the compiled code.
+			ctx.setVariable("target", 42);
+			assertThatExceptionOfType(SpelEvaluationException.class)
+				.isThrownBy(() -> expression.getValue(ctx))
+				.withCauseInstanceOf(ClassCastException.class);
+		}
+
+	}
 
 	@Nested
 	class IndexingTests {
@@ -466,9 +544,12 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
 		}
 
-		@Test
+		@Test  // gh-32356
 		void indexIntoMapOfPrimitiveIntArray() {
 			Map<String, int[]> map = Map.of("foo", new int[] { 1, 2, 3 });
+
+			// Prerequisite: root type must not be public for this use case.
+			assertThat(Modifier.isPublic(map.getClass().getModifiers())).isFalse();
 
 			// map key access
 			expression = parser.parseExpression("['foo']");
@@ -479,22 +560,37 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(stringify(expression.getValue(map))).isEqualTo("1 2 3");
 			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
 
-			// map key access & array index
+			// map key access via implicit #root & array index
 			expression = parser.parseExpression("['foo'][1]");
+
+			assertThat(expression.getValue(map)).isEqualTo(2);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(map)).isEqualTo(2);
+
+			// map key access via explicit #root & array index
+			expression = parser.parseExpression("#root['foo'][1]");
+
+			assertThat(expression.getValue(map)).isEqualTo(2);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(map)).isEqualTo(2);
+
+			// map key access via explicit #this & array index
+			expression = parser.parseExpression("#this['foo'][1]");
 
 			assertThat(expression.getValue(map)).isEqualTo(2);
 			assertCanCompile(expression);
 			assertThat(expression.getValue(map)).isEqualTo(2);
 		}
 
-		@Test
+		@Test  // gh-32356
 		void indexIntoMapOfPrimitiveIntArrayWithCompilableMapAccessor() {
 			StandardEvaluationContext context = new StandardEvaluationContext();
 			context.addPropertyAccessor(new CompilableMapAccessor());
 
-			// Map<String, int[]> map = Map.of("foo", new int[] { 1, 2, 3 });
-			Map<String, int[]> map = new HashMap<>();
-			map.put("foo", new int[] { 1, 2, 3 });
+			Map<String, int[]> map = Map.of("foo", new int[] { 1, 2, 3 });
+
+			// Prerequisite: root type must not be public for this use case.
+			assertThat(Modifier.isPublic(map.getClass().getModifiers())).isFalse();
 
 			// map key access
 			expression = parser.parseExpression("['foo']");
@@ -516,12 +612,13 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 			assertThat(expression.getValue(context, map)).isEqualTo(2);
 			assertCanCompile(expression);
-			// TODO If map is created via Map.of(), the following fails with an IllegalAccessError.
-			//
-			// IllegalAccessError: failed to access class java.util.ImmutableCollections$Map1 from class
-			// spel.Ex2774 (java.util.ImmutableCollections$Map1 is in module java.base of loader 'bootstrap';
-			// spel.Ex2774 is in unnamed module of loader
-			// org.springframework.expression.spel.standard.SpelCompiler$ChildClassLoader @359b650b)
+			assertThat(expression.getValue(context, map)).isEqualTo(2);
+
+			// custom CompilableMapAccessor via explicit #this & array index
+			expression = parser.parseExpression("#this.foo[1]");
+
+			assertThat(expression.getValue(context, map)).isEqualTo(2);
+			assertCanCompile(expression);
 			assertThat(expression.getValue(context, map)).isEqualTo(2);
 
 			// map key access & array index
@@ -644,7 +741,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue()).isEqualTo(boolean.class);
 
 		expression = parse("T(Missing)");
-		assertGetValueFail(expression);
+		assertThatExceptionOfType(SpelEvaluationException.class)
+				.isThrownBy(expression::getValue)
+				.withMessageEndingWith("Type cannot be found 'Missing'");
 		assertCantCompile(expression);
 	}
 
@@ -915,16 +1014,20 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		// Code gen is different for -1 .. 6 because there are bytecode instructions specifically for those values
 
-		// Not an int literal but an opminus with one operand:
-		// expression = parser.parseExpression("-1");
-		// assertCanCompile(expression);
-		// assertEquals(-1, expression.getValue());
+		// Not an int literal but an opMinus with one operand:
+		expression = parser.parseExpression("-1");
+		expression.getValue(Integer.class);
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isEqualTo(-1);
+
 		expression = parser.parseExpression("0");
 		assertCanCompile(expression);
 		assertThat(expression.getValue()).isEqualTo(0);
+
 		expression = parser.parseExpression("2");
 		assertCanCompile(expression);
 		assertThat(expression.getValue()).isEqualTo(2);
+
 		expression = parser.parseExpression("7");
 		assertCanCompile(expression);
 		assertThat(expression.getValue()).isEqualTo(7);
@@ -1374,23 +1477,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 	}
 
-	@Test
-	void variableReference_root() {
-		String s = "hello";
-		Expression expression = parser.parseExpression("#root");
-		String resultI = expression.getValue(s, String.class);
-		assertCanCompile(expression);
-		String resultC = expression.getValue(s, String.class);
-		assertThat(resultI).isEqualTo(s);
-		assertThat(resultC).isEqualTo(s);
-
-		expression = parser.parseExpression("#root");
-		int i = (Integer) expression.getValue(42);
-		assertThat(i).isEqualTo(42);
-		assertCanCompile(expression);
-		i = (Integer) expression.getValue(42);
-		assertThat(i).isEqualTo(42);
-	}
 
 	public static String concat(String a, String b) {
 		return a+b;
@@ -1774,34 +1860,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(ctx)).isEqualTo("abc");
 		assertCanCompile(expression);
 		assertThat(expression.getValue(ctx)).isEqualTo("abc");
-	}
-
-	@Test
-	void variableReference_userDefined() {
-		EvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setVariable("target", "abc");
-		expression = parser.parseExpression("#target");
-		assertThat(expression.getValue(ctx)).isEqualTo("abc");
-		assertCanCompile(expression);
-		assertThat(expression.getValue(ctx)).isEqualTo("abc");
-		ctx.setVariable("target", "123");
-		assertThat(expression.getValue(ctx)).isEqualTo("123");
-		ctx.setVariable("target", 42);
-		assertThatExceptionOfType(SpelEvaluationException.class)
-			.isThrownBy(() -> expression.getValue(ctx))
-			.withCauseInstanceOf(ClassCastException.class);
-
-		ctx.setVariable("target", "abc");
-		expression = parser.parseExpression("#target.charAt(0)");
-		assertThat(expression.getValue(ctx)).isEqualTo('a');
-		assertCanCompile(expression);
-		assertThat(expression.getValue(ctx)).isEqualTo('a');
-		ctx.setVariable("target", "1");
-		assertThat(expression.getValue(ctx)).isEqualTo('1');
-		ctx.setVariable("target", 42);
-		assertThatExceptionOfType(SpelEvaluationException.class)
-			.isThrownBy(() -> expression.getValue(ctx))
-			.withCauseInstanceOf(ClassCastException.class);
 	}
 
 	@Test
@@ -5402,19 +5460,21 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	private void assertCanCompile(Expression expression) {
-		assertThat(SpelCompiler.compile(expression)).isTrue();
+		assertThat(SpelCompiler.compile(expression))
+				.as(() -> "Expression <%s> should be compilable"
+						.formatted(((SpelExpression) expression).toStringAST()))
+				.isTrue();
 	}
 
 	private void assertCantCompile(Expression expression) {
-		assertThat(SpelCompiler.compile(expression)).isFalse();
+		assertThat(SpelCompiler.compile(expression))
+				.as(() -> "Expression <%s> should not be compilable"
+						.formatted(((SpelExpression) expression).toStringAST()))
+				.isFalse();
 	}
 
 	private Expression parse(String expression) {
 		return parser.parseExpression(expression);
-	}
-
-	private void assertGetValueFail(Expression expression) {
-		assertThatException().isThrownBy(expression::getValue);
 	}
 
 

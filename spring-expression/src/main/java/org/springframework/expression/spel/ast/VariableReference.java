@@ -70,16 +70,23 @@ public class VariableReference extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws SpelEvaluationException {
+		TypedValue result;
 		if (THIS.equals(this.name)) {
-			return state.getActiveContextObject();
+			result = state.getActiveContextObject();
+			// If the active context object (#this) is not the root context object (#root),
+			// that means that #this is being evaluated within a nested scope (for example,
+			// collection selection or collection project), which is not a compilable
+			// expression, so we return the result without setting the exit type descriptor.
+			if (result != state.getRootContextObject()) {
+				return result;
+			}
 		}
-		if (ROOT.equals(this.name)) {
-			TypedValue result = state.getRootContextObject();
-			this.exitTypeDescriptor = CodeFlow.toDescriptorFromObject(result.getValue());
-			return result;
+		else if (ROOT.equals(this.name)) {
+			result = state.getRootContextObject();
 		}
-
-		TypedValue result = state.lookupVariable(this.name);
+		else {
+			result = state.lookupVariable(this.name);
+		}
 		setExitTypeDescriptor(result.getValue());
 
 		// A null value in the returned TypedValue will mean either the value was
@@ -132,7 +139,7 @@ public class VariableReference extends SpelNodeImpl {
 
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		if (ROOT.equals(this.name)) {
+		if (THIS.equals(this.name) || ROOT.equals(this.name)) {
 			mv.visitVarInsn(ALOAD, 1);
 		}
 		else {

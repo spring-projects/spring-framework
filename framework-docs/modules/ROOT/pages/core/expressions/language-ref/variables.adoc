@@ -20,6 +20,15 @@ characters.
 * dollar sign: `$`
 ====
 
+[TIP]
+====
+When setting a variable or root context object in the `EvaluationContext`, it is advised
+that the type of the variable or root context object be `public`.
+
+Otherwise, certain types of SpEL expressions involving a variable or root context object
+with a non-public type may fail to evaluate or compile.
+====
+
 [WARNING]
 ====
 Since variables share a common namespace with
