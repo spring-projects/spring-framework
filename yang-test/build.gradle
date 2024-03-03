@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.test'
+version = '6.0.18-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(project(":spring-context"))
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+

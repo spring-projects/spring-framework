@@ -59,3 +59,5 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
+include 'yang-test'
+
