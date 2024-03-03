@@ -42,6 +42,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MultipartFile;
@@ -118,6 +119,10 @@ import org.springframework.web.util.WebUtils;
  * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
  * <tr class="odd-row-color">
+ * <td><div class="block">{@link MethodValidationException}</div></td>
+ * <td><div class="block">500 (SC_INTERNAL_SERVER_ERROR)</div></td>
+ * </tr>
+ * <tr class="odd-row-color">
  * <td><div class="block">{@link HandlerMethodValidationException}</div></td>
  * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
@@ -133,9 +138,9 @@ import org.springframework.web.util.WebUtils;
  * <td><div class="block">AsyncRequestTimeoutException</div></td>
  * <td><div class="block">503 (SC_SERVICE_UNAVAILABLE)</div></td>
  * </tr>
- * <tr class="odd-row-color">
- * <td><div class="block">{@link MethodValidationException}</div></td>
- * <td><div class="block">500 (SC_INTERNAL_SERVER_ERROR)</div></td>
+ * <tr class="even-row-color">
+ * <td><div class="block">AsyncRequestNotUsableException</div></td>
+ * <td><div class="block">Not applicable</div></td>
  * </tr>
  * </tbody>
  * </table>
@@ -236,6 +241,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof MethodValidationException theEx) {
 				return handleMethodValidationException(theEx, request, response, handler);
+			}
+			else if (ex instanceof AsyncRequestNotUsableException) {
+				return handleAsyncRequestNotUsableException(
+						(AsyncRequestNotUsableException) ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerEx) {
@@ -486,6 +495,24 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		return null;
+	}
+
+	/**
+	 * Handle the case of an I/O failure from the ServletOutputStream.
+	 * <p>By default, do nothing since the response is not usable.
+	 * @param ex the {@link AsyncRequestTimeoutException} to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or {@code null} if none chosen
+	 * at the time of the exception (for example, if multipart resolution failed)
+	 * @return an empty ModelAndView indicating the exception was handled
+	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
+	 * @since 5.3.33
+	 */
+	protected ModelAndView handleAsyncRequestNotUsableException(AsyncRequestNotUsableException ex,
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) {
+
+		return new ModelAndView();
 	}
 
 	/**
