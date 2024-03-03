@@ -21,7 +21,9 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
@@ -34,6 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MethodInvoker;
 
 /**
@@ -46,6 +49,14 @@ import org.springframework.util.MethodInvoker;
  * @since 3.0
  */
 public abstract class ReflectionHelper {
+
+	/**
+	 * Cache for equivalent methods in a public declaring class in the type
+	 * hierarchy of the method's declaring class.
+	 * @since 6.2
+	 */
+	private static final Map<Method, Class<?>> publicDeclaringClassCache = new ConcurrentReferenceHashMap<>(256);
+
 
 	/**
 	 * Compare argument arrays and return information about whether they match.
@@ -486,6 +497,66 @@ public abstract class ReflectionHelper {
 			return newArgs;
 		}
 		return args;
+	}
+
+	/**
+	 * Find the first public class or interface in the method's class hierarchy
+	 * that declares the supplied method.
+	 * <p>Sometimes the reflective method discovery logic finds a suitable method
+	 * that can easily be called via reflection but cannot be called from generated
+	 * code when compiling the expression because of visibility restrictions. For
+	 * example, if a non-public class overrides {@code toString()}, this method
+	 * will traverse up the type hierarchy to find the first public type that
+	 * declares the method (if there is one). For {@code toString()}, it may
+	 * traverse as far as {@link Object}.
+	 * @param method the method to process
+	 * @return the public class or interface that declares the method, or
+	 * {@code null} if no such public type could be found
+	 * @since 6.2
+	 */
+	@Nullable
+	public static Class<?> findPublicDeclaringClass(Method method) {
+		return publicDeclaringClassCache.computeIfAbsent(method, key -> {
+				// If the method is already defined in a public type, return that type.
+				if (Modifier.isPublic(key.getDeclaringClass().getModifiers())) {
+					return key.getDeclaringClass();
+				}
+				Method interfaceMethod = ClassUtils.getInterfaceMethodIfPossible(key, null);
+				// If we found an interface method whose type is public, return the interface type.
+				if (!interfaceMethod.equals(key)) {
+					if (Modifier.isPublic(interfaceMethod.getDeclaringClass().getModifiers())) {
+						return interfaceMethod.getDeclaringClass();
+					}
+				}
+				// Attempt to search the type hierarchy.
+				Class<?> superclass = key.getDeclaringClass().getSuperclass();
+				if (superclass != null) {
+					return findPublicDeclaringClass(superclass, key.getName(), key.getParameterTypes());
+				}
+				// Otherwise, no public declaring class found.
+				return null;
+			});
+	}
+
+	@Nullable
+	private static Class<?> findPublicDeclaringClass(
+			Class<?> declaringClass, String methodName, Class<?>[] parameterTypes) {
+
+		if (Modifier.isPublic(declaringClass.getModifiers())) {
+			try {
+				declaringClass.getDeclaredMethod(methodName, parameterTypes);
+				return declaringClass;
+			}
+			catch (NoSuchMethodException ex) {
+				// Continue below...
+			}
+		}
+
+		Class<?> superclass = declaringClass.getSuperclass();
+		if (superclass != null) {
+			return findPublicDeclaringClass(superclass, methodName, parameterTypes);
+		}
+		return null;
 	}
 
 

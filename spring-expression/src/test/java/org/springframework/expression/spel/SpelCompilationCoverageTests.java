@@ -42,6 +42,7 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ast.CompoundExpression;
+import org.springframework.expression.spel.ast.InlineList;
 import org.springframework.expression.spel.ast.OpLT;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.expression.spel.ast.Ternary;
@@ -677,6 +678,158 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 	}
+
+	@Nested
+	class PropertyVisibilityTests {
+
+		@Test
+		void privateSubclassOverridesPropertyInPublicInterface() {
+			expression = parser.parseExpression("text");
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(privateSubclass.getClass());
+
+			String result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("enigma");
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("enigma");
+		}
+
+		@Test
+		void privateSubclassOverridesPropertyInPrivateInterface() {
+			expression = parser.parseExpression("message");
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(privateSubclass.getClass());
+
+			String result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("hello");
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("hello");
+		}
+
+		@Test
+		void privateSubclassOverridesPropertyInPublicSuperclass() {
+			expression = parser.parseExpression("number");
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(privateSubclass.getClass());
+
+			Integer result = expression.getValue(context, privateSubclass, Integer.class);
+			assertThat(result).isEqualTo(2);
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, Integer.class);
+			assertThat(result).isEqualTo(2);
+		}
+
+		private interface PrivateInterface {
+
+			String getMessage();
+		}
+
+		private static class PrivateSubclass extends PublicSuperclass implements PublicInterface, PrivateInterface {
+
+			@Override
+			public int getNumber() {
+				return 2;
+			}
+
+			@Override
+			public String getText() {
+				return "enigma";
+			}
+
+			@Override
+			public String getMessage() {
+				return "hello";
+			}
+		}
+	}
+
+	@Nested
+	class MethodVisibilityTests {
+
+		/**
+		 * Note that {@link InlineList} creates a list and wraps it via
+		 * {@link Collections#unmodifiableList(List)}, whose concrete type is
+		 * package private.
+		 */
+		@Test
+		void packagePrivateSubclassOverridesMethodInPublicInterface() {
+			expression = parser.parseExpression("{2021, 2022}");
+			List<?> inlineList = expression.getValue(List.class);
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(inlineList.getClass());
+
+			expression = parser.parseExpression("{2021, 2022}.contains(2022)");
+			Boolean result = expression.getValue(context, Boolean.class);
+			assertThat(result).isTrue();
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, Boolean.class);
+			assertThat(result).isTrue();
+		}
+
+		@Test
+		void packagePrivateSubclassOverridesMethodInPrivateInterface() {
+			expression = parser.parseExpression("greet('Jane')");
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(privateSubclass.getClass());
+
+			String result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("Hello, Jane");
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("Hello, Jane");
+		}
+
+		@Test
+		void privateSubclassOverridesMethodInPublicSuperclass() {
+			expression = parser.parseExpression("process(2)");
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(privateSubclass.getClass());
+
+			Integer result = expression.getValue(context, privateSubclass, Integer.class);
+			assertThat(result).isEqualTo(2 * 2);
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, Integer.class);
+			assertThat(result).isEqualTo(2 * 2);
+		}
+
+		private interface PrivateInterface {
+
+			String greet(String name);
+		}
+
+		private static class PrivateSubclass extends PublicSuperclass implements PrivateInterface {
+
+			@Override
+			public int process(int num) {
+				return num * 2;
+			}
+
+			@Override
+			public String greet(String name) {
+				return "Hello, " + name;
+			}
+		}
+	}
+
 
 	@Test
 	void typeReference() {

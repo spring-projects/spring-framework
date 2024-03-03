@@ -299,8 +299,10 @@ public class MethodReference extends SpelNodeImpl {
 			return false;
 		}
 
-		Class<?> clazz = executor.getMethod().getDeclaringClass();
-		return (Modifier.isPublic(clazz.getModifiers()) || executor.getPublicDeclaringClass() != null);
+		Method method = executor.getMethod();
+		return ((Modifier.isPublic(method.getModifiers()) &&
+				(Modifier.isPublic(method.getDeclaringClass().getModifiers()) ||
+						executor.getPublicDeclaringClass() != null)));
 	}
 
 	@Override
@@ -310,6 +312,18 @@ public class MethodReference extends SpelNodeImpl {
 			throw new IllegalStateException("No applicable cached executor found: " + executorToCheck);
 		}
 		Method method = methodExecutor.getMethod();
+
+		Class<?> publicDeclaringClass;
+		if (Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+			publicDeclaringClass = method.getDeclaringClass();
+		}
+		else {
+			publicDeclaringClass = methodExecutor.getPublicDeclaringClass();
+		}
+		Assert.state(publicDeclaringClass != null,
+				() -> "Failed to find public declaring class for method: " + method);
+
+		String classDesc = publicDeclaringClass.getName().replace('.', '/');
 		boolean isStatic = Modifier.isStatic(method.getModifiers());
 		String descriptor = cf.lastDescriptor();
 
@@ -339,24 +353,15 @@ public class MethodReference extends SpelNodeImpl {
 			CodeFlow.insertBoxIfNecessary(mv, descriptor.charAt(0));
 		}
 
-		String classDesc;
-		if (Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-			classDesc = method.getDeclaringClass().getName().replace('.', '/');
-		}
-		else {
-			Class<?> publicDeclaringClass = methodExecutor.getPublicDeclaringClass();
-			Assert.state(publicDeclaringClass != null, "No public declaring class");
-			classDesc = publicDeclaringClass.getName().replace('.', '/');
-		}
-
 		if (!isStatic && (descriptor == null || !descriptor.substring(1).equals(classDesc))) {
 			CodeFlow.insertCheckCast(mv, "L" + classDesc);
 		}
 
 		generateCodeForArguments(mv, cf, method, this.children);
-		int opcode = (isStatic ? INVOKESTATIC : method.isDefault() ? INVOKEINTERFACE : INVOKEVIRTUAL);
+		boolean isInterface = publicDeclaringClass.isInterface();
+		int opcode = (isStatic ? INVOKESTATIC : isInterface ? INVOKEINTERFACE : INVOKEVIRTUAL);
 		mv.visitMethodInsn(opcode, classDesc, method.getName(), CodeFlow.createSignatureDescriptor(method),
-				method.getDeclaringClass().isInterface());
+				isInterface);
 		cf.pushDescriptor(this.exitTypeDescriptor);
 
 		if (this.originalPrimitiveExitTypeDescriptor != null) {
