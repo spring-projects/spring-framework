@@ -106,6 +106,13 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun valueClassWithNullable() {
+		composite.addResolver(StubArgumentResolver(LongValueClass::class.java, null))
+		val value = getInvocable(ValueClassHandler::class.java, LongValueClass::class.java).invokeForRequest(request, null)
+		Assertions.assertThat(value).isNull()
+	}
+
+	@Test
 	fun propertyAccessor() {
 		val value = getInvocable(PropertyAccessorHandler::class.java).invokeForRequest(request, null)
 		Assertions.assertThat(value).isEqualTo("foo")
@@ -172,6 +179,9 @@ class InvocableHandlerMethodKotlinTests {
 
 		fun valueClassWithInit(valueClass: ValueClassWithInit) =
 			valueClass
+
+		fun valueClassWithNullable(limit: LongValueClass?) =
+			limit?.value
 
 	}
 
