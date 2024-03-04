@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Interface used by {@link CacheInterceptor}. Implementations know how to source
@@ -45,16 +46,29 @@ public interface CacheOperationSource {
 	 * metadata at class or method level; {@code true} otherwise. The default
 	 * implementation returns {@code true}, leading to regular introspection.
 	 * @since 5.2
+	 * @see #hasCacheOperations
 	 */
 	default boolean isCandidateClass(Class<?> targetClass) {
 		return true;
 	}
 
 	/**
+	 * Determine whether there are cache operations for the given method.
+	 * @param method the method to introspect
+	 * @param targetClass the target class (can be {@code null},
+	 * in which case the declaring class of the method must be used)
+	 * @since 6.2
+	 * @see #getCacheOperations
+	 */
+	default boolean hasCacheOperations(Method method, @Nullable Class<?> targetClass) {
+		return !CollectionUtils.isEmpty(getCacheOperations(method, targetClass));
+	}
+
+	/**
 	 * Return the collection of cache operations for this method,
 	 * or {@code null} if the method contains no <em>cacheable</em> annotations.
 	 * @param method the method to introspect
-	 * @param targetClass the target class (may be {@code null}, in which case
+	 * @param targetClass the target class (can be {@code null}, in which case
 	 * the declaring class of the method must be used)
 	 * @return all cache operations for this method, or {@code null} if none found
 	 */
