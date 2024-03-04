@@ -194,10 +194,10 @@ public abstract class AopUtils {
 	 * this method resolves bridge methods in order to retrieve attributes from
 	 * the <i>original</i> method definition.
 	 * @param method the method to be invoked, which may come from an interface
-	 * @param targetClass the target class for the current invocation.
-	 * May be {@code null} or may not even implement the method.
+	 * @param targetClass the target class for the current invocation
+	 * (can be {@code null} or may not even implement the method)
 	 * @return the specific target method, or the original method if the
-	 * {@code targetClass} doesn't implement it or is {@code null}
+	 * {@code targetClass} does not implement it
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 * @see org.springframework.core.BridgeMethodResolver#getMostSpecificMethod
 	 */
