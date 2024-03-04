@@ -224,10 +224,8 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		for (Class<?> parameterType : parameterTypes) {
 			parameters.add(parameterType.getName());
 		}
-
-		return method.getDeclaringClass().getName()
-				+ '.' + method.getName()
-				+ '(' + StringUtils.collectionToCommaDelimitedString(parameters) + ')';
+		return method.getDeclaringClass().getName() + '.' + method.getName() +
+				'(' + StringUtils.collectionToCommaDelimitedString(parameters) + ')';
 	}
 
 	private int countNonNull(Object... instances) {
