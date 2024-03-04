@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * Miscellaneous {@code java.lang.Class} utility methods.
- * Mainly for internal use within the framework.
+ *
+ * <p>Mainly for internal use within the framework.
  *
  * @author Juergen Hoeller
  * @author Keith Donald
@@ -243,7 +244,7 @@ public abstract class ClassUtils {
 	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
-	 * (may be {@code null}, which indicates the default class loader)
+	 * (can be {@code null}, which indicates the default class loader)
 	 * @return a class instance for the supplied name
 	 * @throws ClassNotFoundException if the class was not found
 	 * @throws LinkageError if the class file could not be loaded
@@ -314,7 +315,7 @@ public abstract class ClassUtils {
 	 * the exceptions thrown in case of class loading failure.
 	 * @param className the name of the Class
 	 * @param classLoader the class loader to use
-	 * (may be {@code null}, which indicates the default class loader)
+	 * (can be {@code null}, which indicates the default class loader)
 	 * @return a class instance for the supplied name
 	 * @throws IllegalArgumentException if the class name was not resolvable
 	 * (that is, the class could not be found or the class file could not be loaded)
@@ -348,7 +349,7 @@ public abstract class ClassUtils {
 	 * one of its dependencies is not present or cannot be loaded.
 	 * @param className the name of the class to check
 	 * @param classLoader the class loader to use
-	 * (may be {@code null} which indicates the default class loader)
+	 * (can be {@code null} which indicates the default class loader)
 	 * @return whether the specified class is present (including all of its
 	 * superclasses and interfaces)
 	 * @throws IllegalStateException if the corresponding class is resolvable but
@@ -375,7 +376,7 @@ public abstract class ClassUtils {
 	 * Check whether the given class is visible in the given ClassLoader.
 	 * @param clazz the class to check (typically an interface)
 	 * @param classLoader the ClassLoader to check against
-	 * (may be {@code null} in which case this method will always return {@code true})
+	 * (can be {@code null} in which case this method will always return {@code true})
 	 */
 	public static boolean isVisible(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		if (classLoader == null) {
@@ -399,7 +400,7 @@ public abstract class ClassUtils {
 	 * i.e. whether it is loaded by the given ClassLoader or a parent of it.
 	 * @param clazz the class to analyze
 	 * @param classLoader the ClassLoader to potentially cache metadata in
-	 * (may be {@code null} which indicates the system class loader)
+	 * (can be {@code null} which indicates the system class loader)
 	 */
 	public static boolean isCacheSafe(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -539,9 +540,10 @@ public abstract class ClassUtils {
 	 * Check if the right-hand side type may be assigned to the left-hand side
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
-	 * @param lhsType the target type
-	 * @param rhsType the value type that should be assigned to the target type
-	 * @return if the target type is assignable from the value type
+	 * @param lhsType the target type (left-hand side (LHS) type)
+	 * @param rhsType the value type (right-hand side (RHS) type) that should
+	 * be assigned to the target type
+	 * @return {@code true} if {@code rhsType} is assignable to {@code lhsType}
 	 * @see TypeUtils#isAssignable(java.lang.reflect.Type, java.lang.reflect.Type)
 	 */
 	public static boolean isAssignable(Class<?> lhsType, Class<?> rhsType) {
@@ -662,7 +664,7 @@ public abstract class ClassUtils {
 	 * in the given collection.
 	 * <p>Basically like {@code AbstractCollection.toString()}, but stripping
 	 * the "class "/"interface " prefix before every class name.
-	 * @param classes a Collection of Class objects (may be {@code null})
+	 * @param classes a Collection of Class objects (can be {@code null})
 	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
 	 * @see java.util.AbstractCollection#toString()
 	 */
@@ -717,7 +719,7 @@ public abstract class ClassUtils {
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyze for interfaces
 	 * @param classLoader the ClassLoader that the interfaces need to be visible in
-	 * (may be {@code null} when accepting all declared interfaces)
+	 * (can be {@code null} when accepting all declared interfaces)
 	 * @return all interfaces that the given object implements as an array
 	 */
 	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, @Nullable ClassLoader classLoader) {
@@ -752,7 +754,7 @@ public abstract class ClassUtils {
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyze for interfaces
 	 * @param classLoader the ClassLoader that the interfaces need to be visible in
-	 * (may be {@code null} when accepting all declared interfaces)
+	 * (can be {@code null} when accepting all declared interfaces)
 	 * @return all interfaces that the given object implements as a Set
 	 */
 	public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz, @Nullable ClassLoader classLoader) {
@@ -866,9 +868,9 @@ public abstract class ClassUtils {
 	/**
 	 * Check whether the given object is a CGLIB proxy.
 	 * @param object the object to check
-	 * @see #isCglibProxyClass(Class)
 	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
 	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * such as for a Spring AOP proxy
 	 */
 	@Deprecated
 	public static boolean isCglibProxy(Object object) {
@@ -878,8 +880,9 @@ public abstract class ClassUtils {
 	/**
 	 * Check whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
-	 * @see #isCglibProxyClassName(String)
+	 * @see #getUserClass(Class)
 	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * or simply a check for containing {@link #CGLIB_CLASS_SEPARATOR}
 	 */
 	@Deprecated
 	public static boolean isCglibProxyClass(@Nullable Class<?> clazz) {
@@ -889,7 +892,9 @@ public abstract class ClassUtils {
 	/**
 	 * Check whether the specified class name is a CGLIB-generated class.
 	 * @param className the class name to check
+	 * @see #CGLIB_CLASS_SEPARATOR
 	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
+	 * or simply a check for containing {@link #CGLIB_CLASS_SEPARATOR}
 	 */
 	@Deprecated
 	public static boolean isCglibProxyClassName(@Nullable String className) {
@@ -913,6 +918,7 @@ public abstract class ClassUtils {
 	 * class, but the original class in case of a CGLIB-generated subclass.
 	 * @param clazz the class to check
 	 * @return the user-defined class
+	 * @see #CGLIB_CLASS_SEPARATOR
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
 		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
@@ -1065,7 +1071,7 @@ public abstract class ClassUtils {
 	 * fully qualified interface/class name + "." + method name.
 	 * @param method the method
 	 * @param clazz the clazz that the method is being invoked on
-	 * (may be {@code null} to indicate the method's declaring class)
+	 * (can be {@code null} to indicate the method's declaring class)
 	 * @return the qualified name of the method
 	 * @since 4.3.4
 	 */
@@ -1146,7 +1152,7 @@ public abstract class ClassUtils {
 	 * @param clazz the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
-	 * (may be {@code null} to indicate any signature)
+	 * (can be {@code null} to indicate any signature)
 	 * @return the method (never {@code null})
 	 * @throws IllegalStateException if the method has not been found
 	 * @see Class#getMethod
@@ -1185,7 +1191,7 @@ public abstract class ClassUtils {
 	 * @param clazz the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
-	 * (may be {@code null} to indicate any signature)
+	 * (can be {@code null} to indicate any signature)
 	 * @return the method, or {@code null} if not found
 	 * @see Class#getMethod
 	 */
@@ -1261,26 +1267,27 @@ public abstract class ClassUtils {
 	/**
 	 * Given a method, which may come from an interface, and a target class used
 	 * in the current reflective invocation, find the corresponding target method
-	 * if there is one. E.g. the method may be {@code IFoo.bar()} and the
-	 * target class may be {@code DefaultFoo}. In this case, the method may be
+	 * if there is one &mdash; for example, the method may be {@code IFoo.bar()},
+	 * and the target class may be {@code DefaultFoo}. In this case, the method may be
 	 * {@code DefaultFoo.bar()}. This enables attributes on that method to be found.
 	 * <p><b>NOTE:</b> In contrast to {@link org.springframework.aop.support.AopUtils#getMostSpecificMethod},
 	 * this method does <i>not</i> resolve bridge methods automatically.
 	 * Call {@link org.springframework.core.BridgeMethodResolver#findBridgedMethod}
-	 * if bridge method resolution is desirable (e.g. for obtaining metadata from
-	 * the original method definition).
-	 * <p><b>NOTE:</b> Since Spring 3.1.1, if Java security settings disallow reflective
-	 * access (e.g. calls to {@code Class#getDeclaredMethods} etc, this implementation
-	 * will fall back to returning the originally provided method.
+	 * if bridge method resolution is desirable &mdash; for example, to obtain
+	 * metadata from the original method definition.
+	 * <p><b>NOTE:</b> If Java security settings disallow reflective access &mdash;
+	 * for example, calls to {@code Class#getDeclaredMethods}, etc. &mdash; this
+	 * implementation will fall back to returning the originally provided method.
 	 * @param method the method to be invoked, which may come from an interface
 	 * @param targetClass the target class for the current invocation
-	 * (may be {@code null} or may not even implement the method)
+	 * (can be {@code null} or may not even implement the method)
 	 * @return the specific target method, or the original method if the
 	 * {@code targetClass} does not implement it
 	 * @see #getInterfaceMethodIfPossible(Method, Class)
 	 */
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
-		if (targetClass != null && targetClass != method.getDeclaringClass() && isOverridable(method, targetClass)) {
+		if (targetClass != null && targetClass != method.getDeclaringClass() &&
+				(isOverridable(method, targetClass) || !method.getDeclaringClass().isAssignableFrom(targetClass))) {
 			try {
 				if (Modifier.isPublic(method.getModifiers())) {
 					try {
