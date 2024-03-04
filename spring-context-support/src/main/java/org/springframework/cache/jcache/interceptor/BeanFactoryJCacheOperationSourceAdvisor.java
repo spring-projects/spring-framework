@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ public class BeanFactoryJCacheOperationSourceAdvisor extends AbstractBeanFactory
 	 * Set the cache operation attribute source which is used to find cache
 	 * attributes. This should usually be identical to the source reference
 	 * set on the cache interceptor itself.
+	 * @see JCacheInterceptor#setCacheOperationSource
 	 */
 	public void setCacheOperationSource(JCacheOperationSource cacheOperationSource) {
 		this.pointcut.setCacheOperationSource(cacheOperationSource);

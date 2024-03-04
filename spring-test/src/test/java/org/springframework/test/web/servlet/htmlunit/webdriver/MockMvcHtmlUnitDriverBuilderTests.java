@@ -50,6 +50,7 @@ class MockMvcHtmlUnitDriverBuilderTests {
 
 	private HtmlUnitDriver driver;
 
+
 	MockMvcHtmlUnitDriverBuilderTests(WebApplicationContext wac) {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 	}

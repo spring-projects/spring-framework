@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
-
 /**
  * Integration tests for {@link MockMvcWebConnection}.
  *
@@ -64,14 +63,15 @@ public class MockMvcWebConnectionTests {
 	public void contextPathEmpty() {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
 		// Empty context path (root context) should not match to a URL with a context path
-		assertThatExceptionOfType(FailingHttpStatusCodeException.class).isThrownBy(() ->
-				this.webClient.getPage("http://localhost/context/a"))
-			.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(404));
+		assertThatExceptionOfType(FailingHttpStatusCodeException.class)
+				.isThrownBy(() -> this.webClient.getPage("http://localhost/context/a"))
+				.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(404));
+
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient));
 		// No context is the same providing an empty context path
-		assertThatExceptionOfType(FailingHttpStatusCodeException.class).isThrownBy(() ->
-				this.webClient.getPage("http://localhost/context/a"))
-		.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(404));
+		assertThatExceptionOfType(FailingHttpStatusCodeException.class)
+				.isThrownBy(() -> this.webClient.getPage("http://localhost/context/a"))
+				.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(404));
 	}
 
 	@Test
@@ -84,8 +84,9 @@ public class MockMvcWebConnectionTests {
 	@Test
 	public void infiniteForward() {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
-		assertThatIllegalStateException().isThrownBy(() -> this.webClient.getPage("http://localhost/infiniteForward"))
-						.withMessage("Forwarded 100 times in a row, potential infinite forward loop");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.webClient.getPage("http://localhost/infiniteForward"))
+				.withMessage("Forwarded 100 times in a row, potential infinite forward loop");
 	}
 
 	@Test

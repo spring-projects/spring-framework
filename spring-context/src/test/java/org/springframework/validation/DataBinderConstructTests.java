@@ -38,7 +38,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DataBinderConstructTests {
 
-
 	@Test
 	void dataClassBinding() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of("param1", "value1", "param2", "true"));
@@ -78,7 +77,7 @@ class DataBinderConstructTests {
 		assertThat(bindingResult.getFieldValue("param3")).isNull();
 	}
 
-	@Test // gh-31821
+	@Test  // gh-31821
 	void dataClassBindingWithNestedOptionalParameterWithMissingParameter() {
 		MapValueResolver valueResolver = new MapValueResolver(Map.of("param1", "value1"));
 		DataBinder binder = initDataBinder(NestedDataClass.class);

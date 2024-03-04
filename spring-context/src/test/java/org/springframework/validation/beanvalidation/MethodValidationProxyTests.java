@@ -83,8 +83,7 @@ class MethodValidationProxyTests {
 		context.close();
 	}
 
-	@Test // gh-29782
-	@SuppressWarnings("unchecked")
+	@Test  // gh-29782
 	public void testMethodValidationPostProcessorForInterfaceOnlyProxy() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(MethodValidationPostProcessor.class);
