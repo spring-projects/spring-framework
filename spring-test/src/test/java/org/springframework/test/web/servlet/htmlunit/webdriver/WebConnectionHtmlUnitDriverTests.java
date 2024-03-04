@@ -48,6 +48,7 @@ class WebConnectionHtmlUnitDriverTests {
 	@Mock
 	private WebConnection connection;
 
+
 	@BeforeEach
 	void setup() throws Exception {
 		given(this.connection.getResponse(any(WebRequest.class))).willThrow(new IOException(""));

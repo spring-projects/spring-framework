@@ -1984,7 +1984,7 @@ class DataBinderTests {
 			.withMessageContaining("DataBinder is already initialized - call setAutoGrowCollectionLimit before other configuration methods");
 	}
 
-	@Test // SPR-15009
+	@Test  // SPR-15009
 	void setCustomMessageCodesResolverBeforeInitializeBindingResultForBeanPropertyAccess() {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
@@ -2001,7 +2001,7 @@ class DataBinderTests {
 		assertThat(((BeanWrapper) binder.getInternalBindingResult().getPropertyAccessor()).getAutoGrowCollectionLimit()).isEqualTo(512);
 	}
 
-	@Test // SPR-15009
+	@Test  // SPR-15009
 	void setCustomMessageCodesResolverBeforeInitializeBindingResultForDirectFieldAccess() {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
@@ -2055,7 +2055,7 @@ class DataBinderTests {
 			.withMessageContaining("DataBinder is already initialized with MessageCodesResolver");
 	}
 
-	@Test // gh-24347
+	@Test  // gh-24347
 	void overrideBindingResultType() {
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");

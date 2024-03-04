@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ final class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointc
 	 * {@link ClassFilter} that delegates to {@link TransactionAttributeSource#isCandidateClass}
 	 * for filtering classes whose methods are not worth searching to begin with.
 	 */
-	private class TransactionAttributeSourceClassFilter implements ClassFilter {
+	private final class TransactionAttributeSourceClassFilter implements ClassFilter {
 
 		@Override
 		public boolean matches(Class<?> clazz) {
@@ -89,6 +89,7 @@ final class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointc
 			return (transactionAttributeSource == null || transactionAttributeSource.isCandidateClass(clazz));
 		}
 
+		@Nullable
 		private TransactionAttributeSource getTransactionAttributeSource() {
 			return transactionAttributeSource;
 		}
@@ -96,7 +97,7 @@ final class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointc
 		@Override
 		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof TransactionAttributeSourceClassFilter that &&
-					ObjectUtils.nullSafeEquals(transactionAttributeSource, that.getTransactionAttributeSource())));
+					ObjectUtils.nullSafeEquals(getTransactionAttributeSource(), that.getTransactionAttributeSource())));
 		}
 
 		@Override
@@ -106,9 +107,8 @@ final class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointc
 
 		@Override
 		public String toString() {
-			return TransactionAttributeSourceClassFilter.class.getName() + ": " + transactionAttributeSource;
+			return TransactionAttributeSourceClassFilter.class.getName() + ": " + getTransactionAttributeSource();
 		}
-
 	}
 
 }
