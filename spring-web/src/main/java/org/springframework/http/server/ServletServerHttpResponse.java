@@ -162,7 +162,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 			if (headerName.equalsIgnoreCase(CONTENT_TYPE)) {
 				// Content-Type is written as an override so check super first
 				String value = super.getFirst(headerName);
-				return (value != null ? value : servletResponse.getHeader(headerName));
+				return (value != null ? value : servletResponse.getContentType());
 			}
 			else {
 				String value = servletResponse.getHeader(headerName);
