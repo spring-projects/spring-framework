@@ -82,7 +82,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 			nestedPath = "";
 		}
 		nestedPath = canonicalFieldName(nestedPath);
-		if (nestedPath.length() > 0 && !nestedPath.endsWith(NESTED_PATH_SEPARATOR)) {
+		if (!nestedPath.isEmpty() && !nestedPath.endsWith(NESTED_PATH_SEPARATOR)) {
 			nestedPath += NESTED_PATH_SEPARATOR;
 		}
 		this.nestedPath = nestedPath;
