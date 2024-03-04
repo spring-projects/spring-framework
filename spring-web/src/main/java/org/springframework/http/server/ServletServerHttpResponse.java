@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -118,12 +119,13 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 				}
 			});
 			// HttpServletResponse exposes some headers as properties: we should include those if not already present
-			if (this.servletResponse.getContentType() == null && this.headers.getContentType() != null) {
-				this.servletResponse.setContentType(this.headers.getContentType().toString());
+			MediaType contentTypeHeader = this.headers.getContentType();
+			if (this.servletResponse.getContentType() == null && contentTypeHeader != null) {
+				this.servletResponse.setContentType(contentTypeHeader.toString());
 			}
-			if (this.servletResponse.getCharacterEncoding() == null && this.headers.getContentType() != null &&
-					this.headers.getContentType().getCharset() != null) {
-				this.servletResponse.setCharacterEncoding(this.headers.getContentType().getCharset().name());
+			if (this.servletResponse.getCharacterEncoding() == null && contentTypeHeader != null &&
+					contentTypeHeader.getCharset() != null) {
+				this.servletResponse.setCharacterEncoding(contentTypeHeader.getCharset().name());
 			}
 			long contentLength = getHeaders().getContentLength();
 			if (contentLength != -1) {
