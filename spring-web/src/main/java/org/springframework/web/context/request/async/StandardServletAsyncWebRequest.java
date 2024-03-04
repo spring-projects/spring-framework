@@ -241,11 +241,11 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		}
 
 		@Override
-		public ServletOutputStream getOutputStream() {
+		public ServletOutputStream getOutputStream() throws IOException {
 			if (this.outputStream == null) {
 				Assert.notNull(this.asyncWebRequest, "Not initialized");
-				this.outputStream = new LifecycleServletOutputStream(
-						(HttpServletResponse) getResponse(), this.asyncWebRequest);
+				ServletOutputStream delegate = getResponse().getOutputStream();
+				this.outputStream = new LifecycleServletOutputStream(delegate, this);
 			}
 			return this.outputStream;
 		}
@@ -258,6 +258,46 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 			}
 			return this.writer;
 		}
+
+		@Override
+		public void flushBuffer() throws IOException {
+			obtainLockAndCheckState();
+			try {
+				getResponse().flushBuffer();
+			}
+			catch (IOException ex) {
+				handleIOException(ex, "ServletResponse failed to flushBuffer");
+			}
+			finally {
+				releaseLock();
+			}
+		}
+
+		private void obtainLockAndCheckState() throws AsyncRequestNotUsableException {
+			Assert.notNull(this.asyncWebRequest, "Not initialized");
+			if (this.asyncWebRequest.state != State.NEW) {
+				this.asyncWebRequest.stateLock.lock();
+				if (this.asyncWebRequest.state != State.ASYNC) {
+					this.asyncWebRequest.stateLock.unlock();
+					throw new AsyncRequestNotUsableException("Response not usable after " +
+							(this.asyncWebRequest.state == State.COMPLETED ?
+									"async request completion" : "onError notification") + ".");
+				}
+			}
+		}
+
+		void handleIOException(IOException ex, String msg) throws AsyncRequestNotUsableException {
+			Assert.notNull(this.asyncWebRequest, "Not initialized");
+			this.asyncWebRequest.transitionToErrorState();
+			throw new AsyncRequestNotUsableException(msg, ex);
+		}
+
+		void releaseLock() {
+			Assert.notNull(this.asyncWebRequest, "Not initialized");
+			if (this.asyncWebRequest.state != State.NEW) {
+				this.asyncWebRequest.stateLock.unlock();
+			}
+		}
 	}
 
 
@@ -267,111 +307,78 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	 */
 	private static final class LifecycleServletOutputStream extends ServletOutputStream {
 
-		private final HttpServletResponse delegate;
+		private final ServletOutputStream delegate;
 
-		private final StandardServletAsyncWebRequest asyncWebRequest;
+		private final LifecycleHttpServletResponse response;
 
-		private LifecycleServletOutputStream(
-				HttpServletResponse delegate, StandardServletAsyncWebRequest asyncWebRequest) {
-
+		private LifecycleServletOutputStream(ServletOutputStream delegate, LifecycleHttpServletResponse response) {
 			this.delegate = delegate;
-			this.asyncWebRequest = asyncWebRequest;
+			this.response = response;
 		}
 
 		@Override
 		public boolean isReady() {
-			return false;
+			return this.delegate.isReady();
 		}
 
 		@Override
 		public void setWriteListener(WriteListener writeListener) {
-			throw new UnsupportedOperationException();
+			this.delegate.setWriteListener(writeListener);
 		}
 
 		@Override
 		public void write(int b) throws IOException {
-			obtainLockAndCheckState();
+			this.response.obtainLockAndCheckState();
 			try {
-				this.delegate.getOutputStream().write(b);
+				this.delegate.write(b);
 			}
 			catch (IOException ex) {
-				handleIOException(ex, "ServletOutputStream failed to write");
+				this.response.handleIOException(ex, "ServletOutputStream failed to write");
 			}
 			finally {
-				releaseLock();
+				this.response.releaseLock();
 			}
 		}
 
 		public void write(byte[] buf, int offset, int len) throws IOException {
-			obtainLockAndCheckState();
+			this.response.obtainLockAndCheckState();
 			try {
-				this.delegate.getOutputStream().write(buf, offset, len);
+				this.delegate.write(buf, offset, len);
 			}
 			catch (IOException ex) {
-				handleIOException(ex, "ServletOutputStream failed to write");
+				this.response.handleIOException(ex, "ServletOutputStream failed to write");
 			}
 			finally {
-				releaseLock();
+				this.response.releaseLock();
 			}
 		}
 
 		@Override
 		public void flush() throws IOException {
-			obtainLockAndCheckState();
+			this.response.obtainLockAndCheckState();
 			try {
-				this.delegate.getOutputStream().flush();
+				this.delegate.flush();
 			}
 			catch (IOException ex) {
-				handleIOException(ex, "ServletOutputStream failed to flush");
+				this.response.handleIOException(ex, "ServletOutputStream failed to flush");
 			}
 			finally {
-				releaseLock();
+				this.response.releaseLock();
 			}
 		}
 
 		@Override
 		public void close() throws IOException {
-			obtainLockAndCheckState();
+			this.response.obtainLockAndCheckState();
 			try {
-				this.delegate.getOutputStream().close();
+				this.delegate.close();
 			}
 			catch (IOException ex) {
-				handleIOException(ex, "ServletOutputStream failed to close");
+				this.response.handleIOException(ex, "ServletOutputStream failed to close");
 			}
 			finally {
-				releaseLock();
+				this.response.releaseLock();
 			}
-		}
-
-		private void obtainLockAndCheckState() throws AsyncRequestNotUsableException {
-			if (state() != State.NEW) {
-				stateLock().lock();
-				if (state() != State.ASYNC) {
-					stateLock().unlock();
-					throw new AsyncRequestNotUsableException("Response not usable after " +
-							(state() == State.COMPLETED ?
-									"async request completion" : "onError notification") + ".");
-				}
-			}
-		}
-
-		private void handleIOException(IOException ex, String msg) throws AsyncRequestNotUsableException {
-			this.asyncWebRequest.transitionToErrorState();
-			throw new AsyncRequestNotUsableException(msg, ex);
-		}
-
-		private void releaseLock() {
-			if (state() != State.NEW) {
-				stateLock().unlock();
-			}
-		}
-
-		private State state() {
-			return this.asyncWebRequest.state;
-		}
-
-		private Lock stateLock() {
-			return this.asyncWebRequest.stateLock;
 		}
 
 	}
