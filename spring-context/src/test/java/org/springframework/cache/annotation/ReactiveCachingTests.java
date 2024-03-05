@@ -61,7 +61,7 @@ class ReactiveCachingTests {
 		Long r3 = service.cacheFuture(key).join();
 
 		assertThat(r1).isNotNull();
-		assertThat(r1).isSameAs(r2).isSameAs(r3);
+		assertThat(r1).as("cacheFuture").isSameAs(r2).isSameAs(r3);
 
 		key = new Object();
 
@@ -70,7 +70,7 @@ class ReactiveCachingTests {
 		r3 = service.cacheMono(key).block();
 
 		assertThat(r1).isNotNull();
-		assertThat(r1).isSameAs(r2).isSameAs(r3);
+		assertThat(r1).as("cacheMono").isSameAs(r2).isSameAs(r3);
 
 		key = new Object();
 
@@ -79,7 +79,7 @@ class ReactiveCachingTests {
 		r3 = service.cacheFlux(key).blockFirst();
 
 		assertThat(r1).isNotNull();
-		assertThat(r1).isSameAs(r2).isSameAs(r3);
+		assertThat(r1).as("cacheFlux blockFirst").isSameAs(r2).isSameAs(r3);
 
 		key = new Object();
 
@@ -88,7 +88,7 @@ class ReactiveCachingTests {
 		List<Long> l3 = service.cacheFlux(key).collectList().block();
 
 		assertThat(l1).isNotNull();
-		assertThat(l1).isEqualTo(l2).isEqualTo(l3);
+		assertThat(l1).as("cacheFlux collectList").isEqualTo(l2).isEqualTo(l3);
 
 		key = new Object();
 
@@ -97,7 +97,7 @@ class ReactiveCachingTests {
 		r3 = service.cacheMono(key).block();
 
 		assertThat(r1).isNotNull();
-		assertThat(r1).isSameAs(r2).isSameAs(r3);
+		assertThat(r1).as("cacheMono common key").isSameAs(r2).isSameAs(r3);
 
 		// Same key as for Mono, reusing its cached value
 
@@ -106,11 +106,10 @@ class ReactiveCachingTests {
 		r3 = service.cacheFlux(key).blockFirst();
 
 		assertThat(r1).isNotNull();
-		assertThat(r1).isSameAs(r2).isSameAs(r3);
+		assertThat(r1).as("cacheFlux blockFirst common key").isSameAs(r2).isSameAs(r3);
 
 		ctx.close();
 	}
-
 
 	@CacheConfig(cacheNames = "first")
 	static class ReactiveCacheableService {
@@ -124,12 +123,16 @@ class ReactiveCachingTests {
 
 		@Cacheable
 		Mono<Long> cacheMono(Object arg) {
-			return Mono.just(this.counter.getAndIncrement());
+			// here counter not only reflects invocations of cacheMono but subscriptions to
+			// the returned Mono as well. See https://github.com/spring-projects/spring-framework/issues/32370
+			return Mono.defer(() -> Mono.just(this.counter.getAndIncrement()));
 		}
 
 		@Cacheable
 		Flux<Long> cacheFlux(Object arg) {
-			return Flux.just(this.counter.getAndIncrement(), 0L);
+			// here counter not only reflects invocations of cacheFlux but subscriptions to
+			// the returned Flux as well. See https://github.com/spring-projects/spring-framework/issues/32370
+			return Flux.defer(() -> Flux.just(this.counter.getAndIncrement(), 0L));
 		}
 	}
 
