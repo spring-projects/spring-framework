@@ -581,37 +581,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	private record InvokerPair(Member member, TypeDescriptor typeDescriptor) {}
 
-	private static final class PropertyCacheKey implements Comparable<PropertyCacheKey> {
-
-		private final Class<?> clazz;
-
-		private final String property;
-
-		private final boolean targetIsClass;
-
-		public PropertyCacheKey(Class<?> clazz, String name, boolean targetIsClass) {
-			this.clazz = clazz;
-			this.property = name;
-			this.targetIsClass = targetIsClass;
-		}
-
-		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof PropertyCacheKey that &&
-					this.clazz == that.clazz && this.property.equals(that.property) &&
-					this.targetIsClass == that.targetIsClass));
-		}
-
-		@Override
-		public int hashCode() {
-			return (this.clazz.hashCode() * 29 + this.property.hashCode());
-		}
-
-		@Override
-		public String toString() {
-			return "PropertyCacheKey [clazz=" + this.clazz.getName() + ", property=" + this.property +
-					", targetIsClass=" + this.targetIsClass + "]";
-		}
+	private record PropertyCacheKey(Class<?> clazz, String property, boolean targetIsClass)
+			implements Comparable<PropertyCacheKey> {
 
 		@Override
 		public int compareTo(PropertyCacheKey other) {
