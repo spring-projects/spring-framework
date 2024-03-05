@@ -530,37 +530,37 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
-		InvokerPair invocationTarget = this.readerCache.get(cacheKey);
+		InvokerPair invokerPair = this.readerCache.get(cacheKey);
 
-		if (invocationTarget == null || invocationTarget.member instanceof Method) {
-			Method method = (Method) (invocationTarget != null ? invocationTarget.member : null);
+		if (invokerPair == null || invokerPair.member instanceof Method) {
+			Method method = (Method) (invokerPair != null ? invokerPair.member : null);
 			if (method == null) {
 				method = findGetterForProperty(name, type, target);
 				if (method != null) {
 					TypeDescriptor typeDescriptor = new TypeDescriptor(new MethodParameter(method, -1));
 					method = ClassUtils.getInterfaceMethodIfPossible(method, type);
-					invocationTarget = new InvokerPair(method, typeDescriptor);
+					invokerPair = new InvokerPair(method, typeDescriptor);
 					ReflectionUtils.makeAccessible(method);
-					this.readerCache.put(cacheKey, invocationTarget);
+					this.readerCache.put(cacheKey, invokerPair);
 				}
 			}
 			if (method != null) {
-				return new OptimalPropertyAccessor(invocationTarget);
+				return new OptimalPropertyAccessor(invokerPair);
 			}
 		}
 
-		if (invocationTarget == null || invocationTarget.member instanceof Field) {
-			Field field = (invocationTarget != null ? (Field) invocationTarget.member : null);
+		if (invokerPair == null || invokerPair.member instanceof Field) {
+			Field field = (invokerPair != null ? (Field) invokerPair.member : null);
 			if (field == null) {
 				field = findField(name, type, target instanceof Class);
 				if (field != null) {
-					invocationTarget = new InvokerPair(field, new TypeDescriptor(field));
+					invokerPair = new InvokerPair(field, new TypeDescriptor(field));
 					ReflectionUtils.makeAccessible(field);
-					this.readerCache.put(cacheKey, invocationTarget);
+					this.readerCache.put(cacheKey, invokerPair);
 				}
 			}
 			if (field != null) {
-				return new OptimalPropertyAccessor(invocationTarget);
+				return new OptimalPropertyAccessor(invokerPair);
 			}
 		}
 
@@ -641,9 +641,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		private final TypeDescriptor typeDescriptor;
 
-		OptimalPropertyAccessor(InvokerPair target) {
-			this.member = target.member;
-			this.typeDescriptor = target.typeDescriptor;
+		OptimalPropertyAccessor(InvokerPair invokerPair) {
+			this.member = invokerPair.member;
+			this.typeDescriptor = invokerPair.typeDescriptor;
 		}
 
 		@Override
