@@ -85,16 +85,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private final Map<Class<?>, Method[]> sortedMethodsCache = new ConcurrentHashMap<>(64);
 
-	@Nullable
-	private volatile InvokerPair lastReadInvokerPair;
-
 
 	/**
 	 * Create a new property accessor for reading as well writing.
 	 * @see #ReflectivePropertyAccessor(boolean)
 	 */
 	public ReflectivePropertyAccessor() {
-		this.allowWrite = true;
+		this(true);
 	}
 
 	/**
@@ -171,7 +168,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		InvokerPair invoker = this.readerCache.get(cacheKey);
-		this.lastReadInvokerPair = invoker;
 
 		if (invoker == null || invoker.member instanceof Method) {
 			Method method = (Method) (invoker != null ? invoker.member : null);
@@ -184,7 +180,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					TypeDescriptor typeDescriptor = new TypeDescriptor(property);
 					method = ClassUtils.getInterfaceMethodIfPossible(method, type);
 					invoker = new InvokerPair(method, typeDescriptor);
-					this.lastReadInvokerPair = invoker;
 					this.readerCache.put(cacheKey, invoker);
 				}
 			}
@@ -206,7 +201,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				field = findField(name, type, target);
 				if (field != null) {
 					invoker = new InvokerPair(field, new TypeDescriptor(field));
-					this.lastReadInvokerPair = invoker;
 					this.readerCache.put(cacheKey, invoker);
 				}
 			}
