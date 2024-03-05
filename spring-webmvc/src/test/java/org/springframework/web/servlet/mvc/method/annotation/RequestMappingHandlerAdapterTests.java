@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.AsyncEvent;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +50,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.springframework.web.context.request.async.StandardServletAsyncWebRequest;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
@@ -55,13 +63,15 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockAsyncContext;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Unit tests for {@link RequestMappingHandlerAdapter}.
+ * Tests for {@link RequestMappingHandlerAdapter}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -250,9 +260,7 @@ public class RequestMappingHandlerAdapterTests {
 		assertThat(mav.getModel().get("attr3")).isNull();
 	}
 
-	// SPR-10859
-
-	@Test
+	@Test // gh-15486
 	public void responseBodyAdvice() throws Exception {
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
@@ -270,6 +278,26 @@ public class RequestMappingHandlerAdapterTests {
 
 		assertThat(this.response.getStatus()).isEqualTo(200);
 		assertThat(this.response.getContentAsString()).isEqualTo("{\"status\":400,\"message\":\"body\"}");
+	}
+
+	@Test
+	void asyncRequestNotUsable() throws Exception {
+
+		// Put AsyncWebRequest in ERROR state
+		StandardServletAsyncWebRequest asyncRequest = new StandardServletAsyncWebRequest(this.request, this.response);
+		asyncRequest.onError(new AsyncEvent(new MockAsyncContext(this.request, this.response), new Exception()));
+
+		// Set it as the current AsyncWebRequest, from the initial REQUEST dispatch
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
+		asyncManager.setAsyncWebRequest(asyncRequest);
+
+		// AsyncWebRequest created for current dispatch should inherit state
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handleOutputStream", OutputStream.class);
+		this.handlerAdapter.afterPropertiesSet();
+
+		// Use of response should be rejected
+		assertThatThrownBy(() -> this.handlerAdapter.handle(this.request, this.response, handlerMethod))
+				.isInstanceOf(AsyncRequestNotUsableException.class);
 	}
 
 	private HandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes) throws Exception {
@@ -297,14 +325,16 @@ public class RequestMappingHandlerAdapterTests {
 		}
 
 		public ResponseEntity<Map<String, String>> handleWithResponseEntity() {
-			return new ResponseEntity<>(Collections.singletonMap(
-					"foo", "bar"), HttpStatus.OK);
+			return new ResponseEntity<>(Collections.singletonMap("foo", "bar"), HttpStatus.OK);
 		}
 
 		public ResponseEntity<String> handleBadRequest() {
 			return new ResponseEntity<>("body", HttpStatus.BAD_REQUEST);
 		}
 
+		public void handleOutputStream(OutputStream outputStream) throws IOException {
+			outputStream.write("body".getBytes(StandardCharsets.UTF_8));
+		}
 	}
 
 
