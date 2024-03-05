@@ -452,7 +452,6 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param handler the executed handler, or {@code null} if none chosen
 	 * at the time of the exception (for example, if multipart resolution failed)
 	 * @return an empty ModelAndView indicating the exception was handled
-	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
 	 * @since 5.3.33
 	 */
 	protected ModelAndView handleAsyncRequestNotUsableException(AsyncRequestNotUsableException ex,
