@@ -877,7 +877,7 @@ public abstract class StringUtils {
 	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	@Nullable
 	public static Locale parseLocaleString(String localeString) {
-		if (localeString.equals("")) {
+		if (localeString.isEmpty()) {
 			return null;
 		}
 
