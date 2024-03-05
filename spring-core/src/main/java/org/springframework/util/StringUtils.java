@@ -819,7 +819,7 @@ public abstract class StringUtils {
 					if (u == -1 || l == -1) {
 						throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
 					}
-					baos.write((char) ((u << 4) + l));
+					baos.write((byte) ((u << 4) + l));
 					i += 2;
 					changed = true;
 				}
@@ -828,7 +828,9 @@ public abstract class StringUtils {
 				}
 			}
 			else {
-				baos.write(ch);
+				String characterAsString = Character.toString((char) ch);
+				byte[] bytes = characterAsString.getBytes(charset);
+				baos.write(bytes, 0, bytes.length);
 			}
 		}
 		return (changed ? StreamUtils.copyToString(baos, charset) : source);
