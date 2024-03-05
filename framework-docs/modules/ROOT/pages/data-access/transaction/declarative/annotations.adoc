@@ -436,9 +436,28 @@ properties of the `@Transactional` annotation:
 | Optional array of exception name patterns that must not cause rollback.
 |===
 
-TIP: See xref:data-access/transaction/declarative/rolling-back.adoc#transaction-declarative-rollback-rules[Rollback rules] for further details
-on rollback rule semantics, patterns, and warnings regarding possible unintentional
-matches for pattern-based rollback rules.
+TIP: See xref:data-access/transaction/declarative/rolling-back.adoc#transaction-declarative-rollback-rules[Rollback rules]
+for further details on rollback rule semantics, patterns, and warnings
+regarding possible unintentional matches for pattern-based rollback rules.
+
+[NOTE]
+====
+As of 6.2, you can globally change the default rollback behavior: e.g. through
+`@EnableTransactionManagement(rollbackOn=ALL_EXCEPTIONS)`, leading to a rollback
+for all exceptions raised within a transaction, including any checked exception.
+For further customizations, `AnnotationTransactionAttributeSource` provides an
+`addDefaultRollbackRule(RollbackRuleAttribute)` method for custom default rules.
+
+Note that transaction-specific rollback rules override the default behavior but
+retain the chosen default for unspecified exceptions. This is the case for
+Spring's `@Transactional` as well as JTA's `jakarta.transaction.Transactional`.
+
+Unless you rely on EJB-style business exceptions with commit behavior, it is
+advisable to switch to `ALL_EXCEPTIONS` for a consistent rollback even in case
+of a (potentially accidental) checked exception. Also, it is advisable to make
+that switch for Kotlin-based applications where there is no enforcement of
+checked exceptions at all.
+====
 
 Currently, you cannot have explicit control over the name of a transaction, where 'name'
 means the transaction name that appears in a transaction monitor and in logging output.
