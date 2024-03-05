@@ -116,6 +116,18 @@ open class MockHttpServletRequestDsl internal constructor (private val builder: 
 	var params: MultiValueMap<String, String>? = null
 
 	/**
+	 * @see [MockHttpServletRequestBuilder.queryParam]
+	 */
+	fun queryParam(name: String, vararg values: String) {
+		builder.queryParam(name, *values)
+	}
+
+	/**
+	 * @see [MockHttpServletRequestBuilder.queryParams]
+	 */
+	var queryParams: MultiValueMap<String, String>? = null
+
+	/**
 	 * @see [MockHttpServletRequestBuilder.cookie]
 	 */
 	fun cookie(vararg cookies: Cookie) {
@@ -200,6 +212,7 @@ open class MockHttpServletRequestDsl internal constructor (private val builder: 
 		accept?.also { builder.accept(it) }
 		contentType?.also { builder.contentType(it) }
 		params?.also { builder.params(it) }
+		queryParams?.also { builder.queryParams(it) }
 		sessionAttrs?.also { builder.sessionAttrs(it) }
 		flashAttrs?.also { builder.flashAttrs(it) }
 		session?.also { builder.session(it) }
