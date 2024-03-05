@@ -791,7 +791,7 @@ public abstract class StringUtils {
 	 * and {@code "0"} through {@code "9"} stay the same.</li>
 	 * <li>Special characters {@code "-"}, {@code "_"}, {@code "."}, and {@code "*"} stay the same.</li>
 	 * <li>A sequence "{@code %<i>xy</i>}" is interpreted as a hexadecimal representation of the character.</li>
-	 * <li>For all characters (including those already decoded), the output is undefined.</li>
+	 * <li>For all other characters (including those already decoded), the output is undefined.</li>
 	 * </ul>
 	 * @param source the encoded String
 	 * @param charset the character set
