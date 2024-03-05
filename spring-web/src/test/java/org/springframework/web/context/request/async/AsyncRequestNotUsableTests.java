@@ -20,9 +20,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import jakarta.servlet.AsyncEvent;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.AsyncEvent;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -51,11 +52,11 @@ public class AsyncRequestNotUsableTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
-	private final HttpServletResponse response = mock();
+	private final HttpServletResponse response = mock(HttpServletResponse.class);
 
-	private final ServletOutputStream outputStream = mock();
+	private final ServletOutputStream outputStream = mock(ServletOutputStream.class);
 
-	private final PrintWriter writer = mock();
+	private final PrintWriter writer = mock(PrintWriter.class);
 
 	private StandardServletAsyncWebRequest asyncRequest;
 
