@@ -288,8 +288,8 @@ class EnableTransactionManagementTests {
 	}
 
 	@Test
-	void gh24502AppliesTransactionOnlyOnAnnotatedInterface() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh24502ConfigA.class);
+	void gh24502AppliesTransactionFromAnnotatedInterface() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh24502Config.class);
 		Object bean = ctx.getBean("testBean");
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
 
@@ -590,7 +590,7 @@ class EnableTransactionManagementTests {
 
 	@Configuration
 	@EnableTransactionManagement
-	static class Gh24502ConfigA {
+	static class Gh24502Config {
 
 		@Bean
 		public MixedTransactionalTestService testBean() {

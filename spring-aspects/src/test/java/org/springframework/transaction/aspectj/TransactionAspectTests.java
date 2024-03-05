@@ -107,32 +107,32 @@ class TransactionAspectTests {
 	void defaultCommitOnAnnotatedClass() {
 		Exception ex = new Exception();
 		assertThatException()
-			.isThrownBy(() -> testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), false))
-			.isSameAs(ex);
+				.isThrownBy(() -> testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), false))
+				.isSameAs(ex);
 	}
 
 	@Test
 	void defaultRollbackOnAnnotatedClass() {
 		RuntimeException ex = new RuntimeException();
 		assertThatRuntimeException()
-			.isThrownBy(() -> testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), true))
-			.isSameAs(ex);
+				.isThrownBy(() -> testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), true))
+				.isSameAs(ex);
 	}
 
 	@Test
 	void defaultCommitOnSubclassOfAnnotatedClass() {
 		Exception ex = new Exception();
 		assertThatException()
-			.isThrownBy(() -> testRollback(() -> new SubclassOfClassWithTransactionalAnnotation().echo(ex), false))
-			.isSameAs(ex);
+				.isThrownBy(() -> testRollback(() -> new SubclassOfClassWithTransactionalAnnotation().echo(ex), false))
+				.isSameAs(ex);
 	}
 
 	@Test
 	void defaultCommitOnSubclassOfClassWithTransactionalMethodAnnotated() {
 		Exception ex = new Exception();
 		assertThatException()
-			.isThrownBy(() -> testRollback(() -> new SubclassOfClassWithTransactionalMethodAnnotation().echo(ex), false))
-			.isSameAs(ex);
+				.isThrownBy(() -> testRollback(() -> new SubclassOfClassWithTransactionalMethodAnnotation().echo(ex), false))
+				.isSameAs(ex);
 	}
 
 	@Test
@@ -168,8 +168,8 @@ class TransactionAspectTests {
 		txManager.clear();
 		assertThat(txManager.begun).isEqualTo(0);
 		assertThatExceptionOfType(Throwable.class)
-			.isThrownBy(toc::performTransactionalOperation)
-			.isSameAs(expected);
+				.isThrownBy(toc::performTransactionalOperation)
+				.isSameAs(expected);
 		assertThat(txManager.begun).isEqualTo(0);
 	}
 
