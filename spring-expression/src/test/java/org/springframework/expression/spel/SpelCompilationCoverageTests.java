@@ -175,7 +175,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			Map<String, Integer> map = Map.of("a", 13, "b", 42);
 
 			// Prerequisite: root type must not be public for this use case.
-			assertThat(Modifier.isPublic(map.getClass().getModifiers())).isFalse();
+			assertNotPublic(map.getClass());
 
 			expression = parser.parseExpression(spel);
 			Integer result = expression.getValue(map, Integer.class);
@@ -549,7 +549,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			Map<String, int[]> map = Map.of("foo", new int[] { 1, 2, 3 });
 
 			// Prerequisite: root type must not be public for this use case.
-			assertThat(Modifier.isPublic(map.getClass().getModifiers())).isFalse();
+			assertNotPublic(map.getClass());
 
 			// map key access
 			expression = parser.parseExpression("['foo']");
@@ -590,7 +590,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			Map<String, int[]> map = Map.of("foo", new int[] { 1, 2, 3 });
 
 			// Prerequisite: root type must not be public for this use case.
-			assertThat(Modifier.isPublic(map.getClass().getModifiers())).isFalse();
+			assertNotPublic(map.getClass());
 
 			// map key access
 			expression = parser.parseExpression("['foo']");
@@ -5475,6 +5475,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	private Expression parse(String expression) {
 		return parser.parseExpression(expression);
+	}
+
+	private static void assertNotPublic(Class<?> clazz) {
+		assertThat(Modifier.isPublic(clazz.getModifiers())).as("%s must be private", clazz.getName()).isFalse();
 	}
 
 
