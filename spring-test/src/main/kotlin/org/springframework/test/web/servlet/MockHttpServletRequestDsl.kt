@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,6 +116,7 @@ open class MockHttpServletRequestDsl internal constructor (private val builder: 
 	var params: MultiValueMap<String, String>? = null
 
 	/**
+	 * @since 6.1.5
 	 * @see [MockHttpServletRequestBuilder.queryParam]
 	 */
 	fun queryParam(name: String, vararg values: String) {
