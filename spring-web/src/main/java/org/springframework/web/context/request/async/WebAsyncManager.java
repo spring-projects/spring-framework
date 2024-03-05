@@ -514,14 +514,11 @@ public final class WebAsyncManager {
 		}
 
 		this.asyncWebRequest.startAsync();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Started async request");
-		}
 	}
 
 	private static String formatUri(AsyncWebRequest asyncWebRequest) {
 		HttpServletRequest request = asyncWebRequest.getNativeRequest(HttpServletRequest.class);
-		return (request != null ? request.getRequestURI() : "servlet container");
+		return (request != null ? "\"" + request.getRequestURI() + "\"" : "servlet container");
 	}
 
 
