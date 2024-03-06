@@ -307,18 +307,31 @@ public class RequestMappingHandlerAdapter
 				exceptions.toArray(arguments);  // efficient arraycopy call in ArrayList
 				arguments[arguments.length - 1] = handlerMethod;
 
-				return invocable.invoke(exchange, bindingContext, arguments);
+				return invocable.invoke(exchange, bindingContext, arguments)
+						.onErrorResume(invocationEx ->
+								handleExceptionHandlerFailure(exchange, exception, invocationEx, exceptions, invocable));
 			}
 			catch (Throwable invocationEx) {
-				if (!disconnectedClientHelper.checkAndLogClientDisconnectedException(invocationEx)) {
-					// Any other than the original exception (or a cause) is unintended here,
-					// probably an accident (e.g. failed assertion or the like).
-					if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
-						logger.warn(exchange.getLogPrefix() + "Failure in @ExceptionHandler " + invocable, invocationEx);
-					}
-				}
+				return handleExceptionHandlerFailure(exchange, exception, invocationEx, exceptions, invocable);
 			}
 		}
+		return Mono.error(exception);
+	}
+
+	private static Mono<HandlerResult> handleExceptionHandlerFailure(
+			ServerWebExchange exchange, Throwable exception, Throwable invocationEx,
+			ArrayList<Throwable> exceptions, InvocableHandlerMethod invocable) {
+
+		if (disconnectedClientHelper.checkAndLogClientDisconnectedException(invocationEx)) {
+			return Mono.empty();
+		}
+
+		// Any other than the original exception (or a cause) is unintended here,
+		// probably an accident (e.g. failed assertion or the like).
+		if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
+			logger.warn(exchange.getLogPrefix() + "Failure in @ExceptionHandler " + invocable, invocationEx);
+		}
+
 		return Mono.error(exception);
 	}
 
