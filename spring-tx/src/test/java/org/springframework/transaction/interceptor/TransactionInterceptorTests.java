@@ -116,15 +116,11 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		ti.setTransactionManager(ptm);
 		ti = SerializationTestUtils.serializeAndDeserialize(ti);
 
-		boolean condition3 = ti.getTransactionManager() instanceof SerializableTransactionManager;
-		assertThat(condition3).isTrue();
-		boolean condition2 = ti.getTransactionAttributeSource() instanceof CompositeTransactionAttributeSource;
-		assertThat(condition2).isTrue();
+		assertThat(ti.getTransactionManager() instanceof SerializableTransactionManager).isTrue();
+		assertThat(ti.getTransactionAttributeSource() instanceof CompositeTransactionAttributeSource).isTrue();
 		CompositeTransactionAttributeSource ctas = (CompositeTransactionAttributeSource) ti.getTransactionAttributeSource();
-		boolean condition1 = ctas.getTransactionAttributeSources()[0] instanceof NameMatchTransactionAttributeSource;
-		assertThat(condition1).isTrue();
-		boolean condition = ctas.getTransactionAttributeSources()[1] instanceof NameMatchTransactionAttributeSource;
-		assertThat(condition).isTrue();
+		assertThat(ctas.getTransactionAttributeSources()[0] instanceof NameMatchTransactionAttributeSource).isTrue();
+		assertThat(ctas.getTransactionAttributeSources()[1] instanceof NameMatchTransactionAttributeSource).isTrue();
 	}
 
 	@Test
@@ -132,7 +128,7 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		PlatformTransactionManager transactionManager = mock();
 		TransactionInterceptor ti = transactionInterceptorWithTransactionManager(transactionManager, null);
 
-		assertThat(ti.determineTransactionManager(new DefaultTransactionAttribute())).isSameAs(transactionManager);
+		assertThat(ti.determineTransactionManager(new DefaultTransactionAttribute(), null)).isSameAs(transactionManager);
 	}
 
 	@Test
@@ -140,7 +136,7 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		PlatformTransactionManager transactionManager = mock();
 		TransactionInterceptor ti = transactionInterceptorWithTransactionManager(transactionManager, null);
 
-		assertThat(ti.determineTransactionManager(null)).isSameAs(transactionManager);
+		assertThat(ti.determineTransactionManager(null, null)).isSameAs(transactionManager);
 	}
 
 	@Test
@@ -148,7 +144,7 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		BeanFactory beanFactory = mock();
 		TransactionInterceptor ti = simpleTransactionInterceptor(beanFactory);
 
-		assertThat(ti.determineTransactionManager(null)).isNull();
+		assertThat(ti.determineTransactionManager(null, null)).isNull();
 	}
 
 	@Test
@@ -158,9 +154,9 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
 		attribute.setQualifier("fooTransactionManager");
 
-		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
-				ti.determineTransactionManager(attribute))
-			.withMessageContaining("'fooTransactionManager'");
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+				.isThrownBy(() -> ti.determineTransactionManager(attribute, null))
+				.withMessageContaining("'fooTransactionManager'");
 	}
 
 	@Test
@@ -174,7 +170,7 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
 		attribute.setQualifier("fooTransactionManager");
 
-		assertThat(ti.determineTransactionManager(attribute)).isSameAs(fooTransactionManager);
+		assertThat(ti.determineTransactionManager(attribute, null)).isSameAs(fooTransactionManager);
 	}
 
 	@Test
@@ -189,7 +185,7 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
 		attribute.setQualifier("fooTransactionManager");
 
-		assertThat(ti.determineTransactionManager(attribute)).isSameAs(fooTransactionManager);
+		assertThat(ti.determineTransactionManager(attribute, null)).isSameAs(fooTransactionManager);
 	}
 
 	@Test
@@ -203,7 +199,7 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
 		attribute.setQualifier("");
 
-		assertThat(ti.determineTransactionManager(attribute)).isSameAs(defaultTransactionManager);
+		assertThat(ti.determineTransactionManager(attribute, null)).isSameAs(defaultTransactionManager);
 	}
 
 	@Test
@@ -215,11 +211,11 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
 		attribute.setQualifier("fooTransactionManager");
-		TransactionManager actual = ti.determineTransactionManager(attribute);
+		TransactionManager actual = ti.determineTransactionManager(attribute, null);
 		assertThat(actual).isSameAs(txManager);
 
 		// Call again, should be cached
-		TransactionManager actual2 = ti.determineTransactionManager(attribute);
+		TransactionManager actual2 = ti.determineTransactionManager(attribute, null);
 		assertThat(actual2).isSameAs(txManager);
 		verify(beanFactory, times(1)).containsBean("fooTransactionManager");
 		verify(beanFactory, times(1)).getBean("fooTransactionManager", TransactionManager.class);
@@ -234,11 +230,11 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		PlatformTransactionManager txManager = associateTransactionManager(beanFactory, "fooTransactionManager");
 
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
-		TransactionManager actual = ti.determineTransactionManager(attribute);
+		TransactionManager actual = ti.determineTransactionManager(attribute, null);
 		assertThat(actual).isSameAs(txManager);
 
 		// Call again, should be cached
-		TransactionManager actual2 = ti.determineTransactionManager(attribute);
+		TransactionManager actual2 = ti.determineTransactionManager(attribute, null);
 		assertThat(actual2).isSameAs(txManager);
 		verify(beanFactory, times(1)).getBean("fooTransactionManager", TransactionManager.class);
 	}
@@ -252,11 +248,11 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		given(beanFactory.getBean(TransactionManager.class)).willReturn(txManager);
 
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
-		TransactionManager actual = ti.determineTransactionManager(attribute);
+		TransactionManager actual = ti.determineTransactionManager(attribute, null);
 		assertThat(actual).isSameAs(txManager);
 
 		// Call again, should be cached
-		TransactionManager actual2 = ti.determineTransactionManager(attribute);
+		TransactionManager actual2 = ti.determineTransactionManager(attribute, null);
 		assertThat(actual2).isSameAs(txManager);
 		verify(beanFactory, times(1)).getBean(TransactionManager.class);
 	}

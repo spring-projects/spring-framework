@@ -548,12 +548,32 @@ transaction managers, differentiated by the `order`, `account`, and `reactive-ac
 qualifiers. The default `<tx:annotation-driven>` target bean name, `transactionManager`,
 is still used if no specifically qualified `TransactionManager` bean is found.
 
+[TIP]
+====
+If all transactional methods on the same class share the same qualifier, consider
+declaring a type-level `org.springframework.beans.factory.annotation.Qualifier`
+annotation instead. If its value matches the qualifier value (or bean name) of a
+specific transaction manager, that transaction manager is going to be used for
+transaction definitions without a specific qualifier on `@Transactional` itself.
+
+Such a type-level qualifier can be declared on the concrete class, applying to
+transaction definitions from a base class as well. This effectively overrides
+the default transaction manager choice for any unqualified base class methods.
+
+Last but not least, such a type-level bean qualifier can serve multiple purposes,
+e.g. with a value of "order" it can be used for autowiring purposes (identifying
+the order repository) as well as transaction manager selection, as long as the
+target beans for autowiring as well as the associated transaction manager
+definitions declare the same qualifier value. Such a qualifier value only needs
+to be unique with a set of type-matching beans, not having to serve as an id.
+====
+
 [[tx-custom-attributes]]
 == Custom Composed Annotations
 
-If you find you repeatedly use the same attributes with `@Transactional` on many different
-methods, xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[Spring's meta-annotation support] lets you
-define custom composed annotations for your specific use cases. For example, consider the
+If you find you repeatedly use the same attributes with `@Transactional` on many different methods,
+xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[Spring's meta-annotation support]
+lets you define custom composed annotations for your specific use cases. For example, consider the
 following annotation definitions:
 
 [tabs]

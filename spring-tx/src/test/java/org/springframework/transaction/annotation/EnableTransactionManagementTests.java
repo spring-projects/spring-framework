@@ -23,7 +23,9 @@ import java.util.Properties;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -46,6 +48,7 @@ import org.springframework.transaction.testfixture.CallCountingTransactionManage
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.springframework.transaction.annotation.RollbackOn.ALL_EXCEPTIONS;
 
 /**
@@ -255,9 +258,34 @@ class EnableTransactionManagementTests {
 		assertThat(txManager.commits).isEqualTo(2);
 		assertThat(txManager.rollbacks).isEqualTo(0);
 
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(bean::findAllFoos);
+
 		ctx.close();
 	}
 
+	@Test
+	void gh24291TransactionManagerViaQualifierAnnotation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh24291Config.class);
+		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
+		CallCountingTransactionManager txManager = ctx.getBean("qualifiedTransactionManager", CallCountingTransactionManager.class);
+
+		bean.saveQualifiedFoo();
+		assertThat(txManager.begun).isEqualTo(1);
+		assertThat(txManager.commits).isEqualTo(1);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		bean.saveQualifiedFooWithAttributeAlias();
+		assertThat(txManager.begun).isEqualTo(2);
+		assertThat(txManager.commits).isEqualTo(2);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		bean.findAllFoos();
+		assertThat(txManager.begun).isEqualTo(3);
+		assertThat(txManager.commits).isEqualTo(3);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		ctx.close();
+	}
 	@Test
 	void spr14322FindsOnInterfaceWithInterfaceProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14322ConfigA.class);
@@ -349,6 +377,12 @@ class EnableTransactionManagementTests {
 		@Transactional(transactionManager = "${myTransactionManager}")
 		public void saveQualifiedFooWithAttributeAlias() {
 		}
+	}
+
+
+	@Service
+	@Qualifier("qualified")
+	public static class TransactionalTestBeanSubclass extends TransactionalTestBean {
 	}
 
 
@@ -534,6 +568,35 @@ class EnableTransactionManagementTests {
 		@Bean
 		public TransactionalTestBean testBean() {
 			return new TransactionalTestBean();
+		}
+
+		@Bean
+		public CallCountingTransactionManager otherTxManager() {
+			return new CallCountingTransactionManager();
+		}
+	}
+
+
+	@Configuration
+	@EnableTransactionManagement
+	@Import(PlaceholderConfig.class)
+	static class Gh24291Config {
+
+		@Autowired
+		public void initializeApp(ConfigurableApplicationContext applicationContext) {
+			applicationContext.getBeanFactory().registerSingleton(
+					"qualifiedTransactionManager", new CallCountingTransactionManager());
+			applicationContext.getBeanFactory().registerAlias("qualifiedTransactionManager", "qualified");
+		}
+
+		@Bean
+		public TransactionalTestBeanSubclass testBean() {
+			return new TransactionalTestBeanSubclass();
+		}
+
+		@Bean
+		public CallCountingTransactionManager otherTxManager() {
+			return new CallCountingTransactionManager();
 		}
 	}
 
