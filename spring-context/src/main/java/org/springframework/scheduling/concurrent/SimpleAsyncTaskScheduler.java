@@ -27,6 +27,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -183,12 +185,21 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 		}
 	}
 
-	private Runnable scheduledTask(Runnable task) {
-		return () -> execute(new DelegatingErrorHandlingRunnable(task, TaskUtils.LOG_AND_PROPAGATE_ERROR_HANDLER));
-	}
-
 	private Runnable taskOnSchedulerThread(Runnable task) {
 		return new DelegatingErrorHandlingRunnable(task, TaskUtils.getDefaultErrorHandler(true));
+	}
+
+	private Runnable scheduledTask(Runnable task) {
+		return () -> execute(new DelegatingErrorHandlingRunnable(task, this::shutdownAwareErrorHandler));
+	}
+
+	private void shutdownAwareErrorHandler(Throwable ex) {
+		if (this.scheduledExecutor.isTerminated()) {
+			LogFactory.getLog(getClass()).debug("Ignoring scheduled task exception after shutdown", ex);
+		}
+		else {
+			TaskUtils.getDefaultErrorHandler(true).handleError(ex);
+		}
 	}
 
 
