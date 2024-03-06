@@ -40,6 +40,10 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 
 	private final Method originalMethod;
 
+	/**
+	 * The method to invoke via reflection, which is not necessarily the method
+	 * to invoke in a compiled expression.
+	 */
 	private final Method methodToInvoke;
 
 	@Nullable

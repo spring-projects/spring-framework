@@ -707,7 +707,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 			else {
 				if (descriptor != null) {
-					// A static field/method call will not consume what is on the stack,
+					// A static field/method call will not consume what is on the stack, so
 					// it needs to be popped off.
 					mv.visitInsn(POP);
 				}
