@@ -286,8 +286,9 @@ class EnableTransactionManagementTests {
 
 		ctx.close();
 	}
+
 	@Test
-	void spr14322FindsOnInterfaceWithInterfaceProxy() {
+	void spr14322AnnotationOnInterfaceWithInterfaceProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14322ConfigA.class);
 		TransactionalTestInterface bean = ctx.getBean(TransactionalTestInterface.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
@@ -302,7 +303,7 @@ class EnableTransactionManagementTests {
 	}
 
 	@Test
-	void spr14322FindsOnInterfaceWithCglibProxy() {
+	void spr14322AnnotationOnInterfaceWithCglibProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14322ConfigB.class);
 		TransactionalTestInterface bean = ctx.getBean(TransactionalTestInterface.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
