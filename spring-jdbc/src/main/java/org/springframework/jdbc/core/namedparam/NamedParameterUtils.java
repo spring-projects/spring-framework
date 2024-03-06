@@ -274,8 +274,8 @@ public abstract class NamedParameterUtils {
 	 * like: <br /><br />
 	 * {@code select id, name, state from table where (name, age) in (('John', 35), ('Ann', 50))}
 	 * <p>The parameter values passed in are used to determine the number of placeholders to
-	 * be used for a select list. Select lists should be limited to 100 or fewer elements.
-	 * A larger number of elements is not guaranteed to be supported by the database and
+	 * be used for a select list. Select lists should be limited to 100 or fewer elements and not be empty,
+	 * A larger number of or empty elements is not guaranteed to be supported by the database and
 	 * is strictly vendor-dependent.
 	 * @param parsedSql the parsed representation of the SQL statement
 	 * @param paramSource the source for named parameters
