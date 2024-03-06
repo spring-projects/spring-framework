@@ -23,6 +23,7 @@ import java.util.Properties;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
@@ -46,6 +47,7 @@ import org.springframework.transaction.testfixture.CallCountingTransactionManage
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /**
  * Tests demonstrating use of @EnableTransactionManagement @Configuration classes.
@@ -226,8 +228,8 @@ class EnableTransactionManagementTests {
 		// should throw CNFE when trying to load AnnotationTransactionAspect.
 		// Do you actually have org.springframework.aspects on the classpath?
 		assertThatException()
-			.isThrownBy(() -> new AnnotationConfigApplicationContext(EnableAspectjTxConfig.class, TxManagerConfig.class))
-			.withMessageContaining("AspectJJtaTransactionManagementConfiguration");
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(EnableAspectjTxConfig.class, TxManagerConfig.class))
+				.withMessageContaining("AspectJJtaTransactionManagementConfiguration");
 	}
 
 	@Test
@@ -254,11 +256,13 @@ class EnableTransactionManagementTests {
 		assertThat(txManager.commits).isEqualTo(2);
 		assertThat(txManager.rollbacks).isEqualTo(0);
 
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(bean::findAllFoos);
+
 		ctx.close();
 	}
 
 	@Test
-	void spr14322FindsOnInterfaceWithInterfaceProxy() {
+	void spr14322AnnotationOnInterfaceWithInterfaceProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14322ConfigA.class);
 		TransactionalTestInterface bean = ctx.getBean(TransactionalTestInterface.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
@@ -273,7 +277,7 @@ class EnableTransactionManagementTests {
 	}
 
 	@Test
-	void spr14322FindsOnInterfaceWithCglibProxy() {
+	void spr14322AnnotationOnInterfaceWithCglibProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14322ConfigB.class);
 		TransactionalTestInterface bean = ctx.getBean(TransactionalTestInterface.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
@@ -503,6 +507,11 @@ class EnableTransactionManagementTests {
 		@Bean
 		public TransactionalTestBean testBean() {
 			return new TransactionalTestBean();
+		}
+
+		@Bean
+		public CallCountingTransactionManager otherTxManager() {
+			return new CallCountingTransactionManager();
 		}
 	}
 

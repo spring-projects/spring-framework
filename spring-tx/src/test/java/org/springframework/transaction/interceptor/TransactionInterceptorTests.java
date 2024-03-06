@@ -116,15 +116,11 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		ti.setTransactionManager(ptm);
 		ti = SerializationTestUtils.serializeAndDeserialize(ti);
 
-		boolean condition3 = ti.getTransactionManager() instanceof SerializableTransactionManager;
-		assertThat(condition3).isTrue();
-		boolean condition2 = ti.getTransactionAttributeSource() instanceof CompositeTransactionAttributeSource;
-		assertThat(condition2).isTrue();
+		assertThat(ti.getTransactionManager() instanceof SerializableTransactionManager).isTrue();
+		assertThat(ti.getTransactionAttributeSource() instanceof CompositeTransactionAttributeSource).isTrue();
 		CompositeTransactionAttributeSource ctas = (CompositeTransactionAttributeSource) ti.getTransactionAttributeSource();
-		boolean condition1 = ctas.getTransactionAttributeSources()[0] instanceof NameMatchTransactionAttributeSource;
-		assertThat(condition1).isTrue();
-		boolean condition = ctas.getTransactionAttributeSources()[1] instanceof NameMatchTransactionAttributeSource;
-		assertThat(condition).isTrue();
+		assertThat(ctas.getTransactionAttributeSources()[0] instanceof NameMatchTransactionAttributeSource).isTrue();
+		assertThat(ctas.getTransactionAttributeSources()[1] instanceof NameMatchTransactionAttributeSource).isTrue();
 	}
 
 	@Test
@@ -158,9 +154,9 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
 		attribute.setQualifier("fooTransactionManager");
 
-		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
-				ti.determineTransactionManager(attribute))
-			.withMessageContaining("'fooTransactionManager'");
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+				.isThrownBy(() -> ti.determineTransactionManager(attribute))
+				.withMessageContaining("'fooTransactionManager'");
 	}
 
 	@Test
