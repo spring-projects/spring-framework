@@ -432,12 +432,13 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, arguments);
 		}
 		catch (Throwable invocationEx) {
-			if (!disconnectedClientHelper.checkAndLogClientDisconnectedException(invocationEx)) {
-				// Any other than the original exception (or a cause) is unintended here,
-				// probably an accident (e.g. failed assertion or the like).
-				if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
-					logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
-				}
+			if (disconnectedClientHelper.checkAndLogClientDisconnectedException(invocationEx)) {
+				return new ModelAndView();
+			}
+			// Any other than the original exception (or a cause) is unintended here,
+			// probably an accident (e.g. failed assertion or the like).
+			if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
+				logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
 			}
 			// Continue with default processing of the original exception...
 			return null;

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Locale;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,6 +51,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
@@ -65,6 +67,8 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test fixture with {@link ExceptionHandlerExceptionResolver}.
@@ -399,6 +403,20 @@ class ExceptionHandlerExceptionResolverTests {
 				this.request, this.response, handler, new IllegalStateException());
 
 		assertExceptionHandledAsBody(mav, "DefaultTestExceptionResolver: IllegalStateException");
+	}
+
+	@Test
+	void resolveExceptionAsyncRequestNotUsable() throws Exception {
+		HttpServletResponse response = mock();
+		given(response.getOutputStream()).willThrow(new AsyncRequestNotUsableException("Simulated I/O failure"));
+
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		this.resolver.afterPropertiesSet();
+		ModelAndView mav = this.resolver.resolveException(this.request, response, handlerMethod, ex);
+
+		assertThat(mav).isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
 	}
 
 
