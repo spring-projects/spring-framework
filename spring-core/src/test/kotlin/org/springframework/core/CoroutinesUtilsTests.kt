@@ -98,6 +98,29 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithMono() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithMono", Continuation::class.java)
+		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this)
+		Assertions.assertThat(publisher).isInstanceOf(Mono::class.java)
+		StepVerifier.create(publisher)
+			.expectNext("foo")
+			.expectComplete()
+			.verify()
+	}
+
+	@Test
+	fun invokeSuspendingFunctionWithFlux() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithFlux", Continuation::class.java)
+		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this)
+		Assertions.assertThat(publisher).isInstanceOf(Flux::class.java)
+		StepVerifier.create(publisher)
+			.expectNext("foo")
+			.expectNext("bar")
+			.expectComplete()
+			.verify()
+	}
+
+	@Test
 	fun invokeSuspendingFunctionWithFlow() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithFlow", Continuation::class.java)
 		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this)
@@ -211,6 +234,16 @@ class CoroutinesUtilsTests {
 	suspend fun suspendingFunctionWithNullable(value: String?): String? {
 		delay(1)
 		return value
+	}
+
+	suspend fun suspendingFunctionWithMono(): Mono<String> {
+		delay(1)
+		return Mono.just("foo")
+	}
+
+	suspend fun suspendingFunctionWithFlux(): Flux<String> {
+		delay(1)
+		return Flux.just("foo", "bar")
 	}
 
 	suspend fun suspendingFunctionWithFlow(): Flow<String> {
