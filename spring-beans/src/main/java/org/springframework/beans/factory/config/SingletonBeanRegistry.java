@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.function.Consumer;
+
 import org.springframework.lang.Nullable;
 
 /**
@@ -56,6 +58,17 @@ public interface SingletonBeanRegistry {
 	 * @see org.springframework.beans.factory.support.BeanDefinitionRegistry#registerBeanDefinition
 	 */
 	void registerSingleton(String beanName, Object singletonObject);
+
+	/**
+	 * Add a callback to be triggered when the specified singleton becomes available
+	 * in the bean registry.
+	 * @param beanName the name of the bean
+	 * @param singletonConsumer a callback for reacting to the availability of the freshly
+	 * registered/created singleton instance (intended for follow-up steps before the bean is
+	 * actively used by other callers, not for modifying the given singleton instance itself)
+	 * @since 6.2
+	 */
+	void addSingletonCallback(String beanName, Consumer<Object> singletonConsumer);
 
 	/**
 	 * Return the (raw) singleton object registered under the given name.
