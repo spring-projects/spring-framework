@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,7 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 			Object handler) throws Exception {
 
 		WebAsyncManager asyncManager = getWebAsyncManager(servletRequest, servletResponse);
+		servletResponse = getWrappedResponse(asyncManager);
 
 		ServerRequest serverRequest = getServerRequest(servletRequest);
 		ServerResponse serverResponse;
@@ -121,6 +122,22 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		return asyncManager;
+	}
+
+	/**
+	 * Obtain response wrapped by
+	 * {@link org.springframework.web.context.request.async.StandardServletAsyncWebRequest}
+	 * to enforce lifecycle rules from Servlet spec (section 2.3.3.4)
+	 * in case of async handling.
+	 */
+	private static HttpServletResponse getWrappedResponse(WebAsyncManager asyncManager) {
+		AsyncWebRequest asyncRequest = asyncManager.getAsyncWebRequest();
+		Assert.notNull(asyncRequest, "No AsyncWebRequest");
+
+		HttpServletResponse servletResponse = asyncRequest.getNativeResponse(HttpServletResponse.class);
+		Assert.notNull(servletResponse, "No HttpServletResponse");
+
+		return servletResponse;
 	}
 
 	private ServerRequest getServerRequest(HttpServletRequest servletRequest) {
