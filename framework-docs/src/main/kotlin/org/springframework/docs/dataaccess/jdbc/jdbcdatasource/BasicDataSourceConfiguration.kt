@@ -9,13 +9,11 @@ class BasicDataSourceConfiguration {
 
 	// tag::dataSourceBean[]
 	@Bean(destroyMethod = "close")
-	fun dataSource(): BasicDataSource {
-		val dataSource = BasicDataSource()
-		dataSource.driverClassName = "org.hsqldb.jdbcDriver"
-		dataSource.url = "jdbc:hsqldb:hsql://localhost:"
-		dataSource.username = "sa"
-		dataSource.password = ""
-		return dataSource
+	fun dataSource() = BasicDataSource().apply {
+		driverClassName = "org.hsqldb.jdbcDriver"
+		url = "jdbc:hsqldb:hsql://localhost:"
+		username = "sa"
+		password = ""
 	}
 	// end::dataSourceBean[]
 }

@@ -9,13 +9,11 @@ internal class ComboPooledDataSourceConfiguration {
 
 	// tag::dataSourceBean[]
 	@Bean(destroyMethod = "close")
-	fun dataSource(): ComboPooledDataSource {
-		val dataSource = ComboPooledDataSource()
-		dataSource.driverClass = "org.hsqldb.jdbcDriver"
-		dataSource.jdbcUrl = "jdbc:hsqldb:hsql://localhost:"
-		dataSource.user = "sa"
-		dataSource.password = ""
-		return dataSource
+	fun dataSource() = ComboPooledDataSource().apply {
+		driverClass = "org.hsqldb.jdbcDriver"
+		jdbcUrl = "jdbc:hsqldb:hsql://localhost:"
+		user = "sa"
+		password = ""
 	}
 	// end::dataSourceBean[]
 
