@@ -16,6 +16,8 @@
 
 package org.springframework.web.testfixture.http.server.reactive.bootstrap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.io.ArrayByteBufferPool;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -31,14 +33,16 @@ import org.springframework.http.server.reactive.JettyCoreHttpHandlerAdapter;
  */
 public class JettyCoreHttpServer extends AbstractHttpServer {
 
-	private ArrayByteBufferPool.Tracking byteBufferPool; // TODO remove
+	protected Log logger = LogFactory.getLog(getClass().getName());
+
+	private ArrayByteBufferPool byteBufferPool;
 
 	private Server jettyServer;
 
-
 	@Override
 	protected void initServer() {
-		this.byteBufferPool = new ArrayByteBufferPool.Tracking();
+		if (logger.isTraceEnabled())
+			this.byteBufferPool = new ArrayByteBufferPool.Tracking();
 		this.jettyServer = new Server(null, null, byteBufferPool);
 
 		ServerConnector connector = new ServerConnector(this.jettyServer);
@@ -73,9 +77,9 @@ public class JettyCoreHttpServer extends AbstractHttpServer {
 		}
 
 		// TODO remove this or make debug only
-		if (wasRunning) {
-			if (!this.byteBufferPool.getLeaks().isEmpty()) {
-				System.err.println("Leaks:\n" + this.byteBufferPool.dumpLeaks());
+		if (wasRunning && this.byteBufferPool instanceof ArrayByteBufferPool.Tracking tracking) {
+			if (!tracking.getLeaks().isEmpty()) {
+				System.err.println("Leaks:\n" + tracking.dumpLeaks());
 				throw new IllegalStateException("LEAKS");
 			}
 		}

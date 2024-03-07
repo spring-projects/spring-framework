@@ -49,11 +49,13 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyCoreHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
@@ -164,6 +166,10 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 	void proxy(HttpServer httpServer) throws Exception {
 		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails proxying requests");
 		startServer(httpServer);
+
+		// TODO For JettyCore this test passes, but calls demand on the request Flux after the handling cycle is
+		//      complete, causing an exception to be logged; and leaks buffers that appear not be released by the
+		//      test application.
 
 		Mono<ResponseEntity<Void>> result = webClient
 				.post()
