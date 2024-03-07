@@ -84,12 +84,7 @@ public abstract class CachedExpressionEvaluator {
 			AnnotatedElementKey elementKey, String expression) {
 
 		ExpressionKey expressionKey = createKey(elementKey, expression);
-		Expression expr = cache.get(expressionKey);
-		if (expr == null) {
-			expr = parseExpression(expression);
-			cache.put(expressionKey, expr);
-		}
-		return expr;
+		return cache.computeIfAbsent(expressionKey, key -> parseExpression(expression));
 	}
 
 	/**
