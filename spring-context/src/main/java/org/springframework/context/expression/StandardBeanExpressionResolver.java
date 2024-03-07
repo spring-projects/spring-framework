@@ -23,9 +23,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanExpressionException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
@@ -159,28 +161,25 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 			return value;
 		}
 		try {
-			Expression expr = this.expressionCache.get(value);
-			if (expr == null) {
-				expr = this.expressionParser.parseExpression(value, this.beanExpressionParserContext);
-				this.expressionCache.put(value, expr);
-			}
-			StandardEvaluationContext sec = this.evaluationCache.get(beanExpressionContext);
-			if (sec == null) {
-				sec = new StandardEvaluationContext(beanExpressionContext);
-				sec.addPropertyAccessor(new BeanExpressionContextAccessor());
-				sec.addPropertyAccessor(new BeanFactoryAccessor());
-				sec.addPropertyAccessor(new MapAccessor());
-				sec.addPropertyAccessor(new EnvironmentAccessor());
-				sec.setBeanResolver(new BeanFactoryResolver(beanExpressionContext.getBeanFactory()));
-				sec.setTypeLocator(new StandardTypeLocator(beanExpressionContext.getBeanFactory().getBeanClassLoader()));
-				sec.setTypeConverter(new StandardTypeConverter(() -> {
-					ConversionService cs = beanExpressionContext.getBeanFactory().getConversionService();
-					return (cs != null ? cs : DefaultConversionService.getSharedInstance());
-				}));
-				customizeEvaluationContext(sec);
-				this.evaluationCache.put(beanExpressionContext, sec);
-			}
-			return expr.getValue(sec);
+			Expression expr = this.expressionCache.computeIfAbsent(value, expression ->
+					this.expressionParser.parseExpression(expression, this.beanExpressionParserContext));
+			EvaluationContext evalContext = this.evaluationCache.computeIfAbsent(beanExpressionContext, bec -> {
+					ConfigurableBeanFactory beanFactory = bec.getBeanFactory();
+					StandardEvaluationContext sec = new StandardEvaluationContext(bec);
+					sec.addPropertyAccessor(new BeanExpressionContextAccessor());
+					sec.addPropertyAccessor(new BeanFactoryAccessor());
+					sec.addPropertyAccessor(new MapAccessor());
+					sec.addPropertyAccessor(new EnvironmentAccessor());
+					sec.setBeanResolver(new BeanFactoryResolver(beanFactory));
+					sec.setTypeLocator(new StandardTypeLocator(beanFactory.getBeanClassLoader()));
+					sec.setTypeConverter(new StandardTypeConverter(() -> {
+						ConversionService cs = beanFactory.getConversionService();
+						return (cs != null ? cs : DefaultConversionService.getSharedInstance());
+					}));
+					customizeEvaluationContext(sec);
+					return sec;
+				});
+			return expr.getValue(evalContext);
 		}
 		catch (Throwable ex) {
 			throw new BeanExpressionException("Expression parsing failed", ex);

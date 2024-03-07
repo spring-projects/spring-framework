@@ -25,12 +25,15 @@ import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
 import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KClass;
-import kotlin.reflect.KClassifier;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import kotlin.reflect.KType;
 import kotlin.reflect.full.KCallables;
 import kotlin.reflect.full.KClasses;
+import kotlin.reflect.full.KClassifiers;
+import kotlin.reflect.full.KTypes;
 import kotlin.reflect.jvm.KCallablesJvm;
+import kotlin.reflect.jvm.KTypesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import kotlinx.coroutines.BuildersKt;
 import kotlinx.coroutines.CoroutineStart;
@@ -55,6 +58,12 @@ import org.springframework.util.CollectionUtils;
  * @since 5.2
  */
 public abstract class CoroutinesUtils {
+
+	private static final KType flowType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Flow.class));
+
+	private static final KType monoType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Mono.class));
+
+	private static final KType publisherType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Publisher.class));
 
 	/**
 	 * Convert a {@link Deferred} instance to a {@link Mono}.
@@ -117,19 +126,14 @@ public abstract class CoroutinesUtils {
 							case VALUE, EXTENSION_RECEIVER -> {
 								Object arg = args[index];
 								if (!(parameter.isOptional() && arg == null)) {
-									if (parameter.getType().getClassifier() instanceof KClass<?> kClass) {
-										Class<?> javaClass = JvmClassMappingKt.getJavaClass(kClass);
-										if (KotlinDetector.isInlineClass(javaClass)
-												&& !(parameter.getType().isMarkedNullable() && arg == null)) {
-											argMap.put(parameter, KClasses.getPrimaryConstructor(kClass).call(arg));
-										}
-										else {
-											argMap.put(parameter, arg);
+									KType type = parameter.getType();
+									if (!(type.isMarkedNullable() && arg == null)) {
+										KClass<?> kClass = KTypesJvm.getJvmErasure(type);
+										if (KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
+											arg = KClasses.getPrimaryConstructor(kClass).call(arg);
 										}
 									}
-									else {
-										argMap.put(parameter, arg);
-									}
+									argMap.put(parameter, arg);
 								}
 								index++;
 							}
@@ -140,18 +144,15 @@ public abstract class CoroutinesUtils {
 				.filter(result -> result != Unit.INSTANCE)
 				.onErrorMap(InvocationTargetException.class, InvocationTargetException::getTargetException);
 
-		KClassifier returnType = function.getReturnType().getClassifier();
-		if (returnType != null) {
-			if (returnType.equals(JvmClassMappingKt.getKotlinClass(Flow.class))) {
-				return mono.flatMapMany(CoroutinesUtils::asFlux);
-			}
-			else if (returnType.equals(JvmClassMappingKt.getKotlinClass(Mono.class))) {
-				return mono.flatMap(o -> ((Mono<?>)o));
-			}
-			else if (returnType instanceof KClass<?> kClass &&
-					Publisher.class.isAssignableFrom(JvmClassMappingKt.getJavaClass(kClass))) {
-				return mono.flatMapMany(o -> ((Publisher<?>)o));
-			}
+		KType returnType = function.getReturnType();
+		if (KTypes.isSubtypeOf(returnType, flowType)) {
+			return mono.flatMapMany(CoroutinesUtils::asFlux);
+		}
+		else if (KTypes.isSubtypeOf(returnType, monoType)) {
+			return mono.flatMap(o -> ((Mono<?>)o));
+		}
+		else if (KTypes.isSubtypeOf(returnType, publisherType)) {
+			return mono.flatMapMany(o -> ((Publisher<?>)o));
 		}
 		return mono;
 	}
