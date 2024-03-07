@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -112,6 +113,7 @@ import org.springframework.validation.annotation.ValidationAnnotationUtils;
  * @author Stephane Nicoll
  * @author Kazuki Shimizu
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #registerCustomEditor
@@ -952,6 +954,19 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 					ResolvableType type = ResolvableType.forMethodParameter(param);
 					args[i] = createObject(type, paramPath + ".", valueResolver);
 				}
+				else if (value == null && (Collection.class == paramType || List.class.isAssignableFrom(paramType)
+						|| Map.class.isAssignableFrom(paramType)) && hasIndexedValuesFor(paramPath, valueResolver)) {
+					if (Collection.class == paramType) {
+						// CollectionFactory.createCollection() will create LinkedHashSet which doesn't support indexed property path
+						args[i] = new ArrayList<>(16);
+					}
+					else if (List.class.isAssignableFrom(paramType)) {
+						args[i] = CollectionFactory.createCollection(paramType, 16);
+					}
+					else if (Map.class.isAssignableFrom(paramType)) {
+						args[i] = CollectionFactory.createMap(paramType, 16);
+					}
+				}
 				else {
 					try {
 						if (value == null && (param.isOptional() || getBindingResult().hasErrors())) {
@@ -1025,6 +1040,15 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	private boolean hasValuesFor(String paramPath, ValueResolver resolver) {
 		for (String name : resolver.getNames()) {
 			if (name.startsWith(paramPath + ".")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean hasIndexedValuesFor(String paramPath, ValueResolver resolver) {
+		for (String name : resolver.getNames()) {
+			if (name.startsWith(paramPath + "[")) {
 				return true;
 			}
 		}

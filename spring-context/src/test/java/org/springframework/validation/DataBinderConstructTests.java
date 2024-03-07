@@ -17,6 +17,8 @@
 package org.springframework.validation;
 
 import java.beans.ConstructorProperties;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -24,6 +26,7 @@ import java.util.Set;
 import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.ResolvableType;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.lang.Nullable;
@@ -35,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link DataBinder} with constructor binding.
  *
  * @author Rossen Stoyanchev
+ * @author Yanming Zhou
  */
 class DataBinderConstructTests {
 
@@ -99,6 +103,24 @@ class DataBinderConstructTests {
 		assertThat(bindingResult.getFieldValue("param1")).isEqualTo("value1");
 		assertThat(bindingResult.getFieldValue("param2")).isEqualTo("x");
 		assertThat(bindingResult.getFieldValue("param3")).isNull();
+	}
+
+	@Test
+	void recordClassBindingWithIndexedValue() {
+		Map<String, Object> data = Map.of("collection[0]", "test","list[0]", "test", "map[foo]", "bar");
+		MapValueResolver valueResolver = new MapValueResolver(data);
+		DataBinder binder = initDataBinder(RecordClass.class);
+		binder.construct(valueResolver);
+		binder.bind(new MutablePropertyValues(data));
+
+		BindingResult bindingResult = binder.getBindingResult();
+		assertThat(bindingResult.getAllErrors()).hasSize(0);
+
+		RecordClass target = (RecordClass) binder.getTarget();
+		assertThat(target).isNotNull();
+		assertThat(target.collection).hasSize(1).first().isEqualTo("test");
+		assertThat(target.list).hasSize(1).first().isEqualTo("test");
+		assertThat(target.map).hasSize(1).containsEntry("foo", "bar");
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -189,6 +211,10 @@ class DataBinderConstructTests {
 		public Set<String> getNames() {
 			return this.map.keySet();
 		}
+	}
+
+	record RecordClass(Collection<String> collection, List<String> list, Map<String, String> map) {
+
 	}
 
 }
