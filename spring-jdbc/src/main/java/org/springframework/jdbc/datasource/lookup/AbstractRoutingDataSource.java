@@ -60,6 +60,8 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	@Nullable
 	private DataSource resolvedDefaultDataSource;
 
+	private Object resolvedDataSourceMonitor=new Object();
+
 
 	/**
 	 * Specify the map of target DataSources, with the lookup key as key.
@@ -138,14 +140,16 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 		if (this.targetDataSources == null) {
 			throw new IllegalArgumentException("Property 'targetDataSources' is required");
 		}
-		this.resolvedDataSources = CollectionUtils.newHashMap(this.targetDataSources.size());
-		this.targetDataSources.forEach((key, value) -> {
-			Object lookupKey = resolveSpecifiedLookupKey(key);
-			DataSource dataSource = resolveSpecifiedDataSource(value);
-			this.resolvedDataSources.put(lookupKey, dataSource);
-		});
-		if (this.defaultTargetDataSource != null) {
-			this.resolvedDefaultDataSource = resolveSpecifiedDataSource(this.defaultTargetDataSource);
+		synchronized (this.resolvedDataSourceMonitor){
+			this.resolvedDataSources = CollectionUtils.newHashMap(this.targetDataSources.size());
+			this.targetDataSources.forEach((key, value) -> {
+				Object lookupKey = resolveSpecifiedLookupKey(key);
+				DataSource dataSource = resolveSpecifiedDataSource(value);
+				this.resolvedDataSources.put(lookupKey, dataSource);
+			});
+			if (this.defaultTargetDataSource != null) {
+				this.resolvedDefaultDataSource = resolveSpecifiedDataSource(this.defaultTargetDataSource);
+			}
 		}
 	}
 
@@ -253,15 +257,17 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 */
 	protected DataSource determineTargetDataSource() {
 		Assert.notNull(this.resolvedDataSources, "DataSource router not initialized");
-		Object lookupKey = determineCurrentLookupKey();
-		DataSource dataSource = this.resolvedDataSources.get(lookupKey);
-		if (dataSource == null && (this.lenientFallback || lookupKey == null)) {
-			dataSource = this.resolvedDefaultDataSource;
+		synchronized (this.resolvedDataSourceMonitor){
+			Object lookupKey = determineCurrentLookupKey();
+			DataSource dataSource = this.resolvedDataSources.get(lookupKey);
+			if (dataSource == null && (this.lenientFallback || lookupKey == null)) {
+				dataSource = this.resolvedDefaultDataSource;
+			}
+			if (dataSource == null) {
+				throw new IllegalStateException("Cannot determine target DataSource for lookup key [" + lookupKey + "]");
+			}
+			return dataSource;
 		}
-		if (dataSource == null) {
-			throw new IllegalStateException("Cannot determine target DataSource for lookup key [" + lookupKey + "]");
-		}
-		return dataSource;
 	}
 
 	/**
