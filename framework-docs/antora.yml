@@ -20,6 +20,8 @@ asciidoc:
     fold: 'all'
     table-stripes: 'odd'
     include-java: 'example$docs-src/main/java/org/springframework/docs'
+    include-kotlin: 'example$docs-src/main/kotlin/org/springframework/docs'
+    include-xml: 'example$docs-src/main/resources/org/springframework/docs'
     spring-site: 'https://spring.io'
     spring-site-blog: '{spring-site}/blog'
     spring-site-cve: "{spring-site}/security"
