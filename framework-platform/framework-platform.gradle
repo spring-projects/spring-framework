@@ -6,10 +6,6 @@ javaPlatform {
 	allowDependencies()
 }
 
-repositories {
-	mavenLocal()
-}
-
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.15.3"))
 	api(platform("io.micrometer:micrometer-bom:1.12.3"))

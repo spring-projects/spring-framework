@@ -8,7 +8,6 @@ description = "Spring Framework API Docs"
 apply from: "${rootDir}/gradle/publications.gradle"
 
 repositories {
-	mavenLocal()
 	maven {
 		url "https://repo.spring.io/release"
 	}
