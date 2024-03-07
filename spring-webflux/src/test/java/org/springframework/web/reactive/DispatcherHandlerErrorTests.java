@@ -38,9 +38,11 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
@@ -195,6 +197,14 @@ public class DispatcherHandlerErrorTests {
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+	@Test
+	void asyncRequestNotUsableFromExceptionHandler() {
+		ServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.post("/request-not-usable-on-exception-handling"));
+
+		StepVerifier.create(this.dispatcherHandler.handle(exchange)).verifyComplete();
+	}
+
 
 	@Configuration
 	@SuppressWarnings({"unused", "WeakerAccess"})
@@ -248,6 +258,16 @@ public class DispatcherHandlerErrorTests {
 		@ResponseBody
 		public Publisher<String> requestBody(@RequestBody Publisher<String> body) {
 			return Mono.from(body).map(s -> "hello " + s);
+		}
+
+		@RequestMapping("/request-not-usable-on-exception-handling")
+		public void handle() throws Exception {
+			throw new IllegalAccessException();
+		}
+
+		@ExceptionHandler
+		public void handleException(IllegalAccessException ex) throws AsyncRequestNotUsableException {
+			throw new AsyncRequestNotUsableException("Simulated response failure");
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -157,7 +158,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 		if (!hasPattern(patterns)) {
 			return EMPTY_PATH_PATTERN;
 		}
-		Set<String> result = new LinkedHashSet<>(patterns.length);
+		Set<String> result = CollectionUtils.newLinkedHashSet(patterns.length);
 		for (String pattern : patterns) {
 			pattern = PathPatternParser.defaultInstance.initFullPathPattern(pattern);
 			result.add(pattern);

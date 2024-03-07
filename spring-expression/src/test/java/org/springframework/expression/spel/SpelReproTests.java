@@ -1325,7 +1325,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		assertThat(Array.get(result, 2)).isEqualTo(XYZ.Z);
 	}
 
-	@Test
+	@Test  // https://github.com/spring-projects/spring-framework/issues/15119
 	void SPR10486() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();

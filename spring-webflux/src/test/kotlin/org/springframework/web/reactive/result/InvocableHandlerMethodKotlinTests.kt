@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.lang.reflect.Method
 import java.time.Duration
+import kotlin.reflect.KClass
 import kotlin.reflect.jvm.javaMethod
 
 /**
@@ -176,8 +177,16 @@ class InvocableHandlerMethodKotlinTests {
 
 	@Test
 	fun nullReturnValue() {
-		val method = NullResultController::nullable.javaMethod!!
+		val method = NullResultController::nullableReturnValue.javaMethod!!
 		val result = invoke(NullResultController(), method)
+		assertHandlerResultValue(result, null)
+	}
+
+	@Test
+	fun nullParameter() {
+		this.resolvers.add(stubResolver(null, String::class.java))
+		val method = NullResultController::nullableParameter.javaMethod!!
+		val result = invoke(NullResultController(), method, null)
 		assertHandlerResultValue(result, null)
 	}
 
@@ -190,11 +199,27 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
-	fun valueClassDefaultValue() {
+	fun valueClassWithDefaultValue() {
 		this.resolvers.add(stubResolver(null, Double::class.java))
 		val method = ValueClassController::valueClassWithDefault.javaMethod!!
 		val result = invoke(ValueClassController(), method)
 		assertHandlerResultValue(result, "3.1")
+	}
+
+	@Test
+	fun valueClassWithInit() {
+		this.resolvers.add(stubResolver("", String::class.java))
+		val method = ValueClassController::valueClassWithInit.javaMethod!!
+		val result = invoke(ValueClassController(), method)
+		assertExceptionThrown(result, IllegalArgumentException::class)
+	}
+
+	@Test
+	fun valueClassWithNullable() {
+		this.resolvers.add(stubResolver(null, LongValueClass::class.java))
+		val method = ValueClassController::valueClassWithNullable.javaMethod!!
+		val result = invoke(ValueClassController(), method, null)
+		assertHandlerResultValue(result, "null")
 	}
 
 	@Test
@@ -256,6 +281,10 @@ class InvocableHandlerMethodKotlinTests {
 				}.verifyComplete()
 	}
 
+	private fun assertExceptionThrown(mono: Mono<HandlerResult>, exceptionClass: KClass<out Throwable>) {
+		StepVerifier.create(mono).verifyError(exceptionClass.java)
+	}
+
 	class CoroutinesController {
 
 		suspend fun singleArg(q: String?): String {
@@ -307,8 +336,12 @@ class InvocableHandlerMethodKotlinTests {
 		fun unit() {
 		}
 
-		fun nullable(): String? {
+		fun nullableReturnValue(): String? {
 			return null
+		}
+
+		fun nullableParameter(value: String?): String? {
+			return value
 		}
 	}
 
@@ -319,6 +352,12 @@ class InvocableHandlerMethodKotlinTests {
 
 		fun valueClassWithDefault(limit: DoubleValueClass = DoubleValueClass(3.1)) =
 			"${limit.value}"
+
+		fun valueClassWithInit(valueClass: ValueClassWithInit) =
+			valueClass
+
+		fun valueClassWithNullable(limit: LongValueClass?) =
+			"${limit?.value}"
 
 	}
 
@@ -345,6 +384,15 @@ class InvocableHandlerMethodKotlinTests {
 
 	@JvmInline
 	value class DoubleValueClass(val value: Double)
+
+	@JvmInline
+	value class ValueClassWithInit(val value: String) {
+		init {
+			if (value.isEmpty()) {
+				throw IllegalArgumentException()
+			}
+		}
+	}
 
 	class CustomException(message: String) : Throwable(message)
 }

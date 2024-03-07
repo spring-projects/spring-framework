@@ -17,16 +17,19 @@
 package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.testfixture.interceptor.NopInterceptor;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
@@ -37,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rod Johnson
  * @author Chris Beams
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  */
 class AopUtilsTests {
 
@@ -97,6 +101,38 @@ class AopUtilsTests {
 		Method method = ReflectionUtils.findMethod(TestBean.class, "getName");
 		Object result = AopUtils.invokeJoinpointUsingReflection(testBean, method, new Object[0]);
 		assertThat(result).isEqualTo(name);
+	}
+
+	@Test  // gh-32365
+	void mostSpecificMethodBetweenJdkProxyAndTarget() throws Exception {
+		Class<?> proxyClass = new ProxyFactory(new WithInterface()).getProxyClass(getClass().getClassLoader());
+		Method specificMethod = AopUtils.getMostSpecificMethod(proxyClass.getMethod("handle", List.class), WithInterface.class);
+		assertThat(ResolvableType.forMethodParameter(specificMethod, 0).getGeneric().toClass()).isEqualTo(String.class);
+	}
+
+	@Test  // gh-32365
+	void mostSpecificMethodBetweenCglibProxyAndTarget() throws Exception {
+		Class<?> proxyClass = new ProxyFactory(new WithoutInterface()).getProxyClass(getClass().getClassLoader());
+		Method specificMethod = AopUtils.getMostSpecificMethod(proxyClass.getMethod("handle", List.class), WithoutInterface.class);
+		assertThat(ResolvableType.forMethodParameter(specificMethod, 0).getGeneric().toClass()).isEqualTo(String.class);
+	}
+
+
+	interface ProxyInterface {
+
+		void handle(List<String> list);
+	}
+
+	static class WithInterface implements ProxyInterface {
+
+		public void handle(List<String> list) {
+		}
+	}
+
+	static class WithoutInterface {
+
+		public void handle(List<String> list) {
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,16 @@ public class CompositeTransactionAttributeSource implements TransactionAttribute
 	public boolean isCandidateClass(Class<?> targetClass) {
 		for (TransactionAttributeSource source : this.transactionAttributeSources) {
 			if (source.isCandidateClass(targetClass)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean hasTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
+		for (TransactionAttributeSource source : this.transactionAttributeSources) {
+			if (source.hasTransactionAttribute(method, targetClass)) {
 				return true;
 			}
 		}

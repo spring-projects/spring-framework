@@ -75,6 +75,7 @@ import org.springframework.core.PriorityOrdered;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
@@ -616,7 +617,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				else if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)) {
 					String[] dependentBeans = getDependentBeans(beanName);
-					Set<String> actualDependentBeans = new LinkedHashSet<>(dependentBeans.length);
+					Set<String> actualDependentBeans = CollectionUtils.newLinkedHashSet(dependentBeans.length);
 					for (String dependentBean : dependentBeans) {
 						if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
 							actualDependentBeans.add(dependentBean);
@@ -765,7 +766,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 									paramNames = pnd.getParameterNames(candidate);
 								}
 							}
-							Set<ConstructorArgumentValues.ValueHolder> usedValueHolders = new HashSet<>(paramTypes.length);
+							Set<ConstructorArgumentValues.ValueHolder> usedValueHolders = CollectionUtils.newHashSet(paramTypes.length);
 							Object[] args = new Object[paramTypes.length];
 							for (int i = 0; i < args.length; i++) {
 								ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.context.annotation;
+
+import java.util.Map;
 
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -52,27 +54,37 @@ final class BeanMethod extends ConfigurationMethod {
 			return;
 		}
 
-		if (this.configurationClass.getMetadata().isAnnotated(Configuration.class.getName())) {
-			if (!getMetadata().isOverridable()) {
-				// instance @Bean methods within @Configuration classes must be overridable to accommodate CGLIB
-				problemReporter.error(new NonOverridableMethodError());
-			}
+		Map<String, Object> attributes =
+				getConfigurationClass().getMetadata().getAnnotationAttributes(Configuration.class.getName());
+		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods") && !getMetadata().isOverridable()) {
+			// instance @Bean methods within @Configuration classes must be overridable to accommodate CGLIB
+			problemReporter.error(new NonOverridableMethodError());
 		}
 	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof BeanMethod that && this.metadata.equals(that.metadata)));
+		return (this == other || (other instanceof BeanMethod that &&
+				this.configurationClass.equals(that.configurationClass) &&
+				getLocalMethodIdentifier(this.metadata).equals(getLocalMethodIdentifier(that.metadata))));
 	}
 
 	@Override
 	public int hashCode() {
-		return this.metadata.hashCode();
+		return this.configurationClass.hashCode() * 31 + getLocalMethodIdentifier(this.metadata).hashCode();
 	}
 
 	@Override
 	public String toString() {
 		return "BeanMethod: " + this.metadata;
+	}
+
+
+	private static String getLocalMethodIdentifier(MethodMetadata metadata) {
+		String metadataString = metadata.toString();
+		int index = metadataString.indexOf(metadata.getDeclaringClassName());
+		return (index >= 0 ? metadataString.substring(index + metadata.getDeclaringClassName().length()) :
+				metadataString);
 	}
 
 

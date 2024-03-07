@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -883,7 +882,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	private void autodetect(Map<String, Object> beans, AutodetectCallback callback) {
 		Assert.state(this.beanFactory != null, "No BeanFactory set");
-		Set<String> beanNames = new LinkedHashSet<>(this.beanFactory.getBeanDefinitionCount());
+		Set<String> beanNames = CollectionUtils.newLinkedHashSet(this.beanFactory.getBeanDefinitionCount());
 		Collections.addAll(beanNames, this.beanFactory.getBeanDefinitionNames());
 		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
 			Collections.addAll(beanNames, cbf.getSingletonNames());

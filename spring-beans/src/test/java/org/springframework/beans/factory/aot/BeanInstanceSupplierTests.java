@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -375,7 +376,7 @@ class BeanInstanceSupplierTests {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
 		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
-		assertThat(arguments.getObject(0)).isInstanceOf(List.class).asList()
+		assertThat(arguments.getObject(0)).isInstanceOf(List.class).asInstanceOf(LIST)
 				.containsExactly("1", "2");
 	}
 

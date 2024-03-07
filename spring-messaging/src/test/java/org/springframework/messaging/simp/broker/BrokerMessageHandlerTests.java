@@ -69,7 +69,7 @@ class BrokerMessageHandlerTests {
 
 	@Test
 	void handleMessageWhenBrokerNotRunning() {
-		this.handler.handleMessage(new GenericMessage<Object>("payload"));
+		this.handler.handleMessage(new GenericMessage<>("payload"));
 		assertThat(this.handler.messages).isEqualTo(Collections.emptyList());
 	}
 

@@ -469,7 +469,7 @@ final class PlaceholderParser {
 		}
 
 		private boolean isTextOnly(List<Part> parts) {
-			return parts.stream().allMatch(part -> part instanceof TextPart);
+			return parts.stream().allMatch(TextPart.class::isInstance);
 		}
 
 		private String toText(List<Part> parts) {

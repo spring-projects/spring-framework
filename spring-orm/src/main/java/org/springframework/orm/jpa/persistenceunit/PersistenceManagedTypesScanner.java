@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -46,6 +45,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -66,7 +66,7 @@ public final class PersistenceManagedTypesScanner {
 	private static final boolean shouldIgnoreClassFormatException =
 			SpringProperties.getFlag(IGNORE_CLASSFORMAT_PROPERTY_NAME);
 
-	private static final Set<AnnotationTypeFilter> entityTypeFilters = new LinkedHashSet<>(4);
+	private static final Set<AnnotationTypeFilter> entityTypeFilters = CollectionUtils.newLinkedHashSet(4);
 
 	static {
 		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));

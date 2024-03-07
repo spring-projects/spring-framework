@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -124,7 +124,7 @@ public class InjectionMetadata {
 			this.checkedElements = Collections.emptySet();
 		}
 		else {
-			Set<InjectedElement> checkedElements = new LinkedHashSet<>((this.injectedElements.size() * 4 / 3) + 1);
+			Set<InjectedElement> checkedElements = CollectionUtils.newLinkedHashSet(this.injectedElements.size());
 			for (InjectedElement element : this.injectedElements) {
 				Member member = element.getMember();
 				if (!beanDefinition.isExternallyManagedConfigMember(member)) {

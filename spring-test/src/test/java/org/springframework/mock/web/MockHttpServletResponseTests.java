@@ -201,7 +201,7 @@ class MockHttpServletResponseTests {
 		response.setCharacterEncoding("UTF-8");
 		assertThat(response.getContentType()).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain;charset=UTF-8");
-		response.setCharacterEncoding(null);
+		response.setCharacterEncoding((String) null);
 		assertThat(response.getContentType()).isEqualTo("test/plain");
 		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain");
 		assertThat(response.getCharacterEncoding()).isEqualTo(WebUtils.DEFAULT_CHARACTER_ENCODING);

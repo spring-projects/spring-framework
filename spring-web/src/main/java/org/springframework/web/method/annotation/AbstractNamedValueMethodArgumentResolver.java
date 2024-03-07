@@ -26,6 +26,7 @@ import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
@@ -281,8 +282,12 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			NamedValueInfo namedValueInfo, @Nullable Object arg) throws Exception {
 
 		WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
+		Class<?> parameterType = parameter.getParameterType();
+		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isInlineClass(parameterType)) {
+			parameterType = BeanUtils.findPrimaryConstructor(parameterType).getParameterTypes()[0];
+		}
 		try {
-			arg = binder.convertIfNecessary(arg, parameter.getParameterType(), parameter);
+			arg = binder.convertIfNecessary(arg, parameterType, parameter);
 		}
 		catch (ConversionNotSupportedException ex) {
 			throw new MethodArgumentConversionNotSupportedException(arg, ex.getRequiredType(),

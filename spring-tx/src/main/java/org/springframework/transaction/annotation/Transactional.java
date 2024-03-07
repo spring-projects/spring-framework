@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,6 +139,14 @@ public @interface Transactional {
 	 * qualifier value (or the bean name) of a specific
 	 * {@link org.springframework.transaction.TransactionManager TransactionManager}
 	 * bean definition.
+	 * <p>Alternatively, as of 6.2, a type-level bean qualifier annotation with a
+	 * {@link org.springframework.beans.factory.annotation.Qualifier#value() qualifier value}
+	 * is also taken into account. If it matches the qualifier value (or bean name)
+	 * of a specific transaction manager, that transaction manager is going to be used
+	 * for transaction definitions without a specific qualifier on this attribute here.
+	 * Such a type-level qualifier can be declared on the concrete class, applying
+	 * to transaction definitions from a base class as well, effectively overriding
+	 * the default transaction manager choice for any unqualified base class methods.
 	 * @since 4.2
 	 * @see #value
 	 * @see org.springframework.transaction.PlatformTransactionManager

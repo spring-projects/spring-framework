@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 
 
 	/**
-	 * Return a {@link Publisher} that will produce for the request body.
+	 * Return a {@link Publisher} that will produce the request body.
 	 * <p>This is mutually exclusive with {@link #getBodyValue()}.
 	 * Only one of the two or neither is set.
 	 */
@@ -73,7 +73,7 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 	}
 
 	/**
-	 * Return the element type for a {@linkplain #getBodyPublisher() Publisher body}.
+	 * Return the element type for a {@linkplain #getBodyPublisher() body publisher}.
 	 */
 	@Nullable
 	public ParameterizedTypeReference<?> getBodyPublisherElementType() {
@@ -81,10 +81,11 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 	}
 
 	/**
-	 * Return the request body as a Publisher.
+	 * Return the request body as a {@link Publisher}.
 	 * <p>This is mutually exclusive with {@link #getBodyValue()}.
 	 * Only one of the two or neither is set.
 	 */
+	@Override
 	@SuppressWarnings("removal")
 	@Nullable
 	public Publisher<?> getBody() {
@@ -92,8 +93,9 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 	}
 
 	/**
-	 * Return the element type for a {@linkplain #getBodyPublisher() Publisher body}.
+	 * Return the element type for a {@linkplain #getBodyPublisher() body publisher}.
 	 */
+	@Override
 	@SuppressWarnings("removal")
 	@Nullable
 	public ParameterizedTypeReference<?> getBodyElementType() {
@@ -217,8 +219,9 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 
 		/**
 		 * {@inheritDoc}
-		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@linkplain #setBodyPublisher(Publisher, ParameterizedTypeReference)}.
+		 * <p>This is mutually exclusive with and resets any previously set
+		 * {@linkplain #setBodyPublisher(Publisher, ParameterizedTypeReference)
+		 * body publisher}.
 		 */
 		@Override
 		public void setBodyValue(Object bodyValue) {
@@ -228,8 +231,8 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 		}
 
 		/**
-		 * Set the request body as a Reactive Streams Publisher.
-		 * <p>This is mutually exclusive with, and resets any previously set
+		 * Set the request body as a Reactive Streams {@link Publisher}.
+		 * <p>This is mutually exclusive with and resets any previously set
 		 * {@linkplain #setBodyValue(Object) body value}.
 		 */
 		@SuppressWarnings("DataFlowIssue")

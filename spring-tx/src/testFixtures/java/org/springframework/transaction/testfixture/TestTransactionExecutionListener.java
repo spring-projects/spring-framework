@@ -49,34 +49,34 @@ public class TestTransactionExecutionListener implements TransactionExecutionLis
 
 
 	@Override
-	public void beforeBegin(TransactionExecution transactionState) {
+	public void beforeBegin(TransactionExecution transaction) {
 		this.beforeBeginCalled = true;
 	}
 
 	@Override
-	public void afterBegin(TransactionExecution transactionState, @Nullable Throwable beginFailure) {
+	public void afterBegin(TransactionExecution transaction, @Nullable Throwable beginFailure) {
 		this.afterBeginCalled = true;
 		this.beginFailure = beginFailure;
 	}
 
 	@Override
-	public void beforeCommit(TransactionExecution transactionState) {
+	public void beforeCommit(TransactionExecution transaction) {
 		this.beforeCommitCalled = true;
 	}
 
 	@Override
-	public void afterCommit(TransactionExecution transactionState, @Nullable Throwable commitFailure) {
+	public void afterCommit(TransactionExecution transaction, @Nullable Throwable commitFailure) {
 		this.afterCommitCalled = true;
 		this.commitFailure = commitFailure;
 	}
 
 	@Override
-	public void beforeRollback(TransactionExecution transactionState) {
+	public void beforeRollback(TransactionExecution transaction) {
 		this.beforeRollbackCalled = true;
 	}
 
 	@Override
-	public void afterRollback(TransactionExecution transactionState, @Nullable Throwable rollbackFailure) {
+	public void afterRollback(TransactionExecution transaction, @Nullable Throwable rollbackFailure) {
 		this.afterRollbackCalled = true;
 		this.rollbackFailure = rollbackFailure;
 	}

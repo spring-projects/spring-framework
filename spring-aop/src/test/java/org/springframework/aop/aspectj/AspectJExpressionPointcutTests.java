@@ -53,8 +53,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class AspectJExpressionPointcutTests {
 
-	public static final String MATCH_ALL_METHODS = "execution(* *(..))";
-
 	private Method getAge;
 
 	private Method setAge;
@@ -175,25 +173,25 @@ class AspectJExpressionPointcutTests {
 	@Test
 	void testFriendlyErrorOnNoLocationClassMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		assertThatIllegalStateException().isThrownBy(() ->
-				pc.matches(ITestBean.class))
-			.withMessageContaining("expression");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> pc.matches(ITestBean.class))
+				.withMessageContaining("expression");
 	}
 
 	@Test
 	void testFriendlyErrorOnNoLocation2ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		assertThatIllegalStateException().isThrownBy(() ->
-				pc.matches(getAge, ITestBean.class))
-			.withMessageContaining("expression");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> pc.matches(getAge, ITestBean.class))
+				.withMessageContaining("expression");
 	}
 
 	@Test
 	void testFriendlyErrorOnNoLocation3ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		assertThatIllegalStateException().isThrownBy(() ->
-				pc.matches(getAge, ITestBean.class, (Object[]) null))
-			.withMessageContaining("expression");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> pc.matches(getAge, ITestBean.class, (Object[]) null))
+				.withMessageContaining("expression");
 	}
 
 
@@ -210,8 +208,10 @@ class AspectJExpressionPointcutTests {
 		// not currently testable in a reliable fashion
 		//assertDoesNotMatchStringClass(classFilter);
 
-		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, 12D)).as("Should match with setSomeNumber with Double input").isTrue();
-		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, 11)).as("Should not match setSomeNumber with Integer input").isFalse();
+		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, 12D))
+				.as("Should match with setSomeNumber with Double input").isTrue();
+		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, 11))
+				.as("Should not match setSomeNumber with Integer input").isFalse();
 		assertThat(methodMatcher.matches(getAge, TestBean.class)).as("Should not match getAge").isFalse();
 		assertThat(methodMatcher.isRuntime()).as("Should be a runtime match").isTrue();
 	}

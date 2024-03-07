@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,23 @@
 
 package org.springframework.orm.jpa.vendor;
 
+import java.util.function.Predicate;
+
 import com.oracle.svm.core.annotate.Alias;
 import com.oracle.svm.core.annotate.RecomputeFieldValue;
+import com.oracle.svm.core.annotate.RecomputeFieldValue.Kind;
 import com.oracle.svm.core.annotate.Substitute;
 import com.oracle.svm.core.annotate.TargetClass;
 import org.hibernate.bytecode.spi.BytecodeProvider;
 
-import static com.oracle.svm.core.annotate.RecomputeFieldValue.Kind;
-
 /**
  * Hibernate substitution designed to prevent ByteBuddy reachability on native, and to enforce the
  * usage of {@code org.hibernate.bytecode.internal.none.BytecodeProviderImpl} with Hibernate 6.3+.
- * TODO Collaborate with Hibernate team on a substitution-less alternative that does not require a custom list of StandardServiceInitiator
  *
  * @author Sebastien Deleuze
  * @since 6.1
  */
-@TargetClass(className = "org.hibernate.bytecode.internal.BytecodeProviderInitiator", onlyWith = SubstituteOnlyIfPresent.class)
+@TargetClass(className = "org.hibernate.bytecode.internal.BytecodeProviderInitiator", onlyWith = Target_BytecodeProviderInitiator.SubstituteOnlyIfPresent.class)
 final class Target_BytecodeProviderInitiator {
 
 	@Alias
@@ -46,4 +46,22 @@ final class Target_BytecodeProviderInitiator {
 	public static BytecodeProvider buildBytecodeProvider(String providerName) {
 		return new org.hibernate.bytecode.internal.none.BytecodeProviderImpl();
 	}
+
+	static class SubstituteOnlyIfPresent implements Predicate<String> {
+
+		@Override
+		public boolean test(String type) {
+			try {
+				Class<?> clazz = Class.forName(type, false, getClass().getClassLoader());
+				clazz.getDeclaredMethod("buildBytecodeProvider", String.class);
+				clazz.getField("BYTECODE_PROVIDER_NAME_NONE");
+				clazz.getField("BYTECODE_PROVIDER_NAME_DEFAULT");
+				return true;
+			}
+			catch (ClassNotFoundException | NoClassDefFoundError | NoSuchMethodException | NoSuchFieldException ex) {
+				return false;
+			}
+		}
+	}
+
 }

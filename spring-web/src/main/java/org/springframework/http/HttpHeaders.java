@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -527,10 +526,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		if (ranges.isEmpty()) {
 			return Collections.emptyList();
 		}
-		return ranges.stream()
-				.map(range -> Locale.forLanguageTag(range.getRange()))
-				.filter(locale -> StringUtils.hasText(locale.getDisplayName()))
-				.toList();
+
+		List<Locale> locales = new ArrayList<>(ranges.size());
+		for (Locale.LanguageRange range : ranges) {
+			if (!range.getRange().startsWith("*")) {
+				locales.add(Locale.forLanguageTag(range.getRange()));
+			}
+		}
+		return locales;
 	}
 
 	/**
@@ -752,7 +755,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String value = getFirst(ALLOW);
 		if (StringUtils.hasLength(value)) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-			Set<HttpMethod> result = new LinkedHashSet<>(tokens.length);
+			Set<HttpMethod> result = CollectionUtils.newLinkedHashSet(tokens.length);
 			for (String token : tokens) {
 				HttpMethod method = HttpMethod.valueOf(token);
 				result.add(method);

@@ -256,7 +256,7 @@ public abstract class ClassUtils {
 	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
-	 * (may be {@code null}, which indicates the default class loader)
+	 * (can be {@code null}, which indicates the default class loader)
 	 * @return a class instance for the supplied name
 	 * @throws ClassNotFoundException if the class was not found
 	 * @throws LinkageError if the class file could not be loaded
@@ -328,7 +328,7 @@ public abstract class ClassUtils {
 	 * the exceptions thrown in case of class loading failure.
 	 * @param className the name of the Class
 	 * @param classLoader the class loader to use
-	 * (may be {@code null}, which indicates the default class loader)
+	 * (can be {@code null}, which indicates the default class loader)
 	 * @return a class instance for the supplied name
 	 * @throws IllegalArgumentException if the class name was not resolvable
 	 * (that is, the class could not be found or the class file could not be loaded)
@@ -362,7 +362,7 @@ public abstract class ClassUtils {
 	 * one of its dependencies is not present or cannot be loaded.
 	 * @param className the name of the class to check
 	 * @param classLoader the class loader to use
-	 * (may be {@code null} which indicates the default class loader)
+	 * (can be {@code null} which indicates the default class loader)
 	 * @return whether the specified class is present (including all of its
 	 * superclasses and interfaces)
 	 * @throws IllegalStateException if the corresponding class is resolvable but
@@ -389,7 +389,7 @@ public abstract class ClassUtils {
 	 * Check whether the given class is visible in the given ClassLoader.
 	 * @param clazz the class to check (typically an interface)
 	 * @param classLoader the ClassLoader to check against
-	 * (may be {@code null} in which case this method will always return {@code true})
+	 * (can be {@code null} in which case this method will always return {@code true})
 	 */
 	public static boolean isVisible(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		if (classLoader == null) {
@@ -413,7 +413,7 @@ public abstract class ClassUtils {
 	 * i.e. whether it is loaded by the given ClassLoader or a parent of it.
 	 * @param clazz the class to analyze
 	 * @param classLoader the ClassLoader to potentially cache metadata in
-	 * (may be {@code null} which indicates the system class loader)
+	 * (can be {@code null} which indicates the system class loader)
 	 */
 	public static boolean isCacheSafe(Class<?> clazz, @Nullable ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -727,7 +727,7 @@ public abstract class ClassUtils {
 	 * in the given collection.
 	 * <p>Basically like {@code AbstractCollection.toString()}, but stripping
 	 * the "class "/"interface " prefix before every class name.
-	 * @param classes a Collection of Class objects (may be {@code null})
+	 * @param classes a Collection of Class objects (can be {@code null})
 	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
 	 * @see java.util.AbstractCollection#toString()
 	 */
@@ -782,7 +782,7 @@ public abstract class ClassUtils {
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyze for interfaces
 	 * @param classLoader the ClassLoader that the interfaces need to be visible in
-	 * (may be {@code null} when accepting all declared interfaces)
+	 * (can be {@code null} when accepting all declared interfaces)
 	 * @return all interfaces that the given object implements as an array
 	 */
 	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, @Nullable ClassLoader classLoader) {
@@ -817,7 +817,7 @@ public abstract class ClassUtils {
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
 	 * @param clazz the class to analyze for interfaces
 	 * @param classLoader the ClassLoader that the interfaces need to be visible in
-	 * (may be {@code null} when accepting all declared interfaces)
+	 * (can be {@code null} when accepting all declared interfaces)
 	 * @return all interfaces that the given object implements as a Set
 	 */
 	public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz, @Nullable ClassLoader classLoader) {
@@ -1146,7 +1146,7 @@ public abstract class ClassUtils {
 	 * fully qualified interface/class name + "." + method name.
 	 * @param method the method
 	 * @param clazz the clazz that the method is being invoked on
-	 * (may be {@code null} to indicate the method's declaring class)
+	 * (can be {@code null} to indicate the method's declaring class)
 	 * @return the qualified name of the method
 	 * @since 4.3.4
 	 */
@@ -1227,7 +1227,7 @@ public abstract class ClassUtils {
 	 * @param clazz the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
-	 * (may be {@code null} to indicate any signature)
+	 * (can be {@code null} to indicate any signature)
 	 * @return the method (never {@code null})
 	 * @throws IllegalStateException if the method has not been found
 	 * @see Class#getMethod
@@ -1266,7 +1266,7 @@ public abstract class ClassUtils {
 	 * @param clazz the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
-	 * (may be {@code null} to indicate any signature)
+	 * (can be {@code null} to indicate any signature)
 	 * @return the method, or {@code null} if not found
 	 * @see Class#getMethod
 	 */
@@ -1355,13 +1355,14 @@ public abstract class ClassUtils {
 	 * implementation will fall back to returning the originally provided method.
 	 * @param method the method to be invoked, which may come from an interface
 	 * @param targetClass the target class for the current invocation
-	 * (may be {@code null} or may not even implement the method)
+	 * (can be {@code null} or may not even implement the method)
 	 * @return the specific target method, or the original method if the
 	 * {@code targetClass} does not implement it
 	 * @see #getInterfaceMethodIfPossible(Method, Class)
 	 */
 	public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
-		if (targetClass != null && targetClass != method.getDeclaringClass() && isOverridable(method, targetClass)) {
+		if (targetClass != null && targetClass != method.getDeclaringClass() &&
+				(isOverridable(method, targetClass) || !method.getDeclaringClass().isAssignableFrom(targetClass))) {
 			try {
 				if (Modifier.isPublic(method.getModifiers())) {
 					try {
@@ -1414,25 +1415,23 @@ public abstract class ClassUtils {
 		}
 		// Try cached version of method in its declaring class
 		Method result = interfaceMethodCache.computeIfAbsent(method,
-				key -> findInterfaceMethodIfPossible(key, key.getDeclaringClass(), Object.class));
+				key -> findInterfaceMethodIfPossible(key, key.getParameterTypes(), key.getDeclaringClass(),
+						Object.class));
 		if (result == method && targetClass != null) {
 			// No interface method found yet -> try given target class (possibly a subclass of the
 			// declaring class, late-binding a base class method to a subclass-declared interface:
 			// see e.g. HashMap.HashIterator.hasNext)
-			result = findInterfaceMethodIfPossible(method, targetClass, method.getDeclaringClass());
+			result = findInterfaceMethodIfPossible(method, method.getParameterTypes(), targetClass,
+					method.getDeclaringClass());
 		}
 		return result;
 	}
 
-	private static Method findInterfaceMethodIfPossible(Method method, Class<?> startClass, Class<?> endClass) {
-		Class<?>[] parameterTypes = null;
+	private static Method findInterfaceMethodIfPossible(Method method, Class<?>[] parameterTypes,
+			Class<?> startClass, Class<?> endClass) {
+
 		Class<?> current = startClass;
 		while (current != null && current != endClass) {
-			if (parameterTypes == null) {
-				// Since Method#getParameterTypes() clones the array, we lazily retrieve
-				// and cache parameter types to avoid cloning the array multiple times.
-				parameterTypes = method.getParameterTypes();
-			}
 			for (Class<?> ifc : current.getInterfaces()) {
 				try {
 					return ifc.getMethod(method.getName(), parameterTypes);

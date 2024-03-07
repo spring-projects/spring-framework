@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
  *
  * @author Juergen Hoeller
  * @since 4.0
+ * @see SpringTransactionAnnotationParser
+ * @see Ejb3TransactionAnnotationParser
  */
 @SuppressWarnings("serial")
 public class JtaTransactionAnnotationParser implements TransactionAnnotationParser, Serializable {
@@ -65,7 +67,7 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 
 		rbta.setPropagationBehaviorName(
-				RuleBasedTransactionAttribute.PREFIX_PROPAGATION + attributes.getEnum("value").toString());
+				RuleBasedTransactionAttribute.PREFIX_PROPAGATION + attributes.getEnum("value"));
 
 		List<RollbackRuleAttribute> rollbackRules = new ArrayList<>();
 		for (Class<?> rbRule : attributes.getClassArray("rollbackOn")) {

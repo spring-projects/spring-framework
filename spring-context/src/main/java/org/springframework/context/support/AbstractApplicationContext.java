@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -138,17 +139,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		implements ConfigurableApplicationContext {
 
 	/**
-	 * The name of the {@link LifecycleProcessor} bean in the context.
-	 * If none is supplied, a {@link DefaultLifecycleProcessor} is used.
-	 * @since 3.0
-	 * @see org.springframework.context.LifecycleProcessor
-	 * @see org.springframework.context.support.DefaultLifecycleProcessor
-	 * @see #start()
-	 * @see #stop()
-	 */
-	public static final String LIFECYCLE_PROCESSOR_BEAN_NAME = "lifecycleProcessor";
-
-	/**
 	 * The name of the {@link MessageSource} bean in the context.
 	 * If none is supplied, message resolution is delegated to the parent.
 	 * @see org.springframework.context.MessageSource
@@ -167,6 +157,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #addApplicationListener(ApplicationListener)
 	 */
 	public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
+
+	/**
+	 * The name of the {@link LifecycleProcessor} bean in the context.
+	 * If none is supplied, a {@link DefaultLifecycleProcessor} is used.
+	 * @since 3.0
+	 * @see org.springframework.context.LifecycleProcessor
+	 * @see org.springframework.context.support.DefaultLifecycleProcessor
+	 * @see #start()
+	 * @see #stop()
+	 */
+	public static final String LIFECYCLE_PROCESSOR_BEAN_NAME = "lifecycleProcessor";
 
 
 	static {
@@ -806,8 +807,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Initialize the MessageSource.
-	 * Use parent's if none defined in this context.
+	 * Initialize the {@link MessageSource}.
+	 * <p>Uses parent's {@code MessageSource} if none defined in this context.
+	 * @see #MESSAGE_SOURCE_BEAN_NAME
 	 */
 	protected void initMessageSource() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
@@ -837,8 +839,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Initialize the ApplicationEventMulticaster.
-	 * Uses SimpleApplicationEventMulticaster if none defined in the context.
+	 * Initialize the {@link ApplicationEventMulticaster}.
+	 * <p>Uses {@link SimpleApplicationEventMulticaster} if none defined in the context.
+	 * @see #APPLICATION_EVENT_MULTICASTER_BEAN_NAME
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	protected void initApplicationEventMulticaster() {
@@ -861,15 +864,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Initialize the LifecycleProcessor.
-	 * Uses DefaultLifecycleProcessor if none defined in the context.
+	 * Initialize the {@link LifecycleProcessor}.
+	 * <p>Uses {@link DefaultLifecycleProcessor} if none defined in the context.
+	 * @since 3.0
+	 * @see #LIFECYCLE_PROCESSOR_BEAN_NAME
 	 * @see org.springframework.context.support.DefaultLifecycleProcessor
 	 */
 	protected void initLifecycleProcessor() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		if (beanFactory.containsLocalBean(LIFECYCLE_PROCESSOR_BEAN_NAME)) {
-			this.lifecycleProcessor =
-					beanFactory.getBean(LIFECYCLE_PROCESSOR_BEAN_NAME, LifecycleProcessor.class);
+			this.lifecycleProcessor = beanFactory.getBean(LIFECYCLE_PROCESSOR_BEAN_NAME, LifecycleProcessor.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Using LifecycleProcessor [" + this.lifecycleProcessor + "]");
 			}
@@ -929,6 +933,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * initializing all remaining singleton beans.
 	 */
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+		// Initialize bootstrap executor for this context.
+		if (beanFactory.containsBean(BOOTSTRAP_EXECUTOR_BEAN_NAME) &&
+				beanFactory.isTypeMatch(BOOTSTRAP_EXECUTOR_BEAN_NAME, Executor.class)) {
+			beanFactory.setBootstrapExecutor(
+					beanFactory.getBean(BOOTSTRAP_EXECUTOR_BEAN_NAME, Executor.class));
+		}
+
 		// Initialize conversion service for this context.
 		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) &&
 				beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)) {

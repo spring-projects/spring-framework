@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 	void generateApplicationContextWithAutowiring() {
 		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBeanDefinition("autowiredComponent", new RootBeanDefinition(AutowiredComponent.class));
-		context.registerBeanDefinition("number", BeanDefinitionBuilder.rootBeanDefinition(Integer.class, "valueOf")
-				.addConstructorArgValue("42").getBeanDefinition());
+		context.registerBeanDefinition("number", BeanDefinitionBuilder.rootBeanDefinition(
+				Integer.class, "valueOf").addConstructorArgValue("42").getBeanDefinition());
 		compile(context, (hints, invocations) -> assertThat(invocations).match(hints));
 	}
 
@@ -89,8 +89,10 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 		compile(context, (hints, invocations) -> assertThat(invocations).match(hints));
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void compile(GenericApplicationContext applicationContext, BiConsumer<RuntimeHints, RuntimeHintsInvocations> initializationResult) {
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private void compile(GenericApplicationContext applicationContext,
+			BiConsumer<RuntimeHints, RuntimeHintsInvocations> initializationResult) {
+
 		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
 		TestGenerationContext generationContext = new TestGenerationContext();
 		generator.processAheadOfTime(applicationContext, generationContext);
@@ -107,17 +109,15 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 		});
 	}
 
+
 	public interface Destroyable {
 
 		@PreDestroy
 		default void destroy() {
-
 		}
-
 	}
 
 	public static class InheritedDestroy implements Destroyable {
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,18 +309,17 @@ public class MethodReference extends SpelNodeImpl {
 		if (executorToCheck == null || !(executorToCheck.get() instanceof ReflectiveMethodExecutor methodExecutor)) {
 			throw new IllegalStateException("No applicable cached executor found: " + executorToCheck);
 		}
-
 		Method method = methodExecutor.getMethod();
-		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
+		boolean isStatic = Modifier.isStatic(method.getModifiers());
 		String descriptor = cf.lastDescriptor();
 
-		if (descriptor == null && !isStaticMethod) {
+		if (descriptor == null && !isStatic) {
 			// Nothing on the stack but something is needed
 			cf.loadTarget(mv);
 		}
 
 		Label skipIfNull = null;
-		if (this.nullSafe && (descriptor != null || !isStaticMethod)) {
+		if (this.nullSafe && (descriptor != null || !isStatic)) {
 			skipIfNull = new Label();
 			Label continueLabel = new Label();
 			mv.visitInsn(DUP);
@@ -330,8 +329,9 @@ public class MethodReference extends SpelNodeImpl {
 			mv.visitLabel(continueLabel);
 		}
 
-		if (descriptor != null && isStaticMethod) {
-			// Something on the stack when nothing is needed
+		if (descriptor != null && isStatic) {
+			// A static method call will not consume what is on the stack, so
+			// it needs to be popped off.
 			mv.visitInsn(POP);
 		}
 
@@ -349,13 +349,13 @@ public class MethodReference extends SpelNodeImpl {
 			classDesc = publicDeclaringClass.getName().replace('.', '/');
 		}
 
-		if (!isStaticMethod && (descriptor == null || !descriptor.substring(1).equals(classDesc))) {
+		if (!isStatic && (descriptor == null || !descriptor.substring(1).equals(classDesc))) {
 			CodeFlow.insertCheckCast(mv, "L" + classDesc);
 		}
 
 		generateCodeForArguments(mv, cf, method, this.children);
-		mv.visitMethodInsn((isStaticMethod ? INVOKESTATIC : (method.isDefault() ? INVOKEINTERFACE : INVOKEVIRTUAL)),
-				classDesc, method.getName(), CodeFlow.createSignatureDescriptor(method),
+		int opcode = (isStatic ? INVOKESTATIC : method.isDefault() ? INVOKEINTERFACE : INVOKEVIRTUAL);
+		mv.visitMethodInsn(opcode, classDesc, method.getName(), CodeFlow.createSignatureDescriptor(method),
 				method.getDeclaringClass().isInterface());
 		cf.pushDescriptor(this.exitTypeDescriptor);
 

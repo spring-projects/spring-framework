@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import org.springframework.lang.Nullable;
 
@@ -85,7 +89,7 @@ public abstract class CollectionUtils {
 	 * @see #newLinkedHashMap(int)
 	 */
 	public static <K, V> HashMap<K, V> newHashMap(int expectedSize) {
-		return new HashMap<>(computeMapInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
+		return new HashMap<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
 	}
 
 	/**
@@ -102,10 +106,36 @@ public abstract class CollectionUtils {
 	 * @see #newHashMap(int)
 	 */
 	public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(int expectedSize) {
-		return new LinkedHashMap<>(computeMapInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
+		return new LinkedHashMap<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
 	}
 
-	private static int computeMapInitialCapacity(int expectedSize) {
+	/**
+	 * Instantiate a new {@link HashSet} with an initial capacity that can
+	 * accommodate the specified number of elements without any immediate
+	 * resize/rehash operations to be expected.
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @since 6.2
+	 * @see #newLinkedHashSet(int)
+	 */
+	public static <E> HashSet<E> newHashSet(int expectedSize) {
+		return new HashSet<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
+	}
+
+	/**
+	 * Instantiate a new {@link LinkedHashSet} with an initial capacity that can
+	 * accommodate the specified number of elements without any immediate
+	 * resize/rehash operations to be expected.
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @since 6.2
+	 * @see #newHashSet(int)
+	 */
+	public static <E> LinkedHashSet<E> newLinkedHashSet(int expectedSize) {
+		return new LinkedHashSet<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
+	}
+
+	private static int computeInitialCapacity(int expectedSize) {
 		return (int) Math.ceil(expectedSize / (double) DEFAULT_LOAD_FACTOR);
 	}
 
@@ -476,6 +506,44 @@ public abstract class CollectionUtils {
 			return (MultiValueMap<K, V>) targetMap;
 		}
 		return new UnmodifiableMultiValueMap<>(targetMap);
+	}
+
+	/**
+	 * Return a (partially unmodifiable) map that combines the provided two
+	 * maps. Invoking {@link Map#put(Object, Object)} or {@link Map#putAll(Map)}
+	 * on the returned map results in an {@link UnsupportedOperationException}.
+	 * @param first the first map to compose
+	 * @param second the second map to compose
+	 * @return a new map that composes the given two maps
+	 * @since 6.2
+	 */
+	public static <K, V> Map<K, V> compositeMap(Map<K,V> first, Map<K,V> second) {
+		return new CompositeMap<>(first, second);
+	}
+
+	/**
+	 * Return a map that combines the provided maps. Invoking
+	 * {@link Map#put(Object, Object)} on the returned map will apply
+	 * {@code putFunction}, or will throw an
+	 * {@link UnsupportedOperationException} {@code putFunction} is
+	 * {@code null}. The same applies to {@link Map#putAll(Map)} and
+	 * {@code putAllFunction}.
+	 * @param first the first map to compose
+	 * @param second the second map to compose
+	 * @param putFunction applied when {@code Map::put} is invoked. If
+	 * {@code null}, {@code Map::put} throws an
+	 * {@code UnsupportedOperationException}.
+	 * @param putAllFunction applied when {@code Map::putAll} is invoked. If
+	 * {@code null}, {@code Map::putAll} throws an
+	 * {@code UnsupportedOperationException}.
+	 * @return a new map that composes the give maps
+	 * @since 6.2
+	 */
+	public static <K, V> Map<K, V> compositeMap(Map<K,V> first, Map<K,V> second,
+			@Nullable BiFunction<K, V, V> putFunction,
+			@Nullable Consumer<Map<K, V>> putAllFunction) {
+
+		return new CompositeMap<>(first, second, putFunction, putAllFunction);
 	}
 
 }

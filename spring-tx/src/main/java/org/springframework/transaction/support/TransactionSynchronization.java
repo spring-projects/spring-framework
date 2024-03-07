@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,34 @@ public interface TransactionSynchronization extends Ordered, Flushable {
 	 */
 	@Override
 	default void flush() {
+	}
+
+	/**
+	 * Invoked on creation of a new savepoint, either when a nested transaction
+	 * is started against an existing transaction or on a programmatic savepoint
+	 * via {@link org.springframework.transaction.TransactionStatus}.
+	 * <p>This synchronization callback is invoked right <i>after</i> the creation
+	 * of the resource savepoint, with the given savepoint object already active.
+	 * @param savepoint the associated savepoint object (primarily as a key for
+	 * identifying the savepoint but also castable to the resource savepoint type)
+	 * @since 6.2
+	 * @see org.springframework.transaction.SavepointManager#createSavepoint
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NESTED
+	 */
+	default void savepoint(Object savepoint) {
+	}
+
+	/**
+	 * Invoked in case of a rollback to the previously created savepoint.
+	 * <p>This synchronization callback is invoked right <i>before</i> the rollback
+	 * of the resource savepoint, with the given savepoint object still active.
+	 * @param savepoint the associated savepoint object (primarily as a key for
+	 * identifying the savepoint but also castable to the resource savepoint type)
+	 * @since 6.2
+	 * @see #savepoint
+	 * @see org.springframework.transaction.SavepointManager#rollbackToSavepoint
+	 */
+	default void savepointRollback(Object savepoint) {
 	}
 
 	/**

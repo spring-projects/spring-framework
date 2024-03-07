@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,24 +35,34 @@ public abstract class KotlinDetector {
 	@Nullable
 	private static final Class<? extends Annotation> kotlinMetadata;
 
+	@Nullable
+	private static final Class<? extends Annotation> kotlinJvmInline;
+
 	// For ConstantFieldFeature compliance, otherwise could be deduced from kotlinMetadata
 	private static final boolean kotlinPresent;
 
 	private static final boolean kotlinReflectPresent;
 
 	static {
-		Class<?> metadata;
 		ClassLoader classLoader = KotlinDetector.class.getClassLoader();
+		Class<?> metadata = null;
+		Class<?> jvmInline = null;
 		try {
 			metadata = ClassUtils.forName("kotlin.Metadata", classLoader);
+			try {
+				jvmInline = ClassUtils.forName("kotlin.jvm.JvmInline", classLoader);
+			}
+			catch (ClassNotFoundException ex) {
+				// JVM inline support not available
+			}
 		}
 		catch (ClassNotFoundException ex) {
 			// Kotlin API not available - no Kotlin support
-			metadata = null;
 		}
 		kotlinMetadata = (Class<? extends Annotation>) metadata;
 		kotlinPresent = (kotlinMetadata != null);
-		kotlinReflectPresent = ClassUtils.isPresent("kotlin.reflect.full.KClasses", classLoader);
+		kotlinReflectPresent = kotlinPresent && ClassUtils.isPresent("kotlin.reflect.full.KClasses", classLoader);
+		kotlinJvmInline = (Class<? extends Annotation>) jvmInline;
 	}
 
 
@@ -91,6 +101,16 @@ public abstract class KotlinDetector {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Determine whether the given {@code Class} is an inline class
+	 * (annotated with {@code @JvmInline}).
+	 * @since 6.1.5
+	 * @see <a href="https://kotlinlang.org/docs/inline-classes.html">Kotlin inline value classes</a>
+	 */
+	public static boolean isInlineClass(Class<?> clazz) {
+		return (kotlinJvmInline != null && clazz.getDeclaredAnnotation(kotlinJvmInline) != null);
 	}
 
 }

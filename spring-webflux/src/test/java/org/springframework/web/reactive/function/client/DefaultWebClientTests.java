@@ -528,6 +528,23 @@ public class DefaultWebClientTests {
 		StepVerifier.create(responsePublisher).expectError(WebClientResponseException.class).verify();
 	}
 
+	@Test // gh-32053
+	void defaultRequestOverride() {
+		WebClient client = this.builder
+				.defaultRequest(spec -> spec.accept(MediaType.APPLICATION_JSON))
+				.build();
+
+		client.get().uri("/path")
+				.accept(MediaType.IMAGE_PNG)
+				.retrieve()
+				.bodyToMono(Void.class)
+				.block(Duration.ofSeconds(3));
+
+		ClientRequest request = verifyAndGetRequest();
+		assertThat(request.headers().getAccept()).containsExactly(MediaType.IMAGE_PNG);
+	}
+
+
 
 	private ClientRequest verifyAndGetRequest() {
 		ClientRequest request = this.captor.getValue();

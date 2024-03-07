@@ -85,12 +85,11 @@ public class Service implements ApplicationContextAware, MessageSourceAware, Dis
 			Assert.state(applicationContext.getBean("messageSource") instanceof StaticMessageSource,
 					"Invalid MessageSource bean");
 			try {
+				// Should not throw BeanCreationNotAllowedException on 6.2 anymore
 				applicationContext.getBean("service2");
-				// Should have thrown BeanCreationNotAllowedException
-				properlyDestroyed = false;
 			}
 			catch (BeanCreationNotAllowedException ex) {
-				// expected
+				properlyDestroyed = false;
 			}
 		});
 		thread.start();

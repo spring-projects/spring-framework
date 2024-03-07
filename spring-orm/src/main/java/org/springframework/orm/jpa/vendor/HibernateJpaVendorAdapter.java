@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.hibernate.dialect.Informix10Dialect;
 import org.hibernate.dialect.MySQL57Dialect;
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.Oracle12cDialect;
-import org.hibernate.dialect.OracleDialect;
 import org.hibernate.dialect.PostgreSQL95Dialect;
 import org.hibernate.dialect.SQLServer2012Dialect;
 import org.hibernate.dialect.SQLServerDialect;
@@ -177,7 +176,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @param database the target database
 	 * @return the Hibernate database dialect class, or {@code null} if none found
 	 */
-	@SuppressWarnings("deprecation")  // for DerbyDialect and PostgreSQLDialect on Hibernate 6.2
+	@SuppressWarnings("deprecation")  // for OracleDialect on Hibernate 5.6 and DerbyDialect/PostgreSQLDialect on Hibernate 6.2
 	@Nullable
 	protected Class<?> determineDatabaseDialectClass(Database database) {
 		if (oldDialectsPresent) {  // Hibernate <6.2
@@ -204,7 +203,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 				case HANA -> HANAColumnStoreDialect.class;
 				case HSQL -> HSQLDialect.class;
 				case MYSQL -> MySQLDialect.class;
-				case ORACLE -> OracleDialect.class;
+				case ORACLE -> org.hibernate.dialect.OracleDialect.class;
 				case POSTGRESQL -> org.hibernate.dialect.PostgreSQLDialect.class;
 				case SQL_SERVER -> SQLServerDialect.class;
 				case SYBASE -> SybaseDialect.class;

@@ -9,7 +9,7 @@ in Kotlin.
 [[final-by-default]]
 == Final by Default
 
-By default, https://discuss.kotlinlang.org/t/classes-final-by-default/166[all classes in Kotlin are `final`].
+By default, https://discuss.kotlinlang.org/t/classes-final-by-default/166[all classes and member functions in Kotlin are `final`].
 The `open` modifier on a class is the opposite of Java's `final`: It allows others to inherit from this
 class. This also applies to member functions, in that they need to be marked as `open` to be overridden.
 
@@ -37,6 +37,12 @@ annotations:
 Meta-annotation support means that types annotated with `@Configuration`, `@Controller`,
 `@RestController`, `@Service`, or `@Repository` are automatically opened since these
 annotations are meta-annotated with `@Component`.
+
+WARNING: Some use cases involving proxies and automatic generation of final methods by the Kotlin compiler require extra
+care. For example, a Kotlin class with properties will generate related `final` getters and setters. In order
+to be able to proxy related methods, a type level `@Component` annotation should be preferred to method level `@Bean` in
+order to have those methods opened by the `kotlin-spring` plugin. A typical use case is `@Scope` and its popular
+`@RequestScope` specialization.
 
 https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io] enables
 the `kotlin-spring` plugin by default. So, in practice, you can write your Kotlin beans

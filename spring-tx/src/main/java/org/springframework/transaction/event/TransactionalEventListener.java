@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,11 +78,6 @@ public @interface TransactionalEventListener {
 	TransactionPhase phase() default TransactionPhase.AFTER_COMMIT;
 
 	/**
-	 * Whether the event should be handled if no transaction is running.
-	 */
-	boolean fallbackExecution() default false;
-
-	/**
 	 * Alias for {@link #classes}.
 	 */
 	@AliasFor(annotation = EventListener.class, attribute = "classes")
@@ -106,6 +101,13 @@ public @interface TransactionalEventListener {
 	 */
 	@AliasFor(annotation = EventListener.class, attribute = "condition")
 	String condition() default "";
+
+	/**
+	 * Whether the event should be handled if no transaction is running.
+	 * @see EventListener#defaultExecution()
+	 */
+	@AliasFor(annotation = EventListener.class, attribute = "defaultExecution")
+	boolean fallbackExecution() default false;
 
 	/**
 	 * An optional identifier for the listener, defaulting to the fully-qualified

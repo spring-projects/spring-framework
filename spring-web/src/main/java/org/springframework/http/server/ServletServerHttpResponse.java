@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -118,12 +119,13 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 				}
 			});
 			// HttpServletResponse exposes some headers as properties: we should include those if not already present
-			if (this.servletResponse.getContentType() == null && this.headers.getContentType() != null) {
-				this.servletResponse.setContentType(this.headers.getContentType().toString());
+			MediaType contentTypeHeader = this.headers.getContentType();
+			if (this.servletResponse.getContentType() == null && contentTypeHeader != null) {
+				this.servletResponse.setContentType(contentTypeHeader.toString());
 			}
-			if (this.servletResponse.getCharacterEncoding() == null && this.headers.getContentType() != null &&
-					this.headers.getContentType().getCharset() != null) {
-				this.servletResponse.setCharacterEncoding(this.headers.getContentType().getCharset().name());
+			if (this.servletResponse.getCharacterEncoding() == null && contentTypeHeader != null &&
+					contentTypeHeader.getCharset() != null) {
+				this.servletResponse.setCharacterEncoding(contentTypeHeader.getCharset().name());
 			}
 			long contentLength = getHeaders().getContentLength();
 			if (contentLength != -1) {
@@ -160,7 +162,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 			if (headerName.equalsIgnoreCase(CONTENT_TYPE)) {
 				// Content-Type is written as an override so check super first
 				String value = super.getFirst(headerName);
-				return (value != null ? value : servletResponse.getHeader(headerName));
+				return (value != null ? value : servletResponse.getContentType());
 			}
 			else {
 				String value = servletResponse.getHeader(headerName);
@@ -169,13 +171,15 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		}
 
 		@Override
+		@Nullable
 		public List<String> get(Object key) {
 			Assert.isInstanceOf(String.class, key, "Key must be a String-based header name");
 
 			String headerName = (String) key;
 			if (headerName.equalsIgnoreCase(CONTENT_TYPE)) {
 				// Content-Type is written as an override so don't merge
-				return Collections.singletonList(getFirst(headerName));
+				String value = getFirst(headerName);
+				return (value != null ? Collections.singletonList(value) : null);
 			}
 
 			Collection<String> values1 = servletResponse.getHeaders(headerName);

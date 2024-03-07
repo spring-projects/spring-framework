@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,14 @@ package org.springframework.web.servlet.function;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Asynchronous subtype of {@link ServerResponse} that exposes the future
@@ -53,7 +57,7 @@ public interface AsyncServerResponse extends ServerResponse {
 	 * @return the asynchronous response
 	 */
 	static AsyncServerResponse create(Object asyncResponse) {
-		return DefaultAsyncServerResponse.create(asyncResponse, null);
+		return createInternal(asyncResponse, null);
 	}
 
 	/**
@@ -69,7 +73,45 @@ public interface AsyncServerResponse extends ServerResponse {
 	 * @return the asynchronous response
 	 */
 	static AsyncServerResponse create(Object asyncResponse, Duration timeout) {
-		return DefaultAsyncServerResponse.create(asyncResponse, timeout);
+		return createInternal(asyncResponse, timeout);
+	}
+
+	private static AsyncServerResponse createInternal(Object asyncResponse, @Nullable Duration timeout) {
+		Assert.notNull(asyncResponse, "AsyncResponse must not be null");
+
+		CompletableFuture<ServerResponse> futureResponse = toCompletableFuture(asyncResponse);
+		if (futureResponse.isDone() &&
+				!futureResponse.isCancelled() &&
+				!futureResponse.isCompletedExceptionally()) {
+
+			try {
+				ServerResponse completedResponse = futureResponse.get();
+				return new CompletedAsyncServerResponse(completedResponse);
+			}
+			catch (InterruptedException | ExecutionException ignored) {
+				// fall through to use DefaultAsyncServerResponse
+			}
+		}
+		return new DefaultAsyncServerResponse(futureResponse, timeout);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static CompletableFuture<ServerResponse> toCompletableFuture(Object obj) {
+		if (obj instanceof CompletableFuture<?> futureResponse) {
+			return (CompletableFuture<ServerResponse>) futureResponse;
+		}
+		else if (DefaultAsyncServerResponse.reactiveStreamsPresent) {
+			ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
+			ReactiveAdapter publisherAdapter = registry.getAdapter(obj.getClass());
+			if (publisherAdapter != null) {
+				Publisher<ServerResponse> publisher = publisherAdapter.toPublisher(obj);
+				ReactiveAdapter futureAdapter = registry.getAdapter(CompletableFuture.class);
+				if (futureAdapter != null) {
+					return (CompletableFuture<ServerResponse>) futureAdapter.fromPublisher(publisher);
+				}
+			}
+		}
+		throw new IllegalArgumentException("Asynchronous type not supported: " + obj.getClass());
 	}
 
 }

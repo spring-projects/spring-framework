@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -54,6 +53,7 @@ import reactor.util.context.Context;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Utility class for working with {@link DataBuffer DataBuffers}.
@@ -382,7 +382,7 @@ public abstract class DataBufferUtils {
 
 	private static Set<OpenOption> checkWriteOptions(OpenOption[] options) {
 		int length = options.length;
-		Set<OpenOption> result = new HashSet<>(length + 3);
+		Set<OpenOption> result = CollectionUtils.newHashSet(length > 0 ? length : 2);
 		if (length == 0) {
 			result.add(StandardOpenOption.CREATE);
 			result.add(StandardOpenOption.TRUNCATE_EXISTING);

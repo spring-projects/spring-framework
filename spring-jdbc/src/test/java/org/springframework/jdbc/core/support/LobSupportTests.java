@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alef Arendsen
  */
+@SuppressWarnings("deprecation")
 class LobSupportTests {
 
 	@Test

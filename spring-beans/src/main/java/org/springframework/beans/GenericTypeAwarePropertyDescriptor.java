@@ -171,6 +171,14 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		return null;
 	}
 
+	@Nullable
+	public Method getUniqueWriteMethodFallback() {
+		if (this.ambiguousWriteMethods != null && this.ambiguousWriteMethods.size() == 1) {
+			return this.ambiguousWriteMethods.iterator().next();
+		}
+		return null;
+	}
+
 	public boolean hasUniqueWriteMethod() {
 		return (this.writeMethod != null && this.ambiguousWriteMethods == null);
 	}

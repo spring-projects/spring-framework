@@ -1,12 +1,13 @@
 [[beans-autowired-annotation-qualifiers]]
 = Fine-tuning Annotation-based Autowiring with Qualifiers
 
-`@Primary` is an effective way to use autowiring by type with several instances when one
-primary candidate can be determined. When you need more control over the selection process,
-you can use Spring's `@Qualifier` annotation. You can associate qualifier values
-with specific arguments, narrowing the set of type matches so that a specific bean is
-chosen for each argument. In the simplest case, this can be a plain descriptive value, as
-shown in the following example:
+`@Primary` and `@Fallback` are effective ways to use autowiring by type with several
+instances when one primary (or non-fallback) candidate can be determined.
+
+When you need more control over the selection process, you can use Spring's `@Qualifier`
+annotation. You can associate qualifier values with specific arguments, narrowing the set
+of type matches so that a specific bean is chosen for each argument. In the simplest case,
+this can be a plain descriptive value, as shown in the following example:
 
 --
 [tabs]

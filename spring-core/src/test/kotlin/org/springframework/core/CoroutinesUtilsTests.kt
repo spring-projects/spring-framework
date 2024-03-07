@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,15 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithNullableParameter() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithNullable", String::class.java, Continuation::class.java)
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null, null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
+		}
+	}
+
+	@Test
 	fun invokeNonSuspendingFunction() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("nonSuspendingFunction", String::class.java)
 		Assertions.assertThatIllegalArgumentException().isThrownBy { CoroutinesUtils.invokeSuspendingFunction(method, this, "foo") }
@@ -155,6 +164,26 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithValueClassWithInitParameter() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassWithInit") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "", null) as Mono
+		Assertions.assertThatIllegalArgumentException().isThrownBy {
+			runBlocking {
+				mono.awaitSingle()
+			}
+		}
+	}
+
+	@Test
+	fun invokeSuspendingFunctionWithNullableValueClassParameter() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithNullableValueClass") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null, null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
+		}
+	}
+
+	@Test
 	fun invokeSuspendingFunctionWithExtension() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithExtension",
 			CustomException::class.java, Continuation::class.java)
@@ -175,6 +204,11 @@ class CoroutinesUtilsTests {
 	}
 
 	suspend fun suspendingFunction(value: String): String {
+		delay(1)
+		return value
+	}
+
+	suspend fun suspendingFunctionWithNullable(value: String?): String? {
 		delay(1)
 		return value
 	}
@@ -206,6 +240,16 @@ class CoroutinesUtilsTests {
 		return value.value
 	}
 
+	suspend fun suspendingFunctionWithValueClassWithInit(value: ValueClassWithInit): String {
+		delay(1)
+		return value.value
+	}
+
+	suspend fun suspendingFunctionWithNullableValueClass(value: ValueClass?): String? {
+		delay(1)
+		return value?.value
+	}
+
 	suspend fun CustomException.suspendingFunctionWithExtension(): String {
 		delay(1)
 		return "${this.message}"
@@ -218,6 +262,15 @@ class CoroutinesUtilsTests {
 
 	@JvmInline
 	value class ValueClass(val value: String)
+
+	@JvmInline
+	value class ValueClassWithInit(val value: String) {
+		 init {
+		     if (value.isEmpty()) {
+				 throw IllegalArgumentException()
+			 }
+		 }
+	}
 
 	class CustomException(message: String) : Throwable(message)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,8 +233,7 @@ public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPo
 
 		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
 		// since those are only meant to apply to beans defined in the original factory.
-		this.scriptBeanFactory.getBeanPostProcessors().removeIf(beanPostProcessor ->
-				beanPostProcessor instanceof AopInfrastructureBean);
+		this.scriptBeanFactory.getBeanPostProcessors().removeIf(AopInfrastructureBean.class::isInstance);
 	}
 
 	@Override

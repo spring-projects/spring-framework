@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import reactor.core.observability.DefaultSignalListener;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -90,6 +90,7 @@ import org.springframework.util.function.SupplierUtils;
  * @author Sam Brannen
  * @author Stephane Nicoll
  * @author Sebastien Deleuze
+ * @author Simon Baslé
  * @since 3.1
  */
 public abstract class CacheAspectSupport extends AbstractCacheInvoker
@@ -1036,32 +1037,45 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 
 	/**
-	 * Reactive Streams Subscriber collection for collecting a List to cache.
+	 * Reactor stateful SignalListener for collecting a List to cache.
 	 */
-	private class CachePutListSubscriber implements Subscriber<Object> {
+	private class CachePutSignalListener extends DefaultSignalListener<Object> {
 
-		private final CachePutRequest request;
+		private final AtomicReference<CachePutRequest> request;
 
 		private final List<Object> cacheValue = new ArrayList<>();
 
-		public CachePutListSubscriber(CachePutRequest request) {
-			this.request = request;
+		public CachePutSignalListener(CachePutRequest request) {
+			this.request = new AtomicReference<>(request);
 		}
 
 		@Override
-		public void onSubscribe(Subscription s) {
-			s.request(Integer.MAX_VALUE);
-		}
-		@Override
-		public void onNext(Object o) {
+		public void doOnNext(Object o) {
 			this.cacheValue.add(o);
 		}
+
 		@Override
-		public void onError(Throwable t) {
+		public void doOnComplete() {
+			CachePutRequest r = this.request.get();
+			if (this.request.compareAndSet(r, null)) {
+				r.performCachePut(this.cacheValue);
+			}
 		}
+
 		@Override
-		public void onComplete() {
-			this.request.performCachePut(this.cacheValue);
+		public void doOnCancel() {
+			// Note: we don't use doFinally as we want to propagate the signal after cache put, not before
+			CachePutRequest r = this.request.get();
+			if (this.request.compareAndSet(r, null)) {
+				r.performCachePut(this.cacheValue);
+			}
+		}
+
+		@Override
+		public void doOnError(Throwable error) {
+			if (this.request.getAndSet(null) != null) {
+				this.cacheValue.clear();
+			}
 		}
 	}
 
@@ -1145,9 +1159,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			ReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);
 			if (adapter != null) {
 				if (adapter.isMultiValue()) {
-					Flux<?> source = Flux.from(adapter.toPublisher(result));
-					source.subscribe(new CachePutListSubscriber(request));
-					return adapter.fromPublisher(source);
+					return adapter.fromPublisher(Flux.from(adapter.toPublisher(result))
+							.tap(() -> new CachePutSignalListener(request)));
 				}
 				else {
 					return adapter.fromPublisher(Mono.from(adapter.toPublisher(result))

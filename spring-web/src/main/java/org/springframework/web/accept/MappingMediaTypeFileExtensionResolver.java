@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.accept;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,6 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
 /**
  * An implementation of {@code MediaTypeFileExtensionResolver} that maintains
@@ -55,7 +55,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	 */
 	public MappingMediaTypeFileExtensionResolver(@Nullable Map<String, MediaType> mediaTypes) {
 		if (mediaTypes != null) {
-			Set<String> allFileExtensions = new HashSet<>(mediaTypes.size());
+			Set<String> allFileExtensions = CollectionUtils.newHashSet(mediaTypes.size());
 			mediaTypes.forEach((extension, mediaType) -> {
 				String lowerCaseExtension = extension.toLowerCase(Locale.ENGLISH);
 				this.mediaTypes.put(lowerCaseExtension, mediaType);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
@@ -283,16 +284,25 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 
 		@Override
 		public boolean setValueFallbackIfPossible(@Nullable Object value) {
-			Method writeMethod = this.pd.getWriteMethodFallback(value != null ? value.getClass() : null);
-			if (writeMethod != null) {
-				ReflectionUtils.makeAccessible(writeMethod);
-				try {
+			try {
+				Method writeMethod = this.pd.getWriteMethodFallback(value != null ? value.getClass() : null);
+				if (writeMethod == null) {
+					writeMethod = this.pd.getUniqueWriteMethodFallback();
+					if (writeMethod != null) {
+						// Conversion necessary as we would otherwise have received the method
+						// from the type-matching getWriteMethodFallback call above already
+						value = convertForProperty(this.pd.getName(), null, value,
+								new TypeDescriptor(new MethodParameter(writeMethod, 0)));
+					}
+				}
+				if (writeMethod != null) {
+					ReflectionUtils.makeAccessible(writeMethod);
 					writeMethod.invoke(getWrappedInstance(), value);
 					return true;
 				}
-				catch (Exception ex) {
-					LogFactory.getLog(BeanPropertyHandler.class).debug("Write method fallback failed", ex);
-				}
+			}
+			catch (Exception ex) {
+				LogFactory.getLog(BeanPropertyHandler.class).debug("Write method fallback failed", ex);
 			}
 			return false;
 		}

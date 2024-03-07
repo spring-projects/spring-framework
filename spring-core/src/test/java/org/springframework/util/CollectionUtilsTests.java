@@ -47,7 +47,7 @@ class CollectionUtilsTests {
 	void isEmpty() {
 		assertThat(CollectionUtils.isEmpty((Set<Object>) null)).isTrue();
 		assertThat(CollectionUtils.isEmpty((Map<String, String>) null)).isTrue();
-		assertThat(CollectionUtils.isEmpty(new HashMap<String, String>())).isTrue();
+		assertThat(CollectionUtils.isEmpty(new HashMap<>())).isTrue();
 		assertThat(CollectionUtils.isEmpty(new HashSet<>())).isTrue();
 
 		List<Object> list = new ArrayList<>();
