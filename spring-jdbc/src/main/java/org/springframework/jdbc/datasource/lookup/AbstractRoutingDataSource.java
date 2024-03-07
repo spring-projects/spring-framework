@@ -60,7 +60,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	@Nullable
 	private DataSource resolvedDefaultDataSource;
 
-	private Object resolvedDataSourceMonitor=new Object();
+	private final Object resolvedDataSourceMonitor=new Object();
 
 
 	/**
