@@ -107,6 +107,28 @@ class CaffeineReactiveCachingTests {
 	}
 
 
+	@ParameterizedTest
+	@ValueSource(classes = {AsyncCacheModeConfig.class, AsyncCacheModeConfig.class})
+	void fluxCacheDoesntDependOnFirstRequest(Class<?> configClass) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
+		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
+
+		Object key = new Object();
+
+		List<Long> l1 = service.cacheFlux(key).take(1L, true).collectList().block();
+		List<Long> l2 = service.cacheFlux(key).take(3L, true).collectList().block();
+		List<Long> l3 = service.cacheFlux(key).collectList().block();
+
+		Long first = l1.get(0);
+
+		assertThat(l1).as("l1").containsExactly(first);
+		assertThat(l2).as("l2").containsExactly(first, 0L, -1L);
+		assertThat(l3).as("l3").containsExactly(first, 0L, -1L, -2L, -3L);
+
+		ctx.close();
+	}
+
+
 	@CacheConfig(cacheNames = "first")
 	static class ReactiveCacheableService {
 
@@ -119,12 +141,16 @@ class CaffeineReactiveCachingTests {
 
 		@Cacheable
 		Mono<Long> cacheMono(Object arg) {
-			return Mono.just(this.counter.getAndIncrement());
+			// here counter not only reflects invocations of cacheMono but subscriptions to
+			// the returned Mono as well. See https://github.com/spring-projects/spring-framework/issues/32370
+			return Mono.defer(() -> Mono.just(this.counter.getAndIncrement()));
 		}
 
 		@Cacheable
 		Flux<Long> cacheFlux(Object arg) {
-			return Flux.just(this.counter.getAndIncrement(), 0L);
+			// here counter not only reflects invocations of cacheFlux but subscriptions to
+			// the returned Flux as well. See https://github.com/spring-projects/spring-framework/issues/32370
+			return Flux.defer(() -> Flux.just(this.counter.getAndIncrement(), 0L, -1L, -2L, -3L));
 		}
 	}
 
