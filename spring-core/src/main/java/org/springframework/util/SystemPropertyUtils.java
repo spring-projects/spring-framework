@@ -44,7 +44,7 @@ public abstract class SystemPropertyUtils {
 	/** Value separator for system property placeholders: {@value}. */
 	public static final String VALUE_SEPARATOR = ":";
 
-	/** Default escape character: {@value}. */
+	/** Default escape character: {@code '\'}. */
 	public static final Character ESCAPE_CHARACTER = '\\';
 
 
