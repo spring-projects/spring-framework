@@ -245,6 +245,12 @@ public class Indexer extends SpelNodeImpl {
 				}
 				case "B" -> {
 					mv.visitTypeInsn(CHECKCAST, "[B");
+					// byte and boolean arrays are both loaded via BALOAD
+					yield BALOAD;
+				}
+				case "Z" -> {
+					mv.visitTypeInsn(CHECKCAST, "[Z");
+					// byte and boolean arrays are both loaded via BALOAD
 					yield BALOAD;
 				}
 				case "C" -> {
