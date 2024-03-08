@@ -19,7 +19,6 @@ package org.springframework.docs.dataaccess.jdbc.jdbcJdbcTemplateidioms
 import org.apache.commons.dbcp2.BasicDataSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.docs.dataaccess.jdbc.JdbcCorporateEventDao
 import javax.sql.DataSource
 
 @Configuration
