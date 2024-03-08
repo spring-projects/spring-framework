@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
@@ -77,7 +76,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	/**
 	 * Contains names of beans that have overrides.
 	 */
-	private final Set<String> beanNames = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+	private final Set<String> beanNames = ConcurrentHashMap.newKeySet(16);
 
 
 	/**

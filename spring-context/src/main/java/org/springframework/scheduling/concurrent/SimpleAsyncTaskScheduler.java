@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -90,6 +92,14 @@ import org.springframework.util.ErrorHandler;
 @SuppressWarnings("serial")
 public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements TaskScheduler,
 		ApplicationContextAware, SmartLifecycle, ApplicationListener<ContextClosedEvent> {
+
+	/**
+	 * The default phase for an executor {@link SmartLifecycle}: {@code Integer.MAX_VALUE / 2}.
+	 * @since 6.2
+	 * @see #getPhase()
+	 * @see ExecutorConfigurationSupport#DEFAULT_PHASE
+	 */
+	public static final int DEFAULT_PHASE = ExecutorConfigurationSupport.DEFAULT_PHASE;
 
 	private static final TimeUnit NANO = TimeUnit.NANOSECONDS;
 
@@ -183,12 +193,21 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 		}
 	}
 
-	private Runnable scheduledTask(Runnable task) {
-		return () -> execute(task);
-	}
-
 	private Runnable taskOnSchedulerThread(Runnable task) {
 		return new DelegatingErrorHandlingRunnable(task, TaskUtils.getDefaultErrorHandler(true));
+	}
+
+	private Runnable scheduledTask(Runnable task) {
+		return () -> execute(new DelegatingErrorHandlingRunnable(task, this::shutdownAwareErrorHandler));
+	}
+
+	private void shutdownAwareErrorHandler(Throwable ex) {
+		if (this.scheduledExecutor.isTerminated()) {
+			LogFactory.getLog(getClass()).debug("Ignoring scheduled task exception after shutdown", ex);
+		}
+		else {
+			TaskUtils.getDefaultErrorHandler(true).handleError(ex);
+		}
 	}
 
 

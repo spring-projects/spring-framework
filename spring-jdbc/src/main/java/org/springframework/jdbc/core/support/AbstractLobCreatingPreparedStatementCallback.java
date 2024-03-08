@@ -51,7 +51,9 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 1.0.2
  * @see org.springframework.jdbc.support.lob.LobCreator
+ * @deprecated as of 6.2, in favor of {@link SqlBinaryValue} and {@link SqlCharacterValue}
  */
+@Deprecated(since = "6.2")
 public abstract class AbstractLobCreatingPreparedStatementCallback implements PreparedStatementCallback<Integer> {
 
 	private final LobHandler lobHandler;

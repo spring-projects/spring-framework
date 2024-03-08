@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,13 +154,8 @@ import org.springframework.util.StringUtils;
  */
 public class FormHttpMessageConverter implements HttpMessageConverter<MultiValueMap<String, ?>> {
 
-	/**
-	 * The default charset used by the converter.
-	 */
+	/** The default charset used by the converter. */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
-	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
-			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
 
 
 	private List<MediaType> supportedMediaTypes = new ArrayList<>();
@@ -387,14 +382,13 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return false;
 	}
 
-	private void writeForm(MultiValueMap<String, Object> formData, @Nullable MediaType contentType,
+	private void writeForm(MultiValueMap<String, Object> formData, @Nullable MediaType mediaType,
 			HttpOutputMessage outputMessage) throws IOException {
 
-		contentType = getFormContentType(contentType);
-		outputMessage.getHeaders().setContentType(contentType);
+		mediaType = getFormContentType(mediaType);
+		outputMessage.getHeaders().setContentType(mediaType);
 
-		Charset charset = contentType.getCharset();
-		Assert.notNull(charset, "No charset"); // should never occur
+		Charset charset = (mediaType.getCharset() != null ? mediaType.getCharset() : this.charset);
 
 		byte[] bytes = serializeForm(formData, charset).getBytes(charset);
 		outputMessage.getHeaders().setContentLength(bytes.length);
@@ -418,26 +412,22 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	/**
-	 * Return the content type used to write forms, given the preferred content type.
-	 * By default, this method returns the given content type, but adds the
-	 * {@linkplain #setCharset(Charset) charset} if it does not have one.
-	 * If {@code contentType} is {@code null},
-	 * {@code application/x-www-form-urlencoded; charset=UTF-8} is returned.
-	 * <p>Subclasses can override this method to change this behavior.
-	 * @param contentType the preferred content type (can be {@code null})
-	 * @return the content type to be used
+	 * Return the content type used to write forms, either the given content type
+	 * or otherwise {@code application/x-www-form-urlencoded}.
+	 * @param contentType the content type passed to {@link #write}, or {@code null}
+	 * @return the content type to use
 	 * @since 5.2.2
 	 */
 	protected MediaType getFormContentType(@Nullable MediaType contentType) {
 		if (contentType == null) {
-			return DEFAULT_FORM_DATA_MEDIA_TYPE;
+			return MediaType.APPLICATION_FORM_URLENCODED;
 		}
-		else if (contentType.getCharset() == null) {
+		// Some servers don't handle charset parameter and spec is unclear,
+		// Add it only if it is not DEFAULT_CHARSET.
+		if (contentType.getCharset() == null && this.charset != DEFAULT_CHARSET) {
 			return new MediaType(contentType, this.charset);
 		}
-		else {
-			return contentType;
-		}
+		return contentType;
 	}
 
 	protected String serializeForm(MultiValueMap<String, Object> formData, Charset charset) {

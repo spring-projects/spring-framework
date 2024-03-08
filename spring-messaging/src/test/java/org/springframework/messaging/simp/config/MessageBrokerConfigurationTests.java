@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +32,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.Ordered;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -599,20 +599,20 @@ class MessageBrokerConfigurationTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
+		public AbstractSubscribableChannel clientInboundChannel(Executor clientInboundChannelExecutor) {
 			return new TestChannel();
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
+		public AbstractSubscribableChannel clientOutboundChannel(Executor clientOutboundChannelExecutor) {
 			return new TestChannel();
 		}
 
 		@Override
 		@Bean
 		public AbstractSubscribableChannel brokerChannel(AbstractSubscribableChannel clientInboundChannel,
-				AbstractSubscribableChannel clientOutboundChannel, TaskExecutor brokerChannelExecutor) {
+				AbstractSubscribableChannel clientOutboundChannel, Executor brokerChannelExecutor) {
 			return new TestChannel();
 		}
 	}
@@ -688,21 +688,21 @@ class MessageBrokerConfigurationTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
+		public AbstractSubscribableChannel clientInboundChannel(Executor clientInboundChannelExecutor) {
 			// synchronous
 			return new ExecutorSubscribableChannel(null);
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
+		public AbstractSubscribableChannel clientOutboundChannel(Executor clientOutboundChannelExecutor) {
 			return new TestChannel();
 		}
 
 		@Override
 		@Bean
 		public AbstractSubscribableChannel brokerChannel(AbstractSubscribableChannel clientInboundChannel,
-				AbstractSubscribableChannel clientOutboundChannel, TaskExecutor brokerChannelExecutor) {
+				AbstractSubscribableChannel clientOutboundChannel, Executor brokerChannelExecutor) {
 			// synchronous
 			return new ExecutorSubscribableChannel(null);
 		}

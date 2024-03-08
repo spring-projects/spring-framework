@@ -75,6 +75,7 @@ import org.springframework.core.PriorityOrdered;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
@@ -616,7 +617,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				else if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)) {
 					String[] dependentBeans = getDependentBeans(beanName);
-					Set<String> actualDependentBeans = new LinkedHashSet<>(dependentBeans.length);
+					Set<String> actualDependentBeans = CollectionUtils.newLinkedHashSet(dependentBeans.length);
 					for (String dependentBean : dependentBeans) {
 						if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
 							actualDependentBeans.add(dependentBean);
@@ -765,7 +766,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 									paramNames = pnd.getParameterNames(candidate);
 								}
 							}
-							Set<ConstructorArgumentValues.ValueHolder> usedValueHolders = new HashSet<>(paramTypes.length);
+							Set<ConstructorArgumentValues.ValueHolder> usedValueHolders = CollectionUtils.newHashSet(paramTypes.length);
 							Object[] args = new Object[paramTypes.length];
 							for (int i = 0; i < args.length; i++) {
 								ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
@@ -972,59 +973,54 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@Nullable
 	private FactoryBean<?> getSingletonFactoryBeanForTypeCheck(String beanName, RootBeanDefinition mbd) {
-		synchronized (getSingletonMutex()) {
-			BeanWrapper bw = this.factoryBeanInstanceCache.get(beanName);
-			if (bw != null) {
-				return (FactoryBean<?>) bw.getWrappedInstance();
-			}
-			Object beanInstance = getSingleton(beanName, false);
-			if (beanInstance instanceof FactoryBean<?> factoryBean) {
-				return factoryBean;
-			}
-			if (isSingletonCurrentlyInCreation(beanName) ||
-					(mbd.getFactoryBeanName() != null && isSingletonCurrentlyInCreation(mbd.getFactoryBeanName()))) {
-				return null;
-			}
+		BeanWrapper bw = this.factoryBeanInstanceCache.get(beanName);
+		if (bw != null) {
+			return (FactoryBean<?>) bw.getWrappedInstance();
+		}
+		Object beanInstance = getSingleton(beanName, false);
+		if (beanInstance instanceof FactoryBean<?> factoryBean) {
+			return factoryBean;
+		}
+		if (isSingletonCurrentlyInCreation(beanName) ||
+				(mbd.getFactoryBeanName() != null && isSingletonCurrentlyInCreation(mbd.getFactoryBeanName()))) {
+			return null;
+		}
 
-			Object instance;
-			try {
-				// Mark this bean as currently in creation, even if just partially.
-				beforeSingletonCreation(beanName);
-				// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-				instance = resolveBeforeInstantiation(beanName, mbd);
-				if (instance == null) {
-					bw = createBeanInstance(beanName, mbd, null);
-					instance = bw.getWrappedInstance();
-				}
-			}
-			catch (UnsatisfiedDependencyException ex) {
-				// Don't swallow, probably misconfiguration...
-				throw ex;
-			}
-			catch (BeanCreationException ex) {
-				// Don't swallow a linkage error since it contains a full stacktrace on
-				// first occurrence... and just a plain NoClassDefFoundError afterwards.
-				if (ex.contains(LinkageError.class)) {
-					throw ex;
-				}
-				// Instantiation failure, maybe too early...
-				if (logger.isDebugEnabled()) {
-					logger.debug("Bean creation exception on singleton FactoryBean type check: " + ex);
-				}
-				onSuppressedException(ex);
-				return null;
-			}
-			finally {
-				// Finished partial creation of this bean.
-				afterSingletonCreation(beanName);
-			}
-
-			FactoryBean<?> fb = getFactoryBean(beanName, instance);
-			if (bw != null) {
+		Object instance;
+		try {
+			// Mark this bean as currently in creation, even if just partially.
+			beforeSingletonCreation(beanName);
+			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			instance = resolveBeforeInstantiation(beanName, mbd);
+			if (instance == null) {
+				bw = createBeanInstance(beanName, mbd, null);
+				instance = bw.getWrappedInstance();
 				this.factoryBeanInstanceCache.put(beanName, bw);
 			}
-			return fb;
 		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Don't swallow, probably misconfiguration...
+			throw ex;
+		}
+		catch (BeanCreationException ex) {
+			// Don't swallow a linkage error since it contains a full stacktrace on
+			// first occurrence... and just a plain NoClassDefFoundError afterwards.
+			if (ex.contains(LinkageError.class)) {
+				throw ex;
+			}
+			// Instantiation failure, maybe too early...
+			if (logger.isDebugEnabled()) {
+				logger.debug("Bean creation exception on singleton FactoryBean type check: " + ex);
+			}
+			onSuppressedException(ex);
+			return null;
+		}
+		finally {
+			// Finished partial creation of this bean.
+			afterSingletonCreation(beanName);
+		}
+
+		return getFactoryBean(beanName, instance);
 	}
 
 	/**
@@ -1912,10 +1908,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@Override
 	protected void removeSingleton(String beanName) {
-		synchronized (getSingletonMutex()) {
-			super.removeSingleton(beanName);
-			this.factoryBeanInstanceCache.remove(beanName);
-		}
+		super.removeSingleton(beanName);
+		this.factoryBeanInstanceCache.remove(beanName);
 	}
 
 	/**
@@ -1923,10 +1917,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@Override
 	protected void clearSingletonCache() {
-		synchronized (getSingletonMutex()) {
-			super.clearSingletonCache();
-			this.factoryBeanInstanceCache.clear();
-		}
+		super.clearSingletonCache();
+		this.factoryBeanInstanceCache.clear();
 	}
 
 	/**

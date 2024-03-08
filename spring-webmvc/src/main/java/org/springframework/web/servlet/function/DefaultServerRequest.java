@@ -679,6 +679,11 @@ class DefaultServerRequest implements ServerRequest {
 			throw new UnsupportedOperationException();
 		}
 
+		// @Override - on Servlet 6.1
+		public void sendRedirect(String location, int sc, boolean clearBuffer) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
 		@Override
 		public void addDateHeader(String name, long date) {
 			throw new UnsupportedOperationException();

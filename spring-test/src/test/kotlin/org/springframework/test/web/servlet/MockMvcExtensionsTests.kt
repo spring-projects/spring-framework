@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,6 +217,16 @@ class MockMvcExtensionsTests {
 				.hasMessage("Multiple Exceptions (2):\n" +
 						"Range for response status value 200 expected:<CLIENT_ERROR> but was:<SUCCESSFUL>\n" +
 						"Content type expected:<text/plain> but was:<application/json>")
+	}
+
+	@Test
+	fun queryParameter() {
+		val result = mockMvc.get("/") {
+			queryParam("foo", "bar")
+			queryParam("foo", "baz")
+		}.andReturn()
+		assertThat(result.request.parameterMap["foo"]).containsExactly("bar", "baz")
+		assertThat(result.request.queryString).isEqualTo("foo=bar&foo=baz")
 	}
 
 

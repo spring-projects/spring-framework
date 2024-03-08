@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jdbc.support.xml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,7 +47,11 @@ import org.springframework.lang.Nullable;
  * @see java.sql.SQLXML
  * @see java.sql.ResultSet#getSQLXML
  * @see java.sql.PreparedStatement#setSQLXML
+ * @deprecated as of 6.2, in favor of direct {@link ResultSet#getSQLXML} and
+ * {@link Connection#createSQLXML()} usage, possibly in combination with a
+ * custom {@link org.springframework.jdbc.support.SqlValue} implementation
  */
+@Deprecated(since = "6.2")
 public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 
 	//-------------------------------------------------------------------------

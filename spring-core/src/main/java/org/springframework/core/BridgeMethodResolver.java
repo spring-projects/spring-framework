@@ -17,6 +17,7 @@
 package org.springframework.core;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,7 +87,10 @@ public final class BridgeMethodResolver {
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method bridgeMethod, @Nullable Class<?> targetClass) {
-		if (targetClass != null && !bridgeMethod.getDeclaringClass().isAssignableFrom(targetClass)) {
+		if (targetClass != null &&
+				!ClassUtils.getUserClass(bridgeMethod.getDeclaringClass()).isAssignableFrom(targetClass) &&
+				!Proxy.isProxyClass(bridgeMethod.getDeclaringClass())) {
+			// From a different class hierarchy, and not a JDK or CGLIB proxy either -> return as-is.
 			return bridgeMethod;
 		}
 

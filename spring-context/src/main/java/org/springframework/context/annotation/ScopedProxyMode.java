@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ package org.springframework.context.annotation;
  * Enumerates the various scoped-proxy options.
  *
  * <p>For a more complete discussion of exactly what a scoped proxy is, see the
- * section of the Spring reference documentation entitled '<em>Scoped beans as
- * dependencies</em>'.
+ * <a href="https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html#beans-factory-scopes-other-injection"
+ * >Scoped Beans as Dependencies</a> section of the Spring reference documentation.
  *
  * @author Mark Fisher
  * @since 2.5

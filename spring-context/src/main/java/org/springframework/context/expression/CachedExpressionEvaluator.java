@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,10 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Shared utility class used to evaluate and cache SpEL expressions that
- * are defined on {@link java.lang.reflect.AnnotatedElement}.
+ * are defined on an {@link java.lang.reflect.AnnotatedElement AnnotatedElement}.
  *
  * @author Stephane Nicoll
  * @since 4.2
@@ -42,18 +41,18 @@ public abstract class CachedExpressionEvaluator {
 
 
 	/**
+	 * Create a new instance with the default {@link SpelExpressionParser}.
+	 */
+	protected CachedExpressionEvaluator() {
+		this(new SpelExpressionParser());
+	}
+
+	/**
 	 * Create a new instance with the specified {@link SpelExpressionParser}.
 	 */
 	protected CachedExpressionEvaluator(SpelExpressionParser parser) {
 		Assert.notNull(parser, "SpelExpressionParser must not be null");
 		this.parser = parser;
-	}
-
-	/**
-	 * Create a new instance with a default {@link SpelExpressionParser}.
-	 */
-	protected CachedExpressionEvaluator() {
-		this(new SpelExpressionParser());
 	}
 
 
@@ -72,24 +71,20 @@ public abstract class CachedExpressionEvaluator {
 		return this.parameterNameDiscoverer;
 	}
 
-
 	/**
-	 * Return the {@link Expression} for the specified SpEL value
-	 * <p>{@link #parseExpression(String) Parse the expression} if it hasn't been already.
+	 * Return the parsed {@link Expression} for the specified SpEL expression.
+	 * <p>{@linkplain #parseExpression(String) Parses} the expression if it hasn't
+	 * already been parsed and cached.
 	 * @param cache the cache to use
-	 * @param elementKey the element on which the expression is defined
+	 * @param elementKey the {@code AnnotatedElementKey} containing the element
+	 * on which the expression is defined
 	 * @param expression the expression to parse
 	 */
 	protected Expression getExpression(Map<ExpressionKey, Expression> cache,
 			AnnotatedElementKey elementKey, String expression) {
 
 		ExpressionKey expressionKey = createKey(elementKey, expression);
-		Expression expr = cache.get(expressionKey);
-		if (expr == null) {
-			expr = parseExpression(expression);
-			cache.put(expressionKey, expr);
-		}
-		return expr;
+		return cache.computeIfAbsent(expressionKey, key -> parseExpression(expression));
 	}
 
 	/**
@@ -125,8 +120,7 @@ public abstract class CachedExpressionEvaluator {
 		@Override
 		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof ExpressionKey that &&
-					this.element.equals(that.element) &&
-					ObjectUtils.nullSafeEquals(this.expression, that.expression)));
+					this.element.equals(that.element) && this.expression.equals(that.expression)));
 		}
 
 		@Override

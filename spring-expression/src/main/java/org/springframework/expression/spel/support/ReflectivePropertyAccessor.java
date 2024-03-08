@@ -85,16 +85,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private final Map<Class<?>, Method[]> sortedMethodsCache = new ConcurrentHashMap<>(64);
 
-	@Nullable
-	private volatile InvokerPair lastReadInvokerPair;
-
 
 	/**
 	 * Create a new property accessor for reading as well writing.
 	 * @see #ReflectivePropertyAccessor(boolean)
 	 */
 	public ReflectivePropertyAccessor() {
-		this.allowWrite = true;
+		this(true);
 	}
 
 	/**
@@ -139,8 +136,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			// The readerCache will only contain gettable properties (let's not worry about setters for now).
 			Property property = new Property(type, method, null);
 			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
-			method = ClassUtils.getInterfaceMethodIfPossible(method, type);
-			this.readerCache.put(cacheKey, new InvokerPair(method, typeDescriptor));
+			Method methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method, type);
+			this.readerCache.put(cacheKey, new InvokerPair(methodToInvoke, typeDescriptor, method));
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
 		}
@@ -171,10 +168,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		InvokerPair invoker = this.readerCache.get(cacheKey);
-		this.lastReadInvokerPair = invoker;
 
 		if (invoker == null || invoker.member instanceof Method) {
 			Method method = (Method) (invoker != null ? invoker.member : null);
+			Method methodToInvoke = method;
 			if (method == null) {
 				method = findGetterForProperty(name, type, target);
 				if (method != null) {
@@ -182,16 +179,15 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					// The readerCache will only contain gettable properties (let's not worry about setters for now).
 					Property property = new Property(type, method, null);
 					TypeDescriptor typeDescriptor = new TypeDescriptor(property);
-					method = ClassUtils.getInterfaceMethodIfPossible(method, type);
-					invoker = new InvokerPair(method, typeDescriptor);
-					this.lastReadInvokerPair = invoker;
+					methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method, type);
+					invoker = new InvokerPair(methodToInvoke, typeDescriptor, method);
 					this.readerCache.put(cacheKey, invoker);
 				}
 			}
-			if (method != null) {
+			if (methodToInvoke != null) {
 				try {
-					ReflectionUtils.makeAccessible(method);
-					Object value = method.invoke(target);
+					ReflectionUtils.makeAccessible(methodToInvoke);
+					Object value = methodToInvoke.invoke(target);
 					return new TypedValue(value, invoker.typeDescriptor.narrow(value));
 				}
 				catch (Exception ex) {
@@ -206,7 +202,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				field = findField(name, type, target);
 				if (field != null) {
 					invoker = new InvokerPair(field, new TypeDescriptor(field));
-					this.lastReadInvokerPair = invoker;
 					this.readerCache.put(cacheKey, invoker);
 				}
 			}
@@ -530,37 +525,37 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
-		InvokerPair invocationTarget = this.readerCache.get(cacheKey);
+		InvokerPair invokerPair = this.readerCache.get(cacheKey);
 
-		if (invocationTarget == null || invocationTarget.member instanceof Method) {
-			Method method = (Method) (invocationTarget != null ? invocationTarget.member : null);
+		if (invokerPair == null || invokerPair.member instanceof Method) {
+			Method method = (Method) (invokerPair != null ? invokerPair.member : null);
 			if (method == null) {
 				method = findGetterForProperty(name, type, target);
 				if (method != null) {
 					TypeDescriptor typeDescriptor = new TypeDescriptor(new MethodParameter(method, -1));
-					method = ClassUtils.getInterfaceMethodIfPossible(method, type);
-					invocationTarget = new InvokerPair(method, typeDescriptor);
-					ReflectionUtils.makeAccessible(method);
-					this.readerCache.put(cacheKey, invocationTarget);
+					Method methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method, type);
+					invokerPair = new InvokerPair(methodToInvoke, typeDescriptor, method);
+					ReflectionUtils.makeAccessible(methodToInvoke);
+					this.readerCache.put(cacheKey, invokerPair);
 				}
 			}
 			if (method != null) {
-				return new OptimalPropertyAccessor(invocationTarget);
+				return new OptimalPropertyAccessor(invokerPair);
 			}
 		}
 
-		if (invocationTarget == null || invocationTarget.member instanceof Field) {
-			Field field = (invocationTarget != null ? (Field) invocationTarget.member : null);
+		if (invokerPair == null || invokerPair.member instanceof Field) {
+			Field field = (invokerPair != null ? (Field) invokerPair.member : null);
 			if (field == null) {
 				field = findField(name, type, target instanceof Class);
 				if (field != null) {
-					invocationTarget = new InvokerPair(field, new TypeDescriptor(field));
+					invokerPair = new InvokerPair(field, new TypeDescriptor(field));
 					ReflectionUtils.makeAccessible(field);
-					this.readerCache.put(cacheKey, invocationTarget);
+					this.readerCache.put(cacheKey, invokerPair);
 				}
 			}
 			if (field != null) {
-				return new OptimalPropertyAccessor(invocationTarget);
+				return new OptimalPropertyAccessor(invokerPair);
 			}
 		}
 
@@ -578,40 +573,17 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	/**
 	 * Captures the member (method/field) to call reflectively to access a property value
 	 * and the type descriptor for the value returned by the reflective call.
+	 * <p>The {@code originalMethod} is only used if the member is a method.
 	 */
-	private record InvokerPair(Member member, TypeDescriptor typeDescriptor) {}
+	private record InvokerPair(Member member, TypeDescriptor typeDescriptor, @Nullable Method originalMethod) {
 
-	private static final class PropertyCacheKey implements Comparable<PropertyCacheKey> {
-
-		private final Class<?> clazz;
-
-		private final String property;
-
-		private final boolean targetIsClass;
-
-		public PropertyCacheKey(Class<?> clazz, String name, boolean targetIsClass) {
-			this.clazz = clazz;
-			this.property = name;
-			this.targetIsClass = targetIsClass;
+		InvokerPair(Member member, TypeDescriptor typeDescriptor) {
+			this(member, typeDescriptor, null);
 		}
+	}
 
-		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof PropertyCacheKey that &&
-					this.clazz == that.clazz && this.property.equals(that.property) &&
-					this.targetIsClass == that.targetIsClass));
-		}
-
-		@Override
-		public int hashCode() {
-			return (this.clazz.hashCode() * 29 + this.property.hashCode());
-		}
-
-		@Override
-		public String toString() {
-			return "PropertyCacheKey [clazz=" + this.clazz.getName() + ", property=" + this.property +
-					", targetIsClass=" + this.targetIsClass + "]";
-		}
+	private record PropertyCacheKey(Class<?> clazz, String property, boolean targetIsClass)
+			implements Comparable<PropertyCacheKey> {
 
 		@Override
 		public int compareTo(PropertyCacheKey other) {
@@ -641,9 +613,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		private final TypeDescriptor typeDescriptor;
 
-		OptimalPropertyAccessor(InvokerPair target) {
-			this.member = target.member;
-			this.typeDescriptor = target.typeDescriptor;
+		@Nullable
+		private final Method originalMethod;
+
+		OptimalPropertyAccessor(InvokerPair invokerPair) {
+			this.member = invokerPair.member;
+			this.typeDescriptor = invokerPair.typeDescriptor;
+			this.originalMethod = invokerPair.originalMethod;
 		}
 
 		@Override
@@ -712,8 +688,14 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		@Override
 		public boolean isCompilable() {
-			return (Modifier.isPublic(this.member.getModifiers()) &&
-					Modifier.isPublic(this.member.getDeclaringClass().getModifiers()));
+			if (Modifier.isPublic(this.member.getModifiers()) &&
+					Modifier.isPublic(this.member.getDeclaringClass().getModifiers())) {
+				return true;
+			}
+			if (this.originalMethod != null) {
+				return (ReflectionHelper.findPublicDeclaringClass(this.originalMethod) != null);
+			}
+			return false;
 		}
 
 		@Override
@@ -728,9 +710,17 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		@Override
 		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
+			Class<?> publicDeclaringClass = this.member.getDeclaringClass();
+			if (!Modifier.isPublic(publicDeclaringClass.getModifiers()) && this.originalMethod != null) {
+				publicDeclaringClass = ReflectionHelper.findPublicDeclaringClass(this.originalMethod);
+			}
+			Assert.state(publicDeclaringClass != null && Modifier.isPublic(publicDeclaringClass.getModifiers()),
+					() -> "Failed to find public declaring class for: " +
+							(this.originalMethod != null ? this.originalMethod : this.member));
+
+			String classDesc = publicDeclaringClass.getName().replace('.', '/');
 			boolean isStatic = Modifier.isStatic(this.member.getModifiers());
 			String descriptor = cf.lastDescriptor();
-			String classDesc = this.member.getDeclaringClass().getName().replace('.', '/');
 
 			if (!isStatic) {
 				if (descriptor == null) {
@@ -742,14 +732,14 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 			else {
 				if (descriptor != null) {
-					// A static field/method call will not consume what is on the stack,
+					// A static field/method call will not consume what is on the stack, so
 					// it needs to be popped off.
 					mv.visitInsn(POP);
 				}
 			}
 
 			if (this.member instanceof Method method) {
-				boolean isInterface = method.getDeclaringClass().isInterface();
+				boolean isInterface = publicDeclaringClass.isInterface();
 				int opcode = (isStatic ? INVOKESTATIC : isInterface ? INVOKEINTERFACE : INVOKEVIRTUAL);
 				mv.visitMethodInsn(opcode, classDesc, method.getName(),
 						CodeFlow.createSignatureDescriptor(method), isInterface);

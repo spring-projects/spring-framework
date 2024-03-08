@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Represents the invocation of a constructor. Either a constructor on a regular type or
+ * Represents the invocation of a constructor: either a constructor on a regular type or
  * construction of an array. When an array is constructed, an initializer can be specified.
  *
  * <h4>Examples</h4>
@@ -76,15 +76,15 @@ public class ConstructorReference extends SpelNodeImpl {
 	@Nullable
 	private final SpelNodeImpl[] dimensions;
 
-	// TODO is this caching safe - passing the expression around will mean this executor is also being passed around
 	/** The cached executor that may be reused on subsequent evaluations. */
 	@Nullable
 	private volatile ConstructorExecutor cachedExecutor;
 
 
 	/**
-	 * Create a constructor reference. The first argument is the type, the rest are the parameters to the constructor
-	 * call
+	 * Create a constructor reference for a regular type.
+	 * <p>The first argument is the type. The rest are the arguments to the
+	 * constructor.
 	 */
 	public ConstructorReference(int startPos, int endPos, SpelNodeImpl... arguments) {
 		super(startPos, endPos, arguments);
@@ -93,8 +93,10 @@ public class ConstructorReference extends SpelNodeImpl {
 	}
 
 	/**
-	 * Create a constructor reference. The first argument is the type, the rest are the parameters to the constructor
-	 * call
+	 * Create a constructor reference for an array.
+	 * <p>The first argument is the array component type. The second argument is
+	 * an {@link InlineList} representing the array initializer, if an initializer
+	 * was supplied in the expression.
 	 */
 	public ConstructorReference(int startPos, int endPos, SpelNodeImpl[] dimensions, SpelNodeImpl... arguments) {
 		super(startPos, endPos, arguments);
@@ -139,11 +141,11 @@ public class ConstructorReference extends SpelNodeImpl {
 			}
 			catch (AccessException ex) {
 				// Two reasons this can occur:
-				// 1. the method invoked actually threw a real exception
-				// 2. the method invoked was not passed the arguments it expected and has become 'stale'
+				// 1. the constructor invoked actually threw a real exception
+				// 2. the constructor invoked was not passed the arguments it expected and has become 'stale'
 
 				// In the first case we should not retry, in the second case we should see if there is a
-				// better suited method.
+				// better suited constructor.
 
 				// To determine which situation it is, the AccessException will contain a cause.
 				// If the cause is an InvocationTargetException, a user exception was thrown inside the constructor.
@@ -167,7 +169,7 @@ public class ConstructorReference extends SpelNodeImpl {
 			}
 		}
 
-		// Either there was no accessor or it no longer exists
+		// Either there was no ConstructorExecutor or it no longer exists
 		String typeName = (String) this.children[0].getValueInternal(state).getValue();
 		Assert.state(typeName != null, "No type name");
 		executorToUse = findExecutorForConstructor(typeName, argumentTypes, state);
@@ -317,8 +319,8 @@ public class ConstructorReference extends SpelNodeImpl {
 		else {
 			// There is an initializer
 			if (this.dimensions == null || this.dimensions.length > 1) {
-				// There is an initializer but this is a multidimensional array (e.g. new int[][]{{1,2},{3,4}})
-				// - this is not currently supported
+				// There is an initializer, but this is a multidimensional array
+				// (e.g. new int[][]{{1,2},{3,4}}), which is not supported.
 				throw new SpelEvaluationException(getStartPosition(),
 						SpelMessage.MULTIDIM_ARRAY_INITIALIZER_NOT_SUPPORTED);
 			}
@@ -450,11 +452,9 @@ public class ConstructorReference extends SpelNodeImpl {
 			return false;
 		}
 
-		if (getChildCount() > 1) {
-			for (int c = 1, max = getChildCount(); c < max; c++) {
-				if (!this.children[c].isCompilable()) {
-					return false;
-				}
+		for (int i = 1; i < this.children.length; i++) {
+			if (!this.children[i].isCompilable()) {
+				return false;
 			}
 		}
 

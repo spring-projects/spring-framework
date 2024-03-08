@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,6 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 
 	private final TransactionPhase transactionPhase;
 
-	private final boolean fallbackExecution;
-
 	private final List<SynchronizationCallback> callbacks = new CopyOnWriteArrayList<>();
 
 
@@ -68,7 +66,6 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 			throw new IllegalStateException("No TransactionalEventListener annotation found on method: " + method);
 		}
 		this.transactionPhase = eventAnn.phase();
-		this.fallbackExecution = eventAnn.fallbackExecution();
 	}
 
 
@@ -91,7 +88,7 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 				logger.debug("Registered transaction synchronization for " + event);
 			}
 		}
-		else if (this.fallbackExecution) {
+		else if (isDefaultExecution()) {
 			if (getTransactionPhase() == TransactionPhase.AFTER_ROLLBACK && logger.isWarnEnabled()) {
 				logger.warn("Processing " + event + " as a fallback execution on AFTER_ROLLBACK phase");
 			}

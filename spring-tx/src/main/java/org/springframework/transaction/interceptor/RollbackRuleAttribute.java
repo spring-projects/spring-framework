@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,14 @@ public class RollbackRuleAttribute implements Serializable{
 	 */
 	public static final RollbackRuleAttribute ROLLBACK_ON_RUNTIME_EXCEPTIONS =
 			new RollbackRuleAttribute(RuntimeException.class);
+
+	/**
+	 * The {@linkplain RollbackRuleAttribute rollback rule} for all
+	 * {@link Exception Exceptions}, including checked exceptions.
+	 * @since 6.2
+	 */
+	public static final RollbackRuleAttribute ROLLBACK_ON_ALL_EXCEPTIONS =
+			new RollbackRuleAttribute(Exception.class);
 
 
 	/**

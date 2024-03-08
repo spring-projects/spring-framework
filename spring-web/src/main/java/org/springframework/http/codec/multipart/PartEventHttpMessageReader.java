@@ -38,6 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.LoggingCodecSupport;
+import org.springframework.http.codec.multipart.MultipartParser.HeadersToken;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -154,7 +155,7 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 
 			AtomicInteger partCount = new AtomicInteger();
 			return allPartsTokens
-					.windowUntil(t -> t instanceof MultipartParser.HeadersToken, true)
+					.windowUntil(HeadersToken.class::isInstance, true)
 					.concatMap(partTokens -> partTokens
 							.switchOnFirst((signal, flux) -> {
 								if (!signal.hasValue()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
@@ -190,6 +193,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	@Nullable
 	private Executor taskExecutor;
 
+	private boolean virtualThreads = false;
+
 	private BackOff backOff = new FixedBackOff(DEFAULT_RECOVERY_INTERVAL, Long.MAX_VALUE);
 
 	private int cacheLevel = CACHE_AUTO;
@@ -221,7 +226,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private Object currentRecoveryMarker = new Object();
 
-	private final Object recoveryMonitor = new Object();
+	private final Lock recoveryLock = new ReentrantLock();
 
 
 	/**
@@ -234,11 +239,40 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * managed in a specific fashion, for example within a Jakarta EE environment.
 	 * A plain thread pool does not add much value, as this listener container
 	 * will occupy a number of threads for its entire lifetime.
+	 * <p>If the specified executor is a {@link SchedulingTaskExecutor} indicating
+	 * {@link SchedulingTaskExecutor#prefersShortLivedTasks() a preference for
+	 * short-lived tasks}, a {@link #setMaxMessagesPerTask} default of 10 will be
+	 * applied in order to provide dynamic scaling at runtime. With the default
+	 * task executor or a similarly non-pooling external executor specified,
+	 * a {@link #setIdleReceivesPerTaskLimit} default of 10 will apply instead.
 	 * @see #setConcurrentConsumers
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
 	 */
 	public void setTaskExecutor(Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
+	}
+
+	/**
+	 * Specify whether the default {@link SimpleAsyncTaskExecutor} should be
+	 * configured to use virtual threads instead of platform threads, for
+	 * efficient blocking behavior in listener threads on Java 21 or higher.
+	 * This is off by default, setting up one platform thread per consumer.
+	 * <p>Only applicable if the internal default executor is in use rather than
+	 * an externally provided {@link #setTaskExecutor TaskExecutor} instance.
+	 * The thread name prefix for virtual threads will be derived from the
+	 * listener container's bean name, just like with default platform threads.
+	 * <p>Alternatively, pass in a virtual threads based executor through
+	 * {@link #setTaskExecutor} (with externally defined thread naming).
+	 * <p>Consider specifying concurrency limits through {@link #setConcurrency}
+	 * or {@link #setConcurrentConsumers}/{@link #setMaxConcurrentConsumers},
+	 * for potential dynamic scaling. This works fine with the default executor;
+	 * see {@link #setIdleReceivesPerTaskLimit} with its effective default of 10.
+	 * @since 6.2
+	 * @see #setTaskExecutor
+	 * @see SimpleAsyncTaskExecutor#setVirtualThreads
+	 */
+	public void setVirtualThreads(boolean virtualThreads) {
+		this.virtualThreads = virtualThreads;
 	}
 
 	/**
@@ -345,7 +379,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Specify the number of concurrent consumers to create. Default is 1.
+	 * Specify the number of core concurrent consumers to create. Default is 1.
 	 * <p>Specifying a higher value for this setting will increase the standard
 	 * level of scheduled concurrent consumers at runtime: This is effectively
 	 * the minimum number of concurrent consumers which will be scheduled
@@ -364,11 +398,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public void setConcurrentConsumers(int concurrentConsumers) {
 		Assert.isTrue(concurrentConsumers > 0, "'concurrentConsumers' value must be at least 1 (one)");
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			this.concurrentConsumers = concurrentConsumers;
 			if (this.maxConcurrentConsumers < concurrentConsumers) {
 				this.maxConcurrentConsumers = concurrentConsumers;
 			}
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -380,15 +418,19 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #getActiveConsumerCount()
 	 */
 	public final int getConcurrentConsumers() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return this.concurrentConsumers;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
 	/**
 	 * Specify the maximum number of concurrent consumers to create. Default is 1.
 	 * <p>If this setting is higher than "concurrentConsumers", the listener container
-	 * will dynamically schedule new consumers at runtime, provided that enough
+	 * will dynamically schedule surplus consumers at runtime, provided that enough
 	 * incoming messages are encountered. Once the load goes down again, the number of
 	 * consumers will be reduced to the standard level ("concurrentConsumers") again.
 	 * <p>Raising the number of concurrent consumers is recommendable in order
@@ -404,8 +446,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public void setMaxConcurrentConsumers(int maxConcurrentConsumers) {
 		Assert.isTrue(maxConcurrentConsumers > 0, "'maxConcurrentConsumers' value must be at least 1 (one)");
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			this.maxConcurrentConsumers = Math.max(maxConcurrentConsumers, this.concurrentConsumers);
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -417,8 +463,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #getActiveConsumerCount()
 	 */
 	public final int getMaxConcurrentConsumers() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return this.maxConcurrentConsumers;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -446,8 +496,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public void setMaxMessagesPerTask(int maxMessagesPerTask) {
 		Assert.isTrue(maxMessagesPerTask != 0, "'maxMessagesPerTask' must not be 0");
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			this.maxMessagesPerTask = maxMessagesPerTask;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -455,8 +509,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Return the maximum number of messages to process in one task.
 	 */
 	public final int getMaxMessagesPerTask() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return this.maxMessagesPerTask;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -472,8 +530,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public void setIdleConsumerLimit(int idleConsumerLimit) {
 		Assert.isTrue(idleConsumerLimit > 0, "'idleConsumerLimit' must be 1 or higher");
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			this.idleConsumerLimit = idleConsumerLimit;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -481,8 +543,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Return the limit for the number of idle consumers.
 	 */
 	public final int getIdleConsumerLimit() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return this.idleConsumerLimit;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -515,8 +581,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public void setIdleTaskExecutionLimit(int idleTaskExecutionLimit) {
 		Assert.isTrue(idleTaskExecutionLimit > 0, "'idleTaskExecutionLimit' must be 1 or higher");
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			this.idleTaskExecutionLimit = idleTaskExecutionLimit;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -524,8 +594,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Return the limit for idle executions of a consumer task.
 	 */
 	public final int getIdleTaskExecutionLimit() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return this.idleTaskExecutionLimit;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -550,14 +624,28 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * idle messages received, the task would be marked as idle and released. This also
 	 * means that after the last message was processed, the task would be released after
 	 * 60 seconds as long as no new messages appear.
+	 * <p><b>NOTE: On its own, this idle limit does not apply to core consumers within
+	 * {@link #setConcurrentConsumers} but rather just to surplus consumers up until
+	 * {@link #setMaxConcurrentConsumers} (as of 6.2).</b> Only in combination with
+	 * {@link #setMaxMessagesPerTask} does it have an effect on core consumers as well,
+	 * as inferred for an external thread pool indicating a preference for short-lived
+	 * tasks, leading to dynamic rescheduling of all consumer tasks in the thread pool.
+	 * <p><b>The default for surplus consumers on a default/simple executor is 10,
+	 * leading to a removal of surplus tasks after 10 idle receives in each task.</b>
+	 * In combination with the default {@link #setReceiveTimeout} of 1000 ms (1 second),
+	 * a surplus task will be scaled down after 10 seconds of idle receives by default.
 	 * @since 5.3.5
 	 * @see #setMaxMessagesPerTask
 	 * @see #setReceiveTimeout
 	 */
 	public void setIdleReceivesPerTaskLimit(int idleReceivesPerTaskLimit) {
 		Assert.isTrue(idleReceivesPerTaskLimit != 0, "'idleReceivesPerTaskLimit' must not be 0)");
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			this.idleReceivesPerTaskLimit = idleReceivesPerTaskLimit;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -567,8 +655,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @since 5.3.5
 	 */
 	public int getIdleReceivesPerTaskLimit() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return this.idleReceivesPerTaskLimit;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -584,19 +676,28 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			this.cacheLevel = (getTransactionManager() != null ? CACHE_NONE : CACHE_CONSUMER);
 		}
 
-		// Prepare taskExecutor and maxMessagesPerTask.
-		synchronized (this.lifecycleMonitor) {
+		// Prepare taskExecutor and maxMessagesPerTask/idleReceivesPerTaskLimit.
+		this.lifecycleLock.lock();
+		try {
 			if (this.taskExecutor == null) {
 				this.taskExecutor = createDefaultTaskExecutor();
 			}
-			else if (this.taskExecutor instanceof SchedulingTaskExecutor ste &&
-					ste.prefersShortLivedTasks() &&
-					this.maxMessagesPerTask == Integer.MIN_VALUE) {
-				// TaskExecutor indicated a preference for short-lived tasks. According to
-				// setMaxMessagesPerTask javadoc, we'll use 10 message per task in this case
-				// unless the user specified a custom value.
-				this.maxMessagesPerTask = 10;
+			if (this.taskExecutor instanceof SchedulingTaskExecutor ste && ste.prefersShortLivedTasks()) {
+				if (this.maxMessagesPerTask == Integer.MIN_VALUE) {
+					// TaskExecutor indicated a preference for short-lived tasks. According to
+					// setMaxMessagesPerTask javadoc, we'll use 10 message per task in this case
+					// unless the user specified a custom value.
+					this.maxMessagesPerTask = 10;
+				}
 			}
+			else if (this.idleReceivesPerTaskLimit == Integer.MIN_VALUE) {
+				// A simple non-pooling executor: unlimited core consumer tasks
+				// whereas surplus consumer tasks terminate after 10 idle receives.
+				this.idleReceivesPerTaskLimit = 10;
+			}
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 
 		// Proceed with actual listener initialization.
@@ -612,10 +713,14 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	@Override
 	protected void doInitialize() throws JMSException {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			for (int i = 0; i < this.concurrentConsumers; i++) {
 				scheduleNewInvoker();
 			}
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -625,43 +730,45 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	@Override
 	protected void doShutdown() throws JMSException {
 		logger.debug("Waiting for shutdown of message listener invokers");
+		this.lifecycleLock.lock();
 		try {
-			synchronized (this.lifecycleMonitor) {
-				long receiveTimeout = getReceiveTimeout();
-				long waitStartTime = System.currentTimeMillis();
-				int waitCount = 0;
-				while (this.activeInvokerCount > 0) {
-					if (waitCount > 0 && !isAcceptMessagesWhileStopping() &&
-							System.currentTimeMillis() - waitStartTime >= receiveTimeout) {
-						// Unexpectedly some invokers are still active after the receive timeout period
-						// -> interrupt remaining receive attempts since we'd reject the messages anyway
-						for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
-							scheduledInvoker.interruptIfNecessary();
-						}
+			long receiveTimeout = getReceiveTimeout();
+			long waitStartTime = System.currentTimeMillis();
+			int waitCount = 0;
+			while (this.activeInvokerCount > 0) {
+				if (waitCount > 0 && !isAcceptMessagesWhileStopping() &&
+						System.currentTimeMillis() - waitStartTime >= receiveTimeout) {
+					// Unexpectedly some invokers are still active after the receive timeout period
+					// -> interrupt remaining receive attempts since we'd reject the messages anyway
+					for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
+						scheduledInvoker.interruptIfNecessary();
 					}
-					if (logger.isDebugEnabled()) {
-						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
-								" message listener invokers (iteration " + waitCount + ")");
-					}
-					// Wait for AsyncMessageListenerInvokers to deactivate themselves...
-					if (receiveTimeout > 0) {
-						this.lifecycleMonitor.wait(receiveTimeout);
-					}
-					else {
-						this.lifecycleMonitor.wait();
-					}
-					waitCount++;
 				}
-				// Clear remaining scheduled invokers, possibly left over as paused tasks
-				for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
-					scheduledInvoker.clearResources();
+				if (logger.isDebugEnabled()) {
+					logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
+							" message listener invokers (iteration " + waitCount + ")");
 				}
-				this.scheduledInvokers.clear();
+				// Wait for AsyncMessageListenerInvokers to deactivate themselves...
+				if (receiveTimeout > 0) {
+					this.lifecycleCondition.await(receiveTimeout, TimeUnit.MILLISECONDS);
+				}
+				else {
+					this.lifecycleCondition.await();
+				}
+				waitCount++;
 			}
+			// Clear remaining scheduled invokers, possibly left over as paused tasks
+			for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
+				scheduledInvoker.clearResources();
+			}
+			this.scheduledInvokers.clear();
 		}
 		catch (InterruptedException ex) {
 			// Re-interrupt current thread, to allow other threads to react.
 			Thread.currentThread().interrupt();
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -670,8 +777,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	@Override
 	public void start() throws JmsException {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			this.stopCallback = null;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 		super.start();
 	}
@@ -691,7 +802,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	@Override
 	public void stop(Runnable callback) throws JmsException {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			if (!isRunning() || this.stopCallback != null) {
 				// Not started, already stopped, or previous stop attempt in progress
 				// -> return immediately, no stop process to control anymore.
@@ -699,6 +811,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				return;
 			}
 			this.stopCallback = callback;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 		stop();
 	}
@@ -713,8 +828,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #getActiveConsumerCount()
 	 */
 	public final int getScheduledConsumerCount() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return this.scheduledInvokers.size();
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -728,8 +847,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #getActiveConsumerCount()
 	 */
 	public final int getActiveConsumerCount() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return this.activeInvokerCount;
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -749,8 +872,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * only {@link #CACHE_CONSUMER} will lead to a fixed registration.
 	 */
 	public boolean isRegisteredWithDestination() {
-		synchronized (this.lifecycleMonitor) {
+		this.lifecycleLock.lock();
+		try {
 			return (this.registeredWithDestination > 0);
+		}
+		finally {
+			this.lifecycleLock.unlock();
 		}
 	}
 
@@ -760,11 +887,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * <p>The default implementation builds a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}
 	 * with the specified bean name (or the class name, if no bean name specified) as thread name prefix.
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor#SimpleAsyncTaskExecutor(String)
+	 * @see #setVirtualThreads
 	 */
 	protected TaskExecutor createDefaultTaskExecutor() {
 		String beanName = getBeanName();
 		String threadNamePrefix = (beanName != null ? beanName + "-" : DEFAULT_THREAD_NAME_PREFIX);
-		return new SimpleAsyncTaskExecutor(threadNamePrefix);
+
+		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(threadNamePrefix);
+		executor.setVirtualThreads(this.virtualThreads);
+		return executor;
 	}
 
 	/**
@@ -831,7 +962,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	protected void scheduleNewInvokerIfAppropriate() {
 		if (isRunning()) {
 			resumePausedTasks();
-			synchronized (this.lifecycleMonitor) {
+			this.lifecycleLock.lock();
+			try {
 				if (this.scheduledInvokers.size() < this.maxConcurrentConsumers &&
 						getIdleInvokerCount() < this.idleConsumerLimit) {
 					scheduleNewInvoker();
@@ -839,6 +971,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 						logger.debug("Raised scheduled invoker count: " + this.scheduledInvokers.size());
 					}
 				}
+			}
+			finally {
+				this.lifecycleLock.unlock();
 			}
 		}
 	}
@@ -857,7 +992,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Determine whether this listener container currently has more
+	 * Called to determine whether this listener container currently has more
 	 * than one idle instance among its scheduled invokers.
 	 */
 	private int getIdleInvokerCount() {
@@ -1072,10 +1207,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			return false;
 		}
 		else {
+			this.lifecycleLock.lock();
 			try {
-				synchronized (this.lifecycleMonitor) {
-					this.lifecycleMonitor.wait(interval);
-				}
+				this.lifecycleCondition.await(interval, TimeUnit.MILLISECONDS);
 			}
 			catch (InterruptedException interEx) {
 				// Re-interrupt current thread, to allow other threads to react.
@@ -1083,6 +1217,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				if (this.recovering) {
 					this.interrupted = true;
 				}
+			}
+			finally {
+				this.lifecycleLock.unlock();
 			}
 			return true;
 		}
@@ -1129,15 +1266,24 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		@Override
 		public void run() {
-			synchronized (lifecycleMonitor) {
+			boolean surplus;
+			lifecycleLock.lock();
+			try {
+				surplus = (scheduledInvokers.size() > concurrentConsumers);
 				activeInvokerCount++;
-				lifecycleMonitor.notifyAll();
+				lifecycleCondition.signalAll();
+			}
+			finally {
+				lifecycleLock.unlock();
 			}
 			boolean messageReceived = false;
 			try {
+				// For core consumers without maxMessagesPerTask, no idle limit applies since they
+				// will always get rescheduled immediately anyway. Whereas for surplus consumers
+				// between concurrentConsumers and maxConcurrentConsumers, an idle limit does apply.
 				int messageLimit = maxMessagesPerTask;
 				int idleLimit = idleReceivesPerTaskLimit;
-				if (messageLimit < 0 && idleLimit < 0) {
+				if (messageLimit < 0 && (!surplus || idleLimit < 0)) {
 					messageReceived = executeOngoingLoop();
 				}
 				else {
@@ -1161,7 +1307,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				}
 				this.lastMessageSucceeded = false;
 				boolean alreadyRecovered = false;
-				synchronized (recoveryMonitor) {
+				recoveryLock.lock();
+				try {
 					if (this.lastRecoveryMarker == currentRecoveryMarker) {
 						handleListenerSetupFailure(ex, false);
 						recoverAfterListenerSetupFailure();
@@ -1171,14 +1318,21 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 						alreadyRecovered = true;
 					}
 				}
+				finally {
+					recoveryLock.unlock();
+				}
 				if (alreadyRecovered) {
 					handleListenerSetupFailure(ex, true);
 				}
 			}
 			finally {
-				synchronized (lifecycleMonitor) {
+				lifecycleLock.lock();
+				try {
 					decreaseActiveInvokerCount();
-					lifecycleMonitor.notifyAll();
+					lifecycleCondition.signalAll();
+				}
+				finally {
+					lifecycleLock.unlock();
 				}
 				if (!messageReceived) {
 					this.idleTaskExecutionCount++;
@@ -1186,14 +1340,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				else {
 					this.idleTaskExecutionCount = 0;
 				}
-				synchronized (lifecycleMonitor) {
+				lifecycleLock.lock();
+				try {
 					if (!shouldRescheduleInvoker(this.idleTaskExecutionCount) || !rescheduleTaskIfNecessary(this)) {
 						// We're shutting down completely.
 						scheduledInvokers.remove(this);
 						if (logger.isDebugEnabled()) {
 							logger.debug("Lowered scheduled invoker count: " + scheduledInvokers.size());
 						}
-						lifecycleMonitor.notifyAll();
+						lifecycleCondition.signalAll();
 						clearResources();
 					}
 					else if (isRunning()) {
@@ -1209,6 +1364,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 						}
 					}
 				}
+				finally {
+					lifecycleLock.unlock();
+				}
 			}
 		}
 
@@ -1216,7 +1374,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			boolean messageReceived = false;
 			boolean active = true;
 			while (active) {
-				synchronized (lifecycleMonitor) {
+				lifecycleLock.lock();
+				try {
 					boolean interrupted = false;
 					boolean wasWaiting = false;
 					while ((active = isActive()) && !isRunning()) {
@@ -1229,7 +1388,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 						}
 						wasWaiting = true;
 						try {
-							lifecycleMonitor.wait();
+							lifecycleCondition.await();
 						}
 						catch (InterruptedException ex) {
 							// Re-interrupt current thread, to allow other threads to react.
@@ -1243,6 +1402,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					if (scheduledInvokers.size() > maxConcurrentConsumers) {
 						active = false;
 					}
+				}
+				finally {
+					lifecycleLock.unlock();
 				}
 				if (active) {
 					messageReceived = (invokeListener() || messageReceived);
@@ -1289,16 +1451,24 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				}
 				if (this.consumer == null && getCacheLevel() >= CACHE_CONSUMER) {
 					this.consumer = createListenerConsumer(this.session);
-					synchronized (lifecycleMonitor) {
+					lifecycleLock.lock();
+					try {
 						registeredWithDestination++;
+					}
+					finally {
+						lifecycleLock.unlock();
 					}
 				}
 			}
 		}
 
 		private void updateRecoveryMarker() {
-			synchronized (recoveryMonitor) {
+			recoveryLock.lock();
+			try {
 				this.lastRecoveryMarker = currentRecoveryMarker;
+			}
+			finally {
+				recoveryLock.unlock();
 			}
 		}
 
@@ -1311,9 +1481,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		private void clearResources() {
 			if (sharedConnectionEnabled()) {
-				synchronized (sharedConnectionMonitor) {
+				sharedConnectionLock.lock();
+				try {
 					JmsUtils.closeMessageConsumer(this.consumer);
 					JmsUtils.closeSession(this.session);
+				}
+				finally {
+					sharedConnectionLock.unlock();
 				}
 			}
 			else {
@@ -1321,8 +1495,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				JmsUtils.closeSession(this.session);
 			}
 			if (this.consumer != null) {
-				synchronized (lifecycleMonitor) {
+				lifecycleLock.lock();
+				try {
 					registeredWithDestination--;
+				}
+				finally {
+					lifecycleLock.unlock();
 				}
 			}
 			this.consumer = null;

@@ -21,7 +21,9 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
@@ -34,11 +36,12 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MethodInvoker;
 
 /**
  * Utility methods used by the reflection resolver code to discover the appropriate
- * methods/constructors and fields that should be used in expressions.
+ * methods, constructors, and fields that should be used in expressions.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -48,8 +51,16 @@ import org.springframework.util.MethodInvoker;
 public abstract class ReflectionHelper {
 
 	/**
+	 * Cache for equivalent methods in a public declaring class in the type
+	 * hierarchy of the method's declaring class.
+	 * @since 6.2
+	 */
+	private static final Map<Method, Class<?>> publicDeclaringClassCache = new ConcurrentReferenceHashMap<>(256);
+
+
+	/**
 	 * Compare argument arrays and return information about whether they match.
-	 * A supplied type converter and conversionAllowed flag allow for matches to take
+	 * <p>A supplied type converter and conversionAllowed flag allow for matches to take
 	 * into account that a type may be transformed into a different type by the converter.
 	 * @param expectedArgTypes the types the method/constructor is expecting
 	 * @param suppliedArgTypes the types that are being supplied at the point of invocation
@@ -68,7 +79,7 @@ public abstract class ReflectionHelper {
 		for (int i = 0; i < expectedArgTypes.size() && match != null; i++) {
 			TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
 			TypeDescriptor expectedArg = expectedArgTypes.get(i);
-			// The user may supply null - and that will be ok unless a primitive is expected
+			// The user may supply null, and that will be OK unless a primitive is expected.
 			if (suppliedArg == null) {
 				if (expectedArg.isPrimitive()) {
 					match = null;
@@ -136,9 +147,9 @@ public abstract class ReflectionHelper {
 
 	/**
 	 * Compare argument arrays and return information about whether they match.
-	 * A supplied type converter and conversionAllowed flag allow for matches to
+	 * <p>A supplied type converter and conversionAllowed flag allow for matches to
 	 * take into account that a type may be transformed into a different type by the
-	 * converter. This variant of compareArguments also allows for a varargs match.
+	 * converter. This variant of {@link #compareArguments} also allows for a varargs match.
 	 * @param expectedArgTypes the types the method/constructor is expecting
 	 * @param suppliedArgTypes the types that are being supplied at the point of invocation
 	 * @param typeConverter a registered type converter
@@ -233,19 +244,25 @@ public abstract class ReflectionHelper {
 		return (match != null ? new ArgumentsMatchInfo(match) : null);
 	}
 
-
-	// TODO could do with more refactoring around argument handling and varargs
 	/**
-	 * Convert a supplied set of arguments into the requested types. If the parameterTypes are related to
-	 * a varargs method then the final entry in the parameterTypes array is going to be an array itself whose
-	 * component type should be used as the conversion target for extraneous arguments. (For example, if the
-	 * parameterTypes are {Integer, String[]} and the input arguments are {Integer, boolean, float} then both
-	 * the boolean and float must be converted to strings). This method does *not* repackage the arguments
-	 * into a form suitable for the varargs invocation - a subsequent call to setupArgumentsForVarargsInvocation handles that.
+	 * Convert the supplied set of arguments into the parameter types specified
+	 * by the supplied {@link Method}.
+	 * <p>The arguments are converted 'in-place' in the input array.
+	 * <p>If the method accepts varargs, the final entry in its parameterTypes
+	 * array is going to be an array itself whose component type will be used as
+	 * the conversion target for any additional arguments. For example, if the
+	 * parameterTypes are {Integer, String[]} and the input arguments are
+	 * {Integer, boolean, float}, then both the boolean and float must be converted
+	 * to strings.
+	 * <p>This method does <strong>not</strong> repackage the arguments into a
+	 * form suitable for the varargs invocation. A subsequent call to
+	 * {@link #setupArgumentsForVarargsInvocation(Class[], Object...)} must be
+	 * used for that.
 	 * @param converter the converter to use for type conversions
-	 * @param arguments the arguments to convert to the requested parameter types
-	 * @param method the target Method
-	 * @return true if some kind of conversion occurred on the argument
+	 * @param arguments the arguments to convert to the parameter types of the
+	 * target method
+	 * @param method the target method
+	 * @return true if some kind of conversion occurred on an argument
 	 * @throws SpelEvaluationException if there is a problem with conversion
 	 */
 	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)
@@ -256,8 +273,9 @@ public abstract class ReflectionHelper {
 	}
 
 	/**
-	 * Takes an input set of argument values and converts them to the types specified as the
-	 * required parameter types. The arguments are converted 'in-place' in the input array.
+	 * Takes an input set of argument values and converts them to the parameter
+	 * types of the supplied {@link Executable} (i.e., constructor or method).
+	 * <p>The arguments are converted 'in-place' in the input array.
 	 * @param converter the type converter to use for attempting conversions
 	 * @param arguments the actual arguments that need conversion
 	 * @param executable the target Method or Constructor
@@ -334,8 +352,9 @@ public abstract class ReflectionHelper {
 	}
 
 	/**
-	 * Takes an input set of argument values and converts them to the types specified as the
-	 * required parameter types. The arguments are converted 'in-place' in the input array.
+	 * Takes an input set of argument values and converts them to the parameter
+	 * types of the supplied {@link MethodHandle}.
+	 * <p>The arguments are converted 'in-place' in the input array.
 	 * @param converter the type converter to use for attempting conversions
 	 * @param arguments the actual arguments that need conversion
 	 * @param methodHandle the target MethodHandle
@@ -478,6 +497,66 @@ public abstract class ReflectionHelper {
 			return newArgs;
 		}
 		return args;
+	}
+
+	/**
+	 * Find the first public class or interface in the method's class hierarchy
+	 * that declares the supplied method.
+	 * <p>Sometimes the reflective method discovery logic finds a suitable method
+	 * that can easily be called via reflection but cannot be called from generated
+	 * code when compiling the expression because of visibility restrictions. For
+	 * example, if a non-public class overrides {@code toString()}, this method
+	 * will traverse up the type hierarchy to find the first public type that
+	 * declares the method (if there is one). For {@code toString()}, it may
+	 * traverse as far as {@link Object}.
+	 * @param method the method to process
+	 * @return the public class or interface that declares the method, or
+	 * {@code null} if no such public type could be found
+	 * @since 6.2
+	 */
+	@Nullable
+	public static Class<?> findPublicDeclaringClass(Method method) {
+		return publicDeclaringClassCache.computeIfAbsent(method, key -> {
+				// If the method is already defined in a public type, return that type.
+				if (Modifier.isPublic(key.getDeclaringClass().getModifiers())) {
+					return key.getDeclaringClass();
+				}
+				Method interfaceMethod = ClassUtils.getInterfaceMethodIfPossible(key, null);
+				// If we found an interface method whose type is public, return the interface type.
+				if (!interfaceMethod.equals(key)) {
+					if (Modifier.isPublic(interfaceMethod.getDeclaringClass().getModifiers())) {
+						return interfaceMethod.getDeclaringClass();
+					}
+				}
+				// Attempt to search the type hierarchy.
+				Class<?> superclass = key.getDeclaringClass().getSuperclass();
+				if (superclass != null) {
+					return findPublicDeclaringClass(superclass, key.getName(), key.getParameterTypes());
+				}
+				// Otherwise, no public declaring class found.
+				return null;
+			});
+	}
+
+	@Nullable
+	private static Class<?> findPublicDeclaringClass(
+			Class<?> declaringClass, String methodName, Class<?>[] parameterTypes) {
+
+		if (Modifier.isPublic(declaringClass.getModifiers())) {
+			try {
+				declaringClass.getDeclaredMethod(methodName, parameterTypes);
+				return declaringClass;
+			}
+			catch (NoSuchMethodException ex) {
+				// Continue below...
+			}
+		}
+
+		Class<?> superclass = declaringClass.getSuperclass();
+		if (superclass != null) {
+			return findPublicDeclaringClass(superclass, methodName, parameterTypes);
+		}
+		return null;
 	}
 
 

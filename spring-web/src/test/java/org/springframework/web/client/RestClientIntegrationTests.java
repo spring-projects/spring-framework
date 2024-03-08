@@ -900,6 +900,29 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getHeader("foo")).isEqualTo("bar"));
 	}
 
+	@ParameterizedRestClientTest
+	void defaultRequestOverride(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+
+		RestClient headersClient = this.restClient.mutate()
+				.defaultRequest(request -> request.accept(MediaType.APPLICATION_JSON))
+				.build();
+
+		String result = headersClient.get()
+				.uri("/greeting")
+				.accept(MediaType.TEXT_PLAIN)
+				.retrieve()
+				.body(String.class);
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
+		expectRequest(request -> assertThat(request.getHeader("Accept")).isEqualTo(MediaType.TEXT_PLAIN_VALUE));
+	}
+
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {
 		MockResponse response = new MockResponse();

@@ -101,8 +101,8 @@ NOTE: When configuring a `PropertySourcesPlaceholderConfigurer` using JavaConfig
 
 Using the above configuration ensures Spring initialization failure if any `${}`
 placeholder could not be resolved. It is also possible to use methods like
-`setPlaceholderPrefix`, `setPlaceholderSuffix`, or `setValueSeparator` to customize
-placeholders.
+`setPlaceholderPrefix`, `setPlaceholderSuffix`, `setValueSeparator`, or
+`setEscapeCharacter` to customize placeholders.
 
 NOTE: Spring Boot configures by default a `PropertySourcesPlaceholderConfigurer` bean that
 will get properties from `application.properties` and `application.yml` files.

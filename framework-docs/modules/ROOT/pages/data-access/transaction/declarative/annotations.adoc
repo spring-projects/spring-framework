@@ -436,16 +436,36 @@ properties of the `@Transactional` annotation:
 | Optional array of exception name patterns that must not cause rollback.
 |===
 
-TIP: See xref:data-access/transaction/declarative/rolling-back.adoc#transaction-declarative-rollback-rules[Rollback rules] for further details
-on rollback rule semantics, patterns, and warnings regarding possible unintentional
-matches for pattern-based rollback rules.
+TIP: See xref:data-access/transaction/declarative/rolling-back.adoc#transaction-declarative-rollback-rules[Rollback rules]
+for further details on rollback rule semantics, patterns, and warnings
+regarding possible unintentional matches for pattern-based rollback rules.
+
+[NOTE]
+====
+As of 6.2, you can globally change the default rollback behavior – for example, through
+`@EnableTransactionManagement(rollbackOn=ALL_EXCEPTIONS)`, leading to a rollback
+for all exceptions raised within a transaction, including any checked exception.
+For further customizations, `AnnotationTransactionAttributeSource` provides an
+`addDefaultRollbackRule(RollbackRuleAttribute)` method for custom default rules.
+
+Note that transaction-specific rollback rules override the default behavior but
+retain the chosen default for unspecified exceptions. This is the case for
+Spring's `@Transactional` as well as JTA's `jakarta.transaction.Transactional`
+annotation.
+
+Unless you rely on EJB-style business exceptions with commit behavior, it is
+advisable to switch to `ALL_EXCEPTIONS` for consistent rollback semantics even
+in case of a (potentially accidental) checked exception. Also, it is advisable
+to make that switch for Kotlin-based applications where there is no enforcement
+of checked exceptions at all.
+====
 
 Currently, you cannot have explicit control over the name of a transaction, where 'name'
 means the transaction name that appears in a transaction monitor and in logging output.
 For declarative transactions, the transaction name is always the fully-qualified class
-name + `.` + the method name of the transactionally advised class. For example, if the
+name of the transactionally advised class + `.` + the method name. For example, if the
 `handlePayment(..)` method of the `BusinessService` class started a transaction, the
-name of the transaction would be: `com.example.BusinessService.handlePayment`.
+name of the transaction would be `com.example.BusinessService.handlePayment`.
 
 [[tx-multiple-tx-mgrs-with-attransactional]]
 == Multiple Transaction Managers with `@Transactional`
@@ -529,12 +549,32 @@ transaction managers, differentiated by the `order`, `account`, and `reactive-ac
 qualifiers. The default `<tx:annotation-driven>` target bean name, `transactionManager`,
 is still used if no specifically qualified `TransactionManager` bean is found.
 
+[TIP]
+====
+If all transactional methods on the same class share the same qualifier, consider
+declaring a type-level `org.springframework.beans.factory.annotation.Qualifier`
+annotation instead. If its value matches the qualifier value (or bean name) of a
+specific transaction manager, that transaction manager is going to be used for
+transaction definitions without a specific qualifier on `@Transactional` itself.
+
+Such a type-level qualifier can be declared on the concrete class, applying to
+transaction definitions from a base class as well. This effectively overrides
+the default transaction manager choice for any unqualified base class methods.
+
+Last but not least, such a type-level bean qualifier can serve multiple purposes,
+e.g. with a value of "order" it can be used for autowiring purposes (identifying
+the order repository) as well as transaction manager selection, as long as the
+target beans for autowiring as well as the associated transaction manager
+definitions declare the same qualifier value. Such a qualifier value only needs
+to be unique within a set of type-matching beans, not having to serve as an ID.
+====
+
 [[tx-custom-attributes]]
 == Custom Composed Annotations
 
-If you find you repeatedly use the same attributes with `@Transactional` on many different
-methods, xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[Spring's meta-annotation support] lets you
-define custom composed annotations for your specific use cases. For example, consider the
+If you find you repeatedly use the same attributes with `@Transactional` on many different methods,
+xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[Spring's meta-annotation support]
+lets you define custom composed annotations for your specific use cases. For example, consider the
 following annotation definitions:
 
 [tabs]

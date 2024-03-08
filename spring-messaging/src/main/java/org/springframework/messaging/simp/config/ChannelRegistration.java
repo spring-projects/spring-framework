@@ -19,10 +19,10 @@ package org.springframework.messaging.simp.config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -41,7 +41,7 @@ public class ChannelRegistration {
 	private TaskExecutorRegistration registration;
 
 	@Nullable
-	private TaskExecutor executor;
+	private Executor executor;
 
 	private final List<ChannelInterceptor> interceptors = new ArrayList<>();
 
@@ -67,14 +67,14 @@ public class ChannelRegistration {
 	}
 
 	/**
-	 * Configure the given {@link TaskExecutor} for this message channel,
+	 * Configure the given {@link Executor} for this message channel,
 	 * taking precedence over a {@linkplain #taskExecutor() task executor
 	 * registration} if any.
-	 * @param taskExecutor the task executor to use
+	 * @param executor the executor to use
 	 * @since 6.1.4
 	 */
-	public ChannelRegistration executor(TaskExecutor taskExecutor) {
-		this.executor = taskExecutor;
+	public ChannelRegistration executor(Executor executor) {
+		this.executor = executor;
 		return this;
 	}
 
@@ -89,7 +89,7 @@ public class ChannelRegistration {
 	}
 
 
-	protected boolean hasTaskExecutor() {
+	protected boolean hasExecutor() {
 		return (this.registration != null || this.executor != null);
 	}
 
@@ -98,30 +98,31 @@ public class ChannelRegistration {
 	}
 
 	/**
-	 * Return the {@link TaskExecutor} to use. If no task executor has been
-	 * configured, the {@code fallback} supplier is used to provide a fallback
-	 * instance.
+	 * Return the {@link Executor} to use. If no executor has been configured,
+	 * the {@code fallback} supplier is used to provide a fallback instance.
 	 * <p>
-	 * If the {@link TaskExecutor} to use is suitable for further customizations,
+	 * If the {@link Executor} to use is suitable for further customizations,
 	 * the {@code customizer} consumer is invoked.
-	 * @param fallback a supplier of a fallback task executor in case none is configured
+	 * @param fallback a supplier of a fallback executor in case none is configured
 	 * @param customizer further customizations
-	 * @return the task executor to use
-	 * @since 6.1.4
+	 * @return the executor to use
+	 * @since 6.2
 	 */
-	protected TaskExecutor getTaskExecutor(Supplier<TaskExecutor> fallback, Consumer<TaskExecutor> customizer) {
+	protected Executor getExecutor(Supplier<Executor> fallback, Consumer<Executor> customizer) {
 		if (this.executor != null) {
 			return this.executor;
 		}
 		else if (this.registration != null) {
 			ThreadPoolTaskExecutor registeredTaskExecutor = this.registration.getTaskExecutor();
-			customizer.accept(registeredTaskExecutor);
+			if (!this.registration.isExternallyDefined()) {
+				customizer.accept(registeredTaskExecutor);
+			}
 			return registeredTaskExecutor;
 		}
 		else {
-			TaskExecutor taskExecutor = fallback.get();
-			customizer.accept(taskExecutor);
-			return taskExecutor;
+			Executor fallbackExecutor = fallback.get();
+			customizer.accept(fallbackExecutor);
+			return fallbackExecutor;
 		}
 	}
 

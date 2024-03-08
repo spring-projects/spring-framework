@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,19 @@ package org.springframework.test.web.reactive.server;
 
 import java.util.function.Consumer;
 
+import com.jayway.jsonpath.Configuration;
 import org.hamcrest.Matcher;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.JsonPathExpectationsHelper;
+import org.springframework.util.Assert;
 
 /**
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> assertions.
  *
  * @author Rossen Stoyanchev
+ * @author Stephane Nicoll
  * @since 5.0
  * @see <a href="https://github.com/jayway/JsonPath">https://github.com/jayway/JsonPath</a>
  * @see JsonPathExpectationsHelper
@@ -40,10 +44,12 @@ public class JsonPathAssertions {
 	private final JsonPathExpectationsHelper pathHelper;
 
 
-	JsonPathAssertions(WebTestClient.BodyContentSpec spec, String content, String expression, Object... args) {
+	JsonPathAssertions(WebTestClient.BodyContentSpec spec, String content, String expression,
+			@Nullable Configuration configuration) {
+		Assert.hasText(expression, "expression must not be null or empty");
 		this.bodySpec = spec;
 		this.content = content;
-		this.pathHelper = new JsonPathExpectationsHelper(expression, args);
+		this.pathHelper = new JsonPathExpectationsHelper(expression, configuration);
 	}
 
 
@@ -148,9 +154,29 @@ public class JsonPathAssertions {
 
 	/**
 	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, Class)}.
-	 * @since 5.1
+	 * @since 6.2
 	 */
+	public <T> WebTestClient.BodyContentSpec value(Class<T> targetType, Matcher<? super T> matcher) {
+		this.pathHelper.assertValue(this.content, matcher, targetType);
+		return this.bodySpec;
+	}
+
+	/**
+	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, Class)}.
+	 * @since 5.1
+	 * @deprecated in favor of {@link #value(Class, Matcher)}
+	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public <T> WebTestClient.BodyContentSpec value(Matcher<? super T> matcher, Class<T> targetType) {
+		this.pathHelper.assertValue(this.content, matcher, targetType);
+		return this.bodySpec;
+	}
+
+	/**
+	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, ParameterizedTypeReference)}.
+	 * @since 6.2
+	 */
+	public <T> WebTestClient.BodyContentSpec value(ParameterizedTypeReference<T> targetType, Matcher<? super T> matcher) {
 		this.pathHelper.assertValue(this.content, matcher, targetType);
 		return this.bodySpec;
 	}
@@ -168,15 +194,33 @@ public class JsonPathAssertions {
 
 	/**
 	 * Consume the result of the JSONPath evaluation and provide a target class.
-	 * @since 5.1
+	 * @since 6.2
 	 */
-	@SuppressWarnings("unchecked")
-	public <T> WebTestClient.BodyContentSpec value(Consumer<T> consumer, Class<T> targetType) {
-		Object value = this.pathHelper.evaluateJsonPath(this.content, targetType);
-		consumer.accept((T) value);
+	public <T> WebTestClient.BodyContentSpec value(Class<T> targetType, Consumer<T> consumer) {
+		T value = this.pathHelper.evaluateJsonPath(this.content, targetType);
+		consumer.accept(value);
 		return this.bodySpec;
 	}
 
+	/**
+	 * Consume the result of the JSONPath evaluation and provide a target class.
+	 * @since 5.1
+	 * @deprecated in favor of {@link #value(Class, Consumer)}
+	 */
+	@Deprecated(since = "6.2", forRemoval = true)
+	public <T> WebTestClient.BodyContentSpec value(Consumer<T> consumer, Class<T> targetType) {
+		return value(targetType, consumer);
+	}
+
+	/**
+	 * Consume the result of the JSONPath evaluation and provide a parameterized type.
+	 * @since 6.2
+	 */
+	public <T> WebTestClient.BodyContentSpec value(ParameterizedTypeReference<T> targetType, Consumer<T> consumer) {
+		T value = this.pathHelper.evaluateJsonPath(this.content, targetType);
+		consumer.accept(value);
+		return this.bodySpec;
+	}
 
 	@Override
 	public boolean equals(@Nullable Object obj) {

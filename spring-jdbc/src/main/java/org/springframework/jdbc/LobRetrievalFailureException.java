@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@ import org.springframework.dao.DataRetrievalFailureException;
  *
  * @author Juergen Hoeller
  * @since 1.0.2
+ * @deprecated as of 6.2 along with {@link org.springframework.jdbc.support.lob.LobHandler}
  */
+@Deprecated(since = "6.2")
 @SuppressWarnings("serial")
 public class LobRetrievalFailureException extends DataRetrievalFailureException {
 

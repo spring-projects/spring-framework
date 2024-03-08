@@ -327,28 +327,6 @@ public abstract class RequestPredicates {
 		}
 	}
 
-	private static <K, V> Map<K, V> mergeMaps(Map<K, V> left, Map<K, V> right) {
-		if (left.isEmpty()) {
-			if (right.isEmpty()) {
-				return Collections.emptyMap();
-			}
-			else {
-				return right;
-			}
-		}
-		else {
-			if (right.isEmpty()) {
-				return left;
-			}
-			else {
-				Map<K, V> result = CollectionUtils.newLinkedHashMap(left.size() + right.size());
-				result.putAll(left);
-				result.putAll(right);
-				return result;
-			}
-		}
-	}
-
 
 	/**
 	 * Receives notifications from the logical structure of request predicates.
@@ -638,7 +616,7 @@ public abstract class RequestPredicates {
 		private void modifyAttributes(Map<String, Object> attributes, ServerRequest request,
 				Map<String, String> variables) {
 
-			Map<String, String> pathVariables = mergeMaps(request.pathVariables(), variables);
+			Map<String, String> pathVariables = CollectionUtils.compositeMap(request.pathVariables(), variables);
 
 			attributes.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
 					Collections.unmodifiableMap(pathVariables));
@@ -1302,7 +1280,9 @@ public abstract class RequestPredicates {
 		public ExtendedAttributesServerRequestWrapper(ServerRequest delegate, Map<String, Object> newAttributes) {
 			super(delegate);
 			Assert.notNull(newAttributes, "NewAttributes must not be null");
-			this.attributes = mergeMaps(delegate.attributes(), newAttributes);
+			Map<String, Object> oldAttributes = delegate.attributes();
+			this.attributes = CollectionUtils.compositeMap(newAttributes, oldAttributes, newAttributes::put,
+					newAttributes::putAll);
 		}
 
 		@Override
@@ -1351,12 +1331,21 @@ public abstract class RequestPredicates {
 
 
 			Map<String, String> oldPathVariables = request.pathVariables();
+			Map<String, String> pathVariables;
+			if (oldPathVariables.isEmpty()) {
+				pathVariables = newPathVariables;
+			}
+			else {
+				pathVariables = CollectionUtils.compositeMap(oldPathVariables, newPathVariables);
+			}
+
 			PathPattern oldPathPattern = (PathPattern) request.attribute(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE)
 					.orElse(null);
+			PathPattern pathPattern = mergePatterns(oldPathPattern, newPathPattern);
 
 			Map<String, Object> result = CollectionUtils.newLinkedHashMap(2);
-			result.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, mergeMaps(oldPathVariables, newPathVariables));
-			result.put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, mergePatterns(oldPathPattern, newPathPattern));
+			result.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
+			result.put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pathPattern);
 			return result;
 		}
 

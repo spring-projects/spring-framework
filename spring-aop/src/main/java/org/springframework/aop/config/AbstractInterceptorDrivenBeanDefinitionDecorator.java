@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 			proxyDefinition.setDecoratedDefinition(targetHolder);
 			proxyDefinition.getPropertyValues().add("target", targetHolder);
 			// create the interceptor names list
-			proxyDefinition.getPropertyValues().add("interceptorNames", new ManagedList<String>());
+			proxyDefinition.getPropertyValues().add("interceptorNames", new ManagedList<>());
 			// copy autowire settings from original bean definition.
 			proxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
 			proxyDefinition.setPrimary(targetDefinition.isPrimary());

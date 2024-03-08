@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa.vendor;
-
-import java.util.function.Predicate;
+package org.springframework.core.testfixture.ide;
 
 /**
- * Predicate intended to enable the related GraalVM substitution only when the class is present on the classpath.
+ * Test utilities related to IDEs.
  *
- * @author Sebastien Deleuze
- * @since 6.1
+ * @author Sam Brannen
+ * @since 6.2
  */
-class SubstituteOnlyIfPresent implements Predicate<String> {
+public class IdeUtils {
 
-	@Override
-	public boolean test(String type) {
-		try {
-			Class.forName(type, false, getClass().getClassLoader());
-			return true;
-		}
-		catch (ClassNotFoundException | NoClassDefFoundError ex) {
-			return false;
-		}
+	/**
+	 * Determine if the current code is running in the Eclipse IDE.
+	 */
+	public static boolean runningInEclipse() {
+		return StackWalker.getInstance().walk(stream -> stream.anyMatch(
+				stackFrame -> stackFrame.getClassName().startsWith("org.eclipse.jdt")));
 	}
+
 }

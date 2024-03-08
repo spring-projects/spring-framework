@@ -36,6 +36,7 @@ import static org.springframework.expression.spel.standard.SpelExpressionTestUti
  * @author Sam Brannen
  * @author Andy Clement
  * @since 5.1.14
+ * @see org.springframework.expression.spel.SpelCompilationCoverageTests
  */
 class SpelCompilerTests {
 

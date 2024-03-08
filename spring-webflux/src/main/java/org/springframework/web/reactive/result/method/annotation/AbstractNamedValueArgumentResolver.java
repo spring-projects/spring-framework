@@ -26,6 +26,7 @@ import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
@@ -197,8 +198,12 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 			BindingContext bindingContext, ServerWebExchange exchange) {
 
 		WebDataBinder binder = bindingContext.createDataBinder(exchange, namedValueInfo.name);
+		Class<?> parameterType = parameter.getParameterType();
+		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isInlineClass(parameterType)) {
+			parameterType = BeanUtils.findPrimaryConstructor(parameterType).getParameterTypes()[0];
+		}
 		try {
-			value = binder.convertIfNecessary(value, parameter.getParameterType(), parameter);
+			value = binder.convertIfNecessary(value, parameterType, parameter);
 		}
 		catch (ConversionNotSupportedException ex) {
 			throw new ServerErrorException("Conversion not supported.", parameter, ex);

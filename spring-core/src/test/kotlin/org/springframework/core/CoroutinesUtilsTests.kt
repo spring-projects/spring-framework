@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,9 +83,41 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithNullableParameter() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithNullable", String::class.java, Continuation::class.java)
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null, null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
+		}
+	}
+
+	@Test
 	fun invokeNonSuspendingFunction() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("nonSuspendingFunction", String::class.java)
 		Assertions.assertThatIllegalArgumentException().isThrownBy { CoroutinesUtils.invokeSuspendingFunction(method, this, "foo") }
+	}
+
+	@Test
+	fun invokeSuspendingFunctionWithMono() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithMono", Continuation::class.java)
+		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this)
+		Assertions.assertThat(publisher).isInstanceOf(Mono::class.java)
+		StepVerifier.create(publisher)
+			.expectNext("foo")
+			.expectComplete()
+			.verify()
+	}
+
+	@Test
+	fun invokeSuspendingFunctionWithFlux() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithFlux", Continuation::class.java)
+		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this)
+		Assertions.assertThat(publisher).isInstanceOf(Flux::class.java)
+		StepVerifier.create(publisher)
+			.expectNext("foo")
+			.expectNext("bar")
+			.expectComplete()
+			.verify()
 	}
 
 	@Test
@@ -155,6 +187,26 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithValueClassWithInitParameter() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassWithInit") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "", null) as Mono
+		Assertions.assertThatIllegalArgumentException().isThrownBy {
+			runBlocking {
+				mono.awaitSingle()
+			}
+		}
+	}
+
+	@Test
+	fun invokeSuspendingFunctionWithNullableValueClassParameter() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithNullableValueClass") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null, null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
+		}
+	}
+
+	@Test
 	fun invokeSuspendingFunctionWithExtension() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithExtension",
 			CustomException::class.java, Continuation::class.java)
@@ -177,6 +229,21 @@ class CoroutinesUtilsTests {
 	suspend fun suspendingFunction(value: String): String {
 		delay(1)
 		return value
+	}
+
+	suspend fun suspendingFunctionWithNullable(value: String?): String? {
+		delay(1)
+		return value
+	}
+
+	suspend fun suspendingFunctionWithMono(): Mono<String> {
+		delay(1)
+		return Mono.just("foo")
+	}
+
+	suspend fun suspendingFunctionWithFlux(): Flux<String> {
+		delay(1)
+		return Flux.just("foo", "bar")
 	}
 
 	suspend fun suspendingFunctionWithFlow(): Flow<String> {
@@ -206,6 +273,16 @@ class CoroutinesUtilsTests {
 		return value.value
 	}
 
+	suspend fun suspendingFunctionWithValueClassWithInit(value: ValueClassWithInit): String {
+		delay(1)
+		return value.value
+	}
+
+	suspend fun suspendingFunctionWithNullableValueClass(value: ValueClass?): String? {
+		delay(1)
+		return value?.value
+	}
+
 	suspend fun CustomException.suspendingFunctionWithExtension(): String {
 		delay(1)
 		return "${this.message}"
@@ -218,6 +295,15 @@ class CoroutinesUtilsTests {
 
 	@JvmInline
 	value class ValueClass(val value: String)
+
+	@JvmInline
+	value class ValueClassWithInit(val value: String) {
+		 init {
+		     if (value.isEmpty()) {
+				 throw IllegalArgumentException()
+			 }
+		 }
+	}
 
 	class CustomException(message: String) : Throwable(message)
 

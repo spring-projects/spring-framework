@@ -101,7 +101,7 @@ class MethodValidationTests {
 		this.request.setMethod("POST");
 		this.request.setContentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 		this.request.addHeader("Accept", "text/plain");
-		this.request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, new HashMap<String, String>(0));
+		this.request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, new HashMap<>(0));
 	}
 
 	private static RequestMappingHandlerAdapter initHandlerAdapter(Validator validator) {

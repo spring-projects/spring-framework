@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,10 @@ import java.lang.annotation.Target;
  * Indicates that a bean should be given preference when multiple candidates
  * are qualified to autowire a single-valued dependency. If exactly one
  * 'primary' bean exists among the candidates, it will be the autowired value.
+ *
+ * <p>Primary beans only have an effect when finding multiple candidates
+ * for single injection points. All type-matching beans are included when
+ * autowiring arrays, collections, maps, or ObjectProvider streams.
  *
  * <p>This annotation is semantically equivalent to the {@code <bean>} element's
  * {@code primary} attribute in Spring XML.
@@ -77,10 +81,12 @@ import java.lang.annotation.Target;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.0
+ * @see Fallback
  * @see Lazy
  * @see Bean
  * @see ComponentScan
  * @see org.springframework.stereotype.Component
+ * @see org.springframework.beans.factory.config.BeanDefinition#setPrimary
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

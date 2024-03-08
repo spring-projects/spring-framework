@@ -41,7 +41,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindException;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.method.MethodValidationException;
 import org.springframework.validation.method.MethodValidationResult;
@@ -108,6 +107,10 @@ class ResponseEntityExceptionHandlerTests {
 				.filter(method -> method.getName().startsWith("handle") && (method.getParameterCount() == 4))
 				.filter(method -> !method.getName().equals("handleErrorResponse"))
 				.map(method -> method.getParameterTypes()[0])
+				.filter(exceptionType -> {
+					String name = exceptionType.getSimpleName();
+					return !name.equals("AsyncRequestNotUsableException");
+				})
 				.forEach(exceptionType -> assertThat(annotation.value())
 						.as("@ExceptionHandler is missing declaration for " + exceptionType.getName())
 						.contains((Class<Exception>) exceptionType));
@@ -290,11 +293,6 @@ class ResponseEntityExceptionHandlerTests {
 	@Test
 	void missingServletRequestPart() {
 		testException(new MissingServletRequestPartException("partName"));
-	}
-
-	@Test
-	void bindException() {
-		testException(new BindException(new Object(), "name"));
 	}
 
 	@Test

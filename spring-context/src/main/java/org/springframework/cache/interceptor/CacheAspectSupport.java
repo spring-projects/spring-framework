@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1036,9 +1036,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 
 	/**
-	 * Reactive Streams Subscriber collection for collecting a List to cache.
+	 * Reactive Streams Subscriber for exhausting the Flux and collecting a List
+	 * to cache.
 	 */
-	private class CachePutListSubscriber implements Subscriber<Object> {
+	private final class CachePutListSubscriber implements Subscriber<Object> {
 
 		private final CachePutRequest request;
 
@@ -1058,6 +1059,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 		@Override
 		public void onError(Throwable t) {
+			this.cacheValue.clear();
 		}
 		@Override
 		public void onComplete() {
@@ -1145,7 +1147,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			ReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);
 			if (adapter != null) {
 				if (adapter.isMultiValue()) {
-					Flux<?> source = Flux.from(adapter.toPublisher(result));
+					Flux<?> source = Flux.from(adapter.toPublisher(result))
+							.publish().refCount(2);
 					source.subscribe(new CachePutListSubscriber(request));
 					return adapter.fromPublisher(source);
 				}

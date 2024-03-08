@@ -23,7 +23,9 @@ import java.util.Properties;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -46,6 +48,8 @@ import org.springframework.transaction.testfixture.CallCountingTransactionManage
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.springframework.transaction.annotation.RollbackOn.ALL_EXCEPTIONS;
 
 /**
  * Tests demonstrating use of @EnableTransactionManagement @Configuration classes.
@@ -226,8 +230,8 @@ class EnableTransactionManagementTests {
 		// should throw CNFE when trying to load AnnotationTransactionAspect.
 		// Do you actually have org.springframework.aspects on the classpath?
 		assertThatException()
-			.isThrownBy(() -> new AnnotationConfigApplicationContext(EnableAspectjTxConfig.class, TxManagerConfig.class))
-			.withMessageContaining("AspectJJtaTransactionManagementConfiguration");
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(EnableAspectjTxConfig.class, TxManagerConfig.class))
+				.withMessageContaining("AspectJJtaTransactionManagementConfiguration");
 	}
 
 	@Test
@@ -254,11 +258,37 @@ class EnableTransactionManagementTests {
 		assertThat(txManager.commits).isEqualTo(2);
 		assertThat(txManager.rollbacks).isEqualTo(0);
 
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(bean::findAllFoos);
+
 		ctx.close();
 	}
 
 	@Test
-	void spr14322FindsOnInterfaceWithInterfaceProxy() {
+	void gh24291TransactionManagerViaQualifierAnnotation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh24291Config.class);
+		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
+		CallCountingTransactionManager txManager = ctx.getBean("qualifiedTransactionManager", CallCountingTransactionManager.class);
+
+		bean.saveQualifiedFoo();
+		assertThat(txManager.begun).isEqualTo(1);
+		assertThat(txManager.commits).isEqualTo(1);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		bean.saveQualifiedFooWithAttributeAlias();
+		assertThat(txManager.begun).isEqualTo(2);
+		assertThat(txManager.commits).isEqualTo(2);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		bean.findAllFoos();
+		assertThat(txManager.begun).isEqualTo(3);
+		assertThat(txManager.commits).isEqualTo(3);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		ctx.close();
+	}
+
+	@Test
+	void spr14322AnnotationOnInterfaceWithInterfaceProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14322ConfigA.class);
 		TransactionalTestInterface bean = ctx.getBean(TransactionalTestInterface.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
@@ -273,7 +303,7 @@ class EnableTransactionManagementTests {
 	}
 
 	@Test
-	void spr14322FindsOnInterfaceWithCglibProxy() {
+	void spr14322AnnotationOnInterfaceWithCglibProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14322ConfigB.class);
 		TransactionalTestInterface bean = ctx.getBean(TransactionalTestInterface.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
@@ -288,8 +318,8 @@ class EnableTransactionManagementTests {
 	}
 
 	@Test
-	void gh24502AppliesTransactionOnlyOnAnnotatedInterface() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh24502ConfigA.class);
+	void gh24502AppliesTransactionFromAnnotatedInterface() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh24502Config.class);
 		Object bean = ctx.getBean("testBean");
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
 
@@ -298,6 +328,36 @@ class EnableTransactionManagementTests {
 		assertThat(txManager.begun).isEqualTo(2);
 		assertThat(txManager.commits).isEqualTo(2);
 		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		ctx.close();
+	}
+
+	@Test
+	void gh23473AppliesToRuntimeExceptionOnly() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh23473ConfigA.class);
+		TestServiceWithRollback bean = ctx.getBean("testBean", TestServiceWithRollback.class);
+		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
+
+		assertThatException().isThrownBy(bean::methodOne);
+		assertThatException().isThrownBy(bean::methodTwo);
+		assertThat(txManager.begun).isEqualTo(2);
+		assertThat(txManager.commits).isEqualTo(2);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+
+		ctx.close();
+	}
+
+	@Test
+	void gh23473AppliesRollbackOnAnyException() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Gh23473ConfigB.class);
+		TestServiceWithRollback bean = ctx.getBean("testBean", TestServiceWithRollback.class);
+		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
+
+		assertThatException().isThrownBy(bean::methodOne);
+		assertThatException().isThrownBy(bean::methodTwo);
+		assertThat(txManager.begun).isEqualTo(2);
+		assertThat(txManager.commits).isEqualTo(0);
+		assertThat(txManager.rollbacks).isEqualTo(2);
 
 		ctx.close();
 	}
@@ -318,6 +378,12 @@ class EnableTransactionManagementTests {
 		@Transactional(transactionManager = "${myTransactionManager}")
 		public void saveQualifiedFooWithAttributeAlias() {
 		}
+	}
+
+
+	@Service
+	@Qualifier("qualified")
+	public static class TransactionalTestBeanSubclass extends TransactionalTestBean {
 	}
 
 
@@ -504,6 +570,35 @@ class EnableTransactionManagementTests {
 		public TransactionalTestBean testBean() {
 			return new TransactionalTestBean();
 		}
+
+		@Bean
+		public CallCountingTransactionManager otherTxManager() {
+			return new CallCountingTransactionManager();
+		}
+	}
+
+
+	@Configuration
+	@EnableTransactionManagement
+	@Import(PlaceholderConfig.class)
+	static class Gh24291Config {
+
+		@Autowired
+		public void initializeApp(ConfigurableApplicationContext applicationContext) {
+			applicationContext.getBeanFactory().registerSingleton(
+					"qualifiedTransactionManager", new CallCountingTransactionManager());
+			applicationContext.getBeanFactory().registerAlias("qualifiedTransactionManager", "qualified");
+		}
+
+		@Bean
+		public TransactionalTestBeanSubclass testBean() {
+			return new TransactionalTestBeanSubclass();
+		}
+
+		@Bean
+		public CallCountingTransactionManager otherTxManager() {
+			return new CallCountingTransactionManager();
+		}
 	}
 
 
@@ -590,11 +685,57 @@ class EnableTransactionManagementTests {
 
 	@Configuration
 	@EnableTransactionManagement
-	static class Gh24502ConfigA {
+	static class Gh24502Config {
 
 		@Bean
 		public MixedTransactionalTestService testBean() {
 			return new MixedTransactionalTestService();
+		}
+
+		@Bean
+		public PlatformTransactionManager txManager() {
+			return new CallCountingTransactionManager();
+		}
+	}
+
+
+	static class TestServiceWithRollback {
+
+		@Transactional
+		public void methodOne() throws Exception {
+			throw new Exception();
+		}
+
+		@Transactional
+		public void methodTwo() throws Exception {
+			throw new Exception();
+		}
+	}
+
+
+	@Configuration
+	@EnableTransactionManagement
+	static class Gh23473ConfigA {
+
+		@Bean
+		public TestServiceWithRollback testBean() {
+			return new TestServiceWithRollback();
+		}
+
+		@Bean
+		public PlatformTransactionManager txManager() {
+			return new CallCountingTransactionManager();
+		}
+	}
+
+
+	@Configuration
+	@EnableTransactionManagement(rollbackOn = ALL_EXCEPTIONS)
+	static class Gh23473ConfigB {
+
+		@Bean
+		public TestServiceWithRollback testBean() {
+			return new TestServiceWithRollback();
 		}
 
 		@Bean

@@ -16,8 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.AsyncEvent;
 import org.apache.groovy.util.Maps;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +53,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.springframework.web.context.request.async.StandardServletAsyncWebRequest;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
@@ -58,10 +66,12 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockAsyncContext;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link RequestMappingHandlerAdapter}.
@@ -285,6 +295,26 @@ class RequestMappingHandlerAdapterTests {
 		assertThat(this.response.getContentAsString()).isEqualTo("Body: {foo=bar}");
 	}
 
+	@Test
+	void asyncRequestNotUsable() throws Exception {
+
+		// Put AsyncWebRequest in ERROR state
+		StandardServletAsyncWebRequest asyncRequest = new StandardServletAsyncWebRequest(this.request, this.response);
+		asyncRequest.onError(new AsyncEvent(new MockAsyncContext(this.request, this.response), new Exception()));
+
+		// Set it as the current AsyncWebRequest, from the initial REQUEST dispatch
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
+		asyncManager.setAsyncWebRequest(asyncRequest);
+
+		// AsyncWebRequest created for current dispatch should inherit state
+		HandlerMethod handlerMethod = handlerMethod(new TestController(), "handleOutputStream", OutputStream.class);
+		this.handlerAdapter.afterPropertiesSet();
+
+		// Use of response should be rejected
+		assertThatThrownBy(() -> this.handlerAdapter.handle(this.request, this.response, handlerMethod))
+				.isInstanceOf(AsyncRequestNotUsableException.class);
+	}
+
 	private HandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes) throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
 		return new InvocableHandlerMethod(handler, method);
@@ -320,6 +350,10 @@ class RequestMappingHandlerAdapterTests {
 		@ResponseBody
 		public String handleBody(@Nullable @RequestBody Map<String, String> body) {
 			return "Body: " + body;
+		}
+
+		public void handleOutputStream(OutputStream outputStream) throws IOException {
+			outputStream.write("body".getBytes(StandardCharsets.UTF_8));
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.testfixture.env.MockPropertySource;
+import org.springframework.util.PlaceholderResolutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -227,7 +228,7 @@ class PropertySourcesPropertyResolverTests {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertThatIllegalArgumentException().isThrownBy(() ->
+		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
 				resolver.resolveRequiredPlaceholders("Replace this ${key} plus ${unknown}"));
 	}
 
@@ -290,11 +291,11 @@ class PropertySourcesPropertyResolverTests {
 		assertThat(pr.getProperty("p2")).isEqualTo("v2");
 		assertThat(pr.getProperty("p3")).isEqualTo("v1:v2");
 		assertThat(pr.getProperty("p4")).isEqualTo("v1:v2");
-		assertThatIllegalArgumentException().isThrownBy(() ->
+		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
 				pr.getProperty("p5"))
 			.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
 		assertThat(pr.getProperty("p6")).isEqualTo("v1:v2:def");
-		assertThatIllegalArgumentException().isThrownBy(() ->
+		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
 				pr.getProperty("pL"))
 			.withMessageContaining("Circular");
 	}
@@ -315,7 +316,7 @@ class PropertySourcesPropertyResolverTests {
 
 		// placeholders nested within the value of "p4" are unresolvable and cause an
 		// exception by default
-		assertThatIllegalArgumentException().isThrownBy(() ->
+		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
 				pr.getProperty("p4"))
 			.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
 
@@ -327,7 +328,7 @@ class PropertySourcesPropertyResolverTests {
 		// resolve[Nested]Placeholders methods behave as usual regardless the value of
 		// ignoreUnresolvableNestedPlaceholders
 		assertThat(pr.resolvePlaceholders("${p1}:${p2}:${bogus}")).isEqualTo("v1:v2:${bogus}");
-		assertThatIllegalArgumentException().isThrownBy(() ->
+		assertThatExceptionOfType(PlaceholderResolutionException.class).isThrownBy(() ->
 				pr.resolveRequiredPlaceholders("${p1}:${p2}:${bogus}"))
 			.withMessageContaining("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\"");
 	}

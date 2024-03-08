@@ -204,6 +204,7 @@ class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 
 	private static class CustomPerson extends Person {
 
+		@Override
 		@MyColumnName("birthdate")
 		public void setBirth_date(Date date) {
 			super.setBirth_date(date);

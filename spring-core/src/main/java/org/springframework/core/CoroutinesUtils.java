@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.core;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Objects;
 
@@ -26,11 +25,15 @@ import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
 import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KClass;
-import kotlin.reflect.KClassifier;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import kotlin.reflect.KType;
 import kotlin.reflect.full.KCallables;
+import kotlin.reflect.full.KClasses;
+import kotlin.reflect.full.KClassifiers;
+import kotlin.reflect.full.KTypes;
 import kotlin.reflect.jvm.KCallablesJvm;
+import kotlin.reflect.jvm.KTypesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import kotlinx.coroutines.BuildersKt;
 import kotlinx.coroutines.CoroutineStart;
@@ -46,7 +49,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Utilities for working with Kotlin Coroutines.
@@ -57,8 +59,11 @@ import org.springframework.util.ReflectionUtils;
  */
 public abstract class CoroutinesUtils {
 
-	private static final ReflectionUtils.MethodFilter boxImplFilter =
-			(method -> method.isSynthetic() && Modifier.isStatic(method.getModifiers()) && method.getName().equals("box-impl"));
+	private static final KType flowType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Flow.class));
+
+	private static final KType monoType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Mono.class));
+
+	private static final KType publisherType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Publisher.class));
 
 	/**
 	 * Convert a {@link Deferred} instance to a {@link Mono}.
@@ -119,16 +124,16 @@ public abstract class CoroutinesUtils {
 						switch (parameter.getKind()) {
 							case INSTANCE -> argMap.put(parameter, target);
 							case VALUE, EXTENSION_RECEIVER -> {
-								if (!parameter.isOptional() || args[index] != null) {
-									if (parameter.getType().getClassifier() instanceof KClass<?> kClass && kClass.isValue()) {
-										Class<?> javaClass = JvmClassMappingKt.getJavaClass(kClass);
-										Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(javaClass, boxImplFilter);
-										Assert.state(methods.length == 1, "Unable to find a single box-impl synthetic static method in " + javaClass.getName());
-										argMap.put(parameter, ReflectionUtils.invokeMethod(methods[0], null, args[index]));
+								Object arg = args[index];
+								if (!(parameter.isOptional() && arg == null)) {
+									KType type = parameter.getType();
+									if (!(type.isMarkedNullable() && arg == null)) {
+										KClass<?> kClass = KTypesJvm.getJvmErasure(type);
+										if (KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
+											arg = KClasses.getPrimaryConstructor(kClass).call(arg);
+										}
 									}
-									else {
-										argMap.put(parameter, args[index]);
-									}
+									argMap.put(parameter, arg);
 								}
 								index++;
 							}
@@ -139,18 +144,15 @@ public abstract class CoroutinesUtils {
 				.filter(result -> result != Unit.INSTANCE)
 				.onErrorMap(InvocationTargetException.class, InvocationTargetException::getTargetException);
 
-		KClassifier returnType = function.getReturnType().getClassifier();
-		if (returnType != null) {
-			if (returnType.equals(JvmClassMappingKt.getKotlinClass(Flow.class))) {
-				return mono.flatMapMany(CoroutinesUtils::asFlux);
-			}
-			else if (returnType.equals(JvmClassMappingKt.getKotlinClass(Mono.class))) {
-				return mono.flatMap(o -> ((Mono<?>)o));
-			}
-			else if (returnType instanceof KClass<?> kClass &&
-					Publisher.class.isAssignableFrom(JvmClassMappingKt.getJavaClass(kClass))) {
-				return mono.flatMapMany(o -> ((Publisher<?>)o));
-			}
+		KType returnType = function.getReturnType();
+		if (KTypes.isSubtypeOf(returnType, flowType)) {
+			return mono.flatMapMany(CoroutinesUtils::asFlux);
+		}
+		else if (KTypes.isSubtypeOf(returnType, monoType)) {
+			return mono.flatMap(o -> ((Mono<?>)o));
+		}
+		else if (KTypes.isSubtypeOf(returnType, publisherType)) {
+			return mono.flatMapMany(o -> ((Publisher<?>)o));
 		}
 		return mono;
 	}

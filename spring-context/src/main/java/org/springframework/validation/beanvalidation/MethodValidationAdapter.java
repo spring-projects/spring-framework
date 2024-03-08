@@ -207,7 +207,7 @@ public class MethodValidationAdapter implements MethodValidator {
 
 
 	/**
-	 * {@inheritDoc}.
+	 * {@inheritDoc}
 	 * <p>Default are the validation groups as specified in the {@link Validated}
 	 * annotation on the method, or on the containing target class of the method,
 	 * or for an AOP proxy without a target (with all behavior in advisors), also

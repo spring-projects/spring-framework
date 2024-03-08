@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @since 17.12.2003
  */
+@SuppressWarnings("deprecation")
 class DefaultLobHandlerTests {
 
 	private ResultSet rs = mock();

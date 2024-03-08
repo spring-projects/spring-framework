@@ -37,11 +37,11 @@ import org.springframework.util.ObjectUtils;
 /**
  * Represents selection over a map or collection.
  *
- * <p>For example, <code>{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this)}</code> evaluates
+ * <p>For example, <code>{1,2,3,4,5,6,7,8,9,10}.?[#isEven(#this)]</code> evaluates
  * to {@code [2, 4, 6, 8, 10]}.
  *
- * <p>Basically a subset of the input data is returned based on the
- * evaluation of the expression supplied as selection criteria.
+ * <p>Basically a subset of the input data is returned based on the evaluation of
+ * the expression supplied as selection criteria.
  *
  * @author Andy Clement
  * @author Mark Fisher
@@ -90,7 +90,6 @@ public class Selection extends SpelNodeImpl {
 		SpelNodeImpl selectionCriteria = this.children[0];
 
 		if (operand instanceof Map<?, ?> mapdata) {
-			// TODO don't lose generic info for the new map
 			Map<Object, Object> result = new HashMap<>();
 			Object lastKey = null;
 
@@ -139,11 +138,10 @@ public class Selection extends SpelNodeImpl {
 					Arrays.asList(ObjectUtils.toObjectArray(operand)));
 
 			List<Object> result = new ArrayList<>();
-			int index = 0;
 			for (Object element : data) {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
-					state.enterScope("index", index);
+					state.enterScope();
 					Object val = selectionCriteria.getValueInternal(state).getValue();
 					if (val instanceof Boolean b) {
 						if (b) {
@@ -157,7 +155,6 @@ public class Selection extends SpelNodeImpl {
 						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
 								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
 					}
-					index++;
 				}
 				finally {
 					state.exitScope();

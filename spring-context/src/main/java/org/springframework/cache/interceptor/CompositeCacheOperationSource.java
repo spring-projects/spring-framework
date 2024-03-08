@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,16 @@ public class CompositeCacheOperationSource implements CacheOperationSource, Seri
 	public boolean isCandidateClass(Class<?> targetClass) {
 		for (CacheOperationSource source : this.cacheOperationSources) {
 			if (source.isCandidateClass(targetClass)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean hasCacheOperations(Method method, @Nullable Class<?> targetClass) {
+		for (CacheOperationSource source : this.cacheOperationSources) {
+			if (source.hasCacheOperations(method, targetClass)) {
 				return true;
 			}
 		}
