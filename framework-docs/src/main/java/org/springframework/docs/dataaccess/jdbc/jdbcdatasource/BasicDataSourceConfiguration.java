@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 class BasicDataSourceConfiguration {
 
-	// tag::dataSourceBean[]
+	// tag::snippet[]
 	@Bean(destroyMethod = "close")
 	BasicDataSource dataSource() {
 		BasicDataSource dataSource = new BasicDataSource();
@@ -34,6 +34,6 @@ class BasicDataSourceConfiguration {
 		dataSource.setPassword("");
 		return dataSource;
 	}
-	// end::dataSourceBean[]
+	// end::snippet[]
 
 }

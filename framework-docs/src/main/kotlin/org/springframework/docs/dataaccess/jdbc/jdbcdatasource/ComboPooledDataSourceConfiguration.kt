@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 internal class ComboPooledDataSourceConfiguration {
 
-	// tag::dataSourceBean[]
+	// tag::snippet[]
 	@Bean(destroyMethod = "close")
 	fun dataSource() = ComboPooledDataSource().apply {
 		driverClass = "org.hsqldb.jdbcDriver"
@@ -15,6 +15,6 @@ internal class ComboPooledDataSourceConfiguration {
 		user = "sa"
 		password = ""
 	}
-	// end::dataSourceBean[]
+	// end::snippet[]
 
 }

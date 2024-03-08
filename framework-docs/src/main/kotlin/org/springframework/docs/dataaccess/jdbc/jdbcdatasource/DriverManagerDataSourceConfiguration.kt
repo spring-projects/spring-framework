@@ -23,7 +23,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource
 @Configuration
 class DriverManagerDataSourceConfiguration {
 
-	// tag::dataSourceBean[]
+	// tag::snippet[]
 	@Bean
 	fun dataSource() = DriverManagerDataSource().apply {
 		setDriverClassName("org.hsqldb.jdbcDriver")
@@ -31,6 +31,6 @@ class DriverManagerDataSourceConfiguration {
 		username = "sa"
 		password = ""
 	}
-	// end::dataSourceBean[]
+	// end::snippet[]
 
 }

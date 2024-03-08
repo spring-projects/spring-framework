@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:context="http://www.springframework.org/schema/context">
 
-	<!-- tag::dataSourceBean[] -->
+	<!-- tag::snippet[] -->
 	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="${jdbc.driverClassName}"/>
 		<property name="url" value="${jdbc.url}"/>
@@ -11,5 +11,5 @@
 	</bean>
 
 	<context:property-placeholder location="jdbc.properties"/>
-	<!-- end::dataSourceBean[] -->
+	<!-- end::snippet[] -->
 </beans>

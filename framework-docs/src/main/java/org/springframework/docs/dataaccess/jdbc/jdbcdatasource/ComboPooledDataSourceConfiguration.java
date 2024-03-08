@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 class ComboPooledDataSourceConfiguration {
 
-	// tag::dataSourceBean[]
+	// tag::snippet[]
 	@Bean(destroyMethod = "close")
 	ComboPooledDataSource dataSource() throws PropertyVetoException {
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
@@ -35,6 +35,6 @@ class ComboPooledDataSourceConfiguration {
 		dataSource.setPassword("");
 		return dataSource;
 	}
-	// end::dataSourceBean[]
+	// end::snippet[]
 
 }

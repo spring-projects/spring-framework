@@ -23,7 +23,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 @Configuration
 class DriverManagerDataSourceConfiguration {
 
-	// tag::dataSourceBean[]
+	// tag::snippet[]
 	@Bean
 	DriverManagerDataSource dataSource() {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -33,6 +33,6 @@ class DriverManagerDataSourceConfiguration {
 		dataSource.setPassword("");
 		return dataSource;
 	}
-	// end::dataSourceBean[]
+	// end::snippet[]
 
 }

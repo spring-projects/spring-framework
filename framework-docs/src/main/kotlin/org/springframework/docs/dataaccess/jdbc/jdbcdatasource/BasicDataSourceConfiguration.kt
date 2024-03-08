@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class BasicDataSourceConfiguration {
 
-	// tag::dataSourceBean[]
+	// tag::snippet[]
 	@Bean(destroyMethod = "close")
 	fun dataSource() = BasicDataSource().apply {
 		driverClassName = "org.hsqldb.jdbcDriver"
@@ -15,5 +15,5 @@ class BasicDataSourceConfiguration {
 		username = "sa"
 		password = ""
 	}
-	// end::dataSourceBean[]
+	// end::snippet[]
 }
