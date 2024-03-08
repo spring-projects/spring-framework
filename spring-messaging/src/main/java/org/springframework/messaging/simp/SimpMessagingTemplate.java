@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * SimpMessageHeaderAccessor#DESTINATION_HEADER} then the message is sent without
 	 * further changes.
 	 * <p>If a destination header is not already present ,the message is sent
-	 * to the configured {@link #setDefaultDestination(Object) defaultDestination}
+	 * to the configured {@link AbstractMessageSendingTemplate#setDefaultDestination(Object) defaultDestination}
 	 * or an exception an {@code IllegalStateException} is raised if that isn't
 	 * configured.
 	 * @param message the message to send (never {@code null})

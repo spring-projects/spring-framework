@@ -356,7 +356,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	/**
-	 * https://jira.spring.io/browse/SPR-2788
+	 * <a href="https://jira.spring.io/browse/SPR-2788">SPR-2788</a>
 	 */
 	@Test
 	void asBodyTagWithErrorsAndExistingMessagesAttributeInNonPageScopeAreNotClobbered() throws Exception {
@@ -380,7 +380,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	/**
-	 * https://jira.spring.io/browse/SPR-2788
+	 * <a href="https://jira.spring.io/browse/SPR-2788">SPR-2788</a>
 	 */
 	@Test
 	void asBodyTagWithNoErrorsAndExistingMessagesAttributeInApplicationScopeAreNotClobbered() throws Exception {
@@ -388,7 +388,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	/**
-	 * https://jira.spring.io/browse/SPR-2788
+	 * <a href="https://jira.spring.io/browse/SPR-2788">SPR-2788</a>
 	 */
 	@Test
 	void asBodyTagWithNoErrorsAndExistingMessagesAttributeInSessionScopeAreNotClobbered() throws Exception {
@@ -396,7 +396,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	/**
-	 * https://jira.spring.io/browse/SPR-2788
+	 * <a href="https://jira.spring.io/browse/SPR-2788">SPR-2788</a>
 	 */
 	@Test
 	void asBodyTagWithNoErrorsAndExistingMessagesAttributeInPageScopeAreNotClobbered() throws Exception {
@@ -404,7 +404,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	/**
-	 * https://jira.spring.io/browse/SPR-2788
+	 * <a href="https://jira.spring.io/browse/SPR-2788">SPR-2788</a>
 	 */
 	@Test
 	void asBodyTagWithNoErrorsAndExistingMessagesAttributeInRequestScopeAreNotClobbered() throws Exception {
@@ -412,7 +412,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	/**
-	 * https://jira.spring.io/browse/SPR-4005
+	 * <a href="https://jira.spring.io/browse/SPR-4005">SPR-4005</a>
 	 */
 	@Test
 	void omittedPathMatchesObjectErrorsOnly() throws Exception {

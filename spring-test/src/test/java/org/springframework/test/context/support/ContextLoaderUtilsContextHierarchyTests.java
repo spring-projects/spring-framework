@@ -328,7 +328,7 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 	}
 
 	/**
-	 * Used to reproduce bug reported in https://jira.spring.io/browse/SPR-10997
+	 * Used to reproduce bug reported in <a href="https://jira.spring.io/browse/SPR-10997">SPR-10997</a>
 	 */
 	@Test
 	void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndOverriddenInitializers() {
@@ -505,7 +505,7 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 	}
 
 	/**
-	 * Used to reproduce bug reported in https://jira.spring.io/browse/SPR-10997
+	 * Used to reproduce bug reported in <a href="https://jira.spring.io/browse/SPR-10997">SPR-10997</a>
 	 */
 	@ContextHierarchy({//
 	//
@@ -516,7 +516,7 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 	}
 
 	/**
-	 * Used to reproduce bug reported in https://jira.spring.io/browse/SPR-10997
+	 * Used to reproduce bug reported in <a href="https://jira.spring.io/browse/SPR-10997">SPR-10997</a>
 	 */
 	@ContextHierarchy({//
 	//
@@ -528,7 +528,7 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 	}
 
 	/**
-	 * Used to reproduce bug reported in https://jira.spring.io/browse/SPR-10997
+	 * Used to reproduce bug reported in <a href="https://jira.spring.io/browse/SPR-10997">SPR-10997</a>
 	 */
 	private static class DummyApplicationContextInitializer implements
 			ApplicationContextInitializer<ConfigurableApplicationContext> {
