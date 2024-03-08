@@ -36,8 +36,8 @@ import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
- * {@link TestExecutionListener} to reset any mock beans that have been marked with a
- * {@link MockReset}. Typically used alongside {@link MockitoTestExecutionListener}.
+ * {@link TestExecutionListener} to reset any mock beans that have been marked
+ * with a {@link MockReset}.
  *
  * @author Phillip Webb
  * @since 6.2

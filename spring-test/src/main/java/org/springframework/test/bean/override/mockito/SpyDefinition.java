@@ -130,8 +130,8 @@ class SpyDefinition extends Definition {
 	}
 
 	/**
-	 * A {@link VerificationStartedListener} that bypasses any proxy created by Spring AOP
-	 * when the verification of a spy starts.
+	 * A {@link VerificationStartedListener} that bypasses any proxy created by
+	 * Spring AOP when the verification of a spy starts.
 	 */
 	private static final class SpringAopBypassingVerificationStartedListener implements VerificationStartedListener {
 

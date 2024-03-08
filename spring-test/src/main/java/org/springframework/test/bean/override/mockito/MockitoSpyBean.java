@@ -27,21 +27,11 @@ import org.mockito.Mockito;
 import org.springframework.test.bean.override.BeanOverride;
 
 /**
- * Mark a field to trigger the override of the bean of the same name with a
- * Mockito spy, which will wrap the original instance.
- * In order to ensure mocks are set up and reset correctly, the test class must
- * itself be annotated with {@link MockitoBeanOverrideTestListeners}.
- *
- * @author Simon Baslé
- * @since 6.2
- */
-/**
  * Mark a field to trigger a bean override using a Mockito spy, which will wrap
  * the original instance. If no explicit {@link #name()} is specified, the
  * annotated field's name is interpreted to be the target of the override.
  * In either case, it is required that the target bean is previously registered
- * in the context. In order to ensure spies are set up and reset correctly,
- * the test class must itself be annotated with {@link MockitoBeanOverrideTestListeners}.
+ * in the context.
  *
  * <p>Dependencies that are known to the application context but are not beans
  * (such as those {@link org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
@@ -64,20 +54,22 @@ public @interface MockitoSpyBean {
 	String name() default "";
 
 	/**
-	 * The reset mode to apply to the spied bean. The default is {@link MockReset#AFTER}
-	 * meaning that spies are automatically reset after each test method is invoked.
+	 * The reset mode to apply to the spied bean. The default is
+	 * {@link MockReset#AFTER} meaning that spies are automatically reset after
+	 * each test method is invoked.
 	 * @return the reset mode
 	 */
 	MockReset reset() default MockReset.AFTER;
 
 	/**
-	 * Indicates that Mockito methods such as {@link Mockito#verify(Object) verify(mock)}
-	 * should use the {@code target} of AOP advised beans, rather than the proxy itself.
+	 * Indicates that Mockito methods such as {@link Mockito#verify(Object)
+	 * verify(mock)} should use the {@code target} of AOP advised beans,
+	 * rather than the proxy itself.
 	 * If set to {@code false} you may need to use the result of
 	 * {@link org.springframework.test.util.AopTestUtils#getUltimateTargetObject(Object)
 	 * AopTestUtils.getUltimateTargetObject(...)} when calling Mockito methods.
-	 * @return {@code true} if the target of AOP advised beans is used or {@code false} if
-	 * the proxy is used directly
+	 * @return {@code true} if the target of AOP advised beans is used or
+	 * {@code false} if the proxy is used directly
 	 */
 	boolean proxyTargetAware() default true;
 

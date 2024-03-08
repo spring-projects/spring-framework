@@ -31,9 +31,7 @@ import org.springframework.test.bean.override.BeanOverride;
  * Mark a field to trigger a bean override using a Mockito mock. If no explicit
  * {@link #name()} is specified, the annotated field's name is interpreted to
  * be the target of the override. In either case, if no existing bean is defined
- * a new one will be added to the context. In order to ensure mocks are set up
- * and reset correctly, the test class must itself be annotated with
- * {@link MockitoBeanOverrideTestListeners}.
+ * a new one will be added to the context.
  *
  * <p>Dependencies that are known to the application context but are not beans
  * (such as those {@link org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
@@ -57,8 +55,8 @@ public @interface MockitoBean {
 	String name() default "";
 
 	/**
-	 * Any extra interfaces that should also be declared on the mock. See
-	 * {@link MockSettings#extraInterfaces(Class...)} for details.
+	 * Any extra interfaces that should also be declared on the mock.
+	 * See {@link MockSettings#extraInterfaces(Class...)} for details.
 	 * @return any extra interfaces
 	 */
 	Class<?>[] extraInterfaces() default {};
@@ -70,15 +68,16 @@ public @interface MockitoBean {
 	Answers answers() default Answers.RETURNS_DEFAULTS;
 
 	/**
-	 * If the generated mock is serializable. See {@link MockSettings#serializable()} for
-	 * details.
+	 * If the generated mock is serializable.
+	 * See {@link MockSettings#serializable()} for details.
 	 * @return if the mock is serializable
 	 */
 	boolean serializable() default false;
 
 	/**
-	 * The reset mode to apply to the mock bean. The default is {@link MockReset#AFTER}
-	 * meaning that mocks are automatically reset after each test method is invoked.
+	 * The reset mode to apply to the mock bean.
+	 * The default is {@link MockReset#AFTER} meaning that mocks are
+	 * automatically reset after each test method is invoked.
 	 * @return the reset mode
 	 */
 	MockReset reset() default MockReset.AFTER;

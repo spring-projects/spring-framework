@@ -29,11 +29,11 @@ import org.springframework.util.Assert;
 
 /**
  * Reset strategy used on a mock bean. Usually applied to a mock through the
- * {@link MockitoBean @MockitoBean} annotation but can also be directly applied to any mock in
- * the {@code ApplicationContext} using the static methods.
+ * {@link MockitoBean @MockitoBean} annotation but can also be directly applied
+ * to any mock in the {@code ApplicationContext} using the static methods.
  *
  * @author Phillip Webb
- * @since 1.4.0
+ * @since 6.2
  * @see MockitoResetTestExecutionListener
  */
 public enum MockReset {
@@ -54,8 +54,8 @@ public enum MockReset {
 	NONE;
 
 	/**
-	 * Create {@link MockSettings settings} to be used with mocks where reset should occur
-	 * before each test method runs.
+	 * Create {@link MockSettings settings} to be used with mocks where reset
+	 * should occur before each test method runs.
 	 * @return mock settings
 	 */
 	public static MockSettings before() {
@@ -63,8 +63,8 @@ public enum MockReset {
 	}
 
 	/**
-	 * Create {@link MockSettings settings} to be used with mocks where reset should occur
-	 * after each test method runs.
+	 * Create {@link MockSettings settings} to be used with mocks where reset
+	 * should occur after each test method runs.
 	 * @return mock settings
 	 */
 	public static MockSettings after() {
@@ -72,8 +72,8 @@ public enum MockReset {
 	}
 
 	/**
-	 * Create {@link MockSettings settings} to be used with mocks where a specific reset
-	 * should occur.
+	 * Create {@link MockSettings settings} to be used with mocks where a
+	 * specific reset should occur.
 	 * @param reset the reset type
 	 * @return mock settings
 	 */

@@ -35,8 +35,8 @@ import org.springframework.util.ReflectionUtils.FieldCallback;
 /**
  * {@link TestExecutionListener} to enable {@link MockitoBean @MockitoBean} and
  * {@link MockitoSpyBean @MockitoSpyBean} support. Also triggers
- * {@link MockitoAnnotations#openMocks(Object)} when any Mockito annotations used,
- * primarily to allow {@link Captor @Captor} annotations.
+ * {@link MockitoAnnotations#openMocks(Object)} when any Mockito annotations are
+ * used, primarily to allow {@link Captor @Captor} annotations.
  * <p>
  * The automatic reset support of {@code @MockBean} and {@code @SpyBean} is
  * handled by sibling {@link MockitoResetTestExecutionListener}.

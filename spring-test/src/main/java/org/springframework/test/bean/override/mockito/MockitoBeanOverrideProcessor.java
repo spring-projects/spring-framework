@@ -23,8 +23,16 @@ import org.springframework.core.ResolvableType;
 import org.springframework.test.bean.override.BeanOverrideProcessor;
 import org.springframework.test.bean.override.OverrideMetadata;
 
+/**
+ * A {@link BeanOverrideProcessor} for mockito-related annotations
+ * ({@link MockitoBean} and {@link MockitoSpyBean}).
+ *
+ * @author Simon Baslé
+ * @since 6.2
+ */
 public class MockitoBeanOverrideProcessor implements BeanOverrideProcessor {
 
+	@Override
 	public OverrideMetadata createMetadata(Field field, Annotation overrideAnnotation, ResolvableType typeToMock) {
 		if (overrideAnnotation instanceof MockitoBean mockBean) {
 			return new MockDefinition(mockBean, field, typeToMock);

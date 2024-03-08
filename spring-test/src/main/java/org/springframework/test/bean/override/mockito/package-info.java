@@ -1,5 +1,5 @@
 /**
- * Support case-by-case Bean overriding in Spring tests.
+ * Bean overriding mechanism based on Mockito mocking and spying.
  */
 @NonNullApi
 @NonNullFields
