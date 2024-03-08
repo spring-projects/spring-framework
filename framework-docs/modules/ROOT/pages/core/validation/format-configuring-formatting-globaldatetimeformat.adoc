@@ -33,6 +33,10 @@ Java::
 			conversionService.addFormatterForFieldAnnotation(
 				new NumberFormatAnnotationFormatterFactory());
 
+			// Add converters useful for most Spring Boot applications
+			// Ensure that Duration conversion from (1s,2m,...) is still supported
+			ApplicationConversionService.addApplicationConverters(conversionService);
+
 			// Register JSR-310 date conversion with a specific global format
 			DateTimeFormatterRegistrar dateTimeRegistrar = new DateTimeFormatterRegistrar();
 			dateTimeRegistrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"));
