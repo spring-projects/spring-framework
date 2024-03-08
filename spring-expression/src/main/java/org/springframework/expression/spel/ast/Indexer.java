@@ -51,7 +51,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * <ul>
  * <li>Arrays: the n<sup>th</sup> element</li>
- * <li>Collections (list and sets): the n<sup>th</sup> element</li>
+ * <li>Collections (lists and sets): the n<sup>th</sup> element</li>
  * <li>Strings: the n<sup>th</sup> character as a {@link String}</li>
  * <li>Maps: the value for the specified key</li>
  * <li>Objects: the property with the specified name</li>
@@ -167,8 +167,9 @@ public class Indexer extends SpelNodeImpl {
 		// Indexing into a Map
 		if (target instanceof Map<?, ?> map) {
 			Object key = index;
-			if (targetDescriptor.getMapKeyTypeDescriptor() != null) {
-				key = state.convertValue(key, targetDescriptor.getMapKeyTypeDescriptor());
+			TypeDescriptor mapKeyTypeDescriptor = targetDescriptor.getMapKeyTypeDescriptor();
+			if (mapKeyTypeDescriptor != null) {
+				key = state.convertValue(key, mapKeyTypeDescriptor);
 			}
 			this.indexedType = IndexedType.MAP;
 			return new MapIndexingValueRef(state.getTypeConverter(), map, key, targetDescriptor);
