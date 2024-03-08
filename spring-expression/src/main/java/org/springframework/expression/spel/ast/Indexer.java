@@ -239,6 +239,7 @@ public class Indexer extends SpelNodeImpl {
 			cf.loadTarget(mv);
 		}
 
+		SpelNodeImpl index = this.children[0];
 		if (this.indexedType == IndexedType.ARRAY) {
 			int insn = switch (this.exitTypeDescriptor) {
 				case "D" -> {
@@ -282,7 +283,6 @@ public class Indexer extends SpelNodeImpl {
 				}
 			};
 
-			SpelNodeImpl index = this.children[0];
 			cf.enterCompilationScope();
 			index.generateCode(mv, cf);
 			cf.exitCompilationScope();
@@ -292,7 +292,7 @@ public class Indexer extends SpelNodeImpl {
 		else if (this.indexedType == IndexedType.LIST) {
 			mv.visitTypeInsn(CHECKCAST, "java/util/List");
 			cf.enterCompilationScope();
-			this.children[0].generateCode(mv, cf);
+			index.generateCode(mv, cf);
 			cf.exitCompilationScope();
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
 		}
@@ -301,13 +301,13 @@ public class Indexer extends SpelNodeImpl {
 			mv.visitTypeInsn(CHECKCAST, "java/util/Map");
 			// Special case when the key is an unquoted string literal that will be parsed as
 			// a property/field reference
-			if ((this.children[0] instanceof PropertyOrFieldReference reference)) {
+			if ((index instanceof PropertyOrFieldReference reference)) {
 				String mapKeyName = reference.getName();
 				mv.visitLdcInsn(mapKeyName);
 			}
 			else {
 				cf.enterCompilationScope();
-				this.children[0].generateCode(mv, cf);
+				index.generateCode(mv, cf);
 				cf.exitCompilationScope();
 			}
 			mv.visitMethodInsn(

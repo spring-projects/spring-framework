@@ -613,6 +613,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		private final TypeDescriptor typeDescriptor;
 
+		/**
+		 * The original method, or {@code null} if the member is not a method.
+		 */
 		@Nullable
 		private final Method originalMethod;
 
