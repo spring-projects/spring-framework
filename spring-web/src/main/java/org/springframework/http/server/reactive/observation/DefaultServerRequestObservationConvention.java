@@ -171,7 +171,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	protected KeyValue httpUrl(ServerRequestObservationContext context) {
 		if (context.getCarrier() != null) {
-			return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getPath().toString());
+			return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getURI().toString());
 		}
 		return HTTP_URL_UNKNOWN;
 	}
