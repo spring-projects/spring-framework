@@ -77,7 +77,7 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 	}
 
 	private static HttpStatus initHttpStatus(MethodValidationResult validationResult) {
-		return (!validationResult.isForReturnValue() ? HttpStatus.BAD_REQUEST : HttpStatus.INTERNAL_SERVER_ERROR);
+		return (validationResult.isForReturnValue() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.BAD_REQUEST);
 	}
 
 
