@@ -518,6 +518,7 @@ following kinds of expressions cannot be compiled.
 * Expressions relying on the conversion service
 * Expressions using custom resolvers or accessors
 * Expressions using overloaded operators
+* Expressions using array construction syntax
 * Expressions using selection or projection
 
 Compilation of additional kinds of expressions may be supported in the future.
