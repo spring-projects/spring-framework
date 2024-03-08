@@ -310,6 +310,18 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 		@Test
+		void indexIntoPrimitiveBooleanArray() {
+			boolean[] booleans = { true, false };
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(expression.getValue(booleans)).isEqualTo(false);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(booleans)).isEqualTo(false);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Z");
+		}
+
+		@Test
 		void indexIntoStringArray() {
 			String[] strings = { "a", "b", "c" };
 
