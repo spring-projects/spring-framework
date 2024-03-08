@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ class UrlFilenameViewControllerTests {
 
 	/**
 	 * This is the expected behavior, and it now has a test to prove it.
-	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2789
+	 * @see <a href="https://opensource.atlassian.com/projects/spring/browse/SPR-2789">SPR-2789</a>
 	 */
 	@PathPatternsParameterizedTest
 	void nestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line(

@@ -44,7 +44,7 @@ class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 	}
 
 	/**
-	 * https://jira.spring.io/browse/SPR-15896
+	 * <a href="https://jira.spring.io/browse/SPR-15896">SPR-15896</a>
 	 *
 	 * @since 5.0
 	 */
@@ -62,7 +62,7 @@ class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 	}
 
 	/**
-	 * https://github.com/spring-projects/spring-framework/issues/27008
+	 * <a href="https://github.com/spring-projects/spring-framework/issues/27008">gh-27008</a>
 	 *
 	 * @since 5.3.11
 	 */

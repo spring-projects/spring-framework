@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class PasswordInputTagTests extends InputTagTests {
 
 	/**
-	 * https://jira.spring.io/browse/SPR-2866
+	 * <a href="https://jira.spring.io/browse/SPR-2866">SPR-2866</a>
 	 */
 	@Test
 	void passwordValueIsNotRenderedByDefault() throws Exception {
@@ -49,7 +49,7 @@ class PasswordInputTagTests extends InputTagTests {
 	}
 
 	/**
-	 * https://jira.spring.io/browse/SPR-2866
+	 * <a href="https://jira.spring.io/browse/SPR-2866">SPR-2866</a>
 	 */
 	@Test
 	void passwordValueIsRenderedIfShowPasswordAttributeIsSetToTrue() throws Exception {
@@ -67,7 +67,7 @@ class PasswordInputTagTests extends InputTagTests {
 	}
 
 	/**
-	 * https://jira.spring.io/browse/SPR-2866
+	 * <a href="https://jira.spring.io/browse/SPR-2866">SPR-2866</a>
 	 */
 	@Test
 	void passwordValueIsNotRenderedIfShowPasswordAttributeIsSetToFalse() throws Exception {
