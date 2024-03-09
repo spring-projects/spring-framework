@@ -43,12 +43,7 @@ class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 		return EmbeddedDatabaseType.H2;
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-15896
-	 *
-	 * @since 5.0
-	 */
-	@Test
+	@Test // SPR-15896
 	void scriptWithH2Alias() {
 		databasePopulator.addScript(usersSchema());
 		databasePopulator.addScript(resource("db-test-data-h2-alias.sql"));
@@ -61,12 +56,7 @@ class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 		assertThat(jdbcTemplate.queryForObject(sql, String.class)).isEqualTo("maS");
 	}
 
-	/**
-	 * https://github.com/spring-projects/spring-framework/issues/27008
-	 *
-	 * @since 5.3.11
-	 */
-	@Test
+	@Test // gh-27008
 	void automaticallyCommitsIfAutoCommitIsDisabled() throws Exception {
 		EmbeddedDatabase database = null;
 		try {

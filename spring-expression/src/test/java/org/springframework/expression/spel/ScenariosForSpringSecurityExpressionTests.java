@@ -37,11 +37,11 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-///CLOVER:OFF
 /**
- * Spring Security scenarios from https://docs.spring.io/spring-security/reference/servlet/authorization/expression-based.html
+ * SpEL expression tests for Spring Security scenarios.
  *
  * @author Andy Clement
+ * @see <a href="https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html#authorization-expressions">Expressing Authorization with SpEL</a>
  */
 class ScenariosForSpringSecurityExpressionTests extends AbstractExpressionTests {
 
