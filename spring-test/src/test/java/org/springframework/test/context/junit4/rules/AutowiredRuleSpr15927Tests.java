@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ import org.springframework.context.annotation.Configuration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for an issue raised in https://jira.spring.io/browse/SPR-15927.
+ * Integration tests for {@code SPR-15927}.
  *
  * @author Sam Brannen
  * @since 5.0
  */
-public class AutowiredRuleTests {
+public class AutowiredRuleSpr15927Tests {
 
 	@ClassRule
 	public static final SpringClassRule springClassRule = new SpringClassRule();
