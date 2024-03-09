@@ -187,6 +187,20 @@ class RequestHeaderMethodArgumentResolverTests {
 	}
 
 	@Test
+	void missingParameterFromSystemPropertyThroughPlaceholder() {
+		String expected = "bar";
+
+		System.setProperty("systemProperty", expected);
+
+		assertThatThrownBy(() ->
+				resolver.resolveArgument(paramResolvedNameWithPlaceholder, null, webRequest, null))
+				.isInstanceOf(MissingRequestHeaderException.class)
+				.extracting("headerName").isEqualTo(expected);
+
+		System.clearProperty("systemProperty");
+	}
+
+	@Test
 	void resolveDefaultValueFromRequest() throws Exception {
 		servletRequest.setContextPath("/bar");
 

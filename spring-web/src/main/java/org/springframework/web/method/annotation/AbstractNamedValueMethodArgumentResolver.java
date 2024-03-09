@@ -122,7 +122,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 				arg = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
 			}
 			else if (namedValueInfo.required && !nestedParameter.isOptional()) {
-				handleMissingValue(namedValueInfo.name, nestedParameter, webRequest);
+				handleMissingValue(resolvedName.toString(), nestedParameter, webRequest);
 			}
 			if (!hasDefaultValue) {
 				arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());

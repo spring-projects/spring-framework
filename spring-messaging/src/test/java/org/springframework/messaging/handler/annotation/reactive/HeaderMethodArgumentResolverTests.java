@@ -36,6 +36,7 @@ import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.messaging.handler.annotation.MessagingPredicates.header;
 import static org.springframework.messaging.handler.annotation.MessagingPredicates.headerPlain;
 
@@ -149,6 +150,21 @@ class HeaderMethodArgumentResolverTests {
 		MethodParameter param = this.resolvable.annot(header("foo")).arg(Optional.class, String.class);
 		Object result = resolveArgument(param, message);
 		assertThat(result).isEqualTo(Optional.empty());
+	}
+
+	@Test
+	void missingParameterFromSystemPropertyThroughPlaceholder() {
+		String expected = "sysbar";
+		System.setProperty("systemProperty", expected);
+		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
+		MethodParameter param = this.resolvable.annot(header("#{systemProperties.systemProperty}")).arg();
+
+		assertThatThrownBy(() ->
+				resolveArgument(param, message))
+				.isInstanceOf(MessageHandlingException.class)
+				.hasMessageContaining(expected);
+
+		System.clearProperty("systemProperty");
 	}
 
 	@SuppressWarnings({"unchecked", "ConstantConditions"})
