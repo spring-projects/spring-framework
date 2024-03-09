@@ -123,10 +123,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 				arg = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
 			}
 			else if (namedValueInfo.required && !nestedParameter.isOptional()) {
-				handleMissingValue(namedValueInfo.name, nestedParameter, webRequest);
+				handleMissingValue(resolvedName.toString(), nestedParameter, webRequest);
 			}
 			if (!hasDefaultValue) {
-				arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());
+				arg = handleNullValue(resolvedName.toString(), arg, nestedParameter.getNestedParameterType());
 			}
 		}
 		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
@@ -142,7 +142,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 					arg = convertIfNecessary(parameter, webRequest, binderFactory, namedValueInfo, arg);
 				}
 				else if (namedValueInfo.required && !nestedParameter.isOptional()) {
-					handleMissingValueAfterConversion(namedValueInfo.name, nestedParameter, webRequest);
+					handleMissingValueAfterConversion(resolvedName.toString(), nestedParameter, webRequest);
 				}
 			}
 		}

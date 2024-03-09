@@ -120,7 +120,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 					return Mono.justOrEmpty(arg);
 				})
 				.switchIfEmpty(getDefaultValue(
-						namedValueInfo, parameter, bindingContext, model, exchange));
+						namedValueInfo, resolvedName.toString(), parameter, bindingContext, model, exchange));
 	}
 
 	/**
@@ -222,7 +222,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	/**
 	 * Resolve the default value, if any.
 	 */
-	private Mono<Object> getDefaultValue(NamedValueInfo namedValueInfo, MethodParameter parameter,
+	private Mono<Object> getDefaultValue(NamedValueInfo namedValueInfo, String resolvedName, MethodParameter parameter,
 			BindingContext bindingContext, Model model, ServerWebExchange exchange) {
 
 		return Mono.fromSupplier(() -> {
@@ -234,10 +234,10 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 				value = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
 			}
 			else if (namedValueInfo.required && !parameter.isOptional()) {
-				handleMissingValue(namedValueInfo.name, parameter, exchange);
+				handleMissingValue(resolvedName, parameter, exchange);
 			}
 			if (!hasDefaultValue) {
-				value = handleNullValue(namedValueInfo.name, value, parameter.getNestedParameterType());
+				value = handleNullValue(resolvedName, value, parameter.getNestedParameterType());
 			}
 			if (value != null || !hasDefaultValue) {
 				value = applyConversion(value, namedValueInfo, parameter, bindingContext, exchange);

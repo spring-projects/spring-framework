@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import jakarta.servlet.http.Part;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
@@ -37,7 +38,9 @@ import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -50,6 +53,7 @@ import org.springframework.web.testfixture.servlet.MockPart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestParam;
@@ -64,7 +68,7 @@ import static org.springframework.web.testfixture.method.MvcAnnotationPredicates
  */
 class RequestParamMethodArgumentResolverTests {
 
-	private RequestParamMethodArgumentResolver resolver = new RequestParamMethodArgumentResolver(null, true);
+	private RequestParamMethodArgumentResolver resolver;
 
 	private MockHttpServletRequest request = new MockHttpServletRequest();
 
@@ -72,6 +76,15 @@ class RequestParamMethodArgumentResolverTests {
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
+	@BeforeEach
+	void setup() {
+		GenericWebApplicationContext context = new GenericWebApplicationContext();
+		context.refresh();
+		resolver = new RequestParamMethodArgumentResolver(context.getBeanFactory(), true);
+
+		// Expose request to the current thread (for SpEL expressions)
+		RequestContextHolder.setRequestAttributes(webRequest);
+	}
 
 	@Test
 	void supportsParameter() {
@@ -141,6 +154,12 @@ class RequestParamMethodArgumentResolverTests {
 
 		param = this.testMethod.annotPresent(RequestPart.class).arg(MultipartFile.class);
 		assertThat(resolver.supportsParameter(param)).isFalse();
+
+		param = this.testMethod.annotPresent(RequestParam.class).arg(Integer.class);
+		assertThat(resolver.supportsParameter(param)).isTrue();
+
+		param = this.testMethod.annotPresent(RequestParam.class).arg(int.class);
+		assertThat(resolver.supportsParameter(param)).isTrue();
 	}
 
 	@Test
@@ -678,6 +697,55 @@ class RequestParamMethodArgumentResolverTests {
 		assertThat(actual).isEqualTo(Optional.empty());
 	}
 
+	@Test
+	void resolveNameFromSystemPropertyThroughPlaceholder() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		Integer expected = 100;
+		request.addParameter("name", expected.toString());
+
+		System.setProperty("systemProperty", "name");
+
+		try {
+			MethodParameter param = this.testMethod.annot(requestParam().name("${systemProperty}")).arg(Integer.class);
+			Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+			boolean condition = result instanceof Integer;
+			assertThat(condition).isTrue();
+		}
+		finally {
+			System.clearProperty("systemProperty");
+		}
+	}
+
+	@Test
+	void missingParameterFromSystemPropertyThroughPlaceholder() {
+		String expected = "name";
+		System.setProperty("systemProperty", expected);
+
+		MethodParameter param = this.testMethod.annot(requestParam().name("${systemProperty}")).arg(Integer.class);
+		assertThatThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null))
+				.isInstanceOf(MissingServletRequestParameterException.class)
+				.extracting("parameterName").isEqualTo(expected);
+
+		System.clearProperty("systemProperty");
+	}
+
+	@Test
+	void notNullablePrimitiveParameterFromSystemPropertyThroughPlaceholder() {
+		String expected = "sysbar";
+		System.setProperty("systemProperty", expected);
+
+		MethodParameter param = this.testMethod.annot(requestParam().name("${systemProperty}").notRequired()).arg(int.class);
+		assertThatThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining(expected);
+
+		System.clearProperty("systemProperty");
+	}
 
 	@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 	public void handle(
@@ -702,7 +770,9 @@ class RequestParamMethodArgumentResolverTests {
 			@RequestParam("name") Optional<Integer[]> paramOptionalArray,
 			@RequestParam("name") Optional<List<?>> paramOptionalList,
 			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional,
-			@RequestParam(defaultValue = "false") Boolean booleanParam) {
+			@RequestParam(defaultValue = "false") Boolean booleanParam,
+			@RequestParam("${systemProperty}") Integer placeholderParam,
+			@RequestParam(name = "${systemProperty}", required = false) int primitivePlaceholderParam) {
 	}
 
 }

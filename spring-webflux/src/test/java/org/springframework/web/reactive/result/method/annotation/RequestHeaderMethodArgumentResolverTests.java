@@ -36,6 +36,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -43,6 +44,7 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link RequestHeaderMethodArgumentResolver}.
@@ -64,6 +66,7 @@ class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramDate;
 	private MethodParameter paramInstant;
 	private MethodParameter paramMono;
+	private MethodParameter primitivePlaceholderParam;
 
 
 	@BeforeEach
@@ -87,6 +90,7 @@ class RequestHeaderMethodArgumentResolverTests {
 		this.paramDate = new SynthesizingMethodParameter(method, 6);
 		this.paramInstant = new SynthesizingMethodParameter(method, 7);
 		this.paramMono = new SynthesizingMethodParameter(method, 8);
+		this.primitivePlaceholderParam = new SynthesizingMethodParameter(method, 9);
 	}
 
 
@@ -201,6 +205,46 @@ class RequestHeaderMethodArgumentResolverTests {
 	}
 
 	@Test
+	void missingParameterFromSystemPropertyThroughPlaceholder() {
+		String expected = "sysbar";
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		System.setProperty("systemProperty", expected);
+		try {
+			Mono<Object> mono = this.resolver.resolveArgument(
+					this.paramResolvedNameWithExpression, this.bindingContext, exchange);
+
+			assertThatThrownBy(() -> mono.block())
+					.isInstanceOf(MissingRequestValueException.class)
+					.extracting("name").isEqualTo(expected);
+		}
+		finally {
+			System.clearProperty("systemProperty");
+		}
+	}
+
+	@Test
+	void notNullablePrimitiveParameterFromSystemPropertyThroughPlaceholder() {
+		String expected = "sysbar";
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		System.setProperty("systemProperty", expected);
+		try {
+			Mono<Object> mono = this.resolver.resolveArgument(
+					this.primitivePlaceholderParam, this.bindingContext, exchange);
+
+			assertThatThrownBy(() -> mono.block())
+					.isInstanceOf(IllegalStateException.class)
+					.hasMessageContaining(expected);
+		}
+		finally {
+			System.clearProperty("systemProperty");
+		}
+	}
+
+	@Test
 	void notFound() {
 		Mono<Object> mono = resolver.resolveArgument(
 				this.paramNamedValueStringArray, this.bindingContext,
@@ -252,7 +296,8 @@ class RequestHeaderMethodArgumentResolverTests {
 			@RequestHeader("name") Map<?, ?> unsupported,
 			@RequestHeader("name") Date dateParam,
 			@RequestHeader("name") Instant instantParam,
-			@RequestHeader Mono<String> alsoNotSupported) {
+			@RequestHeader Mono<String> alsoNotSupported,
+			@RequestHeader(value = "${systemProperty}", required = false) int primitivePlaceholderParam) {
 	}
 
 }
