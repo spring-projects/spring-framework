@@ -17,10 +17,6 @@
 package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +31,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
+import org.springframework.expression.spel.CompilablePropertyAccessor;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
@@ -223,10 +220,11 @@ public class Indexer extends SpelNodeImpl {
 			return (this.children[0] instanceof PropertyOrFieldReference || this.children[0].isCompilable());
 		}
 		else if (this.indexedType == IndexedType.OBJECT) {
-			// If the string name is changing, the accessor is clearly going to change (so no compilation possible)
-			return (this.cachedReadAccessor != null &&
-					this.cachedReadAccessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor &&
-					getChild(0) instanceof StringLiteral);
+			// If the string name is changing, the accessor is clearly going to change.
+			// So compilation is only possible if the index expression is a StringLiteral.
+			return (getChild(0) instanceof StringLiteral &&
+					this.cachedReadAccessor instanceof CompilablePropertyAccessor compilablePropertyAccessor &&
+					compilablePropertyAccessor.isCompilable());
 		}
 		return false;
 	}
@@ -315,30 +313,9 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		else if (this.indexedType == IndexedType.OBJECT) {
-			ReflectivePropertyAccessor.OptimalPropertyAccessor accessor =
-					(ReflectivePropertyAccessor.OptimalPropertyAccessor) this.cachedReadAccessor;
-			Assert.state(accessor != null, "No cached read accessor");
-			Member member = accessor.member;
-			boolean isStatic = Modifier.isStatic(member.getModifiers());
-			String classDesc = member.getDeclaringClass().getName().replace('.', '/');
-
-			if (!isStatic) {
-				if (descriptor == null) {
-					cf.loadTarget(mv);
-				}
-				if (descriptor == null || !classDesc.equals(descriptor.substring(1))) {
-					mv.visitTypeInsn(CHECKCAST, classDesc);
-				}
-			}
-
-			if (member instanceof Method method) {
-				mv.visitMethodInsn((isStatic? INVOKESTATIC : INVOKEVIRTUAL), classDesc, member.getName(),
-						CodeFlow.createSignatureDescriptor(method), false);
-			}
-			else {
-				mv.visitFieldInsn((isStatic ? GETSTATIC : GETFIELD), classDesc, member.getName(),
-						CodeFlow.toJvmDescriptor(((Field) member).getType()));
-			}
+			CompilablePropertyAccessor compilablePropertyAccessor = (CompilablePropertyAccessor) this.cachedReadAccessor;
+			Assert.state(compilablePropertyAccessor != null, "No cached read accessor");
+			compilablePropertyAccessor.generateCode(null, mv, cf);
 		}
 
 		cf.pushDescriptor(this.exitTypeDescriptor);
@@ -600,10 +577,8 @@ public class Indexer extends SpelNodeImpl {
 						Indexer.this.cachedReadAccessor = accessor;
 						Indexer.this.cachedReadName = this.name;
 						Indexer.this.cachedReadTargetType = targetObjectRuntimeClass;
-						if (accessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor optimalAccessor) {
-							Member member = optimalAccessor.member;
-							Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(member instanceof Method method ?
-									method.getReturnType() : ((Field) member).getType());
+						if (accessor instanceof CompilablePropertyAccessor compilablePropertyAccessor) {
+							Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType());
 						}
 						return accessor.read(this.evaluationContext, this.targetObject, this.name);
 					}

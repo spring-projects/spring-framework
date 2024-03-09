@@ -764,6 +764,54 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(result).isEqualTo(2);
 		}
 
+		@Test
+		void indexIntoPropertyInPrivateSubclassThatOverridesPropertyInPublicInterface() {
+			expression = parser.parseExpression("#root['text']");
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(privateSubclass.getClass());
+
+			String result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("enigma");
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("enigma");
+		}
+
+		@Test
+		void indexIntoPropertyInPrivateSubclassThatOverridesPropertyInPrivateInterface() {
+			expression = parser.parseExpression("#root['message']");
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(privateSubclass.getClass());
+
+			String result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("hello");
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("hello");
+		}
+
+		@Test
+		void indexIntoPropertyInPrivateSubclassThatOverridesPropertyInPublicSuperclass() {
+			expression = parser.parseExpression("#root['number']");
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(privateSubclass.getClass());
+
+			Integer result = expression.getValue(context, privateSubclass, Integer.class);
+			assertThat(result).isEqualTo(2);
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, Integer.class);
+			assertThat(result).isEqualTo(2);
+		}
+
 		private interface PrivateInterface {
 
 			String getMessage();

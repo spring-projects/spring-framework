@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.expression.PropertyAccessor;
+import org.springframework.lang.Nullable;
 
 /**
  * A compilable {@link PropertyAccessor} is able to generate bytecode that represents
@@ -41,13 +42,17 @@ public interface CompilablePropertyAccessor extends PropertyAccessor, Opcodes {
 	Class<?> getPropertyType();
 
 	/**
-	 * Generate the bytecode the performs the access operation into the specified
+	 * Generate the bytecode that performs the access operation into the specified
 	 * {@link MethodVisitor} using context information from the {@link CodeFlow}
 	 * where necessary.
-	 * @param propertyName the name of the property
+	 * <p>Concrete implementations of {@code CompilablePropertyAccessor} typically
+	 * have access to the property name via other means (for example, supplied as
+	 * an argument when they were instantiated). Thus, the {@code propertyName}
+	 * supplied to this method may be {@code null}.
+	 * @param propertyName the name of the property, or {@code null} if not available
 	 * @param methodVisitor the ASM method visitor into which code should be generated
 	 * @param codeFlow the current state of the expression compiler
 	 */
-	void generateCode(String propertyName, MethodVisitor methodVisitor, CodeFlow codeFlow);
+	void generateCode(@Nullable String propertyName, MethodVisitor methodVisitor, CodeFlow codeFlow);
 
 }
