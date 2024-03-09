@@ -44,9 +44,6 @@ public class LockMixin extends DelegatingIntroductionInterceptor implements Lock
 		this.locked = false;
 	}
 
-	/**
-	 * @see org.springframework.aop.testfixture.mixin.Lockable#locked()
-	 */
 	@Override
 	public boolean locked() {
 		return this.locked;
@@ -54,10 +51,8 @@ public class LockMixin extends DelegatingIntroductionInterceptor implements Lock
 
 	/**
 	 * Note that we need to override around advice.
-	 * If the method is a setter and we're locked, prevent execution.
-	 * Otherwise let super.invoke() handle it, and do normal
-	 * Lockable(this) then target behaviour.
-	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(MethodInvocation)
+	 * If the method is a setter, and we're locked, prevent execution.
+	 * Otherwise, let super.invoke() handle it.
 	 */
 	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {

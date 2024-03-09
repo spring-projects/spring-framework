@@ -327,10 +327,7 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 		assertContextConfigEntriesAreNotUnique(SingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig.class);
 	}
 
-	/**
-	 * Used to reproduce bug reported in <a href="https://jira.spring.io/browse/SPR-10997">SPR-10997</a>
-	 */
-	@Test
+	@Test // SPR-10997
 	void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndOverriddenInitializers() {
 		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(TestClass2WithMultiLevelContextHierarchyWithOverriddenInitializers.class);
 
@@ -504,32 +501,24 @@ class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConfigurati
 	private static class SingleTestClassWithMultiLevelContextHierarchyWithDuplicatedContextConfig {
 	}
 
-	/**
-	 * Used to reproduce bug reported in <a href="https://jira.spring.io/browse/SPR-10997">SPR-10997</a>
-	 */
 	@ContextHierarchy({//
 	//
 		@ContextConfiguration(name = "alpha", locations = "1-A.xml"),//
 		@ContextConfiguration(name = "beta", locations = "1-B.xml") //
-	})
+	}) // SPR-10997
 	private static class TestClass1WithMultiLevelContextHierarchyWithUniqueContextConfig {
 	}
 
-	/**
-	 * Used to reproduce bug reported in <a href="https://jira.spring.io/browse/SPR-10997">SPR-10997</a>
-	 */
 	@ContextHierarchy({//
 	//
 		@ContextConfiguration(name = "alpha", initializers = DummyApplicationContextInitializer.class),//
 		@ContextConfiguration(name = "beta", initializers = DummyApplicationContextInitializer.class) //
-	})
+	}) // SPR-10997
 	private static class TestClass2WithMultiLevelContextHierarchyWithOverriddenInitializers extends
 			TestClass1WithMultiLevelContextHierarchyWithUniqueContextConfig {
 	}
 
-	/**
-	 * Used to reproduce bug reported in <a href="https://jira.spring.io/browse/SPR-10997">SPR-10997</a>
-	 */
+	// SPR-10997
 	private static class DummyApplicationContextInitializer implements
 			ApplicationContextInitializer<ConfigurableApplicationContext> {
 

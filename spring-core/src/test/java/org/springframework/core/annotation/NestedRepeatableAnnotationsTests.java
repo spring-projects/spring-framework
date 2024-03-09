@@ -39,7 +39,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sam Brannen
  * @since 5.3.24
- * @see <a href="https://github.com/spring-projects/spring-framework/issues/20279">gh-20279</a>
  */
 @SuppressWarnings("unused")
 class NestedRepeatableAnnotationsTests {

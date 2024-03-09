@@ -16,6 +16,7 @@
 
 package org.springframework.web.bind;
 
+import jakarta.servlet.ServletRequest;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
@@ -26,7 +27,8 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 
 /**
- * Benchmarks for extracting parameters from {@link jakarta.servlet.ServletRequest}.
+ * Benchmarks for extracting parameters from {@link ServletRequest}.
+ *
  * @author Brian Clozel
  */
 @BenchmarkMode(Mode.Throughput)

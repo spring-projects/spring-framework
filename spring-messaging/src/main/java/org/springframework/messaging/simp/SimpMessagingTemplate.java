@@ -130,8 +130,8 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * SimpMessageHeaderAccessor#DESTINATION_HEADER} then the message is sent without
 	 * further changes.
 	 * <p>If a destination header is not already present ,the message is sent
-	 * to the configured {@link AbstractMessageSendingTemplate#setDefaultDestination(Object) defaultDestination}
-	 * or an exception an {@code IllegalStateException} is raised if that isn't
+	 * to the configured {@link AbstractMessageSendingTemplate#setDefaultDestination(Object)
+	 * defaultDestination} or an {@code IllegalStateException} is raised if that isn't
 	 * configured.
 	 * @param message the message to send (never {@code null})
 	 */

@@ -30,12 +30,12 @@ import org.springframework.context.annotation.Configuration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for an issue raised in <a href="https://jira.spring.io/browse/SPR-15927">SPR-15927</a>.
+ * Integration tests for {@code SPR-15927}.
  *
  * @author Sam Brannen
  * @since 5.0
  */
-public class AutowiredRuleTests {
+public class AutowiredRuleSpr15927Tests {
 
 	@ClassRule
 	public static final SpringClassRule springClassRule = new SpringClassRule();

@@ -69,8 +69,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	/**
 	 * Indicates we're waiting for one last isReady-onWritePossible cycle
 	 * after "onComplete" because some Servlet containers expect this to take
-	 * place prior to calling AsyncContext.complete().
-	 * @see <a href="https://github.com/eclipse-ee4j/servlet-api/issues/273">gh-273</a>
+	 * place prior to calling AsyncContext.complete(). See also gh-273.
 	 */
 	private volatile boolean readyToCompleteAfterLastWrite;
 

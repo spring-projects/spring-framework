@@ -170,9 +170,8 @@ class UrlFilenameViewControllerTests {
 
 	/**
 	 * This is the expected behavior, and it now has a test to prove it.
-	 * @see <a href="https://opensource.atlassian.com/projects/spring/browse/SPR-2789">SPR-2789</a>
 	 */
-	@PathPatternsParameterizedTest
+	@PathPatternsParameterizedTest // SPR-2789
 	void nestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line(
 			Function<String, MockHttpServletRequest> requestFactory) throws Exception {
 

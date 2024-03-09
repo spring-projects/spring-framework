@@ -355,10 +355,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isEqualTo(existingAttribute);
 	}
 
-	/**
-	 * <a href="https://jira.spring.io/browse/SPR-2788">SPR-2788</a>
-	 */
-	@Test
+	@Test // SPR-2788
 	void asBodyTagWithErrorsAndExistingMessagesAttributeInNonPageScopeAreNotClobbered() throws Exception {
 		String existingAttribute = "something";
 		getPageContext().setAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, existingAttribute, PageContext.APPLICATION_SCOPE);
@@ -379,42 +376,27 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, PageContext.APPLICATION_SCOPE)).isEqualTo(existingAttribute);
 	}
 
-	/**
-	 * <a href="https://jira.spring.io/browse/SPR-2788">SPR-2788</a>
-	 */
-	@Test
+	@Test // SPR-2788
 	void asBodyTagWithNoErrorsAndExistingMessagesAttributeInApplicationScopeAreNotClobbered() throws Exception {
 		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.APPLICATION_SCOPE);
 	}
 
-	/**
-	 * <a href="https://jira.spring.io/browse/SPR-2788">SPR-2788</a>
-	 */
-	@Test
+	@Test // SPR-2788
 	void asBodyTagWithNoErrorsAndExistingMessagesAttributeInSessionScopeAreNotClobbered() throws Exception {
 		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.SESSION_SCOPE);
 	}
 
-	/**
-	 * <a href="https://jira.spring.io/browse/SPR-2788">SPR-2788</a>
-	 */
-	@Test
+	@Test // SPR-2788
 	void asBodyTagWithNoErrorsAndExistingMessagesAttributeInPageScopeAreNotClobbered() throws Exception {
 		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.PAGE_SCOPE);
 	}
 
-	/**
-	 * <a href="https://jira.spring.io/browse/SPR-2788">SPR-2788</a>
-	 */
-	@Test
+	@Test // SPR-2788
 	void asBodyTagWithNoErrorsAndExistingMessagesAttributeInRequestScopeAreNotClobbered() throws Exception {
 		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.REQUEST_SCOPE);
 	}
 
-	/**
-	 * <a href="https://jira.spring.io/browse/SPR-4005">SPR-4005</a>
-	 */
-	@Test
+	@Test // SPR-4005
 	void omittedPathMatchesObjectErrorsOnly() throws Exception {
 		this.tag.setPath(null);
 		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");

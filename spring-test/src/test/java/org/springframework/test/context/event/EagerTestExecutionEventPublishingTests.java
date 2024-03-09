@@ -50,7 +50,6 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
  *
  * @author Sam Brannen
  * @since 5.3.17
- * @see <a href="https://github.com/spring-projects/spring-framework/issues/27757">gh-27757</a>
  */
 class EagerTestExecutionEventPublishingTests {
 

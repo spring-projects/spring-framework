@@ -163,8 +163,8 @@ public class FunctionReference extends SpelNodeImpl {
 	/**
 	 * Execute a function represented as {@link MethodHandle}.
 	 * <p>Method types that take no arguments (fully bound handles or static methods
-	 * with no parameters) can use {@link MethodHandle#invoke(Object... var1)} which is the most
-	 * efficient. Otherwise, {@link MethodHandle#invokeWithArguments(Object... arguments)} is used.
+	 * with no parameters) can use {@link MethodHandle#invoke(Object...)} which is the most
+	 * efficient. Otherwise, {@link MethodHandle#invokeWithArguments(Object...)} is used.
 	 * @param state the expression evaluation state
 	 * @param methodHandle the method handle to invoke
 	 * @return the return value of the invoked Java method
