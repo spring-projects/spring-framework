@@ -100,12 +100,12 @@ class BeanOverrideParser {
 		MergedAnnotations.from(field, MergedAnnotations.SearchStrategy.DIRECT)
 				.stream(BeanOverride.class)
 				.map(bo -> {
-					var a = bo.getMetaSource();
+					MergedAnnotation<?> a = bo.getMetaSource();
 					Assert.notNull(a, "BeanOverride annotation must be meta-present");
 					return new AnnotationPair(a.synthesize(), bo);
 				})
 				.forEach(pair -> {
-					var metaAnnotation = pair.metaAnnotation().synthesize();
+					BeanOverride metaAnnotation = pair.metaAnnotation().synthesize();
 					final BeanOverrideProcessor processor = getProcessorInstance(metaAnnotation.value());
 					if (processor == null) {
 						return;

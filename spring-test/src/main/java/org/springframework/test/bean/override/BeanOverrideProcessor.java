@@ -26,7 +26,8 @@ import org.springframework.core.annotation.MergedAnnotation;
 
 /**
  * An interface for Bean Overriding concrete processing.
- * Processors are generally linked to one or more specific concrete annotations
+ *
+ * <p>Processors are generally linked to one or more specific concrete annotations
  * (meta-annotated with {@link BeanOverride}) and specify different steps in the
  * process of parsing these annotations, ultimately creating
  * {@link OverrideMetadata} which will be used to instantiate the overrides.
@@ -57,8 +58,8 @@ public interface BeanOverrideProcessor {
 	 * {@link #getOrDeduceType(Field, Annotation, Class) type}.
 	 * Specific implementations of metadata can have state to be used during
 	 * override {@link OverrideMetadata#createOverride(String, BeanDefinition,
-	 * Object) instance creation} (e.g. from further parsing the annotation or
-	 * the annotated field).
+	 * Object) instance creation}, that is from further parsing the annotation or
+	 * the annotated field.
 	 * @param field the annotated field
 	 * @param overrideAnnotation the field annotation
 	 * @param typeToOverride the target type

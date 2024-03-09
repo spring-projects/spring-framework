@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.ResolvableType;
@@ -37,8 +36,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Simple {@link BeanOverrideProcessor} primarily made to work with the
- * {@link TestBean} annotation but can work with arbitrary override annotations
+ * {@link BeanOverrideProcessor} implementation primarily made to work with
+ * {@link TestBean @TestBean}, but can work with arbitrary override annotations
  * provided the annotated class has a relevant method according to the
  * convention documented in {@link TestBean}.
  *
@@ -48,19 +47,20 @@ import org.springframework.util.StringUtils;
 public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	/**
-	 * Ensures the {@code enclosingClass} has a static, no-arguments method with
-	 * the provided {@code expectedMethodReturnType} and exactly one of the
+	 * Ensure the given {@code enclosingClass} has a static, no-arguments method
+	 * with the given {@code expectedMethodReturnType} and exactly one of the
 	 * {@code expectedMethodNames}.
 	 */
 	public static Method ensureMethod(Class<?> enclosingClass, Class<?> expectedMethodReturnType,
 			String... expectedMethodNames) {
+
 		Assert.isTrue(expectedMethodNames.length > 0, "At least one expectedMethodName is required");
 		Set<String> expectedNames = new LinkedHashSet<>(Arrays.asList(expectedMethodNames));
 		final List<Method> found = Arrays.stream(enclosingClass.getDeclaredMethods())
-				.filter(m -> Modifier.isStatic(m.getModifiers()))
-				.filter(m -> expectedNames.contains(m.getName()) && expectedMethodReturnType
-						.isAssignableFrom(m.getReturnType()))
-				.collect(Collectors.toList());
+				.filter(method -> Modifier.isStatic(method.getModifiers()))
+				.filter(method -> expectedNames.contains(method.getName())
+						&& expectedMethodReturnType.isAssignableFrom(method.getReturnType()))
+				.toList();
 
 		Assert.state(found.size() == 1, () -> "Found " + found.size() + " static methods " +
 				"instead of exactly one, matching a name in " + expectedNames + " with return type " +
@@ -87,7 +87,7 @@ public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 		}
 		// otherwise defer the resolution of the static method until OverrideMetadata#createOverride
 		return new MethodConventionOverrideMetadata(field, null, null, overrideAnnotation,
-					typeToOverride);
+				typeToOverride);
 	}
 
 	static final class MethodConventionOverrideMetadata extends OverrideMetadata {

@@ -34,11 +34,14 @@ import org.springframework.lang.Nullable;
 public abstract class OverrideMetadata {
 
 	private final Field field;
+
 	private final Annotation overrideAnnotation;
+
 	private final ResolvableType typeToOverride;
+
 	private final BeanOverrideStrategy strategy;
 
-	public OverrideMetadata(Field field, Annotation overrideAnnotation,
+	protected OverrideMetadata(Field field, Annotation overrideAnnotation,
 			ResolvableType typeToOverride, BeanOverrideStrategy strategy) {
 		this.field = field;
 		this.overrideAnnotation = overrideAnnotation;
@@ -47,50 +50,46 @@ public abstract class OverrideMetadata {
 	}
 
 	/**
-	 * Define a short human-readable description of the kind of override this
-	 * OverrideMetadata is about. This is especially useful for
-	 * {@link BeanOverrideProcessor} that produce several subtypes of metadata
-	 * (e.g. "mock" vs "spy").
+	 * Return a short human-readable description of the kind of override this
+	 * instance handles.
 	 */
 	public abstract String getBeanOverrideDescription();
 
 	/**
-	 * Provide the expected bean name to override. Typically, this is either
+	 * Return the expected bean name to override. Typically, this is either
 	 * explicitly set in the concrete annotations or defined by the annotated
 	 * field's name.
-	 * @return the expected bean name, not null
+	 * @return the expected bean name
 	 */
 	protected String getExpectedBeanName() {
 		return this.field.getName();
 	}
 
 	/**
-	 * The field annotated with a {@link BeanOverride}-compatible annotation.
-	 * @return the annotated field
+	 * Return the annotated {@link Field}.
 	 */
 	public Field field() {
 		return this.field;
 	}
 
 	/**
-	 * The concrete override annotation, i.e. the one meta-annotated with
-	 * {@link BeanOverride}.
+	 * Return the concrete override annotation, that is the one meta-annotated
+	 * with {@link BeanOverride}.
 	 */
 	public Annotation overrideAnnotation() {
 		return this.overrideAnnotation;
 	}
 
 	/**
-	 * The type to override, as a {@link ResolvableType}.
+	 * Return the bean {@link ResolvableType type} to override.
 	 */
 	public ResolvableType typeToOverride() {
 		return this.typeToOverride;
 	}
 
 	/**
-	 * Define the broad {@link BeanOverrideStrategy} for this
-	 * {@link OverrideMetadata}, as a hint on how and when the override instance
-	 * should be created.
+	 * Return the {@link BeanOverrideStrategy} for this instance, as a hint on
+	 * how and when the override instance should be created.
 	 */
 	public final BeanOverrideStrategy getBeanOverrideStrategy() {
 		return this.strategy;
@@ -99,7 +98,7 @@ public abstract class OverrideMetadata {
 	/**
 	 * Create an override instance from this {@link OverrideMetadata},
 	 * optionally provided with an existing {@link BeanDefinition} and/or an
-	 * original instance (i.e. a singleton or an early wrapped instance).
+	 * original instance, that is a singleton or an early wrapped instance.
 	 * @param beanName the name of the bean being overridden
 	 * @param existingBeanDefinition an existing bean definition for that bean
 	 * name, or {@code null} if not relevant
@@ -129,7 +128,7 @@ public abstract class OverrideMetadata {
 		if (obj == null || !getClass().isAssignableFrom(obj.getClass())) {
 			return false;
 		}
-		var that = (OverrideMetadata) obj;
+		OverrideMetadata that = (OverrideMetadata) obj;
 		return Objects.equals(this.field, that.field) &&
 				Objects.equals(this.overrideAnnotation, that.overrideAnnotation) &&
 				Objects.equals(this.strategy, that.strategy) &&

@@ -26,8 +26,8 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.util.ReflectionUtils;
 
 /**
- * A {@link TestExecutionListener} that enables Bean Override support in
- * tests, injecting overridden beans in appropriate fields.
+ * A {@link TestExecutionListener} implementation that enables Bean Override
+ * support in tests, injecting overridden beans in appropriate fields.
  *
  * <p>Some flavors of Bean Override might additionally require the use of
  * additional listeners, which should be mentioned in the annotation(s) javadoc.
