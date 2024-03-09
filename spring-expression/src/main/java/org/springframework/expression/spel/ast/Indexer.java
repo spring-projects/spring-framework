@@ -213,16 +213,17 @@ public class Indexer extends SpelNodeImpl {
 		if (this.indexedType == IndexedType.ARRAY) {
 			return (this.exitTypeDescriptor != null);
 		}
-		else if (this.indexedType == IndexedType.LIST) {
-			return this.children[0].isCompilable();
+		SpelNodeImpl index = this.children[0];
+		if (this.indexedType == IndexedType.LIST) {
+			return index.isCompilable();
 		}
 		else if (this.indexedType == IndexedType.MAP) {
-			return (this.children[0] instanceof PropertyOrFieldReference || this.children[0].isCompilable());
+			return (index instanceof PropertyOrFieldReference || index.isCompilable());
 		}
 		else if (this.indexedType == IndexedType.OBJECT) {
 			// If the string name is changing, the accessor is clearly going to change.
 			// So compilation is only possible if the index expression is a StringLiteral.
-			return (getChild(0) instanceof StringLiteral &&
+			return (index instanceof StringLiteral &&
 					this.cachedReadAccessor instanceof CompilablePropertyAccessor compilablePropertyAccessor &&
 					compilablePropertyAccessor.isCompilable());
 		}
@@ -238,6 +239,7 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		SpelNodeImpl index = this.children[0];
+
 		if (this.indexedType == IndexedType.ARRAY) {
 			int insn = switch (this.exitTypeDescriptor) {
 				case "D" -> {
@@ -313,9 +315,14 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		else if (this.indexedType == IndexedType.OBJECT) {
+			if (!(index instanceof StringLiteral stringLiteral)) {
+				throw new IllegalStateException(
+						"Index expression must be a StringLiteral, but was: " + index.getClass().getName());
+			}
 			CompilablePropertyAccessor compilablePropertyAccessor = (CompilablePropertyAccessor) this.cachedReadAccessor;
 			Assert.state(compilablePropertyAccessor != null, "No cached read accessor");
-			compilablePropertyAccessor.generateCode(null, mv, cf);
+			String propertyName = (String) stringLiteral.getLiteralValue().getValue();
+			compilablePropertyAccessor.generateCode(propertyName, mv, cf);
 		}
 
 		cf.pushDescriptor(this.exitTypeDescriptor);

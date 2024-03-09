@@ -712,7 +712,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		@Override
-		public void generateCode(@Nullable String propertyName, MethodVisitor mv, CodeFlow cf) {
+		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
 			Class<?> publicDeclaringClass = this.member.getDeclaringClass();
 			if (!Modifier.isPublic(publicDeclaringClass.getModifiers()) && this.originalMethod != null) {
 				publicDeclaringClass = ReflectionHelper.findPublicDeclaringClass(this.originalMethod);
