@@ -536,6 +536,14 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertCanCompile(expression);
 			assertThat(expression.getValue(map)).isEqualTo(111);
 			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// String key not enclosed in single quotes
+			expression = parser.parseExpression("[aaa]");
+
+			assertThat(expression.getValue(map)).isEqualTo(111);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(map)).isEqualTo(111);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
 		}
 
 		@Test
@@ -642,6 +650,19 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertCanCompile(expression);
 			assertThat(stringify(expression.getValue(context, map))).isEqualTo("3");
 			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
+		}
+
+		@Test
+		void indexIntoStringCannotBeCompiled() {
+			String text = "enigma";
+
+			// "g" is the 4th letter in "enigma" (index 3)
+			expression = parser.parseExpression("[3]");
+
+			assertThat(expression.getValue(text)).isEqualTo("g");
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(text)).isEqualTo("g");
+			assertThat(getAst().getExitDescriptor()).isNull();
 		}
 
 		@Test
