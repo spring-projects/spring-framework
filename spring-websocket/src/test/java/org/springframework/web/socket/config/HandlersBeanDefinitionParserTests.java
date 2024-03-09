@@ -315,32 +315,32 @@ class BarTestInterceptor extends FooTestInterceptor {
 class TestTaskScheduler implements TaskScheduler {
 
 	@Override
-	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
+	public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture schedule(Runnable task, Instant startTime) {
+	public ScheduledFuture<?> schedule(Runnable task, Instant startTime) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleAtFixedRate(Runnable task, Instant startTime, Duration period) {
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Instant startTime, Duration period) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleAtFixedRate(Runnable task, Duration period) {
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Duration period) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
 		return null;
 	}
 
 	@Override
-	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Duration delay) {
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay) {
 		return null;
 	}
 }
