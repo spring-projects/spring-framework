@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -51,8 +52,6 @@ import org.springframework.util.ObjectUtils;
  */
 @SuppressWarnings("serial")
 public class TypeDescriptor implements Serializable {
-
-	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
 	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<>(32);
 
@@ -84,7 +83,7 @@ public class TypeDescriptor implements Serializable {
 	public TypeDescriptor(MethodParameter methodParameter) {
 		this.resolvableType = ResolvableType.forMethodParameter(methodParameter);
 		this.type = this.resolvableType.resolve(methodParameter.getNestedParameterType());
-		this.annotatedElement = new AnnotatedElementAdapter(methodParameter.getParameterIndex() == -1 ?
+		this.annotatedElement = AnnotatedElementAdapter.from(methodParameter.getParameterIndex() == -1 ?
 				methodParameter.getMethodAnnotations() : methodParameter.getParameterAnnotations());
 	}
 
@@ -96,7 +95,7 @@ public class TypeDescriptor implements Serializable {
 	public TypeDescriptor(Field field) {
 		this.resolvableType = ResolvableType.forField(field);
 		this.type = this.resolvableType.resolve(field.getType());
-		this.annotatedElement = new AnnotatedElementAdapter(field.getAnnotations());
+		this.annotatedElement = AnnotatedElementAdapter.from(field.getAnnotations());
 	}
 
 	/**
@@ -109,7 +108,7 @@ public class TypeDescriptor implements Serializable {
 		Assert.notNull(property, "Property must not be null");
 		this.resolvableType = ResolvableType.forMethodParameter(property.getMethodParameter());
 		this.type = this.resolvableType.resolve(property.getType());
-		this.annotatedElement = new AnnotatedElementAdapter(property.getAnnotations());
+		this.annotatedElement = AnnotatedElementAdapter.from(property.getAnnotations());
 	}
 
 	/**
@@ -125,7 +124,7 @@ public class TypeDescriptor implements Serializable {
 	public TypeDescriptor(ResolvableType resolvableType, @Nullable Class<?> type, @Nullable Annotation[] annotations) {
 		this.resolvableType = resolvableType;
 		this.type = (type != null ? type : resolvableType.toClass());
-		this.annotatedElement = new AnnotatedElementAdapter(annotations);
+		this.annotatedElement = AnnotatedElementAdapter.from(annotations);
 	}
 
 
@@ -742,13 +741,21 @@ public class TypeDescriptor implements Serializable {
 	 * @see AnnotatedElementUtils#isAnnotated(AnnotatedElement, Class)
 	 * @see AnnotatedElementUtils#getMergedAnnotation(AnnotatedElement, Class)
 	 */
-	private class AnnotatedElementAdapter implements AnnotatedElement, Serializable {
+	private static final class AnnotatedElementAdapter implements AnnotatedElement, Serializable {
+		private static final AnnotatedElementAdapter EMPTY = new AnnotatedElementAdapter(new Annotation[0]);
 
-		@Nullable
+		@NonNull
 		private final Annotation[] annotations;
 
-		public AnnotatedElementAdapter(@Nullable Annotation[] annotations) {
+		private AnnotatedElementAdapter(@NonNull Annotation[] annotations) {
 			this.annotations = annotations;
+		}
+
+		private static AnnotatedElementAdapter from(@Nullable Annotation[] annotations) {
+			if (annotations == null || annotations.length == 0) {
+				return EMPTY;
+			}
+			return new AnnotatedElementAdapter(annotations);
 		}
 
 		@Override
@@ -775,7 +782,7 @@ public class TypeDescriptor implements Serializable {
 
 		@Override
 		public Annotation[] getAnnotations() {
-			return (this.annotations != null ? this.annotations.clone() : EMPTY_ANNOTATION_ARRAY);
+			return isEmpty() ? this.annotations : this.annotations.clone();
 		}
 
 		@Override
@@ -784,7 +791,7 @@ public class TypeDescriptor implements Serializable {
 		}
 
 		public boolean isEmpty() {
-			return ObjectUtils.isEmpty(this.annotations);
+			return this.annotations.length == 0;
 		}
 
 		@Override
@@ -800,7 +807,7 @@ public class TypeDescriptor implements Serializable {
 
 		@Override
 		public String toString() {
-			return TypeDescriptor.this.toString();
+			return "{AnnotatedElementAdapter annotations=" + Arrays.toString(this.annotations) + "}";
 		}
 	}
 
