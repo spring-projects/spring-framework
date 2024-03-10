@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -742,9 +742,9 @@ public class TypeDescriptor implements Serializable {
 	 * @see AnnotatedElementUtils#getMergedAnnotation(AnnotatedElement, Class)
 	 */
 	private static final class AnnotatedElementAdapter implements AnnotatedElement, Serializable {
+
 		private static final AnnotatedElementAdapter EMPTY = new AnnotatedElementAdapter(new Annotation[0]);
 
-		@NonNull
 		private final Annotation[] annotations;
 
 		private AnnotatedElementAdapter(@NonNull Annotation[] annotations) {
@@ -782,7 +782,7 @@ public class TypeDescriptor implements Serializable {
 
 		@Override
 		public Annotation[] getAnnotations() {
-			return isEmpty() ? this.annotations : this.annotations.clone();
+			return (isEmpty() ? this.annotations : this.annotations.clone());
 		}
 
 		@Override
@@ -791,7 +791,7 @@ public class TypeDescriptor implements Serializable {
 		}
 
 		public boolean isEmpty() {
-			return this.annotations.length == 0;
+			return (this.annotations.length == 0);
 		}
 
 		@Override
@@ -807,7 +807,7 @@ public class TypeDescriptor implements Serializable {
 
 		@Override
 		public String toString() {
-			return "{AnnotatedElementAdapter annotations=" + Arrays.toString(this.annotations) + "}";
+			return "AnnotatedElementAdapter annotations=" + Arrays.toString(this.annotations);
 		}
 	}
 
