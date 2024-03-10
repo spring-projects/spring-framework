@@ -39,8 +39,8 @@
 ** xref:core/resources.adoc[]
 ** xref:core/validation.adoc[]
 *** xref:core/validation/validator.adoc[]
-*** xref:core/validation/conversion.adoc[]
 *** xref:core/validation/beans-beans.adoc[]
+*** xref:core/validation/conversion.adoc[]
 *** xref:core/validation/convert.adoc[]
 *** xref:core/validation/format.adoc[]
 *** xref:core/validation/format-configuring-formatting-globaldatetimeformat.adoc[]
@@ -441,3 +441,4 @@
 ** xref:languages/dynamic.adoc[]
 * xref:appendix.adoc[]
 * {spring-framework-wiki}[Wiki]
+
