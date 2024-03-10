@@ -167,6 +167,22 @@ class HeaderMethodArgumentResolverTests {
 		System.clearProperty("systemProperty");
 	}
 
+	@Test
+	void notNullablePrimitiveParameterFromSystemPropertyThroughPlaceholder() {
+		String expected = "sysbar";
+		System.setProperty("systemProperty", expected);
+		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
+		MethodParameter param = this.resolvable.annot(header("${systemProperty}").required(false)).arg();
+
+		assertThatThrownBy(() ->
+				resolver.resolveArgument(param, message))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining(expected);
+
+		System.clearProperty("systemProperty");
+	}
+
+
 	@SuppressWarnings({"unchecked", "ConstantConditions"})
 	private <T> T resolveArgument(MethodParameter param, Message<?> message) {
 		return (T) this.resolver.resolveArgument(param, message).block(Duration.ofSeconds(5));
@@ -181,7 +197,8 @@ class HeaderMethodArgumentResolverTests {
 			@Header(name = "#{systemProperties.systemProperty}") String param4,
 			String param5,
 			@Header("foo") Optional<String> param6,
-			@Header("nativeHeaders.param1") String nativeHeaderParam1) {
+			@Header("nativeHeaders.param1") String nativeHeaderParam1,
+			@Header(name = "${systemProperty}", required = false) int primitivePlaceholderParam) {
 	}
 
 

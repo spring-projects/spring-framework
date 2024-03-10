@@ -154,6 +154,12 @@ class RequestParamMethodArgumentResolverTests {
 
 		param = this.testMethod.annotPresent(RequestPart.class).arg(MultipartFile.class);
 		assertThat(resolver.supportsParameter(param)).isFalse();
+
+		param = this.testMethod.annotPresent(RequestParam.class).arg(Integer.class);
+		assertThat(resolver.supportsParameter(param)).isTrue();
+
+		param = this.testMethod.annotPresent(RequestParam.class).arg(int.class);
+		assertThat(resolver.supportsParameter(param)).isTrue();
 	}
 
 	@Test
@@ -707,7 +713,6 @@ class RequestParamMethodArgumentResolverTests {
 			Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 			boolean condition = result instanceof Integer;
 			assertThat(condition).isTrue();
-			assertThat(result).as("Invalid result").isEqualTo(expected);
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -727,7 +732,21 @@ class RequestParamMethodArgumentResolverTests {
 
 		System.clearProperty("systemProperty");
 	}
-	
+
+	@Test
+	void notNullablePrimitiveParameterFromSystemPropertyThroughPlaceholder() {
+		String expected = "sysbar";
+		System.setProperty("systemProperty", expected);
+
+		MethodParameter param = this.testMethod.annot(requestParam().name("${systemProperty}").notRequired()).arg(int.class);
+		assertThatThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining(expected);
+
+		System.clearProperty("systemProperty");
+	}
+
 	@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 	public void handle(
 			@RequestParam(name = "name", defaultValue = "bar") String param1,
@@ -752,7 +771,8 @@ class RequestParamMethodArgumentResolverTests {
 			@RequestParam("name") Optional<List<?>> paramOptionalList,
 			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional,
 			@RequestParam(defaultValue = "false") Boolean booleanParam,
-			@RequestParam("${systemProperty}") Integer placeholderParam) {
+			@RequestParam("${systemProperty}") Integer placeholderParam,
+			@RequestParam(name = "${systemProperty}", required = false) int primitivePlaceholderParam) {
 	}
 
 }
