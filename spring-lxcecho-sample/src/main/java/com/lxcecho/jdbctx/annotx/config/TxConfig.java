@@ -25,7 +25,7 @@ public class TxConfig {
 		dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		dataSource.setUsername("root");
 		dataSource.setPassword("Amecho00#");
-		dataSource.setUrl("jdbc:mysql://localhost:3306/spring?characterEncoding=utf8&useSSL=false");
+		dataSource.setUrl("jdbc:mysql://localhost:3306/spring?characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true");
 		return dataSource;
 	}
 
