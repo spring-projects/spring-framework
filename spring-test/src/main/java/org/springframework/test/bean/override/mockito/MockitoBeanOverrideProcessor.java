@@ -40,7 +40,8 @@ public class MockitoBeanOverrideProcessor implements BeanOverrideProcessor {
 		else if (overrideAnnotation instanceof MockitoSpyBean spyBean) {
 			return new SpyDefinition(spyBean, field, typeToMock);
 		}
-		throw new IllegalArgumentException("Invalid annotation for MockitoBeanOverrideProcessor: " + overrideAnnotation.getClass().getName());
+		throw new IllegalArgumentException("Invalid annotation for MockitoBeanOverrideProcessor: " +
+				overrideAnnotation.getClass().getName());
 	}
 
 }

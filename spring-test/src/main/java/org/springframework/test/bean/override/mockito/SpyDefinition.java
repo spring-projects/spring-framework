@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.bean.override.mockito;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
-import java.util.Objects;
 
 import org.mockito.AdditionalAnswers;
 import org.mockito.MockSettings;
@@ -43,6 +42,7 @@ import static org.mockito.Mockito.mock;
  * A complete definition that can be used to create a Mockito spy.
  *
  * @author Phillip Webb
+ * @since 6.2
  */
 class SpyDefinition extends Definition {
 
@@ -53,9 +53,11 @@ class SpyDefinition extends Definition {
 
 	SpyDefinition(String name, MockReset reset, boolean proxyTargetAware, Field field, Annotation annotation,
 			ResolvableType typeToSpy) {
+
 		super(name, reset, proxyTargetAware, field, annotation, typeToSpy, BeanOverrideStrategy.WRAP_EARLY_BEAN);
 		Assert.notNull(typeToSpy, "typeToSpy must not be null");
 	}
+
 
 	@Override
 	public String getBeanOverrideDescription() {
@@ -63,39 +65,41 @@ class SpyDefinition extends Definition {
 	}
 
 	@Override
-	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition, @Nullable Object existingBeanInstance) {
-		return createSpy(beanName, Objects.requireNonNull(existingBeanInstance,
-				"MockitoSpyBean requires an existing bean instance for bean " + beanName));
+	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
+			@Nullable Object existingBeanInstance) {
+
+		Assert.notNull(existingBeanInstance,
+				() -> "MockitoSpyBean requires an existing bean instance for bean " + beanName);
+		return createSpy(beanName, existingBeanInstance);
 	}
 
 	@Override
 	public boolean equals(@Nullable Object obj) {
-		//for SpyBean we want the class to be exactly the same
+		// For SpyBean we want the class to be exactly the same.
 		if (obj == this) {
 			return true;
 		}
 		if (obj == null || obj.getClass() != getClass()) {
 			return false;
 		}
-		SpyDefinition other = (SpyDefinition) obj;
-		boolean result = super.equals(obj);
-		result = result && ObjectUtils.nullSafeEquals(this.typeToOverride(), other.typeToOverride());
-		return result;
+		SpyDefinition that = (SpyDefinition) obj;
+		return (super.equals(obj) && ObjectUtils.nullSafeEquals(typeToOverride(), that.typeToOverride()));
 	}
 
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
-		result = MULTIPLIER * result + ObjectUtils.nullSafeHashCode(this.typeToOverride());
+		result = MULTIPLIER * result + ObjectUtils.nullSafeHashCode(typeToOverride());
 		return result;
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringCreator(this).append("name", this.name)
-			.append("typeToSpy", typeToOverride())
-			.append("reset", getReset())
-			.toString();
+		return new ToStringCreator(this)
+				.append("name", this.name)
+				.append("typeToSpy", typeToOverride())
+				.append("reset", getReset())
+				.toString();
 	}
 
 	<T> T createSpy(Object instance) {
@@ -105,7 +109,9 @@ class SpyDefinition extends Definition {
 	@SuppressWarnings("unchecked")
 	<T> T createSpy(String name, Object instance) {
 		Assert.notNull(instance, "Instance must not be null");
-		Assert.isInstanceOf(Objects.requireNonNull(this.typeToOverride().resolve()), instance);
+		Class<?> resolvedTypeToOverride = typeToOverride().resolve();
+		Assert.notNull(resolvedTypeToOverride, "Failed to resolve type to override");
+		Assert.isInstanceOf(resolvedTypeToOverride, instance);
 		if (Mockito.mockingDetails(instance).isSpy()) {
 			return (T) instance;
 		}
@@ -119,7 +125,7 @@ class SpyDefinition extends Definition {
 		Class<?> toSpy;
 		if (Proxy.isProxyClass(instance.getClass())) {
 			settings.defaultAnswer(AdditionalAnswers.delegatesTo(instance));
-			toSpy = this.typeToOverride().toClass();
+			toSpy = typeToOverride().toClass();
 		}
 		else {
 			settings.defaultAnswer(Mockito.CALLS_REAL_METHODS);

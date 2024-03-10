@@ -19,7 +19,6 @@ package org.springframework.test.bean.override;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanWrapper;
@@ -47,18 +46,14 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
- * Test for {@link BeanOverrideBeanPostProcessor}.
+ * Tests for for {@link BeanOverrideBeanPostProcessor}.
  *
  * @author Simon Baslé
  */
 class BeanOverrideBeanPostProcessorTests {
 
-	BeanOverrideParser parser;
+	private final BeanOverrideParser parser = new BeanOverrideParser();
 
-	@BeforeEach
-	void initParser() {
-		this.parser = new BeanOverrideParser();
-	}
 
 	@Test
 	void canReplaceExistingBeanDefinitions() {
@@ -83,8 +78,9 @@ class BeanOverrideBeanPostProcessorTests {
 		context.register(ReplaceBeans.class);
 		//note we don't register any original bean here
 
-		assertThatIllegalStateException().isThrownBy(context::refresh).withMessage("Unable to override test bean, " +
-				"expected a bean definition to replace with name 'explicit'");
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("Unable to override test bean; expected a bean definition to replace with name 'explicit'");
 	}
 
 	@Test
@@ -125,7 +121,9 @@ class BeanOverrideBeanPostProcessorTests {
 		factoryBeanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, SomeInterface.class);
 		context.registerBeanDefinition("beanToBeOverridden", factoryBeanDefinition);
 		context.register(OverriddenFactoryBean.class);
+
 		context.refresh();
+
 		assertThat(context.getBean("beanToBeOverridden")).isSameAs(OVERRIDE);
 	}
 
@@ -139,10 +137,11 @@ class BeanOverrideBeanPostProcessorTests {
 		factoryBeanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, objectType);
 		context.registerBeanDefinition("beanToBeOverridden", factoryBeanDefinition);
 		context.register(OverriddenFactoryBean.class);
+
 		context.refresh();
+
 		assertThat(context.getBean("beanToBeOverridden")).isSameAs(OVERRIDE);
 	}
-
 
 	@Test
 	void postProcessorShouldNotTriggerEarlyInitialization() {
@@ -192,6 +191,7 @@ class BeanOverrideBeanPostProcessorTests {
 				.matches(Predicate.not(BeanDefinition::isPrototype), "!isPrototype");
 	}
 
+
 	/*
 		Classes to parse and register with the bean post processor
 		-----
@@ -228,7 +228,6 @@ class BeanOverrideBeanPostProcessorTests {
 		static ExampleService useThis() {
 			return OVERRIDE_SERVICE;
 		}
-
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -245,7 +244,6 @@ class BeanOverrideBeanPostProcessorTests {
 		TestFactoryBean testFactoryBean() {
 			return new TestFactoryBean();
 		}
-
 	}
 
 	static class EagerInitBean {
@@ -256,7 +254,6 @@ class BeanOverrideBeanPostProcessorTests {
 		static ExampleService useThis() {
 			return OVERRIDE_SERVICE;
 		}
-
 	}
 
 	static class SingletonBean {
@@ -268,7 +265,6 @@ class BeanOverrideBeanPostProcessorTests {
 		static String useThis() {
 			return "USED THIS";
 		}
-
 	}
 
 	static class TestFactoryBean implements FactoryBean<Object> {
@@ -287,7 +283,6 @@ class BeanOverrideBeanPostProcessorTests {
 		public boolean isSingleton() {
 			return true;
 		}
-
 	}
 
 	static class FactoryBeanRegisteringPostProcessor implements BeanFactoryPostProcessor, Ordered {
@@ -302,7 +297,6 @@ class BeanOverrideBeanPostProcessorTests {
 		public int getOrder() {
 			return Ordered.HIGHEST_PRECEDENCE;
 		}
-
 	}
 
 	static class EarlyBeanInitializationDetector implements BeanFactoryPostProcessor {
@@ -314,15 +308,12 @@ class BeanOverrideBeanPostProcessorTests {
 					"factoryBeanInstanceCache");
 			Assert.isTrue(cache.isEmpty(), "Early initialization of factory bean triggered.");
 		}
-
 	}
 
 	interface SomeInterface {
-
 	}
 
 	static class SomeImplementation implements SomeInterface {
-
 	}
 
 }

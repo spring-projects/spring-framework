@@ -25,15 +25,13 @@ import org.springframework.test.bean.override.OverrideMetadata;
 
 public class ExampleBeanOverrideProcessor implements BeanOverrideProcessor {
 
-	public ExampleBeanOverrideProcessor() {
-	}
-
 	private static final TestOverrideMetadata CONSTANT = new TestOverrideMetadata() {
 		@Override
 		public String toString() {
 			return "{DUPLICATE_TRIGGER}";
 		}
 	};
+
 	public static final String DUPLICATE_TRIGGER = "CONSTANT";
 
 	@Override
@@ -46,4 +44,5 @@ public class ExampleBeanOverrideProcessor implements BeanOverrideProcessor {
 		}
 		return new TestOverrideMetadata(field, annotation, typeToOverride);
 	}
+
 }

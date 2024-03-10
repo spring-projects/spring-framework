@@ -25,7 +25,6 @@ import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.util.ClassUtils;
@@ -33,27 +32,28 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
 /**
- * {@link TestExecutionListener} to enable {@link MockitoBean @MockitoBean} and
+ * {@code TestExecutionListener} that enables {@link MockitoBean @MockitoBean} and
  * {@link MockitoSpyBean @MockitoSpyBean} support. Also triggers
  * {@link MockitoAnnotations#openMocks(Object)} when any Mockito annotations are
- * used, primarily to allow {@link Captor @Captor} annotations.
- * <p>
- * The automatic reset support of {@code @MockBean} and {@code @SpyBean} is
- * handled by sibling {@link MockitoResetTestExecutionListener}.
+ * used, primarily to support {@link Captor @Captor} annotations.
+ *
+ * <p>The automatic reset support for {@code @MockBean} and {@code @SpyBean} is
+ * handled by the {@link MockitoResetTestExecutionListener}.
  *
  * @author Simon Baslé
  * @author Phillip Webb
  * @author Andy Wilkinson
  * @author Moritz Halbritter
- * @since 1.4.2
+ * @since 6.2
  * @see MockitoResetTestExecutionListener
  */
 public class MockitoTestExecutionListener extends AbstractTestExecutionListener {
 
+	private static final String MOCKS_ATTRIBUTE_NAME = MockitoTestExecutionListener.class.getName() + ".mocks";
+
 	static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.MockSettings",
 			MockitoTestExecutionListener.class.getClassLoader());
 
-	private static final String MOCKS_ATTRIBUTE_NAME = MockitoTestExecutionListener.class.getName() + ".mocks";
 
 	/**
 	 * Executes before {@link DependencyInjectionTestExecutionListener}.
@@ -109,22 +109,23 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 	}
 
 	private boolean hasMockitoAnnotations(TestContext testContext) {
-		MockitoAnnotationCollection collector = new MockitoAnnotationCollection();
+		MockitoAnnotationCollector collector = new MockitoAnnotationCollector();
 		ReflectionUtils.doWithFields(testContext.getTestClass(), collector);
 		return collector.hasAnnotations();
 	}
 
+
 	/**
-	 * {@link FieldCallback} to collect Mockito annotations.
+	 * {@link FieldCallback} that collects Mockito annotations.
 	 */
-	private static final class MockitoAnnotationCollection implements FieldCallback {
+	private static final class MockitoAnnotationCollector implements FieldCallback {
 
 		private final Set<Annotation> annotations = new LinkedHashSet<>();
 
 		@Override
 		public void doWith(Field field) throws IllegalArgumentException {
-			for (Annotation annotation : field.getDeclaredAnnotations()) {
-				if (annotation.annotationType().getName().startsWith("org.mockito")) {
+			for (Annotation annotation : field.getAnnotations()) {
+				if (annotation.annotationType().getPackageName().startsWith("org.mockito")) {
 					this.annotations.add(annotation);
 				}
 			}

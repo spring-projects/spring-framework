@@ -53,19 +53,20 @@ import org.springframework.util.StringUtils;
 
 /**
  * A {@link BeanFactoryPostProcessor} used to register and inject overriding
- * bean metadata with the {@link ApplicationContext}. A set of
- * {@link OverrideMetadata} must be passed to the processor.
- * A {@link BeanOverrideParser} can typically be used to parse these from test
- * classes that use any annotation meta-annotated with {@link BeanOverride} to
- * mark override sites.
+ * bean metadata with the {@link ApplicationContext}.
  *
- * <p>This processor supports two {@link BeanOverrideStrategy}:
+ * <p>A set of {@link OverrideMetadata} must be provided to this processor. A
+ * {@link BeanOverrideParser} can typically be used to parse this metadata from
+ * test classes that use any annotation meta-annotated with
+ * {@link BeanOverride @BeanOverride} to mark override sites.
+ *
+ * <p>This processor supports two types of {@link BeanOverrideStrategy}:
  * <ul>
- * <li>replacing a given bean's definition, immediately preparing a singleton
+ * <li>Replacing a given bean's definition, immediately preparing a singleton
  * instance</li>
- * <li>intercepting the actual bean instance upon creation and wrapping it,
+ * <li>Intercepting the actual bean instance upon creation and wrapping it,
  * using the early bean definition mechanism of
- * {@link SmartInstantiationAwareBeanPostProcessor}).</li>
+ * {@link SmartInstantiationAwareBeanPostProcessor}</li>
  * </ul>
  *
  * <p>This processor also provides support for injecting the overridden bean
@@ -78,19 +79,25 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 		BeanFactoryAware, BeanFactoryPostProcessor, Ordered {
 
 	private static final String INFRASTRUCTURE_BEAN_NAME = BeanOverrideBeanPostProcessor.class.getName();
-	private static final String EARLY_INFRASTRUCTURE_BEAN_NAME = BeanOverrideBeanPostProcessor.WrapEarlyBeanPostProcessor.class.getName();
 
-	private final Set<OverrideMetadata> overrideMetadata;
+	private static final String EARLY_INFRASTRUCTURE_BEAN_NAME =
+			BeanOverrideBeanPostProcessor.WrapEarlyBeanPostProcessor.class.getName();
+
+
 	private final Map<String, OverrideMetadata> earlyOverrideMetadata = new HashMap<>();
-
-	private ConfigurableListableBeanFactory beanFactory;
 
 	private final Map<OverrideMetadata, String> beanNameRegistry = new HashMap<>();
 
 	private final Map<Field, String> fieldRegistry = new HashMap<>();
 
+	private final Set<OverrideMetadata> overrideMetadata;
+
+	@Nullable
+	private ConfigurableListableBeanFactory beanFactory;
+
+
 	/**
-	 * Create a new {@link BeanOverrideBeanPostProcessor} instance with the
+	 * Create a new {@code BeanOverrideBeanPostProcessor} instance with the
 	 * given {@link OverrideMetadata} set.
 	 * @param overrideMetadata the initial override metadata
 	 */
@@ -107,7 +114,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, beanFactory,
-				"Beans overriding can only be used with a ConfigurableListableBeanFactory");
+				"Bean overriding can only be used with a ConfigurableListableBeanFactory");
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
 
@@ -120,7 +127,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		Assert.state(this.beanFactory == beanFactory, "Unexpected beanFactory to postProcess");
+		Assert.state(this.beanFactory == beanFactory, "Unexpected BeanFactory to post-process");
 		Assert.isInstanceOf(BeanDefinitionRegistry.class, beanFactory,
 				"Bean overriding annotations can only be used on bean factories that implement "
 						+ "BeanDefinitionRegistry");
@@ -128,17 +135,17 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 	}
 
 	private void postProcessWithRegistry(BeanDefinitionRegistry registry) {
-		//Note that a tracker bean is registered down the line only if there is some overrideMetadata parsed
-		Set<OverrideMetadata> overrideMetadata = getOverrideMetadata();
-		for (OverrideMetadata metadata : overrideMetadata) {
+		// Note that a tracker bean is registered down the line only if there is some overrideMetadata parsed.
+		for (OverrideMetadata metadata : getOverrideMetadata()) {
 			registerBeanOverride(registry, metadata);
 		}
 	}
 
 	/**
-	 * Copy the details of a {@link BeanDefinition} to the definition created by
-	 * this processor for a given {@link OverrideMetadata}. Defaults to copying
-	 * the {@link BeanDefinition#isPrimary()} attribute and scope.
+	 * Copy certain details of a {@link BeanDefinition} to the definition created by
+	 * this processor for a given {@link OverrideMetadata}.
+	 * <p>The default implementation copies the {@linkplain BeanDefinition#isPrimary()
+	 * primary flag} and the {@linkplain BeanDefinition#getScope() scope}.
 	 */
 	protected void copyBeanDefinitionDetails(BeanDefinition from, RootBeanDefinition to) {
 		to.setPrimary(from.isPrimary());
@@ -155,6 +162,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 
 	private void registerReplaceDefinition(BeanDefinitionRegistry registry, OverrideMetadata overrideMetadata,
 			boolean enforceExistingDefinition) {
+
 		RootBeanDefinition beanDefinition = createBeanDefinition(overrideMetadata);
 		String beanName = overrideMetadata.getExpectedBeanName();
 
@@ -166,7 +174,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 		}
 		else if (enforceExistingDefinition) {
 			throw new IllegalStateException("Unable to override " + overrideMetadata.getBeanOverrideDescription() +
-					" bean, expected a bean definition to replace with name '" + beanName + "'");
+					" bean; expected a bean definition to replace with name '" + beanName + "'");
 		}
 		registry.registerBeanDefinition(beanName, beanDefinition);
 
@@ -185,10 +193,10 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 
 	/**
 	 * Check that the expected bean name is registered and matches the type to override.
-	 * If so, put the override metadata in the early tracking map.
-	 * The map will later be checked to see if a given bean should be wrapped
+	 * <p>If so, put the override metadata in the early tracking map.
+	 * <p>The map will later be checked to see if a given bean should be wrapped
 	 * upon creation, during the {@link WrapEarlyBeanPostProcessor#getEarlyBeanReference(Object, String)}
-	 * phase
+	 * phase.
 	 */
 	private void registerWrapEarly(OverrideMetadata metadata) {
 		Set<String> existingBeanNames = getExistingBeanNames(metadata.typeToOverride());
@@ -203,11 +211,12 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 	}
 
 	/**
-	 * Check early overrides records and use the {@link OverrideMetadata} to
+	 * Check early override records and use the {@link OverrideMetadata} to
 	 * create an override instance from the provided bean, if relevant.
 	 * <p>Called during the {@link SmartInstantiationAwareBeanPostProcessor}
-	 * phases (see {@link WrapEarlyBeanPostProcessor#getEarlyBeanReference(Object, String)}
-	 * and {@link WrapEarlyBeanPostProcessor#postProcessAfterInitialization(Object, String)}).
+	 * phases.
+	 * @see WrapEarlyBeanPostProcessor#getEarlyBeanReference(Object, String)
+	 * @see WrapEarlyBeanPostProcessor#postProcessAfterInitialization(Object, String)
 	 */
 	protected final Object wrapIfNecessary(Object bean, String beanName) throws BeansException {
 		final OverrideMetadata metadata = this.earlyOverrideMetadata.get(beanName);
@@ -236,24 +245,8 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 				beans.add(beanName);
 			}
 		}
-		beans.removeIf(this::isScopedTarget);
+		beans.removeIf(ScopedProxyUtils::isScopedTarget);
 		return beans;
-	}
-
-	private boolean isScopedTarget(String beanName) {
-		try {
-			return ScopedProxyUtils.isScopedTarget(beanName);
-		}
-		catch (Throwable ex) {
-			return false;
-		}
-	}
-
-	private void postProcessField(Object bean, Field field) {
-		String beanName = this.fieldRegistry.get(field);
-		if (StringUtils.hasText(beanName)) {
-			inject(field, bean, beanName);
-		}
 	}
 
 	@Override
@@ -263,9 +256,17 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 		return pvs;
 	}
 
+	private void postProcessField(Object bean, Field field) {
+		String beanName = this.fieldRegistry.get(field);
+		if (StringUtils.hasText(beanName)) {
+			inject(field, bean, beanName);
+		}
+	}
+
 	void inject(Field field, Object target, OverrideMetadata overrideMetadata) {
 		String beanName = this.beanNameRegistry.get(overrideMetadata);
-		Assert.state(StringUtils.hasLength(beanName), () -> "No bean found for overrideMetadata " + overrideMetadata);
+		Assert.state(StringUtils.hasLength(beanName),
+				() -> "No bean found for OverrideMetadata: " + overrideMetadata);
 		inject(field, target, beanName);
 	}
 
@@ -287,25 +288,26 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 	}
 
 	/**
-	 * Register the processor with a {@link BeanDefinitionRegistry}.
-	 * Not required when using the Spring TestContext Framework, as registration
-	 * is automatic via the {@link org.springframework.core.io.support.SpringFactoriesLoader SpringFactoriesLoader}
+	 * Register a {@link BeanOverrideBeanPostProcessor} with a {@link BeanDefinitionRegistry}.
+	 * <p>Not required when using the Spring TestContext Framework, as registration
+	 * is automatic via the
+	 * {@link org.springframework.core.io.support.SpringFactoriesLoader SpringFactoriesLoader}
 	 * mechanism.
 	 * @param registry the bean definition registry
 	 * @param overrideMetadata the initial override metadata set
 	 */
 	public static void register(BeanDefinitionRegistry registry, @Nullable Set<OverrideMetadata> overrideMetadata) {
-		//early processor
-		getOrAddInfrastructureBeanDefinition(registry, WrapEarlyBeanPostProcessor.class, EARLY_INFRASTRUCTURE_BEAN_NAME,
-				constructorArguments -> constructorArguments.addIndexedArgumentValue(0,
-						new RuntimeBeanReference(INFRASTRUCTURE_BEAN_NAME)));
+		// Early processor
+		getOrAddInfrastructureBeanDefinition(
+				registry, WrapEarlyBeanPostProcessor.class, EARLY_INFRASTRUCTURE_BEAN_NAME, constructorArgs ->
+					constructorArgs.addIndexedArgumentValue(0, new RuntimeBeanReference(INFRASTRUCTURE_BEAN_NAME)));
 
-		//main processor
-		BeanDefinition definition = getOrAddInfrastructureBeanDefinition(registry, BeanOverrideBeanPostProcessor.class,
-				INFRASTRUCTURE_BEAN_NAME, constructorArguments -> constructorArguments
-						.addIndexedArgumentValue(0, new LinkedHashSet<OverrideMetadata>()));
-		ConstructorArgumentValues.ValueHolder constructorArg = definition.getConstructorArgumentValues()
-				.getIndexedArgumentValue(0, Set.class);
+		// Main processor
+		BeanDefinition definition = getOrAddInfrastructureBeanDefinition(
+				registry, BeanOverrideBeanPostProcessor.class, INFRASTRUCTURE_BEAN_NAME, constructorArgs ->
+					constructorArgs.addIndexedArgumentValue(0, new LinkedHashSet<OverrideMetadata>()));
+		ConstructorArgumentValues.ValueHolder constructorArg =
+				definition.getConstructorArgumentValues().getIndexedArgumentValue(0, Set.class);
 		@SuppressWarnings("unchecked")
 		Set<OverrideMetadata> existing = (Set<OverrideMetadata>) constructorArg.getValue();
 		if (overrideMetadata != null && existing != null) {
@@ -315,6 +317,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 
 	private static BeanDefinition getOrAddInfrastructureBeanDefinition(BeanDefinitionRegistry registry,
 			Class<?> clazz, String beanName, Consumer<ConstructorArgumentValues> constructorArgumentsConsumer) {
+
 		if (!registry.containsBeanDefinition(beanName)) {
 			RootBeanDefinition definition = new RootBeanDefinition(clazz);
 			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -326,16 +329,20 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 		return registry.getBeanDefinition(beanName);
 	}
 
+
 	private static final class WrapEarlyBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
 			PriorityOrdered {
 
 		private final BeanOverrideBeanPostProcessor mainProcessor;
+
 		private final Map<String, Object> earlyReferences;
+
 
 		private WrapEarlyBeanPostProcessor(BeanOverrideBeanPostProcessor mainProcessor) {
 			this.mainProcessor = mainProcessor;
 			this.earlyReferences = new ConcurrentHashMap<>(16);
 		}
+
 
 		@Override
 		public int getOrder() {
@@ -363,8 +370,9 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 		}
 
 		private String getCacheKey(Object bean, String beanName) {
-			return StringUtils.hasLength(beanName) ? beanName : bean.getClass().getName();
+			return (StringUtils.hasLength(beanName) ? beanName : bean.getClass().getName());
 		}
 
 	}
+
 }

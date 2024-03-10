@@ -23,6 +23,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 
 /**
@@ -41,24 +42,27 @@ public abstract class OverrideMetadata {
 
 	private final BeanOverrideStrategy strategy;
 
+
 	protected OverrideMetadata(Field field, Annotation overrideAnnotation,
 			ResolvableType typeToOverride, BeanOverrideStrategy strategy) {
+
 		this.field = field;
 		this.overrideAnnotation = overrideAnnotation;
 		this.typeToOverride = typeToOverride;
 		this.strategy = strategy;
 	}
 
+
 	/**
-	 * Return a short human-readable description of the kind of override this
+	 * Return a short, human-readable description of the kind of override this
 	 * instance handles.
 	 */
 	public abstract String getBeanOverrideDescription();
 
 	/**
-	 * Return the expected bean name to override. Typically, this is either
-	 * explicitly set in the concrete annotations or defined by the annotated
-	 * field's name.
+	 * Return the expected bean name to override.
+	 * <p>Typically, this is either explicitly set in a concrete annotation or
+	 * inferred from the annotated field's name.
 	 * @return the expected bean name
 	 */
 	protected String getExpectedBeanName() {
@@ -74,7 +78,7 @@ public abstract class OverrideMetadata {
 
 	/**
 	 * Return the concrete override annotation, that is the one meta-annotated
-	 * with {@link BeanOverride}.
+	 * with {@link BeanOverride @BeanOverride}.
 	 */
 	public Annotation overrideAnnotation() {
 		return this.overrideAnnotation;
@@ -103,21 +107,21 @@ public abstract class OverrideMetadata {
 	 * @param existingBeanDefinition an existing bean definition for that bean
 	 * name, or {@code null} if not relevant
 	 * @param existingBeanInstance an existing instance for that bean name,
-	 * for wrapping purpose, or {@code null} if irrelevant
+	 * for wrapping purposes, or {@code null} if irrelevant
 	 * @return the instance with which to override the bean
 	 */
 	protected abstract Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
 			@Nullable Object existingBeanInstance);
 
 	/**
-	 * Optionally track objects created by this {@link OverrideMetadata}
-	 * (default is no tracking).
+	 * Optionally track objects created by this {@link OverrideMetadata}.
+	 * <p>The default is not to track, but this can be overridden in subclasses.
 	 * @param override the bean override instance to track
-	 * @param trackingBeanRegistry the registry in which trackers could
+	 * @param trackingBeanRegistry the registry in which trackers can
 	 * optionally be registered
 	 */
 	protected void track(Object override, SingletonBeanRegistry trackingBeanRegistry) {
-		//NO-OP
+		// NO-OP
 	}
 
 	@Override
@@ -132,21 +136,23 @@ public abstract class OverrideMetadata {
 		return Objects.equals(this.field, that.field) &&
 				Objects.equals(this.overrideAnnotation, that.overrideAnnotation) &&
 				Objects.equals(this.strategy, that.strategy) &&
-				Objects.equals(this.typeToOverride, that.typeToOverride);
+				Objects.equals(typeToOverride(), that.typeToOverride());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.field, this.overrideAnnotation, this.strategy, this.typeToOverride);
+		return Objects.hash(this.field, this.overrideAnnotation, this.strategy, typeToOverride());
 	}
 
 	@Override
 	public String toString() {
-		return "OverrideMetadata[" +
-				"category=" + this.getBeanOverrideDescription() + ", " +
-				"field=" + this.field + ", " +
-				"overrideAnnotation=" + this.overrideAnnotation + ", " +
-				"strategy=" + this.strategy + ", " +
-				"typeToOverride=" + this.typeToOverride + ']';
+		return new ToStringCreator(this)
+				.append("category", getBeanOverrideDescription())
+				.append("field", this.field)
+				.append("overrideAnnotation", this.overrideAnnotation)
+				.append("strategy", this.strategy)
+				.append("typeToOverride", typeToOverride())
+				.toString();
 	}
+
 }

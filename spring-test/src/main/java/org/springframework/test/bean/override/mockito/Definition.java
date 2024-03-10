@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,12 @@ import org.springframework.util.StringUtils;
  * Base class for {@link MockDefinition} and {@link SpyDefinition}.
  *
  * @author Phillip Webb
+ * @since 6.2
  */
 abstract class Definition extends OverrideMetadata {
 
-	static final int MULTIPLIER = 31;
+	protected static final int MULTIPLIER = 31;
+
 
 	protected final String name;
 
@@ -43,13 +45,16 @@ abstract class Definition extends OverrideMetadata {
 
 	private final boolean proxyTargetAware;
 
+
 	Definition(String name, @Nullable MockReset reset, boolean proxyTargetAware, Field field,
 			Annotation annotation, ResolvableType typeToOverride, BeanOverrideStrategy strategy) {
+
 		super(field, annotation, typeToOverride, strategy);
 		this.name = name;
 		this.reset = (reset != null) ? reset : MockReset.AFTER;
 		this.proxyTargetAware = proxyTargetAware;
 	}
+
 
 	@Override
 	protected String getExpectedBeanName() {

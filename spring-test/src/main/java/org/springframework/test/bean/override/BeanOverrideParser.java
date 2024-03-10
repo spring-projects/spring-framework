@@ -34,23 +34,22 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
+import static org.springframework.core.annotation.MergedAnnotations.SearchStrategy.DIRECT;
+
 /**
- * A parser that discovers annotations meta-annotated with {@link BeanOverride}
+ * A parser that discovers annotations meta-annotated with {@link BeanOverride @BeanOverride}
  * on fields of a given class and creates {@link OverrideMetadata} accordingly.
  *
  * @author Simon Baslé
+ * @since 6.2
  */
 class BeanOverrideParser {
 
-	private final Set<OverrideMetadata> parsedMetadata;
+	private final Set<OverrideMetadata> parsedMetadata = new LinkedHashSet<>();
 
-	BeanOverrideParser() {
-		this.parsedMetadata = new LinkedHashSet<>();
-	}
 
 	/**
-	 * Getter for the set of {@link OverrideMetadata} once {@link #parse(Class)}
-	 * has been called.
+	 * Get the set of {@link OverrideMetadata} once {@link #parse(Class)} has been called.
 	 */
 	Set<OverrideMetadata> getOverrideMetadata() {
 		return Collections.unmodifiableSet(this.parsedMetadata);
@@ -58,12 +57,12 @@ class BeanOverrideParser {
 
 	/**
 	 * Discover fields of the provided class that are meta-annotated with
-	 * {@link BeanOverride}, then instantiate their corresponding
-	 * {@link BeanOverrideProcessor} and use it to create an {@link OverrideMetadata}
-	 * instance for each field. Each call to {@code parse} adds the parsed
-	 * metadata to the parser's override metadata {{@link #getOverrideMetadata()}
-	 * set}
-	 * @param testClass the class which fields to inspect
+	 * {@link BeanOverride @BeanOverride}, then instantiate the corresponding
+	 * {@link BeanOverrideProcessor} and use it to create {@link OverrideMetadata}
+	 * for each field.
+	 * <p>Each call to {@code parse} adds the parsed metadata to the parser's
+	 * override metadata {@link #getOverrideMetadata() set}.
+	 * @param testClass the test class in which to inspect fields
 	 */
 	void parse(Class<?> testClass) {
 		ReflectionUtils.doWithFields(testClass, field -> parseField(field, testClass));
@@ -71,11 +70,12 @@ class BeanOverrideParser {
 
 	/**
 	 * Check if any field of the provided {@code testClass} is meta-annotated
-	 * with {@link BeanOverride}.
+	 * with {@link BeanOverride @BeanOverride}.
 	 * <p>This is similar to the initial discovery of fields in {@link #parse(Class)}
 	 * without the heavier steps of instantiating processors and creating
-	 * {@link OverrideMetadata}, so this method leaves the current state of
-	 * {@link #getOverrideMetadata()} unchanged.
+	 * {@link OverrideMetadata}. Consequently, this method leaves the current
+	 * state of the parser's override metadata {@link #getOverrideMetadata() set}
+	 * unchanged.
 	 * @param testClass the class which fields to inspect
 	 * @return true if there is a bean override annotation present, false otherwise
 	 * @see #parse(Class)
@@ -86,7 +86,7 @@ class BeanOverrideParser {
 			if (hasBeanOverride.get()) {
 				return;
 			}
-			final long count = MergedAnnotations.from(field, MergedAnnotations.SearchStrategy.DIRECT)
+			long count = MergedAnnotations.from(field, DIRECT)
 					.stream(BeanOverride.class)
 					.count();
 			hasBeanOverride.compareAndSet(false, count > 0L);
@@ -97,45 +97,46 @@ class BeanOverrideParser {
 	private void parseField(Field field, Class<?> source) {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
 
-		MergedAnnotations.from(field, MergedAnnotations.SearchStrategy.DIRECT)
+		MergedAnnotations.from(field, DIRECT)
 				.stream(BeanOverride.class)
-				.map(bo -> {
-					MergedAnnotation<?> a = bo.getMetaSource();
-					Assert.notNull(a, "BeanOverride annotation must be meta-present");
-					return new AnnotationPair(a.synthesize(), bo);
+				.map(mergedAnnotation -> {
+					MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
+					Assert.notNull(metaSource, "@BeanOverride annotation must be meta-present");
+					return new AnnotationPair(metaSource.synthesize(), mergedAnnotation);
 				})
 				.forEach(pair -> {
-					BeanOverride metaAnnotation = pair.metaAnnotation().synthesize();
-					final BeanOverrideProcessor processor = getProcessorInstance(metaAnnotation.value());
+					BeanOverride beanOverride = pair.mergedAnnotation().synthesize();
+					BeanOverrideProcessor processor = getProcessorInstance(beanOverride.value());
 					if (processor == null) {
 						return;
 					}
 					ResolvableType typeToOverride = processor.getOrDeduceType(field, pair.annotation(), source);
 
 					Assert.state(overrideAnnotationFound.compareAndSet(false, true),
-							"Multiple bean override annotations found on annotated field <" + field + ">");
+							() -> "Multiple @BeanOverride annotations found on field: " + field);
 					OverrideMetadata metadata = processor.createMetadata(field, pair.annotation(), typeToOverride);
 					boolean isNewDefinition = this.parsedMetadata.add(metadata);
 					Assert.state(isNewDefinition, () -> "Duplicate " + metadata.getBeanOverrideDescription() +
-								" overrideMetadata " + metadata);
+								" OverrideMetadata: " + metadata);
 				});
 	}
 
 	@Nullable
 	private BeanOverrideProcessor getProcessorInstance(Class<? extends BeanOverrideProcessor> processorClass) {
-		final Constructor<? extends BeanOverrideProcessor> constructor = ClassUtils.getConstructorIfAvailable(processorClass);
+		Constructor<? extends BeanOverrideProcessor> constructor = ClassUtils.getConstructorIfAvailable(processorClass);
 		if (constructor != null) {
-			ReflectionUtils.makeAccessible(constructor);
 			try {
+				ReflectionUtils.makeAccessible(constructor);
 				return constructor.newInstance();
 			}
 			catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-				throw new BeanDefinitionValidationException("Could not get an instance of BeanOverrideProcessor", ex);
+				throw new BeanDefinitionValidationException(
+						"Failed to instantiate BeanOverrideProcessor of type " + processorClass.getName(), ex);
 			}
 		}
 		return null;
 	}
 
-	private record AnnotationPair(Annotation annotation, MergedAnnotation<BeanOverride> metaAnnotation) {}
+	private record AnnotationPair(Annotation annotation, MergedAnnotation<BeanOverride> mergedAnnotation) {}
 
 }

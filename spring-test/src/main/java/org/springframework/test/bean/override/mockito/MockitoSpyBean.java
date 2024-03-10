@@ -34,11 +34,13 @@ import org.springframework.test.bean.override.BeanOverride;
  * in the context.
  *
  * <p>Dependencies that are known to the application context but are not beans
- * (such as those {@link org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
+ * (such as those
+ * {@link org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
  * registered directly}) will not be found.
  *
  * @author Simon Baslé
  * @since 6.2
+ * @see MockitoBean
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -47,16 +49,16 @@ import org.springframework.test.bean.override.BeanOverride;
 public @interface MockitoSpyBean {
 
 	/**
-	 * The name of the bean to spy. If not specified, it will be the name of the
-	 * annotated field.
+	 * The name of the bean to spy.
+	 * <p>If not specified, the name of the annotated field will be used.
 	 * @return the name of the spied bean
 	 */
 	String name() default "";
 
 	/**
-	 * The reset mode to apply to the spied bean. The default is
-	 * {@link MockReset#AFTER} meaning that spies are automatically reset after
-	 * each test method is invoked.
+	 * The reset mode to apply to the spied bean.
+	 * <p>The default is {@link MockReset#AFTER} meaning that spies are automatically
+	 * reset after each test method is invoked.
 	 * @return the reset mode
 	 */
 	MockReset reset() default MockReset.AFTER;
@@ -65,10 +67,11 @@ public @interface MockitoSpyBean {
 	 * Indicates that Mockito methods such as {@link Mockito#verify(Object)
 	 * verify(mock)} should use the {@code target} of AOP advised beans,
 	 * rather than the proxy itself.
-	 * If set to {@code false} you may need to use the result of
+	 * <p>Defaults to {@code true}.
+	 * <p>If set to {@code false} you may need to use the result of
 	 * {@link org.springframework.test.util.AopTestUtils#getUltimateTargetObject(Object)
 	 * AopTestUtils.getUltimateTargetObject(...)} when calling Mockito methods.
-	 * @return {@code true} if the target of AOP advised beans is used or
+	 * @return {@code true} if the target of AOP advised beans is used, or
 	 * {@code false} if the proxy is used directly
 	 */
 	boolean proxyTargetAware() default true;

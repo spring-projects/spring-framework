@@ -32,11 +32,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.NativeDetector;
 import org.springframework.core.Ordered;
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
- * {@link TestExecutionListener} to reset any mock beans that have been marked
+ * {@code TestExecutionListener} that resets any mock beans that have been marked
  * with a {@link MockReset}.
  *
  * @author Phillip Webb

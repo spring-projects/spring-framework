@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,16 +42,16 @@ import static org.mockito.Mockito.mock;
  * A complete definition that can be used to create a Mockito mock.
  *
  * @author Phillip Webb
+ * @since 6.2
  */
 class MockDefinition extends Definition {
-
-	private static final int MULTIPLIER = 31;
 
 	private final Set<Class<?>> extraInterfaces;
 
 	private final Answers answer;
 
 	private final boolean serializable;
+
 
 	MockDefinition(MockitoBean annotation, Field field, ResolvableType typeToMock) {
 		this(annotation.name(), annotation.reset(), field, annotation, typeToMock,
@@ -60,12 +60,14 @@ class MockDefinition extends Definition {
 
 	MockDefinition(String name, MockReset reset, Field field, Annotation annotation, ResolvableType typeToMock,
 			Class<?>[] extraInterfaces, @Nullable Answers answer, boolean serializable) {
+
 		super(name, reset, false, field, annotation, typeToMock, BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION);
 		Assert.notNull(typeToMock, "TypeToMock must not be null");
 		this.extraInterfaces = asClassSet(extraInterfaces);
 		this.answer = (answer != null) ? answer : Answers.RETURNS_DEFAULTS;
 		this.serializable = serializable;
 	}
+
 
 	@Override
 	public String getBeanOverrideDescription() {
@@ -119,7 +121,7 @@ class MockDefinition extends Definition {
 		}
 		MockDefinition other = (MockDefinition) obj;
 		boolean result = super.equals(obj);
-		result = result && ObjectUtils.nullSafeEquals(this.typeToOverride(), other.typeToOverride());
+		result = result && ObjectUtils.nullSafeEquals(typeToOverride(), other.typeToOverride());
 		result = result && ObjectUtils.nullSafeEquals(this.extraInterfaces, other.extraInterfaces);
 		result = result && ObjectUtils.nullSafeEquals(this.answer, other.answer);
 		result = result && this.serializable == other.serializable;
@@ -129,7 +131,7 @@ class MockDefinition extends Definition {
 	@Override
 	public int hashCode() {
 		int result = super.hashCode();
-		result = MULTIPLIER * result + ObjectUtils.nullSafeHashCode(this.typeToOverride());
+		result = MULTIPLIER * result + ObjectUtils.nullSafeHashCode(typeToOverride());
 		result = MULTIPLIER * result + ObjectUtils.nullSafeHashCode(this.extraInterfaces);
 		result = MULTIPLIER * result + ObjectUtils.nullSafeHashCode(this.answer);
 		result = MULTIPLIER * result + Boolean.hashCode(this.serializable);
@@ -138,13 +140,14 @@ class MockDefinition extends Definition {
 
 	@Override
 	public String toString() {
-		return new ToStringCreator(this).append("name", this.name)
-			.append("typeToMock", this.typeToOverride())
-			.append("extraInterfaces", this.extraInterfaces)
-			.append("answer", this.answer)
-			.append("serializable", this.serializable)
-			.append("reset", getReset())
-			.toString();
+		return new ToStringCreator(this)
+				.append("name", this.name)
+				.append("typeToMock", typeToOverride())
+				.append("extraInterfaces", this.extraInterfaces)
+				.append("answer", this.answer)
+				.append("serializable", this.serializable)
+				.append("reset", getReset())
+				.toString();
 	}
 
 	<T> T createMock() {
@@ -164,7 +167,7 @@ class MockDefinition extends Definition {
 		if (this.serializable) {
 			settings.serializable();
 		}
-		return (T) mock(this.typeToOverride().resolve(), settings);
+		return (T) mock(typeToOverride().resolve(), settings);
 	}
 
 }

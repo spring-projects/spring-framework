@@ -34,12 +34,14 @@ import org.springframework.test.bean.override.BeanOverride;
  * a new one will be added to the context.
  *
  * <p>Dependencies that are known to the application context but are not beans
- * (such as those {@link org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
- * registered directly}) will not be found and a mocked bean will be added to
+ * (such as those
+ * {@link org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
+ * registered directly}) will not be found, and a mocked bean will be added to
  * the context alongside the existing dependency.
  *
  * @author Simon Baslé
  * @since 6.2
+ * @see MockitoSpyBean
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -48,35 +50,38 @@ import org.springframework.test.bean.override.BeanOverride;
 public @interface MockitoBean {
 
 	/**
-	 * The name of the bean to register or replace. If not specified, it will be
-	 * the name of the annotated field.
-	 * @return the name of the bean
+	 * The name of the bean to register or replace.
+	 * <p>If not specified, the name of the annotated field will be used.
+	 * @return the name of the mocked bean
 	 */
 	String name() default "";
 
 	/**
-	 * Any extra interfaces that should also be declared on the mock.
-	 * See {@link MockSettings#extraInterfaces(Class...)} for details.
+	 * Extra interfaces that should also be declared on the mock.
+	 * <p>Defaults to none.
 	 * @return any extra interfaces
+	 * @see MockSettings#extraInterfaces(Class...)
 	 */
 	Class<?>[] extraInterfaces() default {};
 
 	/**
 	 * The {@link Answers} type to use on the mock.
+	 * <p>Defaults to {@link Answers#RETURNS_DEFAULTS}.
 	 * @return the answer type
 	 */
 	Answers answers() default Answers.RETURNS_DEFAULTS;
 
 	/**
-	 * If the generated mock is serializable.
-	 * See {@link MockSettings#serializable()} for details.
-	 * @return if the mock is serializable
+	 * Whether the generated mock is serializable.
+	 * <p>Defaults to {@code false}.
+	 * @return {@code true} if the mock is serializable
+	 * @see MockSettings#serializable()
 	 */
 	boolean serializable() default false;
 
 	/**
-	 * The reset mode to apply to the mock bean.
-	 * The default is {@link MockReset#AFTER} meaning that mocks are
+	 * The reset mode to apply to the mock.
+	 * <p>The default is {@link MockReset#AFTER} meaning that mocks are
 	 * automatically reset after each test method is invoked.
 	 * @return the reset mode
 	 */

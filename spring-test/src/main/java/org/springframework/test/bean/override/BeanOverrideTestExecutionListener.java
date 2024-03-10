@@ -20,17 +20,17 @@ import java.lang.reflect.Field;
 import java.util.function.BiConsumer;
 
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * A {@link TestExecutionListener} implementation that enables Bean Override
- * support in tests, injecting overridden beans in appropriate fields.
+ * {@code TestExecutionListener} that enables Bean Override support in tests,
+ * injecting overridden beans in appropriate fields of the test instance.
  *
  * <p>Some flavors of Bean Override might additionally require the use of
- * additional listeners, which should be mentioned in the annotation(s) javadoc.
+ * additional listeners, which should be mentioned in the javadoc for the
+ * corresponding annotations.
  *
  * @author Simon Baslé
  * @since 6.2
@@ -68,36 +68,42 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	/**
 	 * Using a registered {@link BeanOverrideBeanPostProcessor}, find metadata
 	 * associated with the current test class and ensure fields are nulled out
-	 * then re-injected with the overridden bean instance. This method does
-	 * nothing if the {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
-	 * attribute is not present in the {@code testContext}.
+	 * and then re-injected with the overridden bean instance.
+	 * <p>This method does nothing if the
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
+	 * attribute is not present in the {@code TestContext}.
 	 */
 	protected void reinjectFieldsIfConfigured(final TestContext testContext) throws Exception {
 		if (Boolean.TRUE.equals(
 				testContext.getAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE))) {
+
 			postProcessFields(testContext, (testMetadata, postProcessor) -> {
-				Field f = testMetadata.overrideMetadata.field();
-				ReflectionUtils.makeAccessible(f);
-				ReflectionUtils.setField(f, testMetadata.testInstance(), null);
-				postProcessor.inject(f, testMetadata.testInstance(), testMetadata.overrideMetadata());
+				Object testInstance = testMetadata.testInstance;
+				Field field = testMetadata.overrideMetadata.field();
+				ReflectionUtils.makeAccessible(field);
+				ReflectionUtils.setField(field, testInstance, null);
+				postProcessor.inject(field, testInstance, testMetadata.overrideMetadata);
 			});
 		}
 	}
 
 	private void postProcessFields(TestContext testContext, BiConsumer<TestContextOverrideMetadata,
 			BeanOverrideBeanPostProcessor> consumer) {
-		//avoid full parsing but validate that this particular class has some bean override field(s)
+
+		Class<?> testClass = testContext.getTestClass();
+		Object testInstance = testContext.getTestInstance();
 		BeanOverrideParser parser = new BeanOverrideParser();
-		if (parser.hasBeanOverride(testContext.getTestClass())) {
-			BeanOverrideBeanPostProcessor postProcessor = testContext.getApplicationContext()
-					.getBean(BeanOverrideBeanPostProcessor.class);
-			// the class should have already been parsed by the context customizer
-			for (OverrideMetadata metadata: postProcessor.getOverrideMetadata()) {
-				if (!metadata.field().getDeclaringClass().equals(testContext.getTestClass())) {
+
+		// Avoid full parsing, but validate that this particular class has some bean override field(s).
+		if (parser.hasBeanOverride(testClass)) {
+			BeanOverrideBeanPostProcessor postProcessor =
+					testContext.getApplicationContext().getBean(BeanOverrideBeanPostProcessor.class);
+			// The class should have already been parsed by the context customizer.
+			for (OverrideMetadata metadata : postProcessor.getOverrideMetadata()) {
+				if (!metadata.field().getDeclaringClass().equals(testClass)) {
 					continue;
 				}
-				consumer.accept(new TestContextOverrideMetadata(testContext.getTestInstance(), metadata),
-						postProcessor);
+				consumer.accept(new TestContextOverrideMetadata(testInstance, metadata), postProcessor);
 			}
 		}
 	}

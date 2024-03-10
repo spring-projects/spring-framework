@@ -19,7 +19,6 @@ package org.springframework.test.bean.override;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfigurationAttributes;
@@ -29,7 +28,8 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestContextAnnotationUtils;
 
 /**
- * A {@link ContextCustomizerFactory} to add support for Bean Overriding.
+ * {@link ContextCustomizerFactory} which provides support for Bean Overriding
+ * in tests.
  *
  * @author Simon Baslé
  * @since 6.2
@@ -39,6 +39,7 @@ public class BeanOverrideContextCustomizerFactory implements ContextCustomizerFa
 	@Override
 	public ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
+
 		BeanOverrideParser parser = new BeanOverrideParser();
 		parseMetadata(testClass, parser);
 		if (parser.getOverrideMetadata().isEmpty()) {
@@ -56,10 +57,9 @@ public class BeanOverrideContextCustomizerFactory implements ContextCustomizerFa
 	}
 
 	/**
-	 * A {@link ContextCustomizer} for Bean Overriding in tests.
+	 * {@link ContextCustomizer} for Bean Overriding in tests.
 	 */
-	@Reflective
-	static final class BeanOverrideContextCustomizer implements ContextCustomizer {
+	private static final class BeanOverrideContextCustomizer implements ContextCustomizer {
 
 		private final Set<OverrideMetadata> metadata;
 
@@ -97,4 +97,5 @@ public class BeanOverrideContextCustomizerFactory implements ContextCustomizerFa
 			return this.metadata.hashCode();
 		}
 	}
+
 }
