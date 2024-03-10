@@ -141,7 +141,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 					arg = convertIfNecessary(parameter, webRequest, binderFactory, namedValueInfo, arg);
 				}
 				else if (namedValueInfo.required && !nestedParameter.isOptional()) {
-					handleMissingValueAfterConversion(namedValueInfo.name, nestedParameter, webRequest);
+					handleMissingValueAfterConversion(resolvedName.toString(), nestedParameter, webRequest);
 				}
 			}
 		}

@@ -69,6 +69,7 @@ class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramInstant;
 	private MethodParameter paramUuid;
 	private MethodParameter paramUuidOptional;
+	private MethodParameter paramUuidPlaceholder;
 
 	private MockHttpServletRequest servletRequest;
 
@@ -93,6 +94,7 @@ class RequestHeaderMethodArgumentResolverTests {
 		paramInstant = new SynthesizingMethodParameter(method, 8);
 		paramUuid = new SynthesizingMethodParameter(method, 9);
 		paramUuidOptional = new SynthesizingMethodParameter(method, 10);
+		paramUuidPlaceholder = new SynthesizingMethodParameter(method, 11);
 
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
@@ -310,6 +312,24 @@ class RequestHeaderMethodArgumentResolverTests {
 		assertThat(result).isNull();
 	}
 
+	@Test
+	public void uuidPlaceholderConversionWithEmptyValue() {
+		String expected = "name";
+		servletRequest.addHeader(expected, "");
+
+		System.setProperty("systemProperty", expected);
+
+		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
+		bindingInitializer.setConversionService(new DefaultFormattingConversionService());
+
+		assertThatThrownBy(() ->
+ 			    resolver.resolveArgument(paramUuidPlaceholder, null, webRequest,
+						new DefaultDataBinderFactory(bindingInitializer)))
+				.isInstanceOf(MissingRequestHeaderException.class)
+				.extracting("headerName").isEqualTo(expected);
+
+		System.clearProperty("systemProperty");
+	}
 
 	void params(
 			@RequestHeader(name = "name", defaultValue = "bar") String param1,
@@ -322,7 +342,8 @@ class RequestHeaderMethodArgumentResolverTests {
 			@RequestHeader("name") Date dateParam,
 			@RequestHeader("name") Instant instantParam,
 			@RequestHeader("name") UUID uuid,
-			@RequestHeader(name = "name", required = false) UUID uuidOptional) {
+			@RequestHeader(name = "name", required = false) UUID uuidOptional,
+			@RequestHeader(name = "${systemProperty}") UUID uuidPlaceholder) {
 	}
 
 }
