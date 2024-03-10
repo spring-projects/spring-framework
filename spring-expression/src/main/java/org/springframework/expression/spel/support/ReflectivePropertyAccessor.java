@@ -504,15 +504,16 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
-	 * Attempt to create an optimized property accessor tailored for a property of a
-	 * particular name on a particular class. The general ReflectivePropertyAccessor
-	 * will always work but is not optimal due to the need to lookup which reflective
-	 * member (method/field) to use each time read() is called. This method will just
-	 * return the ReflectivePropertyAccessor instance if it is unable to build a more
-	 * optimal accessor.
-	 * <p>Note: An optimal accessor is currently only usable for read attempts.
+	 * Attempt to create an optimized property accessor tailored for a property
+	 * of a particular name on a particular class.
+	 * <p>The general {@link ReflectivePropertyAccessor} will always work but is
+	 * not optimal due to the need to look up which reflective member (method or
+	 * field) to use each time {@link #read(EvaluationContext, Object, String)}
+	 * is called.
+	 * <p>This method will return this {@code ReflectivePropertyAccessor} instance
+	 * if it is unable to build a optimized accessor.
+	 * <p>Note: An optimized accessor is currently only usable for read attempts.
 	 * Do not call this method if you need a read-write accessor.
-	 * @see OptimalPropertyAccessor
 	 */
 	public PropertyAccessor createOptimalAccessor(EvaluationContext context, @Nullable Object target, String name) {
 		// Don't be clever for arrays or a null target...
@@ -597,19 +598,20 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 
 	/**
-	 * An optimized form of a PropertyAccessor that will use reflection but only knows
-	 * how to access a particular property on a particular class. This is unlike the
-	 * general ReflectivePropertyResolver which manages a cache of methods/fields that
-	 * may be invoked to access different properties on different classes. This optimal
-	 * accessor exists because looking up the appropriate reflective object by class/name
-	 * on each read is not cheap.
+	 * An optimized {@link CompilablePropertyAccessor} that will use reflection
+	 * but only knows how to access a particular property on a particular class.
+	 * <p>This is unlike the general {@link ReflectivePropertyAccessor} which
+	 * manages a cache of methods and fields that may be invoked to access
+	 * different properties on different classes.
+	 * <p>This optimized accessor exists because looking up the appropriate
+	 * reflective method or field on each read is not cheap.
 	 */
-	public static class OptimalPropertyAccessor implements CompilablePropertyAccessor {
+	private static class OptimalPropertyAccessor implements CompilablePropertyAccessor {
 
 		/**
 		 * The member being accessed.
 		 */
-		public final Member member;
+		private final Member member;
 
 		private final TypeDescriptor typeDescriptor;
 
