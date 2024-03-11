@@ -277,7 +277,7 @@ class AutowiredConfigurationTests {
 
 		@Bean
 		public TestBean testBean(Optional<Colour> colour, Optional<List<Colour>> colours) {
-			if (!colour.isPresent() && !colours.isPresent()) {
+			if (colour.isEmpty() && colours.isEmpty()) {
 				return new TestBean("");
 			}
 			else {
