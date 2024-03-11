@@ -314,13 +314,15 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/yaml}.
+	 * @since 6.2
 	 */
 	public static final MediaType APPLICATION_YAML;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_YAML}.
+	 * @since 6.2
 	 */
-	public static final String APPLICATION_YAML_VALE = "application/yaml";
+	public static final String APPLICATION_YAML_VALUE = "application/yaml";
 
 	/**
 	 * Public constant media type for {@code image/gif}.

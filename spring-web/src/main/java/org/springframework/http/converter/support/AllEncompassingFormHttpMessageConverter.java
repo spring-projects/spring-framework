@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHt
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -47,6 +48,8 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 	private static final boolean jackson2SmilePresent;
 
+	private static final boolean jackson2YamlPresent;
+
 	private static final boolean gsonPresent;
 
 	private static final boolean jsonbPresent;
@@ -64,6 +67,7 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
+		jackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
 		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
@@ -97,6 +101,10 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 		if (jackson2SmilePresent) {
 			addPartConverter(new MappingJackson2SmileHttpMessageConverter());
+		}
+
+		if (jackson2YamlPresent) {
+			addPartConverter(new MappingJackson2YamlHttpMessageConverter());
 		}
 
 		if (kotlinSerializationCborPresent) {

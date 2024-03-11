@@ -470,7 +470,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			defaultMediaTypes.put("cbor", MediaType.APPLICATION_CBOR_VALUE);
 		}
 		if (jackson2YamlPresent) {
-			defaultMediaTypes.put("yaml", MediaType.APPLICATION_YAML_VALE);
+			defaultMediaTypes.put("yaml", MediaType.APPLICATION_YAML_VALUE);
 		}
 		return defaultMediaTypes;
 	}
