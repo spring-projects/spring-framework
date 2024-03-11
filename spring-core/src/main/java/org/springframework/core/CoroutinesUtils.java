@@ -33,7 +33,6 @@ import kotlin.reflect.full.KClasses;
 import kotlin.reflect.full.KClassifiers;
 import kotlin.reflect.full.KTypes;
 import kotlin.reflect.jvm.KCallablesJvm;
-import kotlin.reflect.jvm.KTypesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import kotlinx.coroutines.BuildersKt;
 import kotlinx.coroutines.CoroutineStart;
@@ -109,7 +108,7 @@ public abstract class CoroutinesUtils {
 	 * @throws IllegalArgumentException if {@code method} is not a suspending function
 	 * @since 6.0
 	 */
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({"deprecation", "DataFlowIssue"})
 	public static Publisher<?> invokeSuspendingFunction(CoroutineContext context, Method method, Object target,
 			Object... args) {
 		Assert.isTrue(KotlinDetector.isSuspendingFunction(method), "'method' must be a suspending function");
@@ -128,7 +127,7 @@ public abstract class CoroutinesUtils {
 								if (!(parameter.isOptional() && arg == null)) {
 									KType type = parameter.getType();
 									if (!(type.isMarkedNullable() && arg == null)) {
-										KClass<?> kClass = KTypesJvm.getJvmErasure(type);
+										KClass<?> kClass = (KClass<?>) type.getClassifier();
 										if (KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
 											arg = KClasses.getPrimaryConstructor(kClass).call(arg);
 										}
