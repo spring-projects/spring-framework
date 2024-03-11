@@ -843,7 +843,7 @@ public abstract class RequestPredicates {
 		@Override
 		public boolean test(ServerRequest request) {
 			String pathExtension = UriUtils.extractFileExtension(request.path());
-			return this.extensionPredicate.test(pathExtension);
+			return (pathExtension != null && this.extensionPredicate.test(pathExtension));
 		}
 
 		@Override
