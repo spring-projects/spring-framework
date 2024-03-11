@@ -18,7 +18,6 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -289,10 +288,10 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		@Nullable
 		private <T> T processReturnType(Method method, @Nullable T returnValue) {
 			Class<?> returnType = method.getReturnType();
-			if (returnType != void.class && returnType.isPrimitive()) {
-				return Objects.requireNonNull(returnValue, () -> "Null return value from replacer does not match primitive return type for: " + method);
+			if (returnValue == null && returnType != void.class && returnType.isPrimitive()) {
+				throw new IllegalStateException(
+						"Null return value from MethodReplacer does not match primitive return type for: " + method);
 			}
-
 			return returnValue;
 		}
 	}
