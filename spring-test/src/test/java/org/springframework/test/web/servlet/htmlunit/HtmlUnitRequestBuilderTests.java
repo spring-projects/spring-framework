@@ -24,15 +24,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import com.gargoylesoftware.htmlunit.FormEncodingType;
-import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.htmlunit.FormEncodingType;
+import org.htmlunit.HttpMethod;
+import org.htmlunit.WebClient;
+import org.htmlunit.WebRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -340,11 +340,11 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	void buildRequestLocalPort() throws Exception {
+	void buildRequestLocalPortMatchingDefault() throws Exception {
 		webRequest.setUrl(new URL("http://localhost:80/test/this/here"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocalPort()).isEqualTo(80);
+		assertThat(actualRequest.getLocalPort()).isEqualTo(-1);
 	}
 
 	@Test
@@ -626,10 +626,18 @@ public class HtmlUnitRequestBuilderTests {
 
 	@Test
 	void buildRequestServerPort() throws Exception {
-		webRequest.setUrl(new URL("http://localhost:80/test/this/here"));
+		webRequest.setUrl(new URL("http://localhost:8080/test/this/here"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getServerPort()).isEqualTo(80);
+		assertThat(actualRequest.getServerPort()).isEqualTo(8080);
+	}
+
+	@Test
+	void buildRequestServerPortMatchingDefault() throws Exception {
+		webRequest.setUrl(new URL("http://localhost/test/this/here"));
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getServerPort()).isEqualTo(-1);
 	}
 
 	@Test
@@ -890,7 +898,7 @@ public class HtmlUnitRequestBuilderTests {
 
 
 	private void assertSingleSessionCookie(String expected) {
-		com.gargoylesoftware.htmlunit.util.Cookie jsessionidCookie = webClient.getCookieManager().getCookie("JSESSIONID");
+		org.htmlunit.util.Cookie jsessionidCookie = webClient.getCookieManager().getCookie("JSESSIONID");
 		if (expected == null || expected.contains("Expires=Thu, 01-Jan-1970 00:00:01 GMT")) {
 			assertThat(jsessionidCookie).isNull();
 			return;

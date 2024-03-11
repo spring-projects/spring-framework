@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.gargoylesoftware.htmlunit.CookieManager;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebConnection;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.util.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.htmlunit.CookieManager;
+import org.htmlunit.WebClient;
+import org.htmlunit.WebConnection;
+import org.htmlunit.WebRequest;
+import org.htmlunit.WebResponse;
+import org.htmlunit.util.Cookie;
 
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -181,7 +181,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	}
 
 	@SuppressWarnings("removal")
-	private static com.gargoylesoftware.htmlunit.util.Cookie createCookie(jakarta.servlet.http.Cookie cookie) {
+	private static Cookie createCookie(jakarta.servlet.http.Cookie cookie) {
 		Date expires = null;
 		if (cookie.getMaxAge() > -1) {
 			expires = new Date(System.currentTimeMillis() + cookie.getMaxAge() * 1000);
@@ -195,7 +195,7 @@ public final class MockMvcWebConnection implements WebConnection {
 		if (cookie.isHttpOnly()) {
 			result.setAttribute("httponly", "true");
 		}
-		return new com.gargoylesoftware.htmlunit.util.Cookie(result);
+		return new Cookie(result);
 	}
 
 	@Override

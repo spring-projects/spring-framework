@@ -8,8 +8,7 @@ to use the raw HtmlUnit libraries.
 == MockMvc and HtmlUnit Setup
 
 First, make sure that you have included a test dependency on
-`net.sourceforge.htmlunit:htmlunit`. In order to use HtmlUnit with Apache HttpComponents
-4.5+, you need to use HtmlUnit 2.18 or higher.
+`org.htmlunit:htmlunit`.
 
 We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by using the
 `MockMvcWebClientBuilder`, as follows:
