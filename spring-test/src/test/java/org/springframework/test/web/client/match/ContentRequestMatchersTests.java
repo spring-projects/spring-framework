@@ -128,23 +128,25 @@ public class ContentRequestMatchersTests {
 	@Test
 	public void testMultipartData() throws Exception {
 		String contentType = "multipart/form-data;boundary=1234567890";
-		String body = "--1234567890\r\n" +
-				"Content-Disposition: form-data; name=\"name 1\"\r\n" +
-				"\r\n" +
-				"vølue 1\r\n" +
-				"--1234567890\r\n" +
-				"Content-Disposition: form-data; name=\"name 2\"\r\n" +
-				"\r\n" +
-				"value 🙂\r\n" +
-				"--1234567890\r\n" +
-				"Content-Disposition: form-data; name=\"name 3\"\r\n" +
-				"\r\n" +
-				"value 漢字\r\n" +
-				"--1234567890\r\n" +
-				"Content-Disposition: form-data; name=\"name 4\"\r\n" +
-				"\r\n" +
-				"\r\n" +
-				"--1234567890--\r\n";
+		String body = """
+				--1234567890\r
+				Content-Disposition: form-data; name="name 1"\r
+				\r
+				vølue 1\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 2"\r
+				\r
+				value 🙂\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 3"\r
+				\r
+				value 漢字\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 4"\r
+				\r
+				\r
+				--1234567890--\r
+				""";
 
 		this.request.getHeaders().setContentType(MediaType.parseMediaType(contentType));
 		this.request.getBody().write(body.getBytes(StandardCharsets.UTF_8));
@@ -160,23 +162,25 @@ public class ContentRequestMatchersTests {
 	@Test
 	public void testMultipartDataContains() throws Exception {
 		String contentType = "multipart/form-data;boundary=1234567890";
-		String body = "--1234567890\r\n" +
-				"Content-Disposition: form-data; name=\"name 1\"\r\n" +
-				"\r\n" +
-				"vølue 1\r\n" +
-				"--1234567890\r\n" +
-				"Content-Disposition: form-data; name=\"name 2\"\r\n" +
-				"\r\n" +
-				"value 🙂\r\n" +
-				"--1234567890\r\n" +
-				"Content-Disposition: form-data; name=\"name 3\"\r\n" +
-				"\r\n" +
-				"value 漢字\r\n" +
-				"--1234567890\r\n" +
-				"Content-Disposition: form-data; name=\"name 4\"\r\n" +
-				"\r\n" +
-				"\r\n" +
-				"--1234567890--\r\n";
+		String body = """
+				--1234567890\r
+				Content-Disposition: form-data; name="name 1"\r
+				\r
+				vølue 1\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 2"\r
+				\r
+				value 🙂\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 3"\r
+				\r
+				value 漢字\r
+				--1234567890\r
+				Content-Disposition: form-data; name="name 4"\r
+				\r
+				\r
+				--1234567890--\r
+				""";
 
 		this.request.getHeaders().setContentType(MediaType.parseMediaType(contentType));
 		this.request.getBody().write(body.getBytes(StandardCharsets.UTF_8));
