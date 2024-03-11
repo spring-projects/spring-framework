@@ -24,6 +24,7 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -93,7 +94,7 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	/**
 	 * Find a public class or interface in the method's class hierarchy that
 	 * declares the {@linkplain #getMethod() original method}.
-	 * <p>See {@link ReflectionHelper#findPublicDeclaringClass(Method)} for
+	 * <p>See {@link CodeFlow#findPublicDeclaringClass(Method)} for
 	 * details.
 	 * @return the public class or interface that declares the method, or
 	 * {@code null} if no such public type could be found
@@ -101,7 +102,7 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	@Nullable
 	public Class<?> getPublicDeclaringClass() {
 		if (!this.computedPublicDeclaringClass) {
-			this.publicDeclaringClass = ReflectionHelper.findPublicDeclaringClass(this.originalMethod);
+			this.publicDeclaringClass = CodeFlow.findPublicDeclaringClass(this.originalMethod);
 			this.computedPublicDeclaringClass = true;
 		}
 		return this.publicDeclaringClass;

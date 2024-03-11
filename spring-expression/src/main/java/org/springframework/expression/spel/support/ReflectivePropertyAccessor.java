@@ -698,7 +698,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				return true;
 			}
 			if (this.originalMethod != null) {
-				return (ReflectionHelper.findPublicDeclaringClass(this.originalMethod) != null);
+				return (CodeFlow.findPublicDeclaringClass(this.originalMethod) != null);
 			}
 			return false;
 		}
@@ -717,7 +717,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
 			Class<?> publicDeclaringClass = this.member.getDeclaringClass();
 			if (!Modifier.isPublic(publicDeclaringClass.getModifiers()) && this.originalMethod != null) {
-				publicDeclaringClass = ReflectionHelper.findPublicDeclaringClass(this.originalMethod);
+				publicDeclaringClass = CodeFlow.findPublicDeclaringClass(this.originalMethod);
 			}
 			Assert.state(publicDeclaringClass != null && Modifier.isPublic(publicDeclaringClass.getModifiers()),
 					() -> "Failed to find public declaring class for: " +
