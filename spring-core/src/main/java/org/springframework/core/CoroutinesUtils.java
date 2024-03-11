@@ -148,10 +148,10 @@ public abstract class CoroutinesUtils {
 		if (KTypes.isSubtypeOf(returnType, flowType)) {
 			return mono.flatMapMany(CoroutinesUtils::asFlux);
 		}
-		else if (KTypes.isSubtypeOf(returnType, monoType)) {
-			return mono.flatMap(o -> ((Mono<?>)o));
-		}
-		else if (KTypes.isSubtypeOf(returnType, publisherType)) {
+		if (KTypes.isSubtypeOf(returnType, publisherType)) {
+			if (KTypes.isSubtypeOf(returnType, monoType)) {
+				return mono.flatMap(o -> ((Mono<?>)o));
+			}
 			return mono.flatMapMany(o -> ((Publisher<?>)o));
 		}
 		return mono;
