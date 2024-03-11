@@ -34,7 +34,6 @@ import kotlin.reflect.KParameter;
 import kotlin.reflect.KType;
 import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
-import kotlin.reflect.jvm.KTypesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import reactor.core.publisher.Mono;
 
@@ -298,7 +297,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		private static final String COROUTINE_CONTEXT_ATTRIBUTE = "org.springframework.web.server.CoWebFilter.context";
 
 		@Nullable
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings({"deprecation", "DataFlowIssue"})
 		public static Object invokeFunction(Method method, Object target, Object[] args, boolean isSuspendingFunction,
 				ServerWebExchange exchange) throws InvocationTargetException, IllegalAccessException {
 
@@ -330,7 +329,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 							if (!(parameter.isOptional() && arg == null)) {
 								KType type = parameter.getType();
 								if (!(type.isMarkedNullable() && arg == null)) {
-									KClass<?> kClass = KTypesJvm.getJvmErasure(type);
+									KClass<?> kClass = (KClass<?>) type.getClassifier();
 									if (KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
 										arg = KClasses.getPrimaryConstructor(kClass).call(arg);
 									}
