@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,8 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 
 
 	public HttpComponentsClientHttpRequest(HttpMethod method, URI uri, HttpClientContext context,
-			DataBufferFactory dataBufferFactory, boolean applyAttributes) {
-		super(applyAttributes);
+			DataBufferFactory dataBufferFactory) {
+
 		this.context = context;
 		this.httpRequest = new BasicHttpRequest(method.name(), uri);
 		this.dataBufferFactory = dataBufferFactory;

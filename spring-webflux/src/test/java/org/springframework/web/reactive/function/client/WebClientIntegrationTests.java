@@ -192,20 +192,8 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
-	void applyAttributesInNativeRequest(ClientHttpConnector connector) {
+	void applyAttributesToNativeRequest(ClientHttpConnector connector) {
 		startServer(connector);
-		connector.setApplyAttributes(true);
-		checkAttributesInNativeRequest(true);
-	}
-
-	@ParameterizedWebClientTest
-	void dontApplyAttributesInNativeRequest(ClientHttpConnector connector) {
-		startServer(connector);
-		connector.setApplyAttributes(false);
-		checkAttributesInNativeRequest(false);
-	}
-
-	private void checkAttributesInNativeRequest(boolean expectAttributesApplied){
 		prepareResponse(response -> {});
 
 		final AtomicReference<Object> nativeRequest = new AtomicReference<>();
@@ -215,36 +203,22 @@ class WebClientIntegrationTests {
 				.httpRequest(clientHttpRequest -> nativeRequest.set(clientHttpRequest.getNativeRequest()))
 				.retrieve()
 				.bodyToMono(Void.class);
-		StepVerifier.create(result)
-				.expectComplete()
-				.verify();
+
+		StepVerifier.create(result).expectComplete().verify();
+
 		if (nativeRequest.get() instanceof ChannelOperations<?,?> nativeReq) {
 			Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(AttributeKey.valueOf("attributes"));
-			if (expectAttributesApplied) {
-				assertThat(attributes.get()).isNotNull();
-				assertThat(attributes.get()).containsEntry("foo", "bar");
-			}
-			else {
-				assertThat(attributes.get()).isNull();
-			}
+			assertThat(attributes.get()).isNotNull();
+			assertThat(attributes.get()).containsEntry("foo", "bar");
 		}
 		else if (nativeRequest.get() instanceof reactor.netty5.channel.ChannelOperations<?,?> nativeReq) {
-			io.netty5.util.Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(io.netty5.util.AttributeKey.valueOf("attributes"));
-			if (expectAttributesApplied) {
-				assertThat(attributes.get()).isNotNull();
-				assertThat(attributes.get()).containsEntry("foo", "bar");
-			}
-			else {
-				assertThat(attributes.get()).isNull();
-			}
+			io.netty5.util.Attribute<Map<String, Object>> attributes =
+					nativeReq.channel().attr(io.netty5.util.AttributeKey.valueOf("attributes"));
+			assertThat(attributes.get()).isNotNull();
+			assertThat(attributes.get()).containsEntry("foo", "bar");
 		}
 		else if (nativeRequest.get() instanceof Request nativeReq) {
-			if (expectAttributesApplied) {
-				assertThat(nativeReq.getAttributes()).containsEntry("foo", "bar");
-			}
-			else {
-				assertThat(nativeReq.getAttributes()).doesNotContainEntry("foo", "bar");
-			}
+			assertThat(nativeReq.getAttributes()).containsEntry("foo", "bar");
 		}
 		else if (nativeRequest.get() instanceof org.apache.hc.core5.http.HttpRequest nativeReq) {
 			// TODO get attributes from HttpClientContext

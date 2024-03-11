@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,7 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	private final ReactiveRequest.Builder builder;
 
 
-	public JettyClientHttpRequest(Request jettyRequest, DataBufferFactory bufferFactory, boolean applyAttributes) {
-		super(applyAttributes);
+	public JettyClientHttpRequest(Request jettyRequest, DataBufferFactory bufferFactory) {
 		this.jettyRequest = jettyRequest;
 		this.bufferFactory = bufferFactory;
 		this.builder = ReactiveRequest.newBuilder(this.jettyRequest).abortOnCancel(true);

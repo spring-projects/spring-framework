@@ -18,7 +18,6 @@ package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
 import java.time.Duration;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -49,22 +48,7 @@ public class WiretapConnectorTests {
 	public void captureAndClaim() {
 		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/test");
 		ClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
-		ClientHttpConnector connector = new ClientHttpConnector() {
-			@Override
-			public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
-				return requestCallback.apply(request).then(Mono.just(response));
-			}
-
-			@Override
-			public void setApplyAttributes(boolean applyAttributes) {
-
-			}
-
-			@Override
-			public boolean getApplyAttributes() {
-				return false;
-			}
-		};
+		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
 
 		ClientRequest clientRequest = ClientRequest.create(HttpMethod.GET, URI.create("/test"))
 				.header(WebTestClient.WEBTESTCLIENT_REQUEST_ID, "1").build();

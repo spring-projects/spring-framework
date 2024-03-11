@@ -64,8 +64,6 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 
 	private final HttpHandler handler;
 
-	private boolean applyAttributes = true;
-
 
 	/**
 	 * Constructor with the {@link HttpHandler} to handle requests with.
@@ -82,16 +80,6 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 
 		return Mono.defer(() -> doConnect(httpMethod, uri, requestCallback))
 				.subscribeOn(Schedulers.parallel());
-	}
-
-	@Override
-	public void setApplyAttributes(boolean applyAttributes) {
-		this.applyAttributes = applyAttributes;
-	}
-
-	@Override
-	public boolean getApplyAttributes() {
-		return this.applyAttributes;
 	}
 
 	private Mono<ClientHttpResponse> doConnect(

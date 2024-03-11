@@ -56,8 +56,7 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 	private final HttpRequest.Builder builder;
 
 
-	public JdkClientHttpRequest(HttpMethod httpMethod, URI uri, DataBufferFactory bufferFactory, boolean applyAttributes) {
-		super(applyAttributes);
+	public JdkClientHttpRequest(HttpMethod httpMethod, URI uri, DataBufferFactory bufferFactory) {
 		Assert.notNull(httpMethod, "HttpMethod is required");
 		Assert.notNull(uri, "URI is required");
 		Assert.notNull(bufferFactory, "DataBufferFactory is required");
@@ -111,15 +110,6 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 	protected void applyCookies() {
 		this.builder.header(HttpHeaders.COOKIE, getCookies().values().stream()
 				.flatMap(List::stream).map(HttpCookie::toString).collect(Collectors.joining(";")));
-	}
-
-	/**
-	 * Not implemented, since {@link HttpRequest} does not offer any possibility to add request attributes.
-	 */
-	@Override
-	protected void applyAttributes() {
-		// TODO
-		throw new RuntimeException(String.format("Using attributes is not available for %s", HttpRequest.class.getName()));
 	}
 
 	@Override

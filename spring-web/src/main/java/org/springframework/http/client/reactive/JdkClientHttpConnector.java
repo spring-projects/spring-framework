@@ -96,7 +96,7 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(
 			HttpMethod method, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		JdkClientHttpRequest jdkClientHttpRequest = new JdkClientHttpRequest(method, uri, this.bufferFactory, getApplyAttributes());
+		JdkClientHttpRequest jdkClientHttpRequest = new JdkClientHttpRequest(method, uri, this.bufferFactory);
 
 		return requestCallback.apply(jdkClientHttpRequest).then(Mono.defer(() -> {
 			HttpRequest httpRequest = jdkClientHttpRequest.getNativeRequest();
@@ -107,21 +107,6 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 			return Mono.fromCompletionStage(future)
 					.map(response -> new JdkClientHttpResponse(response, this.bufferFactory));
 		}));
-	}
-
-	/**
-	 * Sets nothing, since {@link JdkClientHttpConnector} does not offer any possibility to add attributes.
-	 */
-	@Override
-	public void setApplyAttributes(boolean applyAttributes) {
-	}
-
-	/**
-	 * Returns false, since {@link JdkClientHttpConnector} does not offer any possibility to add attributes.
-	 */
-	@Override
-	public boolean getApplyAttributes() {
-		return false;
 	}
 
 }

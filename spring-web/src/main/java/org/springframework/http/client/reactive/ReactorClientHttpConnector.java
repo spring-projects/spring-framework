@@ -66,7 +66,6 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 
 	private final Object lifecycleMonitor = new Object();
 
-	private boolean applyAttributes = true;
 
 	/**
 	 * Default constructor. Initializes {@link HttpClient} via:
@@ -171,20 +170,10 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 		return requestSender.uri(uri.toString());
 	}
 
-	@Override
-	public void setApplyAttributes(boolean applyAttributes) {
-		this.applyAttributes = applyAttributes;
-	}
-
-	@Override
-	public boolean getApplyAttributes() {
-		return this.applyAttributes;
-	}
-
 	private ReactorClientHttpRequest adaptRequest(HttpMethod method, URI uri, HttpClientRequest request,
 			NettyOutbound nettyOutbound) {
 
-		return new ReactorClientHttpRequest(method, uri, request, nettyOutbound, this.applyAttributes);
+		return new ReactorClientHttpRequest(method, uri, request, nettyOutbound);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,6 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private final Map<String, Object> attributes;
 
-	private final boolean applyAttributes;
-
 	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
 	private final List<Supplier<? extends Publisher<Void>>> commitActions = new ArrayList<>(4);
@@ -71,19 +69,14 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 
 	public AbstractClientHttpRequest() {
-		this(new HttpHeaders(), false);
+		this(new HttpHeaders());
 	}
 
-	public AbstractClientHttpRequest(boolean applyAttributes) {
-		this(new HttpHeaders(), applyAttributes);
-	}
-
-	public AbstractClientHttpRequest(HttpHeaders headers, boolean applyAttributes) {
+	public AbstractClientHttpRequest(HttpHeaders headers) {
 		Assert.notNull(headers, "HttpHeaders must not be null");
 		this.headers = headers;
 		this.cookies = new LinkedMultiValueMap<>();
 		this.attributes = new LinkedHashMap<>();
-		this.applyAttributes = applyAttributes;
 	}
 
 
@@ -161,9 +154,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 				Mono.fromRunnable(() -> {
 					applyHeaders();
 					applyCookies();
-					if (this.applyAttributes) {
-						applyAttributes();
-					}
+					applyAttributes();
 					this.state.set(State.COMMITTED);
 				}));
 
@@ -193,9 +184,11 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	protected abstract void applyCookies();
 
 	/**
-	 * Add additional attributes from {@link #getAttributes()} to the underlying request.
+	 * Add attributes from {@link #getAttributes()} to the underlying request.
 	 * This method is called once only.
+	 * @since 6.2
 	 */
-	protected abstract void applyAttributes();
+	protected void applyAttributes() {
+	}
 
 }
