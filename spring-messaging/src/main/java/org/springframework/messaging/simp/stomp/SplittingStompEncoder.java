@@ -24,11 +24,12 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * An extension of {@link org.springframework.messaging.simp.stomp.StompEncoder}
- * that splits the STOMP message to multiple incomplete STOMP frames
- * when the encoded bytes length exceeds {@link SplittingStompEncoder#bufferSizeLimit}.
+ * Uses {@link org.springframework.messaging.simp.stomp.StompEncoder} to encode
+ * a message and splits it into parts no larger than the configured
+ * {@link SplittingStompEncoder#bufferSizeLimit}.
  *
  * @author Injae Kim
+ * @author Rossen Stoyanchev
  * @since 6.2
  * @see StompEncoder
  */
@@ -38,6 +39,7 @@ public class SplittingStompEncoder {
 
 	private final int bufferSizeLimit;
 
+
 	public SplittingStompEncoder(StompEncoder encoder, int bufferSizeLimit) {
 		Assert.notNull(encoder, "StompEncoder is required");
 		Assert.isTrue(bufferSizeLimit > 0, "Buffer size limit must be greater than 0");
@@ -45,11 +47,13 @@ public class SplittingStompEncoder {
 		this.bufferSizeLimit = bufferSizeLimit;
 	}
 
+
 	/**
-	 * Encodes the given payload and headers into a list of one or more {@code byte[]}s.
-	 * @param headers the headers
-	 * @param payload the payload
-	 * @return the list of one or more encoded messages
+	 * Encode the given payload and headers to a STOMP frame, and split into a
+	 * list of parts based on the configured buffer size limit.
+	 * @param headers the STOMP message headers
+	 * @param payload the STOMP message payload
+	 * @return the parts of the encoded STOMP message
 	 */
 	public List<byte[]> encode(Map<String, Object> headers, byte[] payload) {
 		byte[] result = this.encoder.encode(headers, payload);
@@ -65,4 +69,5 @@ public class SplittingStompEncoder {
 		}
 		return frames;
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,8 +83,8 @@ public class StompEncoder {
 
 	/**
 	 * Encodes the given payload and headers into a {@code byte[]}.
-	 * @param headers the headers
-	 * @param payload the payload
+	 * @param headers the STOMP message headers
+	 * @param payload the STOMP message payload
 	 * @return the encoded message
 	 */
 	public byte[] encode(Map<String, Object> headers, byte[] payload) {

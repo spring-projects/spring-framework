@@ -124,7 +124,7 @@ class WebSocketStompClientIntegrationTests {
 	@Test
 	void publishSubscribeWithSlitMessage() throws Exception {
 		StringBuilder sb = new StringBuilder();
-		while (sb.length() < 1024) {
+		while (sb.length() < 2000) {
 			sb.append("A message with a long body... ");
 		}
 		String payload = sb.toString();

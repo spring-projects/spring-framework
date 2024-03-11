@@ -105,12 +105,12 @@ it handle ERROR frames in addition to the `handleException` callback for
 exceptions from the handling of messages and `handleTransportError` for
 transport-level errors including `ConnectionLostException`.
 
-You can also use `setInboundMessageSizeLimit(limit)` and `setOutboundMessageSizeLimit(limit)`
-to limit the maximum size of inbound and outbound message size.
-When outbound message size exceeds `outboundMessageSizeLimit`, message is split into multiple incomplete frames.
-Then receiver buffers these incomplete frames and reassemble to complete message.
-When inbound message size exceeds `inboundMessageSizeLimit`, throw `StompConversionException`.
-The default value of in&outboundMessageSizeLimit is `64KB`.
+You can use the `inboundMessageSizeLimit` and `outboundMessageSizeLimit` properties of
+`WebSocketStompClient` to limit the maximum size of inbound and outbound WebSocket
+messages. When an outbound STOMP message exceeds the limit, it is split into partial frames,
+which the receiver would have to reassemble. By default, there is no size limit for outbound
+messages. When an inbound STOMP message size exceeds the configured limit, a
+`StompConversionException` is thrown. The default size limit for inbound messages is `64KB`.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
