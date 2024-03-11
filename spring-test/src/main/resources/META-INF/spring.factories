@@ -1,22 +1,22 @@
 # Default TestExecutionListeners for the Spring TestContext Framework
 #
 org.springframework.test.context.TestExecutionListener = \
-	org.springframework.test.bean.override.BeanOverrideTestExecutionListener,\
-	org.springframework.test.bean.override.mockito.MockitoTestExecutionListener,\
-	org.springframework.test.bean.override.mockito.MockitoResetTestExecutionListener,\
 	org.springframework.test.context.web.ServletTestExecutionListener,\
 	org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener,\
 	org.springframework.test.context.event.ApplicationEventsTestExecutionListener,\
+	org.springframework.test.context.bean.override.mockito.MockitoTestExecutionListener,\
 	org.springframework.test.context.support.DependencyInjectionTestExecutionListener,\
 	org.springframework.test.context.observation.MicrometerObservationRegistryTestExecutionListener,\
 	org.springframework.test.context.support.DirtiesContextTestExecutionListener,\
 	org.springframework.test.context.transaction.TransactionalTestExecutionListener,\
 	org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener,\
-	org.springframework.test.context.event.EventPublishingTestExecutionListener
+	org.springframework.test.context.event.EventPublishingTestExecutionListener,\
+	org.springframework.test.context.bean.override.mockito.MockitoResetTestExecutionListener,\
+	org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
 
 # Default ContextCustomizerFactory implementations for the Spring TestContext Framework
 #
 org.springframework.test.context.ContextCustomizerFactory = \
-	org.springframework.test.bean.override.BeanOverrideContextCustomizerFactory,\
+	org.springframework.test.context.bean.override.BeanOverrideContextCustomizerFactory,\
 	org.springframework.test.context.web.socket.MockServerContainerContextCustomizerFactory,\
 	org.springframework.test.context.support.DynamicPropertiesContextCustomizerFactory
