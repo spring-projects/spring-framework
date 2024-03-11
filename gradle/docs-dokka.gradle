@@ -5,7 +5,7 @@ tasks.findByName("dokkaHtmlPartial")?.configure {
 			sourceRoots.setFrom(file("src/main/kotlin"))
 			classpath.from(sourceSets["main"].runtimeClasspath)
 			externalDocumentationLink {
-				url.set(new URL("https://docs.spring.io/spring-framework/docs/current/javadoc-api/"))
+				url.set(new URL("https://docs.spring.io/spring-framework/docs/5.3.x/javadoc-api/"))
 			}
 			externalDocumentationLink {
 				url.set(new URL("https://projectreactor.io/docs/core/release/api/"))
