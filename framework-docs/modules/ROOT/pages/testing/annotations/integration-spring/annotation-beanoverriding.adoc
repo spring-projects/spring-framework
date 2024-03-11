@@ -99,7 +99,7 @@ The three annotations introduced above build upon the `@BeanOverride` meta-annot
 and associated infrastructure, which allows to define custom bean overriding variants.
 
 In order to provide an extension, three classes are needed:
- - a concrete `BeanOverrideProcessor` `<P>`
+ - a concrete `BeanOverrideProcessor<P>`
  - a concrete `OverrideMetadata` created by said processor
  - an annotation meta-annotated with `@BeanOverride(P.class)`
 
