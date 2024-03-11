@@ -1,5 +1,5 @@
 /**
- * Provides an HttpMessageConverter for the Yaml data format.
+ * Provides an {@code HttpMessageConverter} for the YAML data format.
  */
 @NonNullApi
 @NonNullFields

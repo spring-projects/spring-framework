@@ -940,7 +940,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Obtain a {@link Jackson2ObjectMapperBuilder} instance in order to
-	 * build a Yaml data format {@link ObjectMapper} instance.
+	 * build a YAML data format {@link ObjectMapper} instance.
 	 * @since 6.2
 	 */
 	public static Jackson2ObjectMapperBuilder yaml() {

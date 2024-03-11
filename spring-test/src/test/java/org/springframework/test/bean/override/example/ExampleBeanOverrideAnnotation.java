@@ -28,7 +28,7 @@ import org.springframework.test.bean.override.BeanOverride;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExampleBeanOverrideAnnotation {
 
-	static final String DEFAULT_VALUE = "TEST OVERRIDE";
+	String DEFAULT_VALUE = "TEST OVERRIDE";
 
 	String value() default DEFAULT_VALUE;
 

@@ -65,7 +65,7 @@ public class MappingJackson2YamlHttpMessageConverter extends AbstractJackson2Htt
 
 	/**
 	 * {@inheritDoc}
-	 * The {@code ObjectMapper} must be configured with a {@code YAMLFactory} instance.
+	 * <p>The {@code ObjectMapper} must be configured with a {@code YAMLFactory} instance.
 	 */
 	@Override
 	public void setObjectMapper(ObjectMapper objectMapper) {
