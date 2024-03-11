@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -275,13 +276,24 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			this.owner = owner;
 		}
 
+		@Nullable
 		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
 			ReplaceOverride ro = (ReplaceOverride) getBeanDefinition().getMethodOverrides().getOverride(method);
 			Assert.state(ro != null, "ReplaceOverride not found");
 			// TODO could cache if a singleton for minor performance optimization
 			MethodReplacer mr = this.owner.getBean(ro.getMethodReplacerBeanName(), MethodReplacer.class);
-			return mr.reimplement(obj, method, args);
+			return processReturnType(method, mr.reimplement(obj, method, args));
+		}
+
+		@Nullable
+		private <T> T processReturnType(Method method, @Nullable T returnValue) {
+			Class<?> returnType = method.getReturnType();
+			if (returnType != void.class && returnType.isPrimitive()) {
+				return Objects.requireNonNull(returnValue, () -> "Null return value from replacer does not match primitive return type for: " + method);
+			}
+
+			return returnValue;
 		}
 	}
 
