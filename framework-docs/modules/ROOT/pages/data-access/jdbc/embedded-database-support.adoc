@@ -16,123 +16,21 @@ lightweight nature. Benefits include ease of configuration, quick startup time,
 testability, and the ability to rapidly evolve your SQL during development.
 
 
-[[jdbc-embedded-database-xml]]
-== Creating an Embedded Database by Using Spring XML
+[[jdbc-embedded-database]]
+== Creating an Embedded Database
 
-If you want to expose an embedded database instance as a bean in a Spring
-`ApplicationContext`, you can use the `embedded-database` tag in the `spring-jdbc` namespace:
+You can expose an embedded database instance as a bean as the following example shows:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<jdbc:embedded-database id="dataSource" generate-name="true">
-		<jdbc:script location="classpath:schema.sql"/>
-		<jdbc:script location="classpath:test-data.sql"/>
-	</jdbc:embedded-database>
-----
+include-code::./JdbcEmbeddedDatabaseConfiguration[tag=snippet,indent=0]
 
-The preceding configuration creates an embedded HSQL database that is populated with SQL from
+The preceding configuration creates an embedded H2 database that is populated with SQL from
 the `schema.sql` and `test-data.sql` resources in the root of the classpath. In addition, as
 a best practice, the embedded database is assigned a uniquely generated name. The
 embedded database is made available to the Spring container as a bean of type
 `javax.sql.DataSource` that can then be injected into data access objects as needed.
 
-
-[[jdbc-embedded-database-java]]
-== Creating an Embedded Database Programmatically
-
-The `EmbeddedDatabaseBuilder` class provides a fluent API for constructing an embedded
-database programmatically. You can use this when you need to create an embedded database in a
-stand-alone environment or in a stand-alone integration test, as in the following example:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
-			.generateUniqueName(true)
-			.setType(H2)
-			.setScriptEncoding("UTF-8")
-			.ignoreFailedDrops(true)
-			.addScript("schema.sql")
-			.addScripts("user_data.sql", "country_data.sql")
-			.build();
-
-	// perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
-
-	db.shutdown()
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	val db = EmbeddedDatabaseBuilder()
-			.generateUniqueName(true)
-			.setType(H2)
-			.setScriptEncoding("UTF-8")
-			.ignoreFailedDrops(true)
-			.addScript("schema.sql")
-			.addScripts("user_data.sql", "country_data.sql")
-			.build()
-
-	// perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
-
-	db.shutdown()
-----
-======
-
 See the {spring-framework-api}/jdbc/datasource/embedded/EmbeddedDatabaseBuilder.html[javadoc for `EmbeddedDatabaseBuilder`]
 for further details on all supported options.
-
-You can also use the `EmbeddedDatabaseBuilder` to create an embedded database by using Java
-configuration, as the following example shows:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	@Configuration
-	public class DataSourceConfig {
-
-		@Bean
-		public DataSource dataSource() {
-			return new EmbeddedDatabaseBuilder()
-					.generateUniqueName(true)
-					.setType(H2)
-					.setScriptEncoding("UTF-8")
-					.ignoreFailedDrops(true)
-					.addScript("schema.sql")
-					.addScripts("user_data.sql", "country_data.sql")
-					.build();
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	@Configuration
-	class DataSourceConfig {
-
-		@Bean
-		fun dataSource(): DataSource {
-			return EmbeddedDatabaseBuilder()
-					.generateUniqueName(true)
-					.setType(H2)
-					.setScriptEncoding("UTF-8")
-					.ignoreFailedDrops(true)
-					.addScript("schema.sql")
-					.addScripts("user_data.sql", "country_data.sql")
-					.build()
-		}
-	}
-----
-======
 
 
 [[jdbc-embedded-database-types]]
@@ -245,8 +143,8 @@ can be useful for one-offs when the embedded database does not need to be reused
 classes. However, if you wish to create an embedded database that is shared within a test suite,
 consider using the xref:testing/testcontext-framework.adoc[Spring TestContext Framework] and
 configuring the embedded database as a bean in the Spring `ApplicationContext` as described
-in xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-xml[Creating an Embedded Database by Using Spring XML] and xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-java[Creating an Embedded Database Programmatically]. The following listing
-shows the test template:
+in xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database[Creating an Embedded Database].
+The following listing shows the test template:
 
 [tabs]
 ======
