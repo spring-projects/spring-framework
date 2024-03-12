@@ -454,9 +454,7 @@ final class DefaultWebClient implements WebClient {
 				if (filterFunctions != null) {
 					filterFunction = filterFunctions.andThen(filterFunction);
 				}
-				ClientRequest request = requestBuilder
-						.attribute(ClientRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext)
-						.build();
+				ClientRequest request = requestBuilder.build();
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
 				observationContext.setRequest(request);
 				Mono<ClientResponse> responseMono = filterFunction.apply(exchangeFunction)
