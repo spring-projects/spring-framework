@@ -71,13 +71,11 @@ class JettyClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
 		if (!headers.isEmpty()) {
-			this.request.headers(httpFields -> {
-				headers.forEach((headerName, headerValues) -> {
-					for (String headerValue : headerValues) {
-						httpFields.add(headerName, headerValue);
-					}
-				});
-			});
+			this.request.headers(httpFields -> headers.forEach((headerName, headerValues) -> {
+				for (String headerValue : headerValues) {
+					httpFields.add(headerName, headerValue);
+				}
+			}));
 		}
 		String contentType = null;
 		if (headers.getContentType() != null) {
