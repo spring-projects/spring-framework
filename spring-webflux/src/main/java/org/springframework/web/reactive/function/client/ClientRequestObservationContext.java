@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.util.Optional;
-
 import io.micrometer.observation.transport.RequestReplySenderContext;
 
 import org.springframework.lang.Nullable;
@@ -34,14 +32,6 @@ import org.springframework.lang.Nullable;
  * @since 6.0
  */
 public class ClientRequestObservationContext extends RequestReplySenderContext<ClientRequest.Builder, ClientResponse> {
-
-	/**
-	 * Name of the request attribute holding the {@link ClientRequestObservationContext context}
-	 * for the current observation.
-	 * @since 6.0.15
-	 */
-	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = ClientRequestObservationContext.class.getName();
-
 
 	@Nullable
 	private String uriTemplate;
@@ -126,16 +116,5 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 		return this.request;
 	}
 
-
-	/**
-	 * Get the current {@link ClientRequestObservationContext observation context}
-	 * from the given request, if available.
-	 * @param request the current client request
-	 * @return the current observation context
-	 * @since 6.0.15
-	 */
-	public static Optional<ClientRequestObservationContext> findCurrent(ClientRequest request) {
-		return Optional.ofNullable((ClientRequestObservationContext) request.attributes().get(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
-	}
 
 }
