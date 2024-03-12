@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class ModuleResourceTests {
 
 	private static final String existingPath = "java/beans/Introspector.class";
+
 	private static final String nonExistingPath = "org/example/NonExistingClass.class";
 
 
@@ -48,18 +49,8 @@ class ModuleResourceTests {
 		ModuleResource mr = new ModuleResource(Introspector.class.getModule(), existingPath);
 		assertExistingResource(mr);
 		assertThat(mr.getDescription()).startsWith("module resource").contains(mr.getModule().getName(), mr.getPath());
-		System.err.println(mr.getDescription());
-
 		assertThat(mr.getContentAsByteArray()).isEqualTo(cpr.getContentAsByteArray());
 		assertThat(mr.contentLength()).isEqualTo(cpr.contentLength());
-	}
-
-	private static void assertExistingResource(Resource resource) {
-		assertThat(resource.exists()).isTrue();
-		assertThat(resource.isReadable()).isTrue();
-		assertThat(resource.isOpen()).isFalse();
-		assertThat(resource.isFile()).isFalse();
-		assertThat(resource.getFilename()).isEqualTo("Introspector.class");
 	}
 
 	@Test
@@ -81,12 +72,22 @@ class ModuleResourceTests {
 		Resource resource1 = new ModuleResource(Introspector.class.getModule(), existingPath);
 		Resource resource2 = new ModuleResource(Introspector.class.getModule(), existingPath);
 		Resource resource3 = new ModuleResource(Introspector.class.getModule(), nonExistingPath);
+
 		assertThat(resource1).isEqualTo(resource1);
 		assertThat(resource1).isEqualTo(resource2);
 		assertThat(resource2).isEqualTo(resource1);
 		assertThat(resource1).isNotEqualTo(resource3);
 		assertThat(resource1).hasSameHashCodeAs(resource2);
 		assertThat(resource1).doesNotHaveSameHashCodeAs(resource3);
+	}
+
+
+	private static void assertExistingResource(Resource resource) {
+		assertThat(resource.exists()).isTrue();
+		assertThat(resource.isReadable()).isTrue();
+		assertThat(resource.isOpen()).isFalse();
+		assertThat(resource.isFile()).isFalse();
+		assertThat(resource.getFilename()).isEqualTo("Introspector.class");
 	}
 
 }
