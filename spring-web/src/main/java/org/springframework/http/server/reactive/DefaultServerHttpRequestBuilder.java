@@ -70,7 +70,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		Assert.notNull(original, "ServerHttpRequest is required");
 
 		this.uri = original.getURI();
-		this.headers = HttpHeaders.writableHttpHeaders(original.getHeaders());
+		this.headers = new HttpHeaders(original.getHeaders());
 		this.httpMethod = original.getMethod();
 		this.contextPath = original.getPath().contextPath().value();
 		this.remoteAddress = original.getRemoteAddress();
