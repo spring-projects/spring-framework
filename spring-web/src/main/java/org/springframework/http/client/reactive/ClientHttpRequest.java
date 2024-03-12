@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,15 +49,16 @@ public interface ClientHttpRequest extends ReactiveHttpOutputMessage {
 	MultiValueMap<String, HttpCookie> getCookies();
 
 	/**
+	 * Return a mutable map of the request attributes.
+	 * @since 6.2
+	 */
+	Map<String, Object> getAttributes();
+
+	/**
 	 * Return the request from the underlying HTTP library.
 	 * @param <T> the expected type of the request to cast to
 	 * @since 5.3
 	 */
 	<T> T getNativeRequest();
-
-	/**
-	 * Return a mutable map of the request attributes.
-	 */
-	Map<String, Object> getAttributes();
 
 }

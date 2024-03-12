@@ -138,14 +138,6 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 				.forEach(this.jettyRequest::cookie);
 	}
 
-	/**
-	 * Applies the attributes to {@link Request#getAttributes()}.
-	 */
-	@Override
-	protected void applyAttributes() {
-		getAttributes().forEach(this.jettyRequest::attribute);
-	}
-
 	@Override
 	protected void applyHeaders() {
 		HttpHeaders headers = getHeaders();
@@ -160,6 +152,15 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected HttpHeaders initReadOnlyHeaders() {
 		return HttpHeaders.readOnlyHttpHeaders(new JettyHeadersAdapter(this.jettyRequest.getHeaders()));
+	}
+
+	@Override
+	protected void applyAttributes() {
+		getAttributes().forEach((key, value) -> {
+			if (this.jettyRequest.getAttributes().get(key) == null) {
+				this.jettyRequest.attribute(key, value);
+			}
+		});
 	}
 
 	public ReactiveRequest toReactiveRequest() {

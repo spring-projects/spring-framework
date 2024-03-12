@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
-import io.netty.util.AttributeKey;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -47,8 +45,6 @@ import org.springframework.http.support.Netty4HeadersAdapter;
  * @see reactor.netty.http.client.HttpClient
  */
 class ReactorClientHttpRequest extends AbstractClientHttpRequest implements ZeroCopyHttpOutputMessage {
-
-	public static final String ATTRIBUTES_CHANNEL_KEY = "attributes";
 
 	private final HttpMethod httpMethod;
 
@@ -141,14 +137,16 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 	}
 
 	/**
-	 * Applies the request attributes to the {@link reactor.netty.http.client.HttpClientRequest} by setting
-	 * a single {@link Map} into the {@link reactor.netty.channel.ChannelOperations#channel()},
-	 * with {@link io.netty5.util.AttributeKey#name()} equal to {@link #ATTRIBUTES_CHANNEL_KEY}.
+	 * Saves the {@link #getAttributes() request attributes} to the
+	 * {@link reactor.netty.channel.ChannelOperations#channel() channel} as a single map
+	 * attribute under the key {@link ReactorClientHttpConnector#ATTRIBUTES_KEY}.
 	 */
 	@Override
 	protected void applyAttributes() {
-		((ChannelOperations<?, ?>) this.request)
-				.channel().attr(AttributeKey.valueOf(ATTRIBUTES_CHANNEL_KEY)).set(getAttributes());
+		if (!getAttributes().isEmpty()) {
+			((ChannelOperations<?, ?>) this.request).channel()
+					.attr(ReactorClientHttpConnector.ATTRIBUTES_KEY).set(getAttributes());
+		}
 	}
 
 	@Override

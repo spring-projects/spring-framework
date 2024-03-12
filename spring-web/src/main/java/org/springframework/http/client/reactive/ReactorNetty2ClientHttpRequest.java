@@ -18,11 +18,9 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Map;
 
 import io.netty5.buffer.Buffer;
 import io.netty5.handler.codec.http.headers.DefaultHttpCookiePair;
-import io.netty5.util.AttributeKey;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -48,8 +46,6 @@ import org.springframework.http.support.Netty5HeadersAdapter;
  * @see reactor.netty5.http.client.HttpClient
  */
 class ReactorNetty2ClientHttpRequest extends AbstractClientHttpRequest implements ZeroCopyHttpOutputMessage {
-
-	public static final String ATTRIBUTES_CHANNEL_KEY = "attributes";
 
 	private final HttpMethod httpMethod;
 
@@ -144,14 +140,16 @@ class ReactorNetty2ClientHttpRequest extends AbstractClientHttpRequest implement
 	}
 
 	/**
-	 * Applies the request attributes to the {@link reactor.netty.http.client.HttpClientRequest} by setting
-	 * a single {@link Map} into the {@link reactor.netty.channel.ChannelOperations#channel()},
-	 * with {@link AttributeKey#name()} equal to {@link #ATTRIBUTES_CHANNEL_KEY}.
+	 * Saves the {@link #getAttributes() request attributes} to the
+	 * {@link reactor.netty.channel.ChannelOperations#channel() channel} as a single map
+	 * attribute under the key {@link ReactorNetty2ClientHttpConnector#ATTRIBUTES_KEY}.
 	 */
 	@Override
 	protected void applyAttributes() {
-		((ChannelOperations<?, ?>) this.request)
-				.channel().attr(AttributeKey.valueOf(ATTRIBUTES_CHANNEL_KEY)).set(getAttributes());
+		if (!getAttributes().isEmpty()) {
+			((ChannelOperations<?, ?>) this.request).channel()
+					.attr(ReactorNetty2ClientHttpConnector.ATTRIBUTES_KEY).set(getAttributes());
+		}
 	}
 
 	@Override

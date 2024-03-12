@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -207,13 +206,13 @@ class WebClientIntegrationTests {
 		StepVerifier.create(result).expectComplete().verify();
 
 		if (nativeRequest.get() instanceof ChannelOperations<?,?> nativeReq) {
-			Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(AttributeKey.valueOf("attributes"));
+			Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(ReactorClientHttpConnector.ATTRIBUTES_KEY);
 			assertThat(attributes.get()).isNotNull();
 			assertThat(attributes.get()).containsEntry("foo", "bar");
 		}
 		else if (nativeRequest.get() instanceof reactor.netty5.channel.ChannelOperations<?,?> nativeReq) {
 			io.netty5.util.Attribute<Map<String, Object>> attributes =
-					nativeReq.channel().attr(io.netty5.util.AttributeKey.valueOf("attributes"));
+					nativeReq.channel().attr(ReactorNetty2ClientHttpConnector.ATTRIBUTES_KEY);
 			assertThat(attributes.get()).isNotNull();
 			assertThat(attributes.get()).containsEntry("foo", "bar");
 		}
@@ -221,7 +220,7 @@ class WebClientIntegrationTests {
 			assertThat(nativeReq.getAttributes()).containsEntry("foo", "bar");
 		}
 		else if (nativeRequest.get() instanceof org.apache.hc.core5.http.HttpRequest nativeReq) {
-			// TODO get attributes from HttpClientContext
+			// Attributes are not in the request, but in separate HttpClientContext
 		}
 	}
 

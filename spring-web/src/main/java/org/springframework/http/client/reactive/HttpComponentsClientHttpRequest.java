@@ -163,7 +163,7 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected void applyAttributes() {
 		getAttributes().forEach((key, value) -> {
-			if(this.context.getAttribute(key) == null) {
+			if (this.context.getAttribute(key) == null) {
 				this.context.setAttribute(key, value);
 			}
 		});

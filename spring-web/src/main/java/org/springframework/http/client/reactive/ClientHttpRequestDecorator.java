@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,11 @@ public class ClientHttpRequestDecorator implements ClientHttpRequest {
 	}
 
 	@Override
+	public Map<String, Object> getAttributes() {
+		return this.delegate.getAttributes();
+	}
+
+	@Override
 	public DataBufferFactory bufferFactory() {
 		return this.delegate.bufferFactory();
 	}
@@ -84,11 +89,6 @@ public class ClientHttpRequestDecorator implements ClientHttpRequest {
 	@Override
 	public <T> T getNativeRequest() {
 		return this.delegate.getNativeRequest();
-	}
-
-	@Override
-	public Map<String, Object> getAttributes() {
-		return this.delegate.getAttributes();
 	}
 
 	@Override
