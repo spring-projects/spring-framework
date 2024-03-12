@@ -24,9 +24,9 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * Uses {@link org.springframework.messaging.simp.stomp.StompEncoder} to encode
- * a message and splits it into parts no larger than the configured
- * {@link SplittingStompEncoder#bufferSizeLimit}.
+ * Uses a {@link StompEncoder} to encode a message and splits it into parts no
+ * larger than the configured
+ * {@linkplain #SplittingStompEncoder(StompEncoder, int) buffer size limit}.
  *
  * @author Injae Kim
  * @author Rossen Stoyanchev
@@ -40,6 +40,11 @@ public class SplittingStompEncoder {
 	private final int bufferSizeLimit;
 
 
+	/**
+	 * Create a new {@code SplittingStompEncoder}.
+	 * @param encoder the {@link StompEncoder} to use
+	 * @param bufferSizeLimit the buffer size limit
+	 */
 	public SplittingStompEncoder(StompEncoder encoder, int bufferSizeLimit) {
 		Assert.notNull(encoder, "StompEncoder is required");
 		Assert.isTrue(bufferSizeLimit > 0, "Buffer size limit must be greater than 0");
@@ -49,7 +54,7 @@ public class SplittingStompEncoder {
 
 
 	/**
-	 * Encode the given payload and headers to a STOMP frame, and split into a
+	 * Encode the given payload and headers to a STOMP frame, and split it into a
 	 * list of parts based on the configured buffer size limit.
 	 * @param headers the STOMP message headers
 	 * @param payload the STOMP message payload

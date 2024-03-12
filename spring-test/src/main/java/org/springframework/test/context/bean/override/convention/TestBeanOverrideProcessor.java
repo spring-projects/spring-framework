@@ -56,10 +56,10 @@ public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 		Assert.isTrue(expectedMethodNames.length > 0, "At least one expectedMethodName is required");
 		Set<String> expectedNames = new LinkedHashSet<>(Arrays.asList(expectedMethodNames));
-		final List<Method> found = Arrays.stream(enclosingClass.getDeclaredMethods())
-				.filter(method -> Modifier.isStatic(method.getModifiers()))
-				.filter(method -> expectedNames.contains(method.getName())
-						&& expectedMethodReturnType.isAssignableFrom(method.getReturnType()))
+		List<Method> found = Arrays.stream(enclosingClass.getDeclaredMethods())
+				.filter(method -> Modifier.isStatic(method.getModifiers()) &&
+						expectedNames.contains(method.getName()) &&
+						expectedMethodReturnType.isAssignableFrom(method.getReturnType()))
 				.toList();
 
 		Assert.state(found.size() == 1, () -> "Found " + found.size() + " static methods " +
@@ -71,13 +71,13 @@ public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	@Override
 	public OverrideMetadata createMetadata(Field field, Annotation overrideAnnotation, ResolvableType typeToOverride) {
-		final Class<?> enclosingClass = field.getDeclaringClass();
-		// if we can get an explicit method name right away, fail fast if it doesn't match
+		Class<?> declaringClass = field.getDeclaringClass();
+		// If we can, get an explicit method name right away; fail fast if it doesn't match.
 		if (overrideAnnotation instanceof TestBean testBeanAnnotation) {
 			Method overrideMethod = null;
 			String beanName = null;
 			if (!testBeanAnnotation.methodName().isBlank()) {
-				overrideMethod = ensureMethod(enclosingClass, field.getType(), testBeanAnnotation.methodName());
+				overrideMethod = ensureMethod(declaringClass, field.getType(), testBeanAnnotation.methodName());
 			}
 			if (!testBeanAnnotation.name().isBlank()) {
 				beanName = testBeanAnnotation.name();
@@ -85,9 +85,8 @@ public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 			return new MethodConventionOverrideMetadata(field, overrideMethod, beanName,
 					overrideAnnotation, typeToOverride);
 		}
-		// otherwise defer the resolution of the static method until OverrideMetadata#createOverride
-		return new MethodConventionOverrideMetadata(field, null, null, overrideAnnotation,
-				typeToOverride);
+		// Otherwise defer the resolution of the static method until OverrideMetadata#createOverride.
+		return new MethodConventionOverrideMetadata(field, null, null, overrideAnnotation, typeToOverride);
 	}
 
 	static final class MethodConventionOverrideMetadata extends OverrideMetadata {
@@ -100,6 +99,7 @@ public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 		public MethodConventionOverrideMetadata(Field field, @Nullable Method overrideMethod, @Nullable String beanName,
 				Annotation overrideAnnotation, ResolvableType typeToOverride) {
+
 			super(field, overrideAnnotation, typeToOverride, BeanOverrideStrategy.REPLACE_DEFINITION);
 			this.overrideMethod = overrideMethod;
 			this.beanName = beanName;
@@ -121,6 +121,7 @@ public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 		@Override
 		protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
 				@Nullable Object existingBeanInstance) {
+
 			Method methodToInvoke = this.overrideMethod;
 			if (methodToInvoke == null) {
 				methodToInvoke = ensureMethod(field().getDeclaringClass(), field().getType(),
@@ -135,7 +136,7 @@ public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 			}
 			catch (IllegalAccessException | InvocationTargetException ex) {
 				throw new IllegalArgumentException("Could not invoke bean overriding method " + methodToInvoke.getName() +
-						", a static method with no input parameters is expected", ex);
+						"; a static method with no formal parameters is expected", ex);
 			}
 
 			return override;

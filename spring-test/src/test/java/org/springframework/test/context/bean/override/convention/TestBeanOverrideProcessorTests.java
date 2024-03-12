@@ -24,77 +24,84 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.test.context.bean.override.convention.TestBeanOverrideProcessor.MethodConventionOverrideMetadata;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.FailingExampleService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatException;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
+/**
+ * Tests for {@link TestBeanOverrideProcessor}.
+ *
+ * @author Simon Baslé
+ * @since 6.2
+ */
 class TestBeanOverrideProcessorTests {
 
 	@Test
 	void ensureMethodFindsFromList() {
-		Method m = TestBeanOverrideProcessor.ensureMethod(MethodConventionConf.class, ExampleService.class,
+		Method method = TestBeanOverrideProcessor.ensureMethod(MethodConventionConf.class, ExampleService.class,
 				"example1", "example2", "example3");
 
-		assertThat(m.getName()).isEqualTo("example2");
+		assertThat(method.getName()).isEqualTo("example2");
 	}
 
 	@Test
 	void ensureMethodNotFound() {
-		assertThatException().isThrownBy(() -> TestBeanOverrideProcessor.ensureMethod(
-				MethodConventionConf.class, ExampleService.class, "example1", "example3"))
+		assertThatIllegalStateException()
+				.isThrownBy(() -> TestBeanOverrideProcessor.ensureMethod(MethodConventionConf.class, ExampleService.class,
+						"example1", "example3"))
 				.withMessage("Found 0 static methods instead of exactly one, matching a name in [example1, example3] with return type " +
-						ExampleService.class.getName() + " on class " + MethodConventionConf.class.getName())
-				.isInstanceOf(IllegalStateException.class);
+						ExampleService.class.getName() + " on class " + MethodConventionConf.class.getName());
 	}
 
 	@Test
 	void ensureMethodTwoFound() {
-		assertThatException().isThrownBy(() -> TestBeanOverrideProcessor.ensureMethod(
-				MethodConventionConf.class, ExampleService.class, "example2", "example4"))
+		assertThatIllegalStateException()
+				.isThrownBy(() -> TestBeanOverrideProcessor.ensureMethod(MethodConventionConf.class, ExampleService.class,
+						"example2", "example4"))
 				.withMessage("Found 2 static methods instead of exactly one, matching a name in [example2, example4] with return type " +
-						ExampleService.class.getName() + " on class " + MethodConventionConf.class.getName())
-				.isInstanceOf(IllegalStateException.class);
+						ExampleService.class.getName() + " on class " + MethodConventionConf.class.getName());
 	}
 
 	@Test
 	void ensureMethodNoNameProvided() {
-		assertThatException().isThrownBy(() -> TestBeanOverrideProcessor.ensureMethod(
-				MethodConventionConf.class, ExampleService.class))
-				.withMessage("At least one expectedMethodName is required")
-				.isInstanceOf(IllegalArgumentException.class);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> TestBeanOverrideProcessor.ensureMethod(MethodConventionConf.class, ExampleService.class))
+				.withMessage("At least one expectedMethodName is required");
 	}
 
 	@Test
 	void createMetaDataForUnknownExplicitMethod() throws NoSuchFieldException {
-		Field f = ExplicitMethodNameConf.class.getField("a");
-		final TestBean overrideAnnotation = Objects.requireNonNull(AnnotationUtils.getAnnotation(f, TestBean.class));
+		Field field = ExplicitMethodNameConf.class.getField("a");
+		TestBean overrideAnnotation = Objects.requireNonNull(field.getAnnotation(TestBean.class));
 		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
-		assertThatException().isThrownBy(() -> processor.createMetadata(f, overrideAnnotation, ResolvableType.forClass(ExampleService.class)))
+		assertThatIllegalStateException()
+				.isThrownBy(() -> processor.createMetadata(field, overrideAnnotation, ResolvableType.forClass(ExampleService.class)))
 				.withMessage("Found 0 static methods instead of exactly one, matching a name in [explicit1] with return type " +
-						ExampleService.class.getName() + " on class " + ExplicitMethodNameConf.class.getName())
-				.isInstanceOf(IllegalStateException.class);
+						ExampleService.class.getName() + " on class " + ExplicitMethodNameConf.class.getName());
 	}
 
 	@Test
 	void createMetaDataForKnownExplicitMethod() throws NoSuchFieldException {
-		Field f = ExplicitMethodNameConf.class.getField("b");
-		final TestBean overrideAnnotation = Objects.requireNonNull(AnnotationUtils.getAnnotation(f, TestBean.class));
+		Field field = ExplicitMethodNameConf.class.getField("b");
+		TestBean overrideAnnotation = Objects.requireNonNull(field.getAnnotation(TestBean.class));
 		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
-		assertThat(processor.createMetadata(f, overrideAnnotation, ResolvableType.forClass(ExampleService.class)))
-				.isInstanceOf(TestBeanOverrideProcessor.MethodConventionOverrideMetadata.class);
+		assertThat(processor.createMetadata(field, overrideAnnotation, ResolvableType.forClass(ExampleService.class)))
+				.isInstanceOf(MethodConventionOverrideMetadata.class);
 	}
 
 	@Test
 	void createMetaDataWithDeferredEnsureMethodCheck() throws NoSuchFieldException {
-		Field f = MethodConventionConf.class.getField("field");
-		final TestBean overrideAnnotation = Objects.requireNonNull(AnnotationUtils.getAnnotation(f, TestBean.class));
+		Field field = MethodConventionConf.class.getField("field");
+		TestBean overrideAnnotation = Objects.requireNonNull(field.getAnnotation(TestBean.class));
 		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
-		assertThat(processor.createMetadata(f, overrideAnnotation, ResolvableType.forClass(ExampleService.class)))
-				.isInstanceOf(TestBeanOverrideProcessor.MethodConventionOverrideMetadata.class);
+		assertThat(processor.createMetadata(field, overrideAnnotation, ResolvableType.forClass(ExampleService.class)))
+				.isInstanceOf(MethodConventionOverrideMetadata.class);
 	}
+
 
 	static class MethodConventionConf {
 
@@ -127,4 +134,5 @@ class TestBeanOverrideProcessorTests {
 			return new FailingExampleService();
 		}
 	}
+
 }

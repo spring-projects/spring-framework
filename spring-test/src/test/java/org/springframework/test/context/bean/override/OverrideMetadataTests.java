@@ -29,12 +29,35 @@ import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Tests for {@link OverrideMetadata}.
+ *
+ * @author Simon Baslé
+ * @since 6.2
+ */
 class OverrideMetadataTests {
+
+	@Test
+	void implicitConfigurations() throws Exception {
+		OverrideMetadata metadata = exampleOverride();
+		assertThat(metadata.getExpectedBeanName()).as("expectedBeanName").isEqualTo(metadata.field().getName());
+	}
+
+
+	@NonNull
+	String annotated = "exampleField";
+
+	private static OverrideMetadata exampleOverride() throws Exception {
+		Field field = OverrideMetadataTests.class.getDeclaredField("annotated");
+		return new ConcreteOverrideMetadata(Objects.requireNonNull(field), field.getAnnotation(NonNull.class),
+				ResolvableType.forClass(String.class), BeanOverrideStrategy.REPLACE_DEFINITION);
+	}
 
 	static class ConcreteOverrideMetadata extends OverrideMetadata {
 
 		ConcreteOverrideMetadata(Field field, Annotation overrideAnnotation, ResolvableType typeToOverride,
 				BeanOverrideStrategy strategy) {
+
 			super(field, overrideAnnotation, typeToOverride, strategy);
 		}
 
@@ -44,25 +67,11 @@ class OverrideMetadataTests {
 		}
 
 		@Override
-		protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition, @Nullable Object existingBeanInstance) {
+		protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
+				@Nullable Object existingBeanInstance) {
+
 			return BeanOverrideStrategy.REPLACE_DEFINITION;
 		}
-	}
-
-	@NonNull
-	public String annotated = "exampleField";
-
-	static OverrideMetadata exampleOverride() throws NoSuchFieldException {
-		final Field annotated = OverrideMetadataTests.class.getField("annotated");
-		return new ConcreteOverrideMetadata(Objects.requireNonNull(annotated), annotated.getAnnotation(NonNull.class),
-				ResolvableType.forClass(String.class), BeanOverrideStrategy.REPLACE_DEFINITION);
-	}
-
-	@Test
-	void implicitConfigurations() throws NoSuchFieldException {
-		final OverrideMetadata metadata = exampleOverride();
-		assertThat(metadata.getExpectedBeanName()).as("expectedBeanName")
-				.isEqualTo(metadata.field().getName());
 	}
 
 }
