@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,14 +48,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 class PathMatchingResourcePatternResolverTests {
 
-	private static final String[] CLASSES_IN_CORE_IO_SUPPORT = { "EncodedResource.class",
+	private static final String[] CLASSES_IN_CORE_IO_SUPPORT = {"EncodedResource.class",
 			"LocalizedResourceHelper.class", "PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
 			"PropertiesLoaderUtils.class", "ResourceArrayPropertyEditor.class", "ResourcePatternResolver.class",
-			"ResourcePatternUtils.class", "SpringFactoriesLoader.class" };
+			"ResourcePatternUtils.class", "SpringFactoriesLoader.class"};
 
-	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT = { "PathMatchingResourcePatternResolverTests.class" };
+	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT = {"PathMatchingResourcePatternResolverTests.class"};
 
-	private static final String[] CLASSES_IN_REACTOR_UTIL_ANNOTATION = { "NonNull.class", "NonNullApi.class", "Nullable.class" };
+	private static final String[] CLASSES_IN_REACTOR_UTIL_ANNOTATION = {"NonNull.class", "NonNullApi.class", "Nullable.class"};
 
 
 	private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
@@ -166,7 +166,7 @@ class PathMatchingResourcePatternResolverTests {
 			}
 
 			@Test
-			void usingFileProtocolWithoutWildcardInPatternAndEndingInSlashStarStar()  {
+			void usingFileProtocolWithoutWildcardInPatternAndEndingInSlashStarStar() {
 				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
 				String pattern = String.format("file:%s/scanned-resources/**", testResourcesDir);
 				String pathPrefix = ".+?resources/";
@@ -294,8 +294,8 @@ class PathMatchingResourcePatternResolverTests {
 	}
 
 	private String getPath(Resource resource) {
-		// Tests fail if we use resouce.getURL().getPath(). They would also fail on Mac OS when
-		// using resouce.getURI().getPath() if the resource paths are not Unicode normalized.
+		// Tests fail if we use resource.getURL().getPath(). They would also fail on macOS when
+		// using resource.getURI().getPath() if the resource paths are not Unicode normalized.
 		//
 		// On the JVM, all tests should pass when using resouce.getFile().getPath(); however,
 		// we use FileSystemResource#getPath since this test class is sometimes run within a
