@@ -45,7 +45,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 public class MockitoResetTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
-	 * Executes before {@link org.springframework.test.bean.override.BeanOverrideTestExecutionListener}.
+	 * Executes before {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener}.
 	 */
 	@Override
 	public int getOrder() {
