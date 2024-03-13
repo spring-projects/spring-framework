@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * @author Arjen Poutsma
@@ -34,6 +35,16 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rossen Stoyanchev
  */
 public class UriTemplateTests {
+
+	@Test
+	void emptyPathDoesNotThrowException() {
+		assertThatNoException().isThrownBy(() -> new UriTemplate(""));
+	}
+
+	@Test
+	void nullPathThrowsException() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new UriTemplate(null));
+	}
 
 	@Test
 	public void getVariableNames() throws Exception {
