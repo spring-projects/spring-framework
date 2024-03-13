@@ -54,10 +54,24 @@ class UriTemplateTests {
 	}
 
 	@Test
+	void getVariableNamesFromEmpty() {
+		UriTemplate template = new UriTemplate("");
+		List<String> variableNames = template.getVariableNames();
+		assertThat(variableNames).isEmpty();
+	}
+
+	@Test
 	void expandVarArgs() {
 		UriTemplate template = new UriTemplate("/hotels/{hotel}/bookings/{booking}");
 		URI result = template.expand("1", "42");
 		assertThat(result).as("Invalid expanded template").isEqualTo(URI.create("/hotels/1/bookings/42"));
+	}
+
+	@Test
+	void expandVarArgsFromEmpty() {
+		UriTemplate template = new UriTemplate("");
+		URI result = template.expand();
+		assertThat(result).as("Invalid expanded template").isEqualTo(URI.create(""));
 	}
 
 	@Test  // SPR-9712
@@ -136,6 +150,15 @@ class UriTemplateTests {
 	}
 
 	@Test
+	void matchesAgainstEmpty() {
+		UriTemplate template = new UriTemplate("");
+		assertThat(template.matches("/hotels/1/bookings/42")).as("UriTemplate matches").isFalse();
+		assertThat(template.matches("/hotels/bookings")).as("UriTemplate matches").isFalse();
+		assertThat(template.matches("")).as("UriTemplate does not match").isTrue();
+		assertThat(template.matches(null)).as("UriTemplate matches").isFalse();
+	}
+
+	@Test
 	void matchesCustomRegex() {
 		UriTemplate template = new UriTemplate("/hotels/{hotel:\\d+}");
 		assertThat(template.matches("/hotels/42")).as("UriTemplate does not match").isTrue();
@@ -151,6 +174,13 @@ class UriTemplateTests {
 		UriTemplate template = new UriTemplate("/hotels/{hotel}/bookings/{booking}");
 		Map<String, String> result = template.match("/hotels/1/bookings/42");
 		assertThat(result).as("Invalid match").isEqualTo(expected);
+	}
+
+	@Test
+	void matchAgainstEmpty() {
+		UriTemplate template = new UriTemplate("");
+		Map<String, String> result = template.match("/hotels/1/bookings/42");
+		assertThat(result).as("Invalid match").isEmpty();
 	}
 
 	@Test
