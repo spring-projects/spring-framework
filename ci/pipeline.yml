@@ -427,8 +427,6 @@ jobs:
         <<: *changelog-task-params
 
 groups:
-- name: "builds"
-  jobs: ["build", "jdk21-build", "jdk23-build"]
 - name: "releases"
   jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone", "promote-rc", "promote-release", "create-github-release"]
 - name: "ci-images"
