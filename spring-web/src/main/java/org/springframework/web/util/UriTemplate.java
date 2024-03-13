@@ -66,7 +66,7 @@ public class UriTemplate implements Serializable {
 	 * @param uriTemplate the URI template string
 	 */
 	public UriTemplate(String uriTemplate) {
-		Assert.hasText(uriTemplate, "'uriTemplate' must not be null");
+		Assert.notNull(uriTemplate, "'uriTemplate' must not be null");
 		this.uriTemplate = uriTemplate;
 		this.uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).build();
 

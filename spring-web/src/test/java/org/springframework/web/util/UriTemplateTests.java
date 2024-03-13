@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * @author Arjen Poutsma
@@ -216,6 +217,16 @@ class UriTemplateTests {
 		UriTemplate template = new UriTemplate("http://localhost/query={query}");
 		URI uri = template.expand("foo@bar");
 		assertThat(uri.toString()).isEqualTo("http://localhost/query=foo@bar");
+	}
+
+	@Test
+	void emptyPathDoesNotThrowException() {
+		assertThatNoException().isThrownBy(() -> new UriTemplate(""));
+	}
+
+	@Test
+	void emptyPathThrowsException() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new UriTemplate(null));
 	}
 
 }
