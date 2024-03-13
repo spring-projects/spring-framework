@@ -17,7 +17,6 @@
 package org.springframework.test.web.reactive.server;
 
 import java.time.Duration;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
@@ -213,10 +212,13 @@ public class CookieAssertions {
 
 	private ResponseCookie getCookie(String name) {
 		ResponseCookie cookie = this.exchangeResult.getResponseCookies().getFirst(name);
-		if (cookie == null) {
+		if (cookie != null) {
+			return cookie;
+		}
+		else {
 			this.exchangeResult.assertWithDiagnostics(() -> fail("No cookie with name '" + name + "'"));
 		}
-		return Objects.requireNonNull(cookie);
+		throw new IllegalStateException("This code path should not be reachable");
 	}
 
 	private static String getMessage(String cookie) {

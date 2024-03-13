@@ -18,7 +18,6 @@ package org.springframework.test.context.bean.override;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 
@@ -49,7 +48,7 @@ class OverrideMetadataTests {
 
 	private static OverrideMetadata exampleOverride() throws Exception {
 		Field field = OverrideMetadataTests.class.getDeclaredField("annotated");
-		return new ConcreteOverrideMetadata(Objects.requireNonNull(field), field.getAnnotation(NonNull.class),
+		return new ConcreteOverrideMetadata(field, field.getAnnotation(NonNull.class),
 				ResolvableType.forClass(String.class), BeanOverrideStrategy.REPLACE_DEFINITION);
 	}
 

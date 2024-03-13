@@ -19,7 +19,6 @@ package org.springframework.test.web.reactive.server;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
@@ -200,10 +199,13 @@ public class HeaderAssertions {
 
 	private List<String> getRequiredValues(String name) {
 		List<String> values = getHeaders().get(name);
-		if (CollectionUtils.isEmpty(values)) {
+		if (!CollectionUtils.isEmpty(values)) {
+			return values;
+		}
+		else {
 			this.exchangeResult.assertWithDiagnostics(() -> fail(getMessage(name) + " not found"));
 		}
-		return Objects.requireNonNull(values);
+		throw new IllegalStateException("This code path should not be reachable");
 	}
 
 	/**

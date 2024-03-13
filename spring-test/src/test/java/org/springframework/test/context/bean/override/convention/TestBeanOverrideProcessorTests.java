@@ -19,7 +19,6 @@ package org.springframework.test.context.bean.override.convention;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 
@@ -91,7 +90,8 @@ class TestBeanOverrideProcessorTests {
 		Class<?> clazz = ExplicitMethodNameConf.class;
 		Class<?> returnType = ExampleService.class;
 		Field field = clazz.getField("a");
-		TestBean overrideAnnotation = Objects.requireNonNull(field.getAnnotation(TestBean.class));
+		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
+		assertThat(overrideAnnotation).isNotNull();
 
 		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
 		assertThatIllegalStateException()
@@ -106,7 +106,8 @@ class TestBeanOverrideProcessorTests {
 	void createMetaDataForKnownExplicitMethod() throws Exception {
 		Class<?> returnType = ExampleService.class;
 		Field field = ExplicitMethodNameConf.class.getField("b");
-		TestBean overrideAnnotation = Objects.requireNonNull(field.getAnnotation(TestBean.class));
+		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
+		assertThat(overrideAnnotation).isNotNull();
 
 		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
 		assertThat(processor.createMetadata(field, overrideAnnotation, ResolvableType.forClass(returnType)))
@@ -117,7 +118,8 @@ class TestBeanOverrideProcessorTests {
 	void createMetaDataWithDeferredCheckForExistenceOfConventionBasedFactoryMethod() throws Exception {
 		Class<?> returnType = ExampleService.class;
 		Field field = MethodConventionConf.class.getField("field");
-		TestBean overrideAnnotation = Objects.requireNonNull(field.getAnnotation(TestBean.class));
+		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
+		assertThat(overrideAnnotation).isNotNull();
 
 		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
 		// When in convention-based mode, createMetadata() will not verify that
