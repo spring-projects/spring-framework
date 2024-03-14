@@ -1,0 +1,43 @@
+name: Build Pull Request
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build pull request
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'spring-projects/spring-framework' }}
+    steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'liberica'
+
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@699bb18358f12c5b78b37bb0111d3a0e2276e0e2
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5
+
+      - name: Build
+        env:
+          CI: 'true'
+          GRADLE_ENTERPRISE_URL: 'https://ge.spring.io'
+        run: ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false --no-daemon --no-parallel --continue build
+
+      - name: Print JVM thread dumps when cancelled
+        uses: ./.github/actions/print-jvm-thread-dumps
+        if: cancelled()
+
+      - name: Upload build reports
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: build-reports
+          path: '**/build/reports/'
