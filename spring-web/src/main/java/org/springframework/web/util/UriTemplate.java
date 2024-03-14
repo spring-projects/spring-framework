@@ -31,7 +31,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Representation of a URI template that can be expanded with URI variables via
- * {@link #expand(Map)}, {@link #expand(Object[])}, or matched to a URL via
+ * {@link #expand(Map)} or {@link #expand(Object[])}, or matched to a URL via
  * {@link #match(String)}. This class is designed to be thread-safe and
  * reusable, and allows any number of expand or match calls.
  *
@@ -77,7 +77,7 @@ public class UriTemplate implements Serializable {
 
 
 	/**
-	 * Return the names of the variables in the template, in order.
+	 * Return the names of the variables in this template, in order.
 	 * @return the template variable names
 	 */
 	public List<String> getVariableNames() {
@@ -85,16 +85,16 @@ public class UriTemplate implements Serializable {
 	}
 
 	/**
-	 * Given the Map of variables, expands this template into a URI. The Map keys represent variable names,
-	 * the Map values variable values. The order of variables is not significant.
+	 * Given the Map of variables, expand this template into a URI.
+	 * <p>The Map keys represent variable names, and the Map values represent
+	 * variable values. The order of variables is not significant.
 	 * <p>Example:
 	 * <pre class="code">
 	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
-	 * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();
-	 * uriVariables.put("booking", "42");
-	 * uriVariables.put("hotel", "Rest &amp; Relax");
-	 * System.out.println(template.expand(uriVariables));
-	 * </pre>
+	 * Map&lt;String, String&gt; uriVariables = Map.of(
+	 *     "booking", "42",
+	 *     "hotel", "Rest &amp; Relax");
+	 * System.out.println(template.expand(uriVariables));</pre>
 	 * will print: <blockquote>{@code https://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
 	 * @param uriVariables the map of URI variables
 	 * @return the expanded URI
@@ -108,13 +108,13 @@ public class UriTemplate implements Serializable {
 	}
 
 	/**
-	 * Given an array of variables, expand this template into a full URI. The array represent variable values.
-	 * The order of variables is significant.
+	 * Given the array of variables, expand this template into a full URI.
+	 * <p>The array represents variable values, and the order of variables is
+	 * significant.
 	 * <p>Example:
 	 * <pre class="code">
 	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
-	 * System.out.println(template.expand("Rest &amp; Relax", 42));
-	 * </pre>
+	 * System.out.println(template.expand("Rest &amp; Relax", 42));</pre>
 	 * will print: <blockquote>{@code https://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
 	 * @param uriVariableValues the array of URI variables
 	 * @return the expanded URI
@@ -141,13 +141,13 @@ public class UriTemplate implements Serializable {
 	}
 
 	/**
-	 * Match the given URI to a map of variable values. Keys in the returned map are variable names,
-	 * values are variable values, as occurred in the given URI.
+	 * Match the given URI to a map of variable values based on this template.
+	 * <p>Keys in the returned map are variable names, and the values in the
+	 * returned map are variable values, as present in the given URI.
 	 * <p>Example:
 	 * <pre class="code">
 	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
-	 * System.out.println(template.match("https://example.com/hotels/1/bookings/42"));
-	 * </pre>
+	 * System.out.println(template.match("https://example.com/hotels/1/bookings/42"));</pre>
 	 * will print: <blockquote>{@code {hotel=1, booking=42}}</blockquote>
 	 * @param uri the URI to match to
 	 * @return a map of variable values
