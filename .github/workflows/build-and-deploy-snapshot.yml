@@ -2,7 +2,7 @@ name: Build and deploy snapshot
 on:
   push:
     branches:
-      - 6.2.x
+      - main
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 jobs:
