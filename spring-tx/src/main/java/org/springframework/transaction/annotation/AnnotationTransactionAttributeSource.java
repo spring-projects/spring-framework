@@ -35,13 +35,14 @@ import org.springframework.util.CollectionUtils;
 /**
  * Implementation of the
  * {@link org.springframework.transaction.interceptor.TransactionAttributeSource}
- * interface for working with transaction metadata in JDK 1.5+ annotation format.
+ * interface for working with transaction metadata from annotations.
  *
- * <p>This class reads Spring's JDK 1.5+ {@link Transactional} annotation and
+ * <p>This class reads Spring's {@link Transactional @Transactional} annotation and
  * exposes corresponding transaction attributes to Spring's transaction infrastructure.
- * Also supports JTA 1.2's {@link jakarta.transaction.Transactional} and EJB3's
+ * Also supports JTA's {@link jakarta.transaction.Transactional} and EJB's
  * {@link jakarta.ejb.TransactionAttribute} annotation (if present).
- * This class may also serve as base class for a custom TransactionAttributeSource,
+ *
+ * <p>This class may also serve as base class for a custom TransactionAttributeSource,
  * or get customized through {@link TransactionAnnotationParser} strategies.
  *
  * @author Colin Sampaleanu

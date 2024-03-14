@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -315,7 +315,7 @@ class TypeConverterDelegate {
 		}
 
 		if (convertedValue == currentConvertedValue) {
-			// Try field lookup as fallback: for JDK 1.5 enum or custom enum
+			// Try field lookup as fallback: for Java enum or custom enum
 			// with values defined as static fields. Resulting value still needs
 			// to be checked, hence we don't return it right away.
 			try {
