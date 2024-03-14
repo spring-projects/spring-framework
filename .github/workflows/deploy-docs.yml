@@ -1,11 +1,10 @@
 name: Deploy Docs
 on:
   push:
-    branches-ignore:
-      - 'gh-pages'
     branches:
       - 'main'
       - '*.x'
+      - '!gh-pages'
     tags:
       - 'v*'
   repository_dispatch:
