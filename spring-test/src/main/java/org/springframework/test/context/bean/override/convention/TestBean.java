@@ -28,7 +28,7 @@ import org.springframework.test.context.bean.override.BeanOverride;
 /**
  * Mark a field to override a bean instance in the {@code BeanFactory}.
  *
- * <p>The instance is created from a no-arg static factory method in the test
+ * <p>The instance is created from a zero-argument static factory method in the test
  * class whose return type is compatible with the annotated field. The method
  * is deduced as follows.
  * <ul>
@@ -77,8 +77,8 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * }</code></pre>
  *
  * <p>By default, the name of the bean to override is inferred from the name of
- * the annotated field. To use a different bean name, set the {@link #name()}
- * attribute.
+ * the annotated field. To use a different bean name, set the {@link #value()} or
+ * {@link #name()} attribute.
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
@@ -93,22 +93,27 @@ import org.springframework.test.context.bean.override.BeanOverride;
 public @interface TestBean {
 
 	/**
-	 * Required suffix for a factory method that overrides a bean instance that
-	 * is detected by convention.
+	 * Required suffix for the name of a factory method that overrides a bean
+	 * instance when the factory method is detected by convention.
+	 * @see #methodName()
 	 */
 	String CONVENTION_SUFFIX = "TestOverride";
 
 
 	/**
 	 * Alias for {@link #name()}.
+	 * <p>Intended to be used when no other attributes are needed &mdash; for
+	 * example, {@code @TestBean("customBeanName")}.
+	 * @see #name()
 	 */
 	@AliasFor("name")
 	String value() default "";
 
 	/**
 	 * Name of the bean to override.
-	 * <p>Defaults to {@code ""} (the empty String) to signal that the name of
-	 * the annotated field should be used as the bean name.
+	 * <p>If left unspecified, the name of the bean to override is the name of
+	 * the annotated field. If specified, the field name is ignored.
+	 * @see #value()
 	 */
 	@AliasFor("value")
 	String name() default "";
@@ -116,8 +121,9 @@ public @interface TestBean {
 	/**
 	 * Name of a static factory method to look for in the test class, which will
 	 * be used to instantiate the bean to override.
-	 * <p>Defaults to {@code ""} (the empty String) to signal that the factory
-	 * method should be detected based on convention.
+	 * <p>If left unspecified, the name of the factory method will be detected
+	 * based on convention.
+	 * @see #CONVENTION_SUFFIX
 	 */
 	String methodName() default "";
 

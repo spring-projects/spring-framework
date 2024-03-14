@@ -53,10 +53,10 @@ public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 	 * Find a test bean factory {@link Method} in the given {@link Class} which
 	 * meets the following criteria.
 	 * <ul>
-	 * <li>The method is static.
-	 * <li>The method does not accept any arguments.
-	 * <li>The method's return type matches the supplied {@code methodReturnType}.
-	 * <li>The method's name is one of the supplied {@code methodNames}.
+	 * <li>The method is static.</li>
+	 * <li>The method does not accept any arguments.</li>
+	 * <li>The method's return type matches the supplied {@code methodReturnType}.</li>
+	 * <li>The method's name is one of the supplied {@code methodNames}.</li>
 	 * </ul>
 	 * @param clazz the class in which to search for the factory method
 	 * @param methodReturnType the return type for the factory method
