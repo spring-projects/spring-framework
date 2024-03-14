@@ -1,12 +1,15 @@
 name: Deploy Docs
 on:
   push:
-    branches-ignore: [ gh-pages ]
-    tags: '**'
+    branches-ignore:
+      - 'gh-pages'
+    branches:
+      - 'main'
+      - '*.x'
+    tags:
+      - 'v*'
   repository_dispatch:
     types: request-build-reference # legacy
-  schedule:
-  - cron: '0 10 * * *' # Once per day at 10am UTC
   workflow_dispatch:
 permissions:
   actions: write
