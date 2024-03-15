@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @since 3.0
  */
-public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
+class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 
 	private final ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 
@@ -97,7 +97,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 	}
 
 	@Test
-	void scheduleOneTimeFailingTaskWithoutErrorHandler() throws Exception {
+	void scheduleOneTimeFailingTaskWithoutErrorHandler() {
 		TestTask task = new TestTask(this.testName, 0);
 		Future<?> future = scheduler.schedule(task, new Date());
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() -> future.get(1000, TimeUnit.MILLISECONDS));
@@ -149,7 +149,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		catch (InterruptedException ex) {
 			throw new IllegalStateException(ex);
 		}
-		assertThat(latch.getCount()).as("latch did not count down,").isEqualTo(0);
+		assertThat(latch.getCount()).as("latch did not count down").isEqualTo(0);
 	}
 
 
