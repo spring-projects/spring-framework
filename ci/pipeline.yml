@@ -37,7 +37,7 @@ resource_types:
   source:
     <<: *docker-resource-source
     repository: concourse/registry-image-resource
-    tag: 1.5.0
+    tag: 1.8.0
 - name: artifactory-resource
   type: registry-image
   source:
@@ -49,7 +49,7 @@ resource_types:
   source:
     <<: *docker-resource-source
     repository: concourse/github-release-resource
-    tag: 1.5.5
+    tag: 1.8.0
 - name: github-status-resource
   type: registry-image
   source:
