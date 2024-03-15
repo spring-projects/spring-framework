@@ -147,7 +147,7 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 		catch (InterruptedException ex) {
 			throw new IllegalStateException(ex);
 		}
-		assertThat(latch.getCount()).as("latch did not count down,").isEqualTo(0);
+		assertThat(latch.getCount()).as("latch did not count down").isEqualTo(0);
 	}
 
 

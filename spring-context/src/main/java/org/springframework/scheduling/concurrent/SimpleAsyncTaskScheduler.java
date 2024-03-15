@@ -41,6 +41,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.TaskUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -114,10 +115,10 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 	/**
 	 * Set the clock to use for scheduling purposes.
 	 * <p>The default clock is the system clock for the default time zone.
-	 * @since 5.3
 	 * @see Clock#systemDefaultZone()
 	 */
 	public void setClock(Clock clock) {
+		Assert.notNull(clock, "Clock must not be null");
 		this.clock = clock;
 	}
 
