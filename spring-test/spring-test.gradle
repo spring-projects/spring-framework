@@ -32,6 +32,7 @@ dependencies {
 	optional("org.apache.groovy:groovy")
 	optional("org.apache.tomcat.embed:tomcat-embed-core")
 	optional("org.aspectj:aspectjweaver")
+	optional("org.assertj:assertj-core")
 	optional("org.hamcrest:hamcrest")
 	optional("org.htmlunit:htmlunit") {
 		exclude group: "commons-logging", module: "commons-logging"
