@@ -1,8 +1,7 @@
 name: CI
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: '30 9 * * *'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 jobs:
