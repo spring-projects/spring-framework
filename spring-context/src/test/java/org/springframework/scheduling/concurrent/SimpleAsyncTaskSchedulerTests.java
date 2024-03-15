@@ -19,7 +19,6 @@ package org.springframework.scheduling.concurrent;
 import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,17 +32,14 @@ import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.ErrorHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * @author Mark Fisher
  * @author Juergen Hoeller
- * @author Sam Brannen
- * @since 3.0
+ * @since 6.2
  */
-class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
+class SimpleAsyncTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 
-	private final ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+	private final SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
 
 	private final AtomicBoolean taskRun = new AtomicBoolean();
 
@@ -56,8 +52,46 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 			runnable.run();
 		});
 		scheduler.setThreadNamePrefix(this.threadNamePrefix);
-		scheduler.afterPropertiesSet();
 		return scheduler;
+	}
+
+
+	@Test
+	@Override
+	void submitRunnableWithGetAfterShutdown() {
+		// decorated Future cannot be cancelled on shutdown with SimpleAsyncTaskScheduler
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	@Override
+	void submitListenableRunnableWithGetAfterShutdown() {
+		// decorated Future cannot be cancelled on shutdown with SimpleAsyncTaskScheduler
+	}
+
+	@Test
+	@Override
+	void submitCompletableRunnableWithGetAfterShutdown() {
+		// decorated Future cannot be cancelled on shutdown with SimpleAsyncTaskScheduler
+	}
+
+	@Test
+	@Override
+	void submitCallableWithGetAfterShutdown() {
+		// decorated Future cannot be cancelled on shutdown with SimpleAsyncTaskScheduler
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	@Override
+	void submitListenableCallableWithGetAfterShutdown() {
+		// decorated Future cannot be cancelled on shutdown with SimpleAsyncTaskScheduler
+	}
+
+	@Test
+	@Override
+	void submitCompletableCallableWithGetAfterShutdown() {
+		// decorated Future cannot be cancelled on shutdown with SimpleAsyncTaskScheduler
 	}
 
 
@@ -105,19 +139,9 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 		Future<?> future = scheduler.schedule(task, new Date());
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
 		assertThat(result).isNull();
-		assertThat(future.isDone()).isTrue();
+		await(task);
 		assertThat(taskRun.get()).isTrue();
 		assertThreadNamePrefix(task);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void scheduleOneTimeFailingTaskWithoutErrorHandler() {
-		TestTask task = new TestTask(this.testName, 0);
-		Future<?> future = scheduler.schedule(task, new Date());
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() -> future.get(1000, TimeUnit.MILLISECONDS));
-		assertThat(future.isDone()).isTrue();
-		assertThat(taskRun.get()).isTrue();
 	}
 
 	@Test
@@ -128,7 +152,7 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 		scheduler.setErrorHandler(errorHandler);
 		Future<?> future = scheduler.schedule(task, new Date());
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertThat(future.isDone()).isTrue();
+		await(errorHandler);
 		assertThat(result).isNull();
 		assertThat(errorHandler.lastError).isNotNull();
 		assertThat(taskRun.get()).isTrue();
