@@ -27,3 +27,4 @@ run:
       { "auths": { "https://index.docker.io/v1/": { "auth": "$DOCKER_HUB_AUTH" }}}
       EOF
       build
+

@@ -37,7 +37,7 @@ resource_types:
   source:
     <<: *docker-resource-source
     repository: concourse/registry-image-resource
-    tag: 1.7.1
+    tag: 1.8.0
 - name: artifactory-resource
   type: registry-image
   source:
