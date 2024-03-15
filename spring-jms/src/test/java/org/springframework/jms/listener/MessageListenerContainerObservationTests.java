@@ -76,6 +76,7 @@ class MessageListenerContainerObservationTests {
 		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
 				.that()
 				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation");
+		assertThat(registry).hasNumberOfObservationsEqualTo(1);
 		listenerContainer.stop();
 		listenerContainer.shutdown();
 	}
@@ -103,7 +104,37 @@ class MessageListenerContainerObservationTests {
 		Assertions.assertThat(observationInErrorHandler.get()).isNotNull();
 		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
 				.that()
-				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation");
+				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation")
+				.hasLowCardinalityKeyValue("exception", "none");
+		assertThat(registry).hasNumberOfObservationsEqualTo(1);
+		listenerContainer.stop();
+		listenerContainer.shutdown();
+	}
+
+	@ParameterizedTest(name = "[{index}] {0}")
+	@MethodSource("listenerContainers")
+	void shouldHaveObservationErrorWhenRethrown(AbstractMessageListenerContainer listenerContainer) throws Exception {
+		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+		jmsTemplate.convertAndSend("spring.test.observation", "message content");
+		CountDownLatch latch = new CountDownLatch(1);
+		listenerContainer.setConnectionFactory(connectionFactory);
+		listenerContainer.setObservationRegistry(registry);
+		listenerContainer.setDestinationName("spring.test.observation");
+		listenerContainer.setMessageListener((MessageListener) message -> {
+			throw new IllegalStateException("error");
+		});
+		listenerContainer.setErrorHandler(error -> {
+			latch.countDown();
+			throw new IllegalStateException("not handled");
+		});
+		listenerContainer.afterPropertiesSet();
+		listenerContainer.start();
+		latch.await(2, TimeUnit.SECONDS);
+		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
+				.that()
+				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation")
+				.hasLowCardinalityKeyValue("exception", "IllegalStateException");
+		assertThat(registry).hasNumberOfObservationsEqualTo(1);
 		listenerContainer.stop();
 		listenerContainer.shutdown();
 	}
