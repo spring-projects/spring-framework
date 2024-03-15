@@ -83,9 +83,11 @@ message code arguments for the "detail" field. `ResponseEntityExceptionHandler` 
 these through a xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
 and updates the corresponding `ProblemDetail` fields accordingly.
 
-The default strategy for message codes follows the pattern:
+The default strategy for message codes is as follows:
 
-`problemDetail.[type|title|detail].[fully qualified exception class name]`
+* "type": `problemDetail.type.[fully qualified exception class name]`
+* "title": `problemDetail.title.[fully qualified exception class name]`
+* "detail": `problemDetail.[fully qualified exception class name][suffix]`
 
 An `ErrorResponse` may expose more than one message code, typically adding a suffix
 to the default message code. The table below lists message codes, and arguments for
