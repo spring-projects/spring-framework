@@ -8,4 +8,3 @@ milestone: "5.3.x"
 build-name: "spring-framework"
 pipeline-name: "spring-framework"
 concourse-url: "https://ci.spring.io"
-task-timeout: 1h00m

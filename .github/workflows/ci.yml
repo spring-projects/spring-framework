@@ -1,0 +1,82 @@
+name: CI
+on:
+  push:
+    branches:
+      - 5.3.x
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+jobs:
+  ci:
+    if: ${{ github.repository == 'spring-projects/spring-framework' }}
+    strategy:
+      matrix:
+        os:
+          - id: ubuntu-latest
+            name: Linux
+        java:
+          - version: 8
+            toolchain: false
+          - version: 17
+            toolchain: true
+          - version: 21
+            toolchain: true
+        exclude:
+          - os:
+              name: Linux
+            java:
+              version: 8
+    name: '${{ matrix.os.name}} | Java ${{ matrix.java.version}}'
+    runs-on: ${{ matrix.os.id }}
+    steps:
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'liberica'
+          java-version: |
+            ${{ matrix.java.version }}
+            ${{ matrix.java.toolchain && '8' || '' }}
+      - name: Prepare Windows runner
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          git config --global core.autocrlf true
+          git config --global core.longPaths true
+          Stop-Service -name Docker
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5
+        with:
+          cache-read-only: false
+      - name: Configure Gradle properties
+        shell: bash
+        run: |
+          mkdir -p $HOME/.gradle
+          echo 'systemProp.user.name=spring-builds+github' >> $HOME/.gradle/gradle.properties
+          echo 'systemProp.org.gradle.internal.launcher.welcomeMessageEnabled=false' >> $HOME/.gradle/gradle.properties
+          echo 'org.gradle.daemon=false' >> $HOME/.gradle/gradle.properties
+          echo 'org.gradle.daemon=4' >> $HOME/.gradle/gradle.properties
+      - name: Configure toolchain properties
+        if: ${{ matrix.java.toolchain }}
+        shell: bash
+        run: |
+          echo toolchainVersion=${{ matrix.java.version }} >> $HOME/.gradle/gradle.properties
+          echo systemProp.org.gradle.java.installations.auto-detect=false >> $HOME/.gradle/gradle.properties
+          echo systemProp.org.gradle.java.installations.auto-download=false >> $HOME/.gradle/gradle.properties
+          echo systemProp.org.gradle.java.installations.paths=${{ format('$JAVA_HOME_{0}_X64', matrix.java.version) }} >> $HOME/.gradle/gradle.properties
+      - name: Build
+        id: build
+        env:
+          CI: 'true'
+          GRADLE_ENTERPRISE_URL: 'https://ge.spring.io'
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
+          GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
+          GRADLE_ENTERPRISE_CACHE_PASSWORD: ${{ secrets.GRADLE_ENTERPRISE_CACHE_PASSWORD }}
+        run: ./gradlew check
+      - name: Send notification
+        uses: ./.github/actions/send-notification
+        if: always()
+        with:
+          webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+          status: ${{ job.status }}
+          build-scan-url: ${{ steps.build.outputs.build-scan-url }}
+          run-name: ${{ format('{0} | {1} | Java {2}', github.ref_name, matrix.os.name, matrix.java.version) }}

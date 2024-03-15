@@ -1,5 +1,7 @@
 == Spring Framework Concourse pipeline
 
+NOTE: CI is being migrated to GitHub Actions.
+
 The Spring Framework uses https://concourse-ci.org/[Concourse] for its CI build and other automated tasks.
 The Spring team has a dedicated Concourse instance available at https://ci.spring.io with a build pipeline
 for https://ci.spring.io/teams/spring-framework/pipelines/spring-framework-5.3.x[Spring Framework 5.3.x].
