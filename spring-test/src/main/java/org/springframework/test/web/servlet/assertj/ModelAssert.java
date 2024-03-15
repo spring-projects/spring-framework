@@ -51,7 +51,7 @@ public class ModelAssert extends AbstractMapAssert<ModelAssert, Map<String, Obje
 	 * Return a new {@linkplain AbstractBindingResultAssert assertion} object
 	 * that uses the {@link BindingResult} with the given {@code name} as the
 	 * object to test.
-	 * Examples: <pre><code class='java'>
+	 * <p>Example: <pre><code class='java'>
 	 * // Check that the "person" attribute in the model has 2 errors:
 	 * assertThat(...).model().extractingBindingResult("person").hasErrorsCount(2);
 	 * </code></pre>
@@ -85,23 +85,23 @@ public class ModelAssert extends AbstractMapAssert<ModelAssert, Map<String, Obje
 	}
 
 	/**
-	 * Verify that the actual model contain the attributes with the given
-	 * {@code names}, and that these attributes have each at least one error.
+	 * Verify that the actual model contains the attributes with the given
+	 * {@code names}, and that each of these attributes has each at least one error.
 	 * @param names the expected names of attributes with errors
 	 */
 	public ModelAssert hasAttributeErrors(String... names) {
 		return assertAttributes(names, BindingResult::hasErrors,
-				"to have attribute errors for", "these attributes do not have any error");
+				"to have attribute errors for", "these attributes do not have any errors");
 	}
 
 	/**
-	 * Verify that the actual model contain the attributes with the given
-	 * {@code names}, and that these attributes do not have any error.
+	 * Verify that the actual model contains the attributes with the given
+	 * {@code names}, and that none of these attributes has an error.
 	 * @param names the expected names of attributes without errors
 	 */
 	public ModelAssert doesNotHaveAttributeErrors(String... names) {
 		return assertAttributes(names, Predicate.not(BindingResult::hasErrors),
-				"to have attribute without errors for", "these attributes have at least an error");
+				"to have attribute without errors for", "these attributes have at least one error");
 	}
 
 	private ModelAssert assertAttributes(String[] names, Predicate<BindingResult> condition,

@@ -46,9 +46,9 @@ public class HandlerResultAssert extends AbstractObjectAssert<HandlerResultAsser
 	/**
 	 * Return a new {@linkplain MethodAssert assertion} object that uses
 	 * the {@link Method} that handles the request as the object to test.
-	 * Verify first that the handler is a {@linkplain #isMethodHandler() method
-	 * handler}.
-	 * Example: <pre><code class='java'>
+	 * <p>Verifies first that the handler is a {@linkplain #isMethodHandler()
+	 * method handler}.
+	 * <p>Example: <pre><code class='java'>
 	 * // Check that a GET to "/greet" is invoked on a "handleGreet" method name
 	 * assertThat(mvc.perform(get("/greet")).handler().method().hasName("sayGreet");
 	 * </code></pre>
@@ -67,14 +67,15 @@ public class HandlerResultAssert extends AbstractObjectAssert<HandlerResultAsser
 
 	/**
 	 * Verify that the handler is managed by the given {@code handlerMethod}.
-	 * This creates a "mock" for the given {@code controllerType} and record the
-	 * method invocation in the {@code handlerMethod}. The arguments used by the
-	 * target method invocation can be {@code null} as the purpose of the mock
+	 * <p>This creates a "mock" for the given {@code controllerType} and records
+	 * the method invocation in the {@code handlerMethod}. The arguments used by
+	 * the target method invocation can be {@code null} as the purpose of the mock
 	 * is to identify the method that was invoked.
-	 * Example: <pre><code class='java'>
+	 * <p>Example: <pre><code class='java'>
 	 * // If the method has a return type, you can return the result of the invocation
 	 * assertThat(mvc.perform(get("/greet")).handler().isInvokedOn(
 	 *         GreetController.class, controller -> controller.sayGreet());
+	 *
 	 * // If the method has a void return type, the controller should be returned
 	 * assertThat(mvc.perform(post("/persons/")).handler().isInvokedOn(
 	 *         PersonController.class, controller -> controller.createPerson(null, null));
@@ -95,7 +96,7 @@ public class HandlerResultAssert extends AbstractObjectAssert<HandlerResultAsser
 	/**
 	 * Verify that the handler is of the given {@code type}. For a controller
 	 * method, this is the type of the controller.
-	 * Example: <pre><code class='java'>
+	 * <p>Example: <pre><code class='java'>
 	 * // Check that a GET to "/greet" is managed by GreetController
 	 * assertThat(mvc.perform(get("/greet")).handler().hasType(GreetController.class);
 	 * </code></pre>

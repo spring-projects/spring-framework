@@ -16,7 +16,6 @@
 
 package org.springframework.test.json;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +42,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * Base AssertJ {@link org.assertj.core.api.Assert assertions} that can be
- * applied to a JSON value. In JSON, values must be one of the following data
- * types:
+ * applied to a JSON value.
+ *
+ * <p>In JSON, values must be one of the following data types:
  * <ul>
  * <li>a {@linkplain #asString() string}</li>
  * <li>a {@linkplain #asNumber() number}</li>
@@ -53,7 +53,7 @@ import org.springframework.util.StringUtils;
  * <li>an {@linkplain #asMap() object} (JSON object)</li>
  * <li>{@linkplain #isNull() null}</li>
  * </ul>
- * This base class offers direct access for each of those types as well as a
+ * This base class offers direct access for each of those types as well as
  * conversion methods based on an optional {@link GenericHttpMessageConverter}.
  *
  * @author Stephane Nicoll
@@ -71,12 +71,14 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 
 	protected AbstractJsonValueAssert(@Nullable Object actual, Class<?> selfType,
 			@Nullable GenericHttpMessageConverter<Object> httpMessageConverter) {
+
 		super(actual, selfType);
 		this.httpMessageConverter = httpMessageConverter;
 	}
 
+
 	/**
-	 * Verify that the actual value is a non-{@code null} {@link String}
+	 * Verify that the actual value is a non-{@code null} {@link String},
 	 * and return a new {@linkplain AbstractStringAssert assertion} object that
 	 * provides dedicated {@code String} assertions for it.
 	 */
@@ -87,7 +89,7 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 
 	/**
 	 * Verify that the actual value is a non-{@code null} {@link Number},
-	 * usually an {@link Integer} or {@link Double} and return a new
+	 * usually an {@link Integer} or {@link Double}, and return a new
 	 * {@linkplain AbstractObjectAssert assertion} object for it.
 	 */
 	public AbstractObjectAssert<?, Number> asNumber() {
@@ -95,7 +97,7 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 	}
 
 	/**
-	 * Verify that the actual value is a non-{@code null} {@link Boolean}
+	 * Verify that the actual value is a non-{@code null} {@link Boolean},
 	 * and return a new {@linkplain AbstractBooleanAssert assertion} object
 	 * that provides dedicated {@code Boolean} assertions for it.
 	 */
@@ -104,9 +106,9 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 	}
 
 	/**
-	 * Verify that the actual value is a non-{@code null} {@link Array}
-	 * and return a new {@linkplain ObjectArrayAssert assertion} object
-	 * that provides dedicated {@code Array} assertions for it.
+	 * Verify that the actual value is a non-{@code null} array, and return a
+	 * new {@linkplain ObjectArrayAssert assertion} object that provides dedicated
+	 * array assertions for it.
 	 */
 	public ObjectArrayAssert<Object> asArray() {
 		List<?> list = castTo(List.class, "an array");
@@ -115,11 +117,12 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 	}
 
 	/**
-	 * Verify that the actual value is a non-{@code null} JSON object and
+	 * Verify that the actual value is a non-{@code null} JSON object, and
 	 * return a new {@linkplain AbstractMapAssert assertion} object that
 	 * provides dedicated assertions on individual elements of the
-	 * object. The returned map assertion object uses the attribute name as the
-	 * key, and the value can itself be any of the valid JSON values.
+	 * object.
+	 * <p>The returned map assertion object uses attribute names as the keys,
+	 * and the values can be any of the valid JSON values.
 	 */
 	@SuppressWarnings("unchecked")
 	public AbstractMapAssert<?, Map<String, Object>, String, Object> asMap() {
@@ -138,7 +141,7 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 
 	/**
 	 * Verify that the actual value can be converted to an instance of the
-	 * given {@code target} and produce a new {@linkplain AbstractObjectAssert
+	 * given {@code target}, and produce a new {@linkplain AbstractObjectAssert
 	 * assertion} object narrowed to that type.
 	 * @param target the {@linkplain Class type} to convert the actual value to
 	 */
@@ -150,7 +153,7 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 
 	/**
 	 * Verify that the actual value can be converted to an instance of the
-	 * given {@code target} and produce a new {@linkplain AbstractObjectAssert
+	 * given {@code target}, and produce a new {@linkplain AbstractObjectAssert
 	 * assertion} object narrowed to that type.
 	 * @param target the {@linkplain ParameterizedTypeReference parameterized
 	 * type} to convert the actual value to
@@ -162,9 +165,10 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 	}
 
 	/**
-	 * Verify that the actual value is empty, that is a {@code null} scalar
-	 * value or an empty list or map. Can also be used when the path is using a
-	 * filter operator to validate that it dit not match.
+	 * Verify that the actual value is empty: either a {@code null} scalar value
+	 * or an empty list or map.
+	 * <p>Can also be used when the path uses a filter operator to validate that
+	 * it did not match.
 	 */
 	public SELF isEmpty() {
 		if (!ObjectUtils.isEmpty(this.actual)) {
@@ -174,10 +178,10 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 	}
 
 	/**
-	 * Verify that the actual value is not empty, that is a non-{@code null}
-	 * scalar value or a non-empty list or map. Can also be used when the path is
-	 * using a filter operator to validate that it dit match at least one
-	 * element.
+	 * Verify that the actual value is not empty: either a non-{@code null}
+	 * scalar value or a non-empty list or map.
+	 * <p>Can also be used when the path uses a filter operator to validate that
+	 * it did match at least one element.
 	 */
 	public SELF isNotEmpty() {
 		if (ObjectUtils.isEmpty(this.actual)) {
@@ -224,6 +228,7 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 	private String actualToString() {
 		return ObjectUtils.nullSafeToString(StringUtils.quoteIfString(this.actual));
 	}
+
 
 	private static final class ValueProcessingFailed extends BasicErrorMessageFactory {
 

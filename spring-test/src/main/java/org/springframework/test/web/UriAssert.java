@@ -70,7 +70,7 @@ public class UriAssert extends AbstractStringAssert<UriAssert> {
 	 * </code></pre>
 	 * @param uriPattern the pattern that is expected to match
 	 */
-	public UriAssert matchPattern(String uriPattern) {
+	public UriAssert matchesPattern(String uriPattern) {
 		Assertions.assertThat(pathMatcher.isPattern(uriPattern))
 				.withFailMessage("'%s' is not an Ant-style path pattern", uriPattern).isTrue();
 		Assertions.assertThat(pathMatcher.match(uriPattern, this.actual))

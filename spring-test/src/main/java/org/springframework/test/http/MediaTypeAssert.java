@@ -36,14 +36,15 @@ import org.springframework.util.StringUtils;
  */
 public class MediaTypeAssert extends AbstractObjectAssert<MediaTypeAssert, MediaType> {
 
+	public MediaTypeAssert(@Nullable String actual) {
+		this(StringUtils.hasText(actual) ? MediaType.parseMediaType(actual) : null);
+	}
+
 	public MediaTypeAssert(@Nullable MediaType mediaType) {
 		super(mediaType, MediaTypeAssert.class);
 		as("Media type");
 	}
 
-	public MediaTypeAssert(@Nullable String actual) {
-		this(StringUtils.hasText(actual) ? MediaType.parseMediaType(actual) : null);
-	}
 
 	/**
 	 * Verify that the actual media type is equal to the given string
@@ -57,7 +58,8 @@ public class MediaTypeAssert extends AbstractObjectAssert<MediaTypeAssert, Media
 	/**
 	 * Verify that the actual media type is
 	 * {@linkplain MediaType#isCompatibleWith(MediaType) compatible} with the
-	 * given one. Example: <pre><code class='java'>
+	 * given one.
+	 * <p>Example: <pre><code class='java'>
 	 * // Check that actual is compatible with "application/json"
 	 * assertThat(mediaType).isCompatibleWith(MediaType.APPLICATION_JSON);
 	 * </code></pre>
@@ -77,7 +79,8 @@ public class MediaTypeAssert extends AbstractObjectAssert<MediaTypeAssert, Media
 	/**
 	 * Verify that the actual media type is
 	 * {@linkplain MediaType#isCompatibleWith(MediaType) compatible} with the
-	 * given one. Example: <pre><code class='java'>
+	 * given one.
+	 * <p>Example: <pre><code class='java'>
 	 * // Check that actual is compatible with "text/plain"
 	 * assertThat(mediaType).isCompatibleWith("text/plain");
 	 * </code></pre>

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import static java.util.Map.entry;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link AbstractHttpServletRequestAssert}.
@@ -52,7 +53,7 @@ public class AbstractHttpServletRequestAssertTests {
 		@Test
 		void attributesWithWrongKey() {
 			HttpServletRequest request = createRequest(Map.of("one", 1));
-			Assertions.assertThatExceptionOfType(AssertionError.class)
+			assertThatExceptionOfType(AssertionError.class)
 					.isThrownBy(() -> assertThat(request).attributes().containsKey("two"))
 					.withMessageContainingAll("Request Attributes", "two", "one");
 		}
@@ -80,7 +81,7 @@ public class AbstractHttpServletRequestAssertTests {
 		@Test
 		void sessionAttributesWithWrongKey() {
 			HttpServletRequest request = createRequest(Map.of("one", 1));
-			Assertions.assertThatExceptionOfType(AssertionError.class)
+			assertThatExceptionOfType(AssertionError.class)
 					.isThrownBy(() -> assertThat(request).sessionAttributes().containsKey("two"))
 					.withMessageContainingAll("Session Attributes", "two", "one");
 		}
@@ -107,7 +108,7 @@ public class AbstractHttpServletRequestAssertTests {
 	void hasAsyncStartedTrueWithFalse() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setAsyncStarted(false);
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(request).hasAsyncStarted(true))
 				.withMessage("Async expected to have started");
 	}
@@ -123,11 +124,12 @@ public class AbstractHttpServletRequestAssertTests {
 	void hasAsyncStartedFalseWithTrue() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setAsyncStarted(true);
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(request).hasAsyncStarted(false))
-				.withMessage("Async expected to not have started");
+				.withMessage("Async expected not to have started");
 
 	}
+
 
 	private static ResponseAssert assertThat(HttpServletRequest response) {
 		return new ResponseAssert(response);
@@ -140,4 +142,5 @@ public class AbstractHttpServletRequestAssertTests {
 			super(actual, ResponseAssert.class);
 		}
 	}
+
 }

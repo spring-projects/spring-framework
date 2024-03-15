@@ -45,7 +45,8 @@ class ModelAssertTests {
 	@Test
 	void hasErrorsWithNoError() {
 		AssertProvider<ModelAssert> actual = forModel(new TestBean(), Map.of("name", "John", "age", "42"));
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertThat(actual).hasErrors())
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(actual).hasErrors())
 				.withMessageContainingAll("John", "to have at least one error");
 	}
 
@@ -57,7 +58,8 @@ class ModelAssertTests {
 	@Test
 	void doesNotHaveErrorsWithError() {
 		AssertProvider<ModelAssert> actual = forModel(new TestBean(), Map.of("name", "John", "age", "4x"));
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertThat(actual).doesNotHaveErrors())
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(actual).doesNotHaveErrors())
 				.withMessageContainingAll("John", "to not have an error, but got 1");
 	}
 
@@ -73,8 +75,8 @@ class ModelAssertTests {
 		Map<String, Object> model = new HashMap<>();
 		augmentModel(model, "person", new TestBean(), Map.of("name", "John", "age", "42"));
 		AssertProvider<ModelAssert> actual = forModel(model);
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-						() -> assertThat(actual).extractingBindingResult("user"))
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(actual).extractingBindingResult("user"))
 				.withMessageContainingAll("to have a binding result for attribute 'user'");
 	}
 
@@ -94,10 +96,10 @@ class ModelAssertTests {
 		augmentModel(model, "valid", new TestBean(), Map.of("name", "second"));
 		augmentModel(model, "wrong2", new TestBean(), Map.of("name", "third", "touchy", "invalid.name"));
 		AssertProvider<ModelAssert> actual = forModel(model);
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-						() -> assertThat(actual).hasAttributeErrors("wrong1", "valid"))
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(actual).hasAttributeErrors("wrong1", "valid"))
 				.withMessageContainingAll("to have attribute errors for:", "wrong1, valid",
-						"but these attributes do not have any error:", "valid");
+						"but these attributes do not have any errors:", "valid");
 	}
 
 	@Test
@@ -107,11 +109,11 @@ class ModelAssertTests {
 		augmentModel(model, "valid", new TestBean(), Map.of("name", "second"));
 		augmentModel(model, "wrong2", new TestBean(), Map.of("name", "third", "touchy", "invalid.name"));
 		AssertProvider<ModelAssert> actual = forModel(model);
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-						() -> assertThat(actual).hasAttributeErrors("wrong1", "unknown", "valid"))
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(actual).hasAttributeErrors("wrong1", "unknown", "valid"))
 				.withMessageContainingAll("to have attribute errors for:", "wrong1, unknown, valid",
 						"but could not find these attributes:", "unknown",
-						"and these attributes do not have any error:", "valid");
+						"and these attributes do not have any errors:", "valid");
 	}
 
 	@Test
@@ -130,10 +132,10 @@ class ModelAssertTests {
 		augmentModel(model, "wrong", new TestBean(), Map.of("name", "second", "age", "4x"));
 		augmentModel(model, "valid2", new TestBean(), Map.of("name", "third"));
 		AssertProvider<ModelAssert> actual = forModel(model);
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-						() -> assertThat(actual).doesNotHaveAttributeErrors("valid1", "wrong"))
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(actual).doesNotHaveAttributeErrors("valid1", "wrong"))
 				.withMessageContainingAll("to have attribute without errors for:", "valid1, wrong",
-						"but these attributes have at least an error:", "wrong");
+						"but these attributes have at least one error:", "wrong");
 	}
 
 	@Test
@@ -143,11 +145,11 @@ class ModelAssertTests {
 		augmentModel(model, "wrong", new TestBean(), Map.of("name", "second", "age", "4x"));
 		augmentModel(model, "valid2", new TestBean(), Map.of("name", "third"));
 		AssertProvider<ModelAssert> actual = forModel(model);
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(
-						() -> assertThat(actual).doesNotHaveAttributeErrors("valid1", "unknown", "wrong"))
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(actual).doesNotHaveAttributeErrors("valid1", "unknown", "wrong"))
 				.withMessageContainingAll("to have attribute without errors for:", "valid1, unknown, wrong",
 						"but could not find these attributes:", "unknown",
-						"and these attributes have at least an error:", "wrong");
+						"and these attributes have at least one error:", "wrong");
 	}
 
 	private AssertProvider<ModelAssert> forModel(Map<String, Object> model) {

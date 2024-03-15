@@ -35,7 +35,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 /**
  * Base AssertJ {@link org.assertj.core.api.Assert assertions} that can be
- * applied to a {@link HttpServletRequest}.
+ * applied to an {@link HttpServletRequest}.
  *
  * @author Stephane Nicoll
  * @since 6.2
@@ -70,7 +70,7 @@ public abstract class AbstractHttpServletRequestAssert<SELF extends AbstractHttp
 	/**
 	 * Return a new {@linkplain MapAssert assertion} object that uses the request
 	 * attributes as the object to test, with values mapped by attribute name.
-	 * Examples: <pre><code class='java'>
+	 * <p>Example: <pre><code class='java'>
 	 * // Check for the presence of a request attribute named "attributeName":
 	 * assertThat(request).attributes().containsKey("attributeName");
 	 * </code></pre>
@@ -82,7 +82,7 @@ public abstract class AbstractHttpServletRequestAssert<SELF extends AbstractHttp
 	/**
 	 * Return a new {@linkplain MapAssert assertion} object that uses the session
 	 * attributes as the object to test, with values mapped by attribute name.
-	 * Examples: <pre><code class='java'>
+	 * <p>Example: <pre><code class='java'>
 	 * // Check for the presence of a session attribute named "username":
 	 * assertThat(request).sessionAttributes().containsKey("username");
 	 * </code></pre>
@@ -92,8 +92,8 @@ public abstract class AbstractHttpServletRequestAssert<SELF extends AbstractHttp
 	}
 
 	/**
-	 * Verify that whether asynchronous processing started, usually as a result
-	 * of a controller method returning {@link Callable} or {@link DeferredResult}.
+	 * Verify whether asynchronous processing has started, usually as a result
+	 * of a controller method returning a {@link Callable} or {@link DeferredResult}.
 	 * <p>The test will await the completion of a {@code Callable} so that
 	 * {@link MvcResultAssert#asyncResult()} can be used to assert the resulting
 	 * value.
@@ -104,7 +104,7 @@ public abstract class AbstractHttpServletRequestAssert<SELF extends AbstractHttp
 	 */
 	public SELF hasAsyncStarted(boolean started) {
 		Assertions.assertThat(this.actual.isAsyncStarted())
-				.withFailMessage("Async expected to %s started", (started ? "have" : "not have"))
+				.withFailMessage("Async expected %sto have started", (started ? "" : "not "))
 				.isEqualTo(started);
 		return this.myself;
 	}

@@ -29,14 +29,14 @@ import org.springframework.lang.Nullable;
  * @author Stephane Nicoll
  * @since 6.2
  */
-public class JsonPathValueAssert
-		extends AbstractJsonValueAssert<JsonPathValueAssert> {
+public class JsonPathValueAssert extends AbstractJsonValueAssert<JsonPathValueAssert> {
 
 	private final String expression;
 
 
 	JsonPathValueAssert(@Nullable Object actual, String expression,
 			@Nullable GenericHttpMessageConverter<Object> httpMessageConverter) {
+
 		super(actual, JsonPathValueAssert.class, httpMessageConverter);
 		this.expression = expression;
 	}
@@ -45,4 +45,5 @@ public class JsonPathValueAssert
 	protected String getExpectedErrorMessagePrefix() {
 		return "Expected value at JSON path \"%s\":".formatted(this.expression);
 	}
+
 }

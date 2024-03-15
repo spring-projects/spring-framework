@@ -71,8 +71,7 @@ class HandlerResultAssertTests {
 
 	@Test
 	void method() {
-		assertThat(handlerMethod(new TestController(), "greet")).method().isEqualTo(
-				ReflectionUtils.findMethod(TestController.class, "greet"));
+		assertThat(handlerMethod(new TestController(), "greet")).method().isEqualTo(method(TestController.class, "greet"));
 	}
 
 	@Test
@@ -126,7 +125,7 @@ class HandlerResultAssertTests {
 	}
 
 	@RestController
-	public static class TestController {
+	static class TestController {
 
 		@GetMapping("/greet")
 		public ResponseEntity<String> greet() {

@@ -22,9 +22,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * JSON content usually created from a JSON tester. Generally used only to
- * {@link AssertProvider provide} {@link JsonContentAssert} to AssertJ
- * {@code assertThat} calls.
+ * JSON content which is generally used to {@link AssertProvider provide}
+ * {@link JsonContentAssert} to AssertJ {@code assertThat} calls.
  *
  * @author Phillip Webb
  * @author Diego Berrueta
@@ -37,8 +36,9 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 	@Nullable
 	private final Class<?> resourceLoadClass;
 
+
 	/**
-	 * Create a new {@link JsonContent} instance.
+	 * Create a new {@code JsonContent} instance.
 	 * @param json the actual JSON content
 	 * @param resourceLoadClass the source class used to load resources
 	 */
@@ -47,6 +47,7 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 		this.json = json;
 		this.resourceLoadClass = resourceLoadClass;
 	}
+
 
 	/**
 	 * Use AssertJ's {@link org.assertj.core.api.Assertions#assertThat assertThat}

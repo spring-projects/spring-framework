@@ -208,7 +208,8 @@ class JsonPathAssertTests {
 		@Test
 		void convertToWithoutHttpMessageConverterShouldFail() {
 			JsonPathValueAssert path = assertThat(forJson(SIMPSONS)).extractingPath("$.familyMembers[0]");
-			assertThatIllegalStateException().isThrownBy(() -> path.convertTo(Member.class))
+			assertThatIllegalStateException()
+					.isThrownBy(() -> path.convertTo(Member.class))
 					.withMessage("No JSON message converter available to convert {name=Homer}");
 		}
 
@@ -296,7 +297,7 @@ class JsonPathAssertTests {
 
 	private Consumer<AssertionError> hasFailedToNotMatchPath(String expression) {
 		return error -> assertThat(error.getMessage()).containsSubsequence("Expecting:",
-				"To not match JSON path:", "\"" + expression + "\"");
+				"Not to match JSON path:", "\"" + expression + "\"");
 	}
 
 

@@ -37,8 +37,8 @@ import org.springframework.util.function.ThrowingBiFunction;
 
 /**
  * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied
- * to a {@link CharSequence} representation of a json document, mostly to
- * compare the json document against a target, using {@linkplain JSONCompare
+ * to a {@link CharSequence} representation of a JSON document, mostly to
+ * compare the JSON document against a target, using {@linkplain JSONCompare
  * JSON Assert}.
  *
  * @author Phillip Webb
@@ -57,7 +57,7 @@ public class JsonContentAssert extends AbstractAssert<JsonContentAssert, CharSeq
 	 * relative to the given {@code resourceLoadClass}, using the given
 	 * {@code charset}.
 	 * @param json the actual JSON content
-	 * @param resourceLoadClass the source class used to load resources
+	 * @param resourceLoadClass the class used to load resources
 	 * @param charset the charset of the JSON resources
 	 */
 	public JsonContentAssert(@Nullable CharSequence json, @Nullable Class<?> resourceLoadClass,
@@ -71,7 +71,7 @@ public class JsonContentAssert extends AbstractAssert<JsonContentAssert, CharSeq
 	 * Create a new {@link JsonContentAssert} instance that will load resources
 	 * relative to the given {@code resourceLoadClass}, using {@code UTF-8}.
 	 * @param json the actual JSON content
-	 * @param resourceLoadClass the source class used to load resources
+	 * @param resourceLoadClass the class used to load resources
 	 */
 	public JsonContentAssert(@Nullable CharSequence json, @Nullable Class<?> resourceLoadClass) {
 		this(json, resourceLoadClass, null);
@@ -343,7 +343,6 @@ public class JsonContentAssert extends AbstractAssert<JsonContentAssert, CharSeq
 
 	private JSONCompareResult compareForNull(@Nullable CharSequence expectedJson) {
 		JSONCompareResult result = new JSONCompareResult();
-		result.passed();
 		if (expectedJson != null) {
 			result.fail("Expected null JSON");
 		}
@@ -352,14 +351,14 @@ public class JsonContentAssert extends AbstractAssert<JsonContentAssert, CharSeq
 
 	private JsonContentAssert assertNotFailed(JSONCompareResult result) {
 		if (result.failed()) {
-			failWithMessage("JSON Comparison failure: %s", result.getMessage());
+			failWithMessage("JSON comparison failure: %s", result.getMessage());
 		}
 		return this;
 	}
 
 	private JsonContentAssert assertNotPassed(JSONCompareResult result) {
 		if (result.passed()) {
-			failWithMessage("JSON Comparison failure: %s", result.getMessage());
+			failWithMessage("JSON comparison failure: %s", result.getMessage());
 		}
 		return this;
 	}

@@ -24,13 +24,13 @@ import org.springframework.test.web.servlet.MvcResult;
 /**
  * A {@link MvcResult} that additionally supports AssertJ style assertions.
  *
- * <p>Can be in two distinct states:
+ * <p>Can be in one of two distinct states:
  * <ol>
  * <li>The request processed successfully, and {@link #getUnresolvedException()}
  * is therefore {@code null}.</li>
  * <li>The request failed unexpectedly with {@link #getUnresolvedException()}
- * providing more information about the error. Any attempt to access a
- * member of the result fails with an exception.</li>
+ * providing more information about the error. Any attempt to access a member of
+ * the result fails with an exception.</li>
  * </ol>
  *
  * @author Stephane Nicoll

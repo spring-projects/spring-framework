@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.assertj;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 import org.assertj.core.api.AssertProvider;
 import org.junit.jupiter.api.Test;
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.json.JsonContent;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -40,8 +40,8 @@ class ResponseBodyAssertTests {
 	@Test
 	void isEqualToWithByteArray() {
 		MockHttpServletResponse response = createResponse("hello");
-		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-		assertThat(fromResponse(response)).isEqualTo("hello".getBytes(StandardCharsets.UTF_8));
+		response.setCharacterEncoding(UTF_8.name());
+		assertThat(fromResponse(response)).isEqualTo("hello".getBytes(UTF_8));
 	}
 
 	@Test

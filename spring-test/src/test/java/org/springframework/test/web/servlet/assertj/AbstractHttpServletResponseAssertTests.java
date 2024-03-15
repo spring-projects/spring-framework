@@ -73,7 +73,8 @@ class AbstractHttpServletResponseAssertTests {
 		@Test
 		void hasStatusWithWrongCode() {
 			MockHttpServletResponse response = createResponse(200);
-			assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertThat(response).hasStatus(300))
+			assertThatExceptionOfType(AssertionError.class)
+					.isThrownBy(() -> assertThat(response).hasStatus(300))
 					.withMessageContainingAll("HTTP status code", "200", "300");
 		}
 
@@ -116,6 +117,7 @@ class AbstractHttpServletResponseAssertTests {
 			return response;
 		}
 	}
+
 
 	private static ResponseAssert assertThat(HttpServletResponse response) {
 		return new ResponseAssert(response);

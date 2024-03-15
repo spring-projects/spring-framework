@@ -47,12 +47,13 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 
 	/**
 	 * Return a new {@linkplain ResponseBodyAssert assertion} object that uses
-	 * the response body as the object to test. The return assertion object
+	 * the response body as the object to test. The returned assertion object
 	 * provides access to the raw byte array, a String value decoded using the
-	 * response's character encoding, and dedicated json testing support.
-	 * Examples: <pre><code class='java'>
+	 * response's character encoding, and dedicated JSON testing support.
+	 * <p>Examples: <pre><code class='java'>
 	 * // Check that the response body is equal to "Hello World":
 	 * assertThat(response).body().isEqualTo("Hello World");
+	 *
 	 * // Check that the response body is strictly equal to the content of "test.json":
 	 * assertThat(response).body().json().isStrictlyEqualToJson("test.json");
 	 * </code></pre>
@@ -65,8 +66,8 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	/**
 	 * Return a new {@linkplain UriAssert assertion} object that uses the
 	 * forwarded URL as the object to test. If a simple equality check is
-	 * required consider using {@link #hasForwardedUrl(String)} instead.
-	 * Example: <pre><code class='java'>
+	 * required, consider using {@link #hasForwardedUrl(String)} instead.
+	 * <p>Example: <pre><code class='java'>
 	 * // Check that the forwarded URL starts with "/orders/":
 	 * assertThat(response).forwardedUrl().matchPattern("/orders/*);
 	 * </code></pre>
@@ -78,8 +79,8 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	/**
 	 * Return a new {@linkplain UriAssert assertion} object that uses the
 	 * redirected URL as the object to test. If a simple equality check is
-	 * required consider using {@link #hasRedirectedUrl(String)} instead.
-	 * Example: <pre><code class='java'>
+	 * required, consider using {@link #hasRedirectedUrl(String)} instead.
+	 * <p>Example: <pre><code class='java'>
 	 * // Check that the redirected URL starts with "/orders/":
 	 * assertThat(response).redirectedUrl().matchPattern("/orders/*);
 	 * </code></pre>

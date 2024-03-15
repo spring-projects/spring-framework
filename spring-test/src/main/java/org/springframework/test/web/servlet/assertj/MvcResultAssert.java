@@ -102,7 +102,7 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	 * Return a new {@linkplain HandlerResultAssert assertion} object that uses
 	 * the handler as the object to test. For a method invocation on a
 	 * controller, this is relative method handler
-	 * Example: <pre><code class='java'>
+	 * <p>Example: <pre><code class='java'>
 	 * // Check that a GET to "/greet" is invoked on a "handleGreet" method name
 	 * assertThat(mvc.perform(get("/greet")).handler().method().hasName("sayGreet");
 	 * </code></pre>

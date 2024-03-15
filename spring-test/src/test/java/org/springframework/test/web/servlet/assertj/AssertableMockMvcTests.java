@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.json.JsonPathAssert;
@@ -40,8 +39,8 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -58,10 +57,10 @@ class AssertableMockMvcTests {
 	private static final MappingJackson2HttpMessageConverter jsonHttpMessageConverter =
 			new MappingJackson2HttpMessageConverter(new ObjectMapper());
 
+
 	@Test
 	void createShouldRejectNullMockMvc() {
-		assertThatThrownBy(() -> AssertableMockMvc.create(null))
-				.isInstanceOf(IllegalArgumentException.class);
+		assertThatIllegalArgumentException().isThrownBy(() -> AssertableMockMvc.create(null));
 	}
 
 	@Test
@@ -122,8 +121,7 @@ class AssertableMockMvcTests {
 	void withHttpMessageConverterDetectsJsonConverter() {
 		MappingJackson2HttpMessageConverter converter = spy(jsonHttpMessageConverter);
 		AssertableMockMvc mockMvc = AssertableMockMvc.of(HelloController.class)
-				.withHttpMessageConverters(List.of(mock(GenericHttpMessageConverter.class),
-						mock(GenericHttpMessageConverter.class), converter));
+				.withHttpMessageConverters(List.of(mock(), mock(), converter));
 		assertThat(mockMvc.perform(get("/json"))).hasStatusOk().body().jsonPath()
 				.extractingPath("$").convertTo(Message.class).satisfies(message -> {
 					assertThat(message.message()).isEqualTo("Hello World");
@@ -136,14 +134,13 @@ class AssertableMockMvcTests {
 	void performWithUnresolvedExceptionSetsException() {
 		AssertableMockMvc mockMvc = AssertableMockMvc.of(HelloController.class);
 		AssertableMvcResult result = mockMvc.perform(get("/error"));
-		assertThat(result.getUnresolvedException()).isNotNull().isInstanceOf(ServletException.class)
+		assertThat(result.getUnresolvedException()).isInstanceOf(ServletException.class)
 				.cause().isInstanceOf(IllegalStateException.class).hasMessage("Expected");
 		assertThat(result).hasFieldOrPropertyWithValue("target", null);
 	}
 
 	private GenericWebApplicationContext create(Class<?>... classes) {
-		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext(
-				new MockServletContext());
+		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext(new MockServletContext());
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(applicationContext);
 		for (Class<?> beanClass : classes) {
 			applicationContext.registerBean(beanClass);
@@ -189,22 +186,23 @@ class AssertableMockMvcTests {
 	private record Message(String message, int counter) {}
 
 	@RestController
-	private static class CounterController {
+	static class CounterController {
 
 		private final AtomicInteger counter;
 
-		public CounterController(AtomicInteger counter) {
-			this.counter = counter;
-		}
-
-		public CounterController() {
+		CounterController() {
 			this(new AtomicInteger());
 		}
 
+		CounterController(AtomicInteger counter) {
+			this.counter = counter;
+		}
+
 		@PostMapping("/increase")
-		public String increase() {
+		String increase() {
 			int value = this.counter.incrementAndGet();
 			return "counter " + value;
 		}
 	}
+
 }

@@ -44,6 +44,7 @@ public abstract class AbstractBindingResultAssert<SELF extends AbstractBindingRe
 
 	private final String name;
 
+
 	protected AbstractBindingResultAssert(String name, BindingResult bindingResult, Class<?> selfType) {
 		super(bindingResult, selfType);
 		this.name = name;
@@ -51,7 +52,7 @@ public abstract class AbstractBindingResultAssert<SELF extends AbstractBindingRe
 	}
 
 	/**
-	 * Verify that the total number of errors is equal to the given one.
+	 * Verify that the total number of errors is equal to the expected value.
 	 * @param expected the expected number of errors
 	 */
 	public SELF hasErrorsCount(int expected) {
@@ -73,7 +74,7 @@ public abstract class AbstractBindingResultAssert<SELF extends AbstractBindingRe
 	/**
 	 * Verify that the actual binding result contains <em>only</em> fields in
 	 * error with the given {@code fieldNames}, and nothing else.
-	 * @param fieldNames the exhaustive list of field name that should be in error
+	 * @param fieldNames the exhaustive list of field names that should be in error
 	 */
 	public SELF hasOnlyFieldErrors(String... fieldNames) {
 		assertThat(fieldErrorNames()).containsOnly(fieldNames);

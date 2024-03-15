@@ -33,6 +33,4 @@ public abstract class AbstractMockHttpServletRequestAssert<SELF extends Abstract
 		super(request, selfType);
 	}
 
-
-
 }

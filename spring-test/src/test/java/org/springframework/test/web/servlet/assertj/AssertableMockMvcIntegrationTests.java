@@ -309,15 +309,15 @@ public class AssertableMockMvcIntegrationTests {
 
 		@Test
 		void doesNotHaveUnresolvedExceptionWithUnresolvedException() {
-			assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-							assertThat(perform(get("/error/1"))).doesNotHaveUnresolvedException())
+			assertThatExceptionOfType(AssertionError.class)
+					.isThrownBy(() -> assertThat(perform(get("/error/1"))).doesNotHaveUnresolvedException())
 					.withMessage("Expecting request to have succeeded but it has failed");
 		}
 
 		@Test
 		void hasUnresolvedExceptionWithoutUnresolvedException() {
-			assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-							assertThat(perform(get("/greet"))).hasUnresolvedException())
+			assertThatExceptionOfType(AssertionError.class)
+					.isThrownBy(() -> assertThat(perform(get("/greet"))).hasUnresolvedException())
 					.withMessage("Expecting request to have failed but it has succeeded");
 		}
 
@@ -330,8 +330,8 @@ public class AssertableMockMvcIntegrationTests {
 
 		@Test
 		void unresolvedExceptionWithSuccessfulRequest() {
-			assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-							assertThat(perform(get("/greet"))).unresolvedException())
+			assertThatExceptionOfType(AssertionError.class)
+					.isThrownBy(() -> assertThat(perform(get("/greet"))).unresolvedException())
 					.withMessage("Expecting request to have failed but it has succeeded");
 		}
 
@@ -439,7 +439,7 @@ public class AssertableMockMvcIntegrationTests {
 	}
 
 	@Test
-	void satisfiesAllowAdditionalAssertions() {
+	void satisfiesAllowsAdditionalAssertions() {
 		assertThat(this.mockMvc.perform(get("/greet"))).satisfies(result -> {
 			assertThat(result).isInstanceOf(MvcResult.class);
 			assertThat(result).hasStatusOk();
@@ -477,7 +477,6 @@ public class AssertableMockMvcIntegrationTests {
 	@Import({ TestController.class, PersonController.class, AsyncController.class,
 			SessionController.class, ErrorController.class })
 	static class WebConfiguration {
-
 	}
 
 	@RestController
@@ -515,7 +514,6 @@ public class AssertableMockMvcIntegrationTests {
 		}
 	}
 
-
 	@RestController
 	static class AsyncController {
 
@@ -552,7 +550,6 @@ public class AssertableMockMvcIntegrationTests {
 		public String validation(@PathVariable @Size(max = 4) String id) {
 			return "Hello " + id;
 		}
-
 	}
 
 }

@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
 
 /**
  * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied
- * to a {@link CharSequence} representation of a json document using
+ * to a {@link CharSequence} representation of a JSON document using
  * {@linkplain JsonPath JSON path}.
  *
  * @author Stephane Nicoll
@@ -41,17 +41,21 @@ public class JsonPathAssert extends AbstractAssert<JsonPathAssert, CharSequence>
 
 	private static final Failures failures = Failures.instance();
 
+
 	@Nullable
 	private final GenericHttpMessageConverter<Object> jsonMessageConverter;
 
+
 	public JsonPathAssert(CharSequence json,
 			@Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
+
 		super(json, JsonPathAssert.class);
 		this.jsonMessageConverter = jsonMessageConverter;
 	}
 
+
 	/**
-	 * Verify that the given JSON {@code path} is present and extract the JSON
+	 * Verify that the given JSON {@code path} is present, and extract the JSON
 	 * value for further {@linkplain JsonPathValueAssert assertions}.
 	 * @param path the {@link JsonPath} expression
 	 * @see #hasPathSatisfying(String, Consumer)
@@ -158,8 +162,9 @@ public class JsonPathAssert extends AbstractAssert<JsonPathAssert, CharSequence>
 		static final class JsonPathNotExpected extends BasicErrorMessageFactory {
 
 			private JsonPathNotExpected(String actual, String path) {
-				super("%nExpecting:%n  %s%nTo not match JSON path:%n  %s%n", actual, path);
+				super("%nExpecting:%n  %s%nNot to match JSON path:%n  %s%n", actual, path);
 			}
 		}
 	}
+
 }

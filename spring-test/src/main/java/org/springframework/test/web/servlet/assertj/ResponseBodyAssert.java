@@ -62,12 +62,14 @@ public class ResponseBodyAssert extends AbstractByteArrayAssert<ResponseBodyAsse
 	}
 
 	/**
-	 * Return a new {@linkplain JsonContentAssert assertion} object that
-	 * provides {@linkplain org.skyscreamer.jsonassert.JSONCompareMode JSON
-	 * assert} comparison to expected json input that can be loaded from the
-	 * classpath. Only absolute locations are supported, consider using
-	 * {@link #json(Class)} to load json documents relative to a given class.
-	 * Example: <pre><code class='java'>
+	 * Return a new {@linkplain JsonContentAssert assertion} object that provides
+	 * support for {@linkplain org.skyscreamer.jsonassert.JSONCompareMode JSON
+	 * assert} comparisons against expected JSON input which can be loaded from
+	 * the classpath.
+	 * <p>This method only supports absolute locations for JSON documents loaded
+	 * from the classpath. Consider using {@link #json(Class)} to load JSON
+	 * documents relative to a given class.
+	 * <p>Example: <pre><code class='java'>
 	 * // Check that the response is strictly equal to the content of
 	 * // "/com/acme/web/person/person-created.json":
 	 * assertThat(...).body().json()
@@ -79,18 +81,19 @@ public class ResponseBodyAssert extends AbstractByteArrayAssert<ResponseBodyAsse
 	}
 
 	/**
-	 * Return a new {@linkplain JsonContentAssert assertion} object that
-	 * provides {@linkplain org.skyscreamer.jsonassert.JSONCompareMode JSON
-	 * assert} comparison to expected json input that can be loaded from the
-	 * classpath. Documents can be absolute using a leading slash, or relative
-	 * to the given {@code resourceLoadClass}.
-	 * Example: <pre><code class='java'>
-	 * // Check that the response is strictly equal to the content of
-	 * // the specified file:
+	 * Return a new {@linkplain JsonContentAssert assertion} object that provides
+	 * support for {@linkplain org.skyscreamer.jsonassert.JSONCompareMode JSON
+	 * assert} comparisons against expected JSON input which can be loaded from
+	 * the classpath.
+	 * <p>Locations for JSON documents can be absolute using a leading slash, or
+	 * relative to the given {@code resourceLoadClass}.
+	 * <p>Example: <pre><code class='java'>
+	 * // Check that the response is strictly equal to the content of the
+	 * // specified file located in the same package as the PersonController:
 	 * assertThat(...).body().json(PersonController.class)
 	 *         .isStrictlyEqualToJson("person-created.json");
 	 * </code></pre>
-	 * @param resourceLoadClass the class used to load relative json documents
+	 * @param resourceLoadClass the class used to load relative JSON documents
 	 * @see ClassPathResource#ClassPathResource(String, Class)
 	 */
 	public JsonContentAssert json(@Nullable Class<?> resourceLoadClass) {
@@ -98,8 +101,8 @@ public class ResponseBodyAssert extends AbstractByteArrayAssert<ResponseBodyAsse
 	}
 
 	/**
-	 * Verifies that the response body is equal to the given {@link String}.
-	 * <p>Convert the actual byte array to a String using the character encoding
+	 * Verify that the response body is equal to the given {@link String}.
+	 * <p>Converts the actual byte array to a String using the character encoding
 	 * of the {@link HttpServletResponse}.
 	 * @param expected the expected content of the response body
 	 * @see #asString()
@@ -110,8 +113,8 @@ public class ResponseBodyAssert extends AbstractByteArrayAssert<ResponseBodyAsse
 	}
 
 	/**
-	 * Override that uses the character encoding of {@link HttpServletResponse} to
-	 * convert the byte[] to a String, rather than the platform's default charset.
+	 * Override that uses the character encoding of the {@link HttpServletResponse}
+	 * to convert the byte[] to a String, rather than the platform's default charset.
 	 */
 	@Override
 	public AbstractStringAssert<?> asString() {

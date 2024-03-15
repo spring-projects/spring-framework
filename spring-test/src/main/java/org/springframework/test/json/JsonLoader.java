@@ -42,20 +42,23 @@ class JsonLoader {
 
 	private final Charset charset;
 
+
 	JsonLoader(@Nullable Class<?> resourceLoadClass, @Nullable Charset charset) {
 		this.resourceLoadClass = resourceLoadClass;
 		this.charset = (charset != null ? charset : StandardCharsets.UTF_8);
 	}
+
 
 	@Nullable
 	String getJson(@Nullable CharSequence source) {
 		if (source == null) {
 			return null;
 		}
-		if (source.toString().endsWith(".json")) {
-			return getJson(new ClassPathResource(source.toString(), this.resourceLoadClass));
+		String string = source.toString();
+		if (string.endsWith(".json")) {
+			return getJson(new ClassPathResource(string, this.resourceLoadClass));
 		}
-		return source.toString();
+		return string;
 	}
 
 	String getJson(Resource source) {

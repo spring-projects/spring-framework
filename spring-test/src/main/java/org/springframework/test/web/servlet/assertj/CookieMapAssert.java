@@ -58,8 +58,7 @@ public class CookieMapAssert extends AbstractMapAssert<CookieMapAssert, Map<Stri
 	}
 
 	/**
-	 * Verify that the actual cookies contain the cookies with the given
-	 * {@code names}.
+	 * Verify that the actual cookies contain cookies with the given {@code names}.
 	 * @param names the names of expected cookies
 	 * @see #containsKeys
 	 */
@@ -68,8 +67,8 @@ public class CookieMapAssert extends AbstractMapAssert<CookieMapAssert, Map<Stri
 	}
 
 	/**
-	 * Verify that the actual cookies do not contain a cookie with the
-	 * given {@code name}.
+	 * Verify that the actual cookies do not contain a cookie with the given
+	 * {@code name}.
 	 * @param name the name of a cookie that should not be present
 	 * @see #doesNotContainKey
 	 */
@@ -78,8 +77,8 @@ public class CookieMapAssert extends AbstractMapAssert<CookieMapAssert, Map<Stri
 	}
 
 	/**
-	 * Verify that the actual cookies do not contain any of the cookies with
-	 * the given {@code names}.
+	 * Verify that the actual cookies do not contain any cookies with the given
+	 * {@code names}.
 	 * @param names the names of cookies that should not be present
 	 * @see #doesNotContainKeys
 	 */
@@ -88,9 +87,8 @@ public class CookieMapAssert extends AbstractMapAssert<CookieMapAssert, Map<Stri
 	}
 
 	/**
-	 * Verify that the actual cookies contain a cookie with the given
-	 * {@code name} that satisfy given {@code cookieRequirements}.
-	 * the specified names.
+	 * Verify that the actual cookies contain a cookie with the given {@code name}
+	 * that satisfies the given {@code cookieRequirements}.
 	 * @param name the name of an expected cookie
 	 * @param cookieRequirements the requirements for the cookie
 	 */
@@ -99,9 +97,8 @@ public class CookieMapAssert extends AbstractMapAssert<CookieMapAssert, Map<Stri
 	}
 
 	/**
-	 * Verify that the actual cookies contain a cookie with the given
-	 * {@code name} whose {@linkplain Cookie#getValue() value} is equal to the
-	 * given one.
+	 * Verify that the actual cookies contain a cookie with the given {@code name}
+	 * whose {@linkplain Cookie#getValue() value} is equal to the expected value.
 	 * @param name the name of the cookie
 	 * @param expected the expected value of the cookie
 	 */
@@ -111,9 +108,8 @@ public class CookieMapAssert extends AbstractMapAssert<CookieMapAssert, Map<Stri
 	}
 
 	/**
-	 * Verify that the actual cookies contain a cookie with the given
-	 * {@code name} whose {@linkplain Cookie#getMaxAge() max age} is equal to
-	 * the given one.
+	 * Verify that the actual cookies contain a cookie with the given {@code name}
+	 * whose {@linkplain Cookie#getMaxAge() max age} is equal to the expected value.
 	 * @param name the name of the cookie
 	 * @param expected the expected max age of the cookie
 	 */
@@ -123,9 +119,8 @@ public class CookieMapAssert extends AbstractMapAssert<CookieMapAssert, Map<Stri
 	}
 
 	/**
-	 * Verify that the actual cookies contain a cookie with the given
-	 * {@code name} whose {@linkplain Cookie#getPath() path} is equal to
-	 * the given one.
+	 * Verify that the actual cookies contain a cookie with the given {@code name}
+	 * whose {@linkplain Cookie#getPath() path} is equal to the expected value.
 	 * @param name the name of the cookie
 	 * @param expected the expected path of the cookie
 	 */
@@ -135,11 +130,10 @@ public class CookieMapAssert extends AbstractMapAssert<CookieMapAssert, Map<Stri
 	}
 
 	/**
-	 * Verify that the actual cookies contain a cookie with the given
-	 * {@code name} whose {@linkplain Cookie#getDomain() domain} is equal to
-	 * the given one.
+	 * Verify that the actual cookies contain a cookie with the given {@code name}
+	 * whose {@linkplain Cookie#getDomain() domain} is equal to the expected value.
 	 * @param name the name of the cookie
-	 * @param expected the expected path of the cookie
+	 * @param expected the expected domain of the cookie
 	 */
 	public CookieMapAssert hasDomain(String name, String expected) {
 		return hasCookieSatisfying(name, cookie ->
@@ -147,9 +141,9 @@ public class CookieMapAssert extends AbstractMapAssert<CookieMapAssert, Map<Stri
 	}
 
 	/**
-	 * Verify that the actual cookies contain a cookie with the given
-	 * {@code name} whose {@linkplain Cookie#getSecure() secure flag} is equal
-	 * to the given one.
+	 * Verify that the actual cookies contain a cookie with the given {@code name}
+	 * whose {@linkplain Cookie#getSecure() secure flag} is equal to the expected
+	 * value.
 	 * @param name the name of the cookie
 	 * @param expected whether the cookie is secure
 	 */
@@ -159,9 +153,9 @@ public class CookieMapAssert extends AbstractMapAssert<CookieMapAssert, Map<Stri
 	}
 
 	/**
-	 * Verify that the actual cookies contain a cookie with the given
-	 * {@code name} whose {@linkplain Cookie#isHttpOnly() http only flag} is
-	 * equal to the given one.
+	 * Verify that the actual cookies contain a cookie with the given {@code name}
+	 * whose {@linkplain Cookie#isHttpOnly() http only flag} is equal to the
+	 * expected value.
 	 * @param name the name of the cookie
 	 * @param expected whether the cookie is http only
 	 */

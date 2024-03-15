@@ -36,8 +36,8 @@ import org.springframework.util.function.SingletonSupplier;
 /**
  * Base AssertJ {@link org.assertj.core.api.Assert assertions} that can be
  * applied to any object that provides an {@link HttpServletResponse}. This
- * allows to provide direct access to response assertions while providing
- * access to a different top-level object.
+ * provides direct access to response assertions while also providing access to
+ * a different top-level object.
  *
  * @author Stephane Nicoll
  * @since 6.2
@@ -60,21 +60,22 @@ public abstract class AbstractHttpServletResponseAssert<R extends HttpServletRes
 	}
 
 	/**
-	 * Provide the response to use if it is available. Throw an
-	 * {@link AssertionError} if the request has failed to process and the
-	 * response is not available.
+	 * Provide the response to use if it is available.
+	 * <p>Throws an {@link AssertionError} if the request has failed to process,
+	 * and the response is not available.
 	 * @return the response to use
 	 */
 	protected abstract R getResponse();
 
 	/**
 	 * Return a new {@linkplain HttpHeadersAssert assertion} object that uses
-	 * the {@link HttpHeaders} as the object to test. The return assertion
+	 * {@link HttpHeaders} as the object to test. The returned assertion
 	 * object provides all the regular {@linkplain AbstractMapAssert map
 	 * assertions}, with headers mapped by header name.
 	 * Examples: <pre><code class='java'>
 	 * // Check for the presence of the Accept header:
 	 * assertThat(response).headers().containsHeader(HttpHeaders.ACCEPT);
+	 *
 	 * // Check for the absence of the Content-Length header:
 	 * assertThat(response).headers().doesNotContainsHeader(HttpHeaders.CONTENT_LENGTH);
 	 * </code></pre>
