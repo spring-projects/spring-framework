@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -128,7 +129,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		return this.backingList.containsAll(c);
+		return new HashSet<>(this.backingList).containsAll(c);
 	}
 
 	/**
