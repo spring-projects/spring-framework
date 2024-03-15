@@ -115,9 +115,12 @@ public final class Netty5HeadersAdapter implements MultiValueMap<String, String>
 
 	@Override
 	public boolean containsValue(Object value) {
-		return (value instanceof String &&
-				StreamSupport.stream(this.headers.spliterator(), false)
-						.anyMatch(entry -> value.equals(entry.getValue())));
+		if (value instanceof CharSequence) {
+			String valueStr = value.toString();
+			return StreamSupport.stream(this.headers.spliterator(), false)
+					.anyMatch(entry -> valueStr.equals(entry.getValue().toString()));
+		}
+		return false;
 	}
 
 	@Override
