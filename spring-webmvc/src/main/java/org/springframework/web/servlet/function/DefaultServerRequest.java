@@ -58,7 +58,6 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -486,7 +485,7 @@ class DefaultServerRequest implements ServerRequest {
 				}
 
 				@Override
-				public boolean addAll(@NonNull Collection<? extends Entry<String, Object>> c) {
+				public boolean addAll(Collection<? extends Entry<String, Object>> c) {
 					throw new UnsupportedOperationException();
 				}
 
@@ -501,7 +500,7 @@ class DefaultServerRequest implements ServerRequest {
 				}
 
 				@Override
-				public boolean retainAll(@NonNull Collection<?> c) {
+				public boolean retainAll(Collection<?> c) {
 					throw new UnsupportedOperationException();
 				}
 
