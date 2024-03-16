@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -751,7 +750,7 @@ public class TypeDescriptor implements Serializable {
 
 		private final Annotation[] annotations;
 
-		private AnnotatedElementAdapter(@NonNull Annotation[] annotations) {
+		private AnnotatedElementAdapter(Annotation[] annotations) {
 			this.annotations = annotations;
 		}
 
