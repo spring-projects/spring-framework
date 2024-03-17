@@ -761,27 +761,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		@Override
 		@Nullable
 		public Object proceed() throws Throwable {
-			try {
 				return super.proceed();
-			}
-			catch (RuntimeException ex) {
-				throw ex;
-			}
-			catch (Exception ex) {
-				if (ReflectionUtils.declaresException(getMethod(), ex.getClass()) ||
-						KotlinDetector.isKotlinType(getMethod().getDeclaringClass())) {
-					// Propagate original exception if declared on the target method
-					// (with callers expecting it). Always propagate it for Kotlin code
-					// since checked exceptions do not have to be explicitly declared there.
-					throw ex;
-				}
-				else {
-					// Checked exception thrown in the interceptor but not declared on the
-					// target method signature -> apply an UndeclaredThrowableException,
-					// aligned with standard JDK dynamic proxy behavior.
-					throw new UndeclaredThrowableException(ex);
-				}
-			}
 		}
 	}
 
