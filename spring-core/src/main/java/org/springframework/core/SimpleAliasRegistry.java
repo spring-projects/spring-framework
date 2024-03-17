@@ -50,7 +50,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	private final Map<String, String> aliasMap = new ConcurrentHashMap<>(16);
 
 	/** List of alias names, in registration order. */
-	private volatile List<String> aliasNames = new ArrayList<>(16);
+	private final List<String> aliasNames = new ArrayList<>(16);
 
 
 	@Override
