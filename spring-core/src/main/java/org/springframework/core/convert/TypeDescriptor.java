@@ -511,16 +511,12 @@ public class TypeDescriptor implements Serializable {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (Annotation ann : getAnnotations()) {
-			builder.append('@').append(getName(ann.annotationType())).append(' ');
+			builder.append('@').append(ann.annotationType().getName()).append(' ');
 		}
 		builder.append(getResolvableType());
 		return builder.toString();
 	}
 
-	private static String getName(Class<?> clazz) {
-		String canonicalName = clazz.getCanonicalName();
-		return (canonicalName != null ? canonicalName : clazz.getName());
-	}
 
 	/**
 	 * Create a new type descriptor for an object.
@@ -802,7 +798,7 @@ public class TypeDescriptor implements Serializable {
 
 		@Override
 		public String toString() {
-			return "AnnotatedElementAdapter annotations=" + Arrays.toString(this.annotations);
+			return Arrays.toString(this.annotations);
 		}
 	}
 
