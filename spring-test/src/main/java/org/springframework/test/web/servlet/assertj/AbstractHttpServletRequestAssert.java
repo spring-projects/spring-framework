@@ -104,7 +104,7 @@ public abstract class AbstractHttpServletRequestAssert<SELF extends AbstractHttp
 	 */
 	public SELF hasAsyncStarted(boolean started) {
 		Assertions.assertThat(this.actual.isAsyncStarted())
-				.withFailMessage("Async expected %sto have started", (started ? "" : "not "))
+				.withFailMessage("Async expected %s have started", (started ? "to" : "not to"))
 				.isEqualTo(started);
 		return this.myself;
 	}

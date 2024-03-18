@@ -128,12 +128,12 @@ class HandlerResultAssertTests {
 	static class TestController {
 
 		@GetMapping("/greet")
-		public ResponseEntity<String> greet() {
+		ResponseEntity<String> greet() {
 			return ResponseEntity.ok().body("Hello");
 		}
 
 		@PostMapping("/update")
-		public void update() {
+		void update() {
 		}
 
 	}

@@ -54,11 +54,11 @@ class JsonLoader {
 		if (source == null) {
 			return null;
 		}
-		String string = source.toString();
-		if (string.endsWith(".json")) {
-			return getJson(new ClassPathResource(string, this.resourceLoadClass));
+		String jsonSource = source.toString();
+		if (jsonSource.endsWith(".json")) {
+			return getJson(new ClassPathResource(jsonSource, this.resourceLoadClass));
 		}
-		return string;
+		return jsonSource;
 	}
 
 	String getJson(Resource source) {

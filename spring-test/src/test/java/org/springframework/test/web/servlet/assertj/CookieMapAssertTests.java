@@ -52,130 +52,130 @@ class CookieMapAssertTests {
 
 	@Test
 	void containsCookieWhenCookieExistsShouldPass() {
-		cookies().containsCookie("framework");
+		assertThat(cookies()).containsCookie("framework");
 	}
 
 	@Test
 	void containsCookieWhenCookieMissingShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().containsCookie("missing"));
+				assertThat(cookies()).containsCookie("missing"));
 	}
 
 	@Test
 	void containsCookiesWhenCookiesExistShouldPass() {
-		cookies().containsCookies("framework", "age");
+		assertThat(cookies()).containsCookies("framework", "age");
 	}
 
 	@Test
 	void containsCookiesWhenCookieMissingShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().containsCookies("framework", "missing"));
+				assertThat(cookies()).containsCookies("framework", "missing"));
 	}
 
 	@Test
 	void doesNotContainCookieWhenCookieMissingShouldPass() {
-		cookies().doesNotContainCookie("missing");
+		assertThat(cookies()).doesNotContainCookie("missing");
 	}
 
 	@Test
 	void doesNotContainCookieWhenCookieExistsShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().doesNotContainCookie("framework"));
+				assertThat(cookies()).doesNotContainCookie("framework"));
 	}
 
 	@Test
 	void doesNotContainCookiesWhenCookiesMissingShouldPass() {
-		cookies().doesNotContainCookies("missing", "missing2");
+		assertThat(cookies()).doesNotContainCookies("missing", "missing2");
 	}
 
 	@Test
 	void doesNotContainCookiesWhenAtLeastOneCookieExistShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().doesNotContainCookies("missing", "framework"));
+				assertThat(cookies()).doesNotContainCookies("missing", "framework"));
 	}
 
 	@Test
 	void hasValueEqualsWhenCookieValueMatchesShouldPass() {
-		cookies().hasValue("framework", "spring");
+		assertThat(cookies()).hasValue("framework", "spring");
 	}
 
 	@Test
 	void hasValueEqualsWhenCookieValueDiffersShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().hasValue("framework", "other"));
+				assertThat(cookies()).hasValue("framework", "other"));
 	}
 
 	@Test
 	void hasCookieSatisfyingWhenCookieValueMatchesShouldPass() {
-		cookies().hasCookieSatisfying("framework", cookie ->
+		assertThat(cookies()).hasCookieSatisfying("framework", cookie ->
 				assertThat(cookie.getValue()).startsWith("spr"));
 	}
 
 	@Test
 	void hasCookieSatisfyingWhenCookieValueDiffersShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().hasCookieSatisfying("framework", cookie ->
+				assertThat(cookies()).hasCookieSatisfying("framework", cookie ->
 						assertThat(cookie.getValue()).startsWith("not")));
 	}
 
 	@Test
 	void hasMaxAgeWhenCookieAgeMatchesShouldPass() {
-		cookies().hasMaxAge("age", Duration.ofMinutes(20));
+		assertThat(cookies()).hasMaxAge("age", Duration.ofMinutes(20));
 	}
 
 	@Test
 	void hasMaxAgeWhenCookieAgeDiffersShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().hasMaxAge("age", Duration.ofMinutes(30)));
+				assertThat(cookies()).hasMaxAge("age", Duration.ofMinutes(30)));
 	}
 
 	@Test
 	void pathWhenCookiePathMatchesShouldPass() {
-		cookies().hasPath("path", "/spring");
+		assertThat(cookies()).hasPath("path", "/spring");
 	}
 
 	@Test
 	void pathWhenCookiePathDiffersShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().hasPath("path", "/other"));
+				assertThat(cookies()).hasPath("path", "/other"));
 	}
 
 	@Test
 	void hasDomainWhenCookieDomainMatchesShouldPass() {
-		cookies().hasDomain("domain", "spring.io");
+		assertThat(cookies()).hasDomain("domain", "spring.io");
 	}
 
 	@Test
 	void hasDomainWhenCookieDomainDiffersShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().hasDomain("domain", "example.org"));
+				assertThat(cookies()).hasDomain("domain", "example.org"));
 	}
 
 	@Test
 	void isSecureWhenCookieSecureMatchesShouldPass() {
-		cookies().isSecure("framework", true);
+		assertThat(cookies()).isSecure("framework", true);
 	}
 
 	@Test
 	void isSecureWhenCookieSecureDiffersShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().isSecure("domain", true));
+				assertThat(cookies()).isSecure("domain", true));
 	}
 
 	@Test
 	void isHttpOnlyWhenCookieHttpOnlyMatchesShouldPass() {
-		cookies().isHttpOnly("framework", true);
+		assertThat(cookies()).isHttpOnly("framework", true);
 	}
 
 	@Test
 	void isHttpOnlyWhenCookieHttpOnlyDiffersShouldFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				cookies().isHttpOnly("domain", true));
+				assertThat(cookies()).isHttpOnly("domain", true));
 	}
 
 
-	private static CookieMapAssert cookies() {
-		return assertThat((AssertProvider<CookieMapAssert>) () -> new CookieMapAssert(cookies));
+	private static AssertProvider<CookieMapAssert> cookies() {
+		return () -> new CookieMapAssert(cookies);
 	}
 
 }

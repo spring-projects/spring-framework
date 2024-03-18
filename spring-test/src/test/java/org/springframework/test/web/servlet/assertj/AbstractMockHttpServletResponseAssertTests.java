@@ -18,13 +18,13 @@ package org.springframework.test.web.servlet.assertj;
 
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
@@ -34,12 +34,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 public class AbstractMockHttpServletResponseAssertTests {
 
-	private MockHttpServletResponse response = new MockHttpServletResponse();
-
-
 	@Test
 	void hasForwardedUrl() {
 		String forwardedUrl = "https://example.com/42";
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setForwardedUrl(forwardedUrl);
 		assertThat(response).hasForwardedUrl(forwardedUrl);
 	}
@@ -47,6 +45,7 @@ public class AbstractMockHttpServletResponseAssertTests {
 	@Test
 	void hasForwardedUrlWithWrongValue() {
 		String forwardedUrl = "https://example.com/42";
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setForwardedUrl(forwardedUrl);
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(response).hasForwardedUrl("another"))
@@ -56,6 +55,7 @@ public class AbstractMockHttpServletResponseAssertTests {
 	@Test
 	void hasRedirectedUrl() {
 		String redirectedUrl = "https://example.com/42";
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader(HttpHeaders.LOCATION, redirectedUrl);
 		assertThat(response).hasRedirectedUrl(redirectedUrl);
 	}
@@ -63,6 +63,7 @@ public class AbstractMockHttpServletResponseAssertTests {
 	@Test
 	void hasRedirectedUrlWithWrongValue() {
 		String redirectedUrl = "https://example.com/42";
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader(HttpHeaders.LOCATION, redirectedUrl);
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(response).hasRedirectedUrl("another"))
@@ -71,15 +72,17 @@ public class AbstractMockHttpServletResponseAssertTests {
 
 	@Test
 	void bodyHasContent() throws UnsupportedEncodingException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.getWriter().write("OK");
 		assertThat(response).body().asString().isEqualTo("OK");
 	}
 
 	@Test
 	void bodyHasContentWithResponseCharacterEncoding() throws UnsupportedEncodingException {
-		byte[] bytes = "OK".getBytes(UTF_8);
+		byte[] bytes = "OK".getBytes(StandardCharsets.UTF_8);
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.getWriter().write("OK");
-		response.setContentType(UTF_8.name());
+		response.setContentType(StandardCharsets.UTF_8.name());
 		assertThat(response).body().isEqualTo(bytes);
 	}
 

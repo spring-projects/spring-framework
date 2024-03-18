@@ -69,8 +69,9 @@ public class UriAssert extends AbstractStringAssert<UriAssert> {
 	 * assertThat(uri).matchPattern("/orders/*"));
 	 * </code></pre>
 	 * @param uriPattern the pattern that is expected to match
+	 * @see AntPathMatcher
 	 */
-	public UriAssert matchesPattern(String uriPattern) {
+	public UriAssert matchesAntPattern(String uriPattern) {
 		Assertions.assertThat(pathMatcher.isPattern(uriPattern))
 				.withFailMessage("'%s' is not an Ant-style path pattern", uriPattern).isTrue();
 		Assertions.assertThat(pathMatcher.match(uriPattern, this.actual))

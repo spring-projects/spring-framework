@@ -51,21 +51,21 @@ class UriAssertTests {
 	}
 
 	@Test
-	void matchesPattern() {
-		assertThat("/orders/1").matchesPattern("/orders/*");
+	void matchesAntPattern() {
+		assertThat("/orders/1").matchesAntPattern("/orders/*");
 	}
 
 	@Test
-	void matchesPatternWithNonValidPattern() {
+	void matchesAntPatternWithNonValidPattern() {
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat("/orders/1").matchesPattern("/orders/"))
+				.isThrownBy(() -> assertThat("/orders/1").matchesAntPattern("/orders/"))
 				.withMessage("'/orders/' is not an Ant-style path pattern");
 	}
 
 	@Test
-	void matchesPatternWithWrongValue() {
+	void matchesAntPatternWithWrongValue() {
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat("/orders/1").matchesPattern("/resources/*"))
+				.isThrownBy(() -> assertThat("/orders/1").matchesAntPattern("/resources/*"))
 				.withMessageContainingAll("Test URI", "/resources/*", "/orders/1");
 	}
 
