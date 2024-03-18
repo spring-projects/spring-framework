@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
 
 import static org.springframework.test.context.bean.override.example.ExampleBeanOverrideAnnotation.DEFAULT_VALUE;
 
-public class TestOverrideMetadata extends OverrideMetadata {
+class TestOverrideMetadata extends OverrideMetadata {
 
 	@Nullable
 	private final Method method;

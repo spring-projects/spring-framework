@@ -17,21 +17,17 @@
 package org.springframework.test.context.bean.override;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.springframework.core.annotation.MergedAnnotations.SearchStrategy.DIRECT;
@@ -41,6 +37,7 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  * on fields of a given class and creates {@link OverrideMetadata} accordingly.
  *
  * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  */
 class BeanOverrideParser {
@@ -102,41 +99,21 @@ class BeanOverrideParser {
 				.map(mergedAnnotation -> {
 					MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
 					Assert.notNull(metaSource, "@BeanOverride annotation must be meta-present");
-					return new AnnotationPair(metaSource.synthesize(), mergedAnnotation);
+					return new AnnotationPair(metaSource.synthesize(), mergedAnnotation.synthesize());
 				})
 				.forEach(pair -> {
-					BeanOverride beanOverride = pair.mergedAnnotation().synthesize();
-					BeanOverrideProcessor processor = getProcessorInstance(beanOverride.value());
-					if (processor == null) {
-						return;
-					}
-					ResolvableType typeToOverride = processor.getOrDeduceType(field, pair.annotation(), source);
+					BeanOverrideProcessor processor = BeanUtils.instantiateClass(pair.beanOverride.value());
+					ResolvableType typeToOverride = processor.getOrDeduceType(field, pair.composedAnnotation, source);
 
 					Assert.state(overrideAnnotationFound.compareAndSet(false, true),
 							() -> "Multiple @BeanOverride annotations found on field: " + field);
-					OverrideMetadata metadata = processor.createMetadata(field, pair.annotation(), typeToOverride);
+					OverrideMetadata metadata = processor.createMetadata(field, pair.composedAnnotation, typeToOverride);
 					boolean isNewDefinition = this.parsedMetadata.add(metadata);
 					Assert.state(isNewDefinition, () -> "Duplicate " + metadata.getBeanOverrideDescription() +
 								" OverrideMetadata: " + metadata);
 				});
 	}
 
-	@Nullable
-	private BeanOverrideProcessor getProcessorInstance(Class<? extends BeanOverrideProcessor> processorClass) {
-		Constructor<? extends BeanOverrideProcessor> constructor = ClassUtils.getConstructorIfAvailable(processorClass);
-		if (constructor != null) {
-			try {
-				ReflectionUtils.makeAccessible(constructor);
-				return constructor.newInstance();
-			}
-			catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-				throw new BeanDefinitionValidationException(
-						"Failed to instantiate BeanOverrideProcessor of type " + processorClass.getName(), ex);
-			}
-		}
-		return null;
-	}
-
-	private record AnnotationPair(Annotation annotation, MergedAnnotation<BeanOverride> mergedAnnotation) {}
+	private record AnnotationPair(Annotation composedAnnotation, BeanOverride beanOverride) {}
 
 }

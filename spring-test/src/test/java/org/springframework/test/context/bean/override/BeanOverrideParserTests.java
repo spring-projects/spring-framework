@@ -26,7 +26,6 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
-import static org.springframework.test.context.bean.override.example.ExampleBeanOverrideProcessor.DUPLICATE_TRIGGER;
 
 /**
  * Unit tests for {@link BeanOverrideParser}.
@@ -34,6 +33,9 @@ import static org.springframework.test.context.bean.override.example.ExampleBean
  * @since 6.2
  */
 class BeanOverrideParserTests {
+
+	// Copy of ExampleBeanOverrideProcessor.DUPLICATE_TRIGGER which is package-private.
+	private static final String DUPLICATE_TRIGGER = "DUPLICATE";
 
 	private final BeanOverrideParser parser = new BeanOverrideParser();
 

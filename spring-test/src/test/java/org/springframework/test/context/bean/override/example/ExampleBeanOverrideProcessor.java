@@ -23,7 +23,10 @@ import org.springframework.core.ResolvableType;
 import org.springframework.test.context.bean.override.BeanOverrideProcessor;
 import org.springframework.test.context.bean.override.OverrideMetadata;
 
-public class ExampleBeanOverrideProcessor implements BeanOverrideProcessor {
+// Intentionally NOT public
+class ExampleBeanOverrideProcessor implements BeanOverrideProcessor {
+
+	static final String DUPLICATE_TRIGGER = "DUPLICATE";
 
 	private static final TestOverrideMetadata CONSTANT = new TestOverrideMetadata() {
 		@Override
@@ -31,8 +34,6 @@ public class ExampleBeanOverrideProcessor implements BeanOverrideProcessor {
 			return "{DUPLICATE_TRIGGER}";
 		}
 	};
-
-	public static final String DUPLICATE_TRIGGER = "CONSTANT";
 
 	@Override
 	public OverrideMetadata createMetadata(Field field, Annotation overrideAnnotation, ResolvableType typeToOverride) {
