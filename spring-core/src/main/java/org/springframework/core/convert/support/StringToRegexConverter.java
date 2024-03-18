@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,19 @@ package org.springframework.core.convert.support;
 import kotlin.text.Regex;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
 
 /**
  * Converts from a String to a Kotlin {@link Regex}.
  *
  * @author Stephane Nicoll
  * @author Sebastien Deleuze
+ * @since 6.1
  */
 class StringToRegexConverter implements Converter<String, Regex> {
 
 	@Override
+	@Nullable
 	public Regex convert(String source) {
 		if (source.isEmpty()) {
 			return null;
