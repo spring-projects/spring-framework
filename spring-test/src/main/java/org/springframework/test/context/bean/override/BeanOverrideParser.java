@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -94,26 +93,21 @@ class BeanOverrideParser {
 	private void parseField(Field field, Class<?> source) {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
 
-		MergedAnnotations.from(field, DIRECT)
-				.stream(BeanOverride.class)
-				.map(mergedAnnotation -> {
-					MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
-					Assert.notNull(metaSource, "@BeanOverride annotation must be meta-present");
-					return new AnnotationPair(metaSource.synthesize(), mergedAnnotation.synthesize());
-				})
-				.forEach(pair -> {
-					BeanOverrideProcessor processor = BeanUtils.instantiateClass(pair.beanOverride.value());
-					ResolvableType typeToOverride = processor.getOrDeduceType(field, pair.composedAnnotation, source);
+		MergedAnnotations.from(field, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
+			Assert.notNull(mergedAnnotation.isMetaPresent(), "@BeanOverride annotation must be meta-present");
 
-					Assert.state(overrideAnnotationFound.compareAndSet(false, true),
-							() -> "Multiple @BeanOverride annotations found on field: " + field);
-					OverrideMetadata metadata = processor.createMetadata(field, pair.composedAnnotation, typeToOverride);
-					boolean isNewDefinition = this.parsedMetadata.add(metadata);
-					Assert.state(isNewDefinition, () -> "Duplicate " + metadata.getBeanOverrideDescription() +
-								" OverrideMetadata: " + metadata);
-				});
+			BeanOverride beanOverride = mergedAnnotation.synthesize();
+			BeanOverrideProcessor processor = BeanUtils.instantiateClass(beanOverride.value());
+			Annotation composedAnnotation = mergedAnnotation.getMetaSource().synthesize();
+			ResolvableType typeToOverride = processor.getOrDeduceType(field, composedAnnotation, source);
+
+			Assert.state(overrideAnnotationFound.compareAndSet(false, true),
+					() -> "Multiple @BeanOverride annotations found on field: " + field);
+			OverrideMetadata metadata = processor.createMetadata(field, composedAnnotation, typeToOverride);
+			boolean isNewDefinition = this.parsedMetadata.add(metadata);
+			Assert.state(isNewDefinition, () -> "Duplicate " + metadata.getBeanOverrideDescription() +
+						" OverrideMetadata: " + metadata);
+		});
 	}
-
-	private record AnnotationPair(Annotation composedAnnotation, BeanOverride beanOverride) {}
 
 }
