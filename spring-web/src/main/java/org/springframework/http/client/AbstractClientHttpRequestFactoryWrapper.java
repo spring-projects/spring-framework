@@ -56,6 +56,7 @@ public abstract class AbstractClientHttpRequestFactoryWrapper implements ClientH
 
 	/**
 	 * Return the delegate request factory.
+	 * @since 6.1.4
 	 */
 	public ClientHttpRequestFactory getDelegate() {
 		return this.requestFactory;
