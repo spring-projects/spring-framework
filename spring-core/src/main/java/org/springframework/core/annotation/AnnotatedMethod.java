@@ -278,6 +278,7 @@ public class AnnotatedMethod {
 		}
 
 		@Override
+		@Nullable
 		public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
 			return AnnotatedMethod.this.getMethodAnnotation(annotationType);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -322,12 +322,13 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@SuppressWarnings("unchecked")
 	protected A createSynthesizedAnnotation() {
 		// Check root annotation
-		if (isTargetAnnotation(this.rootAttributes) && !isSynthesizable((Annotation) this.rootAttributes)) {
-			return (A) this.rootAttributes;
+		if (this.rootAttributes instanceof Annotation ann && isTargetAnnotation(ann) && !isSynthesizable(ann)) {
+			return (A) ann;
 		}
 		// Check meta-annotation
-		else if (isTargetAnnotation(this.mapping.getAnnotation()) && !isSynthesizable(this.mapping.getAnnotation())) {
-			return (A) this.mapping.getAnnotation();
+		Annotation meta = this.mapping.getAnnotation();
+		if (meta != null && isTargetAnnotation(meta) && !isSynthesizable(meta)) {
+			return (A) meta;
 		}
 		return SynthesizedMergedAnnotationInvocationHandler.createProxy(this, getType());
 	}
@@ -338,7 +339,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	 * @param obj the object to check
 	 * @since 5.3.22
 	 */
-	private boolean isTargetAnnotation(@Nullable Object obj) {
+	private boolean isTargetAnnotation(Object obj) {
 		return getType().isInstance(obj);
 	}
 
@@ -432,7 +433,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Nullable
-	private Object getValueForMirrorResolution(Method attribute, Object annotation) {
+	private Object getValueForMirrorResolution(Method attribute, @Nullable Object annotation) {
 		int attributeIndex = this.mapping.getAttributes().indexOf(attribute);
 		boolean valueAttribute = VALUE.equals(attribute.getName());
 		return getValue(attributeIndex, !valueAttribute, true);
