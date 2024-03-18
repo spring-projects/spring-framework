@@ -6,6 +6,7 @@ org.springframework.test.context.TestExecutionListener = \
 	org.springframework.test.context.event.ApplicationEventsTestExecutionListener,\
 	org.springframework.test.context.bean.override.mockito.MockitoTestExecutionListener,\
 	org.springframework.test.context.support.DependencyInjectionTestExecutionListener,\
+	org.springframework.test.context.support.CommonCacheTestExecutionListener,\
 	org.springframework.test.context.observation.MicrometerObservationRegistryTestExecutionListener,\
 	org.springframework.test.context.support.DirtiesContextTestExecutionListener,\
 	org.springframework.test.context.transaction.TransactionalTestExecutionListener,\
