@@ -21,7 +21,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import io.micrometer.jakarta9.instrument.jms.JmsProcessObservationContext;
 import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationHandler;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import jakarta.jms.MessageListener;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
@@ -117,6 +119,7 @@ class MessageListenerContainerObservationTests {
 		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
 		jmsTemplate.convertAndSend("spring.test.observation", "message content");
 		CountDownLatch latch = new CountDownLatch(1);
+		registry.observationConfig().observationHandler(new ErrorHandlerObservationHandler(latch));
 		listenerContainer.setConnectionFactory(connectionFactory);
 		listenerContainer.setObservationRegistry(registry);
 		listenerContainer.setDestinationName("spring.test.observation");
@@ -124,7 +127,6 @@ class MessageListenerContainerObservationTests {
 			throw new IllegalStateException("error");
 		});
 		listenerContainer.setErrorHandler(error -> {
-			latch.countDown();
 			throw new IllegalStateException("not handled");
 		});
 		listenerContainer.afterPropertiesSet();
@@ -137,6 +139,25 @@ class MessageListenerContainerObservationTests {
 		assertThat(registry).hasNumberOfObservationsEqualTo(1);
 		listenerContainer.stop();
 		listenerContainer.shutdown();
+	}
+
+	static class ErrorHandlerObservationHandler implements ObservationHandler<JmsProcessObservationContext> {
+
+		private final CountDownLatch latch;
+
+		ErrorHandlerObservationHandler(CountDownLatch latch) {
+			this.latch = latch;
+		}
+
+		@Override
+		public boolean supportsContext(Observation.Context context) {
+			return context instanceof JmsProcessObservationContext;
+		}
+
+		@Override
+		public void onError(JmsProcessObservationContext context) {
+			this.latch.countDown();
+		}
 	}
 
 	static Stream<Arguments> listenerContainers() {
