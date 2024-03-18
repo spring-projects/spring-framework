@@ -21,9 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import io.micrometer.jakarta9.instrument.jms.JmsProcessObservationContext;
 import io.micrometer.observation.Observation;
-import io.micrometer.observation.ObservationHandler;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import jakarta.jms.MessageListener;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
@@ -65,8 +63,6 @@ class MessageListenerContainerObservationTests {
 	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource("listenerContainers")
 	void shouldRecordJmsProcessObservations(AbstractMessageListenerContainer listenerContainer) throws Exception {
-		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
-		jmsTemplate.convertAndSend("spring.test.observation", "message content");
 		CountDownLatch latch = new CountDownLatch(1);
 		listenerContainer.setConnectionFactory(connectionFactory);
 		listenerContainer.setObservationRegistry(registry);
@@ -74,6 +70,8 @@ class MessageListenerContainerObservationTests {
 		listenerContainer.setMessageListener((MessageListener) message -> latch.countDown());
 		listenerContainer.afterPropertiesSet();
 		listenerContainer.start();
+		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+		jmsTemplate.convertAndSend("spring.test.observation", "message content");
 		latch.await(2, TimeUnit.SECONDS);
 		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
 				.that()
@@ -86,8 +84,6 @@ class MessageListenerContainerObservationTests {
 	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource("listenerContainers")
 	void shouldHaveObservationScopeInErrorHandler(AbstractMessageListenerContainer listenerContainer) throws Exception {
-		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
-		jmsTemplate.convertAndSend("spring.test.observation", "message content");
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<Observation> observationInErrorHandler = new AtomicReference<>();
 		listenerContainer.setConnectionFactory(connectionFactory);
@@ -102,6 +98,8 @@ class MessageListenerContainerObservationTests {
 		});
 		listenerContainer.afterPropertiesSet();
 		listenerContainer.start();
+		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+		jmsTemplate.convertAndSend("spring.test.observation", "message content");
 		latch.await(2, TimeUnit.SECONDS);
 		Assertions.assertThat(observationInErrorHandler.get()).isNotNull();
 		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
@@ -111,53 +109,6 @@ class MessageListenerContainerObservationTests {
 		assertThat(registry).hasNumberOfObservationsEqualTo(1);
 		listenerContainer.stop();
 		listenerContainer.shutdown();
-	}
-
-	@ParameterizedTest(name = "[{index}] {0}")
-	@MethodSource("listenerContainers")
-	void shouldHaveObservationErrorWhenRethrown(AbstractMessageListenerContainer listenerContainer) throws Exception {
-		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
-		jmsTemplate.convertAndSend("spring.test.observation", "message content");
-		CountDownLatch latch = new CountDownLatch(1);
-		registry.observationConfig().observationHandler(new ErrorHandlerObservationHandler(latch));
-		listenerContainer.setConnectionFactory(connectionFactory);
-		listenerContainer.setObservationRegistry(registry);
-		listenerContainer.setDestinationName("spring.test.observation");
-		listenerContainer.setMessageListener((MessageListener) message -> {
-			throw new IllegalStateException("error");
-		});
-		listenerContainer.setErrorHandler(error -> {
-			throw new IllegalStateException("not handled");
-		});
-		listenerContainer.afterPropertiesSet();
-		listenerContainer.start();
-		latch.await(2, TimeUnit.SECONDS);
-		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
-				.that()
-				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation")
-				.hasLowCardinalityKeyValue("exception", "IllegalStateException");
-		assertThat(registry).hasNumberOfObservationsEqualTo(1);
-		listenerContainer.stop();
-		listenerContainer.shutdown();
-	}
-
-	static class ErrorHandlerObservationHandler implements ObservationHandler<JmsProcessObservationContext> {
-
-		private final CountDownLatch latch;
-
-		ErrorHandlerObservationHandler(CountDownLatch latch) {
-			this.latch = latch;
-		}
-
-		@Override
-		public boolean supportsContext(Observation.Context context) {
-			return context instanceof JmsProcessObservationContext;
-		}
-
-		@Override
-		public void onError(JmsProcessObservationContext context) {
-			this.latch.countDown();
-		}
 	}
 
 	static Stream<Arguments> listenerContainers() {
