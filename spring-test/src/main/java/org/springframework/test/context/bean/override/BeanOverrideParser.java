@@ -94,7 +94,7 @@ class BeanOverrideParser {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
 
 		MergedAnnotations.from(field, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
-			Assert.notNull(mergedAnnotation.isMetaPresent(), "@BeanOverride annotation must be meta-present");
+			Assert.isTrue(mergedAnnotation.isMetaPresent(), "@BeanOverride annotation must be meta-present");
 
 			BeanOverride beanOverride = mergedAnnotation.synthesize();
 			BeanOverrideProcessor processor = BeanUtils.instantiateClass(beanOverride.value());
