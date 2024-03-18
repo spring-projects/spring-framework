@@ -163,35 +163,37 @@ public class SimpleAliasRegistry implements AliasRegistry {
 			List<String> aliasNamesCopy = new ArrayList<>(this.aliasNames);
 			aliasNamesCopy.forEach(alias -> {
 				String registeredName = this.aliasMap.get(alias);
-				String resolvedAlias = valueResolver.resolveStringValue(alias);
-				String resolvedName = valueResolver.resolveStringValue(registeredName);
-				if (resolvedAlias == null || resolvedName == null || resolvedAlias.equals(resolvedName)) {
-					this.aliasMap.remove(alias);
-					this.aliasNames.remove(alias);
-				}
-				else if (!resolvedAlias.equals(alias)) {
-					String existingName = this.aliasMap.get(resolvedAlias);
-					if (existingName != null) {
-						if (existingName.equals(resolvedName)) {
-							// Pointing to existing alias - just remove placeholder
-							this.aliasMap.remove(alias);
-							this.aliasNames.remove(alias);
-							return;
-						}
-						throw new IllegalStateException(
-								"Cannot register resolved alias '" + resolvedAlias + "' (original: '" + alias +
-								"') for name '" + resolvedName + "': It is already registered for name '" +
-								existingName + "'.");
+				if (registeredName != null) {
+					String resolvedAlias = valueResolver.resolveStringValue(alias);
+					String resolvedName = valueResolver.resolveStringValue(registeredName);
+					if (resolvedAlias == null || resolvedName == null || resolvedAlias.equals(resolvedName)) {
+						this.aliasMap.remove(alias);
+						this.aliasNames.remove(alias);
 					}
-					checkForAliasCircle(resolvedName, resolvedAlias);
-					this.aliasMap.remove(alias);
-					this.aliasNames.remove(alias);
-					this.aliasMap.put(resolvedAlias, resolvedName);
-					this.aliasNames.add(resolvedAlias);
-				}
-				else if (!registeredName.equals(resolvedName)) {
-					this.aliasMap.put(alias, resolvedName);
-					this.aliasNames.add(alias);
+					else if (!resolvedAlias.equals(alias)) {
+						String existingName = this.aliasMap.get(resolvedAlias);
+						if (existingName != null) {
+							if (existingName.equals(resolvedName)) {
+								// Pointing to existing alias - just remove placeholder
+								this.aliasMap.remove(alias);
+								this.aliasNames.remove(alias);
+								return;
+							}
+							throw new IllegalStateException(
+									"Cannot register resolved alias '" + resolvedAlias + "' (original: '" + alias +
+									"') for name '" + resolvedName + "': It is already registered for name '" +
+									existingName + "'.");
+						}
+						checkForAliasCircle(resolvedName, resolvedAlias);
+						this.aliasMap.remove(alias);
+						this.aliasNames.remove(alias);
+						this.aliasMap.put(resolvedAlias, resolvedName);
+						this.aliasNames.add(resolvedAlias);
+					}
+					else if (!registeredName.equals(resolvedName)) {
+						this.aliasMap.put(alias, resolvedName);
+						this.aliasNames.add(alias);
+					}
 				}
 			});
 		}

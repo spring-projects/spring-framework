@@ -754,7 +754,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			throws IOException {
 
 		String jarFileUrl = null;
-		String rootEntryPath = null;
+		String rootEntryPath = "";
 
 		String urlFile = rootDirUrl.getFile();
 		int separatorIndex = urlFile.indexOf(ResourceUtils.WAR_URL_SEPARATOR);
