@@ -751,7 +751,7 @@ public class TypeDescriptor implements Serializable {
 
 		@Override
 		public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
-			for (Annotation annotation : getAnnotations()) {
+			for (Annotation annotation : this.annotations) {
 				if (annotation.annotationType() == annotationClass) {
 					return true;
 				}
@@ -763,7 +763,7 @@ public class TypeDescriptor implements Serializable {
 		@Nullable
 		@SuppressWarnings("unchecked")
 		public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-			for (Annotation annotation : getAnnotations()) {
+			for (Annotation annotation : this.annotations) {
 				if (annotation.annotationType() == annotationClass) {
 					return (T) annotation;
 				}
