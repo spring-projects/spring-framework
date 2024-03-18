@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,10 +76,11 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 		}
 
 		Class<?> clazz = elementType.toClass();
-		String filename = hints != null ? (String) hints.get(FILENAME_HINT) : null;
+		String filename = (hints != null ? (String) hints.get(FILENAME_HINT) : null);
 		if (clazz == InputStreamResource.class) {
 			return new InputStreamResource(new ByteArrayInputStream(bytes)) {
 				@Override
+				@Nullable
 				public String getFilename() {
 					return filename;
 				}
@@ -92,6 +93,7 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 		else if (Resource.class.isAssignableFrom(clazz)) {
 			return new ByteArrayResource(bytes) {
 				@Override
+				@Nullable
 				public String getFilename() {
 					return filename;
 				}

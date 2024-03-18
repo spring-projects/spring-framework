@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,20 +95,19 @@ public interface Decoder<T> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
 		CompletableFuture<T> future = decodeToMono(Mono.just(buffer), targetType, mimeType, hints).toFuture();
-		Assert.state(future.isDone(), "DataBuffer decoding should have completed.");
+		Assert.state(future.isDone(), "DataBuffer decoding should have completed");
 
-		Throwable failure;
 		try {
 			return future.get();
 		}
 		catch (ExecutionException ex) {
-			failure = ex.getCause();
+			Throwable cause = ex.getCause();
+			throw (cause instanceof CodecException ? (CodecException) cause :
+					new DecodingException("Failed to decode: " + (cause != null ? cause.getMessage() : ex), cause));
 		}
 		catch (InterruptedException ex) {
-			failure = ex;
+			throw new DecodingException("Interrupted during decode", ex);
 		}
-		throw (failure instanceof CodecException ? (CodecException) failure :
-				new DecodingException("Failed to decode: " + failure.getMessage(), failure));
 	}
 
 	/**

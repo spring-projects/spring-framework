@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	@Nullable
 	private static Executable getValidatedExecutable(Class<?> targetClass, Class<?> sourceClass) {
 		Executable executable = conversionExecutableCache.get(targetClass);
-		if (isApplicable(executable, sourceClass)) {
+		if (executable != null && isApplicable(executable, sourceClass)) {
 			return executable;
 		}
 
