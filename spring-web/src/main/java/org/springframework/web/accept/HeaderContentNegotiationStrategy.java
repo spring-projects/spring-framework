@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -55,7 +56,7 @@ public class HeaderContentNegotiationStrategy implements ContentNegotiationStrat
 			MimeTypeUtils.sortBySpecificity(mediaTypes);
 			return !CollectionUtils.isEmpty(mediaTypes) ? mediaTypes : MEDIA_TYPE_ALL_LIST;
 		}
-		catch (InvalidMediaTypeException ex) {
+		catch (InvalidMediaTypeException | InvalidMimeTypeException ex) {
 			throw new HttpMediaTypeNotAcceptableException(
 					"Could not parse 'Accept' header " + headerValues + ": " + ex.getMessage());
 		}
