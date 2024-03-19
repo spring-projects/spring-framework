@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
 
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -80,6 +81,7 @@ public abstract class RepeatableContainers {
 
 
 	@Override
+	@Contract("null -> false")
 	public boolean equals(@Nullable Object other) {
 		if (other == this) {
 			return true;
