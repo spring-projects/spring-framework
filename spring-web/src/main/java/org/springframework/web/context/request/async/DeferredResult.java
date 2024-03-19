@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ public class DeferredResult<T> {
 	 * timeout depends on the default of the underlying server.
 	 * @param timeoutValue timeout value in milliseconds
 	 */
-	public DeferredResult(Long timeoutValue) {
+	public DeferredResult(@Nullable Long timeoutValue) {
 		this(timeoutValue, () -> RESULT_NONE);
 	}
 
@@ -239,11 +239,11 @@ public class DeferredResult<T> {
 	 * {@code false} if the result was already set or the async request expired
 	 * @see #isSetOrExpired()
 	 */
-	public boolean setResult(T result) {
+	public boolean setResult(@Nullable T result) {
 		return setResultInternal(result);
 	}
 
-	private boolean setResultInternal(Object result) {
+	private boolean setResultInternal(@Nullable Object result) {
 		// Immediate expiration check outside of the result lock
 		if (isSetOrExpired()) {
 			return false;

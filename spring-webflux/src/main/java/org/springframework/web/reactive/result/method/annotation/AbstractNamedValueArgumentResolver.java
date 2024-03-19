@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -200,7 +201,10 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 		WebDataBinder binder = bindingContext.createDataBinder(exchange, namedValueInfo.name);
 		Class<?> parameterType = parameter.getParameterType();
 		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isInlineClass(parameterType)) {
-			parameterType = BeanUtils.findPrimaryConstructor(parameterType).getParameterTypes()[0];
+			Constructor<?> ctor = BeanUtils.findPrimaryConstructor(parameterType);
+			if (ctor != null) {
+				parameterType = ctor.getParameterTypes()[0];
+			}
 		}
 		try {
 			value = binder.convertIfNecessary(value, parameterType, parameter);

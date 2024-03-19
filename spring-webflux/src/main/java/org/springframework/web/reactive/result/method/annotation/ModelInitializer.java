@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -74,7 +73,6 @@ class ModelInitializer {
 	 * @param exchange the current exchange
 	 * @return a {@code Mono} for when the model is populated.
 	 */
-	@SuppressWarnings("Convert2MethodRef")
 	public Mono<Void> initModel(HandlerMethod handlerMethod, InitBinderBindingContext bindingContext,
 			ServerWebExchange exchange) {
 
@@ -124,7 +122,7 @@ class ModelInitializer {
 			ResolvableType type = handlerResult.getReturnType();
 			MethodParameter typeSource = handlerResult.getReturnTypeSource();
 			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(type.resolve(), value);
-			if (isAsyncVoidType(type, typeSource, adapter)) {
+			if (adapter != null && isAsyncVoidType(type, typeSource, adapter)) {
 				return Mono.from(adapter.toPublisher(value));
 			}
 			String name = getAttributeName(typeSource);
@@ -134,10 +132,10 @@ class ModelInitializer {
 	}
 
 
-	private boolean isAsyncVoidType(ResolvableType type, MethodParameter typeSource, @Nullable ReactiveAdapter adapter) {
+	private boolean isAsyncVoidType(ResolvableType type, MethodParameter typeSource, ReactiveAdapter adapter) {
 		Method method = typeSource.getMethod();
-		return (adapter != null && (adapter.isNoValue() || type.resolveGeneric() == Void.class)) ||
-				(method != null && KotlinDetector.isSuspendingFunction(method) && typeSource.getParameterType() == void.class);
+		return (adapter.isNoValue() || type.resolveGeneric() == Void.class || (method != null &&
+				KotlinDetector.isSuspendingFunction(method) && typeSource.getParameterType() == void.class));
 	}
 
 	private String getAttributeName(MethodParameter param) {

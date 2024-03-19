@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ class RegexPathElement extends PathElement {
 		if (matches) {
 			if (isNoMorePattern()) {
 				if (matchingContext.determineRemainingPath &&
-						(this.variableNames.isEmpty() || textToMatch.length() > 0)) {
+						(this.variableNames.isEmpty() || !textToMatch.isEmpty())) {
 					matchingContext.remainingPathIndex = pathIndex + 1;
 					matches = true;
 				}
@@ -142,9 +142,9 @@ class RegexPathElement extends PathElement {
 					// No more pattern, is there more data?
 					// If pattern is capturing variables there must be some actual data to bind to them
 					matches = (pathIndex + 1 >= matchingContext.pathLength) &&
-							(this.variableNames.isEmpty() || textToMatch.length() > 0);
+							(this.variableNames.isEmpty() || !textToMatch.isEmpty());
 					if (!matches && matchingContext.isMatchOptionalTrailingSeparator()) {
-						matches = (this.variableNames.isEmpty() || textToMatch.length() > 0) &&
+						matches = (this.variableNames.isEmpty() || !textToMatch.isEmpty()) &&
 								(pathIndex + 2 >= matchingContext.pathLength) &&
 								matchingContext.isSeparator(pathIndex + 1);
 					}

@@ -364,18 +364,18 @@ public abstract class AopUtils {
 		}
 	}
 
+
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
 	private static class KotlinDelegate {
 
-		public static Publisher<?> invokeSuspendingFunction(Method method, Object target, Object... args) {
+		public static Publisher<?> invokeSuspendingFunction(Method method, @Nullable Object target, Object... args) {
 			Continuation<?> continuation = (Continuation<?>) args[args.length -1];
 			Assert.state(continuation != null, "No Continuation available");
 			CoroutineContext context = continuation.getContext().minusKey(Job.Key);
 			return CoroutinesUtils.invokeSuspendingFunction(context, method, target, args);
 		}
-
 	}
 
 }

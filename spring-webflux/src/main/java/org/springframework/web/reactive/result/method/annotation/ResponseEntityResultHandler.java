@@ -108,7 +108,6 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				isSupportedType(result.getReturnType().getGeneric().toClass());
 	}
 
-	@Nullable
 	private static Class<?> resolveReturnValueType(HandlerResult result) {
 		Class<?> valueType = result.getReturnType().toClass();
 		Object value = result.getReturnValue();

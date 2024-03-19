@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
-
 
 /**
  * {@link org.springframework.web.server.WebFilter} that creates {@link Observation observations}
@@ -160,14 +159,16 @@ public class ServerHttpObservationFilter implements WebFilter {
 
 		private void doOnTerminate(ServerRequestObservationContext context) {
 			ServerHttpResponse response = context.getResponse();
-			if (response.isCommitted()) {
-				this.observation.stop();
-			}
-			else {
-				response.beforeCommit(() -> {
+			if (response != null) {
+				if (response.isCommitted()) {
 					this.observation.stop();
-					return Mono.empty();
-				});
+				}
+				else {
+					response.beforeCommit(() -> {
+						this.observation.stop();
+						return Mono.empty();
+					});
+				}
 			}
 		}
 	}

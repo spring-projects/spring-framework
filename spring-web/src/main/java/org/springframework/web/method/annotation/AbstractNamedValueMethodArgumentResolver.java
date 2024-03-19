@@ -16,6 +16,7 @@
 
 package org.springframework.web.method.annotation;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -284,7 +285,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
 		Class<?> parameterType = parameter.getParameterType();
 		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isInlineClass(parameterType)) {
-			parameterType = BeanUtils.findPrimaryConstructor(parameterType).getParameterTypes()[0];
+			Constructor<?> ctor = BeanUtils.findPrimaryConstructor(parameterType);
+			if (ctor != null) {
+				parameterType = ctor.getParameterTypes()[0];
+			}
 		}
 		try {
 			arg = binder.convertIfNecessary(arg, parameterType, parameter);

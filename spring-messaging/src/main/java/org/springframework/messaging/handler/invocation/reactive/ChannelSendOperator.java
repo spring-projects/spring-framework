@@ -309,9 +309,10 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		}
 
 		private boolean emitCachedSignals() {
-			if (this.error != null) {
+			Throwable error = this.error;
+			if (error != null) {
 				try {
-					requiredWriteSubscriber().onError(this.error);
+					requiredWriteSubscriber().onError(error);
 				}
 				finally {
 					releaseCachedItem();

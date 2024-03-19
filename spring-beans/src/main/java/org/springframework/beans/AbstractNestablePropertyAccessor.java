@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -845,8 +845,10 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @return the PropertyAccessor instance, either cached or newly created
 	 */
 	private AbstractNestablePropertyAccessor getNestedPropertyAccessor(String nestedProperty) {
-		if (this.nestedPropertyAccessors == null) {
-			this.nestedPropertyAccessors = new HashMap<>();
+		Map<String, AbstractNestablePropertyAccessor> nestedAccessors = this.nestedPropertyAccessors;
+		if (nestedAccessors == null) {
+			nestedAccessors = new HashMap<>();
+			this.nestedPropertyAccessors = nestedAccessors;
 		}
 		// Get value of bean property.
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
@@ -862,7 +864,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 
 		// Lookup cached sub-PropertyAccessor, create new one if not found.
-		AbstractNestablePropertyAccessor nestedPa = this.nestedPropertyAccessors.get(canonicalName);
+		AbstractNestablePropertyAccessor nestedPa = nestedAccessors.get(canonicalName);
 		if (nestedPa == null || nestedPa.getWrappedInstance() != ObjectUtils.unwrapOptional(value)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Creating new nested " + getClass().getSimpleName() + " for property '" + canonicalName + "'");
@@ -871,7 +873,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			// Inherit all type-specific PropertyEditors.
 			copyDefaultEditorsTo(nestedPa);
 			copyCustomEditorsTo(nestedPa, canonicalName);
-			this.nestedPropertyAccessors.put(canonicalName, nestedPa);
+			nestedAccessors.put(canonicalName, nestedPa);
 		}
 		else {
 			if (logger.isTraceEnabled()) {

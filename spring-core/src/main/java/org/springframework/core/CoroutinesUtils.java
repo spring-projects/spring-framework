@@ -45,6 +45,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -62,6 +63,7 @@ public abstract class CoroutinesUtils {
 	private static final KType monoType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Mono.class));
 
 	private static final KType publisherType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Publisher.class));
+
 
 	/**
 	 * Convert a {@link Deferred} instance to a {@link Mono}.
@@ -90,8 +92,7 @@ public abstract class CoroutinesUtils {
 	 * @return the method invocation result as reactive stream
 	 * @throws IllegalArgumentException if {@code method} is not a suspending function
 	 */
-	public static Publisher<?> invokeSuspendingFunction(Method method, Object target,
-			Object... args) {
+	public static Publisher<?> invokeSuspendingFunction(Method method, Object target, Object... args) {
 		return invokeSuspendingFunction(Dispatchers.getUnconfined(), method, target, args);
 	}
 
@@ -108,9 +109,10 @@ public abstract class CoroutinesUtils {
 	 * @since 6.0
 	 */
 	@SuppressWarnings({"deprecation", "DataFlowIssue"})
-	public static Publisher<?> invokeSuspendingFunction(CoroutineContext context, Method method, Object target,
-			Object... args) {
-		Assert.isTrue(KotlinDetector.isSuspendingFunction(method), "'method' must be a suspending function");
+	public static Publisher<?> invokeSuspendingFunction(
+			CoroutineContext context, Method method, @Nullable Object target, Object... args) {
+
+		Assert.isTrue(KotlinDetector.isSuspendingFunction(method), "Method must be a suspending function");
 		KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 		Assert.notNull(function, () -> "Failed to get Kotlin function for method: " + method);
 		if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {

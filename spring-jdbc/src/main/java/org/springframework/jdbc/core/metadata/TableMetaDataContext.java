@@ -437,7 +437,7 @@ public class TableMetaDataContext {
 			this.quoting = StringUtils.hasText(identifierQuoteString);
 		}
 
-		public void appendTo(StringBuilder stringBuilder, String item) {
+		public void appendTo(StringBuilder stringBuilder, @Nullable String item) {
 			if (this.quoting) {
 				stringBuilder.append(this.identifierQuoteString)
 						.append(item).append(this.identifierQuoteString);

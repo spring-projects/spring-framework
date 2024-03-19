@@ -180,13 +180,14 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 				if (isCancelled(previousState)) {
 					return;
 				}
-
 				if (isTerminated(previousState)) {
 					// failure due to illegal requestN
-					this.actual.onError(this.error);
-					return;
+					Throwable error = this.error;
+					if (error != null) {
+						this.actual.onError(error);
+						return;
+					}
 				}
-
 				this.actual.onError(ex);
 				return;
 			}
@@ -195,13 +196,14 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 			if (isCancelled(previousState)) {
 				return;
 			}
-
 			if (isTerminated(previousState)) {
 				// failure due to illegal requestN
-				this.actual.onError(this.error);
-				return;
+				Throwable error = this.error;
+				if (error != null) {
+					this.actual.onError(error);
+					return;
+				}
 			}
-
 			this.actual.onComplete();
 		}
 
@@ -211,16 +213,13 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 			if (n <= 0) {
 				this.error = new IllegalArgumentException("request should be a positive number");
 				long previousState = tryTerminate();
-
 				if (isTerminated(previousState) || isCancelled(previousState)) {
 					return;
 				}
-
 				if (previousState > 0) {
 					// error should eventually be observed and propagated
 					return;
 				}
-
 				// resume parked thread, so it can observe error and propagate it
 				resume();
 				return;
@@ -278,11 +277,9 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 		private long tryCancel() {
 			while (true) {
 				long r = this.requested.get();
-
 				if (isCancelled(r)) {
 					return r;
 				}
-
 				if (this.requested.compareAndSet(r, Long.MIN_VALUE)) {
 					return r;
 				}
@@ -292,11 +289,9 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 		private long tryTerminate() {
 			while (true) {
 				long r = this.requested.get();
-
 				if (isCancelled(r) || isTerminated(r)) {
 					return r;
 				}
-
 				if (this.requested.compareAndSet(r, Long.MIN_VALUE | Long.MAX_VALUE)) {
 					return r;
 				}

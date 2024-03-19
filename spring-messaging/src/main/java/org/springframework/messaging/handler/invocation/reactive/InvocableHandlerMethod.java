@@ -33,7 +33,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
@@ -153,7 +152,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			MethodParameter returnType = getReturnType();
 			Class<?> reactiveType = (isSuspendingFunction ? value.getClass() : returnType.getParameterType());
 			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(reactiveType);
-			return (isAsyncVoidReturnType(returnType, adapter) ?
+			return (adapter != null && isAsyncVoidReturnType(returnType, adapter) ?
 					Mono.from(adapter.toPublisher(value)) : Mono.justOrEmpty(value));
 		});
 	}
@@ -200,8 +199,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 	}
 
-	private boolean isAsyncVoidReturnType(MethodParameter returnType, @Nullable ReactiveAdapter reactiveAdapter) {
-		if (reactiveAdapter != null && reactiveAdapter.supportsEmpty()) {
+	private boolean isAsyncVoidReturnType(MethodParameter returnType, ReactiveAdapter reactiveAdapter) {
+		if (reactiveAdapter.supportsEmpty()) {
 			if (reactiveAdapter.isNoValue()) {
 				return true;
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Conventions;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.util.ReflectionUtils;
@@ -67,6 +68,7 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 	static final String OBSERVATION_THREAD_LOCAL_ACCESSOR_CLASS_NAME =
 			"io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor";
 
+	@Nullable
 	private static final String ERROR_MESSAGE;
 
 	static {

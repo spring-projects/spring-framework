@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,12 +78,13 @@ public class CacheInterceptor extends CacheAspectSupport implements MethodInterc
 		}
 	}
 
+
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
 	private static class KotlinDelegate {
 
-		public static Publisher<?> invokeSuspendingFunction(Method method, Object target, Object... args) {
+		public static Publisher<?> invokeSuspendingFunction(Method method, @Nullable Object target, Object... args) {
 			Continuation<?> continuation = (Continuation<?>) args[args.length - 1];
 			CoroutineContext coroutineContext = continuation.getContext().minusKey(Job.Key);
 			return CoroutinesUtils.invokeSuspendingFunction(coroutineContext, method, target, args);

@@ -55,7 +55,7 @@ class Token {
 	 * @param startPos the exact start position
 	 * @param endPos the index of the last character
 	 */
-	Token(TokenKind tokenKind, char[] tokenData, int startPos, int endPos) {
+	Token(TokenKind tokenKind, @Nullable char[] tokenData, int startPos, int endPos) {
 		this.kind = tokenKind;
 		this.data = (tokenData != null ? new String(tokenData) : null);
 		this.startPos = startPos;
