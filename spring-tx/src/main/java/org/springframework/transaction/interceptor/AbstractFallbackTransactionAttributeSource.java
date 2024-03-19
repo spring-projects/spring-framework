@@ -178,7 +178,11 @@ public abstract class AbstractFallbackTransactionAttributeSource
 		}
 
 		// Second try is the transaction attribute on the target class.
-		txAttr = findTransactionAttribute(targetClass != null ? targetClass : specificMethod.getDeclaringClass());
+		Class<?> specificTargetClass = method.getDeclaringClass();
+		if (targetClass != null) {
+			specificTargetClass = ClassUtils.getUserClass(targetClass);
+		}
+		txAttr = findTransactionAttribute(specificTargetClass);
 		if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
 			return txAttr;
 		}
