@@ -177,10 +177,18 @@ public abstract class AbstractFallbackTransactionAttributeSource
 			return txAttr;
 		}
 
-		// Second try is the transaction attribute on the target class.
+		// Second try is the transaction attribute on the declaring class.
 		txAttr = findTransactionAttribute(specificMethod.getDeclaringClass());
 		if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
 			return txAttr;
+		}
+
+		// Third try is the transaction attribute on the target class.
+		if (targetClass != null) {
+			txAttr = findTransactionAttribute(targetClass);
+			if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
+				return txAttr;
+			}
 		}
 
 		if (specificMethod != method) {
