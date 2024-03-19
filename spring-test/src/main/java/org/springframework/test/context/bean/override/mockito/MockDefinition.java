@@ -71,7 +71,7 @@ class MockDefinition extends Definition {
 
 	@Override
 	public String getBeanOverrideDescription() {
-		return "mock";
+		return "@MockitoBean";
 	}
 
 	@Override

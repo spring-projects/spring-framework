@@ -61,7 +61,7 @@ class SpyDefinition extends Definition {
 
 	@Override
 	public String getBeanOverrideDescription() {
-		return "spy";
+		return "@MockitoSpyBean";
 	}
 
 	@Override

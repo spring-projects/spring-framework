@@ -28,7 +28,7 @@ import org.springframework.util.ReflectionUtils;
  * {@code TestExecutionListener} that enables Bean Override support in tests,
  * injecting overridden beans in appropriate fields of the test instance.
  *
- * <p>Some flavors of Bean Override might additionally require the use of
+ * <p>Some Bean Override implementations might additionally require the use of
  * additional listeners, which should be mentioned in the javadoc for the
  * corresponding annotations.
  *
@@ -62,7 +62,7 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	 */
 	protected void injectFields(TestContext testContext) {
 		postProcessFields(testContext, (testMetadata, postProcessor) -> postProcessor.inject(
-				testMetadata.overrideMetadata.field(), testMetadata.testInstance(), testMetadata.overrideMetadata()));
+				testMetadata.overrideMetadata.field(), testMetadata.testInstance, testMetadata.overrideMetadata));
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
 	 * attribute is not present in the {@code TestContext}.
 	 */
-	protected void reinjectFieldsIfConfigured(final TestContext testContext) throws Exception {
+	protected void reinjectFieldsIfConfigured(TestContext testContext) throws Exception {
 		if (Boolean.TRUE.equals(
 				testContext.getAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE))) {
 

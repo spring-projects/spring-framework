@@ -89,12 +89,12 @@ public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	@Override
 	public OverrideMetadata createMetadata(Field field, Annotation overrideAnnotation, ResolvableType typeToOverride) {
-		Class<?> declaringClass = field.getDeclaringClass();
 		// If we can, get an explicit method name right away; fail fast if it doesn't match.
 		if (overrideAnnotation instanceof TestBean testBeanAnnotation) {
 			Method overrideMethod = null;
 			String beanName = null;
 			if (!testBeanAnnotation.methodName().isBlank()) {
+				Class<?> declaringClass = field.getDeclaringClass();
 				overrideMethod = findTestBeanFactoryMethod(declaringClass, field.getType(), testBeanAnnotation.methodName());
 			}
 			if (!testBeanAnnotation.name().isBlank()) {
@@ -134,7 +134,7 @@ public class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 		@Override
 		public String getBeanOverrideDescription() {
-			return "method convention";
+			return "@TestBean";
 		}
 
 		@Override

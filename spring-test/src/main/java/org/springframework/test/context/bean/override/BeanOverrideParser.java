@@ -82,10 +82,8 @@ class BeanOverrideParser {
 			if (hasBeanOverride.get()) {
 				return;
 			}
-			long count = MergedAnnotations.from(field, DIRECT)
-					.stream(BeanOverride.class)
-					.count();
-			hasBeanOverride.compareAndSet(false, count > 0L);
+			boolean present = MergedAnnotations.from(field, DIRECT).isPresent(BeanOverride.class);
+			hasBeanOverride.compareAndSet(false, present);
 		});
 		return hasBeanOverride.get();
 	}
@@ -94,7 +92,7 @@ class BeanOverrideParser {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
 
 		MergedAnnotations.from(field, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
-			Assert.isTrue(mergedAnnotation.isMetaPresent(), "@BeanOverride annotation must be meta-present");
+			Assert.state(mergedAnnotation.isMetaPresent(), "@BeanOverride annotation must be meta-present");
 
 			BeanOverride beanOverride = mergedAnnotation.synthesize();
 			BeanOverrideProcessor processor = BeanUtils.instantiateClass(beanOverride.value());

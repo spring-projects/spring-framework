@@ -272,7 +272,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 
 	private void inject(Field field, Object target, String beanName) {
 		try {
-			field.setAccessible(true);
+			ReflectionUtils.makeAccessible(field);
 			Object existingValue = ReflectionUtils.getField(field, target);
 			Object bean = this.beanFactory.getBean(beanName, field.getType());
 			if (existingValue == bean) {
