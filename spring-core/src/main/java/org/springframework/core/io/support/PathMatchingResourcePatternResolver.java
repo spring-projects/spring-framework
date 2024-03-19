@@ -585,12 +585,14 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		String rootDirPath = determineRootDir(locationPattern);
 		String subPattern = locationPattern.substring(rootDirPath.length());
 
-		// Look for pre-cached root dir resources, either a direct match
-		// or for a parent directory in the same classpath locations.
+		// Look for pre-cached root dir resources, either a direct match or
+		// a match for a parent directory in the same classpath locations.
 		Resource[] rootDirResources = this.rootDirCache.get(rootDirPath);
 		String actualRootPath = null;
 		if (rootDirResources == null) {
-			// No direct match -> search for parent directory match.
+			// No direct match -> search for a common parent directory match
+			// (cached based on repeated searches in the same base location,
+			// in particular for different root directories in the same jar).
 			String commonPrefix = null;
 			String existingPath = null;
 			boolean commonUnique = true;
@@ -618,12 +620,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					actualRootPath = path;
 				}
 			}
-			if (rootDirResources == null & StringUtils.hasLength(commonPrefix)) {
+			if (rootDirResources == null && StringUtils.hasLength(commonPrefix)) {
 				// Try common parent directory as long as it points to the same classpath locations.
 				rootDirResources = getResources(commonPrefix);
 				Resource[] existingResources = this.rootDirCache.get(existingPath);
 				if (existingResources != null && rootDirResources.length == existingResources.length) {
-					// Replace existing subdirectory cache entry with common parent directory.
+					// Replace existing subdirectory cache entry with common parent directory,
+					// avoiding repeated determination of root directories in the same jar.
 					this.rootDirCache.remove(existingPath);
 					this.rootDirCache.put(commonPrefix, rootDirResources);
 					actualRootPath = commonPrefix;
