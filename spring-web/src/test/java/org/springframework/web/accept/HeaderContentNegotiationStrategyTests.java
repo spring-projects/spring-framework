@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Test fixture for HeaderContentNegotiationStrategy tests.
+ * Tests for {@link HeaderContentNegotiationStrategy}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -49,31 +49,27 @@ public class HeaderContentNegotiationStrategyTests {
 		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
 		List<MediaType> mediaTypes = this.strategy.resolveMediaTypes(this.webRequest);
 
-		assertThat(mediaTypes).hasSize(4);
-		assertThat(mediaTypes.get(0).toString()).isEqualTo("text/html");
-		assertThat(mediaTypes.get(1).toString()).isEqualTo("text/x-c");
-		assertThat(mediaTypes.get(2).toString()).isEqualTo("text/x-dvi;q=0.8");
-		assertThat(mediaTypes.get(3).toString()).isEqualTo("text/plain;q=0.5");
+		assertThat(mediaTypes).map(Object::toString)
+				.containsExactly("text/html", "text/x-c", "text/x-dvi;q=0.8", "text/plain;q=0.5");
 	}
 
-	@Test  // SPR-14506
-	public void resolveMediaTypesFromMultipleHeaderValues() throws Exception {
+	@Test  // gh-19075
+	void resolveMediaTypesFromMultipleHeaderValues() throws Exception {
 		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, text/html");
 		this.servletRequest.addHeader("Accept", "text/x-dvi; q=0.8, text/x-c");
 		List<MediaType> mediaTypes = this.strategy.resolveMediaTypes(this.webRequest);
 
-		assertThat(mediaTypes).hasSize(4);
-		assertThat(mediaTypes.get(0).toString()).isEqualTo("text/html");
-		assertThat(mediaTypes.get(1).toString()).isEqualTo("text/x-c");
-		assertThat(mediaTypes.get(2).toString()).isEqualTo("text/x-dvi;q=0.8");
-		assertThat(mediaTypes.get(3).toString()).isEqualTo("text/plain;q=0.5");
+		assertThat(mediaTypes).map(Object::toString)
+				.containsExactly("text/html", "text/x-c", "text/x-dvi;q=0.8", "text/plain;q=0.5");
 	}
 
 	@Test
 	public void resolveMediaTypesParseError() throws Exception {
 		this.servletRequest.addHeader("Accept", "textplain; q=0.5");
-		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
-				this.strategy.resolveMediaTypes(this.webRequest));
+		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class)
+				.isThrownBy(() -> this.strategy.resolveMediaTypes(this.webRequest))
+				.withMessageStartingWith("Could not parse 'Accept' header")
+				.withMessageContaining("Invalid mime type");
 	}
 
 }
