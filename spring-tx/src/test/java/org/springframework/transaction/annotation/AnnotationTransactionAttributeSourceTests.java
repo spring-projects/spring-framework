@@ -179,12 +179,23 @@ class AnnotationTransactionAttributeSourceTests {
 	}
 
 	/**
-	 * Test that transaction attribute is inherited from class
+	 * Test that transaction attribute is inherited from class declaring the method
 	 * if not specified on method.
 	 */
 	@Test
 	void defaultsToClassTransactionAttribute() {
 		TransactionAttribute actual = getTransactionAttribute(TestBean4.class, TestBean4.class, "getAge");
+		assertThat(actual).satisfies(hasRollbackRules(new RollbackRuleAttribute(Exception.class),
+				new NoRollbackRuleAttribute(IOException.class)));
+	}
+
+	/**
+	 * Test that transaction attribute is inherited from the target class
+	 * if not specified on method.
+	 */
+	@Test
+	void defaultsToTargetClassTransactionAttribute() {
+		TransactionAttribute actual = getTransactionAttribute(TestBean4.class, TestBean12.class, "getAge");
 		assertThat(actual).satisfies(hasRollbackRules(new RollbackRuleAttribute(Exception.class),
 				new NoRollbackRuleAttribute(IOException.class)));
 	}
@@ -930,6 +941,11 @@ class AnnotationTransactionAttributeSourceTests {
 		public int getAge() {
 			return age;
 		}
+	}
+
+
+	@Transactional
+	static class TestBean12 extends Empty {
 	}
 
 }
