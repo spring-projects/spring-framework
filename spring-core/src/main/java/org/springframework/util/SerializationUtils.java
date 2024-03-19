@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,9 @@ public abstract class SerializationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends Serializable> T clone(T object) {
-		return (T) SerializationUtils.deserialize(SerializationUtils.serialize(object));
+		Object result = SerializationUtils.deserialize(SerializationUtils.serialize(object));
+		Assert.state(result != null, "Deserialized object must not be null");
+		return (T) result;
 	}
 
 }

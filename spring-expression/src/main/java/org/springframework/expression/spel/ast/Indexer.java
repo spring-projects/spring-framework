@@ -222,7 +222,9 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		if (this.indexedType == IndexedType.ARRAY) {
-			int insn = switch (this.exitTypeDescriptor) {
+			String exitTypeDescriptor = this.exitTypeDescriptor;
+			Assert.state(exitTypeDescriptor != null, "Array not compilable without descriptor");
+			int insn = switch (exitTypeDescriptor) {
 				case "D" -> {
 					mv.visitTypeInsn(CHECKCAST, "[D");
 					yield DALOAD;
@@ -258,8 +260,8 @@ public class Indexer extends SpelNodeImpl {
 					yield CALOAD;
 				}
 				default -> {
-					mv.visitTypeInsn(CHECKCAST, "["+ this.exitTypeDescriptor +
-							(CodeFlow.isPrimitiveArray(this.exitTypeDescriptor) ? "" : ";"));
+					mv.visitTypeInsn(CHECKCAST, "["+ exitTypeDescriptor +
+							(CodeFlow.isPrimitiveArray(exitTypeDescriptor) ? "" : ";"));
 					yield AALOAD;
 				}
 			};

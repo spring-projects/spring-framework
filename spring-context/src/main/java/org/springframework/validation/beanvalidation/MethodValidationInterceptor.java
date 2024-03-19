@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,8 @@ import org.springframework.validation.method.ParameterValidationResult;
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 
-	private static final boolean REACTOR_PRESENT =
-			ClassUtils.isPresent("reactor.core.publisher.Mono", MethodValidationInterceptor.class.getClassLoader());
+	private static final boolean reactorPresent = ClassUtils.isPresent(
+			"reactor.core.publisher.Mono", MethodValidationInterceptor.class.getClassLoader());
 
 
 	private final MethodValidationAdapter validationAdapter;
@@ -153,7 +153,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Object[] arguments = invocation.getArguments();
 		Class<?>[] groups = determineValidationGroups(invocation);
 
-		if (REACTOR_PRESENT) {
+		if (reactorPresent) {
 			arguments = ReactorValidationHelper.insertAsyncValidation(
 					this.validationAdapter.getSpringValidatorAdapter(), this.adaptViolations,
 					target, method, arguments);

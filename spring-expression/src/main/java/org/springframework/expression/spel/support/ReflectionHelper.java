@@ -296,7 +296,8 @@ public abstract class ReflectionHelper {
 				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
 				if (argument == null) {
 					// Perform the equivalent of GenericConversionService.convertNullSource() for a single argument.
-					if (targetType.getElementTypeDescriptor().getObjectType() == Optional.class) {
+					TypeDescriptor elementDesc = targetType.getElementTypeDescriptor();
+					if (elementDesc != null && elementDesc.getObjectType() == Optional.class) {
 						arguments[varargsPosition] = Optional.empty();
 						conversionOccurred = true;
 					}
@@ -383,7 +384,8 @@ public abstract class ReflectionHelper {
 				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
 				if (argument == null) {
 					// Perform the equivalent of GenericConversionService.convertNullSource() for a single argument.
-					if (varArgContentType.getElementTypeDescriptor().getObjectType() == Optional.class) {
+					TypeDescriptor elementDesc = varArgContentType.getElementTypeDescriptor();
+					if (elementDesc != null && elementDesc.getObjectType() == Optional.class) {
 						arguments[varargsPosition] = Optional.empty();
 						conversionOccurred = true;
 					}
@@ -408,7 +410,6 @@ public abstract class ReflectionHelper {
 			}
 			// Otherwise, convert remaining arguments to the varargs element type.
 			else {
-				Assert.state(varArgContentType != null, "No element type");
 				for (int i = varargsPosition; i < arguments.length; i++) {
 					Object argument = arguments[i];
 					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), varArgContentType);

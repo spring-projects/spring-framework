@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,14 +126,23 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 				.flatMap(Collection::stream)
 				.forEach(cookie -> result.add(cookie.name().toString(),
 						ResponseCookie.fromClientResponse(cookie.name().toString(), cookie.value().toString())
-								.domain(cookie.domain() != null ? cookie.domain().toString() : null)
-								.path(cookie.path() != null ? cookie.path().toString() : null)
-								.maxAge(cookie.maxAge() != null ? cookie.maxAge() : -1L)
+								.domain(toString(cookie.domain()))
+								.path(toString(cookie.path()))
+								.maxAge(toLong(cookie.maxAge()))
 								.secure(cookie.isSecure())
 								.httpOnly(cookie.isHttpOnly())
 								.sameSite(getSameSite(cookie))
 								.build()));
 		return CollectionUtils.unmodifiableMultiValueMap(result);
+	}
+
+	@Nullable
+	private static String toString(@Nullable CharSequence value) {
+		return (value != null ? value.toString() : null);
+	}
+
+	private static long toLong(@Nullable Long value) {
+		return (value != null ? value : -1);
 	}
 
 	@Nullable

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -257,6 +257,7 @@ public abstract class AbstractAotProcessor<T> {
 			 * @return this builder for method chaining
 			 */
 			public Builder groupId(String groupId) {
+				Assert.hasText(groupId, "'groupId' must not be empty");
 				this.groupId = groupId;
 				return this;
 			}
@@ -268,6 +269,7 @@ public abstract class AbstractAotProcessor<T> {
 			 * @return this builder for method chaining
 			 */
 			public Builder artifactId(String artifactId) {
+				Assert.hasText(artifactId, "'artifactId' must not be empty");
 				this.artifactId = artifactId;
 				return this;
 			}
@@ -279,14 +281,12 @@ public abstract class AbstractAotProcessor<T> {
 				Assert.notNull(this.sourceOutput, "'sourceOutput' must not be null");
 				Assert.notNull(this.resourceOutput, "'resourceOutput' must not be null");
 				Assert.notNull(this.classOutput, "'classOutput' must not be null");
-				Assert.hasText(this.groupId, "'groupId' must not be null or empty");
-				Assert.hasText(this.artifactId, "'artifactId' must not be null or empty");
+				Assert.notNull(this.groupId, "'groupId' must not be null");
+				Assert.notNull(this.artifactId, "'artifactId' must not be null");
 				return new Settings(this.sourceOutput, this.resourceOutput, this.classOutput,
 						this.groupId, this.artifactId);
 			}
-
 		}
-
 	}
 
 }

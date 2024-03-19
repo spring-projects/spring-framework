@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,14 +42,14 @@ final class GeneratedMapUtils {
 	 * @param methodName the name of the static method to invoke
 	 * @return an unmodifiable map retrieved from a static method
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	static Map loadMap(String className, String methodName) {
 		try {
 			Class<?> clazz = ClassUtils.forName(className, null);
 			Method method = ReflectionUtils.findMethod(clazz, methodName);
 			Assert.state(method != null, () -> "No %s() method found in %s".formatted(methodName, className));
 			Map map = (Map) ReflectionUtils.invokeMethod(method, null);
-			return Collections.unmodifiableMap(map);
+			return (map != null ? Collections.unmodifiableMap(map) : Collections.emptyMap());
 		}
 		catch (IllegalStateException ex) {
 			throw ex;

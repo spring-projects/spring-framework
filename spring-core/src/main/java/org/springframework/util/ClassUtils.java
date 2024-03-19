@@ -557,7 +557,7 @@ public abstract class ClassUtils {
 	 * @see Void
 	 * @see Void#TYPE
 	 */
-	public static boolean isVoidType(Class<?> type) {
+	public static boolean isVoidType(@Nullable Class<?> type) {
 		return (type == void.class || type == Void.class);
 	}
 

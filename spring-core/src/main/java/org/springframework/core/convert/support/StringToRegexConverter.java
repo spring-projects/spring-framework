@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
  * @author Sebastien Deleuze
  * @since 6.1
  */
-class StringToRegexConverter implements Converter<String, Regex> {
+final class StringToRegexConverter implements Converter<String, Regex> {
 
 	@Override
 	@Nullable

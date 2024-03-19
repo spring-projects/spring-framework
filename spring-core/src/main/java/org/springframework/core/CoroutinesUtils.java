@@ -46,6 +46,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -63,6 +64,7 @@ public abstract class CoroutinesUtils {
 	private static final KType monoType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Mono.class));
 
 	private static final KType publisherType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Publisher.class));
+
 
 	/**
 	 * Convert a {@link Deferred} instance to a {@link Mono}.
@@ -109,9 +111,10 @@ public abstract class CoroutinesUtils {
 	 * @since 6.0
 	 */
 	@SuppressWarnings({"deprecation", "DataFlowIssue"})
-	public static Publisher<?> invokeSuspendingFunction(CoroutineContext context, Method method, Object target,
-			Object... args) {
-		Assert.isTrue(KotlinDetector.isSuspendingFunction(method), "'method' must be a suspending function");
+	public static Publisher<?> invokeSuspendingFunction(
+			CoroutineContext context, Method method, @Nullable Object target, Object... args) {
+
+		Assert.isTrue(KotlinDetector.isSuspendingFunction(method), "Method must be a suspending function");
 		KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
 		if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
 			KCallablesJvm.setAccessible(function, true);
