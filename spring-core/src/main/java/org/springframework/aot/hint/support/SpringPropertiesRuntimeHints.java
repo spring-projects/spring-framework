@@ -18,6 +18,7 @@ package org.springframework.aot.hint.support;
 
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} to register hints for {@link org.springframework.core.SpringProperties}.
@@ -28,7 +29,7 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 class SpringPropertiesRuntimeHints implements RuntimeHintsRegistrar {
 
 		@Override
-		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+		public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 			hints.resources().registerPattern("spring.properties");
 		}
 }
