@@ -463,7 +463,7 @@ public class TypeDescriptor implements Serializable {
 	 * @see #narrow(Object)
 	 */
 	@Nullable
-	public TypeDescriptor getMapValueTypeDescriptor(Object mapValue) {
+	public TypeDescriptor getMapValueTypeDescriptor(@Nullable Object mapValue) {
 		return narrow(mapValue, getMapValueTypeDescriptor());
 	}
 
