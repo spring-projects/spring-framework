@@ -49,7 +49,7 @@ public class ExpressionException extends RuntimeException {
 	 * @param message a descriptive message
 	 * @param cause the underlying cause of this exception
 	 */
-	public ExpressionException(String message, Throwable cause) {
+	public ExpressionException(String message, @Nullable Throwable cause) {
 		super(message, cause);
 		this.expressionString = null;
 		this.position = 0;
@@ -95,7 +95,7 @@ public class ExpressionException extends RuntimeException {
 	 * @param message a descriptive message
 	 * @param cause the underlying cause of this exception
 	 */
-	public ExpressionException(int position, String message, Throwable cause) {
+	public ExpressionException(int position, String message, @Nullable Throwable cause) {
 		super(message, cause);
 		this.expressionString = null;
 		this.position = position;
@@ -124,6 +124,7 @@ public class ExpressionException extends RuntimeException {
 	 * @see java.lang.Throwable#getMessage()
 	 */
 	@Override
+	@Nullable
 	public String getMessage() {
 		return toDetailedString();
 	}
@@ -132,6 +133,7 @@ public class ExpressionException extends RuntimeException {
 	 * Return a detailed description of this exception, including the expression
 	 * String and position (if available) as well as the actual exception message.
 	 */
+	@Nullable
 	public String toDetailedString() {
 		if (this.expressionString != null) {
 			StringBuilder output = new StringBuilder();
@@ -156,6 +158,7 @@ public class ExpressionException extends RuntimeException {
 	 * that caused the failure.
 	 * @since 4.0
 	 */
+	@Nullable
 	public String getSimpleMessage() {
 		return super.getMessage();
 	}
