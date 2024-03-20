@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'spring-projects'
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Check out code
+      uses: actions/checkout@v4
       with:
         ref: docs-build
         fetch-depth: 1
