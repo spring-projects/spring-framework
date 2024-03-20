@@ -325,6 +325,7 @@ public class Indexer extends SpelNodeImpl {
 			CompilablePropertyAccessor compilablePropertyAccessor = (CompilablePropertyAccessor) this.cachedReadAccessor;
 			Assert.state(compilablePropertyAccessor != null, "No cached read accessor");
 			String propertyName = (String) stringLiteral.getLiteralValue().getValue();
+			Assert.state(propertyName != null, "No property name");
 			compilablePropertyAccessor.generateCode(propertyName, mv, cf);
 		}
 
@@ -565,6 +566,7 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		@Override
+		@SuppressWarnings("NullAway")
 		public TypedValue getValue() {
 			Class<?> targetObjectRuntimeClass = getObjectClass(this.targetObject);
 			try {
@@ -603,6 +605,7 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		@Override
+		@SuppressWarnings("NullAway")
 		public void setValue(@Nullable Object newValue) {
 			Class<?> contextObjectClass = getObjectClass(this.targetObject);
 			try {

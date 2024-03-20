@@ -117,7 +117,7 @@ tasks.withType(JavaCompile).configureEach {
     options.errorprone {
     	disableAllChecks = true
         option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
-        option("NullAway:AnnotatedPackages", "org.springframework.core")
+        option("NullAway:AnnotatedPackages", "org.springframework.core,org.springframework.expression")
         option("NullAway:UnannotatedSubPackages", "org.springframework.instrument,org.springframework.context.index," +
 				"org.springframework.asm,org.springframework.cglib,org.springframework.objenesis," +
 				"org.springframework.javapoet,org.springframework.aot.nativex.substitution")

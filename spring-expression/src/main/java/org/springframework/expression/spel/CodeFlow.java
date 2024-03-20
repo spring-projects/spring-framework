@@ -28,6 +28,7 @@ import java.util.Map;
 import org.springframework.asm.ClassWriter;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -583,6 +584,7 @@ public class CodeFlow implements Opcodes {
 	 * @param descriptor type descriptor
 	 * @return {@code true} if the descriptor is boolean compatible
 	 */
+	@Contract("null -> false")
 	public static boolean isBooleanCompatible(@Nullable String descriptor) {
 		return (descriptor != null && (descriptor.equals("Z") || descriptor.equals("Ljava/lang/Boolean")));
 	}
@@ -592,6 +594,7 @@ public class CodeFlow implements Opcodes {
 	 * @param descriptor type descriptor
 	 * @return {@code true} if a primitive type or {@code void}
 	 */
+	@Contract("null -> false")
 	public static boolean isPrimitive(@Nullable String descriptor) {
 		return (descriptor != null && descriptor.length() == 1);
 	}
@@ -601,6 +604,7 @@ public class CodeFlow implements Opcodes {
 	 * @param descriptor the descriptor for a possible primitive array
 	 * @return {@code true} if the descriptor a primitive array
 	 */
+	@Contract("null -> false")
 	public static boolean isPrimitiveArray(@Nullable String descriptor) {
 		if (descriptor == null) {
 			return false;
@@ -653,6 +657,7 @@ public class CodeFlow implements Opcodes {
 	 * @param descriptor the descriptor for a type
 	 * @return {@code true} if the descriptor is for a supported numeric type or boolean
 	 */
+	@Contract("null -> false")
 	public static boolean isPrimitiveOrUnboxableSupportedNumberOrBoolean(@Nullable String descriptor) {
 		if (descriptor == null) {
 			return false;
@@ -670,6 +675,7 @@ public class CodeFlow implements Opcodes {
 	 * @param descriptor the descriptor for a type
 	 * @return {@code true} if the descriptor is for a supported numeric type
 	 */
+	@Contract("null -> false")
 	public static boolean isPrimitiveOrUnboxableSupportedNumber(@Nullable String descriptor) {
 		if (descriptor == null) {
 			return false;
@@ -690,6 +696,7 @@ public class CodeFlow implements Opcodes {
 	 * @param number the number to check
 	 * @return {@code true} if it is an {@link Integer}, {@link Short} or {@link Byte}
 	 */
+	@Contract("null -> false")
 	public static boolean isIntegerForNumericOp(Number number) {
 		return (number instanceof Integer || number instanceof Short || number instanceof Byte);
 	}

@@ -76,6 +76,7 @@ import org.springframework.expression.spel.ast.StringLiteral;
 import org.springframework.expression.spel.ast.Ternary;
 import org.springframework.expression.spel.ast.TypeReference;
 import org.springframework.expression.spel.ast.VariableReference;
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
@@ -164,6 +165,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//	    | (QMARK^ expression COLON! expression)
 	//      | (ELVIS^ expression))?;
 	@Nullable
+	@SuppressWarnings("NullAway")
 	private SpelNodeImpl eatExpression() {
 		SpelNodeImpl expr = eatLogicalOrExpression();
 		Token t = peekToken();
@@ -274,6 +276,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	//sumExpression: productExpression ( (PLUS^ | MINUS^) productExpression)*;
 	@Nullable
+	@SuppressWarnings("NullAway")
 	private SpelNodeImpl eatSumExpression() {
 		SpelNodeImpl expr = eatProductExpression();
 		while (peekToken(TokenKind.PLUS, TokenKind.MINUS, TokenKind.INC)) {
@@ -313,6 +316,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	// powerExpr  : unaryExpression (POWER^ unaryExpression)? (INC || DEC) ;
 	@Nullable
+	@SuppressWarnings("NullAway")
 	private SpelNodeImpl eatPowerIncDecExpression() {
 		SpelNodeImpl expr = eatUnaryExpression();
 		if (peekToken(TokenKind.POWER)) {
@@ -333,6 +337,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	// unaryExpression: (PLUS^ | MINUS^ | BANG^ | INC^ | DEC^) unaryExpression | primaryExpression ;
 	@Nullable
+	@SuppressWarnings("NullAway")
 	private SpelNodeImpl eatUnaryExpression() {
 		if (peekToken(TokenKind.NOT, TokenKind.PLUS, TokenKind.MINUS)) {
 			Token t = takeToken();
@@ -755,6 +760,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				qualifiedIdPieces.getLast().getEndPosition(), qualifiedIdPieces.toArray(new SpelNodeImpl[0]));
 	}
 
+	@Contract("null -> false")
 	private boolean isValidQualifiedId(@Nullable Token node) {
 		if (node == null || node.kind == TokenKind.LITERAL_STRING) {
 			return false;
@@ -1040,17 +1046,20 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		return t.kind.toString().toLowerCase();
 	}
 
+	@Contract("_, null, _ -> fail; _, _, null -> fail")
 	private void checkOperands(Token token, @Nullable SpelNodeImpl left, @Nullable SpelNodeImpl right) {
 		checkLeftOperand(token, left);
 		checkRightOperand(token, right);
 	}
 
+	@Contract("_, null -> fail")
 	private void checkLeftOperand(Token token, @Nullable SpelNodeImpl operandExpression) {
 		if (operandExpression == null) {
 			throw internalException(token.startPos, SpelMessage.LEFT_OPERAND_PROBLEM);
 		}
 	}
 
+	@Contract("_, null -> fail")
 	private void checkRightOperand(Token token, @Nullable SpelNodeImpl operandExpression) {
 		if (operandExpression == null) {
 			throw internalException(token.startPos, SpelMessage.RIGHT_OPERAND_PROBLEM);
