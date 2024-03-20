@@ -6724,20 +6724,4 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 	}
 
-	// NOTE: saveGeneratedClassFile() can be copied to SpelCompiler and uncommented
-	// at the end of createExpressionClass(SpelNodeImpl) in order to review generated
-	// byte code for debugging purposes.
-	//
-	//	private static void saveGeneratedClassFile(String stringAST, String className, byte[] data) {
-	//		try {
-	//			Path path = Path.of("build", StringUtils.replace(className, "/", ".") + ".class");
-	//			Files.deleteIfExists(path);
-	//			System.out.println("Writing compiled SpEL expression [%s] to [%s]".formatted(stringAST, path.toAbsolutePath()));
-	//			Files.copy(new ByteArrayInputStream(data), path);
-	//		}
-	//		catch (IOException ex) {
-	//			throw new UncheckedIOException(ex);
-	//		}
-	//	}
-
 }
