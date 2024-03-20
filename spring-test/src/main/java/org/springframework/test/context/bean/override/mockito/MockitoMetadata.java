@@ -16,8 +16,8 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
@@ -29,15 +29,12 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Base class for {@link MockDefinition} and {@link SpyDefinition}.
+ * Base class for {@link MockitoBeanMetadata} and {@link MockitoSpyBeanMetadata}.
  *
  * @author Phillip Webb
  * @since 6.2
  */
-abstract class Definition extends OverrideMetadata {
-
-	protected static final int MULTIPLIER = 31;
-
+abstract class MockitoMetadata extends OverrideMetadata {
 
 	protected final String name;
 
@@ -46,10 +43,10 @@ abstract class Definition extends OverrideMetadata {
 	private final boolean proxyTargetAware;
 
 
-	Definition(String name, @Nullable MockReset reset, boolean proxyTargetAware, Field field,
-			Annotation annotation, ResolvableType typeToOverride, BeanOverrideStrategy strategy) {
+	MockitoMetadata(String name, @Nullable MockReset reset, boolean proxyTargetAware, Field field,
+			ResolvableType typeToOverride, BeanOverrideStrategy strategy) {
 
-		super(field, annotation, typeToOverride, strategy);
+		super(field, typeToOverride, strategy);
 		this.name = name;
 		this.reset = (reset != null) ? reset : MockReset.AFTER;
 		this.proxyTargetAware = proxyTargetAware;
@@ -57,11 +54,11 @@ abstract class Definition extends OverrideMetadata {
 
 
 	@Override
-	protected String getExpectedBeanName() {
+	protected String getBeanName() {
 		if (StringUtils.hasText(this.name)) {
 			return this.name;
 		}
-		return super.getExpectedBeanName();
+		return super.getBeanName();
 	}
 
 	@Override
@@ -104,8 +101,9 @@ abstract class Definition extends OverrideMetadata {
 		if (obj == null || !getClass().isAssignableFrom(obj.getClass())) {
 			return false;
 		}
-		Definition other = (Definition) obj;
-		boolean result = ObjectUtils.nullSafeEquals(this.name, other.name);
+		MockitoMetadata other = (MockitoMetadata) obj;
+		boolean result = super.equals(obj);
+		result = result && ObjectUtils.nullSafeEquals(this.name, other.name);
 		result = result && ObjectUtils.nullSafeEquals(this.reset, other.reset);
 		result = result && ObjectUtils.nullSafeEquals(this.proxyTargetAware, other.proxyTargetAware);
 		return result;
@@ -113,11 +111,7 @@ abstract class Definition extends OverrideMetadata {
 
 	@Override
 	public int hashCode() {
-		int result = 1;
-		result = MULTIPLIER * result + ObjectUtils.nullSafeHashCode(this.name);
-		result = MULTIPLIER * result + ObjectUtils.nullSafeHashCode(this.reset);
-		result = MULTIPLIER * result + ObjectUtils.nullSafeHashCode(this.proxyTargetAware);
-		return result;
+		return Objects.hash(super.hashCode(), this.name, this.reset, this.proxyTargetAware);
 	}
 
 }

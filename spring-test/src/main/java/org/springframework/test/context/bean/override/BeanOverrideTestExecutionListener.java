@@ -56,17 +56,17 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	}
 
 	/**
-	 * Using a registered {@link BeanOverrideBeanPostProcessor}, find metadata
+	 * Using a registered {@link BeanOverrideBeanFactoryPostProcessor}, find metadata
 	 * associated with the current test class and ensure fields are injected
 	 * with the overridden bean instance.
 	 */
 	protected void injectFields(TestContext testContext) {
-		postProcessFields(testContext, (testMetadata, postProcessor) -> postProcessor.inject(
-				testMetadata.overrideMetadata.field(), testMetadata.testInstance, testMetadata.overrideMetadata));
+		postProcessFields(testContext, (testMetadata, overrideRegistrar) -> overrideRegistrar.inject(
+				testMetadata.testInstance, testMetadata.overrideMetadata));
 	}
 
 	/**
-	 * Using a registered {@link BeanOverrideBeanPostProcessor}, find metadata
+	 * Using a registered {@link BeanOverrideBeanFactoryPostProcessor}, find metadata
 	 * associated with the current test class and ensure fields are nulled out
 	 * and then re-injected with the overridden bean instance.
 	 * <p>This method does nothing if the
@@ -79,31 +79,28 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 
 			postProcessFields(testContext, (testMetadata, postProcessor) -> {
 				Object testInstance = testMetadata.testInstance;
-				Field field = testMetadata.overrideMetadata.field();
+				Field field = testMetadata.overrideMetadata.getField();
 				ReflectionUtils.makeAccessible(field);
 				ReflectionUtils.setField(field, testInstance, null);
-				postProcessor.inject(field, testInstance, testMetadata.overrideMetadata);
+				postProcessor.inject(testInstance, testMetadata.overrideMetadata);
 			});
 		}
 	}
 
 	private void postProcessFields(TestContext testContext, BiConsumer<TestContextOverrideMetadata,
-			BeanOverrideBeanPostProcessor> consumer) {
+			BeanOverrideRegistrar> consumer) {
 
 		Class<?> testClass = testContext.getTestClass();
 		Object testInstance = testContext.getTestInstance();
-		BeanOverrideParser parser = new BeanOverrideParser();
 
-		// Avoid full parsing, but validate that this particular class has some bean override field(s).
-		if (parser.hasBeanOverride(testClass)) {
-			BeanOverrideBeanPostProcessor postProcessor =
-					testContext.getApplicationContext().getBean(BeanOverrideBeanPostProcessor.class);
-			// The class should have already been parsed by the context customizer.
-			for (OverrideMetadata metadata : postProcessor.getOverrideMetadata()) {
-				if (!metadata.field().getDeclaringClass().equals(testClass)) {
+		if (BeanOverrideParsingUtils.hasBeanOverride(testClass)) {
+			BeanOverrideRegistrar registrar =
+					testContext.getApplicationContext().getBean(BeanOverrideRegistrar.class);
+			for (OverrideMetadata metadata : registrar.getOverrideMetadata()) {
+				if (!metadata.getField().getDeclaringClass().isAssignableFrom(testClass)) {
 					continue;
 				}
-				consumer.accept(new TestContextOverrideMetadata(testInstance, metadata), postProcessor);
+				consumer.accept(new TestContextOverrideMetadata(testInstance, metadata), registrar);
 			}
 		}
 	}

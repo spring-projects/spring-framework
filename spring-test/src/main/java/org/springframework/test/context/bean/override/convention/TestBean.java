@@ -28,9 +28,11 @@ import org.springframework.test.context.bean.override.BeanOverride;
 /**
  * Mark a field to override a bean instance in the {@code BeanFactory}.
  *
- * <p>The instance is created from a zero-argument static factory method in the test
- * class whose return type is compatible with the annotated field. The method
- * is deduced as follows.
+ * <p>The instance is created from a zero-argument static factory method in the
+ * test class whose return type is compatible with the annotated field. In the
+ * case of a nested test, any enclosing class it might have is also considered.
+ * Similarly, in case the test class inherits from a base class the whole class
+ * hierarchy is considered. The method is deduced as follows.
  * <ul>
  * <li>If the {@link #methodName()} is specified, look for a static method with
  * that name.</li>
@@ -121,6 +123,9 @@ public @interface TestBean {
 	/**
 	 * Name of a static factory method to look for in the test class, which will
 	 * be used to instantiate the bean to override.
+	 * <p>In the case of a nested test, any enclosing class it might have is
+	 * also considered. Similarly, in case the test class inherits from a base
+	 * class the whole class hierarchy is considered.
 	 * <p>If left unspecified, the name of the factory method will be detected
 	 * based on convention.
 	 * @see #CONVENTION_SUFFIX

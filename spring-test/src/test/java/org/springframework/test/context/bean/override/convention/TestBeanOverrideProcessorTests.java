@@ -23,8 +23,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.ResolvableType;
-import org.springframework.test.context.bean.override.convention.TestBeanOverrideProcessor.MethodConventionOverrideMetadata;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.NonNull;
+import org.springframework.test.context.bean.override.convention.TestBeanOverrideProcessor.TestBeanOverrideMetadata;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.FailingExampleService;
 
@@ -95,7 +96,7 @@ class TestBeanOverrideProcessorTests {
 
 		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
 		assertThatIllegalStateException()
-				.isThrownBy(() -> processor.createMetadata(field, overrideAnnotation, ResolvableType.forClass(returnType)))
+				.isThrownBy(() -> processor.createMetadata(overrideAnnotation, clazz, field))
 				.withMessage("""
 						Failed to find a static test bean factory method in %s with return type %s \
 						whose name matches one of the supported candidates %s""",
@@ -104,35 +105,49 @@ class TestBeanOverrideProcessorTests {
 
 	@Test
 	void createMetaDataForKnownExplicitMethod() throws Exception {
-		Class<?> returnType = ExampleService.class;
-		Field field = ExplicitMethodNameConf.class.getField("b");
+		Class<?> clazz = ExplicitMethodNameConf.class;
+		Field field = clazz.getField("b");
 		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
 		assertThat(overrideAnnotation).isNotNull();
 
 		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
-		assertThat(processor.createMetadata(field, overrideAnnotation, ResolvableType.forClass(returnType)))
-				.isInstanceOf(MethodConventionOverrideMetadata.class);
+		assertThat(processor.createMetadata(overrideAnnotation, clazz, field))
+				.isInstanceOf(TestBeanOverrideMetadata.class);
 	}
 
 	@Test
-	void createMetaDataWithDeferredCheckForExistenceOfConventionBasedFactoryMethod() throws Exception {
+	void createMetaDataForConventionBasedFactoryMethod() throws Exception {
 		Class<?> returnType = ExampleService.class;
-		Field field = MethodConventionConf.class.getField("field");
+		Class<?> clazz = MethodConventionConf.class;
+		Field field = clazz.getField("field");
 		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
 		assertThat(overrideAnnotation).isNotNull();
 
 		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
-		// When in convention-based mode, createMetadata() will not verify that
-		// the factory method actually exists. So, we don't expect an exception
-		// for this use case.
-		assertThat(processor.createMetadata(field, overrideAnnotation, ResolvableType.forClass(returnType)))
-				.isInstanceOf(MethodConventionOverrideMetadata.class);
+		assertThatIllegalStateException().isThrownBy(() -> processor.createMetadata(
+				overrideAnnotation, clazz, field))
+				.withMessage("""
+						Failed to find a static test bean factory method in %s with return type %s \
+						whose name matches one of the supported candidates %s""",
+						clazz.getName(), returnType.getName(), List.of("someFieldTestOverride", "fieldTestOverride"));
+	}
+
+	@Test
+	void failToCreateMetadataForOtherAnnotation() throws NoSuchFieldException {
+		Class<?> clazz = MethodConventionConf.class;
+		Field field = clazz.getField("field");
+		NonNull badAnnotation = AnnotationUtils.synthesizeAnnotation(NonNull.class);
+
+		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
+		assertThatIllegalStateException().isThrownBy(() -> processor.createMetadata(badAnnotation, clazz, field))
+				.withMessage("Invalid annotation passed to TestBeanOverrideProcessor: expected @TestBean" +
+								" on field %s.%s", field.getDeclaringClass().getName(), field.getName());
 	}
 
 
 	static class MethodConventionConf {
 
-		@TestBean
+		@TestBean(name = "someField")
 		public ExampleService field;
 
 		@Bean

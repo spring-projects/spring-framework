@@ -28,33 +28,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
- * Unit tests for {@link BeanOverrideParser}.
+ * Unit tests for {@link BeanOverrideParsingUtils}.
  *
  * @since 6.2
  */
-class BeanOverrideParserTests {
+class BeanOverrideParsingUtilsTests {
 
-	// Copy of ExampleBeanOverrideProcessor.DUPLICATE_TRIGGER which is package-private.
-	private static final String DUPLICATE_TRIGGER = "DUPLICATE";
-
-	private final BeanOverrideParser parser = new BeanOverrideParser();
-
+	// Metadata built from a String that starts with DUPLICATE_TRIGGER are considered equal
+	private static final String DUPLICATE_TRIGGER1 = ExampleBeanOverrideAnnotation.DUPLICATE_TRIGGER + "-v1";
+	private static final String DUPLICATE_TRIGGER2 = ExampleBeanOverrideAnnotation.DUPLICATE_TRIGGER + "-v2";
 
 	@Test
 	void findsOnField() {
-		parser.parse(SingleAnnotationOnField.class);
-
-		assertThat(parser.getOverrideMetadata())
-				.map(om -> ((ExampleBeanOverrideAnnotation) om.overrideAnnotation()).value())
+		assertThat(BeanOverrideParsingUtils.parse(SingleAnnotationOnField.class))
+				.map(Object::toString)
 				.containsExactly("onField");
 	}
 
 	@Test
 	void allowsMultipleProcessorsOnDifferentElements() {
-		parser.parse(AnnotationsOnMultipleFields.class);
-
-		assertThat(parser.getOverrideMetadata())
-				.map(om -> ((ExampleBeanOverrideAnnotation) om.overrideAnnotation()).value())
+		assertThat(BeanOverrideParsingUtils.parse(AnnotationsOnMultipleFields.class))
+				.map(Object::toString)
 				.containsExactlyInAnyOrder("onField1", "onField2");
 	}
 
@@ -62,15 +56,15 @@ class BeanOverrideParserTests {
 	void rejectsMultipleAnnotationsOnSameElement() {
 		Field field = ReflectionUtils.findField(MultipleAnnotationsOnField.class, "message");
 		assertThatRuntimeException()
-				.isThrownBy(() -> parser.parse(MultipleAnnotationsOnField.class))
+				.isThrownBy(() -> BeanOverrideParsingUtils.parse(MultipleAnnotationsOnField.class))
 				.withMessage("Multiple @BeanOverride annotations found on field: " + field);
 	}
 
 	@Test
-	void detectsDuplicateMetadata() {
-		assertThatRuntimeException()
-				.isThrownBy(() -> parser.parse(DuplicateConf.class))
-				.withMessage("Duplicate test OverrideMetadata: {DUPLICATE_TRIGGER}");
+	void keepsFirstOccurrenceOfEqualMetadata() {
+		assertThat(BeanOverrideParsingUtils.parse(DuplicateConf.class))
+				.map(Object::toString)
+				.containsExactly("{DUPLICATE-v1}");
 	}
 
 
@@ -114,10 +108,10 @@ class BeanOverrideParserTests {
 
 	static class DuplicateConf {
 
-		@ExampleBeanOverrideAnnotation(DUPLICATE_TRIGGER)
+		@ExampleBeanOverrideAnnotation(DUPLICATE_TRIGGER1)
 		String message1;
 
-		@ExampleBeanOverrideAnnotation(DUPLICATE_TRIGGER)
+		@ExampleBeanOverrideAnnotation(DUPLICATE_TRIGGER2)
 		String message2;
 	}
 

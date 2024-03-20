@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  *
  * @author Simon Baslé
  * @since 6.2
- * @see BeanOverrideBeanPostProcessor
+ * @see BeanOverrideBeanFactoryPostProcessor
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)

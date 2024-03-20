@@ -40,6 +40,8 @@ class TestOverrideMetadata extends OverrideMetadata {
 	@Nullable
 	private final String beanName;
 
+	private final String methodName;
+
 	@Nullable
 	private static Method findMethod(AnnotatedElement element, String methodName) {
 		if (DEFAULT_VALUE.equals(methodName)) {
@@ -77,30 +79,31 @@ class TestOverrideMetadata extends OverrideMetadata {
 	}
 
 	public TestOverrideMetadata(Field field, ExampleBeanOverrideAnnotation overrideAnnotation, ResolvableType typeToOverride) {
-		super(field, overrideAnnotation, typeToOverride, overrideAnnotation.createIfMissing() ?
+		super(field, typeToOverride, overrideAnnotation.createIfMissing() ?
 				BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION: BeanOverrideStrategy.REPLACE_DEFINITION);
 		this.method = findMethod(field, overrideAnnotation.value());
+		this.methodName = overrideAnnotation.value();
 		this.beanName = overrideAnnotation.beanName();
 	}
 
 	//Used to trigger duplicate detection in parser test
-	TestOverrideMetadata() {
-		super(null, null, null, null);
+	TestOverrideMetadata(String duplicateTrigger) {
+		super(null, null, null);
 		this.method = null;
-		this.beanName = null;
+		this.methodName = duplicateTrigger;
+		this.beanName = duplicateTrigger;
 	}
 
 	@Override
-	protected String getExpectedBeanName() {
+	protected String getBeanName() {
 		if (StringUtils.hasText(this.beanName)) {
 			return this.beanName;
 		}
-		return super.getExpectedBeanName();
+		return super.getBeanName();
 	}
 
-	@Override
-	public String getBeanOverrideDescription() {
-		return "test";
+	String getAnnotationMethodName() {
+		return this.methodName;
 	}
 
 	@Override
@@ -117,4 +120,29 @@ class TestOverrideMetadata extends OverrideMetadata {
 		}
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this.method == null) {
+			return obj instanceof TestOverrideMetadata tem &&
+					tem.beanName != null &&
+					tem.beanName.startsWith(ExampleBeanOverrideAnnotation.DUPLICATE_TRIGGER);
+		}
+		return super.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		if (this.method == null) {
+			return ExampleBeanOverrideAnnotation.DUPLICATE_TRIGGER.hashCode();
+		}
+		return super.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		if (this.method == null) {
+			return "{" + this.beanName + "}";
+		}
+		return this.methodName;
+	}
 }

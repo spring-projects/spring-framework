@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.bean.override;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
@@ -39,7 +38,7 @@ class OverrideMetadataTests {
 	@Test
 	void implicitConfigurations() throws Exception {
 		OverrideMetadata metadata = exampleOverride();
-		assertThat(metadata.getExpectedBeanName()).as("expectedBeanName").isEqualTo(metadata.field().getName());
+		assertThat(metadata.getBeanName()).as("expectedBeanName").isEqualTo(metadata.getField().getName());
 	}
 
 
@@ -48,21 +47,16 @@ class OverrideMetadataTests {
 
 	private static OverrideMetadata exampleOverride() throws Exception {
 		Field field = OverrideMetadataTests.class.getDeclaredField("annotated");
-		return new ConcreteOverrideMetadata(field, field.getAnnotation(NonNull.class),
-				ResolvableType.forClass(String.class), BeanOverrideStrategy.REPLACE_DEFINITION);
+		return new ConcreteOverrideMetadata(field, ResolvableType.forClass(String.class),
+				BeanOverrideStrategy.REPLACE_DEFINITION);
 	}
 
 	static class ConcreteOverrideMetadata extends OverrideMetadata {
 
-		ConcreteOverrideMetadata(Field field, Annotation overrideAnnotation, ResolvableType typeToOverride,
+		ConcreteOverrideMetadata(Field field, ResolvableType typeToOverride,
 				BeanOverrideStrategy strategy) {
 
-			super(field, overrideAnnotation, typeToOverride, strategy);
-		}
-
-		@Override
-		public String getBeanOverrideDescription() {
-			return ConcreteOverrideMetadata.class.getSimpleName();
+			super(field, typeToOverride, strategy);
 		}
 
 		@Override

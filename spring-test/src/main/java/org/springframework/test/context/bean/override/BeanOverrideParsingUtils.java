@@ -18,13 +18,12 @@ package org.springframework.test.context.bean.override;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.Assert;
@@ -33,63 +32,58 @@ import org.springframework.util.ReflectionUtils;
 import static org.springframework.core.annotation.MergedAnnotations.SearchStrategy.DIRECT;
 
 /**
- * A parser that discovers annotations meta-annotated with {@link BeanOverride @BeanOverride}
- * on fields of a given class and creates {@link OverrideMetadata} accordingly.
+ * Internal parsing utilities to discover the presence of
+ * {@link BeanOverride @BeanOverride} on fields, and create the relevant
+ * {@link OverrideMetadata} accordingly.
  *
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
  */
-class BeanOverrideParser {
-
-	private final Set<OverrideMetadata> parsedMetadata = new LinkedHashSet<>();
-
+abstract class BeanOverrideParsingUtils {
 
 	/**
-	 * Get the set of {@link OverrideMetadata} once {@link #parse(Class)} has been called.
-	 */
-	Set<OverrideMetadata> getOverrideMetadata() {
-		return Collections.unmodifiableSet(this.parsedMetadata);
-	}
-
-	/**
-	 * Discover fields of the provided class that are meta-annotated with
-	 * {@link BeanOverride @BeanOverride}, then instantiate the corresponding
-	 * {@link BeanOverrideProcessor} and use it to create {@link OverrideMetadata}
-	 * for each field.
-	 * <p>Each call to {@code parse} adds the parsed metadata to the parser's
-	 * override metadata {@link #getOverrideMetadata() set}.
-	 * @param testClass the test class in which to inspect fields
-	 */
-	void parse(Class<?> testClass) {
-		ReflectionUtils.doWithFields(testClass, field -> parseField(field, testClass));
-	}
-
-	/**
-	 * Check if any field of the provided {@code testClass} is meta-annotated
+	 * Check if at least one field of the given {@code clazz} is meta-annotated
 	 * with {@link BeanOverride @BeanOverride}.
-	 * <p>This is similar to the initial discovery of fields in {@link #parse(Class)}
-	 * without the heavier steps of instantiating processors and creating
-	 * {@link OverrideMetadata}. Consequently, this method leaves the current
-	 * state of the parser's override metadata {@link #getOverrideMetadata() set}
-	 * unchanged.
-	 * @param testClass the class which fields to inspect
-	 * @return true if there is a bean override annotation present, false otherwise
-	 * @see #parse(Class)
+	 * @param clazz the class which fields to inspect
+	 * @return {@code true} if there is a bean override annotation present,
+	 * {@code false} otherwise
 	 */
-	boolean hasBeanOverride(Class<?> testClass) {
+	static boolean hasBeanOverride(Class<?> clazz) {
 		AtomicBoolean hasBeanOverride = new AtomicBoolean();
-		ReflectionUtils.doWithFields(testClass, field -> {
+		ReflectionUtils.doWithFields(clazz, field -> {
 			if (hasBeanOverride.get()) {
 				return;
 			}
 			boolean present = MergedAnnotations.from(field, DIRECT).isPresent(BeanOverride.class);
 			hasBeanOverride.compareAndSet(false, present);
 		});
-		return hasBeanOverride.get();
+		if (hasBeanOverride.get()) {
+			return true;
+		}
+		return false;
 	}
 
-	private void parseField(Field field, Class<?> source) {
+	/**
+	 * Parse the specified classes for the presence of fields annotated with
+	 * {@link BeanOverride @BeanOverride}, and create an {@link OverrideMetadata}
+	 * for each.
+	 * @param classes the classes to parse
+	 */
+	static Set<OverrideMetadata> parse(Iterable<Class<?>> classes) {
+		Set<OverrideMetadata> result = new LinkedHashSet<>();
+		classes.forEach(c -> ReflectionUtils.doWithFields(c, field -> parseField(field, c, result)));
+		return result;
+	}
+
+	/**
+	 * Convenience method to {@link #parse(Iterable) parse} a single test class.
+	 */
+	static Set<OverrideMetadata> parse(Class<?> clazz) {
+		return parse(List.of(clazz));
+	}
+
+	private static void parseField(Field field, Class<?> testClass, Set<OverrideMetadata> metadataSet) {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
 
 		MergedAnnotations.from(field, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
@@ -100,14 +94,11 @@ class BeanOverrideParser {
 			MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
 			Assert.state(metaSource != null, "Meta-annotation source must not be null");
 			Annotation composedAnnotation = metaSource.synthesize();
-			ResolvableType typeToOverride = processor.getOrDeduceType(field, composedAnnotation, source);
 
 			Assert.state(overrideAnnotationFound.compareAndSet(false, true),
 					() -> "Multiple @BeanOverride annotations found on field: " + field);
-			OverrideMetadata metadata = processor.createMetadata(field, composedAnnotation, typeToOverride);
-			boolean isNewDefinition = this.parsedMetadata.add(metadata);
-			Assert.state(isNewDefinition, () -> "Duplicate " + metadata.getBeanOverrideDescription() +
-						" OverrideMetadata: " + metadata);
+			OverrideMetadata metadata = processor.createMetadata(composedAnnotation, testClass, field);
+			metadataSet.add(metadata);
 		});
 	}
 
