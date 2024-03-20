@@ -30,20 +30,19 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.test.context.cache.SpringExtensionCommonCacheTests.TestConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests that verify that common caches are cleared at the end of a test
- * class. Regular callback cannot be used to validate this as they run
+ * class. Regular callbacks cannot be used to validate this as they run
  * before the listener, so we need two test classes that are ordered to
  * validate the result.
  *
  * @author Stephane Nicoll
  */
-@SpringJUnitConfig(classes = TestConfiguration.class)
+@SpringJUnitConfig
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class SpringExtensionCommonCacheTests {
 
@@ -56,7 +55,7 @@ class SpringExtensionCommonCacheTests {
 
 		@Test
 		void lazyInitBeans() {
-			applicationContext.getBean(String.class);
+			assertThat(applicationContext.getBean(String.class)).isEqualTo("Dummy");
 			assertThat(applicationContext.getResourceCache(MetadataReader.class)).isNotEmpty();
 		}
 
