@@ -37,7 +37,7 @@ class CommonCacheTestExecutionListenerTests {
 
 	@Test
 	void afterTestClassWhenContextIsAvailable() throws Exception {
-		AbstractApplicationContext applicationContext = mock(AbstractApplicationContext.class);
+		AbstractApplicationContext applicationContext = mock();
 		TestContext testContext = mock(TestContext.class);
 		given(testContext.hasApplicationContext()).willReturn(true);
 		given(testContext.getApplicationContext()).willReturn(applicationContext);
@@ -47,7 +47,7 @@ class CommonCacheTestExecutionListenerTests {
 
 	@Test
 	void afterTestClassCWhenContextIsNotAvailable() throws Exception {
-		TestContext testContext = mock(TestContext.class);
+		TestContext testContext = mock();
 		given(testContext.hasApplicationContext()).willReturn(false);
 		listener.afterTestClass(testContext);
 		verify(testContext).hasApplicationContext();

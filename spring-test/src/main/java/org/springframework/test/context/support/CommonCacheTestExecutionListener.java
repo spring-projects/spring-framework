@@ -22,11 +22,13 @@ import org.springframework.test.context.TestContext;
 
 /**
  * {@code TestExecutionListener} which makes sure that caches are cleared once
- * they are no longer required. Clears the resource cache of the
- * {@link ApplicationContext} as it is only required during the beans
- * initialization phase. Runs after {@link DirtiesContextTestExecutionListener}
- * as dirtying the context will remove it from the cache and make this
- * unnecessary.
+ * they are no longer required.
+ *
+ * <p>Clears the resource caches of the {@link ApplicationContext} since they are
+ * only required during the bean initialization phase. Runs after
+ * {@link DirtiesContextTestExecutionListener} since dirtying the context will
+ * close it and remove it from the context cache, making it unnecessary to clear
+ * the associated resource caches.
  *
  * @author Stephane Nicoll
  * @since 6.2
