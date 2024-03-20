@@ -27,13 +27,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Tests for {@link CommonCacheTestExecutionListener}.
+ * Tests for {@link CommonCachesTestExecutionListener}.
  *
  * @author Stephane Nicoll
  */
-class CommonCacheTestExecutionListenerTests {
+class CommonCachesTestExecutionListenerTests {
 
-	private final CommonCacheTestExecutionListener listener = new CommonCacheTestExecutionListener();
+	private final CommonCachesTestExecutionListener listener = new CommonCachesTestExecutionListener();
 
 	@Test
 	void afterTestClassWhenContextIsAvailable() throws Exception {

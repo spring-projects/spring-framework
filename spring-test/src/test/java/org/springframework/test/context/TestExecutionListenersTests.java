@@ -32,7 +32,7 @@ import org.springframework.test.context.event.ApplicationEventsTestExecutionList
 import org.springframework.test.context.event.EventPublishingTestExecutionListener;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.springframework.test.context.support.CommonCacheTestExecutionListener;
+import org.springframework.test.context.support.CommonCachesTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -73,7 +73,7 @@ class TestExecutionListenersTests {
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
-				CommonCacheTestExecutionListener.class, //
+				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
@@ -96,7 +96,7 @@ class TestExecutionListenersTests {
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
-				CommonCacheTestExecutionListener.class, //
+				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
@@ -118,7 +118,7 @@ class TestExecutionListenersTests {
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
-				CommonCacheTestExecutionListener.class, //
+				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
@@ -142,7 +142,7 @@ class TestExecutionListenersTests {
 				BarTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
-				CommonCacheTestExecutionListener.class, //
+				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//

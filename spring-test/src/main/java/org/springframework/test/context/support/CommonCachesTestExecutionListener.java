@@ -21,8 +21,8 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.test.context.TestContext;
 
 /**
- * {@code TestExecutionListener} which makes sure that caches are cleared once
- * they are no longer required.
+ * {@code TestExecutionListener} which makes sure that common caches are cleared
+ * once they are no longer required.
  *
  * <p>Clears the resource caches of the {@link ApplicationContext} since they are
  * only required during the bean initialization phase. Runs after
@@ -33,7 +33,7 @@ import org.springframework.test.context.TestContext;
  * @author Stephane Nicoll
  * @since 6.2
  */
-public class CommonCacheTestExecutionListener extends AbstractTestExecutionListener {
+public class CommonCachesTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
 	 * Returns {@code 3005}.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.cache;
+package org.springframework.test.context.support;
 
 import org.junit.jupiter.api.ClassOrderer;
 import org.junit.jupiter.api.Nested;
@@ -31,6 +31,7 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.support.samples.SampleComponent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringJUnitConfig
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
-class SpringExtensionCommonCacheTests {
+class CommonCachesTestExecutionListenerIntegrationTests {
 
 	@Autowired
 	AbstractApplicationContext applicationContext;
@@ -81,7 +82,7 @@ class SpringExtensionCommonCacheTests {
 		String dummyBean(ResourceLoader resourceLoader) {
 			ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(true);
 			scanner.setResourceLoader(resourceLoader);
-			scanner.findCandidateComponents(TestConfiguration.class.getPackageName());
+			scanner.findCandidateComponents(SampleComponent.class.getPackageName());
 			return "Dummy";
 		}
 	}
