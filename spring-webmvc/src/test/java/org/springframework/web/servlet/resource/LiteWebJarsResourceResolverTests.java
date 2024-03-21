@@ -33,18 +33,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Tests for {@link WebJarsResourceResolver}.
+ * Tests for {@link LiteWebJarsResourceResolver}.
  *
- * @author Brian Clozel
- * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
-@SuppressWarnings("removal")
-class WebJarsResourceResolverTests {
+class LiteWebJarsResourceResolverTests {
 
 	private List<Resource> locations = List.of(new ClassPathResource("/META-INF/resources/webjars"));
 
 	// for this to work, an actual WebJar must be on the test classpath
-	private WebJarsResourceResolver resolver = new WebJarsResourceResolver();
+	private LiteWebJarsResourceResolver resolver = new LiteWebJarsResourceResolver();
 
 	private ResourceResolverChain chain = mock();
 

@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.resource;
+package org.springframework.web.reactive.resource;
 
+import java.time.Duration;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -35,28 +38,29 @@ import static org.mockito.Mockito.verify;
 /**
  * Tests for {@link WebJarsResourceResolver}.
  *
- * @author Brian Clozel
- * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
-@SuppressWarnings("removal")
-class WebJarsResourceResolverTests {
+class LiteWebJarsResourceResolverTests {
+
+	private static final Duration TIMEOUT = Duration.ofSeconds(1);
+
 
 	private List<Resource> locations = List.of(new ClassPathResource("/META-INF/resources/webjars"));
 
 	// for this to work, an actual WebJar must be on the test classpath
-	private WebJarsResourceResolver resolver = new WebJarsResourceResolver();
+	private LiteWebJarsResourceResolver resolver = new LiteWebJarsResourceResolver();
 
 	private ResourceResolverChain chain = mock();
 
-	private HttpServletRequest request = new MockHttpServletRequest();
+	private ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 
 
 	@Test
 	void resolveUrlExisting() {
 		String file = "/foo/2.3/foo.txt";
-		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(file);
+		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(Mono.just(file));
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
+		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).block(TIMEOUT);
 
 		assertThat(actual).isEqualTo(file);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
@@ -65,9 +69,9 @@ class WebJarsResourceResolverTests {
 	@Test
 	void resolveUrlExistingNotInJarFile() {
 		String file = "foo/foo.txt";
-		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
+		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(Mono.empty());
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
+		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).block(TIMEOUT);
 
 		assertThat(actual).isNull();
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
@@ -78,10 +82,10 @@ class WebJarsResourceResolverTests {
 	void resolveUrlWebJarResource() {
 		String file = "underscorejs/underscore.js";
 		String expected = "underscorejs/1.8.3/underscore.js";
-		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
-		given(this.chain.resolveUrlPath(expected, this.locations)).willReturn(expected);
+		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(Mono.empty());
+		given(this.chain.resolveUrlPath(expected, this.locations)).willReturn(Mono.just(expected));
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
+		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).block(TIMEOUT);
 
 		assertThat(actual).isEqualTo(expected);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
@@ -91,9 +95,9 @@ class WebJarsResourceResolverTests {
 	@Test
 	void resolveUrlWebJarResourceNotFound() {
 		String file = "something/something.js";
-		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
+		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(Mono.empty());
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
+		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain).block(TIMEOUT);
 
 		assertThat(actual).isNull();
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
@@ -104,37 +108,46 @@ class WebJarsResourceResolverTests {
 	void resolveResourceExisting() {
 		Resource expected = mock();
 		String file = "foo/2.3/foo.txt";
-		given(this.chain.resolveResource(this.request, file, this.locations)).willReturn(expected);
+		given(this.chain.resolveResource(this.exchange, file, this.locations)).willReturn(Mono.just(expected));
 
-		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
+		Resource actual = this.resolver
+				.resolveResource(this.exchange, file, this.locations, this.chain)
+				.block(TIMEOUT);
 
 		assertThat(actual).isEqualTo(expected);
-		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
+		verify(this.chain, times(1)).resolveResource(this.exchange, file, this.locations);
 	}
 
 	@Test
 	void resolveResourceNotFound() {
 		String file = "something/something.js";
-		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
+		given(this.chain.resolveResource(this.exchange, file, this.locations)).willReturn(Mono.empty());
 
-		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
+		Resource actual = this.resolver
+				.resolveResource(this.exchange, file, this.locations, this.chain)
+				.block(TIMEOUT);
 
 		assertThat(actual).isNull();
-		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
-		verify(this.chain, never()).resolveResource(this.request, null, this.locations);
+		verify(this.chain, times(1)).resolveResource(this.exchange, file, this.locations);
+		verify(this.chain, never()).resolveResource(this.exchange, null, this.locations);
 	}
 
 	@Test
 	void resolveResourceWebJar() {
-		Resource expected = mock();
 		String file = "underscorejs/underscore.js";
-		String expectedPath = "underscorejs/1.8.3/underscore.js";
-		given(this.chain.resolveResource(this.request, expectedPath, this.locations)).willReturn(expected);
+		given(this.chain.resolveResource(this.exchange, file, this.locations)).willReturn(Mono.empty());
 
-		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
+		Resource expected = mock();
+		String expectedPath = "underscorejs/1.8.3/underscore.js";
+		given(this.chain.resolveResource(this.exchange, expectedPath, this.locations))
+				.willReturn(Mono.just(expected));
+
+		Resource actual = this.resolver
+				.resolveResource(this.exchange, file, this.locations, this.chain)
+				.block(TIMEOUT);
 
 		assertThat(actual).isEqualTo(expected);
-		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
+		verify(this.chain, times(1)).resolveResource(this.exchange, file, this.locations);
 	}
 
 }

@@ -18,7 +18,7 @@ package org.springframework.web.reactive.resource;
 
 import java.util.List;
 
-import org.webjars.WebJarAssetLocator;
+import org.webjars.WebJarVersionLocator;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
@@ -36,44 +36,33 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * <p>This also resolves resources for version agnostic HTTP requests {@code "GET /jquery/jquery.min.js"}.
  *
- * <p>This resolver requires the {@code org.webjars:webjars-locator-core} library
+ * <p>This resolver requires the {@code org.webjars:webjars-locator-lite} library
  * on the classpath and is automatically registered if that library is present.
  *
- * <p>Be aware that {@code WebJarAssetLocator} constructor performs a classpath scanning that
- * could slow down application startup.
- *
- * @author Rossen Stoyanchev
- * @author Brian Clozel
- * @since 5.0
+ * @author Sebastien Deleuze
+ * @since 6.2
  * @see <a href="https://www.webjars.org">webjars.org</a>
- * @deprecated as of Spring Framework 6.2 in favor of {@link LiteWebJarsResourceResolver}
  */
-@Deprecated(forRemoval = true)
-public class WebJarsResourceResolver extends AbstractResourceResolver {
+public class LiteWebJarsResourceResolver extends AbstractResourceResolver {
 
-	private static final String WEBJARS_LOCATION = "META-INF/resources/webjars/";
+	private static final int WEBJARS_LOCATION_LENGTH = WebJarVersionLocator.WEBJARS_PATH_PREFIX.length() + 1;
 
-	private static final int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
-
-
-	private final WebJarAssetLocator webJarAssetLocator;
-
+	private final WebJarVersionLocator webJarAssetLocator;
 
 	/**
-	 * Create a {@code WebJarsResourceResolver} with a default {@code WebJarAssetLocator} instance.
+	 * Create a {@code LiteWebJarsResourceResolver} with a default {@code WebJarVersionLocator} instance.
 	 */
-	public WebJarsResourceResolver() {
-		this(new WebJarAssetLocator());
+	public LiteWebJarsResourceResolver() {
+		this.webJarAssetLocator = new WebJarVersionLocator();
 	}
 
 	/**
-	 * Create a {@code WebJarsResourceResolver} with a custom {@code WebJarAssetLocator} instance,
-	 * e.g. with a custom index.
+	 * Create a {@code LiteWebJarsResourceResolver} with a custom {@code WebJarVersionLocator} instance,
+	 * e.g. with a custom cache implementation.
 	 */
-	public WebJarsResourceResolver(WebJarAssetLocator webJarAssetLocator) {
+	public LiteWebJarsResourceResolver(WebJarVersionLocator webJarAssetLocator) {
 		this.webJarAssetLocator = webJarAssetLocator;
 	}
-
 
 	@Override
 	protected Mono<Resource> resolveResourceInternal(@Nullable ServerWebExchange exchange,
@@ -114,7 +103,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 		if (endOffset != -1) {
 			String webjar = path.substring(startOffset, endOffset);
 			String partialPath = path.substring(endOffset + 1);
-			String webJarPath = this.webJarAssetLocator.getFullPathExact(webjar, partialPath);
+			String webJarPath = this.webJarAssetLocator.fullPath(webjar, partialPath);
 			if (webJarPath != null) {
 				return webJarPath.substring(WEBJARS_LOCATION_LENGTH);
 			}
