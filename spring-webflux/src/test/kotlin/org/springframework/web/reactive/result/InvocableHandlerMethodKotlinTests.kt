@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -249,6 +249,15 @@ class InvocableHandlerMethodKotlinTests {
 		assertHandlerResultValue(result, "foo-20")
 	}
 
+	@Test
+	fun genericParameter() {
+		val horse = Animal("horse")
+		this.resolvers.add(stubResolver(horse))
+		val method = AnimalController::handle.javaMethod!!
+		val result = invoke(AnimalController(), method, null)
+		assertHandlerResultValue(result, horse.name)
+	}
+
 
 	private fun invokeForResult(handler: Any, method: Method, vararg providedArgs: Any): HandlerResult? {
 		return invoke(handler, method, *providedArgs).block(Duration.ofSeconds(5))
@@ -378,6 +387,19 @@ class InvocableHandlerMethodKotlinTests {
 			return "${this.message}-$limit"
 		}
 	}
+
+	private abstract class GenericController<T : Named> {
+
+		fun handle(named: T) = named.name
+	}
+
+	private class AnimalController : GenericController<Animal>()
+
+	interface Named {
+		val name: String
+	}
+
+	data class Animal(override val name: String) : Named
 
 	@JvmInline
 	value class LongValueClass(val value: Long)
