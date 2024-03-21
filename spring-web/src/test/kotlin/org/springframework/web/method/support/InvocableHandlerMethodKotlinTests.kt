@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse
 
 /**
- * Kotlin unit tests for {@link InvocableHandlerMethod}.
+ * Kotlin unit tests for [InvocableHandlerMethod].
  *
  * @author Sebastien Deleuze
  */
@@ -134,6 +134,14 @@ class InvocableHandlerMethodKotlinTests {
 		Assertions.assertThat(value).isEqualTo("foo-20")
 	}
 
+	@Test
+	fun genericParameter() {
+		val horse = Animal("horse")
+		composite.addResolver(StubArgumentResolver(Animal::class.java, horse))
+		val value = getInvocable(AnimalHandler::class.java, Named::class.java).invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo(horse.name)
+	}
+
 	private fun getInvocable(clazz: Class<*>, vararg argTypes: Class<*>): InvocableHandlerMethod {
 		val method = ResolvableMethod.on(clazz).argTypes(*argTypes).resolveMethod()
 		val handlerMethod = InvocableHandlerMethod(clazz.constructors.first().newInstance(), method)
@@ -201,6 +209,19 @@ class InvocableHandlerMethodKotlinTests {
 			return "${this.message}-$limit"
 		}
 	}
+
+	private abstract class GenericHandler<T : Named> {
+
+		fun handle(named: T) = named.name
+	}
+
+	private class AnimalHandler : GenericHandler<Animal>()
+
+	interface Named {
+		val name: String
+	}
+
+	data class Animal(override val name: String) : Named
 
 	@JvmInline
 	value class LongValueClass(val value: Long)
