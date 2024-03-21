@@ -45,7 +45,6 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link RequestHeaderMethodArgumentResolver}.
@@ -132,7 +131,6 @@ class RequestHeaderMethodArgumentResolverTests {
 		servletRequest.addHeader("name", expected);
 
 		Object result = resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
-		assertThat(result).isInstanceOf(String[].class);
 		assertThat(result).isEqualTo(expected);
 	}
 
@@ -145,8 +143,8 @@ class RequestHeaderMethodArgumentResolverTests {
 
 	@Test
 	void resolveDefaultValueFromSystemProperty() throws Exception {
-		System.setProperty("systemProperty", "bar");
 		try {
+			System.setProperty("systemProperty", "bar");
 			Object result = resolver.resolveArgument(paramSystemProperty, null, webRequest, null);
 
 			assertThat(result).isEqualTo("bar");
@@ -161,8 +159,8 @@ class RequestHeaderMethodArgumentResolverTests {
 		String expected = "foo";
 		servletRequest.addHeader("bar", expected);
 
-		System.setProperty("systemProperty", "bar");
 		try {
+			System.setProperty("systemProperty", "bar");
 			Object result = resolver.resolveArgument(paramResolvedNameWithExpression, null, webRequest, null);
 
 			assertThat(result).isEqualTo(expected);
@@ -177,8 +175,8 @@ class RequestHeaderMethodArgumentResolverTests {
 		String expected = "foo";
 		servletRequest.addHeader("bar", expected);
 
-		System.setProperty("systemProperty", "bar");
 		try {
+			System.setProperty("systemProperty", "bar");
 			Object result = resolver.resolveArgument(paramResolvedNameWithPlaceholder, null, webRequest, null);
 
 			assertThat(result).isEqualTo(expected);
@@ -190,16 +188,17 @@ class RequestHeaderMethodArgumentResolverTests {
 
 	@Test
 	void missingParameterFromSystemPropertyThroughPlaceholder() {
-		String expected = "bar";
+		try {
+			String expected = "bar";
+			System.setProperty("systemProperty", expected);
 
-		System.setProperty("systemProperty", expected);
-
-		assertThatThrownBy(() ->
-				resolver.resolveArgument(paramResolvedNameWithPlaceholder, null, webRequest, null))
-				.isInstanceOf(MissingRequestHeaderException.class)
-				.extracting("headerName").isEqualTo(expected);
-
-		System.clearProperty("systemProperty");
+			assertThatExceptionOfType(MissingRequestHeaderException.class)
+					.isThrownBy(() -> resolver.resolveArgument(paramResolvedNameWithPlaceholder, null, webRequest, null))
+					.extracting("headerName").isEqualTo(expected);
+		}
+		finally {
+			System.clearProperty("systemProperty");
+		}
 	}
 
 	@Test
@@ -263,10 +262,10 @@ class RequestHeaderMethodArgumentResolverTests {
 
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setConversionService(new DefaultFormattingConversionService());
+		DefaultDataBinderFactory binderFactory = new DefaultDataBinderFactory(bindingInitializer);
 
-		assertThatThrownBy(() ->
-				resolver.resolveArgument(paramUuid, null, webRequest, new DefaultDataBinderFactory(bindingInitializer)))
-				.isInstanceOf(MethodArgumentTypeMismatchException.class)
+		assertThatExceptionOfType(MethodArgumentTypeMismatchException.class)
+				.isThrownBy(() -> resolver.resolveArgument(paramUuid, null, webRequest, binderFactory))
 				.extracting("propertyName").isEqualTo("name");
 	}
 
@@ -285,10 +284,10 @@ class RequestHeaderMethodArgumentResolverTests {
 
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setConversionService(new DefaultFormattingConversionService());
+		DefaultDataBinderFactory binderFactory = new DefaultDataBinderFactory(bindingInitializer);
 
-		assertThatExceptionOfType(MissingRequestHeaderException.class).isThrownBy(() ->
-				resolver.resolveArgument(paramUuid, null, webRequest,
-						new DefaultDataBinderFactory(bindingInitializer)));
+		assertThatExceptionOfType(MissingRequestHeaderException.class)
+				.isThrownBy(() -> resolver.resolveArgument(paramUuid, null, webRequest, binderFactory));
 	}
 
 	@Test
@@ -314,21 +313,23 @@ class RequestHeaderMethodArgumentResolverTests {
 
 	@Test
 	public void uuidPlaceholderConversionWithEmptyValue() {
-		String expected = "name";
-		servletRequest.addHeader(expected, "");
+		try {
+			String expected = "name";
+			servletRequest.addHeader(expected, "");
 
-		System.setProperty("systemProperty", expected);
+			System.setProperty("systemProperty", expected);
 
-		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
-		bindingInitializer.setConversionService(new DefaultFormattingConversionService());
+			ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
+			bindingInitializer.setConversionService(new DefaultFormattingConversionService());
+			DefaultDataBinderFactory binderFactory = new DefaultDataBinderFactory(bindingInitializer);
 
-		assertThatThrownBy(() ->
- 			    resolver.resolveArgument(paramUuidPlaceholder, null, webRequest,
-						new DefaultDataBinderFactory(bindingInitializer)))
-				.isInstanceOf(MissingRequestHeaderException.class)
-				.extracting("headerName").isEqualTo(expected);
-
-		System.clearProperty("systemProperty");
+			assertThatExceptionOfType(MissingRequestHeaderException.class)
+					.isThrownBy(() -> resolver.resolveArgument(paramUuidPlaceholder, null, webRequest, binderFactory))
+					.extracting("headerName").isEqualTo(expected);
+		}
+		finally {
+			System.clearProperty("systemProperty");
+		}
 	}
 
 	void params(
