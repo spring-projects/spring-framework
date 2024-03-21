@@ -426,7 +426,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					CoroutinesUtils.asFlow(returnValue) :
 					CoroutinesUtils.awaitSingleOrNull(returnValue, arguments[arguments.length - 1]);
 		}
-		return returnValue;
+		return ResponseEntityUtils.adaptReturnValue(method, returnValue);
 	}
 
 

@@ -238,7 +238,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				return COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()) ?
 						CoroutinesUtils.asFlow(retVal) : CoroutinesUtils.awaitSingleOrNull(retVal, args[args.length - 1]);
 			}
-			return retVal;
+			return ResponseEntityUtils.adaptReturnValue(method, retVal);
 		}
 		finally {
 			if (target != null && !targetSource.isStatic()) {
