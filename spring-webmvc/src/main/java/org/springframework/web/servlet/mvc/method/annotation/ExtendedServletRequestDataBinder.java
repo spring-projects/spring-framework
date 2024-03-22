@@ -112,6 +112,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 		}
 
 		@Override
+		@Nullable
 		protected Object getRequestParameter(String name, Class<?> type) {
 			Object value = super.getRequestParameter(name, type);
 			if (value == null) {

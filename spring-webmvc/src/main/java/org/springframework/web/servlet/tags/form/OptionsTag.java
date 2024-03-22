@@ -323,6 +323,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * since we're dealing with multiple HTML elements.
 	 */
 	@Override
+	@Nullable
 	protected String resolveId() throws JspException {
 		Object id = evaluate("id", getId());
 		if (id != null) {
