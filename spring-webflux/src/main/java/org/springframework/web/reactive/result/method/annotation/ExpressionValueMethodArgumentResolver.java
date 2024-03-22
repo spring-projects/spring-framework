@@ -63,6 +63,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueSyn
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		// No name to resolve
 		return null;
