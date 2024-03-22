@@ -127,6 +127,15 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 
+	/**
+	 * Does this node represent a null-safe index operation?
+	 * @since 6.2
+	 */
+	@Override
+	public final boolean isNullSafe() {
+		return this.nullSafe;
+	}
+
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		return getValueRef(state).getValue();
