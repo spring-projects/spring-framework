@@ -76,6 +76,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	/**
 	 * Does this node represent a null-safe property or field reference?
 	 */
+	@Override
 	public boolean isNullSafe() {
 		return this.nullSafe;
 	}
