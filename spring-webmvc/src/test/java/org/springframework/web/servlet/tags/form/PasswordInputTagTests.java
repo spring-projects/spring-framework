@@ -31,10 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 class PasswordInputTagTests extends InputTagTests {
 
-	/**
-	 * https://jira.spring.io/browse/SPR-2866
-	 */
-	@Test
+	@Test // SPR-2866
 	void passwordValueIsNotRenderedByDefault() throws Exception {
 		this.getTag().setPath("name");
 
@@ -48,10 +45,7 @@ class PasswordInputTagTests extends InputTagTests {
 		assertValueAttribute(output, "");
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-2866
-	 */
-	@Test
+	@Test // SPR-2866
 	void passwordValueIsRenderedIfShowPasswordAttributeIsSetToTrue() throws Exception {
 		this.getTag().setPath("name");
 		this.getPasswordTag().setShowPassword(true);
@@ -66,10 +60,7 @@ class PasswordInputTagTests extends InputTagTests {
 		assertValueAttribute(output, "Rob");
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-2866
-	 */
-	@Test
+	@Test // >SPR-2866
 	void passwordValueIsNotRenderedIfShowPasswordAttributeIsSetToFalse() throws Exception {
 		this.getTag().setPath("name");
 		this.getPasswordTag().setShowPassword(false);

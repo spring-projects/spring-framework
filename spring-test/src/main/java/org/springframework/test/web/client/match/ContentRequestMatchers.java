@@ -19,6 +19,8 @@ package org.springframework.test.web.client.match;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +61,13 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
  * @since 3.2
  */
 public class ContentRequestMatchers {
+
+	/**
+	 * The encoding for parsing multipart content when the sender hasn't specified it.
+	 * @see DiskFileItemFactory#setDefaultCharset(String)
+	 */
+	private static final Charset DEFAULT_MULTIPART_ENCODING = StandardCharsets.UTF_8;
+
 
 	private final XmlExpectationsHelper xmlHelper;
 
@@ -204,7 +213,15 @@ public class ContentRequestMatchers {
 	 * @since 5.3
 	 */
 	public RequestMatcher multipartData(MultiValueMap<String, ?> expectedMap) {
-		return multipartData(expectedMap, true);
+		return multipartData(expectedMap, DEFAULT_MULTIPART_ENCODING, true);
+	}
+
+	/**
+	 * Variant of {@link #multipartData(MultiValueMap)} with a defaultCharset.
+	 * @since 6.2
+	 */
+	public RequestMatcher multipartData(MultiValueMap<String, ?> expectedMap, Charset defaultCharset) {
+		return multipartData(expectedMap, defaultCharset, true);
 	}
 
 	/**
@@ -219,13 +236,15 @@ public class ContentRequestMatchers {
 	public RequestMatcher multipartDataContains(Map<String, ?> expectedMap) {
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>(expectedMap.size());
 		expectedMap.forEach(map::add);
-		return multipartData(map, false);
+		return multipartData(map, DEFAULT_MULTIPART_ENCODING, false);
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	private RequestMatcher multipartData(MultiValueMap<String, ?> expectedMap, boolean containsExactly) {
+	private RequestMatcher multipartData(
+			MultiValueMap<String, ?> expectedMap, Charset defaultCharset, boolean containsExactly) {
+
 		return request -> {
-			MultiValueMap<String, ?> actualMap = MultipartHelper.parse((MockClientHttpRequest) request);
+			MultiValueMap<String, ?> actualMap = MultipartHelper.parse((MockClientHttpRequest) request, defaultCharset);
 			if (containsExactly) {
 				assertEquals("Multipart request content: " + actualMap, expectedMap.size(), actualMap.size());
 			}
@@ -364,10 +383,12 @@ public class ContentRequestMatchers {
 
 	private static class MultipartHelper {
 
-		public static MultiValueMap<String, ?> parse(MockClientHttpRequest request) {
+		public static MultiValueMap<String, ?> parse(MockClientHttpRequest request, Charset defaultCharset) {
 			try {
 				FileUpload fileUpload = new FileUpload();
-				fileUpload.setFileItemFactory(new DiskFileItemFactory());
+				DiskFileItemFactory factory = new DiskFileItemFactory();
+				factory.setDefaultCharset(defaultCharset.name());
+				fileUpload.setFileItemFactory(factory);
 
 				List<FileItem> fileItems = fileUpload.parseRequest(new UploadContext() {
 					private final byte[] body = request.getBodyAsBytes();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.Map;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
@@ -46,6 +47,12 @@ public interface ClientHttpRequest extends ReactiveHttpOutputMessage {
 	 * Return a mutable map of request cookies to send to the server.
 	 */
 	MultiValueMap<String, HttpCookie> getCookies();
+
+	/**
+	 * Return a mutable map of the request attributes.
+	 * @since 6.2
+	 */
+	Map<String, Object> getAttributes();
 
 	/**
 	 * Return the request from the underlying HTTP library.

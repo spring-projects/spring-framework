@@ -71,7 +71,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.util.HashMap<?, ?>", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.util.HashMap<?, ?>", FieldAnnotation.class.getCanonicalName());
 		assertThat(expression.getValue(this)).isEqualTo(property);
 		assertThat(expression.getValue(this, Map.class)).isEqualTo(property);
 		expression = parser.parseExpression("property['foo']");
@@ -106,7 +106,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.util.HashMap<?, ?>", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.util.HashMap<?, ?>", FieldAnnotation.class.getCanonicalName());
 		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property['foo']");
 		assertThat(expression.getValue(this)).isEqualTo("bar");
@@ -151,7 +151,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getCanonicalName());
 		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property[0]");
 		assertThat(expression.getValue(this)).isEqualTo("bar");
@@ -165,7 +165,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getCanonicalName());
 		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property[0]");
 		assertThat(expression.getValue(this)).isEqualTo(3);
@@ -180,7 +180,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getCanonicalName());
 		assertThat(expression.getValue(this)).isEqualTo(property);
 
 		Expression indexExpression = parser.parseExpression("property[0]");
@@ -257,7 +257,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.lang.Object", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.lang.Object", FieldAnnotation.class.getCanonicalName());
 		assertThat(expression.getValue(this)).isNull();
 
 		Expression indexExpression = parser.parseExpression("property[0]");
@@ -274,7 +274,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getCanonicalName());
 		assertThat(expression.getValue(this)).isEqualTo(property);
 
 		Expression indexExpression = parser.parseExpression("property[0]");
@@ -306,7 +306,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.lang.String[]", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.lang.String[]", FieldAnnotation.class.getCanonicalName());
 		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property[0]");
 		assertThat(expression.getValue(this)).isEqualTo("bar");
@@ -330,7 +330,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listNotGeneric");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.util.ArrayList<?>", FieldAnnotation.class.getCanonicalName());
 		assertThat(expression.getValue(this, String.class)).isEqualTo("5,6");
 	}
 
@@ -339,7 +339,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listNotGeneric");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.util.List<?>", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.util.List<?>", FieldAnnotation.class.getCanonicalName());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -351,7 +351,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("mapNotGeneric");
 		assertThat(expression.getValueTypeDescriptor(this)).asString()
-				.isEqualTo("@%s java.util.HashMap<?, ?>", FieldAnnotation.class.getName());
+				.isEqualTo("@%s java.util.HashMap<?, ?>", FieldAnnotation.class.getCanonicalName());
 	}
 
 	@Test

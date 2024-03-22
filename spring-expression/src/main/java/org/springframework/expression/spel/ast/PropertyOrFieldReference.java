@@ -134,7 +134,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				// 'simple' object
 				try {
 					if (isWritableProperty(this.name,contextObject, evalContext)) {
-						Class<?> clazz = result.getTypeDescriptor().getType();
+						Class<?> clazz = resultDescriptor.getType();
 						Object newObject = ReflectionUtils.accessibleConstructor(clazz).newInstance();
 						writeProperty(contextObject, evalContext, this.name, newObject);
 						result = readProperty(contextObject, evalContext, this.name);
@@ -142,11 +142,11 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				}
 				catch (InvocationTargetException ex) {
 					throw new SpelEvaluationException(getStartPosition(), ex.getTargetException(),
-							SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT, result.getTypeDescriptor().getType());
+							SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT, resultDescriptor.getType());
 				}
 				catch (Throwable ex) {
 					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT, result.getTypeDescriptor().getType());
+							SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT, resultDescriptor.getType());
 				}
 			}
 		}

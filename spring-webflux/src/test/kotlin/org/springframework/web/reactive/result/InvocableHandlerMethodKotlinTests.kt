@@ -249,6 +249,15 @@ class InvocableHandlerMethodKotlinTests {
 		assertHandlerResultValue(result, "foo-20")
 	}
 
+	@Test
+	fun genericParameter() {
+		val horse = Animal("horse")
+		this.resolvers.add(stubResolver(horse))
+		val method = AnimalController::handle.javaMethod!!
+		val result = invoke(AnimalController(), method, null)
+		assertHandlerResultValue(result, horse.name)
+	}
+
 
 	private fun invokeForResult(handler: Any, method: Method, vararg providedArgs: Any): HandlerResult? {
 		return invoke(handler, method, *providedArgs).block(Duration.ofSeconds(5))
@@ -378,6 +387,19 @@ class InvocableHandlerMethodKotlinTests {
 			return "${this.message}-$limit"
 		}
 	}
+
+	private abstract class GenericController<T : Named> {
+
+		fun handle(named: T) = named.name
+	}
+
+	private class AnimalController : GenericController<Animal>()
+
+	interface Named {
+		val name: String
+	}
+
+	data class Animal(override val name: String) : Named
 
 	@JvmInline
 	value class LongValueClass(val value: Long)

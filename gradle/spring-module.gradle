@@ -6,12 +6,15 @@ apply plugin: 'org.springframework.build.optional-dependencies'
 // apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'me.champeau.jmh'
 apply from: "$rootDir/gradle/publications.gradle"
+apply plugin: 'net.ltgt.errorprone'
 
 dependencies {
 	jmh 'org.openjdk.jmh:jmh-core:1.37'
 	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 	jmh 'org.openjdk.jmh:jmh-generator-bytecode:1.37'
 	jmh 'net.sf.jopt-simple:jopt-simple'
+	errorprone 'com.uber.nullaway:nullaway:0.10.24'
+	errorprone 'com.google.errorprone:error_prone_core:2.9.0'
 }
 
 pluginManager.withPlugin("kotlin") {
@@ -109,3 +112,18 @@ publishing {
 // Disable publication of test fixture artifacts.
 components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
 components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }
+
+tasks.withType(JavaCompile).configureEach {
+    options.errorprone {
+    	disableAllChecks = true
+        option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
+        option("NullAway:AnnotatedPackages", "org.springframework.core,org.springframework.expression")
+        option("NullAway:UnannotatedSubPackages", "org.springframework.instrument,org.springframework.context.index," +
+				"org.springframework.asm,org.springframework.cglib,org.springframework.objenesis," +
+				"org.springframework.javapoet,org.springframework.aot.nativex.substitution")
+    }
+}
+tasks.compileJava {
+    // The check defaults to a warning, bump it up to an error for the main sources
+    options.errorprone.error("NullAway")
+}

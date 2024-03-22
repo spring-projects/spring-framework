@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
  * @author Sam Brannen
+ * @author Hyoungjune Kim
  * @since 3.0
  * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
@@ -312,6 +313,18 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_XML_VALUE = "application/xml";
 
 	/**
+	 * Public constant media type for {@code application/yaml}.
+	 * @since 6.2
+	 */
+	public static final MediaType APPLICATION_YAML;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_YAML}.
+	 * @since 6.2
+	 */
+	public static final String APPLICATION_YAML_VALUE = "application/yaml";
+
+	/**
 	 * Public constant media type for {@code image/gif}.
 	 */
 	public static final MediaType IMAGE_GIF;
@@ -454,6 +467,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_STREAM_JSON = new MediaType("application", "stream+json");
 		APPLICATION_XHTML_XML = new MediaType("application", "xhtml+xml");
 		APPLICATION_XML = new MediaType("application", "xml");
+		APPLICATION_YAML = new MediaType("application", "yaml");
 		IMAGE_GIF = new MediaType("image", "gif");
 		IMAGE_JPEG = new MediaType("image", "jpeg");
 		IMAGE_PNG = new MediaType("image", "png");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty5.NettyOutbound;
+import reactor.netty5.channel.ChannelOperations;
 import reactor.netty5.http.client.HttpClientRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -57,7 +58,9 @@ class ReactorNetty2ClientHttpRequest extends AbstractClientHttpRequest implement
 	private final Netty5DataBufferFactory bufferFactory;
 
 
-	public ReactorNetty2ClientHttpRequest(HttpMethod method, URI uri, HttpClientRequest request, NettyOutbound outbound) {
+	public ReactorNetty2ClientHttpRequest(
+			HttpMethod method, URI uri, HttpClientRequest request, NettyOutbound outbound) {
+
 		this.httpMethod = method;
 		this.uri = uri;
 		this.request = request;
@@ -134,6 +137,19 @@ class ReactorNetty2ClientHttpRequest extends AbstractClientHttpRequest implement
 			DefaultHttpCookiePair cookie = new DefaultHttpCookiePair(value.getName(), value.getValue());
 			this.request.addCookie(cookie);
 		}));
+	}
+
+	/**
+	 * Saves the {@link #getAttributes() request attributes} to the
+	 * {@link reactor.netty.channel.ChannelOperations#channel() channel} as a single map
+	 * attribute under the key {@link ReactorNetty2ClientHttpConnector#ATTRIBUTES_KEY}.
+	 */
+	@Override
+	protected void applyAttributes() {
+		if (!getAttributes().isEmpty()) {
+			((ChannelOperations<?, ?>) this.request).channel()
+					.attr(ReactorNetty2ClientHttpConnector.ATTRIBUTES_KEY).set(getAttributes());
+		}
 	}
 
 	@Override

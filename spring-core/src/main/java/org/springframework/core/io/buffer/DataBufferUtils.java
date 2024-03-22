@@ -71,7 +71,6 @@ public abstract class DataBufferUtils {
 	private static final int DEFAULT_CHUNK_SIZE = 1024;
 
 
-
 	//---------------------------------------------------------------------
 	// Reading
 	//---------------------------------------------------------------------
@@ -1083,7 +1082,7 @@ public abstract class DataBufferUtils {
 			attachment.iterator().close();
 			DataBuffer dataBuffer = attachment.dataBuffer();
 
-			if (this.state.get().equals(State.DISPOSED)) {
+			if (this.state.get() == State.DISPOSED) {
 				release(dataBuffer);
 				closeChannel(this.channel);
 				return;
@@ -1114,13 +1113,13 @@ public abstract class DataBufferUtils {
 		}
 
 		@Override
-		public void failed(Throwable exc, Attachment attachment) {
+		public void failed(Throwable ex, Attachment attachment) {
 			attachment.iterator().close();
 			release(attachment.dataBuffer());
 
 			closeChannel(this.channel);
 			this.state.set(State.DISPOSED);
-			this.sink.error(exc);
+			this.sink.error(ex);
 		}
 
 		private enum State {
@@ -1179,7 +1178,6 @@ public abstract class DataBufferUtils {
 		public Context currentContext() {
 			return Context.of(this.sink.contextView());
 		}
-
 	}
 
 
@@ -1274,13 +1272,13 @@ public abstract class DataBufferUtils {
 		}
 
 		@Override
-		public void failed(Throwable exc, Attachment attachment) {
+		public void failed(Throwable ex, Attachment attachment) {
 			attachment.iterator().close();
 
 			this.sink.next(attachment.dataBuffer());
 			this.writing.set(false);
 
-			this.sink.error(exc);
+			this.sink.error(ex);
 		}
 
 		@Override
@@ -1289,9 +1287,6 @@ public abstract class DataBufferUtils {
 		}
 
 		private record Attachment(ByteBuffer byteBuffer, DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator) {}
-
-
 	}
-
 
 }

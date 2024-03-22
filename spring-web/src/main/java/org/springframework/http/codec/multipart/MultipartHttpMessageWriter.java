@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -283,7 +283,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 				.filter(partWriter -> partWriter.canWrite(finalBodyType, contentType))
 				.findFirst();
 
-		if (!writer.isPresent()) {
+		if (writer.isEmpty()) {
 			return Flux.error(new CodecException("No suitable writer found for part: " + name));
 		}
 

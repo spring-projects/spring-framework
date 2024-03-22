@@ -152,7 +152,22 @@ Java::
 
 	}
 ----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration(proxyBeanMethods = false)
+	class DataSourceConfiguration {
+
+		@Bean
+		fun dataSource() = SimpleDataSource()
+
+	}
+----
 ======
+
+WARNING: Kotlin class names with backticks that use invalid Java identifiers (not starting with a letter, containing spaces, etc.) are not supported.
 
 Since there isn't any particular condition on this class, `dataSourceConfiguration` and `dataSource` are identified as candidates.
 The AOT engine will convert the configuration class above to code similar to the following:

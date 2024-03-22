@@ -265,6 +265,9 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 					requestCookies.add(name, cookie);
 				}));
 			}
+
+			request.getAttributes().putAll(this.attributes);
+
 			if (this.httpRequestConsumer != null) {
 				this.httpRequestConsumer.accept(request);
 			}

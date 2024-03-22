@@ -9,6 +9,7 @@ plugins {
 	id 'de.undercouch.download' version '5.4.0'
 	id 'me.champeau.jmh' version '0.7.2' apply false
 	id 'me.champeau.mrjar' version '0.1.1'
+	id "net.ltgt.errorprone" version "3.1.0" apply false
 }
 
 ext {

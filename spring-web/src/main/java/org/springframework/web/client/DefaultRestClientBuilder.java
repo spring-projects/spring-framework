@@ -48,6 +48,7 @@ import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessag
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -60,6 +61,7 @@ import org.springframework.web.util.UriTemplateHandler;
  * Default implementation of {@link RestClient.Builder}.
  *
  * @author Arjen Poutsma
+ * @author Hyoungjune Kim
  * @since 6.1
  */
 final class DefaultRestClientBuilder implements RestClient.Builder {
@@ -86,6 +88,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private static final boolean jackson2CborPresent;
 
+	private static final boolean jackson2YamlPresent;
+
 
 	static {
 		ClassLoader loader = DefaultRestClientBuilder.class.getClassLoader();
@@ -101,6 +105,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", loader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", loader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", loader);
+		jackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", loader);
 	}
 
 	@Nullable
@@ -393,6 +398,9 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			}
 			if (jackson2CborPresent) {
 				this.messageConverters.add(new MappingJackson2CborHttpMessageConverter());
+			}
+			if (jackson2YamlPresent) {
+				this.messageConverters.add(new MappingJackson2YamlHttpMessageConverter());
 			}
 		}
 		return this.messageConverters;

@@ -103,63 +103,6 @@ class WebContentInterceptorTests {
 		assertThat(cacheControlHeaders).isEmpty();
 	}
 
-	@PathPatternsParameterizedTest // SPR-13252, SPR-14053
-	void cachingConfigAndPragmaHeader(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
-		response.setHeader("Pragma", "no-cache");
-		response.setHeader("Expires", "0");
-
-		interceptor.setCacheSeconds(10);
-		interceptor.preHandle(requestFactory.apply("/"), response, handler);
-
-		assertThat(response.getHeader("Pragma")).isEmpty();
-		assertThat(response.getHeader("Expires")).isEmpty();
-	}
-
-	@SuppressWarnings("deprecation")
-	@PathPatternsParameterizedTest // SPR-13252, SPR-14053
-	void http10CachingConfigAndPragmaHeader(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
-		response.setHeader("Pragma", "no-cache");
-		response.setHeader("Expires", "0");
-
-		interceptor.setCacheSeconds(10);
-		interceptor.setAlwaysMustRevalidate(true);
-		interceptor.preHandle(requestFactory.apply("/"), response, handler);
-
-		assertThat(response.getHeader("Pragma")).isEmpty();
-		assertThat(response.getHeader("Expires")).isEmpty();
-	}
-
-	@SuppressWarnings("deprecation")
-	@PathPatternsParameterizedTest
-	void http10CachingConfigAndSpecificMapping(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
-		interceptor.setCacheSeconds(0);
-		interceptor.setUseExpiresHeader(true);
-		interceptor.setAlwaysMustRevalidate(true);
-		Properties mappings = new Properties();
-		mappings.setProperty("/*/*.cache.html", "10");
-		interceptor.setCacheMappings(mappings);
-
-		MockHttpServletRequest request = requestFactory.apply("/foo/page.html");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		interceptor.preHandle(request, response, handler);
-
-		Iterable<String> expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders).hasSize(1);
-		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders).containsExactly("no-cache", "no-store");
-		Iterable<String> pragmaHeaders = response.getHeaders("Pragma");
-		assertThat(pragmaHeaders).containsExactly("no-cache");
-
-		request = requestFactory.apply("/foo/page.cache.html");
-		response = new MockHttpServletResponse();
-		interceptor.preHandle(request, response, handler);
-
-		expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders).hasSize(1);
-		cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders).containsExactly("max-age=10, must-revalidate");
-	}
-
 	@Test
 	void throwsExceptionWithNullPathMatcher() {
 		assertThatIllegalArgumentException()

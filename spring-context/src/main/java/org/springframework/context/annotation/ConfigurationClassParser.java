@@ -49,6 +49,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.context.annotation.DeferredImportSelector.Group;
 import org.springframework.core.OrderComparator;
@@ -102,6 +103,10 @@ class ConfigurationClassParser {
 
 	private static final Predicate<String> DEFAULT_EXCLUSION_FILTER = className ->
 			(className.startsWith("java.lang.annotation.") || className.startsWith("org.springframework.stereotype."));
+
+	private static final Predicate<Condition> REGISTER_BEAN_CONDITION_FILTER = condition ->
+			(condition instanceof ConfigurationCondition configurationCondition
+					&& ConfigurationPhase.REGISTER_BEAN.equals(configurationCondition.getConfigurationPhase()));
 
 	private static final Comparator<DeferredImportSelectorHolder> DEFERRED_IMPORT_COMPARATOR =
 			(o1, o2) -> AnnotationAwareOrderComparator.INSTANCE.compare(o1.getImportSelector(), o2.getImportSelector());
@@ -315,6 +320,11 @@ class ConfigurationClassParser {
 		}
 
 		if (!componentScans.isEmpty()) {
+			List<Condition> registerBeanConditions = collectRegisterBeanConditions(configClass);
+			if (!registerBeanConditions.isEmpty()) {
+				throw new ApplicationContextException(
+						"Component scan could not be used with conditions in REGISTER_BEAN phase: " + registerBeanConditions);
+			}
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
@@ -678,6 +688,27 @@ class ConfigurationClassParser {
 			}
 		}
 		return new SourceClass(this.metadataReaderFactory.getMetadataReader(className));
+	}
+
+	private List<Condition> collectRegisterBeanConditions(ConfigurationClass configurationClass) {
+		AnnotationMetadata metadata = configurationClass.getMetadata();
+		List<Condition> allConditions = new ArrayList<>(this.conditionEvaluator.collectConditions(metadata));
+		ConfigurationClass enclosingConfigurationClass = getEnclosingConfigurationClass(configurationClass);
+		if (enclosingConfigurationClass != null) {
+			allConditions.addAll(this.conditionEvaluator.collectConditions(enclosingConfigurationClass.getMetadata()));
+		}
+		return allConditions.stream().filter(REGISTER_BEAN_CONDITION_FILTER).toList();
+	}
+
+	@Nullable
+	private ConfigurationClass getEnclosingConfigurationClass(ConfigurationClass configurationClass) {
+		String enclosingClassName = configurationClass.getMetadata().getEnclosingClassName();
+		if (enclosingClassName != null) {
+			return configurationClass.getImportedBy().stream()
+					.filter(candidate -> enclosingClassName.equals(candidate.getMetadata().getClassName()))
+					.findFirst().orElse(null);
+		}
+		return null;
 	}
 
 

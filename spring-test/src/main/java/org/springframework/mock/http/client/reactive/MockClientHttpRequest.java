@@ -120,6 +120,10 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
+	protected void applyAttributes() {
+	}
+
+	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return doCommit(() -> Mono.defer(() -> this.writeHandler.apply(Flux.from(body))));
 	}

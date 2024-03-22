@@ -34,6 +34,7 @@ import java.util.SortedSet;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 
 /**
@@ -71,6 +72,7 @@ public abstract class CollectionUtils {
 	 * @param map the Map to check
 	 * @return whether the given Map is empty
 	 */
+	@Contract("null -> true")
 	public static boolean isEmpty(@Nullable Map<?, ?> map) {
 		return (map == null || map.isEmpty());
 	}

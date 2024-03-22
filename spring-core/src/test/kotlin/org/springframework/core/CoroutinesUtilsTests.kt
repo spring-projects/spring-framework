@@ -226,6 +226,16 @@ class CoroutinesUtilsTests {
 		}
 	}
 
+	@Test
+	fun invokeSuspendingFunctionWithGenericParameter() {
+		val method = GenericController::class.java.declaredMethods.first { it.name.startsWith("handle") }
+		val horse = Animal("horse")
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, AnimalController(), horse, null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingle()).isEqualTo(horse.name)
+		}
+	}
+
 	suspend fun suspendingFunction(value: String): String {
 		delay(1)
 		return value
@@ -292,6 +302,22 @@ class CoroutinesUtilsTests {
 		delay(1)
 		return "${this.message}-$limit"
 	}
+
+	interface Named {
+		val name: String
+	}
+
+	data class Animal(override val name: String) : Named
+
+	abstract class GenericController<T : Named> {
+
+		suspend fun handle(named: T): String {
+			delay(1)
+			return named.name;
+		}
+	}
+
+	private class AnimalController : GenericController<Animal>()
 
 	@JvmInline
 	value class ValueClass(val value: String)

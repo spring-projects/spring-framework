@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 class RequestPredicatesTests {
 
@@ -312,6 +314,32 @@ class RequestPredicatesTests {
 		assertThat(predicate.test(request)).isFalse();
 
 		uri = URI.create("https://localhost/file.foo");
+		mockRequest = MockServerHttpRequest.method(HttpMethod.GET, uri).build();
+		request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isFalse();
+	}
+
+	@Test
+	void pathExtensionPredicate() {
+		List<String> extensions = List.of("foo", "bar");
+		RequestPredicate predicate = RequestPredicates.pathExtension(extensions::contains);
+
+		URI uri = URI.create("https://localhost/file.foo");
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.method(HttpMethod.GET, uri).build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isTrue();
+
+		uri = URI.create("https://localhost/file.bar");
+		mockRequest = MockServerHttpRequest.method(HttpMethod.GET, uri).build();
+		request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isTrue();
+
+		uri = URI.create("https://localhost/file");
+		mockRequest = MockServerHttpRequest.method(HttpMethod.GET, uri).build();
+		request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+		assertThat(predicate.test(request)).isFalse();
+
+		uri = URI.create("https://localhost/file.baz");
 		mockRequest = MockServerHttpRequest.method(HttpMethod.GET, uri).build();
 		request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		assertThat(predicate.test(request)).isFalse();

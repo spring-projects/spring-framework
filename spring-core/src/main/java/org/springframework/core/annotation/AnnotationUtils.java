@@ -650,11 +650,10 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 
-		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPERCLASS)
-				.stream()
+		MergedAnnotation<?> merged = MergedAnnotations.from(clazz, SearchStrategy.SUPERCLASS).stream()
 				.filter(MergedAnnotationPredicates.typeIn(annotationTypes).and(MergedAnnotation::isDirectlyPresent))
-				.map(MergedAnnotation::getSource)
 				.findFirst().orElse(null);
+		return (merged != null && merged.getSource() instanceof Class<?> sourceClass ? sourceClass : null);
 	}
 
 	/**
@@ -985,8 +984,12 @@ public abstract class AnnotationUtils {
 		}
 	}
 
-	private static Object getAttributeValueForMirrorResolution(Method attribute, Object attributes) {
-		Object result = ((AnnotationAttributes) attributes).get(attribute.getName());
+	@Nullable
+	private static Object getAttributeValueForMirrorResolution(Method attribute, @Nullable Object attributes) {
+		if (!(attributes instanceof AnnotationAttributes annotationAttributes)) {
+			return null;
+		}
+		Object result = annotationAttributes.get(attribute.getName());
 		return (result instanceof DefaultValueHolder defaultValueHolder ? defaultValueHolder.defaultValue : result);
 	}
 

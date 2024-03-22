@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * An extension of {@link org.springframework.messaging.simp.stomp.StompDecoder}
- * that buffers content remaining in the input ByteBuffer after the parent
- * class has read all (complete) STOMP frames from it. The remaining content
- * represents an incomplete STOMP frame. When called repeatedly with additional
- * data, the decode method returns one or more messages or, if there is not
- * enough data still, continues to buffer.
+ * Uses {@link org.springframework.messaging.simp.stomp.StompDecoder} to decode
+ * a {@link ByteBuffer} to one or more STOMP message. If the message is incomplete,
+ * unused content is buffered and combined with the next input buffer, or if there
+ * is not enough data still, continues to buffer.
  *
  * <p>A single instance of this decoder can be invoked repeatedly to read all
  * messages from a single stream (e.g. WebSocket session) as long as decoding

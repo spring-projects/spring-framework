@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,19 +115,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
-	 * Create a new, empty {@link AnnotationAttributes} instance for the
-	 * specified {@code annotationType}.
-	 * @param annotationType the annotation type name represented by this
-	 * {@code AnnotationAttributes} instance; never {@code null}
-	 * @param classLoader the ClassLoader to try to load the annotation type on,
-	 * or {@code null} to just store the annotation type name
-	 * @since 4.3.2
-	 */
-	public AnnotationAttributes(String annotationType, @Nullable ClassLoader classLoader) {
-		this(getAnnotationType(annotationType, classLoader), false);
-	}
-
-	/**
 	 * Create a possibly already validated new, empty
 	 * {@link AnnotationAttributes} instance for the specified
 	 * {@code annotationType}.
@@ -143,6 +130,21 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		this.validated = validated;
 	}
 
+	/**
+	 * Create a new, empty {@link AnnotationAttributes} instance for the
+	 * specified {@code annotationType}.
+	 * @param annotationType the annotation type name represented by this
+	 * {@code AnnotationAttributes} instance; never {@code null}
+	 * @param classLoader the ClassLoader to try to load the annotation type on,
+	 * or {@code null} to just store the annotation type name
+	 * @since 4.3.2
+	 */
+	public AnnotationAttributes(String annotationType, @Nullable ClassLoader classLoader) {
+		Assert.notNull(annotationType, "'annotationType' must not be null");
+		this.annotationType = getAnnotationType(annotationType, classLoader);
+		this.displayName = annotationType;
+		this.validated = false;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Nullable
@@ -349,39 +351,29 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	private <T> T getRequiredAttribute(String attributeName, Class<T> expectedType) {
 		Assert.hasText(attributeName, "'attributeName' must not be null or empty");
 		Object value = get(attributeName);
-		assertAttributePresence(attributeName, value);
-		assertNotException(attributeName, value);
+		if (value == null) {
+			throw new IllegalArgumentException(String.format(
+					"Attribute '%s' not found in attributes for annotation [%s]",
+					attributeName, this.displayName));
+		}
+		if (value instanceof Throwable throwable) {
+			throw new IllegalArgumentException(String.format(
+					"Attribute '%s' for annotation [%s] was not resolvable due to exception [%s]",
+					attributeName, this.displayName, value), throwable);
+		}
 		if (!expectedType.isInstance(value) && expectedType.isArray() &&
 				expectedType.componentType().isInstance(value)) {
 			Object array = Array.newInstance(expectedType.componentType(), 1);
 			Array.set(array, 0, value);
 			value = array;
 		}
-		assertAttributeType(attributeName, value, expectedType);
-		return (T) value;
-	}
-
-	private void assertAttributePresence(String attributeName, Object attributeValue) {
-		Assert.notNull(attributeValue, () -> String.format(
-				"Attribute '%s' not found in attributes for annotation [%s]",
-				attributeName, this.displayName));
-	}
-
-	private void assertNotException(String attributeName, Object attributeValue) {
-		if (attributeValue instanceof Throwable throwable) {
-			throw new IllegalArgumentException(String.format(
-					"Attribute '%s' for annotation [%s] was not resolvable due to exception [%s]",
-					attributeName, this.displayName, attributeValue), throwable);
-		}
-	}
-
-	private void assertAttributeType(String attributeName, Object attributeValue, Class<?> expectedType) {
-		if (!expectedType.isInstance(attributeValue)) {
+		if (!expectedType.isInstance(value)) {
 			throw new IllegalArgumentException(String.format(
 					"Attribute '%s' is of type %s, but %s was expected in attributes for annotation [%s]",
-					attributeName, attributeValue.getClass().getSimpleName(), expectedType.getSimpleName(),
+					attributeName, value.getClass().getSimpleName(), expectedType.getSimpleName(),
 					this.displayName));
 		}
+		return (T) value;
 	}
 
 	@Override

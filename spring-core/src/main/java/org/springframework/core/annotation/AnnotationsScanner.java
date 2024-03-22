@@ -127,29 +127,31 @@ abstract class AnnotationsScanner {
 				if (result != null) {
 					return result;
 				}
-				Annotation[] declaredAnnotations = getDeclaredAnnotations(source, true);
-				if (relevant == null && declaredAnnotations.length > 0) {
-					relevant = root.getAnnotations();
-					remaining = relevant.length;
-				}
-				for (int i = 0; i < declaredAnnotations.length; i++) {
-					if (declaredAnnotations[i] != null) {
-						boolean isRelevant = false;
-						for (int relevantIndex = 0; relevantIndex < relevant.length; relevantIndex++) {
-							if (relevant[relevantIndex] != null &&
-									declaredAnnotations[i].annotationType() == relevant[relevantIndex].annotationType()) {
-								isRelevant = true;
-								relevant[relevantIndex] = null;
-								remaining--;
-								break;
+				Annotation[] declaredAnns = getDeclaredAnnotations(source, true);
+				if (declaredAnns.length > 0) {
+					if (relevant == null) {
+						relevant = root.getAnnotations();
+						remaining = relevant.length;
+					}
+					for (int i = 0; i < declaredAnns.length; i++) {
+						if (declaredAnns[i] != null) {
+							boolean isRelevant = false;
+							for (int relevantIndex = 0; relevantIndex < relevant.length; relevantIndex++) {
+								if (relevant[relevantIndex] != null &&
+										declaredAnns[i].annotationType() == relevant[relevantIndex].annotationType()) {
+									isRelevant = true;
+									relevant[relevantIndex] = null;
+									remaining--;
+									break;
+								}
 							}
-						}
-						if (!isRelevant) {
-							declaredAnnotations[i] = null;
+							if (!isRelevant) {
+								declaredAnns[i] = null;
+							}
 						}
 					}
 				}
-				result = processor.doWithAnnotations(context, aggregateIndex, source, declaredAnnotations);
+				result = processor.doWithAnnotations(context, aggregateIndex, source, declaredAnns);
 				if (result != null) {
 					return result;
 				}

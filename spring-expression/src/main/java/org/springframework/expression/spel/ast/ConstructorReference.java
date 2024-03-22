@@ -232,7 +232,7 @@ public class ConstructorReference extends SpelNodeImpl {
 				InlineList initializer = (InlineList) getChild(1);
 				sb.append("[] ").append(initializer.toStringAST());
 			}
-			else {
+			else if (this.dimensions != null) {
 				// new int[3], new java.lang.String[3][4], etc.
 				for (SpelNodeImpl dimension : this.dimensions) {
 					sb.append('[').append(dimension.toStringAST()).append(']');

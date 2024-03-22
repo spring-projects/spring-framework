@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.Method;
+
 import org.springframework.util.ClassUtils;
 
 /**
- * Descriptor for a {@link java.lang.reflect.Method Method} which holds a
+ * Descriptor for a {@link Method Method} which holds a
  * reference to the method's {@linkplain #declaringClass declaring class},
  * {@linkplain #methodName name}, and {@linkplain #parameterTypes parameter types}.
  *
@@ -34,8 +36,7 @@ record MethodDescriptor(Class<?> declaringClass, String methodName, Class<?>... 
 	/**
 	 * Create a {@link MethodDescriptor} for the supplied bean class and method name.
 	 * <p>The supplied {@code methodName} may be a {@linkplain Method#getName()
-	 * simple method name} or a
-	 * {@linkplain org.springframework.util.ClassUtils#getQualifiedMethodName(Method)
+	 * simple method name} or a {@linkplain ClassUtils#getQualifiedMethodName(Method)
 	 * qualified method name}.
 	 * <p>If the method name is fully qualified, this utility will parse the
 	 * method name and its declaring class from the qualified method name and then

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.config;
 
+import java.util.List;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
@@ -23,6 +25,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
@@ -131,6 +134,16 @@ public interface WebFluxConfigurer {
 	 * @param configurer to configurer to use
 	 */
 	default void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
+	}
+
+	/**
+	 * Add to the list of {@link ErrorResponse.Interceptor}'s to invoke when
+	 * rendering an RFC 7807 {@link org.springframework.http.ProblemDetail}
+	 * error response.
+	 * @param interceptors the handlers to use
+	 * @since 6.2
+	 */
+	default void addErrorResponseInterceptors(List<ErrorResponse.Interceptor> interceptors) {
 	}
 
 	/**

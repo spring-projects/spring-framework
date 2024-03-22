@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link DefaultGenerationContext} with a custom implementation of
@@ -30,6 +31,7 @@ import org.springframework.aot.hint.RuntimeHints;
  */
 class TestContextGenerationContext extends DefaultGenerationContext {
 
+	@Nullable
 	private final String featureName;
 
 
@@ -41,8 +43,9 @@ class TestContextGenerationContext extends DefaultGenerationContext {
 	 * @param generatedFiles the generated files
 	 * @param runtimeHints the runtime hints
 	 */
-	TestContextGenerationContext(ClassNameGenerator classNameGenerator, GeneratedFiles generatedFiles,
-			RuntimeHints runtimeHints) {
+	TestContextGenerationContext(
+			ClassNameGenerator classNameGenerator, GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
+
 		super(classNameGenerator, generatedFiles, runtimeHints);
 		this.featureName = null;
 	}

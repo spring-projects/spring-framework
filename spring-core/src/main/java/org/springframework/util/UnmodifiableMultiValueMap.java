@@ -96,6 +96,7 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 	}
 
 	@Override
+	@Nullable
 	public V getFirst(K key) {
 		return this.delegate.getFirst(key);
 	}

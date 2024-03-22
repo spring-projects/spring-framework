@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,11 @@ import io.micrometer.common.KeyValues;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientHttpObservationDocumentation.HighCardinalityKeyNames;
 import org.springframework.http.client.observation.ClientHttpObservationDocumentation.LowCardinalityKeyNames;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -84,8 +86,10 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	}
 
 	@Override
+	@Nullable
 	public String getContextualName(ClientRequestObservationContext context) {
-		return "http " + context.getCarrier().getMethod().name().toLowerCase();
+		ClientHttpRequest request = context.getCarrier();
+		return (request != null ? "http " + request.getMethod().name().toLowerCase() : null);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import io.netty.util.AttributeKey;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
@@ -48,6 +50,13 @@ import org.springframework.util.Assert;
  * @see reactor.netty.http.client.HttpClient
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLifecycle {
+
+	/**
+	 * Channel attribute key under which {@code WebClient} request attributes are stored as a Map.
+	 * @since 6.2
+	 */
+	public static final AttributeKey<Map<String, Object>> ATTRIBUTES_KEY =
+			AttributeKey.valueOf(ReactorClientHttpRequest.class.getName() + ".ATTRIBUTES");
 
 	private static final Log logger = LogFactory.getLog(ReactorClientHttpConnector.class);
 

@@ -1096,7 +1096,13 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 			}
 			if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isSuspendingFunction(method)) {
-				return Mono.fromFuture(cache.retrieve(key, () -> ((Mono<?>) invokeOperation(invoker)).toFuture()));
+				return Mono.fromFuture(cache.retrieve(key, () -> {
+					Mono<?> mono = ((Mono<?>) invokeOperation(invoker));
+					if (mono == null) {
+						mono = Mono.empty();
+					}
+					return mono.toFuture();
+				}));
 			}
 			return NOT_HANDLED;
 		}

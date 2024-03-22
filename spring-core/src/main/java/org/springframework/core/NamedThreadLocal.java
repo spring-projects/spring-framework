@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.core;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.springframework.util.Assert;
@@ -76,7 +75,8 @@ public class NamedThreadLocal<T> extends ThreadLocal<T> {
 
 		SuppliedNamedThreadLocal(String name, Supplier<? extends T> supplier) {
 			super(name);
-			this.supplier = Objects.requireNonNull(supplier);
+			Assert.notNull(supplier, "Supplier must not be null");
+			this.supplier = supplier;
 		}
 
 		@Override

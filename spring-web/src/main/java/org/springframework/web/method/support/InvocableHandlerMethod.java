@@ -29,7 +29,6 @@ import kotlin.reflect.KParameter;
 import kotlin.reflect.KType;
 import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
-import kotlin.reflect.jvm.KTypesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 
 import org.springframework.context.MessageSource;
@@ -299,7 +298,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private static class KotlinDelegate {
 
 		@Nullable
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings({"deprecation", "DataFlowIssue"})
 		public static Object invokeFunction(Method method, Object target, Object[] args) throws InvocationTargetException, IllegalAccessException {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			// For property accessors
@@ -318,11 +317,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 						Object arg = args[index];
 						if (!(parameter.isOptional() && arg == null)) {
 							KType type = parameter.getType();
-							if (!(type.isMarkedNullable() && arg == null)) {
-								KClass<?> kClass = KTypesJvm.getJvmErasure(type);
-								if (KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-									arg = KClasses.getPrimaryConstructor(kClass).call(arg);
-								}
+							if (!(type.isMarkedNullable() && arg == null) && type.getClassifier() instanceof KClass<?> kClass
+									&& KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
+								arg = KClasses.getPrimaryConstructor(kClass).call(arg);
 							}
 							argMap.put(parameter, arg);
 						}

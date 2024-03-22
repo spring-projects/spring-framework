@@ -87,7 +87,7 @@ Kotlin::
 
 This test has some obvious drawbacks. If we update our controller to use the parameter
 `message` instead of `text`, our form test continues to pass, even though the HTML form
-is out of synch with the controller. To resolve this we can combine our two tests, as
+is out of sync with the controller. To resolve this we can combine our two tests, as
 follows:
 
 [tabs]

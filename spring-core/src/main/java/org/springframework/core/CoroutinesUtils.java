@@ -19,7 +19,6 @@ package org.springframework.core;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Objects;
 
 import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
@@ -33,7 +32,6 @@ import kotlin.reflect.full.KClasses;
 import kotlin.reflect.full.KClassifiers;
 import kotlin.reflect.full.KTypes;
 import kotlin.reflect.jvm.KCallablesJvm;
-import kotlin.reflect.jvm.KTypesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import kotlinx.coroutines.BuildersKt;
 import kotlinx.coroutines.CoroutineStart;
@@ -47,6 +45,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -64,6 +63,7 @@ public abstract class CoroutinesUtils {
 	private static final KType monoType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Mono.class));
 
 	private static final KType publisherType = KClassifiers.getStarProjectedType(JvmClassMappingKt.getKotlinClass(Publisher.class));
+
 
 	/**
 	 * Convert a {@link Deferred} instance to a {@link Mono}.
@@ -92,8 +92,7 @@ public abstract class CoroutinesUtils {
 	 * @return the method invocation result as reactive stream
 	 * @throws IllegalArgumentException if {@code method} is not a suspending function
 	 */
-	public static Publisher<?> invokeSuspendingFunction(Method method, Object target,
-			Object... args) {
+	public static Publisher<?> invokeSuspendingFunction(Method method, Object target, Object... args) {
 		return invokeSuspendingFunction(Dispatchers.getUnconfined(), method, target, args);
 	}
 
@@ -109,11 +108,13 @@ public abstract class CoroutinesUtils {
 	 * @throws IllegalArgumentException if {@code method} is not a suspending function
 	 * @since 6.0
 	 */
-	@SuppressWarnings("deprecation")
-	public static Publisher<?> invokeSuspendingFunction(CoroutineContext context, Method method, Object target,
-			Object... args) {
-		Assert.isTrue(KotlinDetector.isSuspendingFunction(method), "'method' must be a suspending function");
-		KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
+	@SuppressWarnings({"deprecation", "DataFlowIssue"})
+	public static Publisher<?> invokeSuspendingFunction(
+			CoroutineContext context, Method method, @Nullable Object target, Object... args) {
+
+		Assert.isTrue(KotlinDetector.isSuspendingFunction(method), "Method must be a suspending function");
+		KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+		Assert.notNull(function, () -> "Failed to get Kotlin function for method: " + method);
 		if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
 			KCallablesJvm.setAccessible(function, true);
 		}
@@ -127,11 +128,9 @@ public abstract class CoroutinesUtils {
 								Object arg = args[index];
 								if (!(parameter.isOptional() && arg == null)) {
 									KType type = parameter.getType();
-									if (!(type.isMarkedNullable() && arg == null)) {
-										KClass<?> kClass = KTypesJvm.getJvmErasure(type);
-										if (KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-											arg = KClasses.getPrimaryConstructor(kClass).call(arg);
-										}
+									if (!(type.isMarkedNullable() && arg == null) && type.getClassifier() instanceof KClass<?> kClass
+											&& KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
+										arg = KClasses.getPrimaryConstructor(kClass).call(arg);
 									}
 									argMap.put(parameter, arg);
 								}
@@ -148,10 +147,10 @@ public abstract class CoroutinesUtils {
 		if (KTypes.isSubtypeOf(returnType, flowType)) {
 			return mono.flatMapMany(CoroutinesUtils::asFlux);
 		}
-		else if (KTypes.isSubtypeOf(returnType, monoType)) {
-			return mono.flatMap(o -> ((Mono<?>)o));
-		}
-		else if (KTypes.isSubtypeOf(returnType, publisherType)) {
+		if (KTypes.isSubtypeOf(returnType, publisherType)) {
+			if (KTypes.isSubtypeOf(returnType, monoType)) {
+				return mono.flatMap(o -> ((Mono<?>)o));
+			}
 			return mono.flatMapMany(o -> ((Publisher<?>)o));
 		}
 		return mono;

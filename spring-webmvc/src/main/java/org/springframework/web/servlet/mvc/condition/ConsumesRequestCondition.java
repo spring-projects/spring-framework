@@ -76,14 +76,14 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * @param consumes as described in {@link RequestMapping#consumes()}
 	 * @param headers as described in {@link RequestMapping#headers()}
 	 */
-	public ConsumesRequestCondition(String[] consumes, @Nullable String[] headers) {
+	public ConsumesRequestCondition(@Nullable String[] consumes, @Nullable String[] headers) {
 		this.expressions = parseExpressions(consumes, headers);
 		if (this.expressions.size() > 1) {
 			Collections.sort(this.expressions);
 		}
 	}
 
-	private static List<ConsumeMediaTypeExpression> parseExpressions(String[] consumes, @Nullable String[] headers) {
+	private static List<ConsumeMediaTypeExpression> parseExpressions(@Nullable String[] consumes, @Nullable String[] headers) {
 		Set<ConsumeMediaTypeExpression> result = null;
 		if (!ObjectUtils.isEmpty(headers)) {
 			for (String header : headers) {

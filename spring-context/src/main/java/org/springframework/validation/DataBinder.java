@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1035,7 +1035,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			Class<?> constructorClass, String nestedPath, String name, @Nullable Object value) {
 
 		Object[] hints = null;
-		if (this.targetType.getSource() instanceof MethodParameter parameter) {
+		if (this.targetType != null && this.targetType.getSource() instanceof MethodParameter parameter) {
 			for (Annotation ann : parameter.getParameterAnnotations()) {
 				hints = ValidationAnnotationUtils.determineValidationHints(ann);
 				if (hints != null) {

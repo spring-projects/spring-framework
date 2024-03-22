@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageC
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
@@ -67,6 +68,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.WebDataBinder;
@@ -182,6 +184,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author Hyoungjune Kim
  * @since 3.1
  * @see EnableWebMvc
  * @see WebMvcConfigurer
@@ -199,6 +202,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	private static final boolean jackson2SmilePresent;
 
 	private static final boolean jackson2CborPresent;
+
+	private static final boolean jackson2YamlPresent;
 
 	private static final boolean gsonPresent;
 
@@ -219,6 +224,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
+		jackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
 		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
@@ -250,6 +256,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	@Nullable
 	private List<HttpMessageConverter<?>> messageConverters;
+
+	@Nullable
+	private List<ErrorResponse.Interceptor> errorResponseInterceptors;
 
 	@Nullable
 	private Map<String, CorsConfiguration> corsConfigurations;
@@ -463,6 +472,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (jackson2CborPresent || kotlinSerializationCborPresent) {
 			map.put("cbor", MediaType.APPLICATION_CBOR);
 		}
+		if (jackson2YamlPresent) {
+			map.put("yaml", MediaType.APPLICATION_YAML);
+		}
 		return map;
 	}
 
@@ -653,6 +665,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer(conversionService, validator));
 		adapter.setCustomArgumentResolvers(getArgumentResolvers());
 		adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
+		adapter.setErrorResponseInterceptors(getErrorResponseInterceptors());
 
 		if (jackson2Present) {
 			adapter.setRequestBodyAdvice(Collections.singletonList(new JsonViewRequestBodyAdvice()));
@@ -935,6 +948,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			}
 			messageConverters.add(new MappingJackson2CborHttpMessageConverter(builder.build()));
 		}
+		if (jackson2YamlPresent) {
+			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.yaml();
+			if (this.applicationContext != null) {
+				builder.applicationContext(this.applicationContext);
+			}
+			messageConverters.add(new MappingJackson2YamlHttpMessageConverter(builder.build()));
+		}
 	}
 
 	/**
@@ -1053,6 +1073,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerResolver.setMessageConverters(getMessageConverters());
 		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
 		exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());
+		exceptionHandlerResolver.setErrorResponseInterceptors(getErrorResponseInterceptors());
 		if (jackson2Present) {
 			exceptionHandlerResolver.setResponseBodyAdvice(
 					Collections.singletonList(new JsonViewResponseBodyAdvice()));
@@ -1077,6 +1098,29 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	protected ExceptionHandlerExceptionResolver createExceptionHandlerExceptionResolver() {
 		return new ExceptionHandlerExceptionResolver();
+	}
+
+	/**
+	 * Provide access to the list of {@link ErrorResponse.Interceptor}'s to apply
+	 * when rendering error responses.
+	 * <p>This method cannot be overridden; use {@link #configureErrorResponseInterceptors(List)} instead.
+	 * @since 6.2
+	 */
+	protected final List<ErrorResponse.Interceptor> getErrorResponseInterceptors() {
+		if (this.errorResponseInterceptors == null) {
+			this.errorResponseInterceptors = new ArrayList<>();
+			configureErrorResponseInterceptors(this.errorResponseInterceptors);
+		}
+		return this.errorResponseInterceptors;
+	}
+
+	/**
+	 * Override this method for control over the {@link ErrorResponse.Interceptor}'s
+	 * to apply when rendering error responses.
+	 * @param interceptors the list to add handlers to
+	 * @since 6.2
+	 */
+	protected void configureErrorResponseInterceptors(List<ErrorResponse.Interceptor> interceptors) {
 	}
 
 	/**

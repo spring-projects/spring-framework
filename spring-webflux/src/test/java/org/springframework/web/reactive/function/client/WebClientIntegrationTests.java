@@ -34,14 +34,17 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.netty.util.Attribute;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.eclipse.jetty.client.Request;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
@@ -50,6 +53,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import reactor.netty.channel.ChannelOperations;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
@@ -185,6 +189,41 @@ class WebClientIntegrationTests {
 			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 		});
 	}
+
+	@ParameterizedWebClientTest
+	void applyAttributesToNativeRequest(ClientHttpConnector connector) {
+		startServer(connector);
+		prepareResponse(response -> {});
+
+		final AtomicReference<Object> nativeRequest = new AtomicReference<>();
+		Mono<Void> result = this.webClient.get()
+				.uri("/pojo")
+				.attribute("foo","bar")
+				.httpRequest(clientHttpRequest -> nativeRequest.set(clientHttpRequest.getNativeRequest()))
+				.retrieve()
+				.bodyToMono(Void.class);
+
+		StepVerifier.create(result).expectComplete().verify();
+
+		if (nativeRequest.get() instanceof ChannelOperations<?,?> nativeReq) {
+			Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(ReactorClientHttpConnector.ATTRIBUTES_KEY);
+			assertThat(attributes.get()).isNotNull();
+			assertThat(attributes.get()).containsEntry("foo", "bar");
+		}
+		else if (nativeRequest.get() instanceof reactor.netty5.channel.ChannelOperations<?,?> nativeReq) {
+			io.netty5.util.Attribute<Map<String, Object>> attributes =
+					nativeReq.channel().attr(ReactorNetty2ClientHttpConnector.ATTRIBUTES_KEY);
+			assertThat(attributes.get()).isNotNull();
+			assertThat(attributes.get()).containsEntry("foo", "bar");
+		}
+		else if (nativeRequest.get() instanceof Request nativeReq) {
+			assertThat(nativeReq.getAttributes()).containsEntry("foo", "bar");
+		}
+		else if (nativeRequest.get() instanceof org.apache.hc.core5.http.HttpRequest nativeReq) {
+			// Attributes are not in the request, but in separate HttpClientContext
+		}
+	}
+
 
 	@ParameterizedWebClientTest
 	void retrieveJsonWithParameterizedTypeReference(ClientHttpConnector connector) {
