@@ -137,7 +137,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		return this;
 	}
 
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	private HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders(this.originalResponse.headers().asHttpHeaders());
@@ -159,7 +159,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		return this;
 	}
 
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	private MultiValueMap<String, ResponseCookie> getCookies() {
 		if (this.cookies == null) {
 			this.cookies = new LinkedMultiValueMap<>(this.originalResponse.cookies());
@@ -256,13 +256,13 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		}
 
 		@Override
-		@SuppressWarnings("ConstantConditions")
+		@SuppressWarnings({"ConstantConditions", "NullAway"})
 		public HttpHeaders getHeaders() {
 			return (this.headers != null ? this.headers : this.originalResponse.headers().asHttpHeaders());
 		}
 
 		@Override
-		@SuppressWarnings("ConstantConditions")
+		@SuppressWarnings({"ConstantConditions", "NullAway"})
 		public MultiValueMap<String, ResponseCookie> getCookies() {
 			return (this.cookies != null ? this.cookies : this.originalResponse.cookies());
 		}

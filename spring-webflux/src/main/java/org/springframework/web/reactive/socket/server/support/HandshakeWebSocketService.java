@@ -244,6 +244,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		return null;
 	}
 
+	@SuppressWarnings("NullAway")
 	private Mono<Map<String, Object>> initAttributes(ServerWebExchange exchange) {
 		if (this.sessionAttributePredicate == null) {
 			return EMPTY_ATTRIBUTES;

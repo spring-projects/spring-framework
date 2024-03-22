@@ -375,6 +375,7 @@ class ControllerMethodResolver {
 	 * if {@code null}, check only {@code @ControllerAdvice} classes.
 	 */
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, @Nullable HandlerMethod handlerMethod) {
 
 		Class<?> handlerType = (handlerMethod != null ? handlerMethod.getBeanType() : null);
