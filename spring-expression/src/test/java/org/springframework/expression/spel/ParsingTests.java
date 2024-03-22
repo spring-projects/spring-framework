@@ -44,9 +44,24 @@ class ParsingTests {
 
 		@Test
 		void compoundExpressions() {
+			parseCheck("#var1.methodOne().methodTwo(42)");
+			parseCheck("#func1().methodOne().methodTwo(42)");
+			parseCheck("#func2('enigma').methodOne().methodTwo(42)");
 			parseCheck("property1.property2.methodOne()");
-			parseCheck("property1[0].property2['key'].methodOne()");
+			parseCheck("property1.methodOne('enigma').methodTwo(42)");
+			parseCheck("property1.methodOne().property2.methodTwo()");
+			parseCheck("property1[0].property2['key'].methodTwo()");
+			parseCheck("property1[0][1].property2['key'][42].methodTwo()");
+
+			// null-safe variants
+			parseCheck("#var1?.methodOne()?.methodTwo(42)");
+			parseCheck("#func1()?.methodOne()?.methodTwo(42)");
+			parseCheck("#func2('enigma')?.methodOne()?.methodTwo(42)");
+			parseCheck("property1?.property2?.methodOne()");
+			parseCheck("property1?.methodOne('enigma')?.methodTwo(42)");
 			parseCheck("property1?.methodOne()?.property2?.methodTwo()");
+			parseCheck("property1[0]?.property2['key']?.methodTwo()");
+			parseCheck("property1[0][1]?.property2['key'][42]?.methodTwo()");
 		}
 
 		@Test
@@ -132,25 +147,34 @@ class ParsingTests {
 
 		@Test
 		void projection() {
-			parseCheck("{1,2,3,4,5,6,7,8,9,10}.![#isEven()]");
+			parseCheck("{1,2,3}.![#isEven()]");
+
+			// null-safe variant
+			parseCheck("{1,2,3}?.![#isEven()]");
 		}
 
 		@Test
 		void selection() {
-			parseCheck("{1,2,3,4,5,6,7,8,9,10}.?[#isEven(#this) == 'y']",
-					"{1,2,3,4,5,6,7,8,9,10}.?[(#isEven(#this) == 'y')]");
+			parseCheck("{1,2,3}.?[#isEven(#this)]");
+
+			// null-safe variant
+			parseCheck("{1,2,3}?.?[#isEven(#this)]");
 		}
 
 		@Test
-		void selectionFirst() {
-			parseCheck("{1,2,3,4,5,6,7,8,9,10}.^[#isEven(#this) == 'y']",
-					"{1,2,3,4,5,6,7,8,9,10}.^[(#isEven(#this) == 'y')]");
+		void selectFirst() {
+			parseCheck("{1,2,3}.^[#isEven(#this)]");
+
+			// null-safe variant
+			parseCheck("{1,2,3}?.^[#isEven(#this)]");
 		}
 
 		@Test
-		void selectionLast() {
-			parseCheck("{1,2,3,4,5,6,7,8,9,10}.$[#isEven(#this) == 'y']",
-					"{1,2,3,4,5,6,7,8,9,10}.$[(#isEven(#this) == 'y')]");
+		void selectLast() {
+			parseCheck("{1,2,3}.$[#isEven(#this)]");
+
+			// null-safe variant
+			parseCheck("{1,2,3}?.$[#isEven(#this)]");
 		}
 	}
 
