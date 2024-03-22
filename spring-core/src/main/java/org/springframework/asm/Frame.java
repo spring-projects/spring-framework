@@ -282,10 +282,10 @@ class Frame {
    * @return the abstract type corresponding to the given frame element type.
    */
   static int getAbstractTypeFromApiFormat(final SymbolTable symbolTable, final Object type) {
-    if (type instanceof Integer) {
-      return CONSTANT_KIND | ((Integer) type).intValue();
-    } else if (type instanceof String) {
-      String descriptor = Type.getObjectType((String) type).getDescriptor();
+    if (type instanceof Integer integer) {
+      return CONSTANT_KIND | integer;
+    } else if (type instanceof String string) {
+      String descriptor = Type.getObjectType(string).getDescriptor();
       return getAbstractTypeFromDescriptor(symbolTable, descriptor, 0);
     } else {
       Label label = (Label) type;

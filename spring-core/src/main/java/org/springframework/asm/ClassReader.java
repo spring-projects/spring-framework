@@ -1366,8 +1366,7 @@ public class ClassReader {
     // adapter between the reader and the writer. In this case, it might be possible to copy
     // the method attributes directly into the writer. If so, return early without visiting
     // the content of these attributes.
-    if (methodVisitor instanceof MethodWriter) {
-      MethodWriter methodWriter = (MethodWriter) methodVisitor;
+	if (methodVisitor instanceof MethodWriter methodWriter) {
       if (methodWriter.canCopyMethodAttributes(
           this,
           synthetic,
