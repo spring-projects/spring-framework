@@ -2520,7 +2520,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	private enum PreInstantiation {
 
-		MAIN, BACKGROUND;
+		MAIN, BACKGROUND
 	}
 
 }

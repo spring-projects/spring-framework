@@ -200,6 +200,7 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.UpperEllCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.ArrayTypeStyleCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.OuterTypeFilenameCheck"/>
+		<module name="UnnecessarySemicolonInEnumeration"/>
 
 		<!-- Regexp -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
