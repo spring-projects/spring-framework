@@ -181,7 +181,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			throws EvaluationException {
 
 		Object targetObject = contextObject.getValue();
-		if (targetObject == null && this.nullSafe) {
+		if (targetObject == null && isNullSafe()) {
 			return TypedValue.NULL;
 		}
 
@@ -233,7 +233,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			TypedValue contextObject, EvaluationContext evalContext, String name, @Nullable Object newValue)
 			throws EvaluationException {
 
-		if (contextObject.getValue() == null && this.nullSafe) {
+		if (contextObject.getValue() == null && isNullSafe()) {
 			return;
 		}
 		if (contextObject.getValue() == null) {
@@ -353,7 +353,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 
 		Label skipIfNull = null;
-		if (this.nullSafe) {
+		if (isNullSafe()) {
 			mv.visitInsn(DUP);
 			skipIfNull = new Label();
 			Label continueLabel = new Label();
@@ -381,7 +381,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		// If this property or field access would return a primitive - and yet
 		// it is also marked null safe - then the exit type descriptor must be
 		// promoted to the box type to allow a null value to be passed on
-		if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
+		if (isNullSafe() && CodeFlow.isPrimitive(descriptor)) {
 			this.originalPrimitiveExitTypeDescriptor = descriptor;
 			this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
 		}
