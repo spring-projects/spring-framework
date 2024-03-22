@@ -186,7 +186,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @param exchange current exchange
 	 */
 	@SuppressWarnings("UnusedParameters")
-	protected void validateHandler(Object handler, ServerWebExchange exchange) {
+	protected void validateHandler(@Nullable Object handler, ServerWebExchange exchange) {
 	}
 
 	/**

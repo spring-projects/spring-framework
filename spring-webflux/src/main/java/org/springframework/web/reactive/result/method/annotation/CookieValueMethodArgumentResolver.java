@@ -65,6 +65,7 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueSyncArg
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		HttpCookie cookie = exchange.getRequest().getCookies().getFirst(name);
 		Class<?> paramType = parameter.getNestedParameterType();

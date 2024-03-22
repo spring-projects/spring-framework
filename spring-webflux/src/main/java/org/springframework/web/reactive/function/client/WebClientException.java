@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.client;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for exception published by {@link WebClient} in case of errors.
@@ -42,7 +43,7 @@ public abstract class WebClientException extends NestedRuntimeException {
 	 * @param msg the message
 	 * @param ex the exception
 	 */
-	public WebClientException(String msg, Throwable ex) {
+	public WebClientException(@Nullable String msg, Throwable ex) {
 		super(msg, ex);
 	}
 

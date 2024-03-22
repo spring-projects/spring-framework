@@ -78,6 +78,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		List<String> headerValues = exchange.getRequest().getHeaders().get(name);
 		Object result = null;

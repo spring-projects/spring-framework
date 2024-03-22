@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -40,6 +41,7 @@ public abstract class AbstractFileNameVersionStrategy implements VersionStrategy
 
 
 	@Override
+	@Nullable
 	public String extractVersion(String requestPath) {
 		Matcher matcher = pattern.matcher(requestPath);
 		if (matcher.find()) {

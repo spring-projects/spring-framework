@@ -85,6 +85,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueSyncAr
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		String attributeName = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		return exchange.getAttributeOrDefault(attributeName, Collections.emptyMap()).get(name);
