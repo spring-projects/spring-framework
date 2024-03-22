@@ -86,6 +86,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 

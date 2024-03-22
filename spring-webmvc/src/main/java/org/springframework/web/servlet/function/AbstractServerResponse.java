@@ -82,6 +82,7 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 	}
 
 	@Override
+	@Nullable
 	public ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response,
 			Context context) throws ServletException, IOException {
 

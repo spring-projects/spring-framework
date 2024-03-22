@@ -149,6 +149,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * @see #getViewName()
 	 */
 	@Override
+	@Nullable
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
