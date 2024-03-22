@@ -401,8 +401,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (attribute instanceof Constructor<?> constructor) {
 			return new Constructor<?>[] {constructor};
 		}
-		if (attribute instanceof Constructor<?>[]) {
-			return (Constructor<?>[]) attribute;
+		if (attribute instanceof Constructor<?>[] constructors) {
+			return constructors;
 		}
 		throw new IllegalArgumentException("Invalid value type for attribute '" +
 				PREFERRED_CONSTRUCTORS_ATTRIBUTE + "': " + attribute.getClass().getName());
