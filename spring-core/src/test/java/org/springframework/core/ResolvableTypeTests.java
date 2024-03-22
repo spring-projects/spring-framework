@@ -1403,6 +1403,13 @@ class ResolvableTypeTests {
 		assertThat(repository3.isAssignableFromResolvedPart(repository1)).isFalse();
 	}
 
+	@Test
+	void skipComparingVariableResolverIfUnderlyingTypeIsClass() {
+		ResolvableType type1 = ResolvableType.forClassWithGenerics(IProvider.class, String.class);
+		ResolvableType type2 = ResolvableType.forClassWithGenerics(IProvider.class,
+				ResolvableType.forClass(StringProvider.class).as(IProvider.class).getGenerics());
+		assertThat(type1).isEqualTo(type2);
+	}
 
 	private ResolvableType testSerialization(ResolvableType type) throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1717,6 +1724,9 @@ class ResolvableTypeTests {
 
 
 	public interface IProvider<P> {
+	}
+
+	public interface StringProvider extends IProvider<String> {
 	}
 
 	public interface IBase<BT extends IBase<BT>> {
