@@ -328,11 +328,11 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		String url = getUrl();
 		Assert.state(url != null, "'url' not set");
 
-		if (this.contextRelative && getUrl().startsWith("/")) {
+		if (this.contextRelative && url.startsWith("/")) {
 			// Do not apply context path to relative URLs.
 			targetUrl.append(getContextPath(request));
 		}
-		targetUrl.append(getUrl());
+		targetUrl.append(url);
 
 		String enc = this.encodingScheme;
 		if (enc == null) {

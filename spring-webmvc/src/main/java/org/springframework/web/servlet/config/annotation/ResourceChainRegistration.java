@@ -64,6 +64,7 @@ public class ResourceChainRegistration {
 		this(cacheResources, (cacheResources ? new ConcurrentMapCache(DEFAULT_CACHE_NAME) : null));
 	}
 
+	@SuppressWarnings("NullAway")
 	public ResourceChainRegistration(boolean cacheResources, @Nullable Cache cache) {
 		Assert.isTrue(!cacheResources || cache != null, "'cache' is required when cacheResources=true");
 		if (cacheResources) {
