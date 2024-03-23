@@ -278,6 +278,7 @@ class WebSocketStompClientTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void reassembleReceivedIFragmentedFrames() throws Exception {
 		WebSocketHandler handler = connect();
 		handler.handleMessage(this.webSocketSession, new TextMessage("SEND\ndestination:/topic/foo\nco"));
