@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -57,6 +58,13 @@ import org.springframework.util.ReflectionUtils;
  * <li>Objects: the property with the specified name</li>
  * </ul>
  *
+ * <h3>Null-safe Indexing</h3>
+ *
+ * <p>As of Spring Framework 6.2, null-safe indexing is supported via the {@code '?.'}
+ * operator. For example, {@code 'colors?.[0]'} will evaluate to {@code null} if
+ * {@code colors} is {@code null} and will otherwise evaluate to the 0<sup>th</sup>
+ * color.
+ *
  * @author Andy Clement
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -68,8 +76,13 @@ public class Indexer extends SpelNodeImpl {
 	private enum IndexedType {ARRAY, LIST, MAP, STRING, OBJECT}
 
 
+	private final boolean nullSafe;
+
 	@Nullable
 	private IndexedType indexedType;
+
+	@Nullable
+	private String originalPrimitiveExitTypeDescriptor;
 
 	@Nullable
 	private volatile String arrayTypeDescriptor;
@@ -106,11 +119,33 @@ public class Indexer extends SpelNodeImpl {
 	/**
 	 * Create an {@code Indexer} with the given start position, end position, and
 	 * index expression.
+	 * @see #Indexer(boolean, int, int, SpelNodeImpl)
+	 * @deprecated as of Spring Framework 6.2, in favor of {@link #Indexer(boolean, int, int, SpelNodeImpl)}
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public Indexer(int startPos, int endPos, SpelNodeImpl indexExpression) {
-		super(startPos, endPos, indexExpression);
+		this(false, startPos, endPos, indexExpression);
 	}
 
+	/**
+	 * Create an {@code Indexer} with the given null-safe flag, start position,
+	 * end position, and index expression.
+	 * @since 6.2
+	 */
+	public Indexer(boolean nullSafe, int startPos, int endPos, SpelNodeImpl indexExpression) {
+		super(startPos, endPos, indexExpression);
+		this.nullSafe = nullSafe;
+	}
+
+
+	/**
+	 * Does this node represent a null-safe index operation?
+	 * @since 6.2
+	 */
+	@Override
+	public final boolean isNullSafe() {
+		return this.nullSafe;
+	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
@@ -136,6 +171,15 @@ public class Indexer extends SpelNodeImpl {
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		TypedValue context = state.getActiveContextObject();
 		Object target = context.getValue();
+
+		if (target == null) {
+			if (this.nullSafe) {
+				return ValueRef.NullValueRef.INSTANCE;
+			}
+			// Raise a proper exception in case of a null target
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
+		}
+
 		TypeDescriptor targetDescriptor = context.getTypeDescriptor();
 		TypedValue indexValue;
 		Object index;
@@ -157,11 +201,6 @@ public class Indexer extends SpelNodeImpl {
 			finally {
 				state.popActiveContextObject();
 			}
-		}
-
-		// Raise a proper exception in case of a null target
-		if (target == null) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 
 		// At this point, we need a TypeDescriptor for a non-null target object
@@ -243,6 +282,17 @@ public class Indexer extends SpelNodeImpl {
 			cf.loadTarget(mv);
 		}
 
+		Label skipIfNull = null;
+		if (this.nullSafe) {
+			mv.visitInsn(DUP);
+			skipIfNull = new Label();
+			Label continueLabel = new Label();
+			mv.visitJumpInsn(IFNONNULL, continueLabel);
+			CodeFlow.insertCheckCast(mv, exitTypeDescriptor);
+			mv.visitJumpInsn(GOTO, skipIfNull);
+			mv.visitLabel(continueLabel);
+		}
+
 		SpelNodeImpl index = this.children[0];
 
 		if (this.indexedType == IndexedType.ARRAY) {
@@ -305,6 +355,16 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		cf.pushDescriptor(exitTypeDescriptor);
+
+		if (skipIfNull != null) {
+			if (this.originalPrimitiveExitTypeDescriptor != null) {
+				// The output of the indexer is a primitive, but from the logic above it
+				// might be null. So, to have a common stack element type at the skipIfNull
+				// target, it is necessary to box the primitive.
+				CodeFlow.insertBoxIfNecessary(mv, this.originalPrimitiveExitTypeDescriptor);
+			}
+			mv.visitLabel(skipIfNull);
+		}
 	}
 
 	@Override
@@ -368,56 +428,56 @@ public class Indexer extends SpelNodeImpl {
 		if (arrayComponentType == boolean.class) {
 			boolean[] array = (boolean[]) ctx;
 			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "Z";
+			setExitTypeDescriptor("Z");
 			this.arrayTypeDescriptor = "[Z";
 			return array[idx];
 		}
 		else if (arrayComponentType == byte.class) {
 			byte[] array = (byte[]) ctx;
 			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "B";
+			setExitTypeDescriptor("B");
 			this.arrayTypeDescriptor = "[B";
 			return array[idx];
 		}
 		else if (arrayComponentType == char.class) {
 			char[] array = (char[]) ctx;
 			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "C";
+			setExitTypeDescriptor("C");
 			this.arrayTypeDescriptor = "[C";
 			return array[idx];
 		}
 		else if (arrayComponentType == double.class) {
 			double[] array = (double[]) ctx;
 			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "D";
+			setExitTypeDescriptor("D");
 			this.arrayTypeDescriptor = "[D";
 			return array[idx];
 		}
 		else if (arrayComponentType == float.class) {
 			float[] array = (float[]) ctx;
 			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "F";
+			setExitTypeDescriptor("F");
 			this.arrayTypeDescriptor = "[F";
 			return array[idx];
 		}
 		else if (arrayComponentType == int.class) {
 			int[] array = (int[]) ctx;
 			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "I";
+			setExitTypeDescriptor("I");
 			this.arrayTypeDescriptor = "[I";
 			return array[idx];
 		}
 		else if (arrayComponentType == long.class) {
 			long[] array = (long[]) ctx;
 			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "J";
+			setExitTypeDescriptor("J");
 			this.arrayTypeDescriptor = "[J";
 			return array[idx];
 		}
 		else if (arrayComponentType == short.class) {
 			short[] array = (short[]) ctx;
 			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "S";
+			setExitTypeDescriptor("S");
 			this.arrayTypeDescriptor = "[S";
 			return array[idx];
 		}
@@ -425,7 +485,7 @@ public class Indexer extends SpelNodeImpl {
 			Object[] array = (Object[]) ctx;
 			checkAccess(array.length, idx);
 			Object retValue = array[idx];
-			this.exitTypeDescriptor = CodeFlow.toDescriptor(arrayComponentType);
+			setExitTypeDescriptor(CodeFlow.toDescriptor(arrayComponentType));
 			this.arrayTypeDescriptor = CodeFlow.toDescriptor(array.getClass());
 			return retValue;
 		}
@@ -435,6 +495,19 @@ public class Indexer extends SpelNodeImpl {
 		if (index >= arrayLength) {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS,
 					arrayLength, index);
+		}
+	}
+
+	private void setExitTypeDescriptor(String descriptor) {
+		// If this indexer would return a primitive - and yet it is also marked
+		// null-safe - then the exit type descriptor must be promoted to the box
+		// type to allow a null value to be passed on.
+		if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
+			this.originalPrimitiveExitTypeDescriptor = descriptor;
+			this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
+		}
+		else {
+			this.exitTypeDescriptor = descriptor;
 		}
 	}
 
@@ -574,7 +647,7 @@ public class Indexer extends SpelNodeImpl {
 						Indexer.this.cachedReadName = this.name;
 						Indexer.this.cachedReadTargetType = targetObjectRuntimeClass;
 						if (accessor instanceof CompilablePropertyAccessor compilablePropertyAccessor) {
-							Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType());
+							setExitTypeDescriptor(CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType()));
 						}
 						return accessor.read(this.evaluationContext, this.targetObject, this.name);
 					}
