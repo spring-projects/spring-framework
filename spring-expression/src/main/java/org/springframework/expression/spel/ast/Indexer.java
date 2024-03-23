@@ -58,6 +58,13 @@ import org.springframework.util.ReflectionUtils;
  * <li>Objects: the property with the specified name</li>
  * </ul>
  *
+ * <h3>Null-safe Indexing</h3>
+ *
+ * <p>As of Spring Framework 6.2, null-safe indexing is supported via the {@code '?.'}
+ * operator. For example, {@code 'colors?.[0]'} will evaluate to {@code null} if
+ * {@code colors} is {@code null} and will otherwise evaluate to the 0<sup>th</sup>
+ * color.
+ *
  * @author Andy Clement
  * @author Phillip Webb
  * @author Stephane Nicoll

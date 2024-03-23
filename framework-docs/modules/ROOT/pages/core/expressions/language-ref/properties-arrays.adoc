@@ -7,6 +7,10 @@ into various structures.
 NOTE: Numerical index values are zero-based, such as when accessing the n^th^ element of
 an array in Java.
 
+TIP: See the xref:core/expressions/language-ref/operator-safe-navigation.adoc[Safe Navigation Operator]
+section for details on how to navigate object graphs and index into various structures
+using the null-safe operator.
+
 [[expressions-property-navigation]]
 == Property Navigation
 

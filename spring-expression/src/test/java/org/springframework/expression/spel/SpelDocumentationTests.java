@@ -689,6 +689,24 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 		}
 
 		@Test
+		void nullSafeIndexing() {
+			IEEE society = new IEEE();
+			EvaluationContext context = new StandardEvaluationContext(society);
+
+			// evaluates to Inventor("Nikola Tesla")
+			Inventor inventor = parser.parseExpression("members?.[0]") // <1>
+					.getValue(context, Inventor.class);
+			assertThat(inventor).extracting(Inventor::getName).isEqualTo("Nikola Tesla");
+
+			society.members = null;
+
+			// evaluates to null - does not throw an Exception
+			inventor = parser.parseExpression("members?.[0]") // <2>
+					.getValue(context, Inventor.class);
+			assertThat(inventor).isNull();
+		}
+
+		@Test
 		@SuppressWarnings("unchecked")
 		void nullSafeSelection() {
 			IEEE society = new IEEE();
