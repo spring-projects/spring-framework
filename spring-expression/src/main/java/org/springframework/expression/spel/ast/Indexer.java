@@ -71,6 +71,9 @@ public class Indexer extends SpelNodeImpl {
 	@Nullable
 	private IndexedType indexedType;
 
+	@Nullable
+	private volatile String arrayTypeDescriptor;
+
 	// These fields are used when the indexer is being used as a property read accessor.
 	// If the name and target type match these cached values then the cachedReadAccessor
 	// is used to read the property. If they do not match, the correct accessor is
@@ -212,7 +215,7 @@ public class Indexer extends SpelNodeImpl {
 	@Override
 	public boolean isCompilable() {
 		if (this.indexedType == IndexedType.ARRAY) {
-			return (this.exitTypeDescriptor != null);
+			return (this.exitTypeDescriptor != null && this.arrayTypeDescriptor != null);
 		}
 		SpelNodeImpl index = this.children[0];
 		if (this.indexedType == IndexedType.LIST) {
@@ -233,6 +236,7 @@ public class Indexer extends SpelNodeImpl {
 
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		String exitTypeDescriptor = this.exitTypeDescriptor;
 		String descriptor = cf.lastDescriptor();
 		if (descriptor == null) {
 			// Stack is empty, should use context object
@@ -242,48 +246,19 @@ public class Indexer extends SpelNodeImpl {
 		SpelNodeImpl index = this.children[0];
 
 		if (this.indexedType == IndexedType.ARRAY) {
-			String exitTypeDescriptor = this.exitTypeDescriptor;
-			Assert.state(exitTypeDescriptor != null, "Array not compilable without descriptor");
-			int insn = switch (exitTypeDescriptor) {
-				case "D" -> {
-					mv.visitTypeInsn(CHECKCAST, "[D");
-					yield DALOAD;
-				}
-				case "F" -> {
-					mv.visitTypeInsn(CHECKCAST, "[F");
-					yield FALOAD;
-				}
-				case "J" -> {
-					mv.visitTypeInsn(CHECKCAST, "[J");
-					yield LALOAD;
-				}
-				case "I" -> {
-					mv.visitTypeInsn(CHECKCAST, "[I");
-					yield IALOAD;
-				}
-				case "S" -> {
-					mv.visitTypeInsn(CHECKCAST, "[S");
-					yield SALOAD;
-				}
-				case "B" -> {
-					mv.visitTypeInsn(CHECKCAST, "[B");
-					// byte and boolean arrays are both loaded via BALOAD
-					yield BALOAD;
-				}
-				case "Z" -> {
-					mv.visitTypeInsn(CHECKCAST, "[Z");
-					// byte and boolean arrays are both loaded via BALOAD
-					yield BALOAD;
-				}
-				case "C" -> {
-					mv.visitTypeInsn(CHECKCAST, "[C");
-					yield CALOAD;
-				}
-				default -> {
-					mv.visitTypeInsn(CHECKCAST, "["+ exitTypeDescriptor +
-							(CodeFlow.isPrimitiveArray(exitTypeDescriptor) ? "" : ";"));
-					yield AALOAD;
-				}
+			String arrayTypeDescriptor = this.arrayTypeDescriptor;
+			Assert.state(exitTypeDescriptor != null && arrayTypeDescriptor != null,
+					"Array not compilable without descriptors");
+			CodeFlow.insertCheckCast(mv, arrayTypeDescriptor);
+			int insn = switch (arrayTypeDescriptor) {
+				case "[D" -> DALOAD;
+				case "[F" -> FALOAD;
+				case "[J" -> LALOAD;
+				case "[I" -> IALOAD;
+				case "[S" -> SALOAD;
+				case "[B", "[Z" -> BALOAD; // byte[] & boolean[] are both loaded via BALOAD
+				case "[C" -> CALOAD;
+				default -> AALOAD;
 			};
 
 			cf.enterCompilationScope();
@@ -329,7 +304,7 @@ public class Indexer extends SpelNodeImpl {
 			compilablePropertyAccessor.generateCode(propertyName, mv, cf);
 		}
 
-		cf.pushDescriptor(this.exitTypeDescriptor);
+		cf.pushDescriptor(exitTypeDescriptor);
 	}
 
 	@Override
@@ -394,48 +369,56 @@ public class Indexer extends SpelNodeImpl {
 			boolean[] array = (boolean[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "Z";
+			this.arrayTypeDescriptor = "[Z";
 			return array[idx];
 		}
 		else if (arrayComponentType == byte.class) {
 			byte[] array = (byte[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "B";
+			this.arrayTypeDescriptor = "[B";
 			return array[idx];
 		}
 		else if (arrayComponentType == char.class) {
 			char[] array = (char[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "C";
+			this.arrayTypeDescriptor = "[C";
 			return array[idx];
 		}
 		else if (arrayComponentType == double.class) {
 			double[] array = (double[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "D";
+			this.arrayTypeDescriptor = "[D";
 			return array[idx];
 		}
 		else if (arrayComponentType == float.class) {
 			float[] array = (float[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "F";
+			this.arrayTypeDescriptor = "[F";
 			return array[idx];
 		}
 		else if (arrayComponentType == int.class) {
 			int[] array = (int[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "I";
+			this.arrayTypeDescriptor = "[I";
 			return array[idx];
 		}
 		else if (arrayComponentType == long.class) {
 			long[] array = (long[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "J";
+			this.arrayTypeDescriptor = "[J";
 			return array[idx];
 		}
 		else if (arrayComponentType == short.class) {
 			short[] array = (short[]) ctx;
 			checkAccess(array.length, idx);
 			this.exitTypeDescriptor = "S";
+			this.arrayTypeDescriptor = "[S";
 			return array[idx];
 		}
 		else {
@@ -443,6 +426,7 @@ public class Indexer extends SpelNodeImpl {
 			checkAccess(array.length, idx);
 			Object retValue = array[idx];
 			this.exitTypeDescriptor = CodeFlow.toDescriptor(arrayComponentType);
+			this.arrayTypeDescriptor = CodeFlow.toDescriptor(array.getClass());
 			return retValue;
 		}
 	}

@@ -653,6 +653,18 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 		@Test
+		void indexIntoSetCannotBeCompiled() {
+			Set<Integer> set = Set.of(42);
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(expression.getValue(set)).isEqualTo(42);
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(set)).isEqualTo(42);
+			assertThat(getAst().getExitDescriptor()).isNull();
+		}
+
+		@Test
 		void indexIntoStringCannotBeCompiled() {
 			String text = "enigma";
 
