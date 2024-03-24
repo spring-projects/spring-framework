@@ -386,7 +386,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
 		if (txAttr == null || !(ptm instanceof CallbackPreferringPlatformTransactionManager cpptm)) {
-			// TODO：创建/开启事务，根据实物的传播行为属性去判断是否创建一个事务
+			// TODO：创建/开启事务，根据事务的传播行为属性去判断是否创建一个事务
 			// Standard transaction demarcation with getTransaction and commit/rollback calls.
 			TransactionInfo txInfo = createTransactionIfNecessary(ptm, txAttr, joinpointIdentification);
 
