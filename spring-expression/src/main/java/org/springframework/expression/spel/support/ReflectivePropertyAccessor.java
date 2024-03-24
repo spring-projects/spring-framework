@@ -57,7 +57,7 @@ import org.springframework.util.StringUtils;
  * for reading and possibly also for writing on a target instance.
  *
  * <p>A property can be referenced through a public getter method (when being read)
- * or a public setter method (when being written), and also as a public field.
+ * or a public setter method (when being written), and also through a public field.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -87,7 +87,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 
 	/**
-	 * Create a new property accessor for reading as well writing.
+	 * Create a new property accessor for reading as well as writing.
 	 * @see #ReflectivePropertyAccessor(boolean)
 	 */
 	public ReflectivePropertyAccessor() {

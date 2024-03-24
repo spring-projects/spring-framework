@@ -82,7 +82,7 @@ public class Indexer extends SpelNodeImpl {
 	private IndexedType indexedType;
 
 	@Nullable
-	private String originalPrimitiveExitTypeDescriptor;
+	private volatile String originalPrimitiveExitTypeDescriptor;
 
 	@Nullable
 	private volatile String arrayTypeDescriptor;
@@ -373,131 +373,6 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 
-	private void setArrayElement(TypeConverter converter, Object ctx, int idx, @Nullable Object newValue,
-			Class<?> arrayComponentType) throws EvaluationException {
-
-		if (arrayComponentType == boolean.class) {
-			boolean[] array = (boolean[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, boolean.class);
-		}
-		else if (arrayComponentType == byte.class) {
-			byte[] array = (byte[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, byte.class);
-		}
-		else if (arrayComponentType == char.class) {
-			char[] array = (char[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, char.class);
-		}
-		else if (arrayComponentType == double.class) {
-			double[] array = (double[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, double.class);
-		}
-		else if (arrayComponentType == float.class) {
-			float[] array = (float[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, float.class);
-		}
-		else if (arrayComponentType == int.class) {
-			int[] array = (int[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, int.class);
-		}
-		else if (arrayComponentType == long.class) {
-			long[] array = (long[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, long.class);
-		}
-		else if (arrayComponentType == short.class) {
-			short[] array = (short[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, short.class);
-		}
-		else {
-			Object[] array = (Object[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, arrayComponentType);
-		}
-	}
-
-	private Object accessArrayElement(Object ctx, int idx) throws SpelEvaluationException {
-		Class<?> arrayComponentType = ctx.getClass().componentType();
-		if (arrayComponentType == boolean.class) {
-			boolean[] array = (boolean[]) ctx;
-			checkAccess(array.length, idx);
-			setExitTypeDescriptor("Z");
-			this.arrayTypeDescriptor = "[Z";
-			return array[idx];
-		}
-		else if (arrayComponentType == byte.class) {
-			byte[] array = (byte[]) ctx;
-			checkAccess(array.length, idx);
-			setExitTypeDescriptor("B");
-			this.arrayTypeDescriptor = "[B";
-			return array[idx];
-		}
-		else if (arrayComponentType == char.class) {
-			char[] array = (char[]) ctx;
-			checkAccess(array.length, idx);
-			setExitTypeDescriptor("C");
-			this.arrayTypeDescriptor = "[C";
-			return array[idx];
-		}
-		else if (arrayComponentType == double.class) {
-			double[] array = (double[]) ctx;
-			checkAccess(array.length, idx);
-			setExitTypeDescriptor("D");
-			this.arrayTypeDescriptor = "[D";
-			return array[idx];
-		}
-		else if (arrayComponentType == float.class) {
-			float[] array = (float[]) ctx;
-			checkAccess(array.length, idx);
-			setExitTypeDescriptor("F");
-			this.arrayTypeDescriptor = "[F";
-			return array[idx];
-		}
-		else if (arrayComponentType == int.class) {
-			int[] array = (int[]) ctx;
-			checkAccess(array.length, idx);
-			setExitTypeDescriptor("I");
-			this.arrayTypeDescriptor = "[I";
-			return array[idx];
-		}
-		else if (arrayComponentType == long.class) {
-			long[] array = (long[]) ctx;
-			checkAccess(array.length, idx);
-			setExitTypeDescriptor("J");
-			this.arrayTypeDescriptor = "[J";
-			return array[idx];
-		}
-		else if (arrayComponentType == short.class) {
-			short[] array = (short[]) ctx;
-			checkAccess(array.length, idx);
-			setExitTypeDescriptor("S");
-			this.arrayTypeDescriptor = "[S";
-			return array[idx];
-		}
-		else {
-			Object[] array = (Object[]) ctx;
-			checkAccess(array.length, idx);
-			Object retValue = array[idx];
-			setExitTypeDescriptor(CodeFlow.toDescriptor(arrayComponentType));
-			this.arrayTypeDescriptor = CodeFlow.toDescriptor(array.getClass());
-			return retValue;
-		}
-	}
-
-	private void checkAccess(int arrayLength, int index) throws SpelEvaluationException {
-		if (index >= arrayLength) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS,
-					arrayLength, index);
-		}
-	}
-
 	private void setExitTypeDescriptor(String descriptor) {
 		// If this indexer would return a primitive - and yet it is also marked
 		// null-safe - then the exit type descriptor must be promoted to the box
@@ -509,16 +384,6 @@ public class Indexer extends SpelNodeImpl {
 		else {
 			this.exitTypeDescriptor = descriptor;
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> T convertValue(TypeConverter converter, @Nullable Object value, Class<T> targetType) {
-		T result = (T) converter.convertValue(
-				value, TypeDescriptor.forObject(value), TypeDescriptor.valueOf(targetType));
-		if (result == null) {
-			throw new IllegalStateException("Null conversion result for index [" + value + "]");
-		}
-		return result;
 	}
 
 
@@ -541,7 +406,7 @@ public class Indexer extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			Object arrayElement = accessArrayElement(this.array, this.index);
+			Object arrayElement = getArrayElement(this.array, this.index);
 			return new TypedValue(arrayElement, this.typeDescriptor.elementTypeDescriptor(arrayElement));
 		}
 
@@ -556,6 +421,142 @@ public class Indexer extends SpelNodeImpl {
 		public boolean isWritable() {
 			return true;
 		}
+
+		private Object getArrayElement(Object ctx, int idx) throws SpelEvaluationException {
+			Class<?> arrayComponentType = ctx.getClass().componentType();
+			if (arrayComponentType == boolean.class) {
+				boolean[] array = (boolean[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("Z");
+				Indexer.this.arrayTypeDescriptor = "[Z";
+				return array[idx];
+			}
+			else if (arrayComponentType == byte.class) {
+				byte[] array = (byte[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("B");
+				Indexer.this.arrayTypeDescriptor = "[B";
+				return array[idx];
+			}
+			else if (arrayComponentType == char.class) {
+				char[] array = (char[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("C");
+				Indexer.this.arrayTypeDescriptor = "[C";
+				return array[idx];
+			}
+			else if (arrayComponentType == double.class) {
+				double[] array = (double[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("D");
+				Indexer.this.arrayTypeDescriptor = "[D";
+				return array[idx];
+			}
+			else if (arrayComponentType == float.class) {
+				float[] array = (float[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("F");
+				Indexer.this.arrayTypeDescriptor = "[F";
+				return array[idx];
+			}
+			else if (arrayComponentType == int.class) {
+				int[] array = (int[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("I");
+				Indexer.this.arrayTypeDescriptor = "[I";
+				return array[idx];
+			}
+			else if (arrayComponentType == long.class) {
+				long[] array = (long[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("J");
+				Indexer.this.arrayTypeDescriptor = "[J";
+				return array[idx];
+			}
+			else if (arrayComponentType == short.class) {
+				short[] array = (short[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("S");
+				Indexer.this.arrayTypeDescriptor = "[S";
+				return array[idx];
+			}
+			else {
+				Object[] array = (Object[]) ctx;
+				checkAccess(array.length, idx);
+				Object retValue = array[idx];
+				Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(arrayComponentType);
+				Indexer.this.arrayTypeDescriptor = CodeFlow.toDescriptor(array.getClass());
+				return retValue;
+			}
+		}
+
+		private void setArrayElement(TypeConverter converter, Object ctx, int idx, @Nullable Object newValue,
+				Class<?> arrayComponentType) throws EvaluationException {
+
+			if (arrayComponentType == boolean.class) {
+				boolean[] array = (boolean[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, boolean.class);
+			}
+			else if (arrayComponentType == byte.class) {
+				byte[] array = (byte[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, byte.class);
+			}
+			else if (arrayComponentType == char.class) {
+				char[] array = (char[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, char.class);
+			}
+			else if (arrayComponentType == double.class) {
+				double[] array = (double[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, double.class);
+			}
+			else if (arrayComponentType == float.class) {
+				float[] array = (float[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, float.class);
+			}
+			else if (arrayComponentType == int.class) {
+				int[] array = (int[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, int.class);
+			}
+			else if (arrayComponentType == long.class) {
+				long[] array = (long[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, long.class);
+			}
+			else if (arrayComponentType == short.class) {
+				short[] array = (short[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, short.class);
+			}
+			else {
+				Object[] array = (Object[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, arrayComponentType);
+			}
+		}
+
+		private void checkAccess(int arrayLength, int index) throws SpelEvaluationException {
+			if (index >= arrayLength) {
+				throw new SpelEvaluationException(getStartPosition(), SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS,
+						arrayLength, index);
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		private static <T> T convertValue(TypeConverter converter, @Nullable Object value, Class<T> targetType) {
+			T result = (T) converter.convertValue(
+					value, TypeDescriptor.forObject(value), TypeDescriptor.valueOf(targetType));
+			if (result == null) {
+				throw new IllegalStateException("Null conversion result for index [" + value + "]");
+			}
+			return result;
+		}
+
 	}
 
 
@@ -789,19 +790,19 @@ public class Indexer extends SpelNodeImpl {
 			}
 		}
 
+		@Override
+		public boolean isWritable() {
+			return true;
+		}
+
 		@Nullable
-		private Constructor<?> getDefaultConstructor(Class<?> type) {
+		private static Constructor<?> getDefaultConstructor(Class<?> type) {
 			try {
 				return ReflectionUtils.accessibleConstructor(type);
 			}
 			catch (Throwable ex) {
 				return null;
 			}
-		}
-
-		@Override
-		public boolean isWritable() {
-			return true;
 		}
 	}
 

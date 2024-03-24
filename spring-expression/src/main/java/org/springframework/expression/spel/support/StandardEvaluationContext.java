@@ -381,11 +381,11 @@ public class StandardEvaluationContext implements EvaluationContext {
 	 */
 	public void applyDelegatesTo(StandardEvaluationContext evaluationContext) {
 		// Triggers initialization for default delegates
-		evaluationContext.setConstructorResolvers(new ArrayList<>(this.getConstructorResolvers()));
-		evaluationContext.setMethodResolvers(new ArrayList<>(this.getMethodResolvers()));
-		evaluationContext.setPropertyAccessors(new ArrayList<>(this.getPropertyAccessors()));
-		evaluationContext.setTypeLocator(this.getTypeLocator());
-		evaluationContext.setTypeConverter(this.getTypeConverter());
+		evaluationContext.setConstructorResolvers(new ArrayList<>(getConstructorResolvers()));
+		evaluationContext.setMethodResolvers(new ArrayList<>(getMethodResolvers()));
+		evaluationContext.setPropertyAccessors(new ArrayList<>(getPropertyAccessors()));
+		evaluationContext.setTypeLocator(getTypeLocator());
+		evaluationContext.setTypeConverter(getTypeConverter());
 
 		evaluationContext.beanResolver = this.beanResolver;
 		evaluationContext.operatorOverloader = this.operatorOverloader;
@@ -425,8 +425,8 @@ public class StandardEvaluationContext implements EvaluationContext {
 		return resolvers;
 	}
 
-	private static <T> void addBeforeDefault(List<T> resolvers, T resolver) {
-		resolvers.add(resolvers.size() - 1, resolver);
+	private static <T> void addBeforeDefault(List<T> list, T element) {
+		list.add(list.size() - 1, element);
 	}
 
 }
