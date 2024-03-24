@@ -146,10 +146,6 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.propertyAccessors = propertyAccessors;
 	}
 
-	public void setIndexAccessors(List<IndexAccessor>indexAccessors){
-		this.indexAccessors=indexAccessors;
-	}
-
 	@Override
 	public List<PropertyAccessor> getPropertyAccessors() {
 		return initPropertyAccessors();
@@ -163,11 +159,53 @@ public class StandardEvaluationContext implements EvaluationContext {
 		return initPropertyAccessors().remove(accessor);
 	}
 
-	public void addIndexAccessor(IndexAccessor accessor){
-		initIndexAccessors().add(accessor);
+	/**
+	 * Set the list of index accessors to use in this evaluation context.
+	 * <p>Replaces any previously configured index accessors.
+	 * @since 6.2
+	 * @see #getIndexAccessors()
+	 * @see #addIndexAccessor(IndexAccessor)
+	 * @see #removeIndexAccessor(IndexAccessor)
+	 */
+	public void setIndexAccessors(List<IndexAccessor> indexAccessors) {
+		this.indexAccessors = indexAccessors;
 	}
 
-	public boolean removeIndexAccessor(IndexAccessor indexAccessor){
+	/**
+	 * Get the list of index accessors configured in this evaluation context.
+	 * @since 6.2
+	 * @see #setIndexAccessors(List)
+	 * @see #addIndexAccessor(IndexAccessor)
+	 * @see #removeIndexAccessor(IndexAccessor)
+	 */
+	@Override
+	public List<IndexAccessor> getIndexAccessors() {
+		return initIndexAccessors();
+	}
+
+	/**
+	 * Add the supplied index accessor to this evaluation context.
+	 * @param indexAccessor the index accessor to add
+	 * @since 6.2
+	 * @see #getIndexAccessors()
+	 * @see #setIndexAccessors(List)
+	 * @see #removeIndexAccessor(IndexAccessor)
+	 */
+	public void addIndexAccessor(IndexAccessor indexAccessor) {
+		initIndexAccessors().add(indexAccessor);
+	}
+
+	/**
+	 * Remove the supplied index accessor from this evaluation context.
+	 * @param indexAccessor the index accessor to remove
+	 * @return {@code true} if the index accessor was removed, {@code false} if
+	 * the index accessor was not configured in this evaluation context
+	 * @since 6.2
+	 * @see #getIndexAccessors()
+	 * @see #setIndexAccessors(List)
+	 * @see #addIndexAccessor(IndexAccessor)
+	 */
+	public boolean removeIndexAccessor(IndexAccessor indexAccessor) {
 		return initIndexAccessors().remove(indexAccessor);
 	}
 
@@ -400,6 +438,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		evaluationContext.setConstructorResolvers(new ArrayList<>(getConstructorResolvers()));
 		evaluationContext.setMethodResolvers(new ArrayList<>(getMethodResolvers()));
 		evaluationContext.setPropertyAccessors(new ArrayList<>(getPropertyAccessors()));
+		evaluationContext.setIndexAccessors(new ArrayList<>(getIndexAccessors()));
 		evaluationContext.setTypeLocator(getTypeLocator());
 		evaluationContext.setTypeConverter(getTypeConverter());
 
@@ -420,9 +459,9 @@ public class StandardEvaluationContext implements EvaluationContext {
 		return accessors;
 	}
 
-	private List<IndexAccessor>initIndexAccessors(){
+	private List<IndexAccessor> initIndexAccessors() {
 		List<IndexAccessor> accessors = this.indexAccessors;
-		if(accessors == null){
+		if (accessors == null) {
 			accessors = new ArrayList<>(5);
 			this.indexAccessors = accessors;
 		}
@@ -452,11 +491,6 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	private static <T> void addBeforeDefault(List<T> list, T element) {
 		list.add(list.size() - 1, element);
-	}
-
-	@Override
-	public List<IndexAccessor> getIndexAccessors() {
-		return initIndexAccessors();
 	}
 
 }

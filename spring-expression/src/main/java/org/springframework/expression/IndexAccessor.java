@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,78 +20,91 @@ import org.springframework.expression.spel.ast.ValueRef;
 import org.springframework.lang.Nullable;
 
 /**
- * A index accessor is able to read from (and possibly write to) an array's elements.
+ * An index accessor is able to read from (and possibly write to) an indexed
+ * structure of an object.
  *
- * <p>This interface places no restrictions, and so implementors are free to access elements
- * directly as fields or through getters or in any other way they see as appropriate.
+ * <p>This interface places no restrictions on what constitutes an indexed
+ * structure. Implementors are therefore free to access indexed values any way
+ * they deem appropriate.
  *
- * <p>A resolver can optionally specify an array of target classes for which it should be
- * called. However, if it returns {@code null} from {@link #getSpecificTargetClasses()},
- * it will be called for all property references and given a chance to determine if it
- * can read or write them.
+ * <p>An index accessor can optionally specify an array of target classes for
+ * which it should be called. However, if it returns {@code null} or an empty
+ * array from {@link #getSpecificTargetClasses()}, it will be called for all
+ * indexing operations and given a chance to determine if it can read from or
+ * write to the indexed structure.
  *
- * <p>Property resolvers are considered to be ordered, and each will be called in turn.
- * The only rule that affects the call order is that any resolver naming the target
- * class directly in {@link #getSpecificTargetClasses()} will be called first, before
- * the general resolvers.
+ * <p>Index accessors are considered to be ordered, and each will be called in
+ * turn. The only rule that affects the call order is that any index accessor
+ * which specifies explicit support for the target class via
+ * {@link #getSpecificTargetClasses()} will be called first, before other
+ * generic index accessors.
  *
- * @author jackmiking lee
- * @since 3.0
+ * @author Jackmiking Lee
+ * @author Sam Brannen
+ * @since 6.2
+ * @see PropertyAccessor
  */
-public interface IndexAccessor {
+public interface IndexAccessor extends TargetedAccessor {
+
 	/**
-	 * Return an array of classes for which this resolver should be called.
-	 * <p>Returning {@code null} indicates this is a general resolver that
-	 * can be called in an attempt to resolve a property on any type.
-	 * @return an array of classes that this resolver is suitable for
-	 * (or {@code null} if a general resolver)
+	 * Get the set of classes for which this index accessor should be called.
+	 * <p>Returning {@code null} or an empty array indicates this is a generic
+	 * index accessor that can be called in an attempt to access an index on any
+	 * type.
+	 * @return an array of classes that this index accessor is suitable for
+	 * (or {@code null} or an empty array if a generic index accessor)
 	 */
+	@Override
 	@Nullable
 	Class<?>[] getSpecificTargetClasses();
 
 	/**
-	 * Called to determine if a resolver instance is able to access a specified property
-	 * on a specified target object.
+	 * Called to determine if this index accessor is able to read a specified
+	 * index on a specified target object.
 	 * @param context the evaluation context in which the access is being attempted
-	 * @param target the target object upon which the property is being accessed
-	 * @param index the index of the array being accessed
-	 * @return true if this resolver is able to read the property
-	 * @throws AccessException if there is any problem determining whether the property can be read
+	 * @param target the target object upon which the index is being accessed
+	 * @param index the index being accessed
+	 * @return true if this index accessor is able to read the index
+	 * @throws AccessException if there is any problem determining whether the
+	 * index can be read
 	 */
 	boolean canRead(EvaluationContext context, @Nullable Object target, Object index) throws AccessException;
 
 	/**
-	 * Called to read a property from a specified target object.
-	 * Should only succeed if {@link #canRead} also returns {@code true}.
+	 * Called to read an index from a specified target object.
+	 * <p>Should only succeed if {@link #canRead} also returns {@code true}.
 	 * @param context the evaluation context in which the access is being attempted
-	 * @param target the target object upon which the property is being accessed
-	 * @param index the index of the array being accessed
-	 * @return a TypedValue object wrapping the property value read and a type descriptor for it
-	 * @throws AccessException if there is any problem accessing the property value
+	 * @param target the target object upon which the index is being accessed
+	 * @param index the index being accessed
+	 * @return a TypedValue object wrapping the index value read and a type
+	 * descriptor for it
+	 * @throws AccessException if there is any problem reading the index value
 	 */
-	ValueRef read(EvaluationContext context, @Nullable Object target,Object index) throws AccessException;
+	// TODO Change return type to TypedValue to avoid package cycle.
+	ValueRef read(EvaluationContext context, @Nullable Object target, Object index) throws AccessException;
 
 	/**
-	 * Called to determine if a resolver instance is able to write to a specified
-	 * property on a specified target object.
+	 * Called to determine if this index accessor is able to write to a specified
+	 * index on a specified target object.
 	 * @param context the evaluation context in which the access is being attempted
-	 * @param target the target object upon which the property is being accessed
-	 * @param index the index of the array being accessed
-	 * @return true if this resolver is able to write to the property
+	 * @param target the target object upon which the index is being accessed
+	 * @param index the index being accessed
+	 * @return true if this index accessor is able to write to the index
 	 * @throws AccessException if there is any problem determining whether the
-	 * property can be written to
+	 * index can be written to
 	 */
 	boolean canWrite(EvaluationContext context, @Nullable Object target, Object index) throws AccessException;
 
 	/**
-	 * Called to write to a property on a specified target object.
-	 * Should only succeed if {@link #canWrite} also returns {@code true}.
+	 * Called to write to an index on a specified target object.
+	 * <p>Should only succeed if {@link #canWrite} also returns {@code true}.
 	 * @param context the evaluation context in which the access is being attempted
-	 * @param target the target object upon which the property is being accessed
-	 * @param index the index of the array being accessed
-	 * @param newValue the new value for the property
-	 * @throws AccessException if there is any problem writing to the property value
+	 * @param target the target object upon which the index is being accessed
+	 * @param index the index being accessed
+	 * @param newValue the new value for the index
+	 * @throws AccessException if there is any problem writing to the index value
 	 */
 	void write(EvaluationContext context, @Nullable Object target, Object index, @Nullable Object newValue)
 			throws AccessException;
+
 }

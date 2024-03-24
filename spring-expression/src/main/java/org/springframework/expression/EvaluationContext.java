@@ -16,6 +16,7 @@
 
 package org.springframework.expression;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -57,9 +58,14 @@ public interface EvaluationContext {
 	List<PropertyAccessor> getPropertyAccessors();
 
 	/**
-	 * Return a list of index accessors that will be asked in turn to read/write a property.
+	 * Return a list of index accessors that will be asked in turn to access or
+	 * set an indexed value.
+	 * <p>The default implementation returns an empty list.
+	 * @since 6.2
 	 */
-	List<IndexAccessor> getIndexAccessors();
+	default List<IndexAccessor> getIndexAccessors() {
+		return Collections.emptyList();
+	}
 
 	/**
 	 * Return a list of resolvers that will be asked in turn to locate a constructor.

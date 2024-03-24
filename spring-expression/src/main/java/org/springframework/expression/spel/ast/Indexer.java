@@ -17,11 +17,9 @@
 package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.springframework.asm.Label;
@@ -160,6 +158,7 @@ public class Indexer extends SpelNodeImpl {
 			throws EvaluationException {
 
 		TypedValue typedValue = valueSupplier.get();
+		// TODO Set value for IndexAccessor via its write() method, NOT via the ValueRef returned from its read() method.
 		getValueRef(state).setValue(typedValue.getValue());
 		return typedValue;
 	}
@@ -249,71 +248,23 @@ public class Indexer extends SpelNodeImpl {
 			return new PropertyIndexingValueRef(
 					target, (String) index, state.getEvaluationContext(), targetDescriptor);
 		}
-		Optional<ValueRef> optional = tryIndexAccessor(state, index);
-		if (optional.isPresent()) {
-			return optional.get();
+
+		EvaluationContext evalContext = state.getEvaluationContext();
+		List<IndexAccessor> accessorsToTry = getIndexAccessorsToTry(target, evalContext.getIndexAccessors());
+		try {
+			for (IndexAccessor indexAccessor : accessorsToTry) {
+				if (indexAccessor.canRead(evalContext, target, index)) {
+					// TODO Introduce local IndexAccessorValueRef.
+					return indexAccessor.read(evalContext, target, index);
+				}
+			}
 		}
+		catch (Exception ex) {
+			// TODO throw SpelEvaluationException for "exception during index access"
+		}
+
 		throw new SpelEvaluationException(
 				getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetDescriptor);
-	}
-
-	private Optional<ValueRef> tryIndexAccessor(ExpressionState state, Object index) {
-		EvaluationContext context = state.getEvaluationContext();
-		Object target = state.getActiveContextObject().getValue();
-		if (context != null) {
-			List<IndexAccessor> list = context.getIndexAccessors();
-			if (list != null) {
-				List<IndexAccessor> availableAccessors = getIndexAccessorsToTry(state.getActiveContextObject(), list);
-				try {
-					for (IndexAccessor indexAccessor : availableAccessors) {
-						if (indexAccessor.canRead(context, target, index)) {
-							ValueRef valueRef = indexAccessor.read(context, target, index);
-							return Optional.of(valueRef);
-						}
-					}
-				}
-				catch (Exception ex) {
-				}
-			}
-		}
-		return Optional.empty();
-	}
-
-	private List<IndexAccessor> getIndexAccessorsToTry(
-			@Nullable Object contextObject, List<IndexAccessor> propertyAccessors) {
-
-		Class<?> targetType;
-		if (contextObject instanceof TypedValue) {
-			targetType = ((TypedValue) contextObject).getTypeDescriptor().getObjectType();
-		}
-		else {
-			targetType = (contextObject != null ? contextObject.getClass() : null);
-		}
-
-		List<IndexAccessor> specificAccessors = new ArrayList<>();
-		List<IndexAccessor> generalAccessors = new ArrayList<>();
-		for (IndexAccessor resolver : propertyAccessors) {
-			Class<?>[] targets = resolver.getSpecificTargetClasses();
-			if (targets == null) {
-				// generic resolver that says it can be used for any type
-				generalAccessors.add(resolver);
-			}
-			else if (targetType != null) {
-				for (Class<?> clazz : targets) {
-					if (clazz == targetType) {
-						specificAccessors.add(resolver);
-						break;
-					}
-					else if (clazz.isAssignableFrom(targetType)) {
-						generalAccessors.add(resolver);
-					}
-				}
-			}
-		}
-		List<IndexAccessor> resolvers = new ArrayList<>(specificAccessors);
-		generalAccessors.removeAll(specificAccessors);
-		resolvers.addAll(generalAccessors);
-		return resolvers;
 	}
 
 	@Override
@@ -449,6 +400,22 @@ public class Indexer extends SpelNodeImpl {
 		else {
 			this.exitTypeDescriptor = descriptor;
 		}
+	}
+
+	/**
+	 * Determine the set of index accessors that should be used to try to access
+	 * an index on the specified context object.
+	 * <p>Delegates to {@link AstUtils#getAccessorsToTry(Class, List)}.
+	 * @param targetObject the object upon which index access is being attempted
+	 * @param indexAccessors the list of index accessors to process
+	 * @return a list of accessors that should be tried in order to access the
+	 * index, or an empty list if no suitable accessor could be found
+	 */
+	private static List<IndexAccessor> getIndexAccessorsToTry(
+			@Nullable Object targetObject, List<IndexAccessor> indexAccessors) {
+
+		Class<?> targetType = (targetObject != null ? targetObject.getClass() : null);
+		return AstUtils.getAccessorsToTry(targetType, indexAccessors);
 	}
 
 

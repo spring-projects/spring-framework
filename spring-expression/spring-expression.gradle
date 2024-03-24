@@ -9,5 +9,4 @@ dependencies {
 	testImplementation("org.jetbrains.kotlin:kotlin-reflect")
 	testImplementation("org.jetbrains.kotlin:kotlin-stdlib")
 	testImplementation("com.fasterxml.jackson.core:jackson-databind")
-	testImplementation("com.fasterxml.jackson.core:jackson-core")
 }
