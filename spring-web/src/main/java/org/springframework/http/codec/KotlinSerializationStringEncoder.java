@@ -60,6 +60,11 @@ public abstract class KotlinSerializationStringEncoder<T extends StringFormat> e
 		super(format, supportedMimeTypes);
 	}
 
+	/**
+	 * Set streaming {@link MediaType MediaTypes}.
+	 * @param streamingMediaTypes streaming {@link MediaType MediaTypes}
+	 * @since 6.1.4
+	 */
 	public void setStreamingMediaTypes(Collection<MediaType> streamingMediaTypes) {
 		this.streamingMediaTypes.clear();
 		this.streamingMediaTypes.addAll(streamingMediaTypes);
