@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.annotation;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -33,25 +32,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 class LookupAnnotationTests {
 
-	private DefaultListableBeanFactory beanFactory;
-
-
-	@BeforeEach
-	void setup() {
-		beanFactory = new DefaultListableBeanFactory();
-		AutowiredAnnotationBeanPostProcessor aabpp = new AutowiredAnnotationBeanPostProcessor();
-		aabpp.setBeanFactory(beanFactory);
-		beanFactory.addBeanPostProcessor(aabpp);
-		beanFactory.registerBeanDefinition("abstractBean", new RootBeanDefinition(AbstractBean.class));
-		beanFactory.registerBeanDefinition("beanConsumer", new RootBeanDefinition(BeanConsumer.class));
-		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
-		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		beanFactory.registerBeanDefinition("testBean", tbd);
-	}
-
-
 	@Test
 	void testWithoutConstructorArg() {
+		DefaultListableBeanFactory beanFactory = configureBeanFactory();
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		Object expected = bean.get();
 		assertThat(expected.getClass()).isEqualTo(TestBean.class);
@@ -60,6 +43,7 @@ class LookupAnnotationTests {
 
 	@Test
 	void testWithOverloadedArg() {
+		DefaultListableBeanFactory beanFactory = configureBeanFactory();
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		TestBean expected = bean.get("haha");
 		assertThat(expected.getClass()).isEqualTo(TestBean.class);
@@ -69,6 +53,7 @@ class LookupAnnotationTests {
 
 	@Test
 	void testWithOneConstructorArg() {
+		DefaultListableBeanFactory beanFactory = configureBeanFactory();
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		TestBean expected = bean.getOneArgument("haha");
 		assertThat(expected.getClass()).isEqualTo(TestBean.class);
@@ -78,6 +63,7 @@ class LookupAnnotationTests {
 
 	@Test
 	void testWithTwoConstructorArg() {
+		DefaultListableBeanFactory beanFactory = configureBeanFactory();
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		TestBean expected = bean.getTwoArguments("haha", 72);
 		assertThat(expected.getClass()).isEqualTo(TestBean.class);
@@ -88,6 +74,7 @@ class LookupAnnotationTests {
 
 	@Test
 	void testWithThreeArgsShouldFail() {
+		DefaultListableBeanFactory beanFactory = configureBeanFactory();
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertThatExceptionOfType(AbstractMethodError.class).as("TestBean has no three arg constructor").isThrownBy(() ->
 				bean.getThreeArguments("name", 1, 2));
@@ -96,6 +83,7 @@ class LookupAnnotationTests {
 
 	@Test
 	void testWithEarlyInjection() {
+		DefaultListableBeanFactory beanFactory = configureBeanFactory();
 		AbstractBean bean = beanFactory.getBean("beanConsumer", BeanConsumer.class).abstractBean;
 		Object expected = bean.get();
 		assertThat(expected.getClass()).isEqualTo(TestBean.class);
@@ -106,7 +94,7 @@ class LookupAnnotationTests {
 	public void testWithNullBean() {
 		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class, () -> null);
 		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		beanFactory.registerBeanDefinition("testBean", tbd);
+		DefaultListableBeanFactory beanFactory = configureBeanFactory(tbd);
 
 		AbstractBean bean = beanFactory.getBean("beanConsumer", BeanConsumer.class).abstractBean;
 		Object expected = bean.get();
@@ -116,6 +104,7 @@ class LookupAnnotationTests {
 
 	@Test
 	void testWithGenericBean() {
+		DefaultListableBeanFactory beanFactory = configureBeanFactory();
 		beanFactory.registerBeanDefinition("numberBean", new RootBeanDefinition(NumberBean.class));
 		beanFactory.registerBeanDefinition("doubleStore", new RootBeanDefinition(DoubleStore.class));
 		beanFactory.registerBeanDefinition("floatStore", new RootBeanDefinition(FloatStore.class));
@@ -127,6 +116,7 @@ class LookupAnnotationTests {
 
 	@Test
 	void testSingletonWithoutMetadataCaching() {
+		DefaultListableBeanFactory beanFactory = configureBeanFactory();
 		beanFactory.setCacheBeanMetadata(false);
 
 		beanFactory.registerBeanDefinition("numberBean", new RootBeanDefinition(NumberBean.class));
@@ -140,6 +130,7 @@ class LookupAnnotationTests {
 
 	@Test
 	void testPrototypeWithoutMetadataCaching() {
+		DefaultListableBeanFactory beanFactory = configureBeanFactory();
 		beanFactory.setCacheBeanMetadata(false);
 
 		beanFactory.registerBeanDefinition("numberBean", new RootBeanDefinition(NumberBean.class, BeanDefinition.SCOPE_PROTOTYPE, null));
@@ -153,6 +144,23 @@ class LookupAnnotationTests {
 		bean = (NumberBean) beanFactory.getBean("numberBean");
 		assertThat(beanFactory.getBean(DoubleStore.class)).isSameAs(bean.getDoubleStore());
 		assertThat(beanFactory.getBean(FloatStore.class)).isSameAs(bean.getFloatStore());
+	}
+
+	private DefaultListableBeanFactory configureBeanFactory(RootBeanDefinition tbd) {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor aabpp = new AutowiredAnnotationBeanPostProcessor();
+		aabpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(aabpp);
+		beanFactory.registerBeanDefinition("abstractBean", new RootBeanDefinition(AbstractBean.class));
+		beanFactory.registerBeanDefinition("beanConsumer", new RootBeanDefinition(BeanConsumer.class));
+		beanFactory.registerBeanDefinition("testBean", tbd);
+		return beanFactory;
+	}
+
+	private DefaultListableBeanFactory configureBeanFactory() {
+		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
+		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		return configureBeanFactory(tbd);
 	}
 
 

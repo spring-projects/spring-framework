@@ -181,6 +181,7 @@ class ImportTests {
 	@Test
 	void testImportAnnotationWithMultipleArgumentsResultingInOverriddenBeanDefinition() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.setAllowBeanDefinitionOverriding(true);
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(
 				WithMultipleArgumentsThatWillCauseDuplication.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
@@ -380,6 +381,7 @@ class ImportTests {
 	@Test  // gh-24643
 	void importedConfigOverridesScanned() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setAllowBeanDefinitionOverriding(true);
 		ctx.scan(SiblingImportingConfigA.class.getPackage().getName());
 		ctx.refresh();
 

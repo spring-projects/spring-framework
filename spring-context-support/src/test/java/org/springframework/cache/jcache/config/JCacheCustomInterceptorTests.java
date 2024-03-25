@@ -24,6 +24,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -43,6 +46,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
+ * Tests that use a custom {@link JCacheInterceptor}.
+ *
  * @author Stephane Nicoll
  */
 class JCacheCustomInterceptorTests {
@@ -56,16 +61,19 @@ class JCacheCustomInterceptorTests {
 
 	@BeforeEach
 	void setup() {
-		ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.getBeanFactory().addBeanPostProcessor(
+				new CacheInterceptorBeanPostProcessor(context.getBeanFactory()));
+		context.register(EnableCachingConfig.class);
+		context.refresh();
+		this.ctx = context;
 		cs = ctx.getBean("service", JCacheableService.class);
 		exceptionCache = ctx.getBean("exceptionCache", Cache.class);
 	}
 
 	@AfterEach
 	void tearDown() {
-		if (ctx != null) {
-			ctx.close();
-		}
+		ctx.close();
 	}
 
 
@@ -87,8 +95,8 @@ class JCacheCustomInterceptorTests {
 	@Test
 	void customInterceptorAppliesWithCheckedException() {
 		assertThatRuntimeException()
-			.isThrownBy(() -> cs.cacheWithCheckedException("id", true))
-			.withCauseExactlyInstanceOf(IOException.class);
+				.isThrownBy(() -> cs.cacheWithCheckedException("id", true))
+				.withCauseExactlyInstanceOf(IOException.class);
 	}
 
 
@@ -120,18 +128,28 @@ class JCacheCustomInterceptorTests {
 			return new ConcurrentMapCache("exception");
 		}
 
-		@Bean
-		public JCacheInterceptor jCacheInterceptor(JCacheOperationSource cacheOperationSource) {
-			JCacheInterceptor cacheInterceptor = new TestCacheInterceptor();
-			cacheInterceptor.setCacheOperationSource(cacheOperationSource);
-			return cacheInterceptor;
-		}
 	}
 
 
+	static class CacheInterceptorBeanPostProcessor implements BeanPostProcessor {
+
+		private final BeanFactory beanFactory;
+
+		CacheInterceptorBeanPostProcessor(BeanFactory beanFactory) {this.beanFactory = beanFactory;}
+
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			if (beanName.equals("jCacheInterceptor")) {
+				JCacheInterceptor cacheInterceptor = new TestCacheInterceptor();
+				cacheInterceptor.setCacheOperationSource(beanFactory.getBean(JCacheOperationSource.class));
+				return cacheInterceptor;
+			}
+			return bean;
+		}
+
+	}
+
 	/**
-	 * A test {@link org.springframework.cache.interceptor.CacheInterceptor} that handles special exception
-	 * types.
+	 * A test {@link JCacheInterceptor} that handles special exception types.
 	 */
 	@SuppressWarnings("serial")
 	static class TestCacheInterceptor extends JCacheInterceptor {
