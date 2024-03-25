@@ -645,6 +645,7 @@ public class MessageHeaderAccessor {
 			return super.getRawHeaders();
 		}
 
+		@SuppressWarnings("NullAway")
 		public void setImmutable() {
 			if (!this.mutable) {
 				return;
