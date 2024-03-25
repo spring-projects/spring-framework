@@ -408,7 +408,7 @@ public class HttpRequestValues {
 		/**
 		 * Set the request body as an Object to be serialized.
 		 */
-		public void setBodyValue(Object bodyValue) {
+		public void setBodyValue(@Nullable Object bodyValue) {
 			this.bodyValue = bodyValue;
 		}
 

@@ -37,7 +37,7 @@ public class MethodArgumentTypeMismatchException extends TypeMismatchException {
 
 
 	public MethodArgumentTypeMismatchException(@Nullable Object value,
-			@Nullable Class<?> requiredType, String name, MethodParameter param, Throwable cause) {
+			@Nullable Class<?> requiredType, String name, MethodParameter param, @Nullable Throwable cause) {
 
 		super(value, requiredType, cause);
 		this.name = name;

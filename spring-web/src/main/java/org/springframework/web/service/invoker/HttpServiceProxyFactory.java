@@ -294,6 +294,7 @@ public final class HttpServiceProxyFactory {
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(MethodInvocation invocation) throws Throwable {
 			Method method = invocation.getMethod();
 			HttpServiceMethod httpServiceMethod = this.httpServiceMethods.get(method);

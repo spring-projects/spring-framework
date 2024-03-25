@@ -165,6 +165,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	}
 
 	@Override
+	@Nullable
 	public Object[] getDetailMessageArguments() {
 		return this.messageDetailArguments;
 	}

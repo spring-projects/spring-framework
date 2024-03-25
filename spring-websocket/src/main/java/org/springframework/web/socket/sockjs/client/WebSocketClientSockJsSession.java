@@ -74,18 +74,21 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getLocalAddress() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getLocalAddress();
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getRemoteAddress();
 	}
 
 	@Override
+	@Nullable
 	public String getAcceptedProtocol() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
 		return this.webSocketSession.getAcceptedProtocol();

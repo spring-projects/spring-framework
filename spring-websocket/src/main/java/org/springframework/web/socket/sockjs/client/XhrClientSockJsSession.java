@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -96,17 +97,20 @@ public class XhrClientSockJsSession extends AbstractClientSockJsSession {
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getLocalAddress() {
 		return null;
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		URI uri = getUri();
 		return (uri != null ? new InetSocketAddress(uri.getHost(), uri.getPort()) : null);
 	}
 
 	@Override
+	@Nullable
 	public String getAcceptedProtocol() {
 		return null;
 	}

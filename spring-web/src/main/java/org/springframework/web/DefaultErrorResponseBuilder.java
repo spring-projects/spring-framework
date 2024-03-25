@@ -211,6 +211,7 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 		}
 
 		@Override
+		@Nullable
 		public Object[] getDetailMessageArguments() {
 			return this.detailMessageArguments;
 		}
