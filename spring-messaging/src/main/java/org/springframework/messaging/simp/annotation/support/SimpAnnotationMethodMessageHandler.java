@@ -476,6 +476,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
+	@Nullable
 	protected String getLookupDestination(@Nullable String destination) {
 		if (destination == null) {
 			return null;

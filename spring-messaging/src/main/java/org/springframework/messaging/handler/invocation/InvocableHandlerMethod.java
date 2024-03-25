@@ -111,7 +111,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @see #doInvoke
 	 */
 	@Nullable
-	public Object invoke(Message<?> message, Object... providedArgs) throws Exception {
+	public Object invoke(Message<?> message, @Nullable Object... providedArgs) throws Exception {
 		Object[] args = getMethodArgumentValues(message, providedArgs);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
@@ -125,7 +125,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * <p>The resulting array will be passed into {@link #doInvoke}.
 	 * @since 5.1.2
 	 */
-	protected Object[] getMethodArgumentValues(Message<?> message, Object... providedArgs) throws Exception {
+	protected Object[] getMethodArgumentValues(Message<?> message, @Nullable Object... providedArgs) throws Exception {
 		MethodParameter[] parameters = getMethodParameters();
 		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;

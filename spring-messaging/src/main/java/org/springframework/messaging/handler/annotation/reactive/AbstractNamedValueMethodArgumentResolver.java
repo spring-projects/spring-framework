@@ -81,6 +81,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements SyncHa
 
 
 	@Override
+	@Nullable
 	public Object resolveArgumentValue(MethodParameter parameter, Message<?> message) {
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();

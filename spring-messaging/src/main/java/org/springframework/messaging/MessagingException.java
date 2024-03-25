@@ -53,7 +53,7 @@ public class MessagingException extends NestedRuntimeException {
 		this.failedMessage = message;
 	}
 
-	public MessagingException(Message<?> message, Throwable cause) {
+	public MessagingException(Message<?> message, @Nullable Throwable cause) {
 		super(null, cause);
 		this.failedMessage = message;
 	}

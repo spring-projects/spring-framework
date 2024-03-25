@@ -80,6 +80,7 @@ public class CompositeMessageCondition implements MessageCondition<CompositeMess
 	}
 
 	@Override
+	@Nullable
 	public CompositeMessageCondition getMatchingCondition(Message<?> message) {
 		List<MessageCondition<?>> result = new ArrayList<>(this.messageConditions.size());
 		for (MessageCondition<?> condition : this.messageConditions) {
