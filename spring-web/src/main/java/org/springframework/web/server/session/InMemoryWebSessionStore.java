@@ -189,6 +189,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		}
 
 		@Override
+		@SuppressWarnings("NullAway")
 		public String getId() {
 			return this.id.get();
 		}
@@ -224,6 +225,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		}
 
 		@Override
+		@SuppressWarnings("NullAway")
 		public boolean isStarted() {
 			return this.state.get().equals(State.STARTED) || !getAttributes().isEmpty();
 		}
@@ -252,6 +254,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		}
 
 		@Override
+		@SuppressWarnings("NullAway")
 		public Mono<Void> save() {
 
 			checkMaxSessionsLimit();
@@ -289,6 +292,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 			return isExpired(clock.instant());
 		}
 
+		@SuppressWarnings("NullAway")
 		private boolean isExpired(Instant now) {
 			if (this.state.get().equals(State.EXPIRED)) {
 				return true;

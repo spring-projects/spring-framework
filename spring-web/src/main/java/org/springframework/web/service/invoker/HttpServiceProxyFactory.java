@@ -251,7 +251,7 @@ public final class HttpServiceProxyFactory {
 					this.exchangeAdapter, initArgumentResolvers(), this.embeddedValueResolver);
 		}
 
-		@SuppressWarnings("DataFlowIssue")
+		@SuppressWarnings({"DataFlowIssue", "NullAway"})
 		private List<HttpServiceArgumentResolver> initArgumentResolvers() {
 
 			// Custom

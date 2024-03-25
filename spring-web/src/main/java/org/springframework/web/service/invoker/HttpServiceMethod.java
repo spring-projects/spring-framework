@@ -223,6 +223,7 @@ final class HttpServiceMethod {
 		}
 
 		@Nullable
+		@SuppressWarnings("NullAway")
 		private static String initUrl(
 				@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation,
 				@Nullable StringValueResolver embeddedValueResolver) {

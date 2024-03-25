@@ -522,6 +522,7 @@ final class DefaultRestClient implements RestClient {
 			}
 		}
 
+		@SuppressWarnings("NullAway")
 		private ClientHttpRequest createRequest(URI uri) throws IOException {
 			ClientHttpRequestFactory factory;
 			if (DefaultRestClient.this.interceptors != null) {
