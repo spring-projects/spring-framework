@@ -45,7 +45,7 @@ public interface PropertyAccessor {
 	/**
 	 * Return an array of classes for which this property accessor should be called.
 	 * <p>Returning {@code null} indicates this is a general property accessor that
-	 * can be called in an attempt to resolve a property on any type.
+	 * can be called in an attempt to access a property on any type.
 	 * @return an array of classes that this property accessor is suitable for
 	 * (or {@code null} if a general property accessor)
 	 */

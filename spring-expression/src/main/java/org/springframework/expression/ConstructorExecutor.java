@@ -34,7 +34,7 @@ package org.springframework.expression;
  * @author Andy Clement
  * @author Sam Brannen
  * @since 3.0
- * @see MethodResolver
+ * @see ConstructorResolver
  * @see MethodExecutor
  */
 @FunctionalInterface
