@@ -139,6 +139,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	}
 
 	@Override
+	@Nullable
 	public String[] getConfigLocations() {
 		return null;
 	}

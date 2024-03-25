@@ -221,7 +221,7 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 		 * {@linkplain #setBodyPublisher(Publisher, ParameterizedTypeReference)}.
 		 */
 		@Override
-		public void setBodyValue(Object bodyValue) {
+		public void setBodyValue(@Nullable Object bodyValue) {
 			super.setBodyValue(bodyValue);
 			this.body = null;
 			this.bodyElementType = null;

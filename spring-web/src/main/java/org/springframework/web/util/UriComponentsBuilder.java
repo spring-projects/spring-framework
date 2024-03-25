@@ -676,7 +676,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	@Override
-	public UriComponentsBuilder queryParam(String name, Object... values) {
+	public UriComponentsBuilder queryParam(String name, @Nullable Object... values) {
 		Assert.notNull(name, "Name must not be null");
 		if (!ObjectUtils.isEmpty(values)) {
 			for (Object value : values) {
@@ -926,6 +926,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@Override
+		@Nullable
 		public PathComponent build() {
 			if (this.path.length() == 0) {
 				return null;
@@ -976,6 +977,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		@Override
+		@Nullable
 		public PathComponent build() {
 			return (this.pathSegments.isEmpty() ? null :
 					new HierarchicalUriComponents.PathSegmentComponent(this.pathSegments));

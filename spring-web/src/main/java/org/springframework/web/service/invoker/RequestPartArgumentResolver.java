@@ -78,6 +78,7 @@ public class RequestPartArgumentResolver extends AbstractNamedValueArgumentResol
 
 
 	@Override
+	@Nullable
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		RequestPart annot = parameter.getParameterAnnotation(RequestPart.class);
 		boolean isMultiPartFile = parameter.nestedIfOptional().getNestedParameterType().equals(MultipartFile.class);

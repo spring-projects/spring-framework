@@ -139,6 +139,7 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 		return observation;
 	}
 
+	@Nullable
 	private Throwable unwrapServletException(Throwable ex) {
 		return (ex instanceof ServletException) ? ex.getCause() : ex;
 	}

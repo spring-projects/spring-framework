@@ -84,6 +84,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 
 	@Override
+	@Nullable
 	@SuppressWarnings({"rawtypes", "unchecked", "resource"})
 	public T extractData(ClientHttpResponse response) throws IOException {
 		IntrospectingClientHttpResponse responseWrapper = new IntrospectingClientHttpResponse(response);

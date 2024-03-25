@@ -101,7 +101,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	 * container processing thread has exited.
 	 */
 	@Override
-	public void setTimeout(Long timeout) {
+	public void setTimeout(@Nullable Long timeout) {
 		Assert.state(!isAsyncStarted(), "Cannot change the timeout with concurrent handling in progress");
 		this.timeout = timeout;
 	}

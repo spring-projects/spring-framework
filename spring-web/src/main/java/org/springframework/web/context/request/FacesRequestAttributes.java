@@ -24,6 +24,7 @@ import jakarta.faces.context.FacesContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -102,6 +103,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name, int scope) {
 		return getAttributeMap(scope).get(name);
 	}
@@ -130,6 +132,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 	}
 
 	@Override
+	@Nullable
 	public Object resolveReference(String key) {
 		return switch (key) {
 			case REFERENCE_REQUEST -> getExternalContext().getRequest();

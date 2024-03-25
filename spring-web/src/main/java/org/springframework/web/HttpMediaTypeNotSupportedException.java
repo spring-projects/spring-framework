@@ -63,7 +63,7 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 	 * @param mediaTypes list of supported media types
 	 * @since 6.0.5
 	 */
-	public HttpMediaTypeNotSupportedException(String message, List<MediaType> mediaTypes) {
+	public HttpMediaTypeNotSupportedException(@Nullable String message, List<MediaType> mediaTypes) {
 		super(message, mediaTypes, PARSE_ERROR_DETAIL_CODE, null);
 		this.contentType = null;
 		this.httpMethod = null;
