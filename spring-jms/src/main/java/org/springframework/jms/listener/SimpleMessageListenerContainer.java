@@ -315,6 +315,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #executeListener
 	 */
+	@SuppressWarnings("NullAway")
 	protected MessageConsumer createListenerConsumer(final Session session) throws JMSException {
 		Destination destination = getDestination();
 		if (destination == null) {

@@ -1440,6 +1440,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 		}
 
+		@SuppressWarnings("NullAway")
 		private void initResourcesIfNecessary() throws JMSException {
 			if (getCacheLevel() <= CACHE_CONNECTION) {
 				updateRecoveryMarker();
