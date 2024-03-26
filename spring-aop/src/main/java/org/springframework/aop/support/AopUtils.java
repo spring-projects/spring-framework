@@ -43,6 +43,7 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -73,6 +74,7 @@ public abstract class AopUtils {
 	 * @see #isJdkDynamicProxy
 	 * @see #isCglibProxy
 	 */
+	@Contract("null -> false")
 	public static boolean isAopProxy(@Nullable Object object) {
 		return (object instanceof SpringProxy && (Proxy.isProxyClass(object.getClass()) ||
 				object.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)));
@@ -86,6 +88,7 @@ public abstract class AopUtils {
 	 * @param object the object to check
 	 * @see java.lang.reflect.Proxy#isProxyClass
 	 */
+	@Contract("null -> false")
 	public static boolean isJdkDynamicProxy(@Nullable Object object) {
 		return (object instanceof SpringProxy && Proxy.isProxyClass(object.getClass()));
 	}
@@ -98,6 +101,7 @@ public abstract class AopUtils {
 	 * @param object the object to check
 	 * @see ClassUtils#isCglibProxy(Object)
 	 */
+	@Contract("null -> false")
 	public static boolean isCglibProxy(@Nullable Object object) {
 		return (object instanceof SpringProxy &&
 				object.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR));

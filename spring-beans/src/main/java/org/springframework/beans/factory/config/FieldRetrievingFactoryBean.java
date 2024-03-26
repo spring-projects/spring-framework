@@ -167,6 +167,7 @@ public class FieldRetrievingFactoryBean
 
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchFieldException {
 		if (this.targetClass != null && this.targetObject != null) {
 			throw new IllegalArgumentException("Specify either targetClass or targetObject, not both");

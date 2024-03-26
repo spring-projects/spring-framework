@@ -106,9 +106,9 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 				// by the JDK's JavaBeans Introspector...
 				Set<Method> ambiguousCandidates = new HashSet<>();
 				for (Method method : beanClass.getMethods()) {
-					if (method.getName().equals(writeMethodToUse.getName()) &&
-							!method.equals(writeMethodToUse) && !method.isBridge() &&
-							method.getParameterCount() == writeMethodToUse.getParameterCount()) {
+					if (method.getName().equals(this.writeMethod.getName()) &&
+							!method.equals(this.writeMethod) && !method.isBridge() &&
+							method.getParameterCount() == this.writeMethod.getParameterCount()) {
 						ambiguousCandidates.add(method);
 					}
 				}

@@ -77,7 +77,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 		this.beanFactory = beanFactory;
 		this.name = name;
 		Class<?> resolvedType = type;
-		if (type == null) {
+		if (resolvedType == null) {
 			resolvedType = beanFactory.getType(name);
 			Assert.notNull(resolvedType, "Unresolvable bean type - explicitly specify the aspect class");
 		}

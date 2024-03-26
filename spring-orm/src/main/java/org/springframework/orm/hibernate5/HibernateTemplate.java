@@ -947,6 +947,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	@Deprecated
 	@Override
+	@SuppressWarnings("NullAway")
 	public List<?> findByNamedQueryAndNamedParam(
 			String queryName, @Nullable String[] paramNames, @Nullable Object[] values)
 			throws DataAccessException {

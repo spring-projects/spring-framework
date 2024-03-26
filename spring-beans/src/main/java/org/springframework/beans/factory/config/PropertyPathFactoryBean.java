@@ -162,6 +162,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 

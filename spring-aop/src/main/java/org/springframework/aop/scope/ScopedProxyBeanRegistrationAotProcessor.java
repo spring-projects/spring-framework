@@ -54,6 +54,7 @@ class ScopedProxyBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 
 	@Override
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		if (beanClass.equals(ScopedProxyFactoryBean.class)) {

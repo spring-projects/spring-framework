@@ -349,7 +349,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	@Override
 	public void afterPropertiesSet() throws PersistenceException {
 		PersistenceUnitManager managerToUse = this.persistenceUnitManager;
-		if (this.persistenceUnitManager == null) {
+		if (managerToUse == null) {
 			this.internalPersistenceUnitManager.afterPropertiesSet();
 			managerToUse = this.internalPersistenceUnitManager;
 		}
