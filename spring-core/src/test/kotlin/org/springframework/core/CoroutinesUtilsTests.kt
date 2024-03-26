@@ -28,6 +28,8 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.coroutineContext
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.isAccessible
 
 /**
  * Kotlin tests for [CoroutinesUtils].
@@ -207,6 +209,15 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithValueClassWithPrivateConstructorParameter() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassWithPrivateConstructor") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo", null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo")
+		}
+	}
+
+	@Test
 	fun invokeSuspendingFunctionWithExtension() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithExtension",
 			CustomException::class.java, Continuation::class.java)
@@ -293,6 +304,11 @@ class CoroutinesUtilsTests {
 		return value?.value
 	}
 
+	suspend fun suspendingFunctionWithValueClassWithPrivateConstructor(value: ValueClassWithPrivateConstructor): String? {
+		delay(1)
+		return value.value
+	}
+
 	suspend fun CustomException.suspendingFunctionWithExtension(): String {
 		delay(1)
 		return "${this.message}"
@@ -329,6 +345,13 @@ class CoroutinesUtilsTests {
 				 throw IllegalArgumentException()
 			 }
 		 }
+	}
+
+	@JvmInline
+	value class ValueClassWithPrivateConstructor private constructor(val value: String) {
+		companion object {
+			fun from(value: String) = ValueClassWithPrivateConstructor(value)
+		}
 	}
 
 	class CustomException(message: String) : Throwable(message)
