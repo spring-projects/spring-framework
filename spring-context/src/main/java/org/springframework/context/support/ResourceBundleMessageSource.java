@@ -145,6 +145,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * returning the value found in the bundle as-is (without MessageFormat parsing).
 	 */
 	@Override
+	@Nullable
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
 		Set<String> basenames = getBasenameSet();
 		for (String basename : basenames) {

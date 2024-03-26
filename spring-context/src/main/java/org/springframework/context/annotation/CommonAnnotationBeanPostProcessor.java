@@ -314,6 +314,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	@Override
+	@Nullable
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		BeanRegistrationAotContribution parentAotContribution = super.processAheadOfTime(registeredBean);
 		Class<?> beanClass = registeredBean.getBeanClass();
@@ -350,6 +351,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	@Override
+	@Nullable
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		return null;
 	}

@@ -43,7 +43,7 @@ public abstract class DataAccessException extends NestedRuntimeException {
 	 * Constructor for DataAccessException.
 	 * @param msg the detail message
 	 */
-	public DataAccessException(String msg) {
+	public DataAccessException(@Nullable String msg) {
 		super(msg);
 	}
 

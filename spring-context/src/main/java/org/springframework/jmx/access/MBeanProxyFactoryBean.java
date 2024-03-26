@@ -108,6 +108,7 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getObjectType() {
 		return this.proxyInterface;
 	}

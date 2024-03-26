@@ -16,6 +16,8 @@
 
 package org.springframework.dao;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Exception thrown on a pessimistic locking violation.
  * Thrown by Spring's SQLException translation mechanism
@@ -37,7 +39,7 @@ public class PessimisticLockingFailureException extends ConcurrencyFailureExcept
 	 * Constructor for PessimisticLockingFailureException.
 	 * @param msg the detail message
 	 */
-	public PessimisticLockingFailureException(String msg) {
+	public PessimisticLockingFailureException(@Nullable String msg) {
 		super(msg);
 	}
 
@@ -46,7 +48,7 @@ public class PessimisticLockingFailureException extends ConcurrencyFailureExcept
 	 * @param msg the detail message
 	 * @param cause the root cause from the data access API in use
 	 */
-	public PessimisticLockingFailureException(String msg, Throwable cause) {
+	public PessimisticLockingFailureException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

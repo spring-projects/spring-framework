@@ -305,6 +305,7 @@ public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPo
 	}
 
 	@Override
+	@Nullable
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		// We only apply special treatment to ScriptFactory implementations here.
 		if (!ScriptFactory.class.isAssignableFrom(beanClass)) {

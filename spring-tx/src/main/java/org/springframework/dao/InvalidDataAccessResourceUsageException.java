@@ -16,6 +16,8 @@
 
 package org.springframework.dao;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Root for exceptions thrown when we use a data access resource incorrectly.
  * Thrown for example on specifying bad SQL when using a RDBMS.
@@ -30,7 +32,7 @@ public class InvalidDataAccessResourceUsageException extends NonTransientDataAcc
 	 * Constructor for InvalidDataAccessResourceUsageException.
 	 * @param msg the detail message
 	 */
-	public InvalidDataAccessResourceUsageException(String msg) {
+	public InvalidDataAccessResourceUsageException(@Nullable String msg) {
 		super(msg);
 	}
 
@@ -39,7 +41,7 @@ public class InvalidDataAccessResourceUsageException extends NonTransientDataAcc
 	 * @param msg the detail message
 	 * @param cause the root cause from the data access API in use
 	 */
-	public InvalidDataAccessResourceUsageException(String msg, Throwable cause) {
+	public InvalidDataAccessResourceUsageException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

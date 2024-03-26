@@ -201,7 +201,7 @@ public abstract class StreamUtils {
 	 * @throws IOException in case of I/O errors
 	 * @since 4.3
 	 */
-	public static int drain(InputStream in) throws IOException {
+	public static int drain(@Nullable InputStream in) throws IOException {
 		Assert.notNull(in, "No InputStream specified");
 		return (int) in.transferTo(OutputStream.nullOutputStream());
 	}

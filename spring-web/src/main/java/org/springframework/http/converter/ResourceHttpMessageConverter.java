@@ -82,6 +82,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		if (this.supportsReadStreaming && InputStreamResource.class == clazz) {
 			return new InputStreamResource(inputMessage.getBody()) {
 				@Override
+				@Nullable
 				public String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}

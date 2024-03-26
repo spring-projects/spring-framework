@@ -19,6 +19,7 @@ package org.springframework.web.reactive.socket.server.support;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers reflection hints related to
@@ -30,7 +31,7 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 class HandshakeWebSocketServiceRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		hints.reflection().registerType(HandshakeWebSocketService.initUpgradeStrategy().getClass(),
 				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 	}

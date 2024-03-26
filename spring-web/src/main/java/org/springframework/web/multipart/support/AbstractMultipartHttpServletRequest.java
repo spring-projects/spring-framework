@@ -84,6 +84,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	}
 
 	@Override
+	@Nullable
 	public MultipartFile getFile(String name) {
 		return getMultipartFiles().getFirst(name);
 	}
