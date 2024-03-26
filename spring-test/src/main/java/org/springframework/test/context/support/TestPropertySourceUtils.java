@@ -459,6 +459,7 @@ public abstract class TestPropertySourceUtils {
 		private final LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 
 		@Override
+		@Nullable
 		public Object put(Object key, Object value) {
 			if (key instanceof String str) {
 				return this.map.put(str, value);

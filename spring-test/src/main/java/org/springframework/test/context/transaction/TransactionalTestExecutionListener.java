@@ -155,6 +155,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource(false) {
 
 		@Override
+		@Nullable
 		protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
 			// @Transactional present in inheritance hierarchy?
 			TransactionAttribute result = super.findTransactionAttribute(clazz);

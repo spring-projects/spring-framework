@@ -93,6 +93,7 @@ public class MockServletConfig implements ServletConfig {
 	}
 
 	@Override
+	@Nullable
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
