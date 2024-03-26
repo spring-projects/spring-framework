@@ -179,6 +179,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 		registry.registerBeanDefinition(beanName, beanDefinition);
 
 		Object override = overrideMetadata.createOverride(beanName, existingBeanDefinition, null);
+		Assert.state(this.beanFactory != null, "ConfigurableListableBeanFactory must not be null");
 		if (this.beanFactory.isSingleton(beanName)) {
 			// Now we have an instance (the override) that we can register.
 			// At this stage we don't expect a singleton instance to be present,
@@ -222,6 +223,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 		final OverrideMetadata metadata = this.earlyOverrideMetadata.get(beanName);
 		if (metadata != null && metadata.getBeanOverrideStrategy() == BeanOverrideStrategy.WRAP_EARLY_BEAN) {
 			bean = metadata.createOverride(beanName, null, bean);
+			Assert.state(this.beanFactory != null, "ConfigurableListableBeanFactory must not be null");
 			metadata.track(bean, this.beanFactory);
 		}
 		return bean;
@@ -234,6 +236,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 	}
 
 	private Set<String> getExistingBeanNames(ResolvableType resolvableType) {
+		Assert.state(this.beanFactory != null, "ConfigurableListableBeanFactory must not be null");
 		Set<String> beans = new LinkedHashSet<>(
 				Arrays.asList(this.beanFactory.getBeanNamesForType(resolvableType, true, false)));
 		Class<?> type = resolvableType.resolve(Object.class);
@@ -274,6 +277,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 		try {
 			ReflectionUtils.makeAccessible(field);
 			Object existingValue = ReflectionUtils.getField(field, target);
+			Assert.state(this.beanFactory != null, "ConfigurableListableBeanFactory must not be null");
 			Object bean = this.beanFactory.getBean(beanName, field.getType());
 			if (existingValue == bean) {
 				return;
@@ -308,7 +312,7 @@ public class BeanOverrideBeanPostProcessor implements InstantiationAwareBeanPost
 					constructorArgs.addIndexedArgumentValue(0, new LinkedHashSet<OverrideMetadata>()));
 		ConstructorArgumentValues.ValueHolder constructorArg =
 				definition.getConstructorArgumentValues().getIndexedArgumentValue(0, Set.class);
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({"unchecked", "NullAway"})
 		Set<OverrideMetadata> existing = (Set<OverrideMetadata>) constructorArg.getValue();
 		if (overrideMetadata != null && existing != null) {
 			existing.addAll(overrideMetadata);

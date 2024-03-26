@@ -377,6 +377,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * the supplied {@link TestContextManager}.
 	 * @since 6.1
 	 */
+	@SuppressWarnings("NullAway")
 	private static void registerMethodInvoker(TestContextManager testContextManager, ExtensionContext context) {
 		testContextManager.getTestContext().setMethodInvoker(context.getExecutableInvoker()::invoke);
 	}

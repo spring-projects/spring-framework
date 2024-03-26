@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -96,7 +97,9 @@ class BeanOverrideParser {
 
 			BeanOverride beanOverride = mergedAnnotation.synthesize();
 			BeanOverrideProcessor processor = BeanUtils.instantiateClass(beanOverride.value());
-			Annotation composedAnnotation = mergedAnnotation.getMetaSource().synthesize();
+			MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
+			Assert.state(metaSource != null, "Meta-annotation source must not be null");
+			Annotation composedAnnotation = metaSource.synthesize();
 			ResolvableType typeToOverride = processor.getOrDeduceType(field, composedAnnotation, source);
 
 			Assert.state(overrideAnnotationFound.compareAndSet(false, true),

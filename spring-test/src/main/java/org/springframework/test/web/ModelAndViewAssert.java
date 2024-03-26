@@ -53,7 +53,7 @@ public abstract class ModelAndViewAssert {
 	 * @param expectedType expected type of the model value
 	 * @return the model value
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "NullAway"})
 	public static <T> T assertAndReturnModelAttributeOfType(ModelAndView mav, String modelName, Class<T> expectedType) {
 		Map<String, Object> model = mav.getModel();
 		Object obj = model.get(modelName);
@@ -109,6 +109,7 @@ public abstract class ModelAndViewAssert {
 	 * @param mav the ModelAndView to test against (never {@code null})
 	 * @param expectedModel the expected model
 	 */
+	@SuppressWarnings("NullAway")
 	public static void assertModelAttributeValues(ModelAndView mav, Map<String, Object> expectedModel) {
 		Map<String, Object> model = mav.getModel();
 

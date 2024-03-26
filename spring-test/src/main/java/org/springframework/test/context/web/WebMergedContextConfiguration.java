@@ -218,8 +218,8 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 */
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (super.equals(other) &&
-				this.resourceBasePath.equals(((WebMergedContextConfiguration) other).resourceBasePath)));
+		return (this == other || (super.equals(other) && other instanceof WebMergedContextConfiguration otherConfiguration &&
+				this.resourceBasePath.equals(otherConfiguration.resourceBasePath)));
 	}
 
 	/**

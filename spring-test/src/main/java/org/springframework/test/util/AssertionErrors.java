@@ -16,6 +16,7 @@
 
 package org.springframework.test.util;
 
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
@@ -33,6 +34,7 @@ public abstract class AssertionErrors {
 	 * Fail a test with the given message.
 	 * @param message a message that describes the reason for the failure
 	 */
+	@Contract("_ -> fail")
 	public static void fail(String message) {
 		throw new AssertionError(message);
 	}
@@ -65,6 +67,7 @@ public abstract class AssertionErrors {
 	 * @param message a message that describes the reason for the failure
 	 * @param condition the condition to test for
 	 */
+	@Contract("_, false -> fail")
 	public static void assertTrue(String message, boolean condition) {
 		if (!condition) {
 			fail(message);
@@ -78,6 +81,7 @@ public abstract class AssertionErrors {
 	 * @param condition the condition to test for
 	 * @since 5.2.1
 	 */
+	@Contract("_, true -> fail")
 	public static void assertFalse(String message, boolean condition) {
 		if (condition) {
 			fail(message);
@@ -91,6 +95,7 @@ public abstract class AssertionErrors {
 	 * @param object the object to check
 	 * @since 5.2.1
 	 */
+	@Contract("_, !null -> fail")
 	public static void assertNull(String message, @Nullable Object object) {
 		assertTrue(message, object == null);
 	}
@@ -102,6 +107,7 @@ public abstract class AssertionErrors {
 	 * @param object the object to check
 	 * @since 5.1.8
 	 */
+	@Contract("_, null -> fail")
 	public static void assertNotNull(String message, @Nullable Object object) {
 		assertTrue(message, object != null);
 	}

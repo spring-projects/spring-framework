@@ -203,6 +203,7 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	}
 
 
+	@SuppressWarnings("NullAway")
 	private ModelAndView getModelAndView() {
 		ModelAndView modelAndView = this.actual.getModelAndView();
 		Assertions.assertThat(modelAndView).as("ModelAndView").isNotNull();

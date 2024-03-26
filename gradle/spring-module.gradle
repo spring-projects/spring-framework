@@ -120,8 +120,7 @@ tasks.withType(JavaCompile).configureEach {
         option("NullAway:AnnotatedPackages", "org.springframework")
         option("NullAway:UnannotatedSubPackages", "org.springframework.instrument,org.springframework.context.index," +
 				"org.springframework.asm,org.springframework.cglib,org.springframework.objenesis," +
-				"org.springframework.javapoet,org.springframework.aot.nativex.substitution,org.springframework.aot.nativex.feature," +
-				"org.springframework.test,org.springframework.mock")
+				"org.springframework.javapoet,org.springframework.aot.nativex.substitution,org.springframework.aot.nativex.feature")
     }
 }
 tasks.compileJava {

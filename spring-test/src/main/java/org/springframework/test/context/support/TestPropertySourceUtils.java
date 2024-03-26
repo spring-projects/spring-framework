@@ -135,6 +135,7 @@ public abstract class TestPropertySourceUtils {
 		return mergedAttributes;
 	}
 
+	@SuppressWarnings("NullAway")
 	private static boolean duplicationDetected(TestPropertySourceAttributes currentAttributes,
 			@Nullable TestPropertySourceAttributes previousAttributes) {
 
