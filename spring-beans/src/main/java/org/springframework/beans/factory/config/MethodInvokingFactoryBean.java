@@ -136,6 +136,7 @@ public class MethodInvokingFactoryBean extends MethodInvokingBean implements Fac
 	 * or {@code null} if not known in advance.
 	 */
 	@Override
+	@Nullable
 	public Class<?> getObjectType() {
 		if (!isPrepared()) {
 			// Not fully initialized yet -> return null to indicate "not known yet".

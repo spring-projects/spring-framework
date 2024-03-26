@@ -136,7 +136,7 @@ public class MethodInvoker {
 	 * Set arguments for the method invocation. If this property is not set,
 	 * or the Object array is of length 0, a method with no arguments is assumed.
 	 */
-	public void setArguments(Object... arguments) {
+	public void setArguments(@Nullable Object... arguments) {
 		this.arguments = arguments;
 	}
 

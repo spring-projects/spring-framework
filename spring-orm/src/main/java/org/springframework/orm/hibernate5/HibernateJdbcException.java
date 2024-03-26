@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import org.hibernate.JDBCException;
 
 import org.springframework.dao.UncategorizedDataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Hibernate-specific subclass of UncategorizedDataAccessException,
@@ -48,6 +49,7 @@ public class HibernateJdbcException extends UncategorizedDataAccessException {
 	/**
 	 * Return the SQL that led to the problem.
 	 */
+	@Nullable
 	public String getSql() {
 		return ((JDBCException) getCause()).getSQL();
 	}

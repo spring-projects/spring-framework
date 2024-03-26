@@ -69,7 +69,7 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * @param cause the root cause
 	 * @since 4.3
 	 */
-	public BeanInstantiationException(Constructor<?> constructor, String msg, @Nullable Throwable cause) {
+	public BeanInstantiationException(Constructor<?> constructor, @Nullable String msg, @Nullable Throwable cause) {
 		super("Failed to instantiate [" + constructor.getDeclaringClass().getName() + "]: " + msg, cause);
 		this.beanClass = constructor.getDeclaringClass();
 		this.constructor = constructor;
@@ -84,7 +84,7 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * @param cause the root cause
 	 * @since 4.3
 	 */
-	public BeanInstantiationException(Method constructingMethod, String msg, @Nullable Throwable cause) {
+	public BeanInstantiationException(Method constructingMethod, @Nullable String msg, @Nullable Throwable cause) {
 		super("Failed to instantiate [" + constructingMethod.getReturnType().getName() + "]: " + msg, cause);
 		this.beanClass = constructingMethod.getReturnType();
 		this.constructor = null;
