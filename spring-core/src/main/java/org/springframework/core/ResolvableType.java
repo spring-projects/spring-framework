@@ -999,7 +999,7 @@ public class ResolvableType implements Serializable {
 				!ObjectUtils.nullSafeEquals(this.typeProvider.getType(), otherType.typeProvider.getType()))) {
 			return false;
 		}
-		if (this.variableResolver != otherType.variableResolver &&
+		if (!(this.type instanceof Class<?>) && this.variableResolver != otherType.variableResolver &&
 				(this.variableResolver == null || otherType.variableResolver == null ||
 				!ObjectUtils.nullSafeEquals(this.variableResolver.getSource(), otherType.variableResolver.getSource()))) {
 			return false;
