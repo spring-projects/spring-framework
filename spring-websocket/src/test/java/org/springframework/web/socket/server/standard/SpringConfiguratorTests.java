@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -84,7 +84,7 @@ public class SpringConfiguratorTests {
 
 
 	@Configuration
-	@ComponentScan(basePackageClasses=SpringConfiguratorTests.class)
+	@Import(ComponentEchoEndpoint.class)
 	static class Config {
 
 		@Bean
