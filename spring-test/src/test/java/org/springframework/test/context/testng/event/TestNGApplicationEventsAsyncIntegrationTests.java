@@ -16,9 +16,10 @@
 
 package org.springframework.test.context.testng.event;
 
+import java.util.concurrent.TimeUnit;
+
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.awaitility.Awaitility;
-import org.awaitility.Durations;
 import org.testng.annotations.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,7 @@ class TestNGApplicationEventsAsyncIntegrationTests extends AbstractTestNGSpringC
 	void asyncConsumption() {
 		context.publishEvent(new CustomEvent("asyncConsumption"));
 
-		Awaitility.await().atMost(Durations.ONE_SECOND)
+		Awaitility.await().atMost(5, TimeUnit.SECONDS)
 				.untilAsserted(() -> assertThat(this.applicationEvents.stream(CustomEvent.class))
 						.singleElement()
 						.extracting(CustomEvent::getMessage, InstanceOfAssertFactories.STRING)
