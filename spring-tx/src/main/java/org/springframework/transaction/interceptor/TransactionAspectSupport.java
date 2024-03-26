@@ -326,6 +326,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * 包含了事务执行的整个流程，这里使用了模板模式，具体的实现交给子类去实现
+	 *
 	 * General delegate for around-advice-based subclasses, delegating to several other template
 	 * methods on this class. Able to handle {@link CallbackPreferringPlatformTransactionManager}
 	 * as well as regular {@link PlatformTransactionManager} implementations and
@@ -402,7 +403,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				throw ex;
 			}
 			finally {
-				// 清理消息
+				// 清理消息，即：还原初始状态
 				cleanupTransactionInfo(txInfo);
 			}
 
@@ -609,7 +610,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			if (tm != null) {
-				// 开启事务 ！！！
+				// 开启事务 ！！！并返回 TransactionStatus
 				status = tm.getTransaction(txAttr);
 			}
 			else {
