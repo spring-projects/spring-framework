@@ -123,6 +123,10 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 		return getDelegate().setComplete();
 	}
 
+	@Override
+	public <T> T getNativeResponse() {
+		return getDelegate().getNativeResponse();
+	}
 
 	/**
 	 * Return the native response of the underlying server API, if possible,
@@ -133,16 +137,13 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	 * @since 5.3.3
 	 */
 	public static <T> T getNativeResponse(ServerHttpResponse response) {
-		if (response instanceof AbstractServerHttpResponse abstractServerHttpResponse) {
-			return abstractServerHttpResponse.getNativeResponse();
-		}
-		else if (response instanceof ServerHttpResponseDecorator serverHttpResponseDecorator) {
-			return getNativeResponse(serverHttpResponseDecorator.getDelegate());
-		}
-		else {
+		T nativeResponse = response.getNativeResponse();
+		if (nativeResponse == null) {
 			throw new IllegalArgumentException(
 					"Can't find native response in " + response.getClass().getName());
 		}
+
+		return nativeResponse;
 	}
 
 

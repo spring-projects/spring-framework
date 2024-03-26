@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
-	private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
+	static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
 
 	private final URI uri;
@@ -202,13 +202,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 */
 	@Nullable
 	protected abstract SslInfo initSslInfo();
-
-	/**
-	 * Return the underlying server response.
-	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
-	 * use such as WebSocket upgrades in the spring-webflux module.
-	 */
-	public abstract <T> T getNativeRequest();
 
 	/**
 	 * For internal use in logging at the HTTP adapter layer.

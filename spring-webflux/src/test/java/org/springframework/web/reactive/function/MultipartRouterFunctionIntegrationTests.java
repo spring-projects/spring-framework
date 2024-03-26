@@ -165,6 +165,10 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails proxying requests");
 		startServer(httpServer);
 
+		// TODO For JettyCore this test passes, but calls demand on the request Flux after the handling cycle is
+		//      complete, causing an exception to be logged; and leaks buffers that appear not be released by the
+		//      test application.
+
 		Mono<ResponseEntity<Void>> result = webClient
 				.post()
 				.uri("http://localhost:" + this.port + "/proxy")

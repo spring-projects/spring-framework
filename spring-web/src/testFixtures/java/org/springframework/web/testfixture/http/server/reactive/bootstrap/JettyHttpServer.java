@@ -54,7 +54,6 @@ public class JettyHttpServer extends AbstractHttpServer {
 		connector.setPort(getPort());
 		this.jettyServer.addConnector(connector);
 		this.jettyServer.setHandler(this.contextHandler);
-		this.contextHandler.start();
 	}
 
 	private ServletHttpHandlerAdapter createServletAdapter() {
@@ -70,24 +69,10 @@ public class JettyHttpServer extends AbstractHttpServer {
 	@Override
 	protected void stopInternal() throws Exception {
 		try {
-			if (this.contextHandler.isRunning()) {
-				this.contextHandler.stop();
-			}
+			this.jettyServer.stop();
 		}
-		finally {
-			try {
-				if (this.jettyServer.isRunning()) {
-					// Do not configure a large stop timeout. For example, setting a stop timeout
-					// of 5000 adds an additional 1-2 seconds to the runtime of each test using
-					// the Jetty sever, resulting in 2-4 extra minutes of overall build time.
-					this.jettyServer.setStopTimeout(100);
-					this.jettyServer.stop();
-					this.jettyServer.destroy();
-				}
-			}
-			catch (Exception ex) {
-				// ignore
-			}
+		catch (Exception ex) {
+			// ignore
 		}
 	}
 
@@ -95,18 +80,14 @@ public class JettyHttpServer extends AbstractHttpServer {
 	protected void resetInternal() {
 		try {
 			if (this.jettyServer.isRunning()) {
-				// Do not configure a large stop timeout. For example, setting a stop timeout
-				// of 5000 adds an additional 1-2 seconds to the runtime of each test using
-				// the Jetty sever, resulting in 2-4 extra minutes of overall build time.
-				this.jettyServer.setStopTimeout(100);
 				this.jettyServer.stop();
-				this.jettyServer.destroy();
 			}
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
 		finally {
+			this.jettyServer.destroy();
 			this.jettyServer = null;
 			this.contextHandler = null;
 		}

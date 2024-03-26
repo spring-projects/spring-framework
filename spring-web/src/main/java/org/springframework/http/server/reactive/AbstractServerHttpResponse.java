@@ -155,14 +155,6 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		}
 	}
 
-	/**
-	 * Return the underlying server response.
-	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
-	 * use such as WebSocket upgrades in the spring-webflux module.
-	 */
-	public abstract <T> T getNativeResponse();
-
-
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
 		this.commitActions.add(action);

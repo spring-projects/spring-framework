@@ -116,6 +116,10 @@ public class ZeroDemandResponse implements ServerHttpResponse {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public <T> T getNativeResponse() {
+		return null;
+	}
 
 	private static class ZeroDemandSubscriber extends BaseSubscriber<DataBuffer> {
 

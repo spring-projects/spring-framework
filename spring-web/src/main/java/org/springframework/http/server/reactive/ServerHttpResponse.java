@@ -86,4 +86,13 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 */
 	void addCookie(ResponseCookie cookie);
 
+	/**
+	 * Return the underlying server response.
+	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
+	 * use such as WebSocket upgrades in the spring-webflux module.
+	 */
+	@Nullable
+	default <T> T getNativeResponse() {
+		return null;
+	}
 }

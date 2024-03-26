@@ -98,6 +98,16 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	}
 
 	/**
+	 * Return the underlying server response.
+	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
+	 * use such as WebSocket upgrades in the spring-webflux module.
+	 */
+	@Nullable
+	default <T> T getNativeRequest() {
+		return null;
+	}
+
+	/**
 	 * Return a builder to mutate properties of this request by wrapping it
 	 * with {@link ServerHttpRequestDecorator} and returning either mutated
 	 * values or delegating back to this instance.
