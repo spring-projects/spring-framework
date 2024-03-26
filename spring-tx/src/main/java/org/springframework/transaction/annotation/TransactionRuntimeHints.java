@@ -21,6 +21,7 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers runtime hints for
@@ -33,7 +34,7 @@ import org.springframework.aot.hint.TypeReference;
 class TransactionRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		hints.reflection().registerTypes(TypeReference.listOf(Isolation.class, Propagation.class),
 				TypeHint.builtWith(MemberCategory.DECLARED_FIELDS));
 	}

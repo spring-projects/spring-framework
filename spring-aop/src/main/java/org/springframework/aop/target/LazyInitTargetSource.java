@@ -65,6 +65,7 @@ public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
 
 
 	@Override
+	@Nullable
 	public synchronized Object getTarget() throws BeansException {
 		if (this.target == null) {
 			this.target = getBeanFactory().getBean(getTargetBeanName());

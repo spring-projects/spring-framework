@@ -34,7 +34,7 @@ public abstract class TransientDataAccessException extends DataAccessException {
 	 * Constructor for TransientDataAccessException.
 	 * @param msg the detail message
 	 */
-	public TransientDataAccessException(String msg) {
+	public TransientDataAccessException(@Nullable String msg) {
 		super(msg);
 	}
 
@@ -44,7 +44,7 @@ public abstract class TransientDataAccessException extends DataAccessException {
 	 * @param cause the root cause (usually from using an underlying
 	 * data access API such as JDBC)
 	 */
-	public TransientDataAccessException(String msg, @Nullable Throwable cause) {
+	public TransientDataAccessException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

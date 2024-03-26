@@ -338,6 +338,7 @@ final class QuartzCronField extends CronField {
 
 
 	@Override
+	@Nullable
 	public <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal) {
 		T result = adjust(temporal);
 		if (result != null) {

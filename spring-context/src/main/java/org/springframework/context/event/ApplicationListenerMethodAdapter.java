@@ -367,7 +367,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * Invoke the event listener method with the given argument values.
 	 */
 	@Nullable
-	protected Object doInvoke(Object... args) {
+	protected Object doInvoke(@Nullable Object... args) {
 		Object bean = getTargetBean();
 		// Detect package-protected NullBean instance through equals(null) check
 		if (bean.equals(null)) {
@@ -433,8 +433,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * the given error message.
 	 * @param message error message to append the HandlerMethod details to
 	 */
-	protected String getDetailedErrorMessage(Object bean, String message) {
-		StringBuilder sb = new StringBuilder(message).append('\n');
+	protected String getDetailedErrorMessage(Object bean, @Nullable String message) {
+		StringBuilder sb = (StringUtils.hasLength(message) ? new StringBuilder(message).append('\n') : new StringBuilder());
 		sb.append("HandlerMethod details: \n");
 		sb.append("Bean [").append(bean.getClass().getName()).append("]\n");
 		sb.append("Method [").append(this.method.toGenericString()).append("]\n");
@@ -448,7 +448,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * beans, and others). Event listener beans that require proxying should prefer
 	 * class-based proxy mechanisms.
 	 */
-	private void assertTargetBean(Method method, Object targetBean, Object[] args) {
+	private void assertTargetBean(Method method, Object targetBean, @Nullable Object[] args) {
 		Class<?> methodDeclaringClass = method.getDeclaringClass();
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
@@ -460,7 +460,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 	}
 
-	private String getInvocationErrorMessage(Object bean, String message, Object[] resolvedArgs) {
+	private String getInvocationErrorMessage(Object bean, @Nullable String message, @Nullable Object[] resolvedArgs) {
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(bean, message));
 		sb.append("Resolved arguments: \n");
 		for (int i = 0; i < resolvedArgs.length; i++) {

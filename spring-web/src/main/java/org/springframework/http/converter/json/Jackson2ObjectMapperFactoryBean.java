@@ -469,6 +469,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getObjectType() {
 		return (this.objectMapper != null ? this.objectMapper.getClass() : null);
 	}

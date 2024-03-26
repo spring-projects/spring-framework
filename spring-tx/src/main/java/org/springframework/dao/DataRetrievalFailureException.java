@@ -33,7 +33,7 @@ public class DataRetrievalFailureException extends NonTransientDataAccessExcepti
 	 * Constructor for DataRetrievalFailureException.
 	 * @param msg the detail message
 	 */
-	public DataRetrievalFailureException(String msg) {
+	public DataRetrievalFailureException(@Nullable String msg) {
 		super(msg);
 	}
 
@@ -42,7 +42,7 @@ public class DataRetrievalFailureException extends NonTransientDataAccessExcepti
 	 * @param msg the detail message
 	 * @param cause the root cause from the data access API in use
 	 */
-	public DataRetrievalFailureException(String msg, @Nullable Throwable cause) {
+	public DataRetrievalFailureException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 
