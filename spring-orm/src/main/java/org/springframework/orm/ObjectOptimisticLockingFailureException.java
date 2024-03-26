@@ -42,7 +42,7 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * @param msg the detail message
 	 * @param cause the source exception
 	 */
-	public ObjectOptimisticLockingFailureException(String msg, Throwable cause) {
+	public ObjectOptimisticLockingFailureException(@Nullable String msg, Throwable cause) {
 		super(msg, cause);
 		this.persistentClass = null;
 		this.identifier = null;
@@ -123,7 +123,7 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * @param cause the source exception
 	 */
 	public ObjectOptimisticLockingFailureException(
-			String persistentClassName, @Nullable Object identifier, String msg, @Nullable Throwable cause) {
+			String persistentClassName, @Nullable Object identifier, @Nullable String msg, @Nullable Throwable cause) {
 
 		super(msg, cause);
 		this.persistentClass = persistentClassName;

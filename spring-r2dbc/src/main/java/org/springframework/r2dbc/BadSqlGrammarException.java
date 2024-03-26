@@ -19,6 +19,7 @@ package org.springframework.r2dbc;
 import io.r2dbc.spi.R2dbcException;
 
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.lang.Nullable;
 
 /**
  * Exception thrown when SQL specified is invalid. Such exceptions always have a
@@ -52,6 +53,7 @@ public class BadSqlGrammarException extends InvalidDataAccessResourceUsageExcept
 	/**
 	 * Return the wrapped {@link R2dbcException}.
 	 */
+	@Nullable
 	public R2dbcException getR2dbcException() {
 		return (R2dbcException) getCause();
 	}

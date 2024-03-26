@@ -448,6 +448,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		@SuppressWarnings("unchecked")
 		@Override
+		@Nullable
 		public <T> T getAttribute(Option<T> option) {
 			return (T) doGetValue(option);
 		}

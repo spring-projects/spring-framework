@@ -117,6 +117,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		if (this.proxy == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -125,6 +126,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getObjectType() {
 		if (this.proxy != null) {
 			return this.proxy.getClass();

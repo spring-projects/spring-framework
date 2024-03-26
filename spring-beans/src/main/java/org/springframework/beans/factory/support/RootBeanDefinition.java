@@ -277,6 +277,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 
 	@Override
+	@Nullable
 	public String getParentName() {
 		return null;
 	}

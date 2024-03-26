@@ -83,6 +83,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 				return after.applyWithException(registeredBean, InstanceSupplier.this.get(registeredBean));
 			}
 			@Override
+			@Nullable
 			public Method getFactoryMethod() {
 				return InstanceSupplier.this.getFactoryMethod();
 			}
@@ -126,6 +127,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 				return supplier.getWithException();
 			}
 			@Override
+			@Nullable
 			public Method getFactoryMethod() {
 				return factoryMethod;
 			}

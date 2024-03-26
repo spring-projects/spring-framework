@@ -1435,6 +1435,7 @@ class ConstructorResolver {
 		}
 
 		@Override
+		@Nullable
 		public Object resolveShortcut(BeanFactory beanFactory) {
 			String shortcut = this.shortcut;
 			return (shortcut != null ? beanFactory.getBean(shortcut, getDependencyType()) : null);

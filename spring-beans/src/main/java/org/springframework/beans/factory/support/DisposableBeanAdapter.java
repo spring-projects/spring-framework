@@ -342,7 +342,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		}
 	}
 
-	void logDestroyMethodException(Method destroyMethod, Throwable ex) {
+	void logDestroyMethodException(Method destroyMethod, @Nullable Throwable ex) {
 		if (logger.isWarnEnabled()) {
 			String msg = "Custom destroy method '" + destroyMethod.getName() + "' on bean with name '" +
 					this.beanName + "' propagated an exception";
