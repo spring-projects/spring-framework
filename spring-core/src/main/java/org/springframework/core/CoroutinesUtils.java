@@ -108,7 +108,7 @@ public abstract class CoroutinesUtils {
 	 * @throws IllegalArgumentException if {@code method} is not a suspending function
 	 * @since 6.0
 	 */
-	@SuppressWarnings({"deprecation", "DataFlowIssue"})
+	@SuppressWarnings({"deprecation", "DataFlowIssue", "NullAway"})
 	public static Publisher<?> invokeSuspendingFunction(
 			CoroutineContext context, Method method, @Nullable Object target, @Nullable Object... args) {
 

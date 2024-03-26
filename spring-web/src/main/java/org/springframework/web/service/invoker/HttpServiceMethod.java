@@ -489,7 +489,9 @@ final class HttpServiceMethod {
 
 			return request -> client.exchangeForEntityFlux(request, bodyType)
 					.map(entity -> {
-						Object body = reactiveAdapter.fromPublisher(entity.getBody());
+						Flux<?> entityBody = entity.getBody();
+						Assert.state(entityBody != null, "Entity body must not be null");
+						Object body = reactiveAdapter.fromPublisher(entityBody);
 						return new ResponseEntity<>(body, entity.getHeaders(), entity.getStatusCode());
 					});
 		}

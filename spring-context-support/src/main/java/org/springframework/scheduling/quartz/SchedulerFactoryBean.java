@@ -661,6 +661,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * @see #afterPropertiesSet
 	 * @see org.quartz.SchedulerFactory#getScheduler
 	 */
+	@SuppressWarnings("NullAway")
 	protected Scheduler createScheduler(SchedulerFactory schedulerFactory, @Nullable String schedulerName)
 			throws SchedulerException {
 

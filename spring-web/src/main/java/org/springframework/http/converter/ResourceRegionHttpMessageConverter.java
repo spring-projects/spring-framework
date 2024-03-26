@@ -167,6 +167,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		}
 	}
 
+	@SuppressWarnings("NullAway")
 	private void writeResourceRegionCollection(Collection<ResourceRegion> resourceRegions,
 			HttpOutputMessage outputMessage) throws IOException {
 

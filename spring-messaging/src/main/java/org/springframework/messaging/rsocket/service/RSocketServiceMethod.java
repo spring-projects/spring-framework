@@ -92,6 +92,7 @@ final class RSocketServiceMethod {
 	}
 
 	@Nullable
+	@SuppressWarnings("NullAway")
 	private static String initRoute(
 			Method method, Class<?> containingClass, RSocketStrategies strategies,
 			@Nullable StringValueResolver embeddedValueResolver) {

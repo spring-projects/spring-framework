@@ -344,6 +344,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * @see #executeListener
 	 * @see #setExposeListenerSession
 	 */
+	@SuppressWarnings("NullAway")
 	protected void processMessage(Message message, Session session) {
 		ConnectionFactory connectionFactory = getConnectionFactory();
 		boolean exposeResource = (connectionFactory != null && isExposeListenerSession());

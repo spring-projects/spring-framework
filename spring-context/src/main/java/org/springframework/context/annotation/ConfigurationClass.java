@@ -219,6 +219,7 @@ final class ConfigurationClass {
 		return this.importBeanDefinitionRegistrars;
 	}
 
+	@SuppressWarnings("NullAway")
 	void validate(ProblemReporter problemReporter) {
 		Map<String, Object> attributes = this.metadata.getAnnotationAttributes(Configuration.class.getName());
 

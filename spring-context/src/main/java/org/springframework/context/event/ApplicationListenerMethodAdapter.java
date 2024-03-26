@@ -460,6 +460,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 	}
 
+	@SuppressWarnings("NullAway")
 	private String getInvocationErrorMessage(Object bean, @Nullable String message, @Nullable Object[] resolvedArgs) {
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(bean, message));
 		sb.append("Resolved arguments: \n");

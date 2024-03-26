@@ -177,6 +177,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 					if (this.embeddedValueResolver != null) {
 						prefix = this.embeddedValueResolver.resolveStringValue(prefix);
 					}
+					Assert.state(prefix != null, "Prefix must not be null");
 					info = RequestMappingInfo.paths(prefix).options(this.config).build().combine(info);
 					break;
 				}
