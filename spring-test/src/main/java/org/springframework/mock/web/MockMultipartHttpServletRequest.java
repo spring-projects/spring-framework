@@ -96,6 +96,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 	}
 
 	@Override
+	@Nullable
 	public MultipartFile getFile(String name) {
 		return this.multipartFiles.getFirst(name);
 	}
@@ -117,6 +118,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 	}
 
 	@Override
+	@Nullable
 	public String getMultipartContentType(String paramOrFileName) {
 		MultipartFile file = getFile(paramOrFileName);
 		if (file != null) {
@@ -154,6 +156,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 	}
 
 	@Override
+	@Nullable
 	public HttpHeaders getMultipartHeaders(String paramOrFileName) {
 		MultipartFile file = getFile(paramOrFileName);
 		if (file != null) {

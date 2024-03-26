@@ -130,6 +130,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
+	@Nullable
 	public ApplicationContext getParent() {
 		return null;
 	}
@@ -218,11 +219,13 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.getType(name);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.getType(name, allowFactoryBeanInit);
 	}
@@ -337,6 +340,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	//---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public BeanFactory getParentBeanFactory() {
 		return null;
 	}
@@ -352,6 +356,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	//---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public String getMessage(String code, @Nullable Object[] args, @Nullable String defaultMessage, Locale locale) {
 		return this.messageSource.getMessage(code, args, defaultMessage, locale);
 	}

@@ -127,7 +127,7 @@ class DefaultMvcResult implements MvcResult {
 		return RequestContextUtils.getOutputFlashMap(this.mockRequest);
 	}
 
-	public void setAsyncResult(Object asyncResult) {
+	public void setAsyncResult(@Nullable Object asyncResult) {
 		this.asyncResult.set(asyncResult);
 	}
 
