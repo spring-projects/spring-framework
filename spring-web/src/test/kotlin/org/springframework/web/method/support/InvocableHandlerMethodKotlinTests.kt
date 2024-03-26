@@ -113,6 +113,13 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun valueClassWithPrivateConstructor() {
+		composite.addResolver(StubArgumentResolver(Char::class.java, 'a'))
+		val value = getInvocable(ValueClassHandler::class.java, Char::class.java).invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo('a')
+	}
+
+	@Test
 	fun propertyAccessor() {
 		val value = getInvocable(PropertyAccessorHandler::class.java).invokeForRequest(request, null)
 		Assertions.assertThat(value).isEqualTo("foo")
@@ -191,6 +198,8 @@ class InvocableHandlerMethodKotlinTests {
 		fun valueClassWithNullable(limit: LongValueClass?) =
 			limit?.value
 
+		fun valueClassWithPrivateConstructor(limit: ValueClassWithPrivateConstructor) =
+			limit.value
 	}
 
 	private class PropertyAccessorHandler {
@@ -235,6 +244,13 @@ class InvocableHandlerMethodKotlinTests {
 			if (value.isEmpty()) {
 				throw IllegalArgumentException()
 			}
+		}
+	}
+
+	@JvmInline
+	value class ValueClassWithPrivateConstructor private constructor(val value: Char) {
+		companion object {
+			fun from(value: Char) = ValueClassWithPrivateConstructor(value)
 		}
 	}
 
