@@ -171,14 +171,18 @@ public abstract class AbstractFallbackTransactionAttributeSource
 		// If the target class is null, the method will be unchanged.
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
-		// First try is the method in the target class.
+		// First try is the method in the declaring class.
 		TransactionAttribute txAttr = findTransactionAttribute(specificMethod);
 		if (txAttr != null) {
 			return txAttr;
 		}
 
 		// Second try is the transaction attribute on the target class.
-		txAttr = findTransactionAttribute(specificMethod.getDeclaringClass());
+		Class<?> specificTargetClass = method.getDeclaringClass();
+		if (targetClass != null) {
+			specificTargetClass = ClassUtils.getUserClass(targetClass);
+		}
+		txAttr = findTransactionAttribute(specificTargetClass);
 		if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
 			return txAttr;
 		}
