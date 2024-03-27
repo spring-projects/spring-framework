@@ -41,10 +41,10 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ast.ValueRef;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Person;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -543,44 +543,22 @@ class IndexingTests {
 			}
 
 			@Override
-			public ValueRef read(EvaluationContext context, Object target, Object index) {
-				return new ArrayNodeValueRef((ArrayNode) target, (Integer) index, this.objectMapper);
+			public TypedValue read(EvaluationContext context, Object target, Object index) {
+				ArrayNode arrayNode = (ArrayNode) target;
+				Integer intIndex = (Integer) index;
+				return new TypedValue(arrayNode.get(intIndex));
 			}
 
 			@Override
 			public boolean canWrite(EvaluationContext context, Object target, Object index) {
-				return (target instanceof ArrayNode && index instanceof Integer);
+				return canRead(context, target, index);
 			}
 
 			@Override
-			public void write(EvaluationContext context, Object target, Object index, Object newValue) {
-				if (!(target instanceof ArrayNode arrayNode)) {
-					throw new IllegalStateException("target must be an ArrayNode: " + target.getClass().getName());
-				}
-				if (!(index instanceof Integer intIndex)) {
-					throw new IllegalStateException("index must be an integer: " + target.getClass().getName());
-				}
-
+			public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
+				ArrayNode arrayNode = (ArrayNode) target;
+				Integer intIndex = (Integer) index;
 				arrayNode.set(intIndex, this.objectMapper.convertValue(newValue, JsonNode.class));
-			}
-
-			private record ArrayNodeValueRef(ArrayNode arrayNode, int index, ObjectMapper objectMapper) implements ValueRef {
-
-				@Override
-				public TypedValue getValue() {
-					return new TypedValue(this.arrayNode.get(this.index));
-				}
-
-				@Override
-				public void setValue(Object newValue) {
-					// TODO throw new UnsupportedOperationException("setValue() is not supported");
-					this.arrayNode.set(index, this.objectMapper.convertValue(newValue, JsonNode.class));
-				}
-
-				@Override
-				public boolean isWritable() {
-					return true;
-				}
 			}
 		}
 	}

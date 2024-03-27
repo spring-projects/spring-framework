@@ -158,14 +158,14 @@ public class Indexer extends SpelNodeImpl {
 			throws EvaluationException {
 
 		TypedValue typedValue = valueSupplier.get();
-		// TODO Set value for IndexAccessor via its write() method, NOT via the ValueRef returned from its read() method.
+		// TODO Query IndexAccessor's canWrite() method before invoking its write() method.
 		getValueRef(state).setValue(typedValue.getValue());
 		return typedValue;
 	}
 
 	@Override
 	public boolean isWritable(ExpressionState expressionState) throws SpelEvaluationException {
-		return true;
+		return getValueRef(expressionState).isWritable();
 	}
 
 
@@ -254,13 +254,13 @@ public class Indexer extends SpelNodeImpl {
 		try {
 			for (IndexAccessor indexAccessor : accessorsToTry) {
 				if (indexAccessor.canRead(evalContext, target, index)) {
-					// TODO Introduce local IndexAccessorValueRef.
-					return indexAccessor.read(evalContext, target, index);
+					return new IndexAccessorValueRef(indexAccessor, target, index, evalContext, targetDescriptor);
 				}
 			}
 		}
 		catch (Exception ex) {
-			// TODO throw SpelEvaluationException for "exception during index access"
+			// TODO throw SpelEvaluationException for "exception during index access",
+			// analogous to SpelMessage.EXCEPTION_DURING_PROPERTY_READ.
 		}
 
 		throw new SpelEvaluationException(
@@ -871,6 +871,59 @@ public class Indexer extends SpelNodeImpl {
 		@Override
 		public boolean isWritable() {
 			return false;
+		}
+	}
+
+
+	private class IndexAccessorValueRef implements ValueRef {
+
+		private final IndexAccessor indexAccessor;
+
+		private final Object target;
+
+		private final Object index;
+
+		private final EvaluationContext evaluationContext;
+
+		private final TypeDescriptor typeDescriptor;
+
+
+		IndexAccessorValueRef(IndexAccessor indexAccessor, Object target, Object index,
+				EvaluationContext evaluationContext, TypeDescriptor typeDescriptor) {
+
+			this.indexAccessor = indexAccessor;
+			this.target = target;
+			this.index = index;
+			this.evaluationContext = evaluationContext;
+			this.typeDescriptor = typeDescriptor;
+		}
+
+
+		@Override
+		public TypedValue getValue() {
+			try {
+				return this.indexAccessor.read(this.evaluationContext, this.target, this.index);
+			}
+			catch (AccessException ex) {
+				throw new SpelEvaluationException(getStartPosition(), ex,
+						SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, this.typeDescriptor.toString());
+			}
+		}
+
+		@Override
+		public void setValue(@Nullable Object newValue) {
+			try {
+				this.indexAccessor.write(this.evaluationContext, this.target, this.index, newValue);
+			}
+			catch (AccessException ex) {
+				throw new SpelEvaluationException(getStartPosition(), ex,
+						SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, this.typeDescriptor.toString());
+			}
+		}
+
+		@Override
+		public boolean isWritable() {
+			return true;
 		}
 	}
 

@@ -16,7 +16,6 @@
 
 package org.springframework.expression;
 
-import org.springframework.expression.spel.ast.ValueRef;
 import org.springframework.lang.Nullable;
 
 /**
@@ -80,8 +79,7 @@ public interface IndexAccessor extends TargetedAccessor {
 	 * descriptor for it
 	 * @throws AccessException if there is any problem reading the index value
 	 */
-	// TODO Change return type to TypedValue to avoid package cycle.
-	ValueRef read(EvaluationContext context, Object target, Object index) throws AccessException;
+	TypedValue read(EvaluationContext context, Object target, Object index) throws AccessException;
 
 	/**
 	 * Called to determine if this index accessor is able to write to a specified
