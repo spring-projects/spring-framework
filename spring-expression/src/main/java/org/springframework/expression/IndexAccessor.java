@@ -68,7 +68,7 @@ public interface IndexAccessor extends TargetedAccessor {
 	 * @throws AccessException if there is any problem determining whether the
 	 * index can be read
 	 */
-	boolean canRead(EvaluationContext context, @Nullable Object target, Object index) throws AccessException;
+	boolean canRead(EvaluationContext context, Object target, Object index) throws AccessException;
 
 	/**
 	 * Called to read an index from a specified target object.
@@ -81,7 +81,7 @@ public interface IndexAccessor extends TargetedAccessor {
 	 * @throws AccessException if there is any problem reading the index value
 	 */
 	// TODO Change return type to TypedValue to avoid package cycle.
-	ValueRef read(EvaluationContext context, @Nullable Object target, Object index) throws AccessException;
+	ValueRef read(EvaluationContext context, Object target, Object index) throws AccessException;
 
 	/**
 	 * Called to determine if this index accessor is able to write to a specified
@@ -93,7 +93,7 @@ public interface IndexAccessor extends TargetedAccessor {
 	 * @throws AccessException if there is any problem determining whether the
 	 * index can be written to
 	 */
-	boolean canWrite(EvaluationContext context, @Nullable Object target, Object index) throws AccessException;
+	boolean canWrite(EvaluationContext context, Object target, Object index) throws AccessException;
 
 	/**
 	 * Called to write to an index on a specified target object.
@@ -104,7 +104,7 @@ public interface IndexAccessor extends TargetedAccessor {
 	 * @param newValue the new value for the index
 	 * @throws AccessException if there is any problem writing to the index value
 	 */
-	void write(EvaluationContext context, @Nullable Object target, Object index, @Nullable Object newValue)
+	void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue)
 			throws AccessException;
 
 }
