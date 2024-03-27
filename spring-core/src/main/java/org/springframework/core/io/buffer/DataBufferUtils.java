@@ -487,6 +487,35 @@ public abstract class DataBufferUtils {
 		return new OutputStreamPublisher(outputStreamConsumer, bufferFactory, executor, chunkSize);
 	}
 
+	/**
+	 * Subscribes to given {@link Publisher} and returns subscription
+	 * as {@link InputStream} that allows reading all propagated {@link DataBuffer} messages via its imperative API.
+	 * Given the {@link InputStream} implementation buffers messages as per configuration.
+	 * The returned {@link InputStream} is considered terminated when the given {@link Publisher} signaled one of the
+	 * terminal signal ({@link Subscriber#onComplete() or {@link Subscriber#onError(Throwable)}})
+	 * and all the stored {@link DataBuffer} polled from the internal buffer.
+	 * The returned {@link InputStream} will call {@link Subscription#cancel()} and release all stored {@link DataBuffer}
+	 * when {@link InputStream#close()} is called.
+	 * <p>
+	 * Note: The implementation of the returned {@link InputStream} disallow concurrent call on
+	 * any of the {@link InputStream#read} methods
+	 * <p>
+	 * Note: {@link Subscription#request(long)} happens eagerly for the first time upon subscription
+	 * and then repeats every time {@code bufferSize - (bufferSize >> 2)} consumed
+	 *
+	 * @param publisher the source of {@link DataBuffer} which should be represented as an {@link InputStream}
+	 * @param bufferSize the maximum amount of {@link DataBuffer} prefetched in advance and stored inside {@link InputStream}
+	 * @return an {@link InputStream} instance representing given {@link Publisher} messages
+	 */
+	public static <T extends DataBuffer> InputStream subscribeAsInputStream(Publisher<T> publisher, int bufferSize) {
+		Assert.notNull(publisher, "Publisher must not be null");
+		Assert.isTrue(bufferSize > 0, "Buffer size must be > 0");
+
+		InputStreamSubscriber inputStreamSubscriber = new InputStreamSubscriber(bufferSize);
+		publisher.subscribe(inputStreamSubscriber);
+		return inputStreamSubscriber;
+	}
+
 
 	//---------------------------------------------------------------------
 	// Various
