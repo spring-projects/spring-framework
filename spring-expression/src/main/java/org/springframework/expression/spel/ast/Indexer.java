@@ -259,8 +259,9 @@ public class Indexer extends SpelNodeImpl {
 			}
 		}
 		catch (Exception ex) {
-			// TODO throw SpelEvaluationException for "exception during index access",
-			// analogous to SpelMessage.EXCEPTION_DURING_PROPERTY_READ.
+			throw new SpelEvaluationException(
+					getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_INDEX_READ, index,
+					target.getClass().getTypeName());
 		}
 
 		throw new SpelEvaluationException(
@@ -904,9 +905,10 @@ public class Indexer extends SpelNodeImpl {
 			try {
 				return this.indexAccessor.read(this.evaluationContext, this.target, this.index);
 			}
-			catch (AccessException ex) {
-				throw new SpelEvaluationException(getStartPosition(), ex,
-						SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, this.typeDescriptor.toString());
+			catch (Exception ex) {
+				throw new SpelEvaluationException(
+						getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_INDEX_READ, this.index,
+						this.typeDescriptor.toString());
 			}
 		}
 
@@ -915,9 +917,10 @@ public class Indexer extends SpelNodeImpl {
 			try {
 				this.indexAccessor.write(this.evaluationContext, this.target, this.index, newValue);
 			}
-			catch (AccessException ex) {
-				throw new SpelEvaluationException(getStartPosition(), ex,
-						SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, this.typeDescriptor.toString());
+			catch (Exception ex) {
+				throw new SpelEvaluationException(
+						getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_INDEX_WRITE, this.index,
+						this.typeDescriptor.toString());
 			}
 		}
 

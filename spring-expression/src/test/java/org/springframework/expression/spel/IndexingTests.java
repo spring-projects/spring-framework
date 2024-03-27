@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -48,6 +49,15 @@ import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.doThrow;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.expression.spel.SpelMessage.EXCEPTION_DURING_INDEX_READ;
+import static org.springframework.expression.spel.SpelMessage.EXCEPTION_DURING_INDEX_WRITE;
 import static org.springframework.expression.spel.SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE;
 import static org.springframework.expression.spel.SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE;
 
@@ -485,7 +495,115 @@ class IndexingTests {
 		}
 
 		@Test
-		void indexReadWrite() {
+		void noSuitableIndexAccessorResultsInException() {
+			StandardEvaluationContext context = new StandardEvaluationContext();
+			assertThat(context.getIndexAccessors()).isEmpty();
+
+			SpelExpressionParser parser = new SpelExpressionParser();
+			Expression expr = parser.parseExpression("[0]");
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.getValue(context, this))
+					.withMessageEndingWith("Indexing into type '%s' is not supported", getClass().getName())
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(INDEXING_NOT_SUPPORTED_FOR_TYPE);
+		}
+
+		@Test
+		void canReadThrowsException() throws Exception {
+			StandardEvaluationContext context = new StandardEvaluationContext();
+			RuntimeException exception = new RuntimeException("Boom!");
+
+			IndexAccessor mock = mock();
+			given(mock.canRead(any(), eq(this), any())).willThrow(exception);
+			context.addIndexAccessor(mock);
+
+			SpelExpressionParser parser = new SpelExpressionParser();
+			Expression expr = parser.parseExpression("[0]");
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.getValue(context, this))
+					.withMessageEndingWith("A problem occurred while attempting to read index '%d' in '%s'",
+							0, getClass().getName())
+					.withCause(exception)
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_READ);
+
+			verify(mock, times(1)).canRead(any(), any(), any());
+		}
+
+		@Test
+		void readThrowsException() throws Exception {
+			StandardEvaluationContext context = new StandardEvaluationContext();
+			RuntimeException exception = new RuntimeException("Boom!");
+
+			IndexAccessor mock = mock();
+			given(mock.canRead(any(), eq(this), any())).willReturn(true);
+			given(mock.read(any(), eq(this), any())).willThrow(exception);
+			context.addIndexAccessor(mock);
+
+			SpelExpressionParser parser = new SpelExpressionParser();
+			Expression expr = parser.parseExpression("[0]");
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.getValue(context, this))
+					.withMessageEndingWith("A problem occurred while attempting to read index '%d' in '%s'",
+							0, getClass().getName())
+					.withCause(exception)
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_READ);
+
+			verify(mock, times(1)).canRead(any(), any(), any());
+			verify(mock, times(1)).read(any(), any(), any());
+		}
+
+		@Disabled("Disabled until IndexAccessor#canWrite is honored")
+		@Test
+		void canWriteThrowsException() throws Exception {
+			StandardEvaluationContext context = new StandardEvaluationContext();
+			RuntimeException exception = new RuntimeException("Boom!");
+
+			IndexAccessor mock = mock();
+			// TODO canRead() should not be invoked for this use case.
+			given(mock.canRead(any(), eq(this), any())).willReturn(true);
+			// TODO canWrite() should be invoked for this use case, but it is currently not.
+			given(mock.canWrite(eq(context), eq(this), eq(0))).willThrow(exception);
+			context.addIndexAccessor(mock);
+
+			SpelExpressionParser parser = new SpelExpressionParser();
+			Expression expr = parser.parseExpression("[0]");
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.setValue(context, this, 999))
+					.withMessageEndingWith("A problem occurred while attempting to write index '%d' in '%s'",
+							0, getClass().getName())
+					.withCause(exception)
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_WRITE);
+
+			verify(mock, times(1)).canWrite(any(), any(), any());
+		}
+
+		@Test
+		void writeThrowsException() throws Exception {
+			StandardEvaluationContext context = new StandardEvaluationContext();
+			RuntimeException exception = new RuntimeException("Boom!");
+
+			IndexAccessor mock = mock();
+			// TODO canRead() should not be invoked for this use case.
+			given(mock.canRead(any(), eq(this), any())).willReturn(true);
+			given(mock.canWrite(eq(context), eq(this), eq(0))).willReturn(true);
+			doThrow(exception).when(mock).write(any(), any(), any(), any());
+			context.addIndexAccessor(mock);
+
+			SpelExpressionParser parser = new SpelExpressionParser();
+			Expression expr = parser.parseExpression("[0]");
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.setValue(context, this, 999))
+					.withMessageEndingWith("A problem occurred while attempting to write index '%d' in '%s'",
+							0, getClass().getName())
+					.withCause(exception)
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_WRITE);
+
+			// TODO canWrite() should be invoked for this use case, but it is currently not.
+			// verify(mock, times(1)).canWrite(any(), any(), any());
+			verify(mock, times(1)).write(any(), any(), any(), any());
+		}
+
+		@Test
+		void readAndWriteIndex() {
 			StandardEvaluationContext context = new StandardEvaluationContext();
 
 			ObjectMapper objectMapper = new ObjectMapper();
