@@ -509,6 +509,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<Locale.LanguageRange> getAcceptLanguage() {
 		String value = getFirst(ACCEPT_LANGUAGE);
+		if (value != null) {
+			value = StringUtils.trimTrailingCharacter(value, ';');
+		}
 		return (StringUtils.hasText(value) ? Locale.LanguageRange.parse(value) : Collections.emptyList());
 	}
 
