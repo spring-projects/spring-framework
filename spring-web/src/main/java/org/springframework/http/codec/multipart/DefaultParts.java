@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.util.concurrent.Callable;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -292,35 +291,19 @@ abstract class DefaultParts {
 		@Override
 		public Flux<DataBuffer> content() {
 			return DataBufferUtils.readByteChannel(
-					() -> Files.newByteChannel(this.file, StandardOpenOption.READ),
+							() -> Files.newByteChannel(this.file, StandardOpenOption.READ),
 							DefaultDataBufferFactory.sharedInstance, 1024)
 					.subscribeOn(this.scheduler);
 		}
 
 		@Override
 		public Mono<Void> transferTo(Path dest) {
-			return blockingOperation(() -> Files.copy(this.file, dest, StandardCopyOption.REPLACE_EXISTING));
+			return Mono.fromCallable(() -> Files.copy(this.file, dest, StandardCopyOption.REPLACE_EXISTING)).then();
 		}
 
 		@Override
 		public Mono<Void> delete() {
-			return blockingOperation(() -> {
-				Files.delete(this.file);
-				return null;
-			});
-		}
-
-		private Mono<Void> blockingOperation(Callable<?> callable) {
-			return Mono.<Void>create(sink -> {
-						try {
-							callable.call();
-							sink.success();
-						}
-						catch (Exception ex) {
-							sink.error(ex);
-						}
-					})
-					.subscribeOn(this.scheduler);
+			return Mono.fromCallable(() -> Files.deleteIfExists(this.file)).then();
 		}
 	}
 

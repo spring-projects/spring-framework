@@ -102,13 +102,13 @@ class DefaultPartHttpMessageReaderTests {
 				new ClassPathResource("no-header.multipart", getClass()), "boundary");
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
-			StepVerifier.create(result)
-					.consumeNextWith(part -> {
-						assertThat(part.headers()).isEmpty();
-						part.content().subscribe(DataBufferUtils::release);
-					})
-					.verifyComplete();
-		}
+		StepVerifier.create(result)
+				.consumeNextWith(part -> {
+					assertThat(part.headers()).isEmpty();
+					part.content().subscribe(DataBufferUtils::release);
+				})
+				.verifyComplete();
+	}
 
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void noEndBoundary(DefaultPartHttpMessageReader reader) {
@@ -383,6 +383,8 @@ class DefaultPartHttpMessageReaderTests {
 			Path tempFile = Files.createTempFile("DefaultMultipartMessageReaderTests", null);
 
 			filePart.transferTo(tempFile)
+					.then(Mono.fromCallable(() -> Files.deleteIfExists(tempFile)).then())
+					.then(filePart.delete())
 					.subscribe(null,
 							throwable -> {
 								throw Exceptions.bubble(throwable);
@@ -394,7 +396,6 @@ class DefaultPartHttpMessageReaderTests {
 								finally {
 									latch.countDown();
 								}
-
 							});
 		}
 		catch (Exception ex) {

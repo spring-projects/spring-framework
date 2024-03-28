@@ -25,11 +25,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.ClassPathResource;
@@ -43,6 +44,7 @@ import org.springframework.http.codec.multipart.FormPartEvent;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.codec.multipart.PartEvent;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.AbstractRouterFunctionIntegrationTests;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -65,6 +67,17 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 	private final ClassPathResource resource = new ClassPathResource("foo.txt", getClass());
 
+	private Path tempFile;
+
+	@BeforeEach
+	void setup() throws IOException {
+		this.tempFile = Files.createTempFile("MultipartRouterFunctionIntegrationTests", ".tmp");
+	}
+
+	@AfterEach
+	void cleanup() throws IOException {
+		FileSystemUtils.deleteRecursively(tempFile);
+	}
 
 	@ParameterizedHttpServerTest
 	void multipartData(HttpServer httpServer) throws Exception {
@@ -189,7 +202,7 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 	@Override
 	protected RouterFunction<ServerResponse> routerFunction() {
-		MultipartHandler multipartHandler = new MultipartHandler();
+		MultipartHandler multipartHandler = new MultipartHandler(tempFile);
 		return route()
 				.POST("/multipartData", multipartHandler::multipartData)
 				.POST("/parts", multipartHandler::parts)
@@ -201,6 +214,12 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 
 	private static class MultipartHandler {
+
+		private final Path tempFile;
+
+		private MultipartHandler(Path tempFile) {
+			this.tempFile = tempFile;
+		}
 
 		public Mono<ServerResponse> multipartData(ServerRequest request) {
 			return request
@@ -215,7 +234,7 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 									.concatMap(Part::delete)
 									.then(ServerResponse.ok().build());
 						}
-						catch(Exception e) {
+						catch (Exception e) {
 							return Mono.error(e);
 						}
 					});
@@ -232,7 +251,7 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 									.concatMap(Part::delete)
 									.then(ServerResponse.ok().build());
 						}
-						catch(Exception e) {
+						catch (Exception e) {
 							return Mono.error(e);
 						}
 					});
@@ -242,10 +261,10 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 			return request.body(BodyExtractors.toParts())
 					.ofType(FilePart.class)
 					.next()
-					.flatMap(part -> createTempFile()
-							.flatMap(tempFile ->
-									part.transferTo(tempFile)
-											.then(ServerResponse.ok().bodyValue(tempFile.toString()))));
+					.flatMap(part -> part
+							.transferTo(tempFile)
+							.then(ServerResponse.ok().bodyValue(tempFile.toString()))
+					);
 		}
 
 		public Mono<ServerResponse> partData(ServerRequest request) {
@@ -283,17 +302,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 						.toEntity(Void.class)
 						.flatMap(response -> ServerResponse.ok().build());
 			});
-		}
-
-		private Mono<Path> createTempFile() {
-			return Mono.defer(() -> {
-				try {
-					return Mono.just(Files.createTempFile("MultipartIntegrationTests", null));
-				}
-				catch (IOException ex) {
-					return Mono.error(ex);
-				}
-			}).subscribeOn(Schedulers.boundedElastic());
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,17 @@
 package org.springframework.http.codec.multipart;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
+
+import org.springframework.util.FileSystemUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,12 +36,30 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class FileStorageTests {
 
+	private Mono<Path> directory;
+
+	@BeforeEach
+	public void createTempDirectory() {
+		FileStorage storage = FileStorage.tempDirectory(Schedulers::boundedElastic);
+		directory = storage.directory();
+	}
+
+	@AfterEach
+	void cleanup() {
+		directory
+				.map(Path::toFile)
+				.map(FileSystemUtils::deleteRecursively)
+				.subscribe();
+	}
+
 	@Test
 	void fromPath() throws IOException {
-		Path path = Files.createTempFile("spring", "test");
-		FileStorage storage = FileStorage.fromPath(path);
+		cleanup();
 
-		Mono<Path> directory = storage.directory();
+		Path path = Files.createTempFile("FileStorageTests", ".tmp");
+		FileStorage storage = FileStorage.fromPath(path);
+		directory = storage.directory();
+
 		StepVerifier.create(directory)
 				.expectNext(path)
 				.verifyComplete();
@@ -46,9 +67,6 @@ class FileStorageTests {
 
 	@Test
 	void tempDirectory() {
-		FileStorage storage = FileStorage.tempDirectory(Schedulers::boundedElastic);
-
-		Mono<Path> directory = storage.directory();
 		StepVerifier.create(directory)
 				.consumeNextWith(path -> {
 					assertThat(path).exists();
@@ -61,20 +79,15 @@ class FileStorageTests {
 
 	@Test
 	void tempDirectoryDeleted() {
-		FileStorage storage = FileStorage.tempDirectory(Schedulers::boundedElastic);
-
-		Mono<Path> directory = storage.directory();
 		StepVerifier.create(directory)
 				.consumeNextWith(path1 -> {
-					try {
-						Files.delete(path1);
-						StepVerifier.create(directory)
-								.consumeNextWith(path2 -> assertThat(path2).isNotEqualTo(path1))
-								.verifyComplete();
-					}
-					catch (IOException ex) {
-						throw new UncheckedIOException(ex);
-					}
+					FileSystemUtils.deleteRecursively(path1.toFile());
+					StepVerifier.create(directory)
+							.consumeNextWith(path2 -> {
+								assertThat(path2).isNotEqualTo(path1);
+								FileSystemUtils.deleteRecursively(path2.toFile());
+							})
+							.verifyComplete();
 				})
 				.verifyComplete();
 	}

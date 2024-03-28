@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.codec.multipart.PartEvent;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -180,10 +181,9 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 				.bodyToFlux(String.class);
 
 		StepVerifier.create(result)
-				.consumeNextWith(filename -> verifyContents(Paths.get(filename), new ClassPathResource("foo.txt", MultipartHttpMessageReader.class)))
-				.consumeNextWith(filename -> verifyContents(Paths.get(filename), new ClassPathResource("logo.png", getClass())))
+				.consumeNextWith(filename -> verifyContentsAndCleanAfter(Paths.get(filename), new ClassPathResource("foo.txt", MultipartHttpMessageReader.class)))
+				.consumeNextWith(filename -> verifyContentsAndCleanAfter(Paths.get(filename), new ClassPathResource("logo.png", getClass())))
 				.verifyComplete();
-
 	}
 
 	@ParameterizedHttpServerTest
@@ -227,7 +227,7 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 		return builder.build();
 	}
 
-	private static void verifyContents(Path tempFile, Resource resource) {
+	private static void verifyContentsAndCleanAfter(Path tempFile, Resource resource) {
 		try {
 			// Use FileCopyUtils since the resource might reside in a JAR instead of in the file system.
 			byte[] resourceBytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
@@ -235,6 +235,9 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 		}
 		catch (IOException ex) {
 			throw new AssertionError(ex);
+		}
+		finally {
+			FileSystemUtils.deleteRecursively(tempFile.toFile());
 		}
 	}
 
@@ -291,7 +294,7 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 		Flux<String> transferTo(@RequestPart("fileParts") Flux<FilePart> parts) {
 			return parts.concatMap(filePart -> createTempFile(filePart.filename())
 					.flatMap(tempFile -> filePart.transferTo(tempFile)
-							.then(Mono.just(tempFile.toString() + "\n"))));
+							.then(Mono.just(tempFile + "\n"))));
 		}
 
 		private Mono<Path> createTempFile(String suffix) {

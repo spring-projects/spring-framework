@@ -39,6 +39,8 @@ import java.util.concurrent.Executors;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 import org.reactivestreams.Publisher;
@@ -53,6 +55,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
+import org.springframework.util.FileSystemUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
@@ -69,16 +72,19 @@ import static org.mockito.Mockito.mock;
  */
 class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 
-	private final Resource resource;
+	private final Resource resource = new ClassPathResource("DataBufferUtilsTests.txt", getClass());
 
-	private final Path tempFile;
+	private Path tempFile;
 
-
-	DataBufferUtilsTests() throws Exception {
-		this.resource = new ClassPathResource("DataBufferUtilsTests.txt", getClass());
-		this.tempFile = Files.createTempFile("DataBufferUtilsTests", null);
+	@BeforeEach
+	void setup() throws IOException {
+		this.tempFile = Files.createTempFile("DataBufferUtilsTests", ".tmp");
 	}
 
+	@AfterEach
+	void cleanup() throws IOException {
+		FileSystemUtils.deleteRecursively(tempFile);
+	}
 
 	@ParameterizedDataBufferAllocatingTest
 	void readInputStream(DataBufferFactory bufferFactory) {
@@ -271,7 +277,6 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	void readResourcePositionAndTakeUntil(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
-		Resource resource = new ClassPathResource("DataBufferUtilsTests.txt", getClass());
 		Flux<DataBuffer> flux = DataBufferUtils.read(resource, 3, super.bufferFactory, 3);
 
 		flux = DataBufferUtils.takeUntilByteCount(flux, 5);
@@ -692,14 +697,13 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	void readAndWriteByteChannel(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
-		Path source = Paths.get(
-				DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI());
+		Path source = Paths.get(this.resource.getURI());
 		Flux<DataBuffer> sourceFlux =
 				DataBufferUtils
 						.readByteChannel(() -> FileChannel.open(source, StandardOpenOption.READ),
 							super.bufferFactory, 3);
 
-		Path destination = Files.createTempFile("DataBufferUtilsTests", null);
+		Path destination = tempFile;
 		WritableByteChannel channel = Files.newByteChannel(destination, StandardOpenOption.WRITE);
 
 		DataBufferUtils.write(sourceFlux, channel)
@@ -726,13 +730,12 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	void readAndWriteAsynchronousFileChannel(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
-		Path source = Paths.get(
-				DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI());
+		Path source = Paths.get(this.resource.getURI());
 		Flux<DataBuffer> sourceFlux = DataBufferUtils.readAsynchronousFileChannel(
 				() -> AsynchronousFileChannel.open(source, StandardOpenOption.READ),
 				super.bufferFactory, 3);
 
-		Path destination = Files.createTempFile("DataBufferUtilsTests", null);
+		Path destination = tempFile;
 		AsynchronousFileChannel channel =
 				AsynchronousFileChannel.open(destination, StandardOpenOption.WRITE);
 
@@ -1133,7 +1136,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	@ParameterizedDataBufferAllocatingTest
 	void propagateContextPath(DataBufferFactory bufferFactory) throws IOException {
 		Path path = Paths.get(this.resource.getURI());
-		Path out = Files.createTempFile("data-buffer-utils-tests", ".tmp");
+		Path out = tempFile;
 
 		Flux<Void> result = DataBufferUtils.read(path, bufferFactory, 1024, StandardOpenOption.READ)
 				.transformDeferredContextual((f, ctx) -> {
