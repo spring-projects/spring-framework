@@ -70,6 +70,7 @@ import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanNameGenerator;
@@ -82,6 +83,7 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ConfigurationClassEnhancer.EnhancedConfiguration;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
@@ -103,6 +105,7 @@ import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.lang.Nullable;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -378,6 +381,48 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (configCandidates.isEmpty()) {
 			return;
 		}
+
+		// Got a problem parsing @BootstrapExecutor in BootstrapExecutorBeanDefinitionParser
+		// So I temporarily copied the logic here.
+		// Detect the @BootstrapExecutor annotation
+		BootstrapExecutor bootstrapExecutorAnnotation = null;
+		for (BeanDefinitionHolder holder : configCandidates) {
+			BeanDefinition beanDef = holder.getBeanDefinition();
+			if (beanDef instanceof AnnotatedBeanDefinition annotatedBeanDefinition) {
+				AnnotationMetadata metadata = annotatedBeanDefinition.getMetadata();
+				String className = metadata.getClassName();
+				try {
+					Class<?> configClass = ClassUtils.forName(className, this.beanClassLoader);
+					bootstrapExecutorAnnotation = AnnotationUtils.findAnnotation(configClass, BootstrapExecutor.class);
+					if (bootstrapExecutorAnnotation != null) {
+						break;
+					}
+				}
+				catch (ClassNotFoundException ex) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Could not load class: " + className, ex);
+					}
+				}
+			}
+		}
+
+		// Got a problem parsing @BootstrapExecutor in BootstrapExecutorBeanDefinitionParser
+		// So I temporarily copied the logic here.
+		// Register the ThreadPoolTaskExecutor bean if @BootstrapExecutor is found
+		if (bootstrapExecutorAnnotation != null) {
+			BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(ThreadPoolTaskExecutor.class);
+			builder.addPropertyValue("threadNamePrefix", bootstrapExecutorAnnotation.threadNamePrefix());
+			builder.addPropertyValue("corePoolSize", bootstrapExecutorAnnotation.corePoolSize());
+			// Set other properties here...
+			builder.addPropertyValue("daemon", true);
+
+			// Register as a singleton bean
+			registry.registerBeanDefinition("bootstrapExecutor", builder.getBeanDefinition());
+		}
+		// We could add another check, if bootstrapExecutorAnnotation is not found,
+		// and we have @Bean(bootstrap=BACKGROUND) annotations found,
+		// we can automatically configure a bootstrapExecutor based on the number of
+		// @Bean(bootstrap=BACKGROUND) annotations.
 
 		// Sort by previously determined @Order value, if applicable
 		configCandidates.sort((bd1, bd2) -> {

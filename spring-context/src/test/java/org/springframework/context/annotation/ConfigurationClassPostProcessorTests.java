@@ -65,12 +65,14 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.springframework.context.annotation.Bean.Bootstrap.BACKGROUND;
 
 /**
  * @author Chris Beams
@@ -1129,6 +1131,66 @@ class ConfigurationClassPostProcessorTests {
 		ctx.close();
 	}
 
+	@Test
+	void testParallelBeanInitialization() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(TestAppConfig.class);
+
+		long startTime = System.currentTimeMillis();
+		context.refresh();
+		long endTime = System.currentTimeMillis();
+
+		assertThat(context.getBean("bootstrapExecutor")).isInstanceOf(ThreadPoolTaskExecutor.class);
+		assertThat(context.getBean("slowInitBean")).isNotNull();
+		assertThat(context.getBean("fastInitBean")).isNotNull();
+
+		// Total init time should be under 2000ms because two beans are initialized in parallel
+		assertThat(endTime - startTime).isLessThan(4000L);
+	}
+
+
+	@Test
+	void testParallelBeanInitializationWithMultipleBackgroundBeans() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(TestAppConfigWithMultipleBackgroundBeans.class);
+
+		long startTime = System.currentTimeMillis();
+		context.refresh();
+		long endTime = System.currentTimeMillis();
+
+		ThreadPoolTaskExecutor executor = context.getBean("bootstrapExecutor", ThreadPoolTaskExecutor.class);
+		assertThat(executor.getCorePoolSize()).isEqualTo(2);
+		assertThat(executor.getThreadNamePrefix()).isEqualTo("test-bootstrap-");
+
+		assertThat(context.getBean("backgroundInitBean1")).isNotNull();
+		assertThat(context.getBean("backgroundInitBean2")).isNotNull();
+		assertThat(context.getBean("foregroundInitBean")).isNotNull();
+
+		// Total init time should be around 2000ms because two background beans are initialized in parallel
+		assertThat(endTime - startTime).isLessThan(4000L);
+	}
+
+	@Test
+	void testParallelBeanInitializationWithLimitedThreadPool() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(TestAppConfigWithLimitedThreadPool.class);
+
+		long startTime = System.currentTimeMillis();
+		context.refresh();
+		long endTime = System.currentTimeMillis();
+
+		ThreadPoolTaskExecutor executor = context.getBean("bootstrapExecutor", ThreadPoolTaskExecutor.class);
+		assertThat(executor.getCorePoolSize()).isEqualTo(1);
+		assertThat(executor.getThreadNamePrefix()).isEqualTo("test-bootstrap-");
+
+		assertThat(context.getBean("backgroundInitBean1")).isNotNull();
+		assertThat(context.getBean("backgroundInitBean2")).isNotNull();
+		assertThat(context.getBean("foregroundInitBean")).isNotNull();
+
+		// Total init time should be around 4000ms because the two background beans are initialized sequentially
+		assertThat(endTime - startTime).isGreaterThanOrEqualTo(4000L);
+	}
+
 
 	// -------------------------------------------------------------------------
 
@@ -2064,6 +2126,80 @@ class ConfigurationClassPostProcessorTests {
 				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 				}
 			};
+		}
+	}
+
+	static class BackgroundInitBean {
+		public BackgroundInitBean() {
+			try {
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	static class ForegroundInitBean {
+		public ForegroundInitBean() {
+			try {
+				Thread.sleep(2000);
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@BootstrapExecutor
+	@Configuration
+	static class TestAppConfig {
+		@Bean(bootstrap = BACKGROUND)
+		public BackgroundInitBean slowInitBean() {
+			return new BackgroundInitBean();
+		}
+
+		@Bean
+		public ForegroundInitBean fastInitBean() {
+			return new ForegroundInitBean();
+		}
+	}
+
+	@BootstrapExecutor(threadNamePrefix = "test-bootstrap-", corePoolSize = 2)
+	@Configuration
+	static class TestAppConfigWithMultipleBackgroundBeans {
+		@Bean(bootstrap = BACKGROUND)
+		public BackgroundInitBean backgroundInitBean1() {
+			return new BackgroundInitBean();
+		}
+
+		@Bean(bootstrap = BACKGROUND)
+		public BackgroundInitBean backgroundInitBean2() {
+			return new BackgroundInitBean();
+		}
+
+		@Bean
+		public ForegroundInitBean foregroundInitBean() {
+			return new ForegroundInitBean();
+		}
+	}
+
+	@BootstrapExecutor(threadNamePrefix = "test-bootstrap-", corePoolSize = 1)
+	@Configuration
+	static class TestAppConfigWithLimitedThreadPool {
+		@Bean(bootstrap = BACKGROUND)
+		public BackgroundInitBean backgroundInitBean1() {
+			return new BackgroundInitBean();
+		}
+
+		@Bean(bootstrap = BACKGROUND)
+		public BackgroundInitBean backgroundInitBean2() {
+			return new BackgroundInitBean();
+		}
+
+		@Bean
+		public ForegroundInitBean foregroundInitBean() {
+			return new ForegroundInitBean();
 		}
 	}
 
