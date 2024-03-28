@@ -94,6 +94,17 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokePrivateSuspendingFunction() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("privateSuspendingFunction", String::class.java, Continuation::class.java)
+		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo")
+		Assertions.assertThat(publisher).isInstanceOf(Mono::class.java)
+		StepVerifier.create(publisher)
+			.expectNext("foo")
+			.expectComplete()
+			.verify()
+	}
+
+	@Test
 	fun invokeNonSuspendingFunction() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("nonSuspendingFunction", String::class.java)
 		Assertions.assertThatIllegalArgumentException().isThrownBy { CoroutinesUtils.invokeSuspendingFunction(method, this, "foo") }
@@ -248,6 +259,11 @@ class CoroutinesUtilsTests {
 	}
 
 	suspend fun suspendingFunction(value: String): String {
+		delay(1)
+		return value
+	}
+
+	private suspend fun privateSuspendingFunction(value: String): String {
 		delay(1)
 		return value
 	}

@@ -85,6 +85,15 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun private() {
+		composite.addResolver(StubArgumentResolver(Float::class.java, 1.2f))
+		val value = getInvocable(Handler::class.java, Float::class.java).invokeForRequest(request, null)
+
+		Assertions.assertThat(getStubResolver(0).resolvedParameters).hasSize(1)
+		Assertions.assertThat(value).isEqualTo("1.2")
+	}
+
+	@Test
 	fun valueClass() {
 		composite.addResolver(StubArgumentResolver(Long::class.java, 1L))
 		val value = getInvocable(ValueClassHandler::class.java, Long::class.java).invokeForRequest(request, null)
@@ -181,6 +190,8 @@ class InvocableHandlerMethodKotlinTests {
 		fun nullable(arg: String?): String? {
 			return null
 		}
+
+		private fun private(value: Float) = value.toString()
 
 	}
 

@@ -305,7 +305,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (function == null) {
 				return method.invoke(target, args);
 			}
-			if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
+			if (!KCallablesJvm.isAccessible(function)) {
 				KCallablesJvm.setAccessible(function, true);
 			}
 			Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);

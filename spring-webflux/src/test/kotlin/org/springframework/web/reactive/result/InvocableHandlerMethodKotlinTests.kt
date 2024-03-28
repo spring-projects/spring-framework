@@ -112,9 +112,16 @@ class InvocableHandlerMethodKotlinTests {
 	@Test
 	fun privateController() {
 		this.resolvers.add(stubResolver("foo"))
-		val method = PrivateCoroutinesController::singleArg.javaMethod!!
-		val result = invoke(PrivateCoroutinesController(), method,"foo")
+		val method = PrivateController::singleArg.javaMethod!!
+		val result = invoke(PrivateController(), method,"foo")
 		assertHandlerResultValue(result, "success:foo")
+	}
+
+	@Test
+	fun privateFunction() {
+		val method = PrivateController::class.java.getDeclaredMethod("private")
+		val result = invoke(PrivateController(), method)
+		assertHandlerResultValue(result, "private")
 	}
 
 	@Test
@@ -330,12 +337,14 @@ class InvocableHandlerMethodKotlinTests {
 		}
 	}
 
-	private class PrivateCoroutinesController {
+	private class PrivateController {
 
 		suspend fun singleArg(q: String?): String {
 			delay(1)
 			return "success:$q"
 		}
+
+		private fun private() = "private"
 	}
 
 	class DefaultValueController {
