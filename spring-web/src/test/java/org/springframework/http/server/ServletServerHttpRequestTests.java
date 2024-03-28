@@ -203,4 +203,17 @@ class ServletServerHttpRequestTests {
 		assertThat(result).as("Invalid content returned").isEqualTo(content);
 	}
 
+	@Test // gh-32471
+	void getFormBodyWhenNotEncodedCharactersPresent() throws IOException {
+		mockRequest.setContentType("application/x-www-form-urlencoded; charset=UTF-8");
+		mockRequest.setMethod("POST");
+		mockRequest.addParameter("name", "Test");
+		mockRequest.addParameter("lastName", "Test@er");
+		mockRequest.addHeader("Content-Length", 26);
+
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertThat(result).isEqualTo("name=Test&lastName=Test%40er".getBytes(StandardCharsets.UTF_8));
+		assertThat(request.getHeaders().getContentLength()).isEqualTo(result.length);
+	}
+
 }

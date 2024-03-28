@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,7 +242,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	 * from the body, which can fail if any other code has used the ServletRequest
 	 * to access a parameter, thus causing the input stream to be "consumed".
 	 */
-	private static InputStream getBodyFromServletRequestParameters(HttpServletRequest request) throws IOException {
+	private InputStream getBodyFromServletRequestParameters(HttpServletRequest request) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
 		Writer writer = new OutputStreamWriter(bos, FORM_CHARSET);
 
@@ -268,7 +268,12 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		}
 		writer.flush();
 
-		return new ByteArrayInputStream(bos.toByteArray());
+		byte[] bytes = bos.toByteArray();
+		if (bytes.length > 0 && getHeaders().containsKey(HttpHeaders.CONTENT_LENGTH)) {
+			getHeaders().setContentLength(bytes.length);
+		}
+
+		return new ByteArrayInputStream(bytes);
 	}
 
 }
