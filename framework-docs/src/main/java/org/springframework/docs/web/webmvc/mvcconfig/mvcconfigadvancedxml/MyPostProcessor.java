@@ -26,6 +26,7 @@ public class MyPostProcessor implements BeanPostProcessor {
 
 	public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 		// ...
+		return bean;
 	}
 }
 // end::snippet[]

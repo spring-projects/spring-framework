@@ -18,6 +18,7 @@ package org.springframework.docs.web.webmvc.mvcconfig.mvcconfigvalidation;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 // tag::snippet[]
@@ -26,7 +27,9 @@ public class WebConfiguration implements WebMvcConfigurer {
 
 	@Override
 	public Validator getValidator() {
+		Validator validator = new OptionalValidatorFactoryBean();
 		// ...
+		return validator;
 	}
 }
 // end::snippet[]

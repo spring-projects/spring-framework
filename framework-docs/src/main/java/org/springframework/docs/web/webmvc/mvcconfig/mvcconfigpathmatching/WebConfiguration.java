@@ -17,7 +17,9 @@ public class WebConfiguration implements WebMvcConfigurer {
 	}
 
 	private PathPatternParser patternParser() {
+		PathPatternParser pathPatternParser = new PathPatternParser();
 		// ...
+		return pathPatternParser;
 	}
 }
 // end::snippet[]

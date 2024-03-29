@@ -25,6 +25,7 @@ class MyPostProcessor : BeanPostProcessor {
 
 	override fun postProcessBeforeInitialization(bean: Any, name: String): Any {
 		// ...
+		return bean
 	}
 }
 // end::snippet[]

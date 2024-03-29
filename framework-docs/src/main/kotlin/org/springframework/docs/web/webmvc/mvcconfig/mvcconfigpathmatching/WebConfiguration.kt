@@ -32,7 +32,9 @@ class WebConfiguration : WebMvcConfigurer {
 	}
 
 	fun patternParser(): PathPatternParser {
+		val pathPatternParser = PathPatternParser()
 		//...
+		return pathPatternParser
 	}
 }
 // end::snippet[]
