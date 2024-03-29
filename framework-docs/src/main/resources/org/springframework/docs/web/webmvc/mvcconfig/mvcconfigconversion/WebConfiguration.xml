@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/mvc
+			https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<!-- tag::snippet[] -->
+	<mvc:annotation-driven conversion-service="conversionService"/>
+
+	<bean id="conversionService"
+		  class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<bean class="org.example.MyConverter"/>
+			</set>
+		</property>
+		<property name="formatters">
+			<set>
+				<bean class="org.example.MyFormatter"/>
+				<bean class="org.example.MyAnnotationFormatterFactory"/>
+			</set>
+		</property>
+		<property name="formatterRegistrars">
+			<set>
+				<bean class="org.example.MyFormatterRegistrar"/>
+			</set>
+		</property>
+	</bean>
+	<!-- end::snippet[] -->
+
+</beans>
