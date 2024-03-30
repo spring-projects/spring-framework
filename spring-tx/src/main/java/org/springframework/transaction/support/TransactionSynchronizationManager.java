@@ -73,6 +73,9 @@ import org.springframework.util.Assert;
  */
 public abstract class TransactionSynchronizationManager {
 
+	/**
+	 * TODO 存储连接上下文
+	 */
 	private static final ThreadLocal<Map<Object, Object>> resources =
 			new NamedThreadLocal<>("Transactional resources");
 
@@ -167,7 +170,7 @@ public abstract class TransactionSynchronizationManager {
 	public static void bindResource(Object key, Object value) throws IllegalStateException {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Assert.notNull(value, "Value must not be null");
-		Map<Object, Object> map = resources.get();
+		Map<Object, Object> map = resources.get(); // 第一次进来结果是 NULL【如果前面事务被挂起，这里获取的也是 NULL】
 		// set ThreadLocal Map if none found
 		if (map == null) {
 			map = new HashMap<>();

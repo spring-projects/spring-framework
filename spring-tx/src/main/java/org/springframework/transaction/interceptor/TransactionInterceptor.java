@@ -124,12 +124,13 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		// as well as the method, which may be from an interface.
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
-		// 开始调用父类方法，触发事务
+		// TODO 开始调用父类方法，触发事务
 		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
 		return invokeWithinTransaction(invocation.getMethod(), targetClass, new CoroutinesInvocationCallback() {
 			@Override
 			@Nullable
 			public Object proceedWithInvocation() throws Throwable {
+				// 执行后续的 Interceptor，以及被代理的方法
 				return invocation.proceed();
 			}
 			@Override

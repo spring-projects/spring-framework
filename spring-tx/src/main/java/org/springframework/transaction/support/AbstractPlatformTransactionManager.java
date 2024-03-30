@@ -346,7 +346,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		// Use defaults if no transaction definition given.
 		TransactionDefinition def = (definition != null ? definition : TransactionDefinition.withDefaults());
 
-		// 拿到的是 DataSourceTransactionManager，包含链接、数据源、缓存等信息
+		// 得到一个新的 DataSourceTransactionManager 对象，包含链接、数据源、缓存等信息
 		Object transaction = doGetTransaction();
 		boolean debugEnabled = logger.isDebugEnabled();
 
@@ -365,15 +365,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			throw new IllegalTransactionStateException(
 					"No existing transaction found for transaction marked with propagation 'mandatory'");
 		}
+		// 在当前 Thread 中没有事务的前提下，以下三个是等价的
 		else if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
 				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
 				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+			// 没有事务需要挂起，不过 TransactionSynchronization 有可能需要挂起
+			// suspendedResources 表示当前线程被挂起的资源持有对象（数据库连接、TransactionSynchronization）
+			// 没有事务为啥还要挂起？啥都没干？？？？？
 			SuspendedResourcesHolder suspendedResources = suspend(null);
 			if (debugEnabled) {
 				logger.debug("Creating new transaction with name [" + def.getName() + "]: " + def);
 			}
 			try {
-				// 开启一个新事务
+				// 开启一个新事务，transaction 中就会有数据库连接了，并且 isTransactionActive 为 true
+				// 并返回一个新的 TransactionStatus 对象，该对象保存了很多信息，包括被挂起的资源
 				return startTransaction(def, transaction, debugEnabled, suspendedResources);
 			}
 			catch (RuntimeException | Error ex) {
@@ -570,6 +575,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	@Nullable
 	protected final SuspendedResourcesHolder suspend(@Nullable Object transaction) throws TransactionException {
+		// 判断事务管理器是否同步激活状态：根据另一个 ThreadLocal 对象是否有值判断，第一次进来当前为空，因此是未激活状态
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			List<TransactionSynchronization> suspendedSynchronizations = doSuspendSynchronization();
 			try {
@@ -586,7 +592,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				boolean wasActive = TransactionSynchronizationManager.isActualTransactionActive();
 				TransactionSynchronizationManager.setActualTransactionActive(false);
 				return new SuspendedResourcesHolder(
-						suspendedResources, suspendedSynchronizations, name, readOnly, isolationLevel, wasActive);
+						suspendedResources, suspendedSynchronizations, name, readOnly, isolationLevel, wasActive); // // 挂起事务之后，新建一个 挂起事务上下文对象
 			}
 			catch (RuntimeException | Error ex) {
 				// doSuspend failed - original transaction is still active...
@@ -594,12 +600,15 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				throw ex;
 			}
 		}
+		// 当前事务不为空
 		else if (transaction != null) {
+			// 事务管理器是非同步激活状态，但事务是激活状态，就挂起当前事务
 			// Transaction active but no synchronization active.
 			Object suspendedResources = doSuspend(transaction);
 			return new SuspendedResourcesHolder(suspendedResources);
 		}
 		else {
+			// 事务未激活，事务管理器也是非同步激活状态
 			// Neither transaction nor synchronization active.
 			return null;
 		}
@@ -696,6 +705,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 
 		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
+		// 可以通过 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); 来设置
+		// 事务本来是可以要提交的，但是可以强制回滚
 		if (defStatus.isLocalRollbackOnly()) {
 			if (defStatus.isDebug()) {
 				logger.debug("Transactional code has requested rollback");
@@ -704,6 +715,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			return;
 		}
 
+		// 判断此事务在之前是否设置了需要回滚，跟 globalRollbackOnParticipationFailure 有关
 		if (!shouldCommitOnGlobalRollbackOnly() && defStatus.isGlobalRollbackOnly()) {
 			if (defStatus.isDebug()) {
 				logger.debug("Global transaction is marked as rollback-only but transactional code requested commit");

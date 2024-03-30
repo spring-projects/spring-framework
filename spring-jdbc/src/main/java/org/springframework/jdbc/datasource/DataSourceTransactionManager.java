@@ -304,7 +304,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				txObject.getConnectionHolder().setTimeoutInSeconds(timeout);
 			}
 
-			// Bind the connection holder to the thread.
+			// Bind the connection holder to the thread. 将连接绑定到连接上下文 ConnectionHolder
 			if (txObject.isNewConnectionHolder()) {
 				TransactionSynchronizationManager.bindResource(obtainDataSource(), txObject.getConnectionHolder());
 			}
@@ -323,7 +323,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected Object doSuspend(Object transaction) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 		txObject.setConnectionHolder(null);
-		return TransactionSynchronizationManager.unbindResource(obtainDataSource());
+		return TransactionSynchronizationManager.unbindResource(obtainDataSource()); // 挂起事务就是从 NamedThreadLocal 移除
 	}
 
 	@Override

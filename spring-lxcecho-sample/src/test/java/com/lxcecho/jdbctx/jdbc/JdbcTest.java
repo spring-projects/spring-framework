@@ -22,17 +22,17 @@ public class JdbcTest {
 			// 加载驱动类
 			Class.forName("com.mysql.jdbc.Driver");
 			// 数据库连接
-			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/spring", "root", "root");
+			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/spring", "root", "Amecho00#");
 			// 关闭事务自动提交
 			connection.setAutoCommit(false);
-			// 定义sql
+			// 定义 sql
 			String sql = "update goods_stock set stock = stock - ? where id = ?";
-			// 获取sql执行对象
+			// 获取 sql 执行对象
 			preparedStatement = connection.prepareStatement(sql);
 			// 设置参数
 			preparedStatement.setInt(1, 10);
 			preparedStatement.setInt(2, 1);
-			// 执行sql
+			// 执行 sql
 			preparedStatement.executeUpdate();
 			// 提交事务
 			connection.commit();

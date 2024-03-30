@@ -79,13 +79,21 @@ final class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointc
 	 */
 	private class TransactionAttributeSourceClassFilter implements ClassFilter {
 
+		/**
+		 * 判断是否事务内部类，如果是，返回 false；
+		 *
+		 * @param clazz the candidate target class
+		 * @return
+		 */
 		@Override
 		public boolean matches(Class<?> clazz) {
+			// 是否为事务内部类
 			if (TransactionalProxy.class.isAssignableFrom(clazz) ||
 					TransactionManager.class.isAssignableFrom(clazz) ||
 					PersistenceExceptionTranslator.class.isAssignableFrom(clazz)) {
 				return false;
 			}
+			// 判断某个类是否存在 @Transaction 注解【org.springframework.transaction.annotation.SpringTransactionAnnotationParser.isCandidateClass】
 			return (transactionAttributeSource == null || transactionAttributeSource.isCandidateClass(clazz));
 		}
 

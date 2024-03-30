@@ -72,7 +72,7 @@ public abstract class AopConfigUtils {
 	@Nullable
 	public static BeanDefinition registerAutoProxyCreatorIfNecessary(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
-
+		// InfrastructureAdvisorAutoProxyCreator 父类是 AbstractAutoProxyCreator，主要是开启 AOP，该类不会和 AOP 那样去扫描 @Before 等注解
 		return registerOrEscalateApcAsRequired(InfrastructureAdvisorAutoProxyCreator.class, registry, source);
 	}
 

@@ -19,7 +19,7 @@ package org.springframework.transaction;
 import java.io.Flushable;
 
 /**
- * 事务运行状态接口
+ * 事务运行状态接口：获取或设置事务的相应状态信息
  *
  * Representation of an ongoing {@link PlatformTransactionManager} transaction.
  * Extends the common {@link TransactionExecution} interface.

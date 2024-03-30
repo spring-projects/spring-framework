@@ -75,6 +75,7 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 					// InfrastructureAdvisorAutoProxyCreator 事务入口类和 AOP 入口类 AnnotationAspectJAutoProxyCreator 之间有优先级
 					AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
 					if ((Boolean) proxyTargetClass) {
+						// 设置 InfrastructureAdvisorAutoProxyCreator 的 proxyTargetClass 为 true
 						AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 						return;
 					}
