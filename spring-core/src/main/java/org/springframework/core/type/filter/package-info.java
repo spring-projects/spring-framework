@@ -1,5 +1,5 @@
 /**
- * Core support package for type filtering (for example for classpath scanning).
+ * Core support package for type filtering (for example, for classpath scanning).
  */
 @NonNullApi
 @NonNullFields
