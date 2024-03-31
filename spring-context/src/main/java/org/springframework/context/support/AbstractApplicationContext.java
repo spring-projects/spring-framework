@@ -964,7 +964,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Propagate refresh to lifecycle processor first.
 		getLifecycleProcessor().onRefresh();
 
-		// Publish the final event.
+		// Publish the final event. 发布上下文已刷新完成的事件
 		publishEvent(new ContextRefreshedEvent(this));
 	}
 
