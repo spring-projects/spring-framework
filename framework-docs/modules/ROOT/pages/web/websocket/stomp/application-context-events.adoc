@@ -8,7 +8,7 @@ received by implementing Spring's `ApplicationListener` interface:
 While the "`simple`" broker becomes available immediately on startup and remains so while
 the application is running, the STOMP "`broker relay`" can lose its connection
 to the full featured broker (for example, if the broker is restarted). The broker relay
-has reconnect logic and re-establishes the "`system`" connection to the broker
+has reconnected logic and re-establishes the "`system`" connection to the broker
 when it comes back. As a result, this event is published whenever the state changes from connected
 to disconnected and vice-versa. Components that use the `SimpMessagingTemplate` should
 subscribe to this event and avoid sending messages at times when the broker is not

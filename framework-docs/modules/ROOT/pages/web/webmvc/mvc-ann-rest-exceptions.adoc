@@ -142,7 +142,7 @@ Message codes and arguments for each error are also resolved via `MessageSource`
 | `MethodArgumentNotValidException`
 | (default)
 | `+{0}+` the list of global errors, `+{1}+` the list of field errors.
-  Message codes and arguments for each error are also resolvedvia `MessageSource`.
+  Message codes and arguments for each error are also resolved via `MessageSource`.
 
 | `MissingRequestHeaderException`
 | (default)

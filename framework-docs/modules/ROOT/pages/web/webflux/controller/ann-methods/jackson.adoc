@@ -81,7 +81,7 @@ Kotlin::
 ----
 ======
 
-NOTE: `@JsonView` allows an array of view classes but you can only specify only one per
+NOTE: `@JsonView` allows an array of view classes but you can specify only one per
 controller method. Use a composite interface if you need to activate multiple views.
 
 
