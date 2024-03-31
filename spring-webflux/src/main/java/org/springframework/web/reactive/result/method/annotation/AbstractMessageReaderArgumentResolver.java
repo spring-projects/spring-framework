@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -54,6 +55,7 @@ import org.springframework.web.reactive.result.method.HandlerMethodArgumentResol
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.server.ServerWebInputTooLargeException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
@@ -64,6 +66,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * {@linkplain org.springframework.validation.annotation.ValidationAnnotationUtils#determineValidationHints
  * annotations that trigger validation}. Validation failure results in a
  * {@link ServerWebInputException}.
+ * {@link ServerWebInputTooLargeException}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -233,8 +236,15 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 	private Throwable handleReadError(MethodParameter parameter, Throwable ex) {
-		return (ex instanceof DecodingException ?
-				new ServerWebInputException("Failed to read HTTP message", parameter, ex) : ex);
+		if (ex instanceof DataBufferLimitException) {
+			return new ServerWebInputTooLargeException(ex);
+		}
+
+		if (ex instanceof DecodingException) {
+			return new ServerWebInputException("Failed to read HTTP message", parameter, ex);
+		}
+
+		return ex;
 	}
 
 	private ServerWebInputException handleMissingBody(MethodParameter parameter) {

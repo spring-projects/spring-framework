@@ -54,6 +54,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.server.ServerWebInputTooLargeException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.method.ResolvableMethod;
@@ -110,6 +111,24 @@ class MessageReaderArgumentResolverTests {
 				param, true, this.bindingContext, exchange).block();
 
 		StepVerifier.create(result).expectError(ServerWebInputException.class).verify();
+	}
+
+	@Test @SuppressWarnings("unchecked")
+	public void tooLargeBody() {
+		StringBuilder bodyBuilder = new StringBuilder();
+		while (bodyBuilder.toString().getBytes().length < 256 * 1024) {
+			bodyBuilder.append("The default maximum input length is 256kb.");
+		}
+		String body = "{\"bar\":\"BARBAR\",\"foo\":\"" + bodyBuilder + "\"}";
+
+		MockServerHttpRequest request = post("/path").contentType(MediaType.APPLICATION_JSON).body(body);
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
+		MethodParameter param = this.testMethod.arg(type);
+		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
+				param, true, this.bindingContext, exchange).block();
+
+		StepVerifier.create(result).expectError(ServerWebInputTooLargeException.class).verify();
 	}
 
 	@Test
