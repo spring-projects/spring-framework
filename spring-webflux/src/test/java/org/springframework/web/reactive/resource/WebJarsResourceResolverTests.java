@@ -41,6 +41,7 @@ import static org.mockito.Mockito.verify;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
+@SuppressWarnings("removal")
 class WebJarsResourceResolverTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(1);

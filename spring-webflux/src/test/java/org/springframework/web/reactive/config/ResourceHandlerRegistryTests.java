@@ -44,7 +44,6 @@ import org.springframework.web.reactive.resource.ResourceTransformerSupport;
 import org.springframework.web.reactive.resource.ResourceUrlProvider;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
 import org.springframework.web.reactive.resource.VersionResourceResolver;
-import org.springframework.web.reactive.resource.WebJarsResourceResolver;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -183,7 +182,7 @@ class ResourceHandlerRegistryTests {
 	void resourceChainWithOverrides() {
 		CachingResourceResolver cachingResolver = mock();
 		VersionResourceResolver versionResolver = mock();
-		WebJarsResourceResolver webjarsResolver = mock();
+		LiteWebJarsResourceResolver webjarsResolver = mock();
 		PathResourceResolver pathResourceResolver = new PathResourceResolver();
 		CachingResourceTransformer cachingTransformer = mock();
 		CssLinkResourceTransformer cssLinkTransformer = new CssLinkResourceTransformer();
