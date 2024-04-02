@@ -15,7 +15,7 @@ Applying such optimizations early implies the following restrictions:
 
 * The classpath is fixed and fully defined at build time.
 * The beans defined in your application cannot change at runtime, meaning:
-** `@Profile`, in particular profile-specific configuration needs to be chosen at build time.
+** `@Profile`, in particular profile-specific configuration, needs to be chosen at build time and is automatically enabled at runtime when AOT is enabled.
 ** `Environment` properties that impact the presence of a bean (`@Conditional`) are only considered at build time.
 * Bean definitions with instance suppliers (lambdas or method references) cannot be transformed ahead-of-time.
 * Beans registered as singletons (using `registerSingleton`, typically from
@@ -223,6 +223,17 @@ The generated code above creates bean definitions equivalent to the `@Configurat
 There is a bean definition for `dataSourceConfiguration` and one for `dataSourceBean`.
 When a `datasource` instance is required, a `BeanInstanceSupplier` is called.
 This supplier invokes the `dataSource()` method on the `dataSourceConfiguration` bean.
+
+[[aot.running]]
+== Running with AOT optimizations
+
+AOT is a mandatory step to transform a Spring application to a native executable, so it
+is automatically enabled when running in this mode. It is possible to use those optimizations
+on the JVM by setting the `spring.aot.enabled` System property to `true`.
+
+NOTE: When AOT optimizations are included, some decisions that have been taken at build-time
+are hard-coded in the application setup. For instance, profiles that have been enabled at
+build-time are automatically enabled at runtime as well.
 
 [[aot.bestpractices]]
 == Best Practices
