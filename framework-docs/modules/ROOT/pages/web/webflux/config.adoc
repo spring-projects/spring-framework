@@ -44,6 +44,11 @@ Kotlin::
 ----
 ======
 
+NOTE: When using Spring Boot, you may want to use `@Configuration` class of type `WebFluxConfigurer` but without
+`@EnableWebFlux` to keep Spring Boot WebFlux customizations. See more details in
+xref:#webflux-config-customize[the WebFlux config API section] and in
+{spring-boot-docs}/web.html#web.reactive.webflux.auto-configuration[the dedicated Spring Boot documentation].
+
 The preceding example registers a number of Spring WebFlux
 xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[infrastructure beans] and adapts to dependencies
 available on the classpath -- for JSON, XML, and others.
@@ -64,7 +69,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		// Implement configuration methods...
@@ -76,7 +80,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 @Configuration
-@EnableWebFlux
 class WebConfig : WebFluxConfigurer {
 
 	// Implement configuration methods...
@@ -102,7 +105,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -118,7 +120,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun addFormatters(registry: FormatterRegistry) {
@@ -140,7 +141,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -157,7 +157,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun addFormatters(registry: FormatterRegistry) {
@@ -194,7 +193,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -210,7 +208,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun getValidator(): Validator {
@@ -279,7 +276,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -294,7 +290,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun configureContentTypeResolver(builder: RequestedContentTypeResolverBuilder) {
@@ -319,7 +314,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -334,7 +328,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
@@ -376,7 +369,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -391,7 +383,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
@@ -412,7 +403,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 
@@ -437,7 +427,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
@@ -463,7 +452,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 
@@ -480,7 +468,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
@@ -503,7 +490,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 
@@ -524,7 +510,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 
@@ -565,7 +550,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -583,7 +567,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
@@ -616,7 +599,6 @@ Java::
 [source,java,indent=0,subs="verbatim",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -635,7 +617,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
@@ -695,7 +676,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -711,7 +691,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		@Override
@@ -756,7 +735,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -772,7 +750,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		@Override
@@ -810,7 +787,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -827,7 +803,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		@Override
