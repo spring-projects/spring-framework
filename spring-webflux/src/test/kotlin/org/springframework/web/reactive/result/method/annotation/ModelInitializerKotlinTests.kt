@@ -53,7 +53,7 @@ class ModelInitializerKotlinTests {
 		val resolverConfigurer = ArgumentResolverConfigurer()
 		resolverConfigurer.addCustomResolver(ModelMethodArgumentResolver(adapterRegistry))
 		val methodResolver = ControllerMethodResolver(resolverConfigurer, adapterRegistry, StaticApplicationContext(),
-			emptyList(), null)
+			emptyList(), null, null, null)
 		modelInitializer = ModelInitializer(methodResolver, adapterRegistry)
 	}
 

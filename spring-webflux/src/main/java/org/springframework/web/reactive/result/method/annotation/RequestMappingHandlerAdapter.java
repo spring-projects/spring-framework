@@ -225,7 +225,8 @@ public class RequestMappingHandlerAdapter
 
 		this.methodResolver = new ControllerMethodResolver(
 				this.argumentResolverConfigurer, this.reactiveAdapterRegistry, this.applicationContext,
-				this.messageReaders, this.webBindingInitializer);
+				this.messageReaders, this.webBindingInitializer,
+				this.scheduler, this.blockingMethodPredicate);
 
 		this.modelInitializer = new ModelInitializer(this.methodResolver, this.reactiveAdapterRegistry);
 	}
@@ -260,11 +261,9 @@ public class RequestMappingHandlerAdapter
 				.doOnNext(result -> result.setExceptionHandler(exceptionHandler))
 				.onErrorResume(ex -> exceptionHandler.handleError(exchange, ex));
 
-		if (this.scheduler != null) {
-			Assert.state(this.blockingMethodPredicate != null, "Expected HandlerMethod Predicate");
-			if (this.blockingMethodPredicate.test(handlerMethod)) {
-				resultMono = resultMono.subscribeOn(this.scheduler);
-			}
+		Scheduler optionalScheduler = this.methodResolver.getSchedulerFor(handlerMethod);
+		if (optionalScheduler != null) {
+			return resultMono.subscribeOn(optionalScheduler);
 		}
 
 		return resultMono;

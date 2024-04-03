@@ -78,8 +78,10 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 		url += "/";
 		assertThat(getRestTemplate().getForObject(url, String.class)).isEqualTo("root");
 
-		assertThat(getApplicationContext().getBean(TestExecutor.class).invocationCount.get()).isEqualTo(2);
-		assertThat(getApplicationContext().getBean(TestPredicate.class).invocationCount.get()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(TestExecutor.class).invocationCount.get())
+				.as("executor").isEqualTo(4);
+		assertThat(getApplicationContext().getBean(TestPredicate.class).invocationCount.get())
+				.as("predicate").isEqualTo(4);
 	}
 
 	@ParameterizedHttpServerTest

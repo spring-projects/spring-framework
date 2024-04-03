@@ -80,7 +80,8 @@ class ModelInitializerTests {
 
 		ControllerMethodResolver methodResolver = new ControllerMethodResolver(
 				resolverConfigurer, adapterRegistry, new StaticApplicationContext(),
-				Collections.emptyList(), null);
+				Collections.emptyList(), null,
+				null, null);
 
 		this.modelInitializer = new ModelInitializer(methodResolver, adapterRegistry);
 	}

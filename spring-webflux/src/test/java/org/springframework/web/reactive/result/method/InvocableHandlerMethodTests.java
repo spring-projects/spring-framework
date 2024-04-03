@@ -26,6 +26,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -76,6 +78,15 @@ class InvocableHandlerMethodTests {
 	}
 
 	@Test
+	void resolveArgOnSchedulerThread() {
+		this.resolvers.add(stubResolver(Mono.<Object>just("success").publishOn(Schedulers.newSingle("wrong"))));
+		Method method = ResolvableMethod.on(TestController.class).mockCall(o -> o.singleArgThread(null)).method();
+		Mono<HandlerResult> mono = invokeOnScheduler(Schedulers.newSingle("good"), new TestController(), method);
+
+		assertHandlerResultValue(mono, "success on thread: good-", false);
+	}
+
+	@Test
 	void resolveNoArgValue() {
 		this.resolvers.add(stubResolver(Mono.empty()));
 		Method method = ResolvableMethod.on(TestController.class).mockCall(o -> o.singleArg(null)).method();
@@ -90,6 +101,14 @@ class InvocableHandlerMethodTests {
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
 
 		assertHandlerResultValue(mono, "success");
+	}
+
+	@Test
+	void resolveNoArgsOnSchedulerThread() {
+		Method method = ResolvableMethod.on(TestController.class).mockCall(o -> o.noArgsThread()).method();
+		Mono<HandlerResult> mono = invokeOnScheduler(Schedulers.newSingle("good"), new TestController(), method);
+
+		assertHandlerResultValue(mono, "on thread: good-", false);
 	}
 
 	@Test
@@ -229,6 +248,13 @@ class InvocableHandlerMethodTests {
 		return invocable.invoke(this.exchange, new BindingContext(), providedArgs);
 	}
 
+	private Mono<HandlerResult> invokeOnScheduler(Scheduler scheduler, Object handler, Method method, Object... providedArgs) {
+		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handler, method);
+		invocable.setArgumentResolvers(this.resolvers);
+		invocable.setInvocationScheduler(scheduler);
+		return invocable.invoke(this.exchange, new BindingContext(), providedArgs);
+	}
+
 	private HandlerMethodArgumentResolver stubResolver(Object stubValue) {
 		return stubResolver(Mono.just(stubValue));
 	}
@@ -241,8 +267,19 @@ class InvocableHandlerMethodTests {
 	}
 
 	private void assertHandlerResultValue(Mono<HandlerResult> mono, String expected) {
+		this.assertHandlerResultValue(mono, expected, true);
+	}
+
+	private void assertHandlerResultValue(Mono<HandlerResult> mono, String expected, boolean strict) {
 		StepVerifier.create(mono)
-				.consumeNextWith(result -> assertThat(result.getReturnValue()).isEqualTo(expected))
+				.assertNext(result -> {
+					if (strict) {
+						assertThat(result.getReturnValue()).isEqualTo(expected);
+					}
+					else {
+						assertThat(String.valueOf(result.getReturnValue())).startsWith(expected);
+					}
+				})
 				.expectComplete()
 				.verify();
 	}
@@ -257,6 +294,14 @@ class InvocableHandlerMethodTests {
 
 		String noArgs() {
 			return "success";
+		}
+
+		String singleArgThread(String q) {
+			return q + " on thread: " + Thread.currentThread().getName();
+		}
+
+		String noArgsThread() {
+			return "on thread: " + Thread.currentThread().getName();
 		}
 
 		void exceptionMethod() {
