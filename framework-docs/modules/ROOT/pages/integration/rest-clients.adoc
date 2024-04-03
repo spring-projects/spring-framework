@@ -468,6 +468,22 @@ If no request factory is specified when the `RestClient` was built, it will use 
 Otherwise, if the `java.net.http` module is loaded, it will use Java's `HttpClient`.
 Finally, it will resort to the simple default.
 
+The `ClientHttpRequestFactories` utility class can be used to create `ClientHttpRequestFactory` instances. Settings like connect and read timeouts can be applied using the `ClientHttpRequestFactorySettings` class.
+
+[source,java,indent=0,subs="verbatim"]
+----
+ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.DEFAULTS
+	.withConnectTimeout(Duration.ofSeconds(2))
+	.withReadTimeout(Duration.ofSeconds(5));
+
+ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactories.get(settings);
+
+RestClient.builder()
+	.baseUrl("http://localhost:8181")
+        .requestFactory(clientHttpRequestFactory)
+        .build();
+----
+
 [[rest-webclient]]
 == `WebClient`
 
