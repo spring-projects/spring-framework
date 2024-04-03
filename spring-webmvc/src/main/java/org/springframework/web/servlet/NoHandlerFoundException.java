@@ -32,8 +32,8 @@ import org.springframework.web.ErrorResponse;
  * However, if its (depricated) property "throwExceptionIfNoHandlerFound"
  * is set to {@code false} it sends a 404 response.
  * 
- * <p><strong>Note:</strong> until 6.1 the default was to set throwExceptionIfNoHandlerFound to {@code false} and send a 404 response.
- *
+ * <p><strong>Note:</strong> until 6.1 the default was to send a 404 response unless 
+ * throwExceptionIfNoHandlerFound was set to {@code true}
  * @author Brian Clozel
  * @since 4.0
  * @see DispatcherServlet#setThrowExceptionIfNoHandlerFound(boolean)
