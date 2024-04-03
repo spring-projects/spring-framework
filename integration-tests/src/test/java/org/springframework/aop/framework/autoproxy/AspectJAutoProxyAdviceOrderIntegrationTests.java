@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.core.annotation.Order;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
@@ -48,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThatException;
  * @since 5.2.7
  * @see org.springframework.aop.config.AopNamespaceHandlerAdviceOrderIntegrationTests
  */
-class AspectJAutoProxyAdviceOrderIntegrationTests {
+public class AspectJAutoProxyAdviceOrderIntegrationTests {
 
 	/**
 	 * {@link After @After} advice declared as first <em>after</em> method in source code.
@@ -91,11 +92,36 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 		void afterAdviceIsInvokedLast(@Autowired Echo echo, @Autowired AfterAdviceLastAspect aspect) throws Exception {
 			assertThat(aspect.invocations).isEmpty();
 			assertThat(echo.echo(42)).isEqualTo(42);
-			assertThat(aspect.invocations).containsExactly("around - start", "before", "after returning", "after", "around - end");
+			assertThat(aspect.invocations).containsExactly("before", "around - start", "after returning", "after", "around - end");
 
 			aspect.invocations.clear();
 			assertThatException().isThrownBy(() -> echo.echo(new Exception()));
-			assertThat(aspect.invocations).containsExactly("around - start", "before", "after throwing", "after", "around - end");
+			assertThat(aspect.invocations).containsExactly("before", "around - start", "after throwing", "after", "around - end");
+
+			aspect.invocations.clear();
+			assertThat(echo.echo(42)).isEqualTo(42);
+		}
+	}
+
+	@Nested
+	@SpringJUnitConfig(AfterAdviceFirstAndLastConfig.class)
+	@DirtiesContext
+	class AfterAdviceFirstAndLastTests {
+
+		@Test
+		void afterAdviceIsInvokedLast(@Autowired Echo echo) throws Exception {
+			assertThat(GLOBAL_INVOCATIONS).isEmpty();
+			assertThat(echo.echo(42)).isEqualTo(42);
+			assertThat(GLOBAL_INVOCATIONS).containsExactly("before2", "around1 - start1", "before1", "around2 - start2",
+					"after returning2", "after2", "around2 - end2", "after returning1", "after1", "around1 - end1");
+
+			GLOBAL_INVOCATIONS.clear();
+			assertThatException().isThrownBy(() -> echo.echo(new Exception()));
+			assertThat(GLOBAL_INVOCATIONS).containsExactly("before2", "around1 - start1", "before1", "around2 - start2",
+					"after throwing2", "after2", "around2 - end2", "after throwing1", "after1", "around1 - end1");
+
+			GLOBAL_INVOCATIONS.clear();
+			assertThat(echo.echo(42)).isEqualTo(42);
 		}
 	}
 
@@ -130,6 +156,26 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 		}
 	}
 
+	@Configuration
+	@EnableAspectJAutoProxy(proxyTargetClass = true)
+	static class AfterAdviceFirstAndLastConfig {
+
+		@Bean
+		AfterAdviceFirstAspect echoFirstAspect() {
+			return new AfterAdviceFirstAspect();
+		}
+
+		@Bean
+		AfterAdviceLastAspect echoLastAspect() {
+			return new AfterAdviceLastAspect();
+		}
+
+		@Bean
+		Echo echo() {
+			return new Echo();
+		}
+	}
+
 	static class Echo {
 
 		Object echo(Object obj) throws Exception {
@@ -140,10 +186,13 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 		}
 	}
 
+	private static final List<String> GLOBAL_INVOCATIONS = new ArrayList<>(12);
+
 	/**
 	 * {@link After @After} advice declared as first <em>after</em> method in source code.
 	 */
 	@Aspect
+	@Order(98)
 	static class AfterAdviceFirstAspect {
 
 		List<String> invocations = new ArrayList<>();
@@ -155,31 +204,37 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 		@After("echo()")
 		void after() {
 			invocations.add("after");
+			GLOBAL_INVOCATIONS.add("after1");
 		}
 
 		@AfterReturning("echo()")
 		void afterReturning() {
 			invocations.add("after returning");
+			GLOBAL_INVOCATIONS.add("after returning1");
 		}
 
 		@AfterThrowing("echo()")
 		void afterThrowing() {
 			invocations.add("after throwing");
+			GLOBAL_INVOCATIONS.add("after throwing1");
 		}
 
 		@Before("echo()")
 		void before() {
 			invocations.add("before");
+			GLOBAL_INVOCATIONS.add("before1");
 		}
 
 		@Around("echo()")
 		Object around(ProceedingJoinPoint joinPoint) throws Throwable {
 			invocations.add("around - start");
+			GLOBAL_INVOCATIONS.add("around1 - start1");
 			try {
 				return joinPoint.proceed();
 			}
 			finally {
 				invocations.add("around - end");
+				GLOBAL_INVOCATIONS.add("around1 - end1");
 			}
 		}
 	}
@@ -188,6 +243,7 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 	 * {@link After @After} advice declared as last <em>after</em> method in source code.
 	 */
 	@Aspect
+	@Order(99)
 	static class AfterAdviceLastAspect {
 
 		List<String> invocations = new ArrayList<>();
@@ -199,32 +255,39 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 		@Around("echo()")
 		Object around(ProceedingJoinPoint joinPoint) throws Throwable {
 			invocations.add("around - start");
+			GLOBAL_INVOCATIONS.add("around2 - start2");
 			try {
 				return joinPoint.proceed();
 			}
 			finally {
 				invocations.add("around - end");
+				GLOBAL_INVOCATIONS.add("around2 - end2");
 			}
 		}
 
+		@Order(97)
 		@Before("echo()")
 		void before() {
 			invocations.add("before");
+			GLOBAL_INVOCATIONS.add("before2");
 		}
 
 		@AfterReturning("echo()")
 		void afterReturning() {
 			invocations.add("after returning");
+			GLOBAL_INVOCATIONS.add("after returning2");
 		}
 
 		@AfterThrowing("echo()")
 		void afterThrowing() {
 			invocations.add("after throwing");
+			GLOBAL_INVOCATIONS.add("after throwing2");
 		}
 
 		@After("echo()")
 		void after() {
 			invocations.add("after");
+			GLOBAL_INVOCATIONS.add("after2");
 		}
 	}
 
