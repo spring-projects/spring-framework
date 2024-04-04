@@ -36,6 +36,7 @@ import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -60,6 +61,12 @@ import org.springframework.web.server.ServerWebExchange;
  * Extension of {@link HandlerMethod} that invokes the underlying method with
  * argument values resolved from the current HTTP request through a list of
  * {@link HandlerMethodArgumentResolver}.
+ * <p>By default, the method invocation happens on the thread from which the
+ * {@code Mono} was subscribed to, or in some cases the thread that emitted one
+ * of the resolved arguments (e.g. when the request body needs to be decoded).
+ * To ensure a predictable thread for the underlying method's invocation,
+ * a {@link Scheduler} can optionally be provided via
+ * {@link #setInvocationScheduler(Scheduler)}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -85,6 +92,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private MethodValidator methodValidator;
 
 	private Class<?>[] validationGroups = EMPTY_GROUPS;
+
+	@Nullable
+	private Scheduler invocationScheduler;
 
 
 	/**
@@ -154,6 +164,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
+	/**
+	 * Set the {@link Scheduler} on which to perform the method invocation.
+	 * @since 6.1.6
+	 */
+	public void setInvocationScheduler(@Nullable Scheduler invocationScheduler) {
+		this.invocationScheduler = invocationScheduler;
+	}
 
 	/**
 	 * Invoke the method for the given exchange.
@@ -166,7 +183,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public Mono<HandlerResult> invoke(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
-		return getMethodArgumentValues(exchange, bindingContext, providedArgs).flatMap(args -> {
+		return getMethodArgumentValuesOnScheduler(exchange, bindingContext, providedArgs).flatMap(args -> {
 			if (shouldValidateArguments() && this.methodValidator != null) {
 				this.methodValidator.applyArgumentValidation(
 						getBean(), getBridgedMethod(), getMethodParameters(), args, this.validationGroups);
@@ -216,6 +233,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			HandlerResult result = new HandlerResult(this, value, returnType, bindingContext);
 			return Mono.just(result);
 		});
+	}
+
+	private Mono<Object[]> getMethodArgumentValuesOnScheduler(
+			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
+		Mono<Object[]> argumentValuesMono = getMethodArgumentValues(exchange, bindingContext, providedArgs);
+		return this.invocationScheduler != null ? argumentValuesMono.publishOn(this.invocationScheduler) : argumentValuesMono;
 	}
 
 	private Mono<Object[]> getMethodArgumentValues(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.scheduler.Scheduler;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -104,6 +105,12 @@ class ControllerMethodResolver {
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 	@Nullable
+	private final Scheduler invocationScheduler;
+
+	@Nullable
+	private final Predicate<? super HandlerMethod> blockingMethodPredicate;
+
+	@Nullable
 	private final MethodValidator methodValidator;
 
 	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<>(64);
@@ -125,7 +132,9 @@ class ControllerMethodResolver {
 	ControllerMethodResolver(
 			ArgumentResolverConfigurer customResolvers, ReactiveAdapterRegistry adapterRegistry,
 			ConfigurableApplicationContext context, List<HttpMessageReader<?>> readers,
-			@Nullable WebBindingInitializer webBindingInitializer) {
+			@Nullable WebBindingInitializer webBindingInitializer,
+			@Nullable Scheduler invocationScheduler,
+			@Nullable Predicate<? super HandlerMethod> blockingMethodPredicate) {
 
 		Assert.notNull(customResolvers, "ArgumentResolverConfigurer is required");
 		Assert.notNull(adapterRegistry, "ReactiveAdapterRegistry is required");
@@ -137,6 +146,8 @@ class ControllerMethodResolver {
 		this.requestMappingResolvers = requestMappingResolvers(customResolvers, adapterRegistry, context, readers);
 		this.exceptionHandlerResolvers = exceptionHandlerResolvers(customResolvers, adapterRegistry, context);
 		this.reactiveAdapterRegistry = adapterRegistry;
+		this.invocationScheduler = invocationScheduler;
+		this.blockingMethodPredicate = blockingMethodPredicate;
 
 		if (BEAN_VALIDATION_PRESENT) {
 			this.methodValidator = HandlerMethodValidator.from(webBindingInitializer, null,
@@ -287,6 +298,21 @@ class ControllerMethodResolver {
 		};
 	}
 
+	/**
+	 * Return a {@link Scheduler} for the given method if it is considered
+	 * blocking by the underlying blocking method predicate, or null if no
+	 * particular scheduler should be used for this method invocation.
+	 */
+	@Nullable
+	public Scheduler getSchedulerFor(HandlerMethod handlerMethod) {
+		if (this.invocationScheduler != null) {
+			Assert.state(this.blockingMethodPredicate != null, "Expected HandlerMethod Predicate");
+			if (this.blockingMethodPredicate.test(handlerMethod)) {
+				return this.invocationScheduler;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Return an {@link InvocableHandlerMethod} for the given
@@ -297,6 +323,7 @@ class ControllerMethodResolver {
 		invocable.setArgumentResolvers(this.requestMappingResolvers);
 		invocable.setReactiveAdapterRegistry(this.reactiveAdapterRegistry);
 		invocable.setMethodValidator(this.methodValidator);
+		invocable.setInvocationScheduler(getSchedulerFor(handlerMethod));
 		return invocable;
 	}
 

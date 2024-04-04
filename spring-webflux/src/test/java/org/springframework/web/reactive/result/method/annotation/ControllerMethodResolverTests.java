@@ -77,7 +77,7 @@ class ControllerMethodResolverTests {
 
 		this.methodResolver = new ControllerMethodResolver(
 				resolvers, ReactiveAdapterRegistry.getSharedInstance(), applicationContext,
-				codecs.getReaders(), null);
+				codecs.getReaders(), null, null, null);
 
 		Method method = ResolvableMethod.on(TestController.class).mockCall(TestController::handle).method();
 		this.handlerMethod = new HandlerMethod(new TestController(), method);
