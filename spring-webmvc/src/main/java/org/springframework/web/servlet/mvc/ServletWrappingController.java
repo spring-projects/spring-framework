@@ -159,6 +159,7 @@ public class ServletWrappingController extends AbstractController
 	 * @see jakarta.servlet.Servlet#service(jakarta.servlet.ServletRequest, jakarta.servlet.ServletResponse)
 	 */
 	@Override
+	@Nullable
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 

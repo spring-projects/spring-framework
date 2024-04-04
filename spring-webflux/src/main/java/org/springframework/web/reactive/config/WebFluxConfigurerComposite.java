@@ -62,11 +62,13 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	}
 
 	@Override
+	@Nullable
 	public Validator getValidator() {
 		return createSingleBean(WebFluxConfigurer::getValidator, Validator.class);
 	}
 
 	@Override
+	@Nullable
 	public MessageCodesResolver getMessageCodesResolver() {
 		return createSingleBean(WebFluxConfigurer::getMessageCodesResolver, MessageCodesResolver.class);
 	}

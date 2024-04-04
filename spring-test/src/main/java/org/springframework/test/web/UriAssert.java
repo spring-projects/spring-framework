@@ -80,6 +80,7 @@ public class UriAssert extends AbstractStringAssert<UriAssert> {
 		return this;
 	}
 
+	@SuppressWarnings("NullAway")
 	private String buildUri(String uriTemplate, Object... uriVars) {
 		try {
 			return UriComponentsBuilder.fromUriString(uriTemplate)

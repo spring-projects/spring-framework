@@ -51,6 +51,7 @@ class LocaleContextThreadLocalAccessorTests {
 
 	@ParameterizedTest
 	@MethodSource
+	@SuppressWarnings("try")
 	void propagation(@Nullable LocaleContext previous, LocaleContext current) throws Exception {
 		LocaleContextHolder.setLocaleContext(current);
 		ContextSnapshot snapshot = ContextSnapshotFactory.builder()

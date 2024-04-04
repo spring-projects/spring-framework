@@ -426,6 +426,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	// Jackson2CodecSupport
 
 	@Override
+	@Nullable
 	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
 		return parameter.getMethodAnnotation(annotType);
 	}

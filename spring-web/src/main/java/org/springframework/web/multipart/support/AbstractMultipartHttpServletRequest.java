@@ -84,6 +84,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	}
 
 	@Override
+	@Nullable
 	public MultipartFile getFile(String name) {
 		return getMultipartFiles().getFirst(name);
 	}
@@ -136,6 +137,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	 * lazily initializing it if necessary.
 	 * @see #initializeMultipart()
 	 */
+	@SuppressWarnings("NullAway")
 	protected MultiValueMap<String, MultipartFile> getMultipartFiles() {
 		if (this.multipartFiles == null) {
 			initializeMultipart();

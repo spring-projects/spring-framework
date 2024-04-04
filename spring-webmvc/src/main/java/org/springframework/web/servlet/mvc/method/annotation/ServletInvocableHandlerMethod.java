@@ -215,6 +215,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		private final MethodParameter returnType;
 
+		@SuppressWarnings("NullAway")
 		public ConcurrentResultHandlerMethod(@Nullable Object result, ConcurrentResultMethodParameter returnType) {
 			super((Callable<Object>) () -> {
 				if (result instanceof Exception exception) {
@@ -253,6 +254,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		 * Bridge to controller method-level annotations.
 		 */
 		@Override
+		@Nullable
 		public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 			return ServletInvocableHandlerMethod.this.getMethodAnnotation(annotationType);
 		}

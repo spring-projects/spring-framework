@@ -68,21 +68,25 @@ final class DefaultAssertableMvcResult implements AssertableMvcResult {
 	}
 
 	@Override
+	@Nullable
 	public Object getHandler() {
 		return getTarget().getHandler();
 	}
 
 	@Override
+	@Nullable
 	public HandlerInterceptor[] getInterceptors() {
 		return getTarget().getInterceptors();
 	}
 
 	@Override
+	@Nullable
 	public ModelAndView getModelAndView() {
 		return getTarget().getModelAndView();
 	}
 
 	@Override
+	@Nullable
 	public Exception getResolvedException() {
 		return getTarget().getResolvedException();
 	}

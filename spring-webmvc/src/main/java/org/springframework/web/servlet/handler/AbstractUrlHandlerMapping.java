@@ -186,6 +186,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @since 5.3
 	 */
 	@Nullable
+	@SuppressWarnings("NullAway")
 	protected Object lookupHandler(
 			RequestPath path, String lookupPath, HttpServletRequest request) throws Exception {
 

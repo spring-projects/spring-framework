@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
  * @author Brian Clozel
  * @author Sam Brannen
  */
+@SuppressWarnings("removal")
 class WebJarsResourceResolverTests {
 
 	private List<Resource> locations = List.of(new ClassPathResource("/META-INF/resources/webjars"));

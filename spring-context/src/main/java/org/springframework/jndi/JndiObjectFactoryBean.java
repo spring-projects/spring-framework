@@ -273,6 +273,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getObjectType() {
 		if (this.proxyInterfaces != null) {
 			if (this.proxyInterfaces.length == 1) {

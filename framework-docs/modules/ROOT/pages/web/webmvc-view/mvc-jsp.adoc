@@ -683,7 +683,7 @@ the HTML would be as follows:
 ----
 
 What if we want to display the entire list of errors for a given page? The next example
-shows that the `errors` tag also supports some basic wildcarding functionality.
+shows that the `errors` tag also supports some basic wildcard functionality.
 
 * `path="{asterisk}"`: Displays all errors.
 * `path="lastName"`: Displays all errors associated with the `lastName` field.

@@ -361,6 +361,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
+	@SuppressWarnings("NullAway")
 	private void addMatchingMappings(Collection<T> mappings, List<Match> matches, ServerWebExchange exchange) {
 		for (T mapping : mappings) {
 			T match = getMatchingMapping(mapping, exchange);
@@ -400,6 +401,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	@Override
+	@Nullable
 	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
 		CorsConfiguration corsConfig = super.getCorsConfiguration(handler, exchange);
 		if (handler instanceof HandlerMethod handlerMethod) {

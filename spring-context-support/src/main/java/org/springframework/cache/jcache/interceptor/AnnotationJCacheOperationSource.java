@@ -58,6 +58,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 	}
 
 	@Override
+	@Nullable
 	protected JCacheOperation<?> findCacheOperation(Method method, @Nullable Class<?> targetType) {
 		CacheResult cacheResult = method.getAnnotation(CacheResult.class);
 		CachePut cachePut = method.getAnnotation(CachePut.class);

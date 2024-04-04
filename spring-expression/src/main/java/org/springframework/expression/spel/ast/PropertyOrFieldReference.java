@@ -76,6 +76,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	/**
 	 * Does this node represent a null-safe property or field reference?
 	 */
+	@Override
 	public boolean isNullSafe() {
 		return this.nullSafe;
 	}
@@ -181,7 +182,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			throws EvaluationException {
 
 		Object targetObject = contextObject.getValue();
-		if (targetObject == null && this.nullSafe) {
+		if (targetObject == null && isNullSafe()) {
 			return TypedValue.NULL;
 		}
 
@@ -189,7 +190,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		if (accessorToUse != null) {
 			if (evalContext.getPropertyAccessors().contains(accessorToUse)) {
 				try {
-					return accessorToUse.read(evalContext, contextObject.getValue(), name);
+					return accessorToUse.read(evalContext, targetObject, name);
 				}
 				catch (Exception ex) {
 					// This is OK - it may have gone stale due to a class change,
@@ -200,19 +201,19 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 
 		List<PropertyAccessor> accessorsToTry =
-				getPropertyAccessorsToTry(contextObject.getValue(), evalContext.getPropertyAccessors());
+				getPropertyAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
 		// Go through the accessors that may be able to resolve it. If they are a cacheable accessor then
 		// get the accessor and use it. If they are not cacheable but report they can read the property
 		// then ask them to read it
 		try {
 			for (PropertyAccessor accessor : accessorsToTry) {
-				if (accessor.canRead(evalContext, contextObject.getValue(), name)) {
+				if (accessor.canRead(evalContext, targetObject, name)) {
 					if (accessor instanceof ReflectivePropertyAccessor reflectivePropertyAccessor) {
 						accessor = reflectivePropertyAccessor.createOptimalAccessor(
-								evalContext, contextObject.getValue(), name);
+								evalContext, targetObject, name);
 					}
 					this.cachedReadAccessor = accessor;
-					return accessor.read(evalContext, contextObject.getValue(), name);
+					return accessor.read(evalContext, targetObject, name);
 				}
 			}
 		}
@@ -233,18 +234,20 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			TypedValue contextObject, EvaluationContext evalContext, String name, @Nullable Object newValue)
 			throws EvaluationException {
 
-		if (contextObject.getValue() == null && this.nullSafe) {
-			return;
-		}
-		if (contextObject.getValue() == null) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, name);
+		Object targetObject = contextObject.getValue();
+		if (targetObject == null) {
+			if (isNullSafe()) {
+				return;
+			}
+			throw new SpelEvaluationException(
+					getStartPosition(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, name);
 		}
 
 		PropertyAccessor accessorToUse = this.cachedWriteAccessor;
 		if (accessorToUse != null) {
 			if (evalContext.getPropertyAccessors().contains(accessorToUse)) {
 				try {
-					accessorToUse.write(evalContext, contextObject.getValue(), name, newValue);
+					accessorToUse.write(evalContext, targetObject, name, newValue);
 					return;
 				}
 				catch (Exception ex) {
@@ -256,12 +259,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 
 		List<PropertyAccessor> accessorsToTry =
-				getPropertyAccessorsToTry(contextObject.getValue(), evalContext.getPropertyAccessors());
+				getPropertyAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
 		try {
 			for (PropertyAccessor accessor : accessorsToTry) {
-				if (accessor.canWrite(evalContext, contextObject.getValue(), name)) {
+				if (accessor.canWrite(evalContext, targetObject, name)) {
 					this.cachedWriteAccessor = accessor;
-					accessor.write(evalContext, contextObject.getValue(), name, newValue);
+					accessor.write(evalContext, targetObject, name, newValue);
 					return;
 				}
 			}
@@ -272,19 +275,19 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE, name,
-				FormatHelper.formatClassNameForMessage(getObjectClass(contextObject.getValue())));
+				FormatHelper.formatClassNameForMessage(getObjectClass(targetObject)));
 	}
 
 	public boolean isWritableProperty(String name, TypedValue contextObject, EvaluationContext evalContext)
 			throws EvaluationException {
 
-		Object value = contextObject.getValue();
-		if (value != null) {
+		Object targetObject = contextObject.getValue();
+		if (targetObject != null) {
 			List<PropertyAccessor> accessorsToTry =
-					getPropertyAccessorsToTry(contextObject.getValue(), evalContext.getPropertyAccessors());
+					getPropertyAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
 			for (PropertyAccessor accessor : accessorsToTry) {
 				try {
-					if (accessor.canWrite(evalContext, value, name)) {
+					if (accessor.canWrite(evalContext, targetObject, name)) {
 						return true;
 					}
 				}
@@ -297,46 +300,18 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 	/**
-	 * Determines the set of property resolvers that should be used to try and access a property
-	 * on the specified target type. The resolvers are considered to be in an ordered list,
-	 * however in the returned list any that are exact matches for the input target type (as
-	 * opposed to 'general' resolvers that could work for any type) are placed at the start of the
-	 * list. In addition, there are specific resolvers that exactly name the class in question
-	 * and resolvers that name a specific class but it is a supertype of the class we have.
-	 * These are put at the end of the specific resolvers set and will be tried after exactly
-	 * matching accessors but before generic accessors.
-	 * @param contextObject the object upon which property access is being attempted
-	 * @return a list of resolvers that should be tried in order to access the property
+	 * Determine the set of property accessors that should be used to try to
+	 * access a property on the specified context object.
+	 * <p>Delegates to {@link AstUtils#getPropertyAccessorsToTry(Class, List)}.
+	 * @param targetObject the object upon which property access is being attempted
+	 * @return a list of accessors that should be tried in order to access the
+	 * property, or an empty list if no suitable accessor could be found
 	 */
 	private List<PropertyAccessor> getPropertyAccessorsToTry(
-			@Nullable Object contextObject, List<PropertyAccessor> propertyAccessors) {
+			@Nullable Object targetObject, List<PropertyAccessor> propertyAccessors) {
 
-		Class<?> targetType = (contextObject != null ? contextObject.getClass() : null);
-
-		List<PropertyAccessor> specificAccessors = new ArrayList<>();
-		List<PropertyAccessor> generalAccessors = new ArrayList<>();
-		for (PropertyAccessor resolver : propertyAccessors) {
-			Class<?>[] targets = resolver.getSpecificTargetClasses();
-			if (targets == null) {
-				// generic resolver that says it can be used for any type
-				generalAccessors.add(resolver);
-			}
-			else if (targetType != null) {
-				for (Class<?> clazz : targets) {
-					if (clazz == targetType) {
-						specificAccessors.add(resolver);
-						break;
-					}
-					else if (clazz.isAssignableFrom(targetType)) {
-						generalAccessors.add(resolver);
-					}
-				}
-			}
-		}
-		List<PropertyAccessor> resolvers = new ArrayList<>(specificAccessors);
-		generalAccessors.removeAll(specificAccessors);
-		resolvers.addAll(generalAccessors);
-		return resolvers;
+		Class<?> targetType = (targetObject != null ? targetObject.getClass() : null);
+		return AstUtils.getPropertyAccessorsToTry(targetType, propertyAccessors);
 	}
 
 	@Override
@@ -353,7 +328,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 
 		Label skipIfNull = null;
-		if (this.nullSafe) {
+		if (isNullSafe()) {
 			mv.visitInsn(DUP);
 			skipIfNull = new Label();
 			Label continueLabel = new Label();
@@ -381,7 +356,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		// If this property or field access would return a primitive - and yet
 		// it is also marked null safe - then the exit type descriptor must be
 		// promoted to the box type to allow a null value to be passed on
-		if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
+		if (isNullSafe() && CodeFlow.isPrimitive(descriptor)) {
 			this.originalPrimitiveExitTypeDescriptor = descriptor;
 			this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
 		}

@@ -43,6 +43,7 @@ import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -117,7 +118,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 		pvs.removePropertyValue("defaultValue");
 		PropertyAccessorFactory.forBeanPropertyAccess(bean).setPropertyValues(pvs);
 		String defaultValue = (String) map.get("defaultValue");
-		if (!defaultValue.isEmpty()) {
+		if (StringUtils.hasLength(defaultValue)) {
 			bean.setDefaultValue(defaultValue);
 		}
 		return bean;

@@ -306,7 +306,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * @return the adapted XSLT Source
 	 * @throws IllegalArgumentException if the given Object is not of a supported type
 	 */
-	protected Source convertSource(Object sourceObject) throws Exception {
+	protected Source convertSource(@Nullable Object sourceObject) throws Exception {
 		if (sourceObject instanceof Source source) {
 			return source;
 		}

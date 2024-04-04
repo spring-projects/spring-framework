@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.lang.Nullable;
 
 /**
  * Support for single-value reactive types (like {@code Mono} or {@code Single})
@@ -57,6 +58,7 @@ public class ReactiveReturnValueHandler extends AbstractAsyncReturnValueHandler 
 	}
 
 	@Override
+	@Nullable
 	public CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType) {
 		ReactiveAdapter adapter = this.adapterRegistry.getAdapter(returnType.getParameterType(), returnValue);
 		if (adapter != null) {

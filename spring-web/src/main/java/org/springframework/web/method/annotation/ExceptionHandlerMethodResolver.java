@@ -174,6 +174,7 @@ public class ExceptionHandlerMethodResolver {
 	 * Return the {@link Method} mapped to the given exception type, or
 	 * {@link #NO_MATCHING_EXCEPTION_HANDLER_METHOD} if none.
 	 */
+	@Nullable
 	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {

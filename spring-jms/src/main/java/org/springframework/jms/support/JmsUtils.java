@@ -244,6 +244,7 @@ public abstract class JmsUtils {
 	 * @return the descriptive message String
 	 * @see jakarta.jms.JMSException#getLinkedException()
 	 */
+	@Nullable
 	public static String buildExceptionMessage(JMSException ex) {
 		String message = ex.getMessage();
 		Exception linkedEx = ex.getLinkedException();

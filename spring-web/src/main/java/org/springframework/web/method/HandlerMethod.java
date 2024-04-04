@@ -342,7 +342,7 @@ public class HandlerMethod extends AnnotatedMethod {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (super.equals(other) && this.bean.equals(((HandlerMethod) other).bean)));
+		return (this == other || (super.equals(other) && other instanceof HandlerMethod otherMethod && this.bean.equals(otherMethod.bean)));
 	}
 
 	@Override

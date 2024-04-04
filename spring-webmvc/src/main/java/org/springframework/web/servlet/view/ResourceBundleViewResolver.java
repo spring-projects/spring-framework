@@ -200,6 +200,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 
 
 	@Override
+	@Nullable
 	protected View loadView(String viewName, Locale locale) throws Exception {
 		BeanFactory factory = initFactory(locale);
 		try {

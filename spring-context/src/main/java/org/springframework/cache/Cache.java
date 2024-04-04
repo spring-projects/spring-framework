@@ -315,7 +315,7 @@ public interface Cache {
 		@Nullable
 		private final Object key;
 
-		public ValueRetrievalException(@Nullable Object key, Callable<?> loader, Throwable ex) {
+		public ValueRetrievalException(@Nullable Object key, Callable<?> loader, @Nullable Throwable ex) {
 			super(String.format("Value for key '%s' could not be loaded using '%s'", key, loader), ex);
 			this.key = key;
 		}

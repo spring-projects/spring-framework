@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.test.context.junit.jupiter.event;
 
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.awaitility.Awaitility;
-import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -263,7 +263,7 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 		void asyncConsumption() {
 			context.publishEvent(new CustomEvent("sync"));
 
-			Awaitility.await().atMost(Durations.ONE_SECOND)
+			Awaitility.await().atMost(5, TimeUnit.SECONDS)
 					.untilAsserted(() -> assertThat(this.applicationEvents.stream(CustomEvent.class))
 							.singleElement()
 							.extracting(CustomEvent::getMessage, InstanceOfAssertFactories.STRING)

@@ -134,6 +134,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * @see #getResolvedDataSources()
 	 * @see #getResolvedDefaultDataSource()
 	 */
+	@SuppressWarnings("NullAway")
 	public void initialize() {
 		if (this.targetDataSources == null) {
 			throw new IllegalArgumentException("Property 'targetDataSources' is required");

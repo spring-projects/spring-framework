@@ -81,6 +81,7 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.log.LogMessage;
 import org.springframework.core.metrics.StartupStep;
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -151,7 +152,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private String serializationId;
 
 	/** Whether to allow re-registration of a different definition with the same name. */
-	private boolean allowBeanDefinitionOverriding = true;
+	@Nullable
+	private Boolean allowBeanDefinitionOverriding;
 
 	/** Whether to allow eager class loading even for lazy-init beans. */
 	private boolean allowEagerClassLoading = true;
@@ -258,7 +260,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @since 4.1.2
 	 */
 	public boolean isAllowBeanDefinitionOverriding() {
-		return this.allowBeanDefinitionOverriding;
+		return !Boolean.FALSE.equals(this.allowBeanDefinitionOverriding);
 	}
 
 	/**
@@ -1141,27 +1143,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!isBeanDefinitionOverridable(beanName)) {
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
-			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
-				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
-				if (logger.isInfoEnabled()) {
-					logger.info("Overriding user-defined bean definition for bean '" + beanName +
-							"' with a framework-generated bean definition: replacing [" +
-							existingDefinition + "] with [" + beanDefinition + "]");
-				}
-			}
-			else if (!beanDefinition.equals(existingDefinition)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Overriding bean definition for bean '" + beanName +
-							"' with a different definition: replacing [" + existingDefinition +
-							"] with [" + beanDefinition + "]");
-				}
-			}
 			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Overriding bean definition for bean '" + beanName +
-							"' with an equivalent definition: replacing [" + existingDefinition +
-							"] with [" + beanDefinition + "]");
-				}
+				logBeanDefinitionOverriding(beanName, beanDefinition, existingDefinition);
 			}
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 		}
@@ -1213,6 +1196,44 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// Cache a primary marker for the given bean.
 		if (beanDefinition.isPrimary()) {
 			this.primaryBeanNames.add(beanName);
+		}
+	}
+
+	private void logBeanDefinitionOverriding(String beanName, BeanDefinition beanDefinition,
+			BeanDefinition existingDefinition) {
+
+		boolean explicitBeanOverride = (this.allowBeanDefinitionOverriding != null);
+		if (existingDefinition.getRole() < beanDefinition.getRole()) {
+			// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
+			if (logger.isInfoEnabled()) {
+				logger.info("Overriding user-defined bean definition for bean '" + beanName +
+						"' with a framework-generated bean definition: replacing [" +
+						existingDefinition + "] with [" + beanDefinition + "]");
+			}
+		}
+		else if (!beanDefinition.equals(existingDefinition)) {
+			if (explicitBeanOverride && logger.isInfoEnabled()) {
+				logger.info("Overriding bean definition for bean '" + beanName +
+						"' with a different definition: replacing [" + existingDefinition +
+						"] with [" + beanDefinition + "]");
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Overriding bean definition for bean '" + beanName +
+						"' with a different definition: replacing [" + existingDefinition +
+						"] with [" + beanDefinition + "]");
+			}
+		}
+		else {
+			if (explicitBeanOverride && logger.isInfoEnabled()) {
+				logger.info("Overriding bean definition for bean '" + beanName +
+						"' with an equivalent definition: replacing [" + existingDefinition +
+						"] with [" + beanDefinition + "]");
+			}
+			if (logger.isTraceEnabled()) {
+				logger.trace("Overriding bean definition for bean '" + beanName +
+						"' with an equivalent definition: replacing [" + existingDefinition +
+						"] with [" + beanDefinition + "]");
+			}
 		}
 	}
 
@@ -1487,6 +1508,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable String beanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
 
@@ -2066,6 +2088,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * i.e. whether the candidate points back to the original bean or to a factory method
 	 * on the original bean.
 	 */
+	@Contract("null, _ -> false;_, null -> false;")
 	private boolean isSelfReference(@Nullable String beanName, @Nullable String candidateName) {
 		return (beanName != null && candidateName != null &&
 				(beanName.equals(candidateName) || (containsBeanDefinition(candidateName) &&
@@ -2520,7 +2543,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	private enum PreInstantiation {
 
-		MAIN, BACKGROUND;
+		MAIN, BACKGROUND
 	}
 
 }

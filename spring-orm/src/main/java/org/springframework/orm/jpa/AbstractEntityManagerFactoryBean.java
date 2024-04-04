@@ -427,7 +427,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 				if (cause != null) {
 					String message = ex.getMessage();
 					String causeString = cause.toString();
-					if (!message.endsWith(causeString)) {
+					if (message != null && !message.endsWith(causeString)) {
 						ex = new PersistenceException(message + "; nested exception is " + causeString, cause);
 					}
 				}

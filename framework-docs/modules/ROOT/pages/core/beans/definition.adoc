@@ -73,7 +73,23 @@ runtime (concurrently with live access to the factory) is not officially support
 lead to concurrent access exceptions, inconsistent state in the bean container, or both.
 ====
 
+[[beans-definition-overriding]]
+== Overriding Beans
 
+Bean overriding is happening when a bean is registered using an identifier that is
+already allocated. While bean overriding is possible, it makes the configuration harder
+to read and this feature will be deprecated in a future release.
+
+To disable bean overriding altogether, you can set the `allowBeanDefinitionOverriding`
+to `false` on the `ApplicationContext` before it is refreshed. In such setup, an
+exception is thrown if bean overriding is used.
+
+By default, the container logs every bean overriding at `INFO` level so that you can
+adapt your configuration accordingly. While not recommended, you can silence those logs
+by setting the `allowBeanDefinitionOverriding` flag to `true`.
+
+NOTE: We acknowledge that overriding beans in a test is convenient, and there is
+explicit support for this. For more details please refer to xref:testing/annotations/integration-spring/annotation-beanoverriding.adoc[this section].
 
 [[beans-beanname]]
 == Naming Beans

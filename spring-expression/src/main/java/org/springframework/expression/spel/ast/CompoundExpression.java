@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelNode;
 
 /**
  * Represents a DOT separated expression sequence, such as
@@ -120,14 +119,13 @@ public class CompoundExpression extends SpelNodeImpl {
 		for (int i = 0; i < getChildCount(); i++) {
 			sb.append(getChild(i).toStringAST());
 			if (i < getChildCount() - 1) {
-				SpelNode nextChild = getChild(i + 1);
+				SpelNodeImpl nextChild = this.children[i + 1];
+				if (nextChild.isNullSafe()) {
+					sb.append("?.");
+				}
 				// Don't append a '.' if the next child is an Indexer.
 				// For example, we want 'myVar[0]' instead of 'myVar.[0]'.
-				if (!(nextChild instanceof Indexer)) {
-					if ((nextChild instanceof MethodReference methodRef && methodRef.isNullSafe()) ||
-						(nextChild instanceof PropertyOrFieldReference pofRef && pofRef.isNullSafe())) {
-						sb.append('?');
-					}
+				else if (!(nextChild instanceof Indexer)) {
 					sb.append('.');
 				}
 			}

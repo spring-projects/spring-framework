@@ -131,6 +131,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return new URI(url.toString());
 	}
 
+	@SuppressWarnings("NullAway")
 	private static MultiValueMap<String, String> initHeaders(
 			MultiValueMap<String, String> headerValues, HttpServletRequest request) {
 

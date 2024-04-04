@@ -224,7 +224,7 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 		 * body publisher}.
 		 */
 		@Override
-		public void setBodyValue(Object bodyValue) {
+		public void setBodyValue(@Nullable Object bodyValue) {
 			super.setBodyValue(bodyValue);
 			this.body = null;
 			this.bodyElementType = null;

@@ -439,6 +439,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void testResourcesWithResolversTransformers() {
 		loadBeanDefinitions("mvc-config-resources-chain.xml");
 

@@ -500,6 +500,7 @@ public class HandlerMappingIntrospector
 		}
 
 		@Override
+		@Nullable
 		public Object getAttribute(String name) {
 			return this.attributes.get(name);
 		}
@@ -532,6 +533,7 @@ public class HandlerMappingIntrospector
 		}
 
 		@Override
+		@Nullable
 		public PathPatternParser getPatternParser() {
 			return this.delegate.getPatternParser();
 		}

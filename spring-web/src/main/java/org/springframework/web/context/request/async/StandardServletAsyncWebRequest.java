@@ -84,6 +84,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	 * @param previousRequest the existing request from the last dispatch
 	 * @since 5.3.33
 	 */
+	@SuppressWarnings("NullAway")
 	StandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response,
 			@Nullable StandardServletAsyncWebRequest previousRequest) {
 
@@ -101,7 +102,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	 * container processing thread has exited.
 	 */
 	@Override
-	public void setTimeout(Long timeout) {
+	public void setTimeout(@Nullable Long timeout) {
 		Assert.state(!isAsyncStarted(), "Cannot change the timeout with concurrent handling in progress");
 		this.timeout = timeout;
 	}
@@ -243,6 +244,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		}
 
 		@Override
+		@SuppressWarnings("NullAway")
 		public ServletOutputStream getOutputStream() throws IOException {
 			int level = obtainLockAndCheckState();
 			try {
@@ -262,6 +264,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		}
 
 		@Override
+		@SuppressWarnings("NullAway")
 		public PrintWriter getWriter() throws IOException {
 			int level = obtainLockAndCheckState();
 			try {

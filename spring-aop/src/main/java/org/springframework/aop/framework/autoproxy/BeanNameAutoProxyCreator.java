@@ -81,6 +81,7 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * @see #setBeanNames(String...)
 	 */
 	@Override
+	@Nullable
 	protected TargetSource getCustomTargetSource(Class<?> beanClass, String beanName) {
 		return (isSupportedBeanName(beanClass, beanName) ?
 				super.getCustomTargetSource(beanClass, beanName) : null);

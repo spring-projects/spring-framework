@@ -25,6 +25,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
@@ -69,6 +70,7 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 	}
 
 	@Override
+	@Nullable
 	public <T> T exchangeForBody(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
 		return newRequest(values).retrieve().body(bodyType);
 	}

@@ -507,8 +507,8 @@ The MVC configuration exposes the following options for asynchronous request pro
 
 You can configure the following:
 
-* Default timeout value for async requests, which if not set, depends
-on the underlying Servlet container.
+* The default timeout value for async requests depends
+on the underlying Servlet container, unless it is set explicitly.
 * `AsyncTaskExecutor` to use for blocking writes when streaming with
 xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types] and for
 executing `Callable` instances returned from controller methods.

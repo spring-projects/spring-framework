@@ -540,7 +540,7 @@ public abstract class WebUtils {
 	 * @param name the name of the attribute
 	 * @param value the suggested value of the attribute
 	 */
-	private static void exposeRequestAttributeIfNotPresent(ServletRequest request, String name, Object value) {
+	private static void exposeRequestAttributeIfNotPresent(ServletRequest request, String name, @Nullable Object value) {
 		if (request.getAttribute(name) == null) {
 			request.setAttribute(name, value);
 		}

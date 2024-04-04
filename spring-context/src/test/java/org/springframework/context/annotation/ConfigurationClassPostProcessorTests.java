@@ -329,6 +329,7 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test
 	void postProcessorOverridesNonApplicationBeanDefinitions() {
+		beanFactory.setAllowBeanDefinitionOverriding(true);
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setRole(RootBeanDefinition.ROLE_SUPPORT);
 		beanFactory.registerBeanDefinition("bar", rbd);
@@ -342,6 +343,7 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test
 	void postProcessorDoesNotOverrideRegularBeanDefinitions() {
+		beanFactory.setAllowBeanDefinitionOverriding(true);
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setResource(new DescriptiveResource("XML or something"));
 		beanFactory.registerBeanDefinition("bar", rbd);
@@ -354,6 +356,7 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test
 	void postProcessorDoesNotOverrideRegularBeanDefinitionsEvenWithScopedProxy() {
+		beanFactory.setAllowBeanDefinitionOverriding(true);
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setResource(new DescriptiveResource("XML or something"));
 		BeanDefinitionHolder proxied = ScopedProxyUtils.createScopedProxy(
@@ -396,6 +399,7 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test
 	void configurationClassesProcessedInCorrectOrder() {
+		beanFactory.setAllowBeanDefinitionOverriding(true);
 		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
 		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(SingletonBeanConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
@@ -410,6 +414,7 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test
 	void configurationClassesWithValidOverridingForProgrammaticCall() {
+		beanFactory.setAllowBeanDefinitionOverriding(true);
 		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(OverridingAgainSingletonBeanConfig.class));
 		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
 		beanFactory.registerBeanDefinition("config3", new RootBeanDefinition(SingletonBeanConfig.class));
@@ -425,6 +430,7 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test
 	void configurationClassesWithInvalidOverridingForProgrammaticCall() {
+		beanFactory.setAllowBeanDefinitionOverriding(true);
 		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(InvalidOverridingSingletonBeanConfig.class));
 		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
 		beanFactory.registerBeanDefinition("config3", new RootBeanDefinition(SingletonBeanConfig.class));
@@ -441,6 +447,7 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test  // SPR-15384
 	void nestedConfigurationClassesProcessedInCorrectOrder() {
+		beanFactory.setAllowBeanDefinitionOverriding(true);
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ConfigWithOrderedNestedClasses.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
@@ -454,6 +461,7 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test  // SPR-16734
 	void innerConfigurationClassesProcessedInCorrectOrder() {
+		beanFactory.setAllowBeanDefinitionOverriding(true);
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(ConfigWithOrderedInnerClasses.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);

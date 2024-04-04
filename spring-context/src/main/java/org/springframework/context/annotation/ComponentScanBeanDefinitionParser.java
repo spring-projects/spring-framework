@@ -40,6 +40,7 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -112,14 +113,18 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			parseBeanNameGenerator(element, scanner);
 		}
 		catch (Exception ex) {
-			parserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());
+			String message = ex.getMessage();
+			Assert.state(message != null, "Exception message must not be null");
+			parserContext.getReaderContext().error(message, parserContext.extractSource(element), ex.getCause());
 		}
 
 		try {
 			parseScope(element, scanner);
 		}
 		catch (Exception ex) {
-			parserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());
+			String message = ex.getMessage();
+			Assert.state(message != null, "Exception message must not be null");
+			parserContext.getReaderContext().error(message, parserContext.extractSource(element), ex.getCause());
 		}
 
 		parseTypeFilters(element, scanner, parserContext);
@@ -214,8 +219,10 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 							"Ignoring non-present type filter class: " + ex, parserContext.extractSource(element));
 				}
 				catch (Exception ex) {
+					String message = ex.getMessage();
+					Assert.state(message != null, "Exception message must not be null");
 					parserContext.getReaderContext().error(
-							ex.getMessage(), parserContext.extractSource(element), ex.getCause());
+							message, parserContext.extractSource(element), ex.getCause());
 				}
 			}
 		}

@@ -182,6 +182,16 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	/**
+	 * Determine if this node is the target of a null-safe navigation operation.
+	 * <p>The default implementation returns {@code false}.
+	 * @return {@code true} if this node is the target of a null-safe operation
+	 * @since 6.1.6
+	 */
+	public boolean isNullSafe() {
+		return false;
+	}
+
+	/**
 	 * Check whether a node can be compiled to bytecode. The reasoning in each node may
 	 * be different but will typically involve checking whether the exit type descriptor
 	 * of the node is known and any relevant child nodes are compilable.

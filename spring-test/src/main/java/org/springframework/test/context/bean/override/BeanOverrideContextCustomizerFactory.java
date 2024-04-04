@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
@@ -37,6 +38,7 @@ import org.springframework.test.context.TestContextAnnotationUtils;
 public class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 
 	@Override
+	@Nullable
 	public ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 

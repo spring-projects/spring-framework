@@ -92,7 +92,7 @@ public abstract class CoroutinesUtils {
 	 * @return the method invocation result as reactive stream
 	 * @throws IllegalArgumentException if {@code method} is not a suspending function
 	 */
-	public static Publisher<?> invokeSuspendingFunction(Method method, Object target, Object... args) {
+	public static Publisher<?> invokeSuspendingFunction(Method method, Object target, @Nullable Object... args) {
 		return invokeSuspendingFunction(Dispatchers.getUnconfined(), method, target, args);
 	}
 
@@ -108,14 +108,14 @@ public abstract class CoroutinesUtils {
 	 * @throws IllegalArgumentException if {@code method} is not a suspending function
 	 * @since 6.0
 	 */
-	@SuppressWarnings({"deprecation", "DataFlowIssue"})
+	@SuppressWarnings({"deprecation", "DataFlowIssue", "NullAway"})
 	public static Publisher<?> invokeSuspendingFunction(
-			CoroutineContext context, Method method, @Nullable Object target, Object... args) {
+			CoroutineContext context, Method method, @Nullable Object target, @Nullable Object... args) {
 
 		Assert.isTrue(KotlinDetector.isSuspendingFunction(method), "Method must be a suspending function");
 		KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 		Assert.notNull(function, () -> "Failed to get Kotlin function for method: " + method);
-		if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
+		if (!KCallablesJvm.isAccessible(function)) {
 			KCallablesJvm.setAccessible(function, true);
 		}
 		Mono<Object> mono = MonoKt.mono(context, (scope, continuation) -> {
@@ -130,7 +130,11 @@ public abstract class CoroutinesUtils {
 									KType type = parameter.getType();
 									if (!(type.isMarkedNullable() && arg == null) && type.getClassifier() instanceof KClass<?> kClass
 											&& KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-										arg = KClasses.getPrimaryConstructor(kClass).call(arg);
+										KFunction<?> constructor = KClasses.getPrimaryConstructor(kClass);
+										if (!KCallablesJvm.isAccessible(constructor)) {
+											KCallablesJvm.setAccessible(constructor, true);
+										}
+										arg = constructor.call(arg);
 									}
 									argMap.put(parameter, arg);
 								}

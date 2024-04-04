@@ -147,6 +147,7 @@ public class SimpleErrors implements Errors, Serializable {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getFieldType(String field) {
 		PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(this.target.getClass(), field);
 		if (pd != null) {

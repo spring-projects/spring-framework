@@ -322,6 +322,7 @@ final class PlaceholderParser {
 		}
 
 		@Override
+		@Nullable
 		public String resolvePlaceholder(String placeholderName) {
 			String value = this.resolver.resolvePlaceholder(placeholderName);
 			if (value != null && logger.isTraceEnabled()) {
@@ -358,6 +359,7 @@ final class PlaceholderParser {
 		}
 
 		public void removePlaceholder(String placeholder) {
+			Assert.state(this.visitedPlaceholders != null, "Visited placeholders must not be null");
 			this.visitedPlaceholders.remove(placeholder);
 		}
 

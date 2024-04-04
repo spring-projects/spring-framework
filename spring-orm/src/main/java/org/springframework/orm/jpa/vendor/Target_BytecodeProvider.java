@@ -36,6 +36,7 @@ import org.hibernate.property.access.spi.PropertyAccess;
 final class Target_BytecodeProvider {
 
 	@Substitute
+	@SuppressWarnings("NullAway")
 	public ReflectionOptimizer getReflectionOptimizer(Class<?> clazz, Map<String, PropertyAccess> propertyAccessMap) {
 		return null;
 	}

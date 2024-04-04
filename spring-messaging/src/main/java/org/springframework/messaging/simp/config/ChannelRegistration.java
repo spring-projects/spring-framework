@@ -71,7 +71,7 @@ public class ChannelRegistration {
 	 * taking precedence over a {@linkplain #taskExecutor() task executor
 	 * registration} if any.
 	 * @param executor the executor to use
-	 * @since 6.1.4
+	 * @since 6.2
 	 */
 	public ChannelRegistration executor(Executor executor) {
 		this.executor = executor;

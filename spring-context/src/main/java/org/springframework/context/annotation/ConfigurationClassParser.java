@@ -819,6 +819,7 @@ class ConfigurationClassParser {
 					deferredImport.getConfigurationClass());
 		}
 
+		@SuppressWarnings("NullAway")
 		void processGroupImports() {
 			for (DeferredImportSelectorGrouping grouping : this.groupings.values()) {
 				Predicate<String> filter = grouping.getCandidateFilter();

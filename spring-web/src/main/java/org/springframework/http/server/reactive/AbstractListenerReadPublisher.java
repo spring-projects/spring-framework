@@ -47,6 +47,7 @@ import org.springframework.util.Assert;
  * @since 5.0
  * @param <T> the type of element signaled
  */
+@SuppressWarnings("NullAway")
 public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	/**

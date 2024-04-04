@@ -301,7 +301,7 @@ public class ProblemDetail {
 	/**
 	 * Create a {@code ProblemDetail} instance with the given status and detail.
 	 */
-	public static ProblemDetail forStatusAndDetail(HttpStatusCode status, String detail) {
+	public static ProblemDetail forStatusAndDetail(HttpStatusCode status, @Nullable String detail) {
 		Assert.notNull(status, "HttpStatusCode is required");
 		ProblemDetail problemDetail = forStatus(status.value());
 		problemDetail.setDetail(detail);

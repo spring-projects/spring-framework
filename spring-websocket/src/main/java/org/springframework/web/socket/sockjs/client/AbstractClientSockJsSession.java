@@ -110,6 +110,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	}
 
 	@Override
+	@Nullable
 	public Principal getPrincipal() {
 		return this.request.getUser();
 	}

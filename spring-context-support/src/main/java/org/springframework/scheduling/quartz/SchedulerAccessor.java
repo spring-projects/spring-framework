@@ -203,6 +203,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	/**
 	 * Register jobs and triggers (within a transaction, if possible).
 	 */
+	@SuppressWarnings("NullAway")
 	protected void registerJobsAndTriggers() throws SchedulerException {
 		TransactionStatus transactionStatus = null;
 		if (this.transactionManager != null) {

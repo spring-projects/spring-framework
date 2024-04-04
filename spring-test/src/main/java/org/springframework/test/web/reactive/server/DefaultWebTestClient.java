@@ -374,6 +374,7 @@ class DefaultWebTestClient implements WebTestClient {
 					DefaultWebTestClient.this.entityResultConsumer, getResponseTimeout());
 		}
 
+		@SuppressWarnings("NullAway")
 		private ClientRequest.Builder initRequestBuilder() {
 			return ClientRequest.create(this.httpMethod, initUri())
 					.headers(headersToUse -> {

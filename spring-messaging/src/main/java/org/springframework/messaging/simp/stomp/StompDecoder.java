@@ -130,6 +130,7 @@ public class StompDecoder {
 	 * Decode a single STOMP frame from the given {@code byteBuffer} into a {@link Message}.
 	 */
 	@Nullable
+	@SuppressWarnings("NullAway")
 	private Message<byte[]> decodeMessage(ByteBuffer byteBuffer, @Nullable MultiValueMap<String, String> headers) {
 		Message<byte[]> decodedMessage = null;
 		skipEol(byteBuffer);

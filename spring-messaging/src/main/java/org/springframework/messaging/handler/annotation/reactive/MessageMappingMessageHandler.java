@@ -272,6 +272,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 
 	@Override
+	@Nullable
 	protected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType) {
 		CompositeMessageCondition methodCondition = getCondition(method);
 		if (methodCondition != null) {
@@ -304,6 +305,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 * @param destinations the destinations
 	 * @return new array with the processed destinations or the same array
 	 */
+	@SuppressWarnings("NullAway")
 	protected String[] processDestinations(String[] destinations) {
 		if (this.valueResolver != null) {
 			destinations = Arrays.stream(destinations)
@@ -325,12 +327,14 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	@Override
+	@Nullable
 	protected RouteMatcher.Route getDestination(Message<?> message) {
 		return (RouteMatcher.Route) message.getHeaders()
 				.get(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER);
 	}
 
 	@Override
+	@Nullable
 	protected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message) {
 		return mapping.getMatchingCondition(message);
 	}

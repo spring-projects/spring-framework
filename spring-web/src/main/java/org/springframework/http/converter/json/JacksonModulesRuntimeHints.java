@@ -22,6 +22,7 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeHint.Builder;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers reflection entries
@@ -38,7 +39,7 @@ class JacksonModulesRuntimeHints implements RuntimeHintsRegistrar {
 					.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		hints.reflection()
 				.registerTypeIfPresent(classLoader,
 						"com.fasterxml.jackson.datatype.jdk8.Jdk8Module", asJacksonModule)

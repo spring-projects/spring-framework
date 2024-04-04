@@ -137,6 +137,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Enumeration<String> getParameterNames() {
 		if (this.multipartParameterNames == null) {
 			initializeMultipart();
@@ -157,6 +158,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Map<String, String[]> getParameterMap() {
 		if (this.multipartParameterNames == null) {
 			initializeMultipart();
@@ -177,6 +179,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	}
 
 	@Override
+	@Nullable
 	public String getMultipartContentType(String paramOrFileName) {
 		try {
 			Part part = getPart(paramOrFileName);
@@ -188,6 +191,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	}
 
 	@Override
+	@Nullable
 	public HttpHeaders getMultipartHeaders(String paramOrFileName) {
 		try {
 			Part part = getPart(paramOrFileName);

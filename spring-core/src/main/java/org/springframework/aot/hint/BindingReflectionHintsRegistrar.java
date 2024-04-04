@@ -63,7 +63,8 @@ public class BindingReflectionHintsRegistrar {
 	 * @param hints the hints instance to use
 	 * @param types the types to register
 	 */
-	public void registerReflectionHints(ReflectionHints hints, Type... types) {
+	@SuppressWarnings("NullAway")
+	public void registerReflectionHints(ReflectionHints hints, @Nullable Type... types) {
 		Set<Type> seen = new HashSet<>();
 		for (Type type : types) {
 			registerReflectionHints(hints, seen, type);

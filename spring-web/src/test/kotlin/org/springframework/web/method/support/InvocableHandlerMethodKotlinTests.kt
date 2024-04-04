@@ -85,6 +85,15 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun private() {
+		composite.addResolver(StubArgumentResolver(Float::class.java, 1.2f))
+		val value = getInvocable(Handler::class.java, Float::class.java).invokeForRequest(request, null)
+
+		Assertions.assertThat(getStubResolver(0).resolvedParameters).hasSize(1)
+		Assertions.assertThat(value).isEqualTo("1.2")
+	}
+
+	@Test
 	fun valueClass() {
 		composite.addResolver(StubArgumentResolver(Long::class.java, 1L))
 		val value = getInvocable(ValueClassHandler::class.java, Long::class.java).invokeForRequest(request, null)
@@ -110,6 +119,13 @@ class InvocableHandlerMethodKotlinTests {
 		composite.addResolver(StubArgumentResolver(LongValueClass::class.java, null))
 		val value = getInvocable(ValueClassHandler::class.java, LongValueClass::class.java).invokeForRequest(request, null)
 		Assertions.assertThat(value).isNull()
+	}
+
+	@Test
+	fun valueClassWithPrivateConstructor() {
+		composite.addResolver(StubArgumentResolver(Char::class.java, 'a'))
+		val value = getInvocable(ValueClassHandler::class.java, Char::class.java).invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo('a')
 	}
 
 	@Test
@@ -175,6 +191,8 @@ class InvocableHandlerMethodKotlinTests {
 			return null
 		}
 
+		private fun private(value: Float) = value.toString()
+
 	}
 
 	private class ValueClassHandler {
@@ -191,6 +209,8 @@ class InvocableHandlerMethodKotlinTests {
 		fun valueClassWithNullable(limit: LongValueClass?) =
 			limit?.value
 
+		fun valueClassWithPrivateConstructor(limit: ValueClassWithPrivateConstructor) =
+			limit.value
 	}
 
 	private class PropertyAccessorHandler {
@@ -235,6 +255,13 @@ class InvocableHandlerMethodKotlinTests {
 			if (value.isEmpty()) {
 				throw IllegalArgumentException()
 			}
+		}
+	}
+
+	@JvmInline
+	value class ValueClassWithPrivateConstructor private constructor(val value: Char) {
+		companion object {
+			fun from(value: Char) = ValueClassWithPrivateConstructor(value)
 		}
 	}
 

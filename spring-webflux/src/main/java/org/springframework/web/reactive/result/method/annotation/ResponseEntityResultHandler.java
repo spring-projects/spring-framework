@@ -128,7 +128,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 
 	@Override
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
 		Mono<?> returnValueMono;

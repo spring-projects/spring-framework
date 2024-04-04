@@ -182,6 +182,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Connection getConnection() throws SQLException {
 		this.connectionLock.lock();
 		try {

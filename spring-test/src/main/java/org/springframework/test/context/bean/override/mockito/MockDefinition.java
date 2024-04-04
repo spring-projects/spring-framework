@@ -75,7 +75,7 @@ class MockDefinition extends Definition {
 	}
 
 	@Override
-	protected Object createOverride(String beanName, BeanDefinition existingBeanDefinition, Object existingBeanInstance) {
+	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition, @Nullable Object existingBeanInstance) {
 		return createMock(beanName);
 	}
 

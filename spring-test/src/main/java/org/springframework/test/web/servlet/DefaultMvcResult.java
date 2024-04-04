@@ -127,7 +127,7 @@ class DefaultMvcResult implements MvcResult {
 		return RequestContextUtils.getOutputFlashMap(this.mockRequest);
 	}
 
-	public void setAsyncResult(Object asyncResult) {
+	public void setAsyncResult(@Nullable Object asyncResult) {
 		this.asyncResult.set(asyncResult);
 	}
 
@@ -137,6 +137,7 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Object getAsyncResult(long timeToWait) {
 		if (this.mockRequest.getAsyncContext() != null && timeToWait == -1) {
 			long requestTimeout = this.mockRequest.getAsyncContext().getTimeout();

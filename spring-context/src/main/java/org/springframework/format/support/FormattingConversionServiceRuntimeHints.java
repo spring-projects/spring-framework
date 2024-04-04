@@ -19,6 +19,7 @@ package org.springframework.format.support;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} to register hints for {@link DefaultFormattingConversionService}.
@@ -29,7 +30,7 @@ import org.springframework.aot.hint.TypeReference;
 class FormattingConversionServiceRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		hints.reflection().registerType(TypeReference.of("javax.money.MonetaryAmount"));
 	}
 }

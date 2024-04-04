@@ -177,6 +177,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 					if (this.embeddedValueResolver != null) {
 						prefix = this.embeddedValueResolver.resolveStringValue(prefix);
 					}
+					Assert.state(prefix != null, "Prefix must not be null");
 					info = RequestMappingInfo.paths(prefix).options(this.config).build().combine(info);
 					break;
 				}
@@ -356,6 +357,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	@Override
+	@Nullable
 	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
 		HandlerMethod handlerMethod = createHandlerMethod(handler, method);
 		Class<?> beanType = handlerMethod.getBeanType();

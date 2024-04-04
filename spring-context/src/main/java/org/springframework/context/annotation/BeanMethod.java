@@ -43,6 +43,7 @@ final class BeanMethod extends ConfigurationMethod {
 
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void validate(ProblemReporter problemReporter) {
 		if ("void".equals(getMetadata().getReturnTypeName())) {
 			// declared as void: potential misuse of @Bean, maybe meant as init method instead?

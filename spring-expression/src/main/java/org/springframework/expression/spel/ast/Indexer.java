@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -57,6 +58,13 @@ import org.springframework.util.ReflectionUtils;
  * <li>Objects: the property with the specified name</li>
  * </ul>
  *
+ * <h3>Null-safe Indexing</h3>
+ *
+ * <p>As of Spring Framework 6.2, null-safe indexing is supported via the {@code '?.'}
+ * operator. For example, {@code 'colors?.[0]'} will evaluate to {@code null} if
+ * {@code colors} is {@code null} and will otherwise evaluate to the 0<sup>th</sup>
+ * color.
+ *
  * @author Andy Clement
  * @author Phillip Webb
  * @author Stephane Nicoll
@@ -68,8 +76,16 @@ public class Indexer extends SpelNodeImpl {
 	private enum IndexedType {ARRAY, LIST, MAP, STRING, OBJECT}
 
 
+	private final boolean nullSafe;
+
 	@Nullable
 	private IndexedType indexedType;
+
+	@Nullable
+	private volatile String originalPrimitiveExitTypeDescriptor;
+
+	@Nullable
+	private volatile String arrayTypeDescriptor;
 
 	// These fields are used when the indexer is being used as a property read accessor.
 	// If the name and target type match these cached values then the cachedReadAccessor
@@ -103,11 +119,33 @@ public class Indexer extends SpelNodeImpl {
 	/**
 	 * Create an {@code Indexer} with the given start position, end position, and
 	 * index expression.
+	 * @see #Indexer(boolean, int, int, SpelNodeImpl)
+	 * @deprecated as of Spring Framework 6.2, in favor of {@link #Indexer(boolean, int, int, SpelNodeImpl)}
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public Indexer(int startPos, int endPos, SpelNodeImpl indexExpression) {
-		super(startPos, endPos, indexExpression);
+		this(false, startPos, endPos, indexExpression);
 	}
 
+	/**
+	 * Create an {@code Indexer} with the given null-safe flag, start position,
+	 * end position, and index expression.
+	 * @since 6.2
+	 */
+	public Indexer(boolean nullSafe, int startPos, int endPos, SpelNodeImpl indexExpression) {
+		super(startPos, endPos, indexExpression);
+		this.nullSafe = nullSafe;
+	}
+
+
+	/**
+	 * Does this node represent a null-safe index operation?
+	 * @since 6.2
+	 */
+	@Override
+	public final boolean isNullSafe() {
+		return this.nullSafe;
+	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
@@ -133,6 +171,15 @@ public class Indexer extends SpelNodeImpl {
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		TypedValue context = state.getActiveContextObject();
 		Object target = context.getValue();
+
+		if (target == null) {
+			if (this.nullSafe) {
+				return ValueRef.NullValueRef.INSTANCE;
+			}
+			// Raise a proper exception in case of a null target
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
+		}
+
 		TypeDescriptor targetDescriptor = context.getTypeDescriptor();
 		TypedValue indexValue;
 		Object index;
@@ -154,11 +201,6 @@ public class Indexer extends SpelNodeImpl {
 			finally {
 				state.popActiveContextObject();
 			}
-		}
-
-		// Raise a proper exception in case of a null target
-		if (target == null) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 
 		// At this point, we need a TypeDescriptor for a non-null target object
@@ -212,7 +254,7 @@ public class Indexer extends SpelNodeImpl {
 	@Override
 	public boolean isCompilable() {
 		if (this.indexedType == IndexedType.ARRAY) {
-			return (this.exitTypeDescriptor != null);
+			return (this.exitTypeDescriptor != null && this.arrayTypeDescriptor != null);
 		}
 		SpelNodeImpl index = this.children[0];
 		if (this.indexedType == IndexedType.LIST) {
@@ -233,57 +275,40 @@ public class Indexer extends SpelNodeImpl {
 
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
+		String exitTypeDescriptor = this.exitTypeDescriptor;
 		String descriptor = cf.lastDescriptor();
 		if (descriptor == null) {
 			// Stack is empty, should use context object
 			cf.loadTarget(mv);
 		}
 
+		Label skipIfNull = null;
+		if (this.nullSafe) {
+			mv.visitInsn(DUP);
+			skipIfNull = new Label();
+			Label continueLabel = new Label();
+			mv.visitJumpInsn(IFNONNULL, continueLabel);
+			CodeFlow.insertCheckCast(mv, exitTypeDescriptor);
+			mv.visitJumpInsn(GOTO, skipIfNull);
+			mv.visitLabel(continueLabel);
+		}
+
 		SpelNodeImpl index = this.children[0];
 
 		if (this.indexedType == IndexedType.ARRAY) {
-			String exitTypeDescriptor = this.exitTypeDescriptor;
-			Assert.state(exitTypeDescriptor != null, "Array not compilable without descriptor");
-			int insn = switch (exitTypeDescriptor) {
-				case "D" -> {
-					mv.visitTypeInsn(CHECKCAST, "[D");
-					yield DALOAD;
-				}
-				case "F" -> {
-					mv.visitTypeInsn(CHECKCAST, "[F");
-					yield FALOAD;
-				}
-				case "J" -> {
-					mv.visitTypeInsn(CHECKCAST, "[J");
-					yield LALOAD;
-				}
-				case "I" -> {
-					mv.visitTypeInsn(CHECKCAST, "[I");
-					yield IALOAD;
-				}
-				case "S" -> {
-					mv.visitTypeInsn(CHECKCAST, "[S");
-					yield SALOAD;
-				}
-				case "B" -> {
-					mv.visitTypeInsn(CHECKCAST, "[B");
-					// byte and boolean arrays are both loaded via BALOAD
-					yield BALOAD;
-				}
-				case "Z" -> {
-					mv.visitTypeInsn(CHECKCAST, "[Z");
-					// byte and boolean arrays are both loaded via BALOAD
-					yield BALOAD;
-				}
-				case "C" -> {
-					mv.visitTypeInsn(CHECKCAST, "[C");
-					yield CALOAD;
-				}
-				default -> {
-					mv.visitTypeInsn(CHECKCAST, "["+ exitTypeDescriptor +
-							(CodeFlow.isPrimitiveArray(exitTypeDescriptor) ? "" : ";"));
-					yield AALOAD;
-				}
+			String arrayTypeDescriptor = this.arrayTypeDescriptor;
+			Assert.state(exitTypeDescriptor != null && arrayTypeDescriptor != null,
+					"Array not compilable without descriptors");
+			CodeFlow.insertCheckCast(mv, arrayTypeDescriptor);
+			int insn = switch (arrayTypeDescriptor) {
+				case "[D" -> DALOAD;
+				case "[F" -> FALOAD;
+				case "[J" -> LALOAD;
+				case "[I" -> IALOAD;
+				case "[S" -> SALOAD;
+				case "[B", "[Z" -> BALOAD; // byte[] & boolean[] are both loaded via BALOAD
+				case "[C" -> CALOAD;
+				default -> AALOAD;
 			};
 
 			cf.enterCompilationScope();
@@ -329,7 +354,17 @@ public class Indexer extends SpelNodeImpl {
 			compilablePropertyAccessor.generateCode(propertyName, mv, cf);
 		}
 
-		cf.pushDescriptor(this.exitTypeDescriptor);
+		cf.pushDescriptor(exitTypeDescriptor);
+
+		if (skipIfNull != null) {
+			if (this.originalPrimitiveExitTypeDescriptor != null) {
+				// The output of the indexer is a primitive, but from the logic above it
+				// might be null. So, to have a common stack element type at the skipIfNull
+				// target, it is necessary to box the primitive.
+				CodeFlow.insertBoxIfNecessary(mv, this.originalPrimitiveExitTypeDescriptor);
+			}
+			mv.visitLabel(skipIfNull);
+		}
 	}
 
 	@Override
@@ -338,130 +373,17 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 
-	private void setArrayElement(TypeConverter converter, Object ctx, int idx, @Nullable Object newValue,
-			Class<?> arrayComponentType) throws EvaluationException {
-
-		if (arrayComponentType == boolean.class) {
-			boolean[] array = (boolean[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, boolean.class);
-		}
-		else if (arrayComponentType == byte.class) {
-			byte[] array = (byte[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, byte.class);
-		}
-		else if (arrayComponentType == char.class) {
-			char[] array = (char[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, char.class);
-		}
-		else if (arrayComponentType == double.class) {
-			double[] array = (double[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, double.class);
-		}
-		else if (arrayComponentType == float.class) {
-			float[] array = (float[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, float.class);
-		}
-		else if (arrayComponentType == int.class) {
-			int[] array = (int[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, int.class);
-		}
-		else if (arrayComponentType == long.class) {
-			long[] array = (long[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, long.class);
-		}
-		else if (arrayComponentType == short.class) {
-			short[] array = (short[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, short.class);
+	private void setExitTypeDescriptor(String descriptor) {
+		// If this indexer would return a primitive - and yet it is also marked
+		// null-safe - then the exit type descriptor must be promoted to the box
+		// type to allow a null value to be passed on.
+		if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
+			this.originalPrimitiveExitTypeDescriptor = descriptor;
+			this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
 		}
 		else {
-			Object[] array = (Object[]) ctx;
-			checkAccess(array.length, idx);
-			array[idx] = convertValue(converter, newValue, arrayComponentType);
+			this.exitTypeDescriptor = descriptor;
 		}
-	}
-
-	private Object accessArrayElement(Object ctx, int idx) throws SpelEvaluationException {
-		Class<?> arrayComponentType = ctx.getClass().componentType();
-		if (arrayComponentType == boolean.class) {
-			boolean[] array = (boolean[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "Z";
-			return array[idx];
-		}
-		else if (arrayComponentType == byte.class) {
-			byte[] array = (byte[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "B";
-			return array[idx];
-		}
-		else if (arrayComponentType == char.class) {
-			char[] array = (char[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "C";
-			return array[idx];
-		}
-		else if (arrayComponentType == double.class) {
-			double[] array = (double[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "D";
-			return array[idx];
-		}
-		else if (arrayComponentType == float.class) {
-			float[] array = (float[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "F";
-			return array[idx];
-		}
-		else if (arrayComponentType == int.class) {
-			int[] array = (int[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "I";
-			return array[idx];
-		}
-		else if (arrayComponentType == long.class) {
-			long[] array = (long[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "J";
-			return array[idx];
-		}
-		else if (arrayComponentType == short.class) {
-			short[] array = (short[]) ctx;
-			checkAccess(array.length, idx);
-			this.exitTypeDescriptor = "S";
-			return array[idx];
-		}
-		else {
-			Object[] array = (Object[]) ctx;
-			checkAccess(array.length, idx);
-			Object retValue = array[idx];
-			this.exitTypeDescriptor = CodeFlow.toDescriptor(arrayComponentType);
-			return retValue;
-		}
-	}
-
-	private void checkAccess(int arrayLength, int index) throws SpelEvaluationException {
-		if (index >= arrayLength) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS,
-					arrayLength, index);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> T convertValue(TypeConverter converter, @Nullable Object value, Class<T> targetType) {
-		T result = (T) converter.convertValue(
-				value, TypeDescriptor.forObject(value), TypeDescriptor.valueOf(targetType));
-		if (result == null) {
-			throw new IllegalStateException("Null conversion result for index [" + value + "]");
-		}
-		return result;
 	}
 
 
@@ -484,7 +406,7 @@ public class Indexer extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			Object arrayElement = accessArrayElement(this.array, this.index);
+			Object arrayElement = getArrayElement(this.array, this.index);
 			return new TypedValue(arrayElement, this.typeDescriptor.elementTypeDescriptor(arrayElement));
 		}
 
@@ -499,6 +421,142 @@ public class Indexer extends SpelNodeImpl {
 		public boolean isWritable() {
 			return true;
 		}
+
+		private Object getArrayElement(Object ctx, int idx) throws SpelEvaluationException {
+			Class<?> arrayComponentType = ctx.getClass().componentType();
+			if (arrayComponentType == boolean.class) {
+				boolean[] array = (boolean[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("Z");
+				Indexer.this.arrayTypeDescriptor = "[Z";
+				return array[idx];
+			}
+			else if (arrayComponentType == byte.class) {
+				byte[] array = (byte[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("B");
+				Indexer.this.arrayTypeDescriptor = "[B";
+				return array[idx];
+			}
+			else if (arrayComponentType == char.class) {
+				char[] array = (char[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("C");
+				Indexer.this.arrayTypeDescriptor = "[C";
+				return array[idx];
+			}
+			else if (arrayComponentType == double.class) {
+				double[] array = (double[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("D");
+				Indexer.this.arrayTypeDescriptor = "[D";
+				return array[idx];
+			}
+			else if (arrayComponentType == float.class) {
+				float[] array = (float[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("F");
+				Indexer.this.arrayTypeDescriptor = "[F";
+				return array[idx];
+			}
+			else if (arrayComponentType == int.class) {
+				int[] array = (int[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("I");
+				Indexer.this.arrayTypeDescriptor = "[I";
+				return array[idx];
+			}
+			else if (arrayComponentType == long.class) {
+				long[] array = (long[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("J");
+				Indexer.this.arrayTypeDescriptor = "[J";
+				return array[idx];
+			}
+			else if (arrayComponentType == short.class) {
+				short[] array = (short[]) ctx;
+				checkAccess(array.length, idx);
+				setExitTypeDescriptor("S");
+				Indexer.this.arrayTypeDescriptor = "[S";
+				return array[idx];
+			}
+			else {
+				Object[] array = (Object[]) ctx;
+				checkAccess(array.length, idx);
+				Object retValue = array[idx];
+				Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(arrayComponentType);
+				Indexer.this.arrayTypeDescriptor = CodeFlow.toDescriptor(array.getClass());
+				return retValue;
+			}
+		}
+
+		private void setArrayElement(TypeConverter converter, Object ctx, int idx, @Nullable Object newValue,
+				Class<?> arrayComponentType) throws EvaluationException {
+
+			if (arrayComponentType == boolean.class) {
+				boolean[] array = (boolean[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, boolean.class);
+			}
+			else if (arrayComponentType == byte.class) {
+				byte[] array = (byte[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, byte.class);
+			}
+			else if (arrayComponentType == char.class) {
+				char[] array = (char[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, char.class);
+			}
+			else if (arrayComponentType == double.class) {
+				double[] array = (double[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, double.class);
+			}
+			else if (arrayComponentType == float.class) {
+				float[] array = (float[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, float.class);
+			}
+			else if (arrayComponentType == int.class) {
+				int[] array = (int[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, int.class);
+			}
+			else if (arrayComponentType == long.class) {
+				long[] array = (long[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, long.class);
+			}
+			else if (arrayComponentType == short.class) {
+				short[] array = (short[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, short.class);
+			}
+			else {
+				Object[] array = (Object[]) ctx;
+				checkAccess(array.length, idx);
+				array[idx] = convertValue(converter, newValue, arrayComponentType);
+			}
+		}
+
+		private void checkAccess(int arrayLength, int index) throws SpelEvaluationException {
+			if (index >= arrayLength) {
+				throw new SpelEvaluationException(getStartPosition(), SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS,
+						arrayLength, index);
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		private static <T> T convertValue(TypeConverter converter, @Nullable Object value, Class<T> targetType) {
+			T result = (T) converter.convertValue(
+					value, TypeDescriptor.forObject(value), TypeDescriptor.valueOf(targetType));
+			if (result == null) {
+				throw new IllegalStateException("Null conversion result for index [" + value + "]");
+			}
+			return result;
+		}
+
 	}
 
 
@@ -590,7 +648,7 @@ public class Indexer extends SpelNodeImpl {
 						Indexer.this.cachedReadName = this.name;
 						Indexer.this.cachedReadTargetType = targetObjectRuntimeClass;
 						if (accessor instanceof CompilablePropertyAccessor compilablePropertyAccessor) {
-							Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType());
+							setExitTypeDescriptor(CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType()));
 						}
 						return accessor.read(this.evaluationContext, this.targetObject, this.name);
 					}
@@ -732,19 +790,19 @@ public class Indexer extends SpelNodeImpl {
 			}
 		}
 
+		@Override
+		public boolean isWritable() {
+			return true;
+		}
+
 		@Nullable
-		private Constructor<?> getDefaultConstructor(Class<?> type) {
+		private static Constructor<?> getDefaultConstructor(Class<?> type) {
 			try {
 				return ReflectionUtils.accessibleConstructor(type);
 			}
 			catch (Throwable ex) {
 				return null;
 			}
-		}
-
-		@Override
-		public boolean isWritable() {
-			return true;
 		}
 	}
 

@@ -341,6 +341,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * @since 4.1.2
 	 */
 	@SuppressWarnings("ConstantConditions")
+	@Nullable
 	public Collection<String> getAllowedOrigins() {
 		return this.corsConfiguration.getAllowedOrigins();
 	}
@@ -363,6 +364,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * @since 5.3.2
 	 */
 	@SuppressWarnings("ConstantConditions")
+	@Nullable
 	public Collection<String> getAllowedOriginPatterns() {
 		return this.corsConfiguration.getAllowedOriginPatterns();
 	}
@@ -415,8 +417,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 			}
 
 			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
-				if (!getAllowedOrigins().isEmpty() && !getAllowedOrigins().contains("*") ||
-						!getAllowedOriginPatterns().isEmpty()) {
+				if (!CollectionUtils.isEmpty(getAllowedOrigins()) && !getAllowedOrigins().contains("*") ||
+						!CollectionUtils.isEmpty(getAllowedOriginPatterns())) {
 					if (requestInfo != null) {
 						logger.debug("Iframe support is disabled when an origin check is required. " +
 								"Ignoring transport request: " + requestInfo);
@@ -424,7 +426,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
-				if (getAllowedOrigins().isEmpty()) {
+				if (CollectionUtils.isEmpty(getAllowedOrigins())) {
 					response.getHeaders().add(XFRAME_OPTIONS_HEADER, "SAMEORIGIN");
 				}
 				if (requestInfo != null) {

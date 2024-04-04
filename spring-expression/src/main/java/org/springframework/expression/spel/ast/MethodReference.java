@@ -77,6 +77,7 @@ public class MethodReference extends SpelNodeImpl {
 	 * Does this node represent a null-safe method reference?
 	 * @since 6.0.13
 	 */
+	@Override
 	public final boolean isNullSafe() {
 		return this.nullSafe;
 	}

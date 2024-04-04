@@ -47,6 +47,7 @@ public class ViewResultMatchers {
 	/**
 	 * Assert the selected view name with the given Hamcrest {@link Matcher}.
 	 */
+	@SuppressWarnings("NullAway")
 	public ResultMatcher name(Matcher<? super String> matcher) {
 		return result -> {
 			ModelAndView mav = result.getModelAndView();
@@ -60,6 +61,7 @@ public class ViewResultMatchers {
 	/**
 	 * Assert the selected view name.
 	 */
+	@SuppressWarnings("NullAway")
 	public ResultMatcher name(String expectedViewName) {
 		return result -> {
 			ModelAndView mav = result.getModelAndView();

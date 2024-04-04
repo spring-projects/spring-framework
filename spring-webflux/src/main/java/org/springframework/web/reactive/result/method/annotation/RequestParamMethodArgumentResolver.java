@@ -98,6 +98,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueSyncAr
 	}
 
 	@Override
+	@Nullable
 	protected Object resolveNamedValue(String name, MethodParameter parameter, ServerWebExchange exchange) {
 		List<String> paramValues = exchange.getRequest().getQueryParams().get(name);
 		Object result = null;

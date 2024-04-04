@@ -19,6 +19,7 @@ package org.springframework.web.util;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers resource
@@ -30,7 +31,7 @@ import org.springframework.core.io.ClassPathResource;
 class WebUtilRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		hints.resources().registerResource(
 				new ClassPathResource("HtmlCharacterEntityReferences.properties", getClass()));
 	}

@@ -56,6 +56,7 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 
 
 	@Override
+	@Nullable
 	public MediaType getContentType() {
 		if (this.cachedContentType != null) {
 			return this.cachedContentType;
@@ -85,6 +86,7 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
+	@Nullable
 	public List<String> get(Object key) {
 		List<String> values = this.headers.get(key);
 		return (values != null ? Collections.unmodifiableList(values) : null);

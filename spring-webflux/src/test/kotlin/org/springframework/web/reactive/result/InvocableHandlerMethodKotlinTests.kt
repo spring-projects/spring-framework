@@ -112,9 +112,16 @@ class InvocableHandlerMethodKotlinTests {
 	@Test
 	fun privateController() {
 		this.resolvers.add(stubResolver("foo"))
-		val method = PrivateCoroutinesController::singleArg.javaMethod!!
-		val result = invoke(PrivateCoroutinesController(), method,"foo")
+		val method = PrivateController::singleArg.javaMethod!!
+		val result = invoke(PrivateController(), method,"foo")
 		assertHandlerResultValue(result, "success:foo")
+	}
+
+	@Test
+	fun privateFunction() {
+		val method = PrivateController::class.java.getDeclaredMethod("private")
+		val result = invoke(PrivateController(), method)
+		assertHandlerResultValue(result, "private")
 	}
 
 	@Test
@@ -223,6 +230,14 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun valueClassWithPrivateConstructor() {
+		this.resolvers.add(stubResolver(1L, Long::class.java))
+		val method = ValueClassController::valueClassWithPrivateConstructor.javaMethod!!
+		val result = invoke(ValueClassController(), method, 1L)
+		assertHandlerResultValue(result, "1")
+	}
+
+	@Test
 	fun propertyAccessor() {
 		this.resolvers.add(stubResolver(null, String::class.java))
 		val method = PropertyAccessorController::prop.getter.javaMethod!!
@@ -322,12 +337,14 @@ class InvocableHandlerMethodKotlinTests {
 		}
 	}
 
-	private class PrivateCoroutinesController {
+	private class PrivateController {
 
 		suspend fun singleArg(q: String?): String {
 			delay(1)
 			return "success:$q"
 		}
+
+		private fun private() = "private"
 	}
 
 	class DefaultValueController {
@@ -368,6 +385,8 @@ class InvocableHandlerMethodKotlinTests {
 		fun valueClassWithNullable(limit: LongValueClass?) =
 			"${limit?.value}"
 
+		fun valueClassWithPrivateConstructor(limit: ValueClassWithPrivateConstructor) =
+			"${limit.value}"
 	}
 
 	class PropertyAccessorController {
@@ -413,6 +432,13 @@ class InvocableHandlerMethodKotlinTests {
 			if (value.isEmpty()) {
 				throw IllegalArgumentException()
 			}
+		}
+	}
+
+	@JvmInline
+	value class ValueClassWithPrivateConstructor private constructor(val value: Long) {
+		companion object {
+			fun from(value: Long) = ValueClassWithPrivateConstructor(value)
 		}
 	}
 

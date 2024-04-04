@@ -21,6 +21,7 @@ import java.util.Map;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying the API for a Simple JDBC Call implemented by {@link SimpleJdbcCall}.
@@ -117,6 +118,7 @@ public interface SimpleJdbcCallOperations {
 	 * Parameter values must be provided in the same order as the parameters are defined
 	 * for the stored procedure.
 	 */
+	@Nullable
 	<T> T executeFunction(Class<T> returnType, Object... args);
 
 	/**
@@ -125,6 +127,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args a Map containing the parameter values to be used in the call
 	 */
+	@Nullable
 	<T> T executeFunction(Class<T> returnType, Map<String, ?> args);
 
 	/**
@@ -133,6 +136,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args the MapSqlParameterSource containing the parameter values to be used in the call
 	 */
+	@Nullable
 	<T> T executeFunction(Class<T> returnType, SqlParameterSource args);
 
 	/**
@@ -144,6 +148,7 @@ public interface SimpleJdbcCallOperations {
 	 * Parameter values must be provided in the same order as the parameters are defined for
 	 * the stored procedure.
 	 */
+	@Nullable
 	<T> T executeObject(Class<T> returnType, Object... args);
 
 	/**
@@ -153,6 +158,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args a Map containing the parameter values to be used in the call
 	 */
+	@Nullable
 	<T> T executeObject(Class<T> returnType, Map<String, ?> args);
 
 	/**
@@ -162,6 +168,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param returnType the type of the value to return
 	 * @param args the MapSqlParameterSource containing the parameter values to be used in the call
 	 */
+	@Nullable
 	<T> T executeObject(Class<T> returnType, SqlParameterSource args);
 
 	/**

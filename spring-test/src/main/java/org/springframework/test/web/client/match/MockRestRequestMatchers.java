@@ -158,6 +158,7 @@ public abstract class MockRestRequestMatchers {
 	 * @see #queryParam(String, String...)
 	 */
 	@SafeVarargs
+	@SuppressWarnings("NullAway")
 	public static RequestMatcher queryParam(String name, Matcher<? super String>... matchers) {
 		return request -> {
 			MultiValueMap<String, String> params = getQueryParams(request);
@@ -185,6 +186,7 @@ public abstract class MockRestRequestMatchers {
 	 * @see #queryParamList(String, Matcher)
 	 * @see #queryParam(String, Matcher...)
 	 */
+	@SuppressWarnings("NullAway")
 	public static RequestMatcher queryParam(String name, String... expectedValues) {
 		return request -> {
 			MultiValueMap<String, String> params = getQueryParams(request);
@@ -362,7 +364,7 @@ public abstract class MockRestRequestMatchers {
 		if (values == null) {
 			fail(message + " to exist but was null");
 		}
-		if (count > values.size()) {
+		else if (count > values.size()) {
 			fail(message + " to have at least <" + count + "> values but found " + values);
 		}
 	}

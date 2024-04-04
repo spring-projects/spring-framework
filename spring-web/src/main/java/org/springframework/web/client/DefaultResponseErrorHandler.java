@@ -201,6 +201,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link RestClientResponseException#setBodyConvertFunction(Function)}.
 	 * @since 6.0
 	 */
+	@SuppressWarnings("NullAway")
 	protected Function<ResolvableType, ?> initBodyConvertFunction(ClientHttpResponse response, byte[] body) {
 		Assert.state(!CollectionUtils.isEmpty(this.messageConverters), "Expected message converters");
 		return resolvableType -> {

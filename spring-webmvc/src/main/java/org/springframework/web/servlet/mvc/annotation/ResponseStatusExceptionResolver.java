@@ -61,7 +61,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 
 	@Override
-	public void setMessageSource(MessageSource messageSource) {
+	public void setMessageSource(@Nullable MessageSource messageSource) {
 		this.messageSource = messageSource;
 	}
 

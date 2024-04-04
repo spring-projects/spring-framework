@@ -188,6 +188,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 		}
 	}
 
+	@SuppressWarnings("NullAway")
 	protected CacheManager getDefaultCacheManager() {
 		if (getCacheManager() == null) {
 			Assert.state(this.beanFactory != null, "BeanFactory required for default CacheManager resolution");
@@ -207,6 +208,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	protected CacheResolver getDefaultCacheResolver() {
 		if (getCacheResolver() == null) {
 			this.cacheResolver = SingletonSupplier.of(new SimpleCacheResolver(getDefaultCacheManager()));
@@ -215,6 +217,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	protected CacheResolver getDefaultExceptionCacheResolver() {
 		if (getExceptionCacheResolver() == null) {
 			this.exceptionCacheResolver = SingletonSupplier.of(new LazyCacheResolver());

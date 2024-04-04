@@ -98,6 +98,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 	 */
 	@Override
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 		final Method userMethod = BridgeMethodResolver.getMostSpecificMethod(invocation.getMethod(), targetClass);

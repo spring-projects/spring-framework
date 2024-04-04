@@ -242,6 +242,7 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		}
 
 		@Override
+		@Nullable
 		public Consumer<ClientHttpRequest> httpRequest() {
 			return this.httpRequestConsumer;
 		}

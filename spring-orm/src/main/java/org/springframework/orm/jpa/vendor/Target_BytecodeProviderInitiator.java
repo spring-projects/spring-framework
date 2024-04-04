@@ -36,6 +36,7 @@ import org.hibernate.bytecode.spi.BytecodeProvider;
 final class Target_BytecodeProviderInitiator {
 
 	@Alias
+	@SuppressWarnings("NullAway")
 	public static String BYTECODE_PROVIDER_NAME_NONE;
 
 	@Alias

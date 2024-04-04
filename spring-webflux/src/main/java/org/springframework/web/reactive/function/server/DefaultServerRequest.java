@@ -337,6 +337,7 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		@Override
+		@Nullable
 		public InetSocketAddress host() {
 			return this.httpHeaders.getHost();
 		}

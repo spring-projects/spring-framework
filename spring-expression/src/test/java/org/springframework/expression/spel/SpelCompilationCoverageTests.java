@@ -653,6 +653,18 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 		@Test
+		void indexIntoSetCannotBeCompiled() {
+			Set<Integer> set = Set.of(42);
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(expression.getValue(set)).isEqualTo(42);
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(set)).isEqualTo(42);
+			assertThat(getAst().getExitDescriptor()).isNull();
+		}
+
+		@Test
 		void indexIntoStringCannotBeCompiled() {
 			String text = "enigma";
 
@@ -709,6 +721,198 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				return String.valueOf(object);
 			}
 			return stream.map(Object::toString).collect(joining(" "));
+		}
+
+	}
+
+	@Nested
+	class NullSafeIndexTests {  // gh-29847
+
+		private final RootContextWithIndexedProperties rootContext = new RootContextWithIndexedProperties();
+
+		private final StandardEvaluationContext context = new StandardEvaluationContext(rootContext);
+
+		@Test
+		void nullSafeIndexIntoPrimitiveIntArray() {
+			expression = parser.parseExpression("intArray?.[0]");
+
+			// Cannot compile before the array type is known.
+			assertThat(expression.getValue(context)).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isNull();
+
+			rootContext.intArray = new int[] { 8, 9, 10 };
+			assertThat(expression.getValue(context)).isEqualTo(8);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(8);
+			// Normally we would expect the exit type descriptor to be "I" for an
+			// element of an int[]. However, with null-safe indexing support the
+			// only way for it to evaluate to null is to box the 'int' to an 'Integer'.
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Integer");
+
+			// Null-safe support should have been compiled once the array type is known.
+			rootContext.intArray = null;
+			assertThat(expression.getValue(context)).isNull();
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Integer");
+		}
+
+		@Test
+		void nullSafeIndexIntoNumberArray() {
+			expression = parser.parseExpression("numberArray?.[0]");
+
+			// Cannot compile before the array type is known.
+			assertThat(expression.getValue(context)).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isNull();
+
+			rootContext.numberArray = new Number[] { 8, 9, 10 };
+			assertThat(expression.getValue(context)).isEqualTo(8);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(8);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Number");
+
+			// Null-safe support should have been compiled once the array type is known.
+			rootContext.numberArray = null;
+			assertThat(expression.getValue(context)).isNull();
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Number");
+		}
+
+		@Test
+		void nullSafeIndexIntoList() {
+			expression = parser.parseExpression("list?.[0]");
+
+			// Cannot compile before the list type is known.
+			assertThat(expression.getValue(context)).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isNull();
+
+			rootContext.list = List.of(42);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// Null-safe support should have been compiled once the list type is known.
+			rootContext.list = null;
+			assertThat(expression.getValue(context)).isNull();
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void nullSafeIndexIntoSetCannotBeCompiled() {
+			expression = parser.parseExpression("set?.[0]");
+
+			assertThat(expression.getValue(context)).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isNull();
+
+			rootContext.set = Set.of(42);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+			assertThat(getAst().getExitDescriptor()).isNull();
+		}
+
+		@Test
+		void nullSafeIndexIntoStringCannotBeCompiled() {
+			expression = parser.parseExpression("string?.[0]");
+
+			assertThat(expression.getValue(context)).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isNull();
+
+			rootContext.string = "XYZ";
+			assertThat(expression.getValue(context)).isEqualTo("X");
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("X");
+			assertThat(getAst().getExitDescriptor()).isNull();
+		}
+
+		@Test
+		void nullSafeIndexIntoMap() {
+			expression = parser.parseExpression("map?.['enigma']");
+
+			// Cannot compile before the map type is known.
+			assertThat(expression.getValue(context)).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isNull();
+
+			rootContext.map = Map.of("enigma", 42);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// Null-safe support should have been compiled once the map type is known.
+			rootContext.map = null;
+			assertThat(expression.getValue(context)).isNull();
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void nullSafeIndexIntoObjectViaPrimitiveProperty() {
+			expression = parser.parseExpression("person?.['age']");
+
+			// Cannot compile before the Person type is known.
+			assertThat(expression.getValue(context)).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isNull();
+
+			rootContext.person = new Person("Jane");
+			rootContext.person.setAge(42);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(42);
+			// Normally we would expect the exit type descriptor to be "I" for
+			// an int. However, with null-safe indexing support the only way
+			// for it to evaluate to null is to box the 'int' to an 'Integer'.
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Integer");
+
+			// Null-safe support should have been compiled once the Person type is known.
+			rootContext.person = null;
+			assertThat(expression.getValue(context)).isNull();
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Integer");
+		}
+
+		@Test
+		void nullSafeIndexIntoObjectViaStringProperty() {
+			expression = parser.parseExpression("person?.['name']");
+
+			// Cannot compile before the Person type is known.
+			assertThat(expression.getValue(context)).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isNull();
+
+			rootContext.person = new Person("Jane");
+			assertThat(expression.getValue(context)).isEqualTo("Jane");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("Jane");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+
+			// Null-safe support should have been compiled once the Person type is known.
+			rootContext.person = null;
+			assertThat(expression.getValue(context)).isNull();
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
 		}
 
 	}
@@ -6722,6 +6926,17 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			_valueD2 = value==null?null:Double.valueOf(value);
 			_valueF2 = value==null?null:Float.valueOf(value);
 		}
+	}
+
+	// Must be public with public fields/properties.
+	public static class RootContextWithIndexedProperties {
+		public int[] intArray;
+		public Number[] numberArray;
+		public List<Integer> list;
+		public Set<Integer> set;
+		public String string;
+		public Map<String, Integer> map;
+		public Person person;
 	}
 
 }

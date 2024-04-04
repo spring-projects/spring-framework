@@ -31,6 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.NativeDetector;
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
@@ -101,6 +102,7 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 		}
 	}
 
+	@Nullable
 	private Object getBean(ConfigurableListableBeanFactory beanFactory, String name) {
 		try {
 			if (isStandardBeanOrSingletonFactoryBean(beanFactory, name)) {

@@ -98,6 +98,7 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 				return descriptor.getDependencyType();
 			}
 			@Override
+			@SuppressWarnings("NullAway")
 			public Object getTarget() {
 				Set<String> autowiredBeanNames = (beanName != null ? new LinkedHashSet<>(1) : null);
 				Object target = dlbf.doResolveDependency(descriptor, beanName, autowiredBeanNames, null);

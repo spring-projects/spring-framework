@@ -46,6 +46,7 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -161,7 +162,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param providedArgs optional list of argument values to match by type
 	 * @return a Mono with a {@link HandlerResult}
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "NullAway"})
 	public Mono<HandlerResult> invoke(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
@@ -261,6 +262,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 	}
 
+	@Contract("_, null -> false")
 	private static boolean isAsyncVoidReturnType(MethodParameter returnType, @Nullable ReactiveAdapter adapter) {
 		if (adapter != null && adapter.supportsEmpty()) {
 			if (adapter.isNoValue()) {
@@ -316,7 +318,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				if (function == null) {
 					return method.invoke(target, args);
 				}
-				if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
+				if (!KCallablesJvm.isAccessible(function)) {
 					KCallablesJvm.setAccessible(function, true);
 				}
 				Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
@@ -330,7 +332,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 								KType type = parameter.getType();
 								if (!(type.isMarkedNullable() && arg == null) && type.getClassifier() instanceof KClass<?> kClass
 										&& KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-									arg = KClasses.getPrimaryConstructor(kClass).call(arg);
+									KFunction<?> constructor = KClasses.getPrimaryConstructor(kClass);
+									if (!KCallablesJvm.isAccessible(constructor)) {
+										KCallablesJvm.setAccessible(constructor, true);
+									}
+									arg = constructor.call(arg);
 								}
 								argMap.put(parameter, arg);
 							}

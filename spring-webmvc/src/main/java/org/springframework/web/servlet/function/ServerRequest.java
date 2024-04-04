@@ -243,7 +243,7 @@ public interface ServerRequest {
 	default String pathVariable(String name) {
 		Map<String, String> pathVariables = pathVariables();
 		if (pathVariables.containsKey(name)) {
-			return pathVariables().get(name);
+			return pathVariables.get(name);
 		}
 		else {
 			throw new IllegalArgumentException("No path variable with name \"" + name + "\" available");
