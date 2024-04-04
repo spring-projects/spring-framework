@@ -105,7 +105,7 @@ class InvocableHandlerMethodTests {
 
 	@Test
 	void resolveNoArgsOnSchedulerThread() {
-		Method method = ResolvableMethod.on(TestController.class).mockCall(o -> o.noArgsThread()).method();
+		Method method = ResolvableMethod.on(TestController.class).mockCall(TestController::noArgsThread).method();
 		Mono<HandlerResult> mono = invokeOnScheduler(Schedulers.newSingle("good"), new TestController(), method);
 
 		assertHandlerResultValue(mono, "on thread: good-", false);

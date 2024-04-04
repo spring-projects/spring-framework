@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,6 +105,12 @@ class ControllerMethodResolver {
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 	@Nullable
+	private final Scheduler invocationScheduler;
+
+	@Nullable
+	private final Predicate<? super HandlerMethod> blockingMethodPredicate;
+
+	@Nullable
 	private final MethodValidator methodValidator;
 
 	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<>(64);
@@ -121,12 +127,6 @@ class ControllerMethodResolver {
 			new LinkedHashMap<>(64);
 
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache = new ConcurrentHashMap<>(64);
-
-	@Nullable
-	private final Scheduler invocationScheduler;
-
-	@Nullable
-	private final Predicate<? super HandlerMethod> blockingMethodPredicate;
 
 
 	ControllerMethodResolver(
@@ -323,9 +323,7 @@ class ControllerMethodResolver {
 		invocable.setArgumentResolvers(this.requestMappingResolvers);
 		invocable.setReactiveAdapterRegistry(this.reactiveAdapterRegistry);
 		invocable.setMethodValidator(this.methodValidator);
-		//getSchedulerFor returns null if not applicable, which is ok here
 		invocable.setInvocationScheduler(getSchedulerFor(handlerMethod));
-
 		return invocable;
 	}
 

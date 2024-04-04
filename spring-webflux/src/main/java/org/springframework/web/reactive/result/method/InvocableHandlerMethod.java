@@ -247,6 +247,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;
 		}
+
 		List<Mono<Object>> argMonos = new ArrayList<>(parameters.length);
 		for (MethodParameter parameter : parameters) {
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);

@@ -217,7 +217,9 @@ class ControllerAdviceTests {
 
 		Method method = controller.getClass().getMethod(methodName, parameterTypes);
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
-		return adapter.handle(exchange, handlerMethod).block(timeout);
+		HandlerResult handlerResult = adapter.handle(exchange, handlerMethod).block(timeout);
+		assertThat(handlerResult).isNotNull();
+		return handlerResult;
 	}
 
 
