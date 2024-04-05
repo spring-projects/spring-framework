@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.support.Netty4HeadersAdapter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StreamUtils;
 
 /**
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.
@@ -89,7 +90,13 @@ final class ReactorNettyClientResponse implements ClientHttpResponse {
 
 	@Override
 	public void close() {
-		this.connection.dispose();
+		try{
+			InputStream body = getBody();
+			StreamUtils.drain(body);
+			body.close();
+		}
+		catch (IOException ignored) {
+		}
 	}
 
 }
