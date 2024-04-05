@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +118,8 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			String msg = cause.getMessage();
 			if (msg != null) {
 				msg = msg.toLowerCase();
-				if (msg.contains("exceed") && (msg.contains("size") || msg.contains("length"))) {
+				if ((msg.contains("exceed") && (msg.contains("size") || msg.contains("length"))) ||
+						(msg.contains("request") && (msg.contains("big") || msg.contains("large")))) {
 					throw new MaxUploadSizeExceededException(-1, ex);
 				}
 			}
