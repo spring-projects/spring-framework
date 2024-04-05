@@ -340,7 +340,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		@SuppressWarnings("DataFlowIssue")
 		@Override
-		@Nullable
 		public Object getAttribute(String name) {
 			if (name.equals(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)) {
 				return this.forwardedPrefixExtractor.getErrorRequestUri();

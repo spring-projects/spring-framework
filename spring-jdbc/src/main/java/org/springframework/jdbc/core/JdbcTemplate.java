@@ -907,13 +907,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Deprecated
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, @Nullable Object[] args, Class<T> requiredType) throws DataAccessException {
 		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
 	}
 
 	@Override
-	@Nullable
 	public <T> T queryForObject(String sql, Class<T> requiredType, @Nullable Object... args) throws DataAccessException {
 		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
 	}
