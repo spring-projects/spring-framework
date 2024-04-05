@@ -1112,7 +1112,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 		}
 
 		@Override
-		@Nullable
 		public Object getTarget() {
 			try {
 				return super.getTarget();

@@ -123,8 +123,6 @@ public class ExpressionException extends RuntimeException {
 	 * @see #getSimpleMessage()
 	 * @see java.lang.Throwable#getMessage()
 	 */
-	@Override
-	@Nullable
 	public String getMessage() {
 		return toDetailedString();
 	}
@@ -133,7 +131,6 @@ public class ExpressionException extends RuntimeException {
 	 * Return a detailed description of this exception, including the expression
 	 * String and position (if available) as well as the actual exception message.
 	 */
-	@Nullable
 	public String toDetailedString() {
 		if (this.expressionString != null) {
 			StringBuilder output = new StringBuilder();
@@ -158,7 +155,7 @@ public class ExpressionException extends RuntimeException {
 	 * that caused the failure.
 	 * @since 4.0
 	 */
-	@Nullable
+	@SuppressWarnings("NullAway")
 	public String getSimpleMessage() {
 		return super.getMessage();
 	}
