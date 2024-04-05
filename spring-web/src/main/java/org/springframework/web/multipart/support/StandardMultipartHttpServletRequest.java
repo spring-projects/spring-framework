@@ -119,7 +119,8 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			String msg = cause.getMessage();
 			if (msg != null) {
 				msg = msg.toLowerCase();
-				if (msg.contains("exceed") && (msg.contains("size") || msg.contains("length"))) {
+				if ((msg.contains("exceed") && (msg.contains("size") || msg.contains("length"))) ||
+						(msg.contains("request") && (msg.contains("big") || msg.contains("large")))) {
 					throw new MaxUploadSizeExceededException(-1, ex);
 				}
 			}
