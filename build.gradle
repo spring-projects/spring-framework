@@ -91,7 +91,6 @@ configure([rootProject] + javaProjects) { project ->
 			"https://docs.oracle.com/en/java/javase/17/docs/api/",
 			"https://jakarta.ee/specifications/platform/9/apidocs/",
 			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ and weblogic.* packages
-			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/", // com.ibm.*
 			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/", // org.jboss.resource.*
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
 			"https://eclipse.dev/aspectj/doc/released/aspectj5rt-api",
