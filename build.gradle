@@ -277,8 +277,19 @@ configure(allprojects) { project ->
 			cacheChangingModulesFor 0, "seconds"
 		}
 		repositories {
-			mavenCentral()
-			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+//			mavenCentral()
+//			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+			// Add the following entries for using Alibaba Cloud Maven mirror
+			maven {
+				url 'https://maven.aliyun.com/repository/public'
+			}
+			maven {
+				url 'https://maven.aliyun.com/repository/spring'
+			}
+			// If you also need Gradle plugins from the plugin portal
+			maven {
+				url 'https://maven.aliyun.com/repository/gradle-plugin'
+			}
 		}
 	}
 	configurations.all {
