@@ -122,14 +122,14 @@ public abstract class AopConfigUtils {
 
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
-			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
-				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
-				int requiredPriority = findPriorityForClass(cls);
-				if (currentPriority < requiredPriority) {
-					apcDefinition.setBeanClassName(cls.getName());
-				}
+			if (cls.getName().equals(apcDefinition.getBeanClassName())) {
+				return null;
 			}
-			return null;
+			int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
+			int requiredPriority = findPriorityForClass(cls);
+			if (currentPriority < requiredPriority) {
+				apcDefinition.setBeanClassName(cls.getName());
+			}
 		}
 
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
