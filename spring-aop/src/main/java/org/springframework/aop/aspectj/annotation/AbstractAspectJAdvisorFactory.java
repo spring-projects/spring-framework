@@ -134,12 +134,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	@Nullable
 	private static AspectJAnnotation findAnnotation(Method method, Class<? extends Annotation> annotationType) {
 		Annotation annotation = AnnotationUtils.findAnnotation(method, annotationType);
-		if (annotation != null) {
-			return new AspectJAnnotation(annotation);
-		}
-		else {
+		if (annotation == null) {
 			return null;
+			
 		}
+		return new AspectJAnnotation(annotation);
 	}
 
 
@@ -252,16 +251,14 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			}
 			StringTokenizer nameTokens = new StringTokenizer(annotation.getArgumentNames(), ",");
 			int numTokens = nameTokens.countTokens();
-			if (numTokens > 0) {
-				String[] names = new String[numTokens];
-				for (int i = 0; i < names.length; i++) {
-					names[i] = nameTokens.nextToken();
-				}
-				return names;
-			}
-			else {
+			if (numTokens <= 0) {
 				return null;
 			}
+			String[] names = new String[numTokens];
+			for (int i = 0; i < names.length; i++) {
+				names[i] = nameTokens.nextToken();
+			}
+			return names;
 		}
 
 		@Override
