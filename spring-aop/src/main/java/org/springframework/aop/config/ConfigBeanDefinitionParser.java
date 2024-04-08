@@ -260,14 +260,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * '{@code after-throwing}' or '{@code around}'.
 	 */
 	private boolean isAdviceNode(Node aNode, ParserContext parserContext) {
-		if (!(aNode instanceof Element)) {
-			return false;
-		}
-		else {
+		if (aNode instanceof Element) {
 			String name = parserContext.getDelegate().getLocalName(aNode);
 			return (BEFORE.equals(name) || AFTER.equals(name) || AFTER_RETURNING_ELEMENT.equals(name) ||
 					AFTER_THROWING_ELEMENT.equals(name) || AROUND.equals(name));
 		}
+		return false;
 	}
 
 	/**
@@ -461,28 +459,26 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 					element, this.parseState.snapshot());
 			return null;
 		}
-		else if (element.hasAttribute(POINTCUT)) {
+		if (element.hasAttribute(POINTCUT)) {
 			// Create a pointcut for the anonymous pc and register it.
 			String expression = element.getAttribute(POINTCUT);
 			AbstractBeanDefinition pointcutDefinition = createPointcutDefinition(expression);
 			pointcutDefinition.setSource(parserContext.extractSource(element));
 			return pointcutDefinition;
 		}
-		else if (element.hasAttribute(POINTCUT_REF)) {
+		if (element.hasAttribute(POINTCUT_REF)) {
 			String pointcutRef = element.getAttribute(POINTCUT_REF);
-			if (!StringUtils.hasText(pointcutRef)) {
-				parserContext.getReaderContext().error(
-						"'pointcut-ref' attribute contains empty value.", element, this.parseState.snapshot());
-				return null;
+			if (StringUtils.hasText(pointcutRef)) {
+				return pointcutRef;
 			}
-			return pointcutRef;
-		}
-		else {
 			parserContext.getReaderContext().error(
-					"Must define one of 'pointcut' or 'pointcut-ref' on <advisor> tag.",
-					element, this.parseState.snapshot());
+					"'pointcut-ref' attribute contains empty value.", element, this.parseState.snapshot());
 			return null;
 		}
+		parserContext.getReaderContext().error(
+				"Must define one of 'pointcut' or 'pointcut-ref' on <advisor> tag.",
+				element, this.parseState.snapshot());
+		return null;
 	}
 
 	/**
