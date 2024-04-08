@@ -59,12 +59,10 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 
 	@Override
 	public int getOrder() {
-		if (this.order != null) {
-			return this.order;
-		}
-		else {
+		if (this.order == null) {
 			return this.advice.getOrder();
 		}
+		return this.order;
 	}
 
 	@Override
