@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,21 +47,21 @@ public class LiteWebJarsResourceResolver extends AbstractResourceResolver {
 
 	private static final int WEBJARS_LOCATION_LENGTH = WebJarVersionLocator.WEBJARS_PATH_PREFIX.length() + 1;
 
-	private final WebJarVersionLocator webJarAssetLocator;
+	private final WebJarVersionLocator webJarVersionLocator;
 
 	/**
 	 * Create a {@code LiteWebJarsResourceResolver} with a default {@code WebJarVersionLocator} instance.
 	 */
 	public LiteWebJarsResourceResolver() {
-		this.webJarAssetLocator = new WebJarVersionLocator();
+		this.webJarVersionLocator = new WebJarVersionLocator();
 	}
 
 	/**
 	 * Create a {@code LiteWebJarsResourceResolver} with a custom {@code WebJarVersionLocator} instance,
 	 * e.g. with a custom cache implementation.
 	 */
-	public LiteWebJarsResourceResolver(WebJarVersionLocator webJarAssetLocator) {
-		this.webJarAssetLocator = webJarAssetLocator;
+	public LiteWebJarsResourceResolver(WebJarVersionLocator webJarVersionLocator) {
+		this.webJarVersionLocator = webJarVersionLocator;
 	}
 
 	@Override
@@ -98,12 +98,12 @@ public class LiteWebJarsResourceResolver extends AbstractResourceResolver {
 
 	@Nullable
 	protected String findWebJarResourcePath(String path) {
-		int startOffset = (path.startsWith("/") ? 1 : 0);
 		int endOffset = path.indexOf('/', 1);
 		if (endOffset != -1) {
+			int startOffset = (path.startsWith("/") ? 1 : 0);
 			String webjar = path.substring(startOffset, endOffset);
 			String partialPath = path.substring(endOffset + 1);
-			String webJarPath = this.webJarAssetLocator.fullPath(webjar, partialPath);
+			String webJarPath = this.webJarVersionLocator.fullPath(webjar, partialPath);
 			if (webJarPath != null) {
 				return webJarPath.substring(WEBJARS_LOCATION_LENGTH);
 			}
