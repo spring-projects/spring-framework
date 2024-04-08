@@ -136,7 +136,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		Annotation annotation = AnnotationUtils.findAnnotation(method, annotationType);
 		if (annotation == null) {
 			return null;
-			
 		}
 		return new AspectJAnnotation(annotation);
 	}
