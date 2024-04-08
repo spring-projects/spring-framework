@@ -93,13 +93,13 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	@Nullable
 	public Object proceed(Object[] arguments) throws Throwable {
 		Assert.notNull(arguments, "Argument array passed to proceed cannot be null");
-		if (arguments.length != this.methodInvocation.getArguments().length) {
-			throw new IllegalArgumentException("Expecting " +
-					this.methodInvocation.getArguments().length + " arguments to proceed, " +
-					"but was passed " + arguments.length + " arguments");
+		if (arguments.length == this.methodInvocation.getArguments().length) {
+			this.methodInvocation.setArguments(arguments);
+			return this.methodInvocation.invocableClone(arguments).proceed();
 		}
-		this.methodInvocation.setArguments(arguments);
-		return this.methodInvocation.invocableClone(arguments).proceed();
+		throw new IllegalArgumentException("Expecting " +
+				this.methodInvocation.getArguments().length + " arguments to proceed, " +
+				"but was passed " + arguments.length + " arguments");
 	}
 
 	/**
@@ -254,17 +254,17 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 
 			StringBuilder sb = new StringBuilder();
 			if (includeModifier) {
-				sb.append(Modifier.toString(getModifiers()));
-				sb.append(' ');
+				sb.append(Modifier.toString(getModifiers()))
+				  .append(' ');
 			}
 			if (includeReturnTypeAndArgs) {
 				appendType(sb, getReturnType(), useLongReturnAndArgumentTypeName);
 				sb.append(' ');
 			}
 			appendType(sb, getDeclaringType(), useLongTypeName);
-			sb.append('.');
-			sb.append(getMethod().getName());
-			sb.append('(');
+			sb.append('.')
+			  .append(getMethod().getName())
+			  .append('(');
 			Class<?>[] parametersTypes = getParameterTypes();
 			appendTypes(sb, parametersTypes, includeReturnTypeAndArgs, useLongReturnAndArgumentTypeName);
 			sb.append(')');
