@@ -138,7 +138,9 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 			String[] configLocations, boolean refresh, @Nullable ApplicationContext parent)
 			throws BeansException {
 
+		// 调用父类方法，初始化各种属性
 		super(parent);
+		// 将xml文件名中${}中的占位符使用环境变量和系统属性进行替换，生成最终的参数文件名，并保存至父类AbstractRefreshableConfigApplicationContext的configLocations属性中
 		setConfigLocations(configLocations);
 		if (refresh) {
 			refresh();
