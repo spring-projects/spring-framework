@@ -404,15 +404,13 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	private boolean maybeBindProceedingJoinPoint(Class<?> candidateParameterType) {
 		if (ProceedingJoinPoint.class == candidateParameterType) {
-			if (!supportsProceedingJoinPoint()) {
-				throw new IllegalArgumentException("ProceedingJoinPoint is only supported for around advice");
+			if (supportsProceedingJoinPoint()) {
+				this.joinPointArgumentIndex = 0;
+				return true;
 			}
-			this.joinPointArgumentIndex = 0;
-			return true;
+			throw new IllegalArgumentException("ProceedingJoinPoint is only supported for around advice");
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	protected boolean supportsProceedingJoinPoint() {
@@ -424,24 +422,20 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			this.joinPointStaticPartArgumentIndex = 0;
 			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	private void bindArgumentsByName(int numArgumentsExpectingToBind) {
 		if (this.argumentNames == null) {
 			this.argumentNames = createParameterNameDiscoverer().getParameterNames(this.aspectJAdviceMethod);
 		}
-		if (this.argumentNames != null) {
-			// We have been able to determine the arg names.
-			bindExplicitArguments(numArgumentsExpectingToBind);
-		}
-		else {
+		if (this.argumentNames == null) {
 			throw new IllegalStateException("Advice method [" + this.aspectJAdviceMethod.getName() + "] " +
 					"requires " + numArgumentsExpectingToBind + " arguments to be bound by name, but " +
 					"the argument names were not specified and could not be discovered.");
 		}
+		// We have been able to determine the arg names.
+		bindExplicitArguments(numArgumentsExpectingToBind);
 	}
 
 	/**
