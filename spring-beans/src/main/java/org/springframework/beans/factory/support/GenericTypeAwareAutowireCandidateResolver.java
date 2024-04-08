@@ -102,23 +102,6 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 					}
 				}
 			}
-			else {
-				// Pre-existing target type: In case of a generic FactoryBean type,
-				// unwrap nested generic type when matching a non-FactoryBean type.
-				Class<?> resolvedClass = targetType.resolve();
-				if (resolvedClass != null && FactoryBean.class.isAssignableFrom(resolvedClass)) {
-					Class<?> typeToBeMatched = dependencyType.resolve();
-					if (typeToBeMatched != null && !FactoryBean.class.isAssignableFrom(typeToBeMatched) &&
-							!typeToBeMatched.isAssignableFrom(resolvedClass)) {
-						targetType = targetType.getGeneric();
-						if (descriptor.fallbackMatchAllowed()) {
-							// Matching the Class-based type determination for FactoryBean
-							// objects in the lazy-determination getType code path below.
-							targetType = ResolvableType.forClass(targetType.resolve());
-						}
-					}
-				}
-			}
 		}
 
 		if (targetType == null) {
@@ -145,6 +128,23 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		if (cacheType) {
 			rbd.targetType = targetType;
 		}
+
+		// Pre-declared target type: In case of a generic FactoryBean type,
+		// unwrap nested generic type when matching a non-FactoryBean type.
+		Class<?> targetClass = targetType.resolve();
+		if (targetClass != null && FactoryBean.class.isAssignableFrom(targetClass)) {
+			Class<?> classToMatch = dependencyType.resolve();
+			if (classToMatch != null && !FactoryBean.class.isAssignableFrom(classToMatch) &&
+					!classToMatch.isAssignableFrom(targetClass)) {
+				targetType = targetType.getGeneric();
+				if (descriptor.fallbackMatchAllowed()) {
+					// Matching the Class-based type determination for FactoryBean
+					// objects in the lazy-determination getType code path above.
+					targetType = ResolvableType.forClass(targetType.resolve());
+				}
+			}
+		}
+
 		if (descriptor.fallbackMatchAllowed() &&
 				(targetType.hasUnresolvableGenerics() || targetType.resolve() == Properties.class)) {
 			// Fallback matches allow unresolvable generics, e.g. plain HashMap to Map<String,String>;
