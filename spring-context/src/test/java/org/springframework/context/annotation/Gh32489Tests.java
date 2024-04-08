@@ -18,7 +18,6 @@ package org.springframework.context.annotation;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanUtils;
@@ -67,8 +66,7 @@ public class Gh32489Tests {
 	}
 
 	@Test
-	@Disabled
-	void resolveFactoryBeanWithMatchingGeneric() {
+	void provideFactoryBeanWithMatchingGenerics() {
 		try (AnnotationConfigApplicationContext context = prepareContext()) {
 			context.refresh();
 			ResolvableType requiredType = ResolvableType.forClassWithGenerics(SimpleRepositoryFactoryBean.class,
@@ -78,7 +76,7 @@ public class Gh32489Tests {
 	}
 
 	@Test
-	void resolveFactoryBeanWithFirstNonMatchingGeneric() {
+	void provideFactoryBeanWithFirstNonMatchingGenerics() {
 		try (AnnotationConfigApplicationContext context = prepareContext()) {
 			context.refresh();
 			ResolvableType requiredType = ResolvableType.forClassWithGenerics(SimpleRepositoryFactoryBean.class,
@@ -88,7 +86,7 @@ public class Gh32489Tests {
 	}
 
 	@Test
-	void resolveFactoryBeanWithSecondNonMatchingGeneric() {
+	void provideFactoryBeanWithSecondNonMatchingGenerics() {
 		try (AnnotationConfigApplicationContext context = prepareContext()) {
 			context.refresh();
 			ResolvableType requiredType = ResolvableType.forClassWithGenerics(SimpleRepositoryFactoryBean.class,
@@ -98,7 +96,7 @@ public class Gh32489Tests {
 	}
 
 	@Test
-	void resolveFactoryBeanTargetTypeWithMatchingGeneric() {
+	void provideFactoryBeanTargetTypeWithMatchingGenerics() {
 		try (AnnotationConfigApplicationContext context = prepareContext()) {
 			context.refresh();
 			ResolvableType requiredType = ResolvableType.forClassWithGenerics(Repository.class,
@@ -109,7 +107,7 @@ public class Gh32489Tests {
 	}
 
 	@Test
-	void resolveFactoryBeanTargetTypeWithFirstNonMatchingGeneric() {
+	void provideFactoryBeanTargetTypeWithFirstNonMatchingGenerics() {
 		try (AnnotationConfigApplicationContext context = prepareContext()) {
 			context.refresh();
 			ResolvableType requiredType = ResolvableType.forClassWithGenerics(Repository.class,
@@ -119,7 +117,7 @@ public class Gh32489Tests {
 	}
 
 	@Test
-	void resolveFactoryBeanTargetTypeWithSecondNonMatchingGeneric() {
+	void provideFactoryBeanTargetTypeWithSecondNonMatchingGenerics() {
 		try (AnnotationConfigApplicationContext context = prepareContext()) {
 			context.refresh();
 			ResolvableType requiredType = ResolvableType.forClassWithGenerics(Repository.class,
@@ -143,21 +141,18 @@ public class Gh32489Tests {
 
 		@Autowired
 		List<SimpleRepositoryFactoryBean<?, ?>> repositoryFactoryies;
-
 	}
 
 	static class RepositoryFactoriesInformationHolder {
 
 		@Autowired
 		List<RepositoryFactoryInformation<?, ?>> repositoryFactoresInformation;
-
 	}
 
 	static class RepositoryFactoryHolder {
 
 		@Autowired
 		SimpleRepositoryFactoryBean<EmployeeRepository, Long> repositoryFactory;
-
 	}
 
 	static class SimpleRepositoryFactoryBean<T, ID> extends RepositoryFactoryBeanSupport<T, ID> {
