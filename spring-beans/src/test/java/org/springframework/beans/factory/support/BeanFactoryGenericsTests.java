@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.BeanCreationException;
@@ -756,25 +758,31 @@ class BeanFactoryGenericsTests {
 		assertThat(floatStoreNames).isEmpty();
 	}
 
-	@Test
-	void genericMatchingWithFullTypeDifferentiation() {
+	@ParameterizedTest
+	@ValueSource(classes = {NumberStoreFactory.class, NumberStoreFactoryBeans.class})
+	void genericMatchingWithFullTypeDifferentiation(Class<?> factoryClass) {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
 
-		RootBeanDefinition bd1 = new RootBeanDefinition(NumberStoreFactory.class);
+		RootBeanDefinition bd1 = new RootBeanDefinition(factoryClass);
 		bd1.setFactoryMethodName("newDoubleStore");
 		bf.registerBeanDefinition("store1", bd1);
-		RootBeanDefinition bd2 = new RootBeanDefinition(NumberStoreFactory.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(factoryClass);
 		bd2.setFactoryMethodName("newFloatStore");
 		bf.registerBeanDefinition("store2", bd2);
-		bf.registerBeanDefinition("numberBean",
-				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+		RootBeanDefinition bd3 = new RootBeanDefinition(NumberBean.class);
+		bd3.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd3.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("numberBean", bd3);
 
-		NumberBean nb = bf.getBean(NumberBean.class);
 		NumberStore<?> store1 = bf.getBean("store1", NumberStore.class);
-		assertThat(nb.getDoubleStore()).isSameAs(store1);
 		NumberStore<?> store2 = bf.getBean("store2", NumberStore.class);
+		NumberBean nb = bf.getBean(NumberBean.class);
+		assertThat(nb.getDoubleStore()).isSameAs(store1);
+		assertThat(nb.getFloatStore()).isSameAs(store2);
+		nb = bf.getBean(NumberBean.class);
+		assertThat(nb.getDoubleStore()).isSameAs(store1);
 		assertThat(nb.getFloatStore()).isSameAs(store2);
 
 		String[] numberStoreNames = bf.getBeanNamesForType(ResolvableType.forClass(NumberStore.class));
@@ -822,16 +830,17 @@ class BeanFactoryGenericsTests {
 		assertThat(floatStoreProvider.orderedStream()).singleElement().isEqualTo(store2);
 	}
 
-	@Test
-	void genericMatchingWithUnresolvedOrderedStream() {
+	@ParameterizedTest
+	@ValueSource(classes = {NumberStoreFactory.class, NumberStoreFactoryBeans.class})
+	void genericMatchingWithUnresolvedOrderedStream(Class<?> factoryClass) {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
 
-		RootBeanDefinition bd1 = new RootBeanDefinition(NumberStoreFactory.class);
+		RootBeanDefinition bd1 = new RootBeanDefinition(factoryClass);
 		bd1.setFactoryMethodName("newDoubleStore");
 		bf.registerBeanDefinition("store1", bd1);
-		RootBeanDefinition bd2 = new RootBeanDefinition(NumberStoreFactory.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(factoryClass);
 		bd2.setFactoryMethodName("newFloatStore");
 		bf.registerBeanDefinition("store2", bd2);
 
@@ -854,7 +863,22 @@ class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("myFactoryBeanHolder",
 				new RootBeanDefinition(MyFactoryBeanHolder.class, AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
 
-		assertThat(bf.getBean(MyFactoryBeanHolder.class).factoryBeans).contains(bf.getBean(MyFactoryBean.class));
+		assertThat(bf.getBean(MyFactoryBeanHolder.class).factoryBeans).containsOnly(bf.getBean(MyFactoryBean.class));
+	}
+
+	@Test  // gh-32489
+	void genericMatchingAgainstLazyFactoryBeanClass() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		RootBeanDefinition bd = new RootBeanDefinition(MyFactoryBean.class);
+		bd.setTargetType(ResolvableType.forClassWithGenerics(MyFactoryBean.class, String.class));
+		bd.setLazyInit(true);
+		bf.registerBeanDefinition("myFactoryBean", bd);
+		bf.registerBeanDefinition("myFactoryBeanHolder",
+				new RootBeanDefinition(MyFactoryBeanHolder.class, AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+
+		assertThat(bf.getBean(MyFactoryBeanHolder.class).factoryBeans).containsOnly(bf.getBean(MyFactoryBean.class));
 	}
 
 
@@ -970,6 +994,38 @@ class BeanFactoryGenericsTests {
 		@Order(0)
 		public static NumberStore<Float> newFloatStore() {
 			return new FloatStore();
+		}
+	}
+
+
+	public static class NumberStoreFactoryBeans {
+
+		@Order(1)
+		public static FactoryBean<NumberStore<Double>> newDoubleStore() {
+			return new FactoryBean<>() {
+				@Override
+				public NumberStore<Double> getObject() {
+					return new DoubleStore();
+				}
+				@Override
+				public Class<?> getObjectType() {
+					return DoubleStore.class;
+				}
+			};
+		}
+
+		@Order(0)
+		public static FactoryBean<NumberStore<Float>> newFloatStore() {
+			return new FactoryBean<>() {
+				@Override
+				public NumberStore<Float> getObject() {
+					return new FloatStore();
+				}
+				@Override
+				public Class<?> getObjectType() {
+					return FloatStore.class;
+				}
+			};
 		}
 	}
 
