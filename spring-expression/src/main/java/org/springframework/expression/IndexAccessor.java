@@ -58,49 +58,51 @@ public interface IndexAccessor extends TargetedAccessor {
 	Class<?>[] getSpecificTargetClasses();
 
 	/**
-	 * Called to determine if this index accessor is able to read a specified
-	 * index on a specified target object.
+	 * Determine if this index accessor is able to read a specified index on a
+	 * specified target object.
 	 * @param context the evaluation context in which the access is being attempted
 	 * @param target the target object upon which the index is being accessed
 	 * @param index the index being accessed
-	 * @return true if this index accessor is able to read the index
+	 * @return {@code true} if this index accessor is able to read the index
 	 * @throws AccessException if there is any problem determining whether the
 	 * index can be read
 	 */
 	boolean canRead(EvaluationContext context, Object target, Object index) throws AccessException;
 
 	/**
-	 * Called to read an index from a specified target object.
-	 * <p>Should only succeed if {@link #canRead} also returns {@code true}.
+	 * Read an index from a specified target object.
+	 * <p>Should only be invoked if {@link #canRead} returns {@code true} for the
+	 * same arguments.
 	 * @param context the evaluation context in which the access is being attempted
 	 * @param target the target object upon which the index is being accessed
 	 * @param index the index being accessed
 	 * @return a TypedValue object wrapping the index value read and a type
-	 * descriptor for it
-	 * @throws AccessException if there is any problem reading the index value
+	 * descriptor for the value
+	 * @throws AccessException if there is any problem reading the index
 	 */
 	TypedValue read(EvaluationContext context, Object target, Object index) throws AccessException;
 
 	/**
-	 * Called to determine if this index accessor is able to write to a specified
-	 * index on a specified target object.
+	 * Determine if this index accessor is able to write to a specified index on
+	 * a specified target object.
 	 * @param context the evaluation context in which the access is being attempted
 	 * @param target the target object upon which the index is being accessed
 	 * @param index the index being accessed
-	 * @return true if this index accessor is able to write to the index
+	 * @return {@code true} if this index accessor is able to write to the index
 	 * @throws AccessException if there is any problem determining whether the
 	 * index can be written to
 	 */
 	boolean canWrite(EvaluationContext context, Object target, Object index) throws AccessException;
 
 	/**
-	 * Called to write to an index on a specified target object.
-	 * <p>Should only succeed if {@link #canWrite} also returns {@code true}.
+	 * Write to an index on a specified target object.
+	 * <p>Should only be invoked if {@link #canWrite} returns {@code true} for the
+	 * same arguments.
 	 * @param context the evaluation context in which the access is being attempted
 	 * @param target the target object upon which the index is being accessed
 	 * @param index the index being accessed
 	 * @param newValue the new value for the index
-	 * @throws AccessException if there is any problem writing to the index value
+	 * @throws AccessException if there is any problem writing to the index
 	 */
 	void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue)
 			throws AccessException;
