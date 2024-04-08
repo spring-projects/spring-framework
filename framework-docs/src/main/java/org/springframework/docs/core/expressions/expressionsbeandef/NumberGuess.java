@@ -33,4 +33,3 @@ public class NumberGuess {
 	}
 }
 // end::snippet[]
-
