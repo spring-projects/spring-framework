@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -850,6 +851,23 @@ class BeanFactoryGenericsTests {
 				bf.getBean("store2", NumberStore.class), bf.getBean("store1", NumberStore.class));
 	}
 
+	@Test  // gh-32489
+	void genericMatchingAgainstFactoryBeanClass() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		RootBeanDefinition bd = new RootBeanDefinition(MyFactoryBean.class);
+		// Replicate org.springframework.data.repository.config.RepositoryConfigurationDelegate#registerRepositoriesIn
+		// behavior of setting targetType, required to hit other branch in
+		// org.springframework.beans.factory.support.GenericTypeAwareAutowireCandidateResolver.checkGenericTypeMatch
+		bd.setTargetType(ResolvableType.forClassWithGenerics(MyFactoryBean.class, String.class));
+		bf.registerBeanDefinition("myFactoryBean", bd);
+		bf.registerBeanDefinition("myFactoryBeanHolder",
+				new RootBeanDefinition(MyFactoryBeanHolder.class, AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+
+		assertThat(bf.getBean(MyFactoryBeanHolder.class).factoryBeans).contains(bf.getBean(MyFactoryBean.class));
+	}
+
 
 	/**
 	 * Mimics and delegates to {@link Mockito#mock(Class)} -- created here to avoid factory
@@ -963,6 +981,34 @@ class BeanFactoryGenericsTests {
 		@Order(0)
 		public static NumberStore<Float> newFloatStore() {
 			return new FloatStore();
+		}
+	}
+
+
+	public interface MyGenericInterfaceForFactoryBeans<T> {
+	}
+
+
+	public static class MyFactoryBean<T extends CharSequence> implements FactoryBean<T>, MyGenericInterfaceForFactoryBeans<T> {
+
+		@Override
+		public T getObject() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return String.class;
+		}
+	}
+
+
+	public static class MyFactoryBeanHolder {
+
+		List<MyGenericInterfaceForFactoryBeans<?>> factoryBeans;  // Requested type is not a FactoryBean type
+
+		public MyFactoryBeanHolder(List<MyGenericInterfaceForFactoryBeans<?>> factoryBeans) {
+			this.factoryBeans = factoryBeans;
 		}
 	}
 
