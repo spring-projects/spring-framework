@@ -297,21 +297,19 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		if (shadowMatch.alwaysMatches()) {
 			return true;
 		}
-		else if (shadowMatch.neverMatches()) {
+		if (shadowMatch.neverMatches()) {
 			return false;
 		}
-		else {
-			// the maybe case
-			if (hasIntroductions) {
-				return true;
-			}
-			// A match test returned maybe - if there are any subtype sensitive variables
-			// involved in the test (this, target, at_this, at_target, at_annotation) then
-			// we say this is not a match as in Spring there will never be a different
-			// runtime subtype.
-			RuntimeTestWalker walker = getRuntimeTestWalker(shadowMatch);
-			return (!walker.testsSubtypeSensitiveVars() || walker.testTargetInstanceOfResidue(targetClass));
+		// the maybe case
+		if (hasIntroductions) {
+			return true;
 		}
+		// A match test returned maybe - if there are any subtype sensitive variables
+		// involved in the test (this, target, at_this, at_target, at_annotation) then
+		// we say this is not a match as in Spring there will never be a different
+		// runtime subtype.
+		RuntimeTestWalker walker = getRuntimeTestWalker(shadowMatch);
+		return (!walker.testsSubtypeSensitiveVars() || walker.testTargetInstanceOfResidue(targetClass));
 	}
 
 	@Override
@@ -338,11 +336,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			MethodInvocation curr = ExposeInvocationInterceptor.currentInvocation();
 			if (curr.getMethod() == method) {
 				targetObject = curr.getThis();
-				if (!(curr instanceof ProxyMethodInvocation currPmi)) {
-					throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + curr);
+				if (curr instanceof ProxyMethodInvocation currPmi) {
+					pmi = currPmi;
+					thisObject = pmi.getProxy();
 				}
-				pmi = currPmi;
-				thisObject = pmi.getProxy();
+				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + curr);
 			}
 		}
 		catch (IllegalStateException ex) {
@@ -363,17 +361,16 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			 * type but not 'this' (as would be the case of JDK dynamic proxies).
 			 * <p>See SPR-2979 for the original bug.
 			 */
-			if (pmi != null && thisObject != null) {  // there is a current invocation
-				RuntimeTestWalker originalMethodResidueTest = getRuntimeTestWalker(getShadowMatch(method, method));
-				if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
-					return false;
-				}
-				if (joinPointMatch.matches()) {
-					bindParameters(pmi, joinPointMatch);
-				}
+			if (pmi == null && thisObject == null) {  // there is a current invocation
+				return joinPointMatch.matches();
 			}
-
-			return joinPointMatch.matches();
+			RuntimeTestWalker originalMethodResidueTest = getRuntimeTestWalker(getShadowMatch(method, method));
+			if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
+				return false;
+			}
+			if (joinPointMatch.matches()) {
+				bindParameters(pmi, joinPointMatch);
+			}	
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
@@ -542,9 +539,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	public String toString() {
 		StringBuilder sb = new StringBuilder("AspectJExpressionPointcut: (");
 		for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
-			sb.append(this.pointcutParameterTypes[i].getName());
-			sb.append(' ');
-			sb.append(this.pointcutParameterNames[i]);
+			sb.append(this.pointcutParameterTypes[i].getName())
+			  .append(' ')
+			  .append(this.pointcutParameterNames[i]);
 			if ((i+1) < this.pointcutParameterTypes.length) {
 				sb.append(", ");
 			}
@@ -552,8 +549,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		sb.append(") ");
 		if (getExpression() != null) {
 			sb.append(getExpression());
-		}
-		else {
+		} else {
 			sb.append("<pointcut expression not set>");
 		}
 		return sb.toString();
