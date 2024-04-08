@@ -144,11 +144,10 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 			List<Advisor> cachedAdvisors = this.advisorsCache.get(aspectName);
 			if (cachedAdvisors != null) {
 				advisors.addAll(cachedAdvisors);
+				continue;
 			}
-			else {
-				MetadataAwareAspectInstanceFactory factory = this.aspectFactoryCache.get(aspectName);
-				advisors.addAll(this.advisorFactory.getAdvisors(factory));
-			}
+			MetadataAwareAspectInstanceFactory factory = this.aspectFactoryCache.get(aspectName);
+			advisors.addAll(this.advisorFactory.getAdvisors(factory));
 		}
 		return advisors;
 	}
