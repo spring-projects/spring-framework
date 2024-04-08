@@ -66,11 +66,11 @@ class RequestParamMethodArgumentResolverTests {
 
 	private RequestParamMethodArgumentResolver resolver = new RequestParamMethodArgumentResolver(null, true);
 
-	private MockHttpServletRequest request = new MockHttpServletRequest();
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 	private NativeWebRequest webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 
-	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
+	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Test
@@ -165,6 +165,19 @@ class RequestParamMethodArgumentResolverTests {
 		boolean condition = result instanceof String[];
 		assertThat(condition).isTrue();
 		assertThat((String[]) result).as("Invalid result").isEqualTo(expected);
+	}
+
+	@Test // gh-32577
+	void resolveStringArrayWithEmptyArraySuffix() throws Exception {
+		String[] expected = new String[] {"foo", "bar"};
+		request.addParameter("name[]", expected[0]);
+		request.addParameter("name[]", expected[1]);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
+		Object result = resolver.resolveArgument(param, null, webRequest, null);
+		boolean condition = result instanceof String[];
+		assertThat(condition).isTrue();
+		assertThat((String[]) result).isEqualTo(expected);
 	}
 
 	@Test
