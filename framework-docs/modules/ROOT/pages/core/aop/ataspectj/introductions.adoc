@@ -72,7 +72,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 ----
-	val usageTracked = context.getBean("myService", UsageTracked.class)
+	val usageTracked = context.getBean<UsageTracked>("myService")
 ----
 ======
 

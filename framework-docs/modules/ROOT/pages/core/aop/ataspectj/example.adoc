@@ -16,93 +16,9 @@ aspect.
 Because we want to retry the operation, we need to use around advice so that we can
 call `proceed` multiple times. The following listing shows the basic aspect implementation:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim",role="primary"]
-----
-	@Aspect
-	public class ConcurrentOperationExecutor implements Ordered {
+include-code::./ConcurrentOperationExecutor[tag=snippet,indent=0]
 
-		private static final int DEFAULT_MAX_RETRIES = 2;
-
-		private int maxRetries = DEFAULT_MAX_RETRIES;
-		private int order = 1;
-
-		public void setMaxRetries(int maxRetries) {
-			this.maxRetries = maxRetries;
-		}
-
-		public int getOrder() {
-			return this.order;
-		}
-
-		public void setOrder(int order) {
-			this.order = order;
-		}
-
-		@Around("com.xyz.CommonPointcuts.businessService()") // <1>
-		public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
-			int numAttempts = 0;
-			PessimisticLockingFailureException lockFailureException;
-			do {
-				numAttempts++;
-				try {
-					return pjp.proceed();
-				}
-				catch(PessimisticLockingFailureException ex) {
-					lockFailureException = ex;
-				}
-			} while(numAttempts <= this.maxRetries);
-			throw lockFailureException;
-		}
-	}
-----
-<1> References the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
-----
-	@Aspect
-	class ConcurrentOperationExecutor : Ordered {
-
-		private val DEFAULT_MAX_RETRIES = 2
-		private var maxRetries = DEFAULT_MAX_RETRIES
-		private var order = 1
-
-		fun setMaxRetries(maxRetries: Int) {
-			this.maxRetries = maxRetries
-		}
-
-		override fun getOrder(): Int {
-			return this.order
-		}
-
-		fun setOrder(order: Int) {
-			this.order = order
-		}
-
-		@Around("com.xyz.CommonPointcuts.businessService()") // <1>
-		fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any? {
-			var numAttempts = 0
-			var lockFailureException: PessimisticLockingFailureException
-			do {
-				numAttempts++
-				try {
-					return pjp.proceed()
-				} catch (ex: PessimisticLockingFailureException) {
-					lockFailureException = ex
-				}
-
-			} while (numAttempts <= this.maxRetries)
-			throw lockFailureException
-		}
-	}
-----
-<1> References the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
-======
+`@Around("com.xyz.CommonPointcuts.businessService()")` references the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
 
 Note that the aspect implements the `Ordered` interface so that we can set the precedence of
 the aspect higher than the transaction advice (we want a fresh transaction each time we
@@ -114,70 +30,15 @@ we have exhausted all of our retry attempts.
 
 The corresponding Spring configuration follows:
 
-[source,xml,indent=0,subs="verbatim"]
-----
-	<aop:aspectj-autoproxy/>
-
-	<bean id="concurrentOperationExecutor"
-			class="com.xyz.service.impl.ConcurrentOperationExecutor">
-		<property name="maxRetries" value="3"/>
-		<property name="order" value="100"/>
-	</bean>
-----
+include-code::./ApplicationConfiguration[tag=snippet,indent=0]
 
 To refine the aspect so that it retries only idempotent operations, we might define the following
 `Idempotent` annotation:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim",role="primary"]
-----
-	@Retention(RetentionPolicy.RUNTIME)
-	// marker annotation
-	public @interface Idempotent {
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
-----
-	@Retention(AnnotationRetention.RUNTIME)
-	// marker annotation
-	annotation class Idempotent
-----
-======
+include-code::./service/Idempotent[tag=snippet,indent=0]
 
 We can then use the annotation to annotate the implementation of service operations. The change
 to the aspect to retry only idempotent operations involves refining the pointcut
 expression so that only `@Idempotent` operations match, as follows:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim",role="primary"]
-----
-	@Around("execution(* com.xyz..service.*.*(..)) && " +
-			"@annotation(com.xyz.service.Idempotent)")
-	public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
-----
-	@Around("execution(* com.xyz..service.*.*(..)) && " +
-			"@annotation(com.xyz.service.Idempotent)")
-	fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any? {
-		// ...
-	}
-----
-======
-
-
-
+include-code::./service/SampleService[tag=snippet,indent=0]
