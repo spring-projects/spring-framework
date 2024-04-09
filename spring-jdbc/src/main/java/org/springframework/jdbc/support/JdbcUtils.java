@@ -228,14 +228,14 @@ public abstract class JdbcUtils {
 			try {
 				return rs.getObject(index, requiredType);
 			}
-			catch (AbstractMethodError err) {
-				logger.debug("JDBC driver does not implement JDBC 4.1 'getObject(int, Class)' method", err);
-			}
-			catch (SQLFeatureNotSupportedException ex) {
+			catch (SQLFeatureNotSupportedException | AbstractMethodError ex) {
 				logger.debug("JDBC driver does not support JDBC 4.1 'getObject(int, Class)' method", ex);
 			}
 			catch (SQLException ex) {
-				logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex);
+				if (logger.isDebugEnabled()) {
+					logger.debug("JDBC driver has limited support for 'getObject(int, Class)' with column type: " +
+							requiredType.getName(), ex);
+				}
 			}
 
 			// Corresponding SQL types for JSR-310 / Joda-Time types, left up
