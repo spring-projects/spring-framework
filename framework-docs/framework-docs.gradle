@@ -66,6 +66,7 @@ dependencies {
 	api(project(":spring-webmvc"))
 	api(project(":spring-context-support"))
 	api(project(":spring-aspects"))
+	api(project(":spring-websocket"))
 
 	api("org.jetbrains.kotlin:kotlin-stdlib")
 	api("jakarta.jms:jakarta.jms-api")
@@ -76,6 +77,7 @@ dependencies {
 	api("com.fasterxml.jackson.module:jackson-module-parameter-names")
 	api("jakarta.validation:jakarta.validation-api")
 	api("org.aspectj:aspectjweaver")
+	api("io.projectreactor.netty:reactor-netty-http")
 
 	implementation(project(":spring-core-test"))
 	implementation("org.assertj:assertj-core")

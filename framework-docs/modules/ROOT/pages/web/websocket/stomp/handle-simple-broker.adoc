@@ -17,29 +17,4 @@ declared in the built-in WebSocket configuration, however, you'll' need `@Lazy` 
 a cycle between the built-in WebSocket configuration and your
 `WebSocketMessageBrokerConfigurer`. For example:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-@Configuration
-@EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-	private TaskScheduler messageBrokerTaskScheduler;
-
-	@Autowired
-	public void setMessageBrokerTaskScheduler(@Lazy TaskScheduler taskScheduler) {
-		this.messageBrokerTaskScheduler = taskScheduler;
-	}
-
-	@Override
-	public void configureMessageBroker(MessageBrokerRegistry registry) {
-		registry.enableSimpleBroker("/queue/", "/topic/")
-				.setHeartbeatValue(new long[] {10000, 20000})
-				.setTaskScheduler(this.messageBrokerTaskScheduler);
-
-		// ...
-	}
-}
-----
-
-
-
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]

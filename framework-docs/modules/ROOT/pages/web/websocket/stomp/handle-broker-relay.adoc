@@ -15,48 +15,7 @@ and run it with STOMP support enabled. Then you can enable the STOMP broker rela
 
 The following example configuration enables a full-featured broker:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebSocketMessageBroker
-	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-		@Override
-		public void registerStompEndpoints(StompEndpointRegistry registry) {
-			registry.addEndpoint("/portfolio").withSockJS();
-		}
-
-		@Override
-		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.enableStompBrokerRelay("/topic", "/queue");
-			registry.setApplicationDestinationPrefixes("/app");
-		}
-
-	}
-----
-
-The following example shows the XML configuration equivalent of the preceding example:
-
-[source,xml,indent=0,subs="verbatim,quotes,attributes"]
-----
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:websocket="http://www.springframework.org/schema/websocket"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/websocket
-			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
-
-		<websocket:message-broker application-destination-prefix="/app">
-			<websocket:stomp-endpoint path="/portfolio" />
-				<websocket:sockjs/>
-			</websocket:stomp-endpoint>
-			<websocket:stomp-broker-relay prefix="/topic,/queue" />
-		</websocket:message-broker>
-
-	</beans>
-----
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]
 
 The STOMP broker relay in the preceding configuration is a Spring
 {spring-framework-api}/messaging/MessageHandler.html[`MessageHandler`]

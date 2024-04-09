@@ -16,69 +16,12 @@ Creating a WebSocket server is as simple as implementing `WebSocketHandler` or, 
 likely, extending either `TextWebSocketHandler` or `BinaryWebSocketHandler`. The following
 example uses `TextWebSocketHandler`:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	import org.springframework.web.socket.WebSocketHandler;
-	import org.springframework.web.socket.WebSocketSession;
-	import org.springframework.web.socket.TextMessage;
+include-code::./MyHandler[tag=snippet,indent=0]
 
-	public class MyHandler extends TextWebSocketHandler {
-
-		@Override
-		public void handleTextMessage(WebSocketSession session, TextMessage message) {
-			// ...
-		}
-
-	}
-----
-
-There is dedicated WebSocket Java configuration and XML namespace support for mapping the preceding
+There is dedicated WebSocket programmatic configuration and XML namespace support for mapping the preceding
 WebSocket handler to a specific URL, as the following example shows:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	import org.springframework.web.socket.config.annotation.EnableWebSocket;
-	import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-	import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-
-	@Configuration
-	@EnableWebSocket
-	public class WebSocketConfig implements WebSocketConfigurer {
-
-		@Override
-		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-			registry.addHandler(myHandler(), "/myHandler");
-		}
-
-		@Bean
-		public WebSocketHandler myHandler() {
-			return new MyHandler();
-		}
-
-	}
-----
-
-The following example shows the XML configuration equivalent of the preceding example:
-
-[source,xml,indent=0,subs="verbatim,quotes,attributes"]
-----
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:websocket="http://www.springframework.org/schema/websocket"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/websocket
-			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
-
-		<websocket:handlers>
-			<websocket:mapping path="/myHandler" handler="myHandler"/>
-		</websocket:handlers>
-
-		<bean id="myHandler" class="org.springframework.samples.MyHandler"/>
-
-	</beans>
-----
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]
 
 The preceding example is for use in Spring MVC applications and should be included
 in the configuration of a xref:web/webmvc/mvc-servlet.adoc[`DispatcherServlet`]. However, Spring's
@@ -104,45 +47,7 @@ You can use such an interceptor to preclude the handshake or to make any attribu
 available to the `WebSocketSession`. The following example uses a built-in interceptor
 to pass HTTP session attributes to the WebSocket session:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebSocket
-	public class WebSocketConfig implements WebSocketConfigurer {
-
-		@Override
-		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-			registry.addHandler(new MyHandler(), "/myHandler")
-				.addInterceptors(new HttpSessionHandshakeInterceptor());
-		}
-
-	}
-----
-
-The following example shows the XML configuration equivalent of the preceding example:
-
-[source,xml,indent=0,subs="verbatim,quotes,attributes"]
-----
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:websocket="http://www.springframework.org/schema/websocket"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/websocket
-			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
-
-		<websocket:handlers>
-			<websocket:mapping path="/myHandler" handler="myHandler"/>
-			<websocket:handshake-interceptors>
-				<bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor"/>
-			</websocket:handshake-interceptors>
-		</websocket:handlers>
-
-		<bean id="myHandler" class="org.springframework.samples.MyHandler"/>
-
-	</beans>
-----
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]
 
 A more advanced option is to extend the `DefaultHandshakeHandler` that performs
 the steps of the WebSocket handshake, including validating the client origin,
@@ -236,69 +141,17 @@ You can configure of the underlying WebSocket server such as input message buffe
 idle timeout, and more.
 
 For Jakarta WebSocket servers, you can add a `ServletServerContainerFactoryBean` to your
-Java configuration. For example:
+configuration. For example:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-     @Bean
-     public ServletServerContainerFactoryBean createWebSocketContainer() {
-         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-         container.setMaxTextMessageBufferSize(8192);
-         container.setMaxBinaryMessageBufferSize(8192);
-         return container;
-     }
-----
-
-Or to your XML configuration:
-
-[source,xml,indent=0,subs="verbatim,quotes,attributes"]
-----
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:websocket="http://www.springframework.org/schema/websocket"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/websocket
-			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
-
-		<bean class="org.springframework...ServletServerContainerFactoryBean">
-			<property name="maxTextMessageBufferSize" value="8192"/>
-			<property name="maxBinaryMessageBufferSize" value="8192"/>
-		</bean>
-
-	</beans>
-----
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]
 
 NOTE: For client Jakarta WebSocket configuration, use
-ContainerProvider.getWebSocketContainer() in Java configuration, or
+ContainerProvider.getWebSocketContainer() in programmatic configuration, or
 `WebSocketContainerFactoryBean` in XML.
 
-For Jetty, you can supply a `Consumer` callback to configure the WebSocket server:
+For Jetty, you can supply a callback to configure the WebSocket server:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebSocket
-	public class WebSocketConfig implements WebSocketConfigurer {
-
-		@Override
-		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-			registry.addHandler(echoWebSocketHandler(), "/echo").setHandshakeHandler(handshakeHandler());
-		}
-
-		@Bean
-		public DefaultHandshakeHandler handshakeHandler() {
-			JettyRequestUpgradeStrategy strategy = new JettyRequestUpgradeStrategy();
-			strategy.addWebSocketConfigurer(configurable -> {
-					policy.setInputBufferSize(8192);
-					policy.setIdleTimeout(600000);
-			});
-			return new DefaultHandshakeHandler(strategy);
-		}
-
-	}
-----
+include-code::./JettyWebSocketConfiguration[tag=snippet,indent=0]
 
 TIP: When using STOMP over WebSocket, you will also need to configure
 xref:web/websocket/stomp/server-config.adoc[STOMP WebSocket transport]
@@ -331,51 +184,4 @@ The three possible behaviors are:
 
 You can configure WebSocket and SockJS allowed origins, as the following example shows:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	import org.springframework.web.socket.config.annotation.EnableWebSocket;
-	import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-	import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-
-	@Configuration
-	@EnableWebSocket
-	public class WebSocketConfig implements WebSocketConfigurer {
-
-		@Override
-		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-			registry.addHandler(myHandler(), "/myHandler").setAllowedOrigins("https://mydomain.com");
-		}
-
-		@Bean
-		public WebSocketHandler myHandler() {
-			return new MyHandler();
-		}
-
-	}
-----
-
-The following example shows the XML configuration equivalent of the preceding example:
-
-[source,xml,indent=0,subs="verbatim,quotes,attributes"]
-----
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:websocket="http://www.springframework.org/schema/websocket"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/websocket
-			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
-
-		<websocket:handlers allowed-origins="https://mydomain.com">
-			<websocket:mapping path="/myHandler" handler="myHandler" />
-		</websocket:handlers>
-
-		<bean id="myHandler" class="org.springframework.samples.MyHandler"/>
-
-	</beans>
-----
-
-
-
-
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]
