@@ -76,6 +76,12 @@ import org.springframework.util.concurrent.ListenableFuture;
  * which tend to have specific constraints for the scheduler thread pool,
  * requiring a separate thread pool for general executor purposes in practice.
  *
+ * <p><b>NOTE: This scheduler variant does not track the actual completion of tasks
+ * but rather just the hand-off to an execution thread.</b> As a consequence,
+ * a {@link ScheduledFuture} handle (e.g. from {@link #schedule(Runnable, Instant)})
+ * represents that hand-off rather than the actual completion of the provided task
+ * (or series of repeated tasks).
+ *
  * <p>As an alternative to the built-in thread-per-task capability, this scheduler
  * can also be configured with a separate target executor for scheduled task
  * execution through {@link #setTargetTaskExecutor}: e.g. pointing to a shared
