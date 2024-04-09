@@ -43,7 +43,11 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
 
 	public JettyWebSocketClient() {
-		this.client = new org.eclipse.jetty.websocket.client.WebSocketClient();
+		this(new org.eclipse.jetty.websocket.client.WebSocketClient());
+	}
+
+	public JettyWebSocketClient(org.eclipse.jetty.websocket.client.WebSocketClient client) {
+		this.client = client;
 	}
 
 	@Override
@@ -58,7 +62,7 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 
 	@Override
 	public boolean isRunning() {
-		return false;
+		return this.client.isRunning();
 	}
 
 	@Override
@@ -91,12 +95,11 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 				new JettyWebSocketSession(session, handshakeInfo.get(), DefaultDataBufferFactory.sharedInstance, completion));
 		try {
 			this.client.connect(handlerAdapter, url, upgradeRequest, jettyUpgradeListener)
-					.whenComplete((session, throwable) -> {
+					.exceptionally((throwable) -> {
 						// Only fail the completion if we have an error
 						// as the JettyWebSocketSession will never be opened.
-						if (throwable != null) {
-							completion.tryEmitError(throwable);
-						}
+						completion.tryEmitError(throwable);
+						return null;
 					});
 			return completion.asMono();
 		}
