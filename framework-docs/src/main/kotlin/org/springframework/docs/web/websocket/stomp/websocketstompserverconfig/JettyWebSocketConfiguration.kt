@@ -24,7 +24,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler
 import java.time.Duration
-import java.util.function.Consumer
 
 // tag::snippet[]
 @Configuration

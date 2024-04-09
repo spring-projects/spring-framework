@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+@file:Suppress("UNUSED_PARAMETER")
 package org.springframework.docs.web.websocket.stomp.websocketstompdestinationseparator
 
 import org.springframework.messaging.handler.annotation.DestinationVariable
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Controller
 class RedController {
 
 	@MessageMapping("blue.{green}")
-	fun handleGreen(@DestinationVariable green: String?) {
+	fun handleGreen(@DestinationVariable green: String) {
 		// ...
 	}
 }

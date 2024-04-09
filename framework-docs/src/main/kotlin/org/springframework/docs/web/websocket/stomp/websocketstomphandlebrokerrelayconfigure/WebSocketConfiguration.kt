@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
 package org.springframework.docs.web.websocket.stomp.websocketstomphandlebrokerrelayconfigure
 
 import org.springframework.context.annotation.Configuration
