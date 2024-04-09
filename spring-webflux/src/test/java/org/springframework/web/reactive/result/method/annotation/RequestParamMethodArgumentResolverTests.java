@@ -53,7 +53,7 @@ class RequestParamMethodArgumentResolverTests {
 
 	private BindingContext bindContext;
 
-	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
+	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@BeforeEach
@@ -124,6 +124,16 @@ class RequestParamMethodArgumentResolverTests {
 	void resolveStringArray() {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?name=foo&name=bar").build();
+		Object result = resolve(param, MockServerWebExchange.from(request));
+		boolean condition = result instanceof String[];
+		assertThat(condition).isTrue();
+		assertThat((String[]) result).isEqualTo(new String[] {"foo", "bar"});
+	}
+
+	@Test // gh-32577
+	void resolveStringArrayWithEmptyArraySuffix() {
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path?name[]=foo&name[]=bar").build();
 		Object result = resolve(param, MockServerWebExchange.from(request));
 		boolean condition = result instanceof String[];
 		assertThat(condition).isTrue();
