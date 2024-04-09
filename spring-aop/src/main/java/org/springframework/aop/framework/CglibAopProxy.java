@@ -102,6 +102,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
+	private static final boolean coroutinesReactorPresent = ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt",
+			CglibAopProxy.class.getClassLoader());;
+
 
 	/** The configuration used to configure this proxy. */
 	protected final AdvisedSupport advised;
@@ -421,7 +424,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			throw new AopInvocationException(
 					"Null return value from advice does not match primitive return type for: " + method);
 		}
-		if (KotlinDetector.isSuspendingFunction(method)) {
+		if (coroutinesReactorPresent && KotlinDetector.isSuspendingFunction(method)) {
 			return COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()) ?
 					CoroutinesUtils.asFlow(returnValue) :
 					CoroutinesUtils.awaitSingleOrNull(returnValue, arguments[arguments.length - 1]);
