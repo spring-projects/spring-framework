@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import io.micrometer.observation.tck.TestObservationRegistry;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
+import jakarta.jms.Session;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.junit.EmbeddedActiveMQExtension;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,6 +84,54 @@ class JmsTemplateObservationTests {
 		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
 			.that()
 			.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation");
+	}
+
+	@Test
+	void shouldRecordJmsPublishAndProcessObservations() throws Exception {
+		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+		jmsTemplate.setObservationRegistry(registry);
+
+		new Thread(() -> {
+			jmsTemplate.execute(session -> {
+				try {
+					CountDownLatch latch = new CountDownLatch(1);
+					MessageConsumer mc = session.createConsumer(session.createQueue("spring.test.observation"));
+					mc.setMessageListener(message -> {
+						try {
+							Destination jmsReplyTo = message.getJMSReplyTo();
+							jmsTemplate.send(jmsReplyTo, new MessageCreator() {
+								@Override
+								public Message createMessage(Session session) throws JMSException {
+									latch.countDown();
+									return session.createTextMessage("response content");
+								}
+							});
+						}
+						catch (JMSException e) {
+							throw new RuntimeException(e);
+						}
+					});
+					return latch.await(2, TimeUnit.SECONDS);
+				}
+				catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+			}, true);
+
+		}).start();
+		Message response = jmsTemplate.sendAndReceive("spring.test.observation", new MessageCreator() {
+			@Override
+			public Message createMessage(Session session) throws JMSException {
+				return session.createTextMessage("request content");
+			}
+		});
+
+		String responseBody = response.getBody(String.class);
+		Assertions.assertThat(responseBody).isEqualTo("response content");
+
+		assertThat(registry).hasNumberOfObservationsWithNameEqualTo("jms.message.publish", 2);
+		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process").that()
+				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation");
 	}
 
 	@AfterEach
