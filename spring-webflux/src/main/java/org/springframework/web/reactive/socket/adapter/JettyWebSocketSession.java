@@ -55,7 +55,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	private final Sinks.One<CloseStatus> closeStatusSink = Sinks.one();
 	private final Lock lock = new ReentrantLock();
 	private long requested = 0;
-	private boolean awaitingDemand = false;
+	private boolean awaitingMessage = false;
 
 	@SuppressWarnings("NotNullFieldNotInitialized")
 	private FluxSink<WebSocketMessage> sink;
@@ -79,9 +79,9 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 				this.lock.lock();
 				try {
 					this.requested += n;
-					if (!this.awaitingDemand && this.requested > 0) {
+					if (!this.awaitingMessage && this.requested > 0) {
 						this.requested--;
-						this.awaitingDemand = true;
+						this.awaitingMessage = true;
 						demand = true;
 					}
 				}
@@ -102,13 +102,13 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		boolean demand = false;
 		this.lock.lock();
 		try {
-			if (!this.awaitingDemand) {
+			if (!this.awaitingMessage) {
 				throw new IllegalStateException();
 			}
-			this.awaitingDemand = false;
+			this.awaitingMessage = false;
 			if (this.requested > 0) {
 				this.requested--;
-				this.awaitingDemand = true;
+				this.awaitingMessage = true;
 				demand = true;
 			}
 		}
@@ -130,40 +130,17 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	void onHandlerError(Throwable error) {
-		getDelegate().close(StatusCode.SERVER_ERROR, error.getMessage(), new Callback() {
-			@Override
-			public void succeed() {
-				if (JettyWebSocketSession.this.handlerCompletionSink != null) {
-					JettyWebSocketSession.this.handlerCompletionSink.tryEmitError(error);
-				}
-			}
-
-			@Override
-			public void fail(Throwable ex) {
-				if (JettyWebSocketSession.this.handlerCompletionSink != null) {
-					error.addSuppressed(ex);
-					JettyWebSocketSession.this.handlerCompletionSink.tryEmitError(error);
-				}
-			}
-		});
+		if (JettyWebSocketSession.this.handlerCompletionSink != null) {
+			JettyWebSocketSession.this.handlerCompletionSink.tryEmitError(error);
+		}
+		getDelegate().close(StatusCode.SERVER_ERROR, error.getMessage(), Callback.NOOP);
 	}
 
 	void onHandleComplete() {
-		getDelegate().close(StatusCode.NORMAL, null, new Callback() {
-			@Override
-			public void succeed() {
-				if (JettyWebSocketSession.this.handlerCompletionSink != null) {
-					JettyWebSocketSession.this.handlerCompletionSink.tryEmitEmpty();
-				}
-			}
-
-			@Override
-			public void fail(Throwable ex) {
-				if (JettyWebSocketSession.this.handlerCompletionSink != null) {
-					JettyWebSocketSession.this.handlerCompletionSink.tryEmitEmpty();
-				}
-			}
-		});
+		if (JettyWebSocketSession.this.handlerCompletionSink != null) {
+			JettyWebSocketSession.this.handlerCompletionSink.tryEmitEmpty();
+		}
+		getDelegate().close(StatusCode.NORMAL, null, Callback.NOOP);
 	}
 
 	@Override
