@@ -29,6 +29,7 @@ import org.eclipse.jetty.websocket.client.JettyUpgradeListener;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
@@ -37,25 +38,27 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 
-public class JettyWebSocketClient implements WebSocketClient {
+public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 
 	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
 
 	public JettyWebSocketClient() {
 		this.client = new org.eclipse.jetty.websocket.client.WebSocketClient();
+	}
+
+	@Override
+	public void start() {
 		LifeCycle.start(this.client);
 	}
 
-	public JettyWebSocketClient(org.eclipse.jetty.websocket.client.WebSocketClient client) {
-		this.client = client;
+	@Override
+	public void stop() {
+		LifeCycle.stop(this.client);
 	}
 
-	public void start() throws Exception {
-		this.client.start();
-	}
-
-	public void stop() throws Exception {
-		this.client.stop();
+	@Override
+	public boolean isRunning() {
+		return false;
 	}
 
 	@Override
