@@ -16,6 +16,10 @@
 
 package org.springframework.cglib.core;
 
+import java.lang.reflect.UndeclaredThrowableException;
+
+import org.springframework.cglib.transform.impl.UndeclaredThrowableStrategy;
+
 /**
  * CGLIB GeneratorStrategy variant which exposes the application ClassLoader
  * as current thread context ClassLoader for the time of class generation.
@@ -25,11 +29,12 @@ package org.springframework.cglib.core;
  * @author Juergen Hoeller
  * @since 5.2
  */
-public class ClassLoaderAwareGeneratorStrategy extends DefaultGeneratorStrategy {
+public class ClassLoaderAwareGeneratorStrategy extends UndeclaredThrowableStrategy {
 
 	private final ClassLoader classLoader;
 
 	public ClassLoaderAwareGeneratorStrategy(ClassLoader classLoader) {
+		super(UndeclaredThrowableException.class);
 		this.classLoader = classLoader;
 	}
 
