@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,8 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.InstanceOfAssertFactories.array;
+import static org.assertj.core.api.InstanceOfAssertFactories.optional;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestParam;
 
@@ -58,7 +61,6 @@ class RequestParamMethodArgumentResolverTests {
 
 	@BeforeEach
 	void setup() throws Exception {
-
 		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		this.resolver = new RequestParamMethodArgumentResolver(null, adapterRegistry, true);
 
@@ -70,7 +72,6 @@ class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	void supportsParameter() {
-
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
@@ -91,7 +92,6 @@ class RequestParamMethodArgumentResolverTests {
 
 		param = this.testMethod.annot(requestParam().notRequired()).arg(String.class);
 		assertThat(this.resolver.supportsParameter(param)).isTrue();
-
 	}
 
 	@Test
@@ -125,9 +125,7 @@ class RequestParamMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?name=foo&name=bar").build();
 		Object result = resolve(param, MockServerWebExchange.from(request));
-		boolean condition = result instanceof String[];
-		assertThat(condition).isTrue();
-		assertThat((String[]) result).isEqualTo(new String[] {"foo", "bar"});
+		assertThat(result).asInstanceOf(array(String[].class)).containsExactly("foo", "bar");
 	}
 
 	@Test // gh-32577
@@ -135,9 +133,7 @@ class RequestParamMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?name[]=foo&name[]=bar").build();
 		Object result = resolve(param, MockServerWebExchange.from(request));
-		boolean condition = result instanceof String[];
-		assertThat(condition).isTrue();
-		assertThat((String[]) result).isEqualTo(new String[] {"foo", "bar"});
+		assertThat(result).asInstanceOf(array(String[].class)).containsExactly("foo", "bar");
 	}
 
 	@Test
@@ -214,10 +210,7 @@ class RequestParamMethodArgumentResolverTests {
 		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name=123"));
 		result = resolve(param, exchange);
 
-		assertThat(result.getClass()).isEqualTo(Optional.class);
-		Optional<?> value = (Optional<?>) result;
-		assertThat(value).isPresent();
-		assertThat(value.get()).isEqualTo(123);
+		assertThat(result).asInstanceOf(optional(Integer.class)).contains(123);
 	}
 
 
