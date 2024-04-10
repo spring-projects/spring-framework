@@ -188,8 +188,8 @@ class ControllerAdviceTests {
 		TestController controller = context.getBean(TestController.class);
 		controller.setException(exception);
 
-		Object actual = handle(adapter, controller, this.postExchange, Duration.ofMillis(100)
-				, "threadWithArg", String.class).getReturnValue();
+		Object actual = handle(adapter, controller, this.postExchange, Duration.ofMillis(1000),
+				"threadWithArg", String.class).getReturnValue();
 		assertThat(actual).isEqualTo(expected);
 	}
 
@@ -242,13 +242,13 @@ class ControllerAdviceTests {
 		}
 	}
 
+
 	@Controller
 	static class TestController {
 
 		private Validator validator;
 
 		private Throwable exception;
-
 
 		void setValidator(Validator validator) {
 			this.validator = validator;
@@ -257,7 +257,6 @@ class ControllerAdviceTests {
 		void setException(Throwable exception) {
 			this.exception = exception;
 		}
-
 
 		@InitBinder
 		public void initDataBinder(WebDataBinder dataBinder) {
@@ -291,6 +290,7 @@ class ControllerAdviceTests {
 		}
 	}
 
+
 	@ControllerAdvice
 	@Order(1)
 	static class OneControllerAdvice {
@@ -322,6 +322,7 @@ class ControllerAdviceTests {
 			return err.toString();
 		}
 	}
+
 
 	@ControllerAdvice
 	@Order(2)

@@ -28,6 +28,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.BindingContext;
@@ -58,7 +59,6 @@ class RequestParamMethodArgumentResolverTests {
 
 	@BeforeEach
 	void setup() throws Exception {
-
 		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		this.resolver = new RequestParamMethodArgumentResolver(null, adapterRegistry, true);
 
@@ -70,7 +70,6 @@ class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	void supportsParameter() {
-
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
@@ -105,12 +104,12 @@ class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	void doesNotSupportReactiveWrapper() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				this.resolver.supportsParameter(this.testMethod.annot(requestParam()).arg(Mono.class, String.class)))
-			.withMessageStartingWith("RequestParamMethodArgumentResolver does not support reactive type wrapper");
-		assertThatIllegalStateException().isThrownBy(() ->
-				this.resolver.supportsParameter(this.testMethod.annotNotPresent(RequestParam.class).arg(Mono.class, String.class)))
-			.withMessageStartingWith("RequestParamMethodArgumentResolver does not support reactive type wrapper");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.resolver.supportsParameter(this.testMethod.annot(requestParam()).arg(Mono.class, String.class)))
+				.withMessageStartingWith("RequestParamMethodArgumentResolver does not support reactive type wrapper");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.resolver.supportsParameter(this.testMethod.annotNotPresent(RequestParam.class).arg(Mono.class, String.class)))
+				.withMessageStartingWith("RequestParamMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test
@@ -125,19 +124,15 @@ class RequestParamMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?name=foo&name=bar").build();
 		Object result = resolve(param, MockServerWebExchange.from(request));
-		boolean condition = result instanceof String[];
-		assertThat(condition).isTrue();
-		assertThat((String[]) result).isEqualTo(new String[] {"foo", "bar"});
+		assertThat(result).isEqualTo(new String[] {"foo", "bar"});
 	}
 
-	@Test // gh-32577
+	@Test  // gh-32577
 	void resolveStringArrayWithEmptyArraySuffix() {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?name[]=foo&name[]=bar").build();
 		Object result = resolve(param, MockServerWebExchange.from(request));
-		boolean condition = result instanceof String[];
-		assertThat(condition).isTrue();
-		assertThat((String[]) result).isEqualTo(new String[] {"foo", "bar"});
+		assertThat(result).isEqualTo(new String[] {"foo", "bar"});
 	}
 
 	@Test
@@ -146,7 +141,7 @@ class RequestParamMethodArgumentResolverTests {
 		assertThat(resolve(param, MockServerWebExchange.from(MockServerHttpRequest.get("/")))).isEqualTo("bar");
 	}
 
-	@Test // SPR-17050
+	@Test  // SPR-17050
 	public void resolveAndConvertNullValue() {
 		MethodParameter param = this.testMethod
 				.annot(requestParam().notRequired())
@@ -156,7 +151,6 @@ class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	void missingRequestParam() {
-
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		Mono<Object> mono = this.resolver.resolveArgument(param, this.bindContext, exchange);
@@ -221,6 +215,7 @@ class RequestParamMethodArgumentResolverTests {
 	}
 
 
+	@Nullable
 	private Object resolve(MethodParameter parameter, ServerWebExchange exchange) {
 		return this.resolver.resolveArgument(parameter, this.bindContext, exchange).block(Duration.ZERO);
 	}
