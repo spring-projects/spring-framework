@@ -1,0 +1,39 @@
+[[spring-testing-annotation-beanoverriding-testbean]]
+= `@TestBean`
+
+`@TestBean` is used on a test class field to override a specific bean with an instance
+provided by a conventionally named static factory method.
+
+By default, the bean name and the associated factory method name are derived from the
+annotated field's name but the annotation allows for specific values to be provided.
+
+The `@TestBean` annotation uses the `REPLACE_DEFINITION`
+xref:testing/testcontext-framework/bean-overriding.adoc#spring-testing-beanoverriding-extending[strategy for test bean overriding].
+
+The following example shows how to fully configure the `@TestBean` annotation, with
+explicit values equivalent to the default:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class OverrideBeanTests {
+		@TestBean(name = "service", methodName = "serviceTestOverride")  // <1>
+		private CustomService service;
+
+		// test case body...
+
+		private static CustomService serviceTestOverride() { // <2>
+			return new MyFakeCustomService();
+		}
+	}
+----
+<1> Mark a field for bean overriding in this test class
+<2> The result of this static method will be used as the instance and injected into the field
+======
+
+NOTE: The method to invoke is searched in the test class and any enclosing class it might
+have, as well as its hierarchy. This typically allows nested test class to rely on the
+factory method in the root test class.

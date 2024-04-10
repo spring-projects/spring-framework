@@ -1,0 +1,53 @@
+[[spring-testing-beanoverriding]]
+= Bean Overriding in Tests
+
+Bean Overriding in Tests refers to the ability to override specific beans in the Context
+for a test class, by annotating one or more fields in said test class.
+
+NOTE: This is intended as a less risky alternative to the practice of registering a bean via
+`@Bean` with the `DefaultListableBeanFactory` `setAllowBeanDefinitionOverriding` set to
+`true`.
+
+The Spring Testing Framework provides two sets of annotations:
+xref:testing/annotations/integration-spring/annotation-testbean.adoc[`@TestBean`],
+xref:testing/annotations/integration-spring/annotation-mockitobean.adoc[`@MockitoBean` and
+`@MockitoSpyBean`]. The former relies purely on Spring, while the later set relies on
+the https://site.mockito.org/[Mockito] third party library.
+
+[[spring-testing-beanoverriding-extending]]
+== Extending bean override with a custom annotation
+
+The three annotations mentioned above build upon the `@BeanOverride` meta-annotation
+and associated infrastructure, which allows to define custom bean overriding variants.
+
+To create an extension, the following is needed:
+
+- An annotation meta-annotated with `@BeanOverride` that defines the
+`BeanOverrideProcessor` to use.
+- The `BeanOverrideProcessor` implementation itself.
+- One or more concrete `OverrideMetadata` implementations provided by the processor.
+
+The Spring TestContext Framework includes infrastructure classes that support bean
+overriding: a `BeanFactoryPostProcessor`, a `TestExecutionListener` and a
+`ContextCustomizerFactory`.
+The later two are automatically registered via the Spring TestContext Framework
+`spring.factories` file, and are responsible for setting up the rest of the infrastructure.
+
+The test classes are parsed looking for any field meta-annotated with `@BeanOverride`,
+instantiating the relevant `BeanOverrideProcessor` in order to register an
+`OverrideMetadata`.
+
+Then the `BeanOverrideBeanFactoryPostProcessor` will use that information to alter the
+context, registering and replacing bean definitions as defined by each metadata
+`BeanOverrideStrategy`:
+
+- `REPLACE_DEFINITION`: replaces the bean definition. If it is not present in the
+context, an exception is thrown.
+- `CREATE_OR_REPLACE_DEFINITION`: replaces the bean definition if the bean definition
+does not exist, or create one if it is not.
+- `WRAP_BEAN`: get the original instance early so that it can be wrapped.
+
+NOTE: The Bean Overriding infrastructure does not include any bean resolution step,
+unlike an `@Autowired`-annotated field for instance. As such, the name of the bean to
+override must be somehow provided to or computed by the `BeanOverrideProcessor`.
+Typically, the user provides the name one way or the other.

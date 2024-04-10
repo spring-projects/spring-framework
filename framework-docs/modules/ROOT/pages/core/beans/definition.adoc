@@ -89,7 +89,7 @@ adapt your configuration accordingly. While not recommended, you can silence tho
 by setting the `allowBeanDefinitionOverriding` flag to `true`.
 
 NOTE: We acknowledge that overriding beans in a test is convenient, and there is
-explicit support for this. For more details please refer to xref:testing/annotations/integration-spring/annotation-beanoverriding.adoc[this section].
+explicit support for this. For more details please refer to xref:testing/testcontext-framework/bean-overriding.adoc[this section].
 
 [[beans-beanname]]
 == Naming Beans
