@@ -74,7 +74,24 @@ import org.springframework.util.ReflectionUtils;
  */
 public class Indexer extends SpelNodeImpl {
 
-	private enum IndexedType {ARRAY, LIST, MAP, STRING, OBJECT}
+	private enum IndexedType {ARRAY, LIST, MAP, STRING, OBJECT, CUSTOM}
+
+	private enum AccessMode {
+
+		READ(true, false),
+
+		WRITE(false, true),
+
+		READ_WRITE(true, true);
+
+		private final boolean supportsReads;
+		private final boolean supportsWrites;
+
+		private AccessMode(boolean supportsReads, boolean supportsWrites) {
+			this.supportsReads = supportsReads;
+			this.supportsWrites = supportsWrites;
+		}
+	}
 
 
 	private final boolean nullSafe;
@@ -88,33 +105,81 @@ public class Indexer extends SpelNodeImpl {
 	@Nullable
 	private volatile String arrayTypeDescriptor;
 
-	// These fields are used when the indexer is being used as a property read accessor.
-	// If the name and target type match these cached values then the cachedReadAccessor
-	// is used to read the property. If they do not match, the correct accessor is
-	// discovered and then cached for later use.
+	// These fields are used when the Indexer is being used as PropertyAccessor
+	// for reading. If the name and target type match these cached values, then
+	// the cachedPropertyReadAccessor is used to read the property. If they do
+	// not match, a suitable accessor is discovered and then cached for later use.
 
 	@Nullable
-	private String cachedReadName;
+	private String cachedPropertyReadName;
 
 	@Nullable
-	private Class<?> cachedReadTargetType;
+	private Class<?> cachedPropertyReadTargetType;
 
 	@Nullable
-	private PropertyAccessor cachedReadAccessor;
+	private PropertyAccessor cachedPropertyReadAccessor;
 
-	// These fields are used when the indexer is being used as a property write accessor.
-	// If the name and target type match these cached values then the cachedWriteAccessor
-	// is used to write the property. If they do not match, the correct accessor is
-	// discovered and then cached for later use.
-
-	@Nullable
-	private String cachedWriteName;
+	// These fields are used when the Indexer is being used as a PropertyAccessor
+	// for writing. If the name and target type match these cached values, then
+	// the cachedPropertyWriteAccessor is used to write the property. If they do
+	// not match, a suitable accessor is discovered and then cached for later use.
 
 	@Nullable
-	private Class<?> cachedWriteTargetType;
+	private String cachedPropertyWriteName;
 
 	@Nullable
-	private PropertyAccessor cachedWriteAccessor;
+	private Class<?> cachedPropertyWriteTargetType;
+
+	@Nullable
+	private PropertyAccessor cachedPropertyWriteAccessor;
+
+	// These fields are used when the Indexer is being used as an IndexAccessor
+	// for reading. If the index value and target type match these cached values,
+	// then the cachedIndexReadAccessor is used to read the index. If they do not
+	// match, a suitable accessor is discovered and then cached for later use.
+
+	/**
+	 * The index value: the value inside the square brackets, such as the
+	 * Integer 0 in [0], the String "name" in ['name'], etc.
+	 */
+	@Nullable
+	private Object cachedIndexReadIndex;
+
+	/**
+	 * The target type on which the index is being read.
+	 */
+	@Nullable
+	private Class<?> cachedIndexReadTargetType;
+
+	/**
+	 * Cached {@link IndexAccessor} for reading.
+	 */
+	@Nullable
+	private IndexAccessor cachedIndexReadAccessor;
+
+	// These fields are used when the Indexer is being used as an IndexAccessor
+	// for writing. If the name and target type match these cached values, then
+	// the cachedIndexWriteAccessor is used to read the property. If they do not
+	// match, a suitable accessor is discovered and then cached for later use.
+
+	/**
+	 * The index value: the value inside the square brackets, such as the
+	 * Integer 0 in [0], the String "name" in ['name'], etc.
+	 */
+	@Nullable
+	private Object cachedIndexWriteIndex;
+
+	/**
+	 * The target type on which the index is being written.
+	 */
+	@Nullable
+	private Class<?> cachedIndexWriteTargetType;
+
+	/**
+	 * Cached {@link IndexAccessor} for writing.
+	 */
+	@Nullable
+	private IndexAccessor cachedIndexWriteAccessor;
 
 
 	/**
@@ -150,7 +215,7 @@ public class Indexer extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		return getValueRef(state).getValue();
+		return getValueRef(state, AccessMode.READ).getValue();
 	}
 
 	@Override
@@ -158,19 +223,21 @@ public class Indexer extends SpelNodeImpl {
 			throws EvaluationException {
 
 		TypedValue typedValue = valueSupplier.get();
-		// TODO Query IndexAccessor's canWrite() method before invoking its write() method.
-		getValueRef(state).setValue(typedValue.getValue());
+		getValueRef(state, AccessMode.WRITE).setValue(typedValue.getValue());
 		return typedValue;
 	}
 
 	@Override
 	public boolean isWritable(ExpressionState expressionState) throws SpelEvaluationException {
-		return getValueRef(expressionState).isWritable();
+		return getValueRef(expressionState, AccessMode.WRITE).isWritable();
 	}
-
 
 	@Override
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
+		return getValueRef(state, AccessMode.READ_WRITE);
+	}
+
+	private ValueRef getValueRef(ExpressionState state, AccessMode accessMode) throws EvaluationException {
 		TypedValue context = state.getActiveContextObject();
 		Object target = context.getValue();
 
@@ -241,27 +308,45 @@ public class Indexer extends SpelNodeImpl {
 			}
 		}
 
-		// Try and treat the index value as a property of the context object
+		// Try to treat the index value as a property of the context object.
 		TypeDescriptor valueType = indexValue.getTypeDescriptor();
 		if (valueType != null && String.class == valueType.getType()) {
 			this.indexedType = IndexedType.OBJECT;
-			return new PropertyIndexingValueRef(
+			return new PropertyAccessorValueRef(
 					target, (String) index, state.getEvaluationContext(), targetDescriptor);
 		}
 
 		EvaluationContext evalContext = state.getEvaluationContext();
 		List<IndexAccessor> accessorsToTry = getIndexAccessorsToTry(target, evalContext.getIndexAccessors());
-		try {
-			for (IndexAccessor indexAccessor : accessorsToTry) {
-				if (indexAccessor.canRead(evalContext, target, index)) {
-					return new IndexAccessorValueRef(indexAccessor, target, index, evalContext, targetDescriptor);
+		if (accessMode.supportsReads) {
+			try {
+				for (IndexAccessor indexAccessor : accessorsToTry) {
+					if (indexAccessor.canRead(evalContext, target, index)) {
+						this.indexedType = IndexedType.CUSTOM;
+						return new IndexAccessorValueRef(target, index, evalContext, targetDescriptor);
+					}
 				}
 			}
+			catch (Exception ex) {
+				throw new SpelEvaluationException(
+						getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_INDEX_READ,
+						index, target.getClass().getTypeName());
+			}
 		}
-		catch (Exception ex) {
-			throw new SpelEvaluationException(
-					getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_INDEX_READ, index,
-					target.getClass().getTypeName());
+		if (accessMode.supportsWrites) {
+			try {
+				for (IndexAccessor indexAccessor : accessorsToTry) {
+					if (indexAccessor.canWrite(evalContext, target, index)) {
+						this.indexedType = IndexedType.CUSTOM;
+						return new IndexAccessorValueRef(target, index, evalContext, targetDescriptor);
+					}
+				}
+			}
+			catch (Exception ex) {
+				throw new SpelEvaluationException(
+						getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_INDEX_WRITE,
+						index, target.getClass().getTypeName());
+			}
 		}
 
 		throw new SpelEvaluationException(
@@ -284,8 +369,8 @@ public class Indexer extends SpelNodeImpl {
 			// If the string name is changing, the accessor is clearly going to change.
 			// So compilation is only possible if the index expression is a StringLiteral.
 			return (index instanceof StringLiteral &&
-					this.cachedReadAccessor instanceof CompilablePropertyAccessor compilablePropertyAccessor &&
-					compilablePropertyAccessor.isCompilable());
+					this.cachedPropertyReadAccessor instanceof CompilablePropertyAccessor cpa &&
+					cpa.isCompilable());
 		}
 		return false;
 	}
@@ -364,7 +449,8 @@ public class Indexer extends SpelNodeImpl {
 				throw new IllegalStateException(
 						"Index expression must be a StringLiteral, but was: " + index.getClass().getName());
 			}
-			CompilablePropertyAccessor compilablePropertyAccessor = (CompilablePropertyAccessor) this.cachedReadAccessor;
+			CompilablePropertyAccessor compilablePropertyAccessor =
+					(CompilablePropertyAccessor) this.cachedPropertyReadAccessor;
 			Assert.state(compilablePropertyAccessor != null, "No cached read accessor");
 			String propertyName = (String) stringLiteral.getLiteralValue().getValue();
 			Assert.state(propertyName != null, "No property name");
@@ -401,6 +487,34 @@ public class Indexer extends SpelNodeImpl {
 		else {
 			this.exitTypeDescriptor = descriptor;
 		}
+	}
+
+	private void updatePropertyReadState(@Nullable PropertyAccessor propertyAccessor, @Nullable String name,
+			@Nullable Class<?> targetType) {
+		this.cachedPropertyReadAccessor = propertyAccessor;
+		this.cachedPropertyReadName = name;
+		this.cachedPropertyReadTargetType = targetType;
+	}
+
+	private void updatePropertyWriteState(@Nullable PropertyAccessor propertyAccessor, @Nullable String name,
+			@Nullable Class<?> targetType) {
+		this.cachedPropertyWriteAccessor = propertyAccessor;
+		this.cachedPropertyWriteName = name;
+		this.cachedPropertyWriteTargetType = targetType;
+	}
+
+	private void updateIndexReadState(@Nullable IndexAccessor indexAccessor, @Nullable Object index,
+			@Nullable Class<?> targetType) {
+		this.cachedIndexReadAccessor = indexAccessor;
+		this.cachedIndexReadIndex = index;
+		this.cachedIndexReadTargetType = targetType;
+	}
+
+	private void updateIndexWriteState(@Nullable IndexAccessor indexAccessor, @Nullable Object index,
+			@Nullable Class<?> targetType) {
+		this.cachedIndexWriteAccessor = indexAccessor;
+		this.cachedIndexWriteIndex = index;
+		this.cachedIndexWriteTargetType = targetType;
 	}
 
 	/**
@@ -637,7 +751,7 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 
-	private class PropertyIndexingValueRef implements ValueRef {
+	private class PropertyAccessorValueRef implements ValueRef {
 
 		private final Object targetObject;
 
@@ -647,7 +761,7 @@ public class Indexer extends SpelNodeImpl {
 
 		private final TypeDescriptor targetObjectTypeDescriptor;
 
-		public PropertyIndexingValueRef(Object targetObject, String value,
+		public PropertyAccessorValueRef(Object targetObject, String value,
 				EvaluationContext evaluationContext, TypeDescriptor targetObjectTypeDescriptor) {
 
 			this.targetObject = targetObject;
@@ -657,29 +771,27 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		@Override
-		@SuppressWarnings("NullAway")
 		public TypedValue getValue() {
-			Class<?> targetObjectRuntimeClass = getObjectClass(this.targetObject);
+			Class<?> targetType = getObjectClass(this.targetObject);
 			try {
-				if (Indexer.this.cachedReadName != null && Indexer.this.cachedReadName.equals(this.name) &&
-						Indexer.this.cachedReadTargetType != null &&
-						Indexer.this.cachedReadTargetType.equals(targetObjectRuntimeClass)) {
+				String cachedPropertyReadName = Indexer.this.cachedPropertyReadName;
+				Class<?> cachedPropertyReadTargetType = Indexer.this.cachedPropertyReadTargetType;
+				if (cachedPropertyReadName != null && cachedPropertyReadName.equals(this.name) &&
+						cachedPropertyReadTargetType != null && cachedPropertyReadTargetType.equals(targetType)) {
 					// It is OK to use the cached accessor
-					PropertyAccessor accessor = Indexer.this.cachedReadAccessor;
-					Assert.state(accessor != null, "No cached read accessor");
+					PropertyAccessor accessor = Indexer.this.cachedPropertyReadAccessor;
+					Assert.state(accessor != null, "No cached PropertyAccessor for reading");
 					return accessor.read(this.evaluationContext, this.targetObject, this.name);
 				}
 				List<PropertyAccessor> accessorsToTry = AstUtils.getPropertyAccessorsToTry(
-						targetObjectRuntimeClass, this.evaluationContext.getPropertyAccessors());
+						targetType, this.evaluationContext.getPropertyAccessors());
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canRead(this.evaluationContext, this.targetObject, this.name)) {
 						if (accessor instanceof ReflectivePropertyAccessor reflectivePropertyAccessor) {
 							accessor = reflectivePropertyAccessor.createOptimalAccessor(
 									this.evaluationContext, this.targetObject, this.name);
 						}
-						Indexer.this.cachedReadAccessor = accessor;
-						Indexer.this.cachedReadName = this.name;
-						Indexer.this.cachedReadTargetType = targetObjectRuntimeClass;
+						updatePropertyReadState(accessor, this.name, targetType);
 						if (accessor instanceof CompilablePropertyAccessor compilablePropertyAccessor) {
 							setExitTypeDescriptor(CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType()));
 						}
@@ -696,26 +808,24 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		@Override
-		@SuppressWarnings("NullAway")
 		public void setValue(@Nullable Object newValue) {
-			Class<?> contextObjectClass = getObjectClass(this.targetObject);
+			Class<?> targetType = getObjectClass(this.targetObject);
 			try {
-				if (Indexer.this.cachedWriteName != null && Indexer.this.cachedWriteName.equals(this.name) &&
-						Indexer.this.cachedWriteTargetType != null &&
-						Indexer.this.cachedWriteTargetType.equals(contextObjectClass)) {
+				String cachedPropertyWriteName = Indexer.this.cachedPropertyWriteName;
+				Class<?> cachedPropertyWriteTargetType = Indexer.this.cachedPropertyWriteTargetType;
+				if (cachedPropertyWriteName != null && cachedPropertyWriteName.equals(this.name) &&
+						cachedPropertyWriteTargetType != null && cachedPropertyWriteTargetType.equals(targetType)) {
 					// It is OK to use the cached accessor
-					PropertyAccessor accessor = Indexer.this.cachedWriteAccessor;
-					Assert.state(accessor != null, "No cached write accessor");
+					PropertyAccessor accessor = Indexer.this.cachedPropertyWriteAccessor;
+					Assert.state(accessor != null, "No cached PropertyAccessor for writing");
 					accessor.write(this.evaluationContext, this.targetObject, this.name, newValue);
 					return;
 				}
 				List<PropertyAccessor> accessorsToTry = AstUtils.getPropertyAccessorsToTry(
-						contextObjectClass, this.evaluationContext.getPropertyAccessors());
+						targetType, this.evaluationContext.getPropertyAccessors());
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canWrite(this.evaluationContext, this.targetObject, this.name)) {
-						Indexer.this.cachedWriteName = this.name;
-						Indexer.this.cachedWriteTargetType = contextObjectClass;
-						Indexer.this.cachedWriteAccessor = accessor;
+						updatePropertyWriteState(accessor, this.name, targetType);
 						accessor.write(this.evaluationContext, this.targetObject, this.name, newValue);
 						return;
 					}
@@ -878,8 +988,6 @@ public class Indexer extends SpelNodeImpl {
 
 	private class IndexAccessorValueRef implements ValueRef {
 
-		private final IndexAccessor indexAccessor;
-
 		private final Object target;
 
 		private final Object index;
@@ -889,10 +997,9 @@ public class Indexer extends SpelNodeImpl {
 		private final TypeDescriptor typeDescriptor;
 
 
-		IndexAccessorValueRef(IndexAccessor indexAccessor, Object target, Object index,
-				EvaluationContext evaluationContext, TypeDescriptor typeDescriptor) {
+		IndexAccessorValueRef(Object target, Object index, EvaluationContext evaluationContext,
+				TypeDescriptor typeDescriptor) {
 
-			this.indexAccessor = indexAccessor;
 			this.target = target;
 			this.index = index;
 			this.evaluationContext = evaluationContext;
@@ -902,26 +1009,102 @@ public class Indexer extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
+			Class<?> targetType = getObjectClass(this.target);
+			Exception exception = null;
 			try {
-				return this.indexAccessor.read(this.evaluationContext, this.target, this.index);
+				Object cachedIndexReadIndex = Indexer.this.cachedIndexReadIndex;
+				Class<?> cachedIndexReadTargetType = Indexer.this.cachedIndexReadTargetType;
+				// Is it OK to use the cached IndexAccessor?
+				if (cachedIndexReadIndex != null && cachedIndexReadIndex.equals(this.index) &&
+						cachedIndexReadTargetType != null && cachedIndexReadTargetType.equals(targetType)) {
+					IndexAccessor accessor = Indexer.this.cachedIndexReadAccessor;
+					Assert.state(accessor != null, "No cached IndexAccessor for reading");
+					if (this.evaluationContext.getIndexAccessors().contains(accessor)) {
+						try {
+							return accessor.read(this.evaluationContext, this.target, this.index);
+						}
+						catch (Exception ex) {
+							// This is OK: it may have gone stale due to a class change.
+							// So, we track the exception and try to find a new accessor
+							// before giving up...
+							exception = ex;
+						}
+					}
+					// If the above code block did not use a cached accessor,
+					// we need to reset our cached state.
+					updateIndexReadState(null, null, null);
+				}
+				List<IndexAccessor> accessorsToTry =
+						getIndexAccessorsToTry(this.target, this.evaluationContext.getIndexAccessors());
+				for (IndexAccessor indexAccessor : accessorsToTry) {
+					if (indexAccessor.canRead(this.evaluationContext, this.target, this.index)) {
+						updateIndexReadState(indexAccessor, this.index, targetType);
+						return indexAccessor.read(this.evaluationContext, this.target, this.index);
+					}
+				}
 			}
 			catch (Exception ex) {
+				exception = ex;
+			}
+
+			if (exception != null) {
 				throw new SpelEvaluationException(
-						getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_INDEX_READ, this.index,
+						getStartPosition(), exception, SpelMessage.EXCEPTION_DURING_INDEX_READ, this.index,
 						this.typeDescriptor.toString());
 			}
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, this.typeDescriptor.toString());
 		}
 
 		@Override
 		public void setValue(@Nullable Object newValue) {
+			Class<?> targetType = getObjectClass(this.target);
+			Exception exception = null;
 			try {
-				this.indexAccessor.write(this.evaluationContext, this.target, this.index, newValue);
+				Object cachedIndexWriteIndex = Indexer.this.cachedIndexWriteIndex;
+				Class<?> cachedIndexWriteTargetType = Indexer.this.cachedIndexWriteTargetType;
+				// Is it OK to use the cached IndexAccessor?
+				if (cachedIndexWriteIndex != null && cachedIndexWriteIndex.equals(this.index) &&
+						cachedIndexWriteTargetType != null && cachedIndexWriteTargetType.equals(targetType)) {
+					IndexAccessor accessor = Indexer.this.cachedIndexWriteAccessor;
+					Assert.state(accessor != null, "No cached IndexAccessor for writing");
+					if (this.evaluationContext.getIndexAccessors().contains(accessor)) {
+						try {
+							accessor.write(this.evaluationContext, this.target, this.index, newValue);
+							return;
+						}
+						catch (Exception ex) {
+							// This is OK: it may have gone stale due to a class change.
+							// So, we track the exception and try to find a new accessor
+							// before giving up...
+							exception = ex;
+						}
+					}
+					// If the above code block did not use a cached accessor,
+					// we need to reset our cached state.
+					updateIndexWriteState(null, null, null);
+				}
+				List<IndexAccessor> accessorsToTry =
+						getIndexAccessorsToTry(this.target, this.evaluationContext.getIndexAccessors());
+				for (IndexAccessor indexAccessor : accessorsToTry) {
+					if (indexAccessor.canWrite(this.evaluationContext, this.target, this.index)) {
+						updateIndexWriteState(indexAccessor, this.index, targetType);
+						indexAccessor.write(this.evaluationContext, this.target, this.index, newValue);
+						return;
+					}
+				}
 			}
 			catch (Exception ex) {
+				exception = ex;
+			}
+
+			if (exception != null) {
 				throw new SpelEvaluationException(
-						getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_INDEX_WRITE, this.index,
+						getStartPosition(), exception, SpelMessage.EXCEPTION_DURING_INDEX_WRITE, this.index,
 						this.typeDescriptor.toString());
 			}
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, this.typeDescriptor.toString());
 		}
 
 		@Override

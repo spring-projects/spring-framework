@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -56,6 +55,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.expression.spel.SpelMessage.EXCEPTION_DURING_INDEX_READ;
 import static org.springframework.expression.spel.SpelMessage.EXCEPTION_DURING_INDEX_WRITE;
 import static org.springframework.expression.spel.SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE;
@@ -513,6 +513,7 @@ class IndexingTests {
 			RuntimeException exception = new RuntimeException("Boom!");
 
 			IndexAccessor mock = mock();
+			given(mock.getSpecificTargetClasses()).willReturn(null);
 			given(mock.canRead(any(), eq(this), any())).willThrow(exception);
 			context.addIndexAccessor(mock);
 
@@ -525,7 +526,9 @@ class IndexingTests {
 					.withCause(exception)
 					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_READ);
 
+			verify(mock, times(1)).getSpecificTargetClasses();
 			verify(mock, times(1)).canRead(any(), any(), any());
+			verifyNoMoreInteractions(mock);
 		}
 
 		@Test
@@ -534,6 +537,7 @@ class IndexingTests {
 			RuntimeException exception = new RuntimeException("Boom!");
 
 			IndexAccessor mock = mock();
+			given(mock.getSpecificTargetClasses()).willReturn(null);
 			given(mock.canRead(any(), eq(this), any())).willReturn(true);
 			given(mock.read(any(), eq(this), any())).willThrow(exception);
 			context.addIndexAccessor(mock);
@@ -547,20 +551,19 @@ class IndexingTests {
 					.withCause(exception)
 					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_READ);
 
-			verify(mock, times(1)).canRead(any(), any(), any());
+			verify(mock, times(2)).getSpecificTargetClasses();
+			verify(mock, times(2)).canRead(any(), any(), any());
 			verify(mock, times(1)).read(any(), any(), any());
+			verifyNoMoreInteractions(mock);
 		}
 
-		@Disabled("Disabled until IndexAccessor#canWrite is honored")
 		@Test
 		void canWriteThrowsException() throws Exception {
 			StandardEvaluationContext context = new StandardEvaluationContext();
 			RuntimeException exception = new RuntimeException("Boom!");
 
 			IndexAccessor mock = mock();
-			// TODO canRead() should not be invoked for this use case.
-			given(mock.canRead(any(), eq(this), any())).willReturn(true);
-			// TODO canWrite() should be invoked for this use case, but it is currently not.
+			given(mock.getSpecificTargetClasses()).willReturn(null);
 			given(mock.canWrite(eq(context), eq(this), eq(0))).willThrow(exception);
 			context.addIndexAccessor(mock);
 
@@ -573,7 +576,9 @@ class IndexingTests {
 					.withCause(exception)
 					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_WRITE);
 
+			verify(mock, times(1)).getSpecificTargetClasses();
 			verify(mock, times(1)).canWrite(any(), any(), any());
+			verifyNoMoreInteractions(mock);
 		}
 
 		@Test
@@ -582,8 +587,7 @@ class IndexingTests {
 			RuntimeException exception = new RuntimeException("Boom!");
 
 			IndexAccessor mock = mock();
-			// TODO canRead() should not be invoked for this use case.
-			given(mock.canRead(any(), eq(this), any())).willReturn(true);
+			given(mock.getSpecificTargetClasses()).willReturn(null);
 			given(mock.canWrite(eq(context), eq(this), eq(0))).willReturn(true);
 			doThrow(exception).when(mock).write(any(), any(), any(), any());
 			context.addIndexAccessor(mock);
@@ -597,9 +601,10 @@ class IndexingTests {
 					.withCause(exception)
 					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_WRITE);
 
-			// TODO canWrite() should be invoked for this use case, but it is currently not.
-			// verify(mock, times(1)).canWrite(any(), any(), any());
+			verify(mock, times(2)).getSpecificTargetClasses();
+			verify(mock, times(2)).canWrite(any(), any(), any());
 			verify(mock, times(1)).write(any(), any(), any(), any());
+			verifyNoMoreInteractions(mock);
 		}
 
 		@Test
