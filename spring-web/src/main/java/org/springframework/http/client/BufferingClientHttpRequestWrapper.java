@@ -55,21 +55,23 @@ final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHtt
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		this.request.getHeaders().putAll(headers);
 
-		if (this.request instanceof StreamingHttpOutputMessage streamingHttpOutputMessage) {
-			streamingHttpOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
-				@Override
-				public void writeTo(OutputStream outputStream) throws IOException {
-					StreamUtils.copy(bufferedOutput, outputStream);
-				}
+		if (bufferedOutput.length > 0) {
+			if (this.request instanceof StreamingHttpOutputMessage streamingHttpOutputMessage) {
+				streamingHttpOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+					@Override
+					public void writeTo(OutputStream outputStream) throws IOException {
+						StreamUtils.copy(bufferedOutput, outputStream);
+					}
 
-				@Override
-				public boolean repeatable() {
-					return true;
-				}
-			});
-		}
-		else {
-			StreamUtils.copy(bufferedOutput, this.request.getBody());
+					@Override
+					public boolean repeatable() {
+						return true;
+					}
+				});
+			}
+			else {
+				StreamUtils.copy(bufferedOutput, this.request.getBody());
+			}
 		}
 
 		ClientHttpResponse response = this.request.execute();
