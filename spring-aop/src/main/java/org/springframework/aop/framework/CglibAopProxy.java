@@ -19,6 +19,7 @@ package org.springframework.aop.framework;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy;
 import org.springframework.cglib.core.CodeGenerationException;
+import org.springframework.cglib.core.GeneratorStrategy;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
@@ -45,6 +47,7 @@ import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
+import org.springframework.cglib.transform.impl.UndeclaredThrowableStrategy;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.SmartClassLoader;
@@ -92,16 +95,19 @@ class CglibAopProxy implements AopProxy, Serializable {
 	private static final int INVOKE_HASHCODE = 6;
 
 
+	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
+
+	private static final boolean coroutinesReactorPresent = ClassUtils.isPresent(
+			"kotlinx.coroutines.reactor.MonoKt", CglibAopProxy.class.getClassLoader());
+
+	private static final GeneratorStrategy undeclaredThrowableStrategy =
+			new UndeclaredThrowableStrategy(UndeclaredThrowableException.class);
+
 	/** Logger available to subclasses; static to optimize serialization. */
 	protected static final Log logger = LogFactory.getLog(CglibAopProxy.class);
 
 	/** Keeps track of the Classes that we have validated for final methods. */
 	private static final Map<Class<?>, Boolean> validatedClasses = new WeakHashMap<>();
-
-	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
-
-	private static final boolean coroutinesReactorPresent = ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt",
-			CglibAopProxy.class.getClassLoader());;
 
 
 	/** The configuration used to configure this proxy. */
@@ -200,7 +206,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setAttemptLoad(true);
-			enhancer.setStrategy(new ClassLoaderAwareGeneratorStrategy(classLoader));
+			enhancer.setStrategy(new ClassLoaderAwareGeneratorStrategy(classLoader, undeclaredThrowableStrategy));
 
 			Callback[] callbacks = getCallbacks(rootClass);
 			Class<?>[] types = new Class<?>[callbacks.length];

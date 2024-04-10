@@ -16,7 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import java.io.Serial;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Objects;
@@ -36,23 +35,62 @@ import static org.mockito.BDDMockito.doAnswer;
 import static org.mockito.BDDMockito.doThrow;
 import static org.mockito.BDDMockito.mock;
 
+/**
+ * @author Mikaël Francoeur
+ * @since 6.2
+ */
 abstract class ProxyExceptionHandlingTests implements WithAssertions {
 
 	private static final RuntimeException uncheckedException = new RuntimeException();
+
 	private static final DeclaredCheckedException declaredCheckedException = new DeclaredCheckedException();
+
 	private static final UndeclaredCheckedException undeclaredCheckedException = new UndeclaredCheckedException();
 
 	protected final MyClass target = mock(MyClass.class);
+
 	protected final ProxyFactory proxyFactory = new ProxyFactory(target);
 
 	@Nullable
 	protected MyInterface proxy;
+
 	@Nullable
 	private Throwable throwableSeenByCaller;
 
-	static class ObjenesisCglibAopProxyTests extends ProxyExceptionHandlingTests {
+
+	@BeforeEach
+	void clear() {
+		Mockito.clearInvocations(target);
+	}
+
+	protected void assertProxyType(Object proxy) {
+	}
+
+	private void invokeProxy() {
+		throwableSeenByCaller = catchThrowable(() -> Objects.requireNonNull(proxy).doSomething());
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	private Answer<?> sneakyThrow(Throwable throwable) {
+		return invocation -> {
+			throw throwable;
+		};
+	}
+
+
+	static class JdkAopProxyTests extends ProxyExceptionHandlingTests {
+
+		@Override
+		protected void assertProxyType(Object proxy) {
+			assertThat(Proxy.isProxyClass(proxy.getClass())).isTrue();
+		}
+	}
+
+
+	static class CglibAopProxyTests extends ProxyExceptionHandlingTests {
+
 		@BeforeEach
-		void beforeEach() {
+		void setup() {
 			proxyFactory.setProxyTargetClass(true);
 		}
 
@@ -62,20 +100,6 @@ abstract class ProxyExceptionHandlingTests implements WithAssertions {
 		}
 	}
 
-	static class JdkAopProxyTests extends ProxyExceptionHandlingTests {
-		@Override
-		protected void assertProxyType(Object proxy) {
-			assertThat(Proxy.isProxyClass(proxy.getClass())).isTrue();
-		}
-	}
-
-	protected void assertProxyType(Object proxy) {
-	}
-
-	@BeforeEach
-	void beforeEach() {
-		Mockito.clearInvocations(target);
-	}
 
 	@Nested
 	class WhenThereIsOneInterceptor {
@@ -86,18 +110,14 @@ abstract class ProxyExceptionHandlingTests implements WithAssertions {
 		@BeforeEach
 		void beforeEach() {
 			proxyFactory.addAdvice(captureThrowable());
-
-			proxy = (MyInterface) proxyFactory.getProxy();
-
+			proxy = (MyInterface) proxyFactory.getProxy(ProxyExceptionHandlingTests.class.getClassLoader());
 			assertProxyType(proxy);
 		}
 
 		@Test
 		void targetThrowsUndeclaredCheckedException() throws DeclaredCheckedException {
 			doAnswer(sneakyThrow(undeclaredCheckedException)).when(target).doSomething();
-
 			invokeProxy();
-
 			assertThat(throwableSeenByInterceptor).isSameAs(undeclaredCheckedException);
 			assertThat(throwableSeenByCaller)
 					.isInstanceOf(UndeclaredThrowableException.class)
@@ -107,9 +127,7 @@ abstract class ProxyExceptionHandlingTests implements WithAssertions {
 		@Test
 		void targetThrowsDeclaredCheckedException() throws DeclaredCheckedException {
 			doThrow(declaredCheckedException).when(target).doSomething();
-
 			invokeProxy();
-
 			assertThat(throwableSeenByInterceptor).isSameAs(declaredCheckedException);
 			assertThat(throwableSeenByCaller).isSameAs(declaredCheckedException);
 		}
@@ -117,9 +135,7 @@ abstract class ProxyExceptionHandlingTests implements WithAssertions {
 		@Test
 		void targetThrowsUncheckedException() throws DeclaredCheckedException {
 			doThrow(uncheckedException).when(target).doSomething();
-
 			invokeProxy();
-
 			assertThat(throwableSeenByInterceptor).isSameAs(uncheckedException);
 			assertThat(throwableSeenByCaller).isSameAs(uncheckedException);
 		}
@@ -129,30 +145,28 @@ abstract class ProxyExceptionHandlingTests implements WithAssertions {
 				try {
 					return invocation.proceed();
 				}
-				catch (Exception e) {
-					throwableSeenByInterceptor = e;
-					throw e;
+				catch (Exception ex) {
+					throwableSeenByInterceptor = ex;
+					throw ex;
 				}
 			};
 		}
 	}
+
 
 	@Nested
 	class WhenThereAreNoInterceptors {
 
 		@BeforeEach
 		void beforeEach() {
-			proxy = (MyInterface) proxyFactory.getProxy();
-
+			proxy = (MyInterface) proxyFactory.getProxy(ProxyExceptionHandlingTests.class.getClassLoader());
 			assertProxyType(proxy);
 		}
 
 		@Test
 		void targetThrowsUndeclaredCheckedException() throws DeclaredCheckedException {
 			doAnswer(sneakyThrow(undeclaredCheckedException)).when(target).doSomething();
-
 			invokeProxy();
-
 			assertThat(throwableSeenByCaller)
 					.isInstanceOf(UndeclaredThrowableException.class)
 					.hasCauseReference(undeclaredCheckedException);
@@ -161,51 +175,38 @@ abstract class ProxyExceptionHandlingTests implements WithAssertions {
 		@Test
 		void targetThrowsDeclaredCheckedException() throws DeclaredCheckedException {
 			doThrow(declaredCheckedException).when(target).doSomething();
-
 			invokeProxy();
-
 			assertThat(throwableSeenByCaller).isSameAs(declaredCheckedException);
 		}
 
 		@Test
 		void targetThrowsUncheckedException() throws DeclaredCheckedException {
 			doThrow(uncheckedException).when(target).doSomething();
-
 			invokeProxy();
-
 			assertThat(throwableSeenByCaller).isSameAs(uncheckedException);
 		}
 	}
 
-	private void invokeProxy() {
-		throwableSeenByCaller = catchThrowable(() -> Objects.requireNonNull(proxy).doSomething());
-	}
 
-	private Answer<?> sneakyThrow(@SuppressWarnings("SameParameterValue") Throwable throwable) {
-		return invocation -> {
-			throw throwable;
-		};
+	protected interface MyInterface {
+
+		void doSomething() throws DeclaredCheckedException;
 	}
 
 	static class MyClass implements MyInterface {
+
 		@Override
 		public void doSomething() throws DeclaredCheckedException {
 			throw declaredCheckedException;
 		}
 	}
 
-	protected interface MyInterface {
-		void doSomething() throws DeclaredCheckedException;
-	}
-
+	@SuppressWarnings("serial")
 	protected static class UndeclaredCheckedException extends Exception {
-		@Serial
-		private static final long serialVersionUID = -4199611059122356651L;
 	}
 
+	@SuppressWarnings("serial")
 	protected static class DeclaredCheckedException extends Exception {
-		@Serial
-		private static final long serialVersionUID = 8851375818059230518L;
 	}
 
 }
