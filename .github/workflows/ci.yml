@@ -1,0 +1,26 @@
+
+name: "CI"
+on: [push]
+
+jobs:
+  ci:
+    name: "CI"
+    runs-on: ubuntu-latest
+    container: springci/spring-framework-ci:5.1.x
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Build"
+        run: |
+          ./gradlew build
+      - name: "Upload jars"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "jars"
+          path: "**/*.jar"
+      - name: "Upload test results"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "build-results"
+          path: "**/build/reports"
