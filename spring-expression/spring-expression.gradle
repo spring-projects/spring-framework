@@ -8,4 +8,5 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation("org.jetbrains.kotlin:kotlin-reflect")
 	testImplementation("org.jetbrains.kotlin:kotlin-stdlib")
+	testImplementation("com.fasterxml.jackson.core:jackson-databind")
 }
