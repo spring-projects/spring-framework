@@ -35,8 +35,8 @@ import org.springframework.lang.Nullable;
  */
 class KotlinReflectionBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-	@Nullable
 	@Override
+	@Nullable
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		if (KotlinDetector.isKotlinType(beanClass)) {
@@ -44,6 +44,7 @@ class KotlinReflectionBeanRegistrationAotProcessor implements BeanRegistrationAo
 		}
 		return null;
 	}
+
 
 	private static class AotContribution implements BeanRegistrationAotContribution {
 

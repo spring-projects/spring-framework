@@ -65,8 +65,9 @@ import org.springframework.util.ReflectionUtils;
  */
 public abstract class AopUtils {
 
-	private static final boolean coroutinesReactorPresent = ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt",
-			AopUtils.class.getClassLoader());;
+	private static final boolean coroutinesReactorPresent = ClassUtils.isPresent(
+			"kotlinx.coroutines.reactor.MonoKt", AopUtils.class.getClassLoader());
+
 
 	/**
 	 * Check whether the given object is a JDK dynamic proxy or a CGLIB proxy.
@@ -353,8 +354,8 @@ public abstract class AopUtils {
 		// Use reflection to invoke the method.
 		try {
 			ReflectionUtils.makeAccessible(method);
-			return coroutinesReactorPresent && KotlinDetector.isSuspendingFunction(method) ?
-					KotlinDelegate.invokeSuspendingFunction(method, target, args) : method.invoke(target, args);
+			return (coroutinesReactorPresent && KotlinDetector.isSuspendingFunction(method) ?
+					KotlinDelegate.invokeSuspendingFunction(method, target, args) : method.invoke(target, args));
 		}
 		catch (InvocationTargetException ex) {
 			// Invoked method threw a checked exception.
