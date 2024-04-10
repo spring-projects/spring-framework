@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,17 @@ class KotlinReflectionBeanRegistrationAotProcessorTests {
 		assertThat(generationContext.runtimeHints.reflection().typeHints()).isEmpty()
 	}
 
+	@Test
+	fun shouldGenerateOuterClassHints() {
+		process(OuterBean.NestedBean::class.java)
+		assertThat(
+			RuntimeHintsPredicates.reflection()
+				.onType(OuterBean.NestedBean::class.java)
+				.withMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS)
+				.and(RuntimeHintsPredicates.reflection().onType(OuterBean::class.java))
+		).accepts(generationContext.runtimeHints)
+	}
+
 	private fun process(beanClass: Class<*>) {
 		createContribution(beanClass)?.applyTo(generationContext, Mockito.mock(BeanRegistrationCode::class.java))
 	}
@@ -85,6 +96,10 @@ class KotlinReflectionBeanRegistrationAotProcessorTests {
 	open class BaseKotlinBean {
 		fun base() {
 		}
+	}
+
+	class OuterBean {
+		class NestedBean
 	}
 
 }
