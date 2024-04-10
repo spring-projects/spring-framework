@@ -74,11 +74,8 @@ public abstract class JmsUtils {
 		if (con != null) {
 			try {
 				if (stop) {
-					try {
+					try (con) {
 						con.stop();
-					}
-					finally {
-						con.close();
 					}
 				}
 				else {
