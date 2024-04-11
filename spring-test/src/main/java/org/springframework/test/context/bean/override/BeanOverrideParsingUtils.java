@@ -33,8 +33,8 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
 
 /**
  * Internal parsing utilities to discover the presence of
- * {@link BeanOverride @BeanOverride} on fields, and create the relevant
- * {@link OverrideMetadata} accordingly.
+ * {@link BeanOverride @BeanOverride} and create the relevant
+ * {@link OverrideMetadata} if necessary.
  *
  * @author Simon Baslé
  * @author Sam Brannen
@@ -58,16 +58,13 @@ abstract class BeanOverrideParsingUtils {
 			boolean present = MergedAnnotations.from(field, DIRECT).isPresent(BeanOverride.class);
 			hasBeanOverride.compareAndSet(false, present);
 		});
-		if (hasBeanOverride.get()) {
-			return true;
-		}
-		return false;
+		return hasBeanOverride.get();
 	}
 
 	/**
 	 * Parse the specified classes for the presence of fields annotated with
 	 * {@link BeanOverride @BeanOverride}, and create an {@link OverrideMetadata}
-	 * for each.
+	 * for each identified field.
 	 * @param classes the classes to parse
 	 */
 	static Set<OverrideMetadata> parse(Iterable<Class<?>> classes) {
@@ -77,7 +74,8 @@ abstract class BeanOverrideParsingUtils {
 	}
 
 	/**
-	 * Convenience method to {@link #parse(Iterable) parse} a single test class.
+	 * Convenience method to parse a single test class.
+	 * @see #parse(Iterable)
 	 */
 	static Set<OverrideMetadata> parse(Class<?> clazz) {
 		return parse(List.of(clazz));
@@ -85,7 +83,6 @@ abstract class BeanOverrideParsingUtils {
 
 	private static void parseField(Field field, Class<?> testClass, Set<OverrideMetadata> metadataSet) {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
-
 		MergedAnnotations.from(field, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
 			Assert.state(mergedAnnotation.isMetaPresent(), "@BeanOverride annotation must be meta-present");
 

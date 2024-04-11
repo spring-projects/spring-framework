@@ -48,7 +48,7 @@ Java::
 ======
 
 NOTE: The method to invoke is searched in the test class and any enclosing class it might
-have, as well as its hierarchy. This typically allows nested test class to provide the
+have, as well as its hierarchy. This typically allows nested test class to rely on the
 method to use in the root test class.
 
 [[spring-testing-annotation-beanoverriding-mockitobean]]
@@ -101,33 +101,34 @@ Java::
 The three annotations introduced above build upon the `@BeanOverride` meta-annotation
 and associated infrastructure, which allows to define custom bean overriding variants.
 
-In order to provide an extension, three classes are needed:
+To create an extension, the following is needed:
 
- - A concrete `BeanOverrideProcessor` implementation, `P`.
- - One or more concrete `OverrideMetadata` implementations created by said processor.
- - An annotation meta-annotated with `@BeanOverride(P.class)`.
+- An annotation meta-annotated with `@BeanOverride` that defines the
+`BeanOverrideProcessor` to use.
+- The `BeanOverrideProcessor` implementation itself.
+- One or more concrete `OverrideMetadata` implementations provided by the processor.
 
 The Spring TestContext Framework includes infrastructure classes that support bean
-overriding: a `BeanFactoryPostProcessor`, a `TestExecutionListener` and a `ContextCustomizerFactory`.
+overriding: a `BeanFactoryPostProcessor`, a `TestExecutionListener` and a
+`ContextCustomizerFactory`.
 The later two are automatically registered via the Spring TestContext Framework
 `spring.factories` file, and are responsible for setting up the rest of the infrastructure.
 
 The test classes are parsed looking for any field meta-annotated with `@BeanOverride`,
-instantiating the relevant `BeanOverrideProcessor` in order to register an `OverrideMetadata`.
+instantiating the relevant `BeanOverrideProcessor` in order to register an
+`OverrideMetadata`.
 
 Then the `BeanOverrideBeanFactoryPostProcessor` will use that information to alter the
-Context, registering and replacing bean definitions as influenced by each metadata
+context, registering and replacing bean definitions as defined by each metadata
 `BeanOverrideStrategy`:
 
- - `REPLACE_DEFINITION`: the bean post-processor replaces the bean definition.
-If it is not present in the context, an exception is thrown.
- - `CREATE_OR_REPLACE_DEFINITION`: same as above but if the bean definition is not present
-in the context, one is created
- - `WRAP_EARLY_BEAN`: an original instance is obtained and passed to the `OverrideMetadata`
-when the override instance is created.
+ - `REPLACE_DEFINITION`: replaces the bean definition. If it is not present in the
+context, an exception is thrown.
+ - `CREATE_OR_REPLACE_DEFINITION`: replaces the bean definition if the bean definition
+does not exist, or create one if it is not.
+ - `WRAP_BEAN`: get the original instance early so that it can be wrapped.
 
-NOTE: The Bean Overriding infrastructure doesn't include any bean resolution step
-(unlike e.g. an `@Autowired`-annotated field). As such, the name of the bean to override
-MUST be somehow provided to or computed by the `BeanOverrideProcessor`. Typically, the end
-user provides the name as part of the custom annotation's attributes, or the annotated
-field's name.
+NOTE: The Bean Overriding infrastructure does not include any bean resolution step,
+unlike an `@Autowired`-annotated field for instance. As such, the name of the bean to
+override must be somehow provided to or computed by the `BeanOverrideProcessor`.
+Typically, the user provides the name one way or the other.

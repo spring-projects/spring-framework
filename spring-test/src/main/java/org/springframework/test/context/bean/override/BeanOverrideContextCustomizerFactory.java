@@ -20,13 +20,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
-import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestContextAnnotationUtils;
 
 /**
@@ -59,40 +56,6 @@ class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 		}
 		if (TestContextAnnotationUtils.searchEnclosingClass(testClass)) {
 			findClassesWithBeanOverride(testClass.getEnclosingClass(), detectedClasses);
-		}
-	}
-
-	private static final class BeanOverrideContextCustomizer implements ContextCustomizer {
-
-		private final Set<Class<?>> detectedClasses;
-
-		BeanOverrideContextCustomizer(Set<Class<?>> detectedClasses) {
-			this.detectedClasses = detectedClasses;
-		}
-
-		@Override
-		public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-			if (context instanceof BeanDefinitionRegistry registry) {
-				BeanOverrideRegistrar.register(registry, this.detectedClasses);
-				BeanOverrideBeanFactoryPostProcessor.register(registry);
-			}
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == this) {
-				return true;
-			}
-			if (obj == null || obj.getClass() != getClass()) {
-				return false;
-			}
-			BeanOverrideContextCustomizer other = (BeanOverrideContextCustomizer) obj;
-			return this.detectedClasses.equals(other.detectedClasses);
-		}
-
-		@Override
-		public int hashCode() {
-			return this.detectedClasses.hashCode();
 		}
 	}
 

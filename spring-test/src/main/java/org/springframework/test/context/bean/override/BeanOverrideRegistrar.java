@@ -18,7 +18,6 @@ package org.springframework.test.context.bean.override;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,11 +25,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -46,40 +41,40 @@ import org.springframework.util.StringUtils;
  */
 class BeanOverrideRegistrar implements BeanFactoryAware {
 
-	static final String INFRASTRUCTURE_BEAN_NAME = BeanOverrideRegistrar.class.getName();
-
 	private final Map<OverrideMetadata, String> beanNameRegistry;
+
 	private final Map<String, OverrideMetadata> earlyOverrideMetadata;
+
 	private final Set<OverrideMetadata> overrideMetadata;
 
 	@Nullable
 	private ConfigurableBeanFactory beanFactory;
 
 	/**
-	 * Construct a new registrar and immediately parse the provided classes.
+	 * Create a new registrar and immediately parse the provided classes.
 	 * @param classesToParse the initial set of classes that have been
-	 * detected to contain bean overriding annotations, to be parsed immediately.
+	 * detected to contain bean overriding annotations
 	 */
 	BeanOverrideRegistrar(Set<Class<?>> classesToParse) {
-		Set<OverrideMetadata> metadata = BeanOverrideParsingUtils.parse(classesToParse);
-		Assert.state(!metadata.isEmpty(), "Expected metadata to be produced by parser");
-		this.overrideMetadata = metadata;
 		this.beanNameRegistry = new HashMap<>();
 		this.earlyOverrideMetadata = new HashMap<>();
-	}
-
-	/**
-	 * Return this processor's {@link OverrideMetadata} set.
-	 */
-	Set<OverrideMetadata> getOverrideMetadata() {
-		return this.overrideMetadata;
+		this.overrideMetadata = BeanOverrideParsingUtils.parse(classesToParse);
 	}
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		Assert.isInstanceOf(ConfigurableBeanFactory.class, beanFactory,
-				"Bean OverrideRegistrar can only be used with a ConfigurableBeanFactory");
-		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		if (!(beanFactory instanceof ConfigurableBeanFactory cbf)) {
+			throw new IllegalStateException("Cannot process bean override with a BeanFactory " +
+					"that doesn't implement ConfigurableBeanFactory: " + beanFactory.getClass());
+		}
+		this.beanFactory = cbf;
+	}
+
+	/**
+	 * Return the detected {@link OverrideMetadata} instances.
+	 */
+	Set<OverrideMetadata> getOverrideMetadata() {
+		return this.overrideMetadata;
 	}
 
 	/**
@@ -87,8 +82,8 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 	 * records and use the {@link OverrideMetadata} to create an override
 	 * instance from the provided bean, if relevant.
 	 */
-	final Object wrapIfNecessary(Object bean, String beanName) throws BeansException {
-		final OverrideMetadata metadata = this.earlyOverrideMetadata.get(beanName);
+	Object wrapIfNecessary(Object bean, String beanName) throws BeansException {
+		OverrideMetadata metadata = this.earlyOverrideMetadata.get(beanName);
 		if (metadata != null && metadata.getStrategy() == BeanOverrideStrategy.WRAP_BEAN) {
 			bean = metadata.createOverride(beanName, null, bean);
 			Assert.state(this.beanFactory != null, "ConfigurableBeanFactory must not be null");
@@ -98,7 +93,7 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 	}
 
 	/**
-	 * Register the provided {@link OverrideMetadata} and associated it with a
+	 * Register the provided {@link OverrideMetadata} and associate it with a
 	 * {@code beanName}.
 	 */
 	void registerNameForMetadata(OverrideMetadata metadata, String beanName) {
@@ -109,41 +104,8 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 	 * Mark the provided {@link OverrideMetadata} and {@code beanName} as "wrap
 	 * early", allowing for later bean override using {@link #wrapIfNecessary(Object, String)}.
 	 */
-	public void markWrapEarly(OverrideMetadata metadata, String beanName) {
+	void markWrapEarly(OverrideMetadata metadata, String beanName) {
 		this.earlyOverrideMetadata.put(beanName, metadata);
-	}
-
-	/**
-	 * Register a bean definition for a {@link BeanOverrideRegistrar} if it does
-	 * not yet exist. Additionally, each call adds the provided
-	 * {@code detectedTestClasses} to the set that will be used as constructor
-	 * argument.
-	 * <p>The resulting complete set of test classes will be parsed as soon as
-	 * the {@link BeanOverrideRegistrar} is constructed.
-	 * @param registry the bean definition registry
-	 * @param detectedTestClasses a partial {@link Set} of {@link Class classes}
-	 * that are expected to contain bean overriding annotations
-	 */
-	public static void register(BeanDefinitionRegistry registry, @Nullable Set<Class<?>> detectedTestClasses) {
-		BeanDefinition definition;
-		if (!registry.containsBeanDefinition(BeanOverrideRegistrar.INFRASTRUCTURE_BEAN_NAME)) {
-			definition = new RootBeanDefinition(BeanOverrideRegistrar.class);
-			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			ConstructorArgumentValues constructorArguments = definition.getConstructorArgumentValues();
-			constructorArguments.addIndexedArgumentValue(0, new LinkedHashSet<Class<?>>());
-			registry.registerBeanDefinition(INFRASTRUCTURE_BEAN_NAME, definition);
-		}
-		else {
-			definition = registry.getBeanDefinition(BeanOverrideRegistrar.INFRASTRUCTURE_BEAN_NAME);
-		}
-
-		ConstructorArgumentValues.ValueHolder constructorArg =
-				definition.getConstructorArgumentValues().getIndexedArgumentValue(0, Set.class);
-		@SuppressWarnings({"unchecked", "NullAway"})
-		Set<Class<?>> existing = (Set<Class<?>>) constructorArg.getValue();
-		if (detectedTestClasses != null && existing != null) {
-			existing.addAll(detectedTestClasses);
-		}
 	}
 
 	void inject(Object target, OverrideMetadata overrideMetadata) {
@@ -170,4 +132,5 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 			throw new BeanCreationException("Could not inject field '" + field + "'", ex);
 		}
 	}
+
 }

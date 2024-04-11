@@ -31,6 +31,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
+import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -39,9 +40,10 @@ import org.springframework.util.StringUtils;
 import static org.mockito.Mockito.mock;
 
 /**
- * A complete definition that can be used to create a Mockito spy.
+ * {@link OverrideMetadata} for Mockito {@code spy} support.
  *
  * @author Phillip Webb
+ * @author Simon Baslé
  * @since 6.2
  */
 class MockitoSpyBeanMetadata extends MockitoMetadata {
@@ -52,7 +54,6 @@ class MockitoSpyBeanMetadata extends MockitoMetadata {
 	}
 
 	MockitoSpyBeanMetadata(String name, MockReset reset, boolean proxyTargetAware, Field field, ResolvableType typeToSpy) {
-
 		super(name, reset, proxyTargetAware, field, typeToSpy, BeanOverrideStrategy.WRAP_BEAN);
 		Assert.notNull(typeToSpy, "typeToSpy must not be null");
 	}

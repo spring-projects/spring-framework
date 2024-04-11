@@ -151,7 +151,8 @@ class MockitoBeanMetadata extends MockitoMetadata {
 		if (this.serializable) {
 			settings.serializable();
 		}
-		return (T) mock(getBeanType().resolve(), settings);
+		Class<?> targetType = getBeanType().resolve();
+		return (T) mock(targetType, settings);
 	}
 
 }

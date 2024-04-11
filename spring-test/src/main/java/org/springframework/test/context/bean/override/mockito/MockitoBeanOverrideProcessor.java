@@ -23,11 +23,13 @@ import org.springframework.core.ResolvableType;
 import org.springframework.test.context.bean.override.BeanOverrideProcessor;
 
 /**
- * A {@link BeanOverrideProcessor} for mockito-related annotations
- * ({@link MockitoBean} and {@link MockitoSpyBean}).
+ * {@link BeanOverrideProcessor} implementation for Mockito support. Both mocking
+ * and spying are supported.
  *
  * @author Simon Baslé
  * @since 6.2
+ * @see MockitoBean
+ * @see MockitoSpyBean
  */
 class MockitoBeanOverrideProcessor implements BeanOverrideProcessor {
 

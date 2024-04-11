@@ -22,31 +22,26 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.ResolvableType;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
  * A {@link BeanFactoryPostProcessor} implementation that processes test classes
- * and adapt the {@link BeanDefinitionRegistry} for any {@link BeanOverride} it
- * may define.
+ * and adapt the {@link BeanFactory} for any {@link BeanOverride} it may define.
  *
  * <p>A set of classes from which to parse {@link OverrideMetadata} must be
  * provided to this processor. Each test class is expected to use any
@@ -66,10 +61,6 @@ import org.springframework.util.StringUtils;
  */
 class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
 
-	private static final String INFRASTRUCTURE_BEAN_NAME = BeanOverrideBeanFactoryPostProcessor.class.getName();
-
-	private static final String EARLY_INFRASTRUCTURE_BEAN_NAME =
-			BeanOverrideBeanFactoryPostProcessor.WrapEarlyBeanPostProcessor.class.getName();
 
 	private final BeanOverrideRegistrar overrideRegistrar;
 
@@ -94,14 +85,16 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		Assert.isInstanceOf(DefaultListableBeanFactory.class, beanFactory,
-				"Bean overriding annotations can only be used on a DefaultListableBeanFactory");
-		postProcessWithRegistry((DefaultListableBeanFactory) beanFactory);
+		if (!(beanFactory instanceof BeanDefinitionRegistry registry)) {
+			throw new IllegalStateException("Cannot process bean override with a BeanFactory " +
+					"that doesn't implement BeanDefinitionRegistry: " + beanFactory.getClass());
+		}
+		postProcessWithRegistry(beanFactory, registry);
 	}
 
-	private void postProcessWithRegistry(DefaultListableBeanFactory registry) {
+	private void postProcessWithRegistry(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry) {
 		for (OverrideMetadata metadata : this.overrideRegistrar.getOverrideMetadata()) {
-			registerBeanOverride(registry, metadata);
+			registerBeanOverride(beanFactory, registry, metadata);
 		}
 	}
 
@@ -116,15 +109,20 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		to.setScope(from.getScope());
 	}
 
-	private void registerBeanOverride(DefaultListableBeanFactory beanFactory, OverrideMetadata overrideMetadata) {
+	private void registerBeanOverride(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry,
+			OverrideMetadata overrideMetadata) {
+
 		switch (overrideMetadata.getStrategy()) {
-			case REPLACE_DEFINITION -> registerReplaceDefinition(beanFactory, overrideMetadata, true);
-			case REPLACE_OR_CREATE_DEFINITION -> registerReplaceDefinition(beanFactory, overrideMetadata, false);
+			case REPLACE_DEFINITION ->
+					registerReplaceDefinition(beanFactory, registry, overrideMetadata, true);
+			case REPLACE_OR_CREATE_DEFINITION ->
+					registerReplaceDefinition(beanFactory, registry, overrideMetadata, false);
 			case WRAP_BEAN -> registerWrapBean(beanFactory, overrideMetadata);
 		}
 	}
 
-	private void registerReplaceDefinition(DefaultListableBeanFactory beanFactory, OverrideMetadata overrideMetadata, boolean enforceExistingDefinition) {
+	private void registerReplaceDefinition(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry,
+			OverrideMetadata overrideMetadata, boolean enforceExistingDefinition) {
 
 		RootBeanDefinition beanDefinition = createBeanDefinition(overrideMetadata);
 		String beanName = overrideMetadata.getBeanName();
@@ -133,13 +131,13 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		if (beanFactory.containsBeanDefinition(beanName)) {
 			existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
 			copyBeanDefinitionDetails(existingBeanDefinition, beanDefinition);
-			beanFactory.removeBeanDefinition(beanName);
+			registry.removeBeanDefinition(beanName);
 		}
 		else if (enforceExistingDefinition) {
 			throw new IllegalStateException("Unable to override bean '" + beanName + "'; there is no" +
 					" bean definition to replace with that name");
 		}
-		beanFactory.registerBeanDefinition(beanName, beanDefinition);
+		registry.registerBeanDefinition(beanName, beanDefinition);
 
 		Object override = overrideMetadata.createOverride(beanName, existingBeanDefinition, null);
 		if (beanFactory.isSingleton(beanName)) {
@@ -160,7 +158,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	 * upon creation, during the {@link WrapEarlyBeanPostProcessor#getEarlyBeanReference(Object, String)}
 	 * phase.
 	 */
-	private void registerWrapBean(DefaultListableBeanFactory beanFactory, OverrideMetadata metadata) {
+	private void registerWrapBean(ConfigurableListableBeanFactory beanFactory, OverrideMetadata metadata) {
 		Set<String> existingBeanNames = getExistingBeanNames(beanFactory, metadata.getBeanType());
 		String beanName = metadata.getBeanName();
 		if (!existingBeanNames.contains(beanName)) {
@@ -177,7 +175,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		return definition;
 	}
 
-	private Set<String> getExistingBeanNames(DefaultListableBeanFactory beanFactory, ResolvableType resolvableType) {
+	private Set<String> getExistingBeanNames(ConfigurableListableBeanFactory beanFactory, ResolvableType resolvableType) {
 		Set<String> beans = new LinkedHashSet<>(
 				Arrays.asList(beanFactory.getBeanNamesForType(resolvableType, true, false)));
 		Class<?> type = resolvableType.resolve(Object.class);
@@ -191,39 +189,6 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		}
 		beans.removeIf(ScopedProxyUtils::isScopedTarget);
 		return beans;
-	}
-
-	/**
-	 * Register a {@link BeanOverrideBeanFactoryPostProcessor} with a {@link BeanDefinitionRegistry}.
-	 * <p>Not required when using the Spring TestContext Framework, as registration
-	 * is automatic via the
-	 * {@link org.springframework.core.io.support.SpringFactoriesLoader SpringFactoriesLoader}
-	 * mechanism.
-	 * @param registry the bean definition registry
-	 */
-	public static void register(BeanDefinitionRegistry registry) {
-		RuntimeBeanReference registrarReference = new RuntimeBeanReference(BeanOverrideRegistrar.INFRASTRUCTURE_BEAN_NAME);
-		// Early processor
-		addInfrastructureBeanDefinition(
-				registry, WrapEarlyBeanPostProcessor.class, EARLY_INFRASTRUCTURE_BEAN_NAME, constructorArgs ->
-					constructorArgs.addIndexedArgumentValue(0, registrarReference));
-
-		// Main processor
-		addInfrastructureBeanDefinition(
-				registry, BeanOverrideBeanFactoryPostProcessor.class, INFRASTRUCTURE_BEAN_NAME, constructorArgs ->
-						constructorArgs.addIndexedArgumentValue(0, registrarReference));
-	}
-
-	private static void addInfrastructureBeanDefinition(BeanDefinitionRegistry registry,
-			Class<?> clazz, String beanName, Consumer<ConstructorArgumentValues> constructorArgumentsConsumer) {
-
-		if (!registry.containsBeanDefinition(beanName)) {
-			RootBeanDefinition definition = new RootBeanDefinition(clazz);
-			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			ConstructorArgumentValues constructorArguments = definition.getConstructorArgumentValues();
-			constructorArgumentsConsumer.accept(constructorArguments);
-			registry.registerBeanDefinition(beanName, definition);
-		}
 	}
 
 

@@ -29,7 +29,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Base class for {@link MockitoBeanMetadata} and {@link MockitoSpyBeanMetadata}.
+ * Base class for Mockito override metadata.
  *
  * @author Phillip Webb
  * @since 6.2
@@ -94,7 +94,7 @@ abstract class MockitoMetadata extends OverrideMetadata {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		if (obj == this) {
 			return true;
 		}

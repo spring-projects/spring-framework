@@ -177,8 +177,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 	private AnnotationConfigApplicationContext createContext(Class<?>... classes) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		BeanOverrideRegistrar.register(context, Set.of(classes));
-		BeanOverrideBeanFactoryPostProcessor.register(context);
+		BeanOverrideContextCustomizer.registerInfrastructure(context, Set.of(classes));
 		return context;
 	}
 
@@ -193,6 +192,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	 */
 
 	static final SomeInterface OVERRIDE = new SomeImplementation();
+
 	static final ExampleService OVERRIDE_SERVICE = new FailingExampleService();
 
 	static class ReplaceBeans {

@@ -69,7 +69,7 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 	 * @param methodNames a set of supported names for the factory method
 	 * @return the corresponding factory method
 	 * @throws IllegalStateException if a matching factory method cannot
-	 * be found or multiple methods have a match
+	 * be found or multiple methods match
 	 */
 	static Method findTestBeanFactoryMethod(Class<?> clazz, Class<?> methodReturnType, String... methodNames) {
 		Assert.isTrue(methodNames.length > 0, "At least one candidate method name is required");
