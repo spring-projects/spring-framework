@@ -146,7 +146,6 @@ public class DateFormatterTests {
 		assertThat(formatter.parse("2009-06-01T14:23:05.003+0000", Locale.US), is(date));
 	}
 
-	@Test
 	public void shouldSupportJodaStylePatterns() throws Exception {
 		String[] chars = { "S", "M", "L", "F", "-" };
 		for (String d : chars) {

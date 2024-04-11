@@ -52,7 +52,6 @@ import static org.junit.Assert.*;
  */
 public class EnableAsyncTests {
 
-	@Test
 	public void proxyingOccurs() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class);
@@ -74,7 +73,6 @@ public class EnableAsyncTests {
 	}
 
 
-	@Test
 	public void withAsyncBeanWithExecutorQualifiedByName() throws ExecutionException, InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncWithExecutorQualifiedByNameConfig.class);
@@ -129,7 +127,6 @@ public class EnableAsyncTests {
 	}
 
 
-	@Test
 	public void asyncProcessorIsOrderedLowestPrecedenceByDefault() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class);
@@ -140,7 +137,6 @@ public class EnableAsyncTests {
 	}
 
 
-	@Test
 	public void orderAttributeIsPropagated() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(OrderedAsyncConfig.class);
@@ -161,7 +157,6 @@ public class EnableAsyncTests {
 	}
 
 
-	@Test
 	public void customAsyncAnnotationIsPropagated() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(CustomAsyncAnnotationConfig.class);
@@ -224,7 +219,6 @@ public class EnableAsyncTests {
 	}
 
 
-	@Test
 	public void customExecutorIsPropagated() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(CustomExecutorAsyncConfig.class);

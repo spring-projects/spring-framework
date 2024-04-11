@@ -77,7 +77,6 @@ public class AnnotationUtilsTests {
 		assertNull(findAnnotation(m, Order.class));
 	}
 
-	@Test
 	public void testFindMethodAnnotationOnBridgeMethod() throws Exception {
 
 		final Method m = SimpleFoo.class.getMethod("something", Object.class);

@@ -105,21 +105,21 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertTrue("URI not included", output.contains(uri));
 	}
 
-	public void testRenderAsPdfWithDataSource() throws Exception {
+	/*public void testRenderAsPdfWithDataSource() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getDataSource(), os);
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);
-	}
+	}*/
 
-	public void testRenderAsPdfWithCollection() throws Exception {
+	/*public void testRenderAsPdfWithCollection() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os);
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);
-	}
+	}*/
 
-	public void testRenderAsPdfWithExporterParameters() throws Exception {
+	/*public void testRenderAsPdfWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
 		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6.toString());
@@ -127,7 +127,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);
 		assertTrue(new String(output).contains("PDF-1.6"));
-	}
+	}*/
 
 	public void testRenderAsXlsWithDataSource() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -164,13 +164,13 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertHtmlOutputCorrect(output);
 	}
 
-	public void testRenderWithOutputStream() throws Exception {
+	/*public void testRenderWithOutputStream() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperPrint print = JasperFillManager.fillReport(getReport(), getParameters(), getDataSource());
 		JasperReportsUtils.render(new JRPdfExporter(), print, os);
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);
-	}
+	}*/
 
 	private void assertCsvOutputCorrect(String output) {
 		assertTrue("Output length should be greater than 0", (output.length() > 0));

@@ -3,8 +3,8 @@ buildscript {
 		maven { url "http://repo.springsource.org/plugins-release" }
 	}
 	dependencies {
-		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.4")
-		classpath("org.springframework.build.gradle:docbook-reference-plugin:0.2.7")
+		classpath(files("libs/propdeps-plugin-0.0.10.RELEASE.jar"))
+		classpath(files("libs/docbook-reference-plugin-0.3.2-SNAPSHOT.jar"))
 	}
 }
 
@@ -17,7 +17,7 @@ configure(allprojects) { project ->
 	// "Class not found: javac1.8" issue with Ant versions prior to 1.9.x
 	ant.properties["build.compiler"] = "javac1.7"
 
-	ext.aspectjVersion  = "1.7.2"
+	ext.aspectjVersion  = "1.8.1"
 	ext.hsqldbVersion   = "1.8.0.10"
 	ext.junitVersion    = "4.11"
 	ext.slf4jVersion    = "1.6.1"
@@ -70,6 +70,7 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "http://repo.springsource.org/libs-release" }
+		maven { url "https://repo1.maven.org/maven2" }
 	}
 
 	dependencies {
@@ -119,7 +120,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 			expand(copyright: new Date().format("yyyy"), version: project.version)
 		}
 	}
-
+/*
 	javadoc {
 		description = "Generates project-level javadoc for use in -javadoc jar"
 
@@ -136,21 +137,21 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 		logging.captureStandardError LogLevel.INFO
 		logging.captureStandardOutput LogLevel.INFO // suppress "## warnings" message
 	}
-
+*/
 	task sourcesJar(type: Jar, dependsOn:classes) {
 		classifier = "sources"
 		from sourceSets.main.allJava.srcDirs
 		include "**/*.java", "**/*.aj"
 	}
-
+/*
 	task javadocJar(type: Jar) {
 		classifier = "javadoc"
 		from javadoc
 	}
-
+*/
 	artifacts {
 		archives sourcesJar
-		archives javadocJar
+		//archives javadocJar
 	}
 }
 
@@ -345,9 +346,12 @@ project("spring-context") {
 		jvmArgs = ["-disableassertions:org.aspectj.weaver.UnresolvedType"] // SPR-7989
 	}
 }
-
 project("spring-tx") {
 	description = "Spring Transaction"
+	repositories {
+		maven { url "https://maven.repository.redhat.com/ga" }
+	}
+
 
 	dependencies {
 		optional(project(":spring-context")) // for JCA, @EnableTransactionManagement
@@ -380,7 +384,7 @@ project("spring-oxm") {
 		compile(project(":spring-core"))
 		testCompile(project(":spring-context"))
 		optional("com.thoughtworks.xstream:xstream:1.3.1")
-		optional("org.jibx:jibx-run:1.2.3")
+		compile("org.jibx:jibx-run:1.3.1")
 		optional("org.apache.xmlbeans:xmlbeans:2.4.0")
 		optional("org.codehaus.castor:castor-xml:1.3.2")
 		testCompile("org.codehaus.jettison:jettison:1.0.1")
@@ -460,6 +464,9 @@ project("spring-context-support") {
 
 project("spring-web") {
 	description = "Spring Web"
+	repositories {
+		mavenLocal()
+	}
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans")) // for MultiPartFilter
@@ -501,6 +508,9 @@ project("spring-web") {
 
 project("spring-orm") {
 	description = "Spring Object/Relational Mapping"
+	repositories {
+		maven { url "https://maven.repository.redhat.com/ga" }
+	}
 
 	compileTestJava {
 		// necessary to avoid java.lang.VerifyError on toplink compilation
@@ -525,8 +535,8 @@ project("spring-orm") {
 		testCompile("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
-		testCompile("org.eclipse.persistence:org.eclipse.persistence.asm:1.0.1")
-		testCompile("org.eclipse.persistence:org.eclipse.persistence.antlr:1.0.1")
+		testCompile("org.eclipse.persistence:org.eclipse.persistence.asm:2.4.2")
+		testCompile("org.eclipse.persistence:org.eclipse.persistence.antlr:2.4.2")
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
@@ -569,7 +579,7 @@ project("spring-webmvc") {
 		optional("org.apache.tiles:tiles-servlet:2.1.2")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.3")
 		optional("org.apache.poi:poi:3.0.2-FINAL")
-		optional("com.lowagie:itext:2.1.7")
+		compile("com.lowagie:itext:2.1.7")
 		optional("jasperreports:jasperreports:2.0.5") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
@@ -790,16 +800,16 @@ project("spring-aspects") {
 configure(rootProject) {
 	description = "Spring Framework"
 
-	apply plugin: "docbook-reference"
+	//apply plugin: "docbook-reference"
 	apply plugin: "groovy"
 	// apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
-
+/*
 	reference {
 		sourceDir = file("src/reference/docbook")
 		pdfFilename = "spring-framework-reference.pdf"
 	}
-
+*/
 	// TODO: DetectSplitPackagesPlugin fails in line 154 due to method not found on java.io.File.
 	// TODO: Possibly related to user rights or OS differences on OpenJDK 8; works fine on JDK 7.
 	// detectSplitPackages {
@@ -870,7 +880,7 @@ configure(rootProject) {
 			classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
 		}
 	}
-
+/*
 	task docsZip(type: Zip) {
 		group = "Distribution"
 		baseName = "spring-framework"
@@ -890,7 +900,7 @@ configure(rootProject) {
 			into "spring-framework-reference"
 		}
 	}
-
+*/
 	task schemaZip(type: Zip) {
 		group = "Distribution"
 		baseName = "spring-framework"
@@ -919,7 +929,7 @@ configure(rootProject) {
 		}
 	}
 
-	task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
+	task distZip(type: Zip, dependsOn: [schemaZip]) {
 		group = "Distribution"
 		baseName = "spring-framework"
 		classifier = "dist"
@@ -935,11 +945,11 @@ configure(rootProject) {
 			into "${baseDir}"
 			expand(copyright: new Date().format("yyyy"), version: project.version)
 		}
-
+/*
 		from(zipTree(docsZip.archivePath)) {
 			into "${baseDir}/docs"
 		}
-
+*/
 		from(zipTree(schemaZip.archivePath)) {
 			into "${baseDir}/schema"
 		}
@@ -990,7 +1000,7 @@ configure(rootProject) {
 	}
 
 	artifacts {
-		archives docsZip
+		//archives docsZip
 		archives schemaZip
 		archives distZip
 	}
