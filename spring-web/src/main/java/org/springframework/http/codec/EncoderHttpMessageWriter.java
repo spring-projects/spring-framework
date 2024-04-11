@@ -16,20 +16,15 @@
 
 package org.springframework.http.codec;
 
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -38,6 +33,11 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * {@code HttpMessageWriter} that wraps and delegates to an {@link Encoder}.
@@ -127,6 +127,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 			return body
 					.singleOrEmpty()
 					.switchIfEmpty(Mono.defer(() -> {
+						message.getHeaders().remove(HttpHeaders.CONTENT_TYPE);
 						message.getHeaders().setContentLength(0);
 						return message.setComplete().then(Mono.empty());
 					}))
