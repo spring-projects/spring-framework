@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,9 +65,11 @@ class AutowiredConfigurationErrorsIntegrationTests {
 	@ParameterizedTest
 	@ValueSource(classes = {
 		StaticAutowiredBeforeAllMethod.class,
+		StaticAutowiredPrivateBeforeAllMethod.class,
 		StaticAutowiredAfterAllMethod.class,
 		AutowiredBeforeEachMethod.class,
 		AutowiredAfterEachMethod.class,
+		AutowiredPrivateAfterEachMethod.class,
 		AutowiredTestMethod.class,
 		AutowiredRepeatedTestMethod.class,
 		AutowiredParameterizedTestMethod.class
@@ -167,6 +169,21 @@ class AutowiredConfigurationErrorsIntegrationTests {
 	}
 
 	@SpringJUnitConfig(Config.class)
+	@FailingTestCase
+	static class StaticAutowiredPrivateBeforeAllMethod {
+
+		@Autowired
+		@BeforeAll
+		private static void beforeAll(TestInfo testInfo) {
+		}
+
+		@Test
+		@DisplayName(DISPLAY_NAME)
+		void test() {
+		}
+	}
+
+	@SpringJUnitConfig(Config.class)
 	@TestInstance(PER_CLASS)
 	@FailingTestCase
 	static class NonStaticAutowiredBeforeAllMethod {
@@ -242,6 +259,22 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		void afterEach(TestInfo testInfo) {
 		}
 	}
+
+	@SpringJUnitConfig(Config.class)
+	@FailingTestCase
+	static class AutowiredPrivateAfterEachMethod {
+
+		@Test
+		@DisplayName(DISPLAY_NAME)
+		void test() {
+		}
+
+		@Autowired
+		@AfterEach
+		private void afterEach(TestInfo testInfo) {
+		}
+	}
+
 
 	@SpringJUnitConfig(Config.class)
 	@FailingTestCase
