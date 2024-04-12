@@ -58,7 +58,7 @@ class PackagesAnnotationFilterTests {
 	@Test
 	void matchesWhenNotInPackageReturnsFalse() {
 		PackagesAnnotationFilter filter = new PackagesAnnotationFilter("com.example");
-		assertThat(filter.matches("org.springframework.sterotype.Component")).isFalse();
+		assertThat(filter.matches("org.springframework.stereotype.Component")).isFalse();
 	}
 
 	@Test
