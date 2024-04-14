@@ -238,7 +238,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		if (proxyType == null) {
 			TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
 			if (targetSource != null) {
-				if (StringUtils.hasLength(beanName)) {
+				if (StringUtils.hasText(beanName)) {
 					this.targetSourcedBeans.add(beanName);
 				}
 			}
@@ -273,7 +273,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
-		if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
+		if (!StringUtils.hasText(beanName) || !this.targetSourcedBeans.contains(beanName)) {
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
@@ -288,7 +288,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		// The TargetSource will handle target instances in a custom fashion.
 		TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
 		if (targetSource != null) {
-			if (StringUtils.hasLength(beanName)) {
+			if (StringUtils.hasText(beanName)) {
 				this.targetSourcedBeans.add(beanName);
 			}
 			Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
@@ -352,7 +352,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @return a proxy wrapping the bean, or the raw bean instance as-is
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
+		if (StringUtils.hasText(beanName) && this.targetSourcedBeans.contains(beanName)) {
 			return bean;
 		}
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
