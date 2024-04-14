@@ -227,7 +227,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 */
 	public final void setTimeout(int timeout) {
 		if (timeout < TIMEOUT_DEFAULT) {
-			throw new IllegalArgumentException("Timeout must be a positive integer or TIMEOUT_DEFAULT");
+			throw new IllegalArgumentException("Timeout must be a non-negative integer or TIMEOUT_DEFAULT");
 		}
 		this.timeout = timeout;
 	}
