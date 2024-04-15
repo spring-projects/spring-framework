@@ -212,7 +212,7 @@ public enum SpelMessage {
 			"No bean resolver registered in the context to resolve access to bean ''{0}''"),
 
 	EXCEPTION_DURING_BEAN_RESOLUTION(Kind.ERROR, 1058,
-			"A problem occurred when trying to resolve bean ''{0}'':''{1}''"),
+			"A problem occurred when trying to resolve bean ''{0}'': ''{1}''"),
 
 	INVALID_BEAN_REFERENCE(Kind.ERROR, 1059,
 			"@ or & can only be followed by an identifier or a quoted name"),

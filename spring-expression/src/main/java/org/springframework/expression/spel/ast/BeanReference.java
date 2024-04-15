@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,11 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 
 /**
- * Represents a bean reference to a type, for example {@code @foo} or {@code @'foo.bar'}.
- * For a FactoryBean the syntax {@code &foo} can be used to access the factory itself.
+ * Represents a reference to a bean, for example {@code @orderService} or
+ * {@code @'order.service'}.
+ *
+ * <p>For a {@link org.springframework.beans.factory.FactoryBean FactoryBean}, the
+ * syntax {@code &orderServiceFactory} can be used to access the factory itself.
  *
  * @author Andy Clement
  */
