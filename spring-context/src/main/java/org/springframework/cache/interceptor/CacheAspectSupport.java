@@ -548,8 +548,19 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		// Collect puts from any @Cacheable miss, if no cached value is found
 		List<CachePutRequest> cachePutRequests = new ArrayList<>(1);
+		Collection<CacheOperationContext> cacheableContexts = contexts.get(CacheableOperation.class);
 		if (cacheHit == null) {
-			collectPutRequests(contexts.get(CacheableOperation.class), cacheValue, cachePutRequests);
+			collectPutRequests(cacheableContexts, cacheValue, cachePutRequests);
+		} else {
+			//Put cached into the lower(higher speed) layers
+			Collection<CacheOperationContext> cachesToPut = new ArrayList<>();
+			for (CacheOperationContext cacheableContext : cacheableContexts) {
+				if (cacheableContext.isHit()) {
+					break;
+				}
+				cachesToPut.add(cacheableContext);
+			}
+			collectPutRequests(cachesToPut, cacheValue, cachePutRequests);
 		}
 
 		// Collect any explicit @CachePuts
@@ -829,6 +840,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private final Collection<String> cacheNames;
 
+		private boolean hit = false;
+
+
 		@Nullable
 		private Boolean conditionPassing;
 
@@ -842,6 +856,15 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			this.caches = CacheAspectSupport.this.getCaches(this, metadata.cacheResolver);
 			this.cacheNames = prepareCacheNames(this.caches);
 		}
+
+		public void setHit(boolean hit) {
+			this.hit = hit;
+		}
+
+		public boolean isHit() {
+			return hit;
+		}
+
 
 		@Override
 		public CacheOperation getOperation() {
