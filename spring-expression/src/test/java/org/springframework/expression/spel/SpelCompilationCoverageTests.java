@@ -32,14 +32,18 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Stream;
 
+import example.Color;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ast.CompoundExpression;
 import org.springframework.expression.spel.ast.InlineList;
@@ -52,12 +56,19 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 import org.springframework.expression.spel.testresources.Person;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.within;
 import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.springframework.expression.spel.SpelMessage.EXCEPTION_DURING_INDEX_READ;
 import static org.springframework.expression.spel.standard.SpelExpressionTestUtils.assertIsCompiled;
 
 /**
@@ -749,6 +760,198 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			return stream.map(Object::toString).collect(joining(" "));
 		}
 
+		@Nested
+		class IndexAccessorTests {
+
+			@Test
+			void indexWithPrimitiveIndexTypeAndReferenceValueTypeAccessedViaRoot() {
+				String exitTypeDescriptor = CodeFlow.toDescriptor(Color.class);
+				Colors colors = new Colors();
+
+				StandardEvaluationContext context = new StandardEvaluationContext();
+				context.addIndexAccessor(new ColorsIndexAccessor());
+
+				expression = parser.parseExpression("[0]");
+				assertCannotCompile(expression);
+
+				assertThatExceptionOfType(SpelEvaluationException.class)
+						.isThrownBy(() -> expression.getValue(context, colors))
+						.withMessageEndingWith("A problem occurred while attempting to read index '%s' in '%s'",
+								0, Colors.class.getName())
+						.withCauseInstanceOf(IndexOutOfBoundsException.class)
+						.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_READ);
+				assertCannotCompile(expression);
+
+				// IntLiteral as index --> represented as an int in compiled bytecode,
+				// which does not require unboxing since get(int) method expects an int.
+				// Falls in range [ICONST_0, ICONST_5]
+				expression = parser.parseExpression("[1]");
+				assertCannotCompile(expression);
+
+				assertThat(expression.getValue(context, colors)).isEqualTo(Color.BLUE);
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context, colors)).isEqualTo(Color.BLUE);
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// IntLiteral as index --> represented as an int in compiled bytecode,
+				// which does not require unboxing since get(int) method expects an int.
+				// Does not fall in range [ICONST_0, ICONST_5]
+				expression = parser.parseExpression("[42]");
+				assertCannotCompile(expression);
+
+				assertThat(expression.getValue(context, colors)).isEqualTo(Color.PURPLE);
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context, colors)).isEqualTo(Color.PURPLE);
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// Integer variable as index --> represented as an Integer in compiled bytecode,
+				// which requires unboxing from Integer to int since get(int) method expects an int.
+				context.setVariable("colorIndex", 2);
+				expression = parser.parseExpression("[#colorIndex]");
+				assertCannotCompile(expression);
+
+				assertThat(expression.getValue(context, colors)).isEqualTo(Color.GREEN);
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context, colors)).isEqualTo(Color.GREEN);
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// Reuse expression but change value of colorIndex.
+				context.setVariable("colorIndex", 3);
+
+				assertThat(expression.getValue(context, colors)).isEqualTo(Color.ORANGE);
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context, colors)).isEqualTo(Color.ORANGE);
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+			}
+
+			@Test
+			void indexWithPrimitiveIndexTypeAndReferenceValueTypeAccessedViaList() {
+				String exitTypeDescriptor = CodeFlow.toDescriptor(Color.class);
+
+				StandardEvaluationContext context = new StandardEvaluationContext();
+				context.addIndexAccessor(new ColorsIndexAccessor());
+				context.setVariable("list", List.of(new Colors()));
+
+				expression = parser.parseExpression("#list.get(0)[0]");
+				assertCannotCompile(expression);
+
+				assertThatExceptionOfType(SpelEvaluationException.class)
+						.isThrownBy(() -> expression.getValue(context))
+						.withMessageEndingWith("A problem occurred while attempting to read index '%s' in '%s'",
+								0, Colors.class.getName())
+						.withCauseInstanceOf(IndexOutOfBoundsException.class)
+						.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_READ);
+				assertCannotCompile(expression);
+
+				// IntLiteral as index --> represented as an int in compiled bytecode,
+				// which does not require unboxing since get(int) method expects an int.
+				expression = parser.parseExpression("#list.get(0)[1]");
+				assertCannotCompile(expression);
+
+				assertThat(expression.getValue(context)).isEqualTo(Color.BLUE);
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo(Color.BLUE);
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// Integer variable as index --> represented as an Integer in compiled bytecode,
+				// which requires unboxing from Integer to int since get(int) method expects an int.
+				context.setVariable("colorIndex", 2);
+				expression = parser.parseExpression("#list.get(0)[#colorIndex]");
+				assertCannotCompile(expression);
+
+				assertThat(expression.getValue(context)).isEqualTo(Color.GREEN);
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo(Color.GREEN);
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// Reuse expression but change value of colorIndex.
+				context.setVariable("colorIndex", 3);
+
+				assertThat(expression.getValue(context)).isEqualTo(Color.ORANGE);
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo(Color.ORANGE);
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+			}
+
+			@Test
+			void indexWithReferenceIndexTypeAndPrimitiveValueType() {
+				String exitTypeDescriptor = CodeFlow.toDescriptor(int.class);
+
+				StandardEvaluationContext context = new StandardEvaluationContext();
+				context.addIndexAccessor(new ColorOrdinalsIndexAccessor());
+				context.setVariable("colorOrdinals", new ColorOrdinals());
+				context.setVariable("color", Color.GREEN);
+
+				expression = parser.parseExpression("#colorOrdinals[#color]");
+				assertCannotCompile(expression);
+
+				assertThat(expression.getValue(context)).isEqualTo(Color.GREEN.ordinal());
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo(Color.GREEN.ordinal());
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// Reuse expression but change value of color.
+				context.setVariable("color", Color.BLUE);
+
+				assertThat(expression.getValue(context)).isEqualTo(Color.BLUE.ordinal());
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo(Color.BLUE.ordinal());
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+			}
+
+			@ParameterizedTest(name = "{0}")
+			@MethodSource("fruitsIndexAccessors")
+			void indexWithReferenceIndexTypeAndReferenceValueType(IndexAccessor indexAccessor) {
+				String exitTypeDescriptor = CodeFlow.toDescriptor(String.class);
+
+				StandardEvaluationContext context = new StandardEvaluationContext();
+				context.addIndexAccessor(indexAccessor);
+				context.setVariable("list", List.of(new Fruits()));
+
+				expression = parser.parseExpression("#list.get(0)[T(example.Color).PURPLE]");
+				assertCannotCompile(expression);
+
+				assertThatExceptionOfType(SpelEvaluationException.class)
+						.isThrownBy(() -> expression.getValue(context))
+						.withMessageEndingWith("A problem occurred while attempting to read index '%s' in '%s'",
+								Color.PURPLE, Fruits.class.getName())
+						.withCauseInstanceOf(IndexOutOfBoundsException.class)
+						.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_READ);
+				assertCannotCompile(expression);
+
+				expression = parser.parseExpression("#list[0][T(example.Color).RED]");
+				assertCannotCompile(expression);
+
+				assertThat(expression.getValue(context)).isEqualTo("cherry");
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo("cherry");
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				context.setVariable("color", Color.GREEN);
+				expression = parser.parseExpression("#list[0][#color]");
+				assertCannotCompile(expression);
+
+				assertThat(expression.getValue(context)).isEqualTo("kiwi");
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo("kiwi");
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// Reuse expression but change value of color.
+				context.setVariable("color", Color.BLUE);
+
+				assertThat(expression.getValue(context)).isEqualTo("blueberry");
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo("blueberry");
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+			}
+
+			static Stream<Arguments> fruitsIndexAccessors() {
+				return Stream.of(
+					arguments(named("FruitsIndexAccessor", new FruitsIndexAccessor())),
+					arguments(named("ReflectiveIndexAccessor", new ReflectiveIndexAccessor(Fruits.class, Color.class, "get")))
+				);
+			}
+		}
 	}
 
 	@Nested
@@ -941,6 +1144,73 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
 		}
 
+		@Nested
+		class NullSafeIndexAccessorTests {
+
+			@Test
+			void nullSafeIndexWithReferenceIndexTypeAndPrimitiveValueType() {
+				// Integer instead of int, since null-safe operators can return null.
+				String exitTypeDescriptor = CodeFlow.toDescriptor(Integer.class);
+
+				StandardEvaluationContext context = new StandardEvaluationContext();
+				context.addIndexAccessor(new ColorOrdinalsIndexAccessor());
+				context.setVariable("color", Color.GREEN);
+
+				expression = parser.parseExpression("#colorOrdinals?.[#color]");
+				assertCannotCompile(expression);
+
+				// Cannot compile before the indexed value type is known.
+				assertThat(expression.getValue(context)).isNull();
+				assertCannotCompile(expression);
+				assertThat(expression.getValue(context)).isNull();
+				assertThat(getAst().getExitDescriptor()).isNull();
+
+				context.setVariable("colorOrdinals", new ColorOrdinals());
+
+				assertThat(expression.getValue(context)).isEqualTo(Color.GREEN.ordinal());
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo(Color.GREEN.ordinal());
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// Null-safe support should have been compiled once the indexed value type is known.
+				context.setVariable("colorOrdinals", null);
+				assertThat(expression.getValue(context)).isNull();
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isNull();
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+			}
+
+			@Test
+			void nullSafeIndexWithReferenceIndexTypeAndReferenceValueType() {
+				String exitTypeDescriptor = CodeFlow.toDescriptor(String.class);
+
+				StandardEvaluationContext context = new StandardEvaluationContext();
+				context.addIndexAccessor(new FruitsIndexAccessor());
+				context.setVariable("color", Color.RED);
+
+				expression = parser.parseExpression("#fruits?.[#color]");
+
+				// Cannot compile before the indexed value type is known.
+				assertThat(expression.getValue(context)).isNull();
+				assertCannotCompile(expression);
+				assertThat(expression.getValue(context)).isNull();
+				assertThat(getAst().getExitDescriptor()).isNull();
+
+				context.setVariable("fruits", new Fruits());
+
+				assertThat(expression.getValue(context)).isEqualTo("cherry");
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo("cherry");
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// Null-safe support should have been compiled once the indexed value type is known.
+				context.setVariable("fruits", null);
+				assertThat(expression.getValue(context)).isNull();
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isNull();
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+			}
+		}
 	}
 
 	@Nested
@@ -6963,6 +7233,242 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public String string;
 		public Map<String, Integer> map;
 		public Person person;
+	}
+
+	/**
+	 * {@link CompilableIndexAccessor} that uses reflection to invoke the
+	 * configured read-method for index access operations.
+	 */
+	static class ReflectiveIndexAccessor implements CompilableIndexAccessor {
+
+		private final Class<?> targetType;
+
+		private final Class<?> indexType;
+
+		private final Method readMethod;
+
+		private final Method readMethodToInvoke;
+
+		private final String targetTypeDesc;
+
+		private final String methodDescr;
+
+
+		public ReflectiveIndexAccessor(Class<?> targetType, Class<?> indexType, String readMethodName) {
+			this.targetType = targetType;
+			this.indexType = indexType;
+			this.readMethod = ReflectionUtils.findMethod(targetType, readMethodName, indexType);
+			Assert.notNull(this.readMethod, () -> "Failed to find method '%s(%s)' in class '%s'."
+					.formatted(readMethodName, indexType.getTypeName(), targetType.getTypeName()));
+			this.readMethodToInvoke = ClassUtils.getInterfaceMethodIfPossible(this.readMethod, targetType);
+			this.targetTypeDesc = CodeFlow.toDescriptor(targetType);
+			this.methodDescr = CodeFlow.createSignatureDescriptor(this.readMethod);
+		}
+
+
+		@Override
+		public Class<?>[] getSpecificTargetClasses() {
+			return new Class[] { this.targetType };
+		}
+
+		@Override
+		public boolean canRead(EvaluationContext context, Object target, Object index) {
+			return (ClassUtils.isAssignableValue(this.targetType, target) &&
+					ClassUtils.isAssignableValue(this.indexType, index));
+		}
+
+		@Override
+		public TypedValue read(EvaluationContext context, Object target, Object index) {
+			ReflectionUtils.makeAccessible(this.readMethodToInvoke);
+			Object value = ReflectionUtils.invokeMethod(this.readMethodToInvoke, target, index);
+			return new TypedValue(value);
+		}
+
+		@Override
+		public boolean canWrite(EvaluationContext context, Object target, Object index) {
+			return false;
+		}
+
+		@Override
+		public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean isCompilable() {
+			return true;
+		}
+
+		@Override
+		public Class<?> getIndexedValueType() {
+			return this.readMethod.getReturnType();
+		}
+
+		@Override
+		public void generateCode(SpelNode index, MethodVisitor mv, CodeFlow cf) {
+			// Determine the public declaring class.
+			Class<?> publicDeclaringClass = this.readMethodToInvoke.getDeclaringClass();
+			if (!Modifier.isPublic(publicDeclaringClass.getModifiers()) && this.readMethod != null) {
+				publicDeclaringClass = CodeFlow.findPublicDeclaringClass(this.readMethod);
+			}
+			Assert.state(publicDeclaringClass != null && Modifier.isPublic(publicDeclaringClass.getModifiers()),
+					() -> "Failed to find public declaring class for: " + this.readMethod);
+
+			// Ensure the current object on the stack is the target type.
+			String lastDesc = cf.lastDescriptor();
+			if (lastDesc == null || !lastDesc.equals(this.targetTypeDesc)) {
+				CodeFlow.insertCheckCast(mv, this.targetTypeDesc);
+			}
+
+			// Push the index onto the stack.
+			cf.generateCodeForArgument(mv, index, this.indexType);
+
+			// Invoke the read method.
+			String classDesc = publicDeclaringClass.getName().replace('.', '/');
+			boolean isStatic = Modifier.isStatic(this.readMethod.getModifiers());
+			boolean isInterface = publicDeclaringClass.isInterface();
+			int opcode = (isStatic ? INVOKESTATIC : isInterface ? INVOKEINTERFACE : INVOKEVIRTUAL);
+			mv.visitMethodInsn(opcode, classDesc, this.readMethod.getName(), this.methodDescr, isInterface);
+		}
+	}
+
+	/**
+	 * Type that can be indexed by an int or an Integer and whose indexed values
+	 * are enums.
+	 */
+	public static class Colors {
+
+		public Color get(int index) {
+			return switch (index) {
+				case 1 -> Color.BLUE;
+				case 2 -> Color.GREEN;
+				case 3 -> Color.ORANGE;
+				case 42 -> Color.PURPLE;
+				default -> throw new IndexOutOfBoundsException("No color for index " + index);
+			};
+		}
+	}
+
+	/**
+	 * {@link CompilableIndexAccessor} that knows how to index into {@link Colors}.
+	 */
+	private static class ColorsIndexAccessor extends ReflectiveIndexAccessor {
+
+		ColorsIndexAccessor() {
+			super(Colors.class, int.class, "get");
+		}
+	}
+
+	/**
+	 * Type that can be indexed by an enum and whose indexed values are primitive
+	 * integers.
+	 */
+	public static class ColorOrdinals {
+
+		public int get(Color color) {
+			return color.ordinal();
+		}
+	}
+
+	/**
+	 * {@link CompilableIndexAccessor} that knows how to index into {@link ColorOrdinals}.
+	 */
+	private static class ColorOrdinalsIndexAccessor extends ReflectiveIndexAccessor {
+
+		ColorOrdinalsIndexAccessor() {
+			super(ColorOrdinals.class, Color.class, "get");
+		}
+	}
+
+	/**
+	 * Type that can be indexed by the {@link Color} enum (i.e., something other
+	 * than an int, Integer, or String) and whose indexed values are Strings.
+	 */
+	public static class Fruits {
+
+		public String get(Color color) {
+			return switch (color) {
+				case RED -> "cherry";
+				case ORANGE -> "orange";
+				case YELLOW -> "banana";
+				case GREEN -> "kiwi";
+				case BLUE -> "blueberry";
+				// We don't map PURPLE so that we can test for IndexOutOfBoundsException.
+				// case PURPLE -> "plum";
+				default -> throw new IndexOutOfBoundsException("color " + color + " is not supported");
+			};
+		}
+	}
+
+	/**
+	 * Manually implemented {@link CompilableIndexAccessor} that knows how to
+	 * index into {@link Fruits}.
+	 */
+	private static class FruitsIndexAccessor implements CompilableIndexAccessor {
+
+		private final Class<?> targetType = Fruits.class;
+
+		private final Class<?> indexType = Color.class;
+
+		private final Method method = ReflectionUtils.findMethod(this.targetType, "get", this.indexType);
+
+		private final String targetTypeDesc = CodeFlow.toDescriptor(this.targetType);
+
+		private final String classDesc = this.targetTypeDesc.substring(1);
+
+		private final String methodDescr = CodeFlow.createSignatureDescriptor(this.method);
+
+
+		@Override
+		public Class<?>[] getSpecificTargetClasses() {
+			return new Class[] { this.targetType };
+		}
+
+		@Override
+		public boolean canRead(EvaluationContext context, Object target, Object index) {
+			return (this.targetType.isInstance(target) && this.indexType.isInstance(index));
+		}
+
+		@Override
+		public TypedValue read(EvaluationContext context, Object target, Object index) {
+			Fruits fruits = (Fruits) target;
+			Color color = (Color) index;
+			return new TypedValue(fruits.get(color));
+		}
+
+		@Override
+		public boolean canWrite(EvaluationContext context, Object target, Object index) {
+			return false;
+		}
+
+		@Override
+		public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean isCompilable() {
+			return true;
+		}
+
+		@Override
+		public Class<?> getIndexedValueType() {
+			return this.method.getReturnType();
+		}
+
+		@Override
+		public void generateCode(SpelNode index, MethodVisitor mv, CodeFlow cf) {
+			String lastDesc = cf.lastDescriptor();
+			// Ensure the current object on the stack is the target type.
+			if (lastDesc == null || !lastDesc.equals(this.targetTypeDesc)) {
+				CodeFlow.insertCheckCast(mv, this.targetTypeDesc);
+			}
+			// Push the index onto the stack.
+			cf.generateCodeForArgument(mv, index, Color.class);
+			// Invoke the read-index method.
+			mv.visitMethodInsn(INVOKEVIRTUAL, this.classDesc, this.method.getName(), this.methodDescr, false);
+		}
+
 	}
 
 }

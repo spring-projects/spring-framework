@@ -33,6 +33,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
+import org.springframework.expression.spel.CompilableIndexAccessor;
 import org.springframework.expression.spel.CompilablePropertyAccessor;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -314,6 +315,12 @@ public class Indexer extends SpelNodeImpl {
 					cachedPropertyReadState.accessor instanceof CompilablePropertyAccessor cpa &&
 					cpa.isCompilable());
 		}
+		else if (this.indexedType == IndexedType.CUSTOM) {
+			CachedIndexState cachedIndexReadState = this.cachedIndexReadState;
+			return (cachedIndexReadState != null &&
+					cachedIndexReadState.accessor instanceof CompilableIndexAccessor cia &&
+					cia.isCompilable() && index.isCompilable());
+		}
 		return false;
 	}
 
@@ -396,6 +403,17 @@ public class Indexer extends SpelNodeImpl {
 			String propertyName = (String) stringLiteral.getLiteralValue().getValue();
 			Assert.state(propertyName != null, "No property name");
 			compilablePropertyAccessor.generateCode(propertyName, mv, cf);
+		}
+
+		else if (this.indexedType == IndexedType.CUSTOM) {
+			CachedIndexState cachedIndexReadState = this.cachedIndexReadState;
+			Assert.state(cachedIndexReadState != null, "No cached IndexAccessor for reading");
+			if (!(cachedIndexReadState.accessor instanceof CompilableIndexAccessor compilableIndexAccessor)) {
+				throw new IllegalStateException(
+						"Cached IndexAccessor must be a CompilableIndexAccessor, but was: " +
+							cachedIndexReadState.accessor.getClass().getName());
+			}
+			compilableIndexAccessor.generateCode(index, mv, cf);
 		}
 
 		cf.pushDescriptor(exitTypeDescriptor);
@@ -987,6 +1005,9 @@ public class Indexer extends SpelNodeImpl {
 					if (indexAccessor.canRead(this.evaluationContext, this.target, this.index)) {
 						TypedValue result = indexAccessor.read(this.evaluationContext, this.target, this.index);
 						Indexer.this.cachedIndexReadState = new CachedIndexState(indexAccessor, targetType, this.index);
+						if (indexAccessor instanceof CompilableIndexAccessor compilableIndexAccessor) {
+							setExitTypeDescriptor(CodeFlow.toDescriptor(compilableIndexAccessor.getIndexedValueType()));
+						}
 						return result;
 					}
 				}
