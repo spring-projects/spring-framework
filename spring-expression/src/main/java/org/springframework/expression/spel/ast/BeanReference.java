@@ -32,6 +32,7 @@ import org.springframework.expression.spel.SpelMessage;
  * syntax {@code &orderServiceFactory} can be used to access the factory itself.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  */
 public class BeanReference extends SpelNodeImpl {
 
@@ -45,6 +46,16 @@ public class BeanReference extends SpelNodeImpl {
 		this.beanName = beanName;
 	}
 
+
+	/**
+	 * Get the name of the referenced bean.
+	 * @return the name of the referenced bean, potentially prefixed with
+	 * {@code &} for a direct reference to a {@code FactoryBean}
+	 * @since 6.2
+	 */
+	public final String getName() {
+		return this.beanName;
+	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
