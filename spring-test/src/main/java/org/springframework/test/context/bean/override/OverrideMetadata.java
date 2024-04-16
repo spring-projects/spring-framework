@@ -26,15 +26,15 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 
 /**
- * Metadata for Bean Override injection points, also responsible for the
- * creation of the overriding instance.
+ * Metadata for Bean Override injection points, also responsible for creation of
+ * the overriding instance.
  *
  * <p><strong>WARNING</strong>: implementations are used as a cache key and
- * must implement proper {@code equals} and {@code hashCode}t methods.
+ * must implement proper {@code equals()} and {@code hashCode()} methods.
  *
  * <p>Specific implementations of metadata can have state to be used during
  * override {@linkplain #createOverride(String, BeanDefinition, Object)
- * instance creation} &mdash; for example, from further parsing of the
+ * instance creation} &mdash; for example, based on further parsing of the
  * annotation or the annotated field.
  *
  * @author Simon Baslé
@@ -58,31 +58,32 @@ public abstract class OverrideMetadata {
 	}
 
 	/**
-	 * Return the bean name to override.
+	 * Get the bean name to override.
+	 * <p>Defaults to the name of the {@link #getField() field}.
 	 */
 	protected String getBeanName() {
 		return this.field.getName();
 	}
 
 	/**
-	 * Return the bean {@link ResolvableType type} to override.
+	 * Get the bean {@linkplain ResolvableType type} to override.
 	 */
-	public ResolvableType getBeanType() {
+	public final ResolvableType getBeanType() {
 		return this.beanType;
 	}
 
 	/**
-	 * Return the annotated {@link Field}.
+	 * Get the annotated {@link Field}.
 	 */
-	public Field getField() {
+	public final Field getField() {
 		return this.field;
 	}
 
 	/**
-	 * Return the {@link BeanOverrideStrategy} for this instance, as a hint on
+	 * Get the {@link BeanOverrideStrategy} for this instance, as a hint on
 	 * how and when the override instance should be created.
 	 */
-	public BeanOverrideStrategy getStrategy() {
+	public final BeanOverrideStrategy getStrategy() {
 		return this.strategy;
 	}
 
@@ -91,9 +92,9 @@ public abstract class OverrideMetadata {
 	 * optionally provided with an existing {@link BeanDefinition} and/or an
 	 * original instance, that is a singleton or an early wrapped instance.
 	 * @param beanName the name of the bean being overridden
-	 * @param existingBeanDefinition an existing bean definition for that bean
-	 * name, or {@code null} if not relevant
-	 * @param existingBeanInstance an existing instance for that bean name,
+	 * @param existingBeanDefinition an existing bean definition for the supplied
+	 * bean name, or {@code null} if not relevant
+	 * @param existingBeanInstance an existing instance for the supplied bean name
 	 * for wrapping purposes, or {@code null} if irrelevant
 	 * @return the instance with which to override the bean
 	 */

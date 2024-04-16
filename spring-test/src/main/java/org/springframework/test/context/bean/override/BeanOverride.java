@@ -22,25 +22,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark an annotation as eligible for Bean Override processing.
+ * Mark a composed annotation as eligible for Bean Override processing.
  *
- * <p>Specifying this annotation triggers the defined  {@link BeanOverrideProcessor}
+ * <p>Specifying this annotation triggers the configured {@link BeanOverrideProcessor}
  * which must be capable of handling the composed annotation and its attributes.
  *
- * <p>The composed annotation is meant to be detected on fields only so it is
- * expected that it has a {@code Target} of {@link ElementType#FIELD FIELD}.
+ * <p>Since the composed annotation should only be applied to fields, it is
+ * expected that it has a {@link Target} of {@link ElementType#FIELD FIELD}.
  *
  * @author Simon Baslé
  * @since 6.2
- * @see BeanOverrideBeanFactoryPostProcessor
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface BeanOverride {
 
 	/**
-	 * The {@link BeanOverrideProcessor} implementation to trigger against
-	 * the composed annotation.
+	 * The {@link BeanOverrideProcessor} implementation to use.
 	 */
 	Class<? extends BeanOverrideProcessor> value();
 

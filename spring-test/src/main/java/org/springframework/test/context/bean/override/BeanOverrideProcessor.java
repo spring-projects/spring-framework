@@ -20,11 +20,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 /**
- * Strategy interface for Bean Override processing, providing an
+ * Strategy interface for Bean Override processing, providing
  * {@link OverrideMetadata} that drives how the target bean is overridden.
  *
- * <p>At least one composed annotations meta-annotated with
- * {@link BeanOverride @BeanOverride}) is a companion of this processor and
+ * <p>At least one composed annotation that is meta-annotated with
+ * {@link BeanOverride @BeanOverride} must be a companion of this processor and
  * may provide additional user settings that drive how the concrete
  * {@link OverrideMetadata} is configured.
  *

@@ -69,6 +69,7 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 
 	private static void addInfrastructureBeanDefinition(BeanDefinitionRegistry registry,
 			Class<?> clazz, String beanName, Consumer<ConstructorArgumentValues> constructorArgumentsConsumer) {
+
 		if (!registry.containsBeanDefinition(beanName)) {
 			RootBeanDefinition definition = new RootBeanDefinition(clazz);
 			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

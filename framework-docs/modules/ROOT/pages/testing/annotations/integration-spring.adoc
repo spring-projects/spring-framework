@@ -16,6 +16,8 @@ Spring's testing annotations include the following:
 * xref:testing/annotations/integration-spring/annotation-activeprofiles.adoc[`@ActiveProfiles`]
 * xref:testing/annotations/integration-spring/annotation-testpropertysource.adoc[`@TestPropertySource`]
 * xref:testing/annotations/integration-spring/annotation-dynamicpropertysource.adoc[`@DynamicPropertySource`]
+* xref:testing/annotations/integration-spring/annotation-testbean.adoc[`@TestBean`]
+* xref:testing/annotations/integration-spring/annotation-mockitobean.adoc[`@MockitoBean` and `@MockitoSpyBean`]
 * xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[`@DirtiesContext`]
 * xref:testing/annotations/integration-spring/annotation-testexecutionlisteners.adoc[`@TestExecutionListeners`]
 * xref:testing/annotations/integration-spring/annotation-recordapplicationevents.adoc[`@RecordApplicationEvents`]
@@ -28,6 +30,4 @@ Spring's testing annotations include the following:
 * xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[`@SqlMergeMode`]
 * xref:testing/annotations/integration-spring/annotation-sqlgroup.adoc[`@SqlGroup`]
 * xref:testing/annotations/integration-spring/annotation-disabledinaotmode.adoc[`@DisabledInAotMode`]
-* xref:testing/annotations/integration-spring/annotation-testbean.adoc[`@TestBean`]
-* xref:testing/annotations/integration-spring/annotation-mockitobean.adoc[`@MockitoBean` and `@MockitoSpyBean`]
 

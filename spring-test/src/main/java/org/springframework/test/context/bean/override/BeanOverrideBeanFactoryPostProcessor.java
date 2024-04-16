@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * A {@link BeanFactoryPostProcessor} implementation that processes test classes
- * and adapt the {@link BeanFactory} for any {@link BeanOverride} it may define.
+ * and adapts the {@link BeanFactory} for any {@link BeanOverride} it may define.
  *
  * <p>A set of classes from which to parse {@link OverrideMetadata} must be
  * provided to this processor. Each test class is expected to use any
@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>The provided classes are fully parsed at creation to build a metadata set.
  * This processor implements several {@link BeanOverrideStrategy overriding
- * strategy} and chooses the correct one according to each override metadata
+ * strategies} and chooses the correct one according to each override metadata's
  * {@link OverrideMetadata#getStrategy()} method. Additionally, it provides
  * support for injecting the overridden bean instances into their corresponding
  * annotated {@link Field fields}.
@@ -60,7 +60,6 @@ import org.springframework.util.StringUtils;
  * @since 6.2
  */
 class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
-
 
 	private final BeanOverrideRegistrar overrideRegistrar;
 
@@ -195,14 +194,13 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	static final class WrapEarlyBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
 			PriorityOrdered {
 
-		private final BeanOverrideRegistrar overrideRegistrar;
+		private final Map<String, Object> earlyReferences = new ConcurrentHashMap<>(16);
 
-		private final Map<String, Object> earlyReferences;
+		private final BeanOverrideRegistrar overrideRegistrar;
 
 
 		private WrapEarlyBeanPostProcessor(BeanOverrideRegistrar registrar) {
 			this.overrideRegistrar = registrar;
-			this.earlyReferences = new ConcurrentHashMap<>(16);
 		}
 
 

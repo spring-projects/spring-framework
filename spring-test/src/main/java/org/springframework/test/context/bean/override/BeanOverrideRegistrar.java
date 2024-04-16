@@ -41,14 +41,15 @@ import org.springframework.util.StringUtils;
  */
 class BeanOverrideRegistrar implements BeanFactoryAware {
 
-	private final Map<OverrideMetadata, String> beanNameRegistry;
+	private final Map<OverrideMetadata, String> beanNameRegistry = new HashMap<>();
 
-	private final Map<String, OverrideMetadata> earlyOverrideMetadata;
+	private final Map<String, OverrideMetadata> earlyOverrideMetadata = new HashMap<>();
 
 	private final Set<OverrideMetadata> overrideMetadata;
 
 	@Nullable
 	private ConfigurableBeanFactory beanFactory;
+
 
 	/**
 	 * Create a new registrar and immediately parse the provided classes.
@@ -56,8 +57,6 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 	 * detected to contain bean overriding annotations
 	 */
 	BeanOverrideRegistrar(Set<Class<?>> classesToParse) {
-		this.beanNameRegistry = new HashMap<>();
-		this.earlyOverrideMetadata = new HashMap<>();
 		this.overrideMetadata = BeanOverrideParsingUtils.parse(classesToParse);
 	}
 
@@ -71,7 +70,7 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 	}
 
 	/**
-	 * Return the detected {@link OverrideMetadata} instances.
+	 * Get the detected {@link OverrideMetadata} instances.
 	 */
 	Set<OverrideMetadata> getOverrideMetadata() {
 		return this.overrideMetadata;
@@ -85,16 +84,16 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 	Object wrapIfNecessary(Object bean, String beanName) throws BeansException {
 		OverrideMetadata metadata = this.earlyOverrideMetadata.get(beanName);
 		if (metadata != null && metadata.getStrategy() == BeanOverrideStrategy.WRAP_BEAN) {
-			bean = metadata.createOverride(beanName, null, bean);
 			Assert.state(this.beanFactory != null, "ConfigurableBeanFactory must not be null");
+			bean = metadata.createOverride(beanName, null, bean);
 			metadata.track(bean, this.beanFactory);
 		}
 		return bean;
 	}
 
 	/**
-	 * Register the provided {@link OverrideMetadata} and associate it with a
-	 * {@code beanName}.
+	 * Register the provided {@link OverrideMetadata} and associate it with the
+	 * supplied {@code beanName}.
 	 */
 	void registerNameForMetadata(OverrideMetadata metadata, String beanName) {
 		this.beanNameRegistry.put(metadata, beanName);
@@ -119,7 +118,7 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 		try {
 			ReflectionUtils.makeAccessible(field);
 			Object existingValue = ReflectionUtils.getField(field, target);
-			Assert.state(this.beanFactory != null, "beanFactory must not be null");
+			Assert.state(this.beanFactory != null, "ConfigurableBeanFactory must not be null");
 			Object bean = this.beanFactory.getBean(beanName, field.getType());
 			if (existingValue == bean) {
 				return;

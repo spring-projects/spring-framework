@@ -35,7 +35,7 @@ public enum BeanOverrideStrategy {
 	/**
 	 * Replace or create a given bean definition, immediately preparing a
 	 * singleton instance.
-	 * <p>Contrary to {@link #REPLACE_DEFINITION} this create a new bean
+	 * <p>Contrary to {@link #REPLACE_DEFINITION}, this creates a new bean
 	 * definition if the target bean definition does not exist rather than
 	 * failing.
 	 */
@@ -43,8 +43,9 @@ public enum BeanOverrideStrategy {
 
 	/**
 	 * Intercept and process an early bean reference rather than a bean
-	 * definition, allowing variants of bean overriding to wrap the instance.
-	 * For instance, to delegate to actual methods in the context of a mocking "spy".
+	 * definition, allowing variants of bean overriding to wrap the instance
+	 * &mdash; for example, to delegate to actual methods in the context of a
+	 * mocking "spy".
 	 */
 	WRAP_BEAN
 

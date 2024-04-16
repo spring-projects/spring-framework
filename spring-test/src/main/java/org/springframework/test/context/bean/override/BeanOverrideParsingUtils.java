@@ -84,12 +84,11 @@ abstract class BeanOverrideParsingUtils {
 	private static void parseField(Field field, Class<?> testClass, Set<OverrideMetadata> metadataSet) {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
 		MergedAnnotations.from(field, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
-			Assert.state(mergedAnnotation.isMetaPresent(), "@BeanOverride annotation must be meta-present");
+			MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
+			Assert.state(metaSource != null, "@BeanOverride annotation must be meta-present");
 
 			BeanOverride beanOverride = mergedAnnotation.synthesize();
 			BeanOverrideProcessor processor = BeanUtils.instantiateClass(beanOverride.value());
-			MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
-			Assert.state(metaSource != null, "Meta-annotation source must not be null");
 			Annotation composedAnnotation = metaSource.synthesize();
 
 			Assert.state(overrideAnnotationFound.compareAndSet(false, true),

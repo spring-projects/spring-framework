@@ -1,53 +1,67 @@
-[[spring-testing-beanoverriding]]
+[[testcontext-bean-overriding]]
 = Bean Overriding in Tests
 
-Bean Overriding in Tests refers to the ability to override specific beans in the Context
-for a test class, by annotating one or more fields in said test class.
+Bean overriding in tests refers to the ability to override specific beans in the
+`ApplicationContext` for a test class, by annotating one or more fields in the test class.
 
-NOTE: This is intended as a less risky alternative to the practice of registering a bean via
-`@Bean` with the `DefaultListableBeanFactory` `setAllowBeanDefinitionOverriding` set to
-`true`.
+NOTE: This feature is intended as a less risky alternative to the practice of registering
+a bean via `@Bean` with the `DefaultListableBeanFactory`
+`setAllowBeanDefinitionOverriding` flag set to `true`.
 
-The Spring Testing Framework provides two sets of annotations:
-xref:testing/annotations/integration-spring/annotation-testbean.adoc[`@TestBean`],
-xref:testing/annotations/integration-spring/annotation-mockitobean.adoc[`@MockitoBean` and
-`@MockitoSpyBean`]. The former relies purely on Spring, while the later set relies on
-the https://site.mockito.org/[Mockito] third party library.
+The Spring TestContext framework provides two sets of annotations for bean overriding.
 
-[[spring-testing-beanoverriding-extending]]
-== Extending bean override with a custom annotation
+* xref:testing/annotations/integration-spring/annotation-testbean.adoc[`@TestBean`]
+* xref:testing/annotations/integration-spring/annotation-mockitobean.adoc[`@MockitoBean` and `@MockitoSpyBean`]
 
-The three annotations mentioned above build upon the `@BeanOverride` meta-annotation
-and associated infrastructure, which allows to define custom bean overriding variants.
+The former relies purely on Spring, while the latter set relies on the
+https://site.mockito.org/[Mockito] third-party library.
 
-To create an extension, the following is needed:
+[[testcontext-bean-overriding-custom]]
+== Custom Bean Override Support
 
-- An annotation meta-annotated with `@BeanOverride` that defines the
-`BeanOverrideProcessor` to use.
-- The `BeanOverrideProcessor` implementation itself.
-- One or more concrete `OverrideMetadata` implementations provided by the processor.
+The three annotations mentioned above build upon the `@BeanOverride` meta-annotation and
+associated infrastructure, which allows one to define custom bean overriding variants.
 
-The Spring TestContext Framework includes infrastructure classes that support bean
-overriding: a `BeanFactoryPostProcessor`, a `TestExecutionListener` and a
-`ContextCustomizerFactory`.
-The later two are automatically registered via the Spring TestContext Framework
-`spring.factories` file, and are responsible for setting up the rest of the infrastructure.
+To create custom bean override support, the following is needed:
 
-The test classes are parsed looking for any field meta-annotated with `@BeanOverride`,
-instantiating the relevant `BeanOverrideProcessor` in order to register an
-`OverrideMetadata`.
+* An annotation meta-annotated with `@BeanOverride` that defines the
+  `BeanOverrideProcessor` to use
+* A custom `BeanOverrideProcessor` implementation
+* One or more concrete `OverrideMetadata` implementations provided by the processor
 
-Then the `BeanOverrideBeanFactoryPostProcessor` will use that information to alter the
-context, registering and replacing bean definitions as defined by each metadata
-`BeanOverrideStrategy`:
+The Spring TestContext framework includes implementations of the following APIs that
+support bean overriding and are responsible for setting up the rest of the infrastructure.
 
-- `REPLACE_DEFINITION`: replaces the bean definition. If it is not present in the
-context, an exception is thrown.
-- `CREATE_OR_REPLACE_DEFINITION`: replaces the bean definition if the bean definition
-does not exist, or create one if it is not.
-- `WRAP_BEAN`: get the original instance early so that it can be wrapped.
+* a `BeanFactoryPostProcessor`
+* a `ContextCustomizerFactory`
+* a `TestExecutionListener`
 
-NOTE: The Bean Overriding infrastructure does not include any bean resolution step,
-unlike an `@Autowired`-annotated field for instance. As such, the name of the bean to
-override must be somehow provided to or computed by the `BeanOverrideProcessor`.
-Typically, the user provides the name one way or the other.
+The `spring-test` module registers implementations of the latter two
+(`BeanOverrideContextCustomizerFactory` and `BeanOverrideTestExecutionListener`) in its
+{spring-framework-code}/spring-test/src/main/resources/META-INF/spring.factories[`META-INF/spring.factories`
+properties file].
+
+The bean overriding infrastructure searches in test classes for any field meta-annotated
+with `@BeanOverride` and instantiates the corresponding `BeanOverrideProcessor` which is
+responsible for registering appropriate `OverrideMetadata`.
+
+The internal `BeanOverrideBeanFactoryPostProcessor` then uses that information to alter
+the test's `ApplicationContext` by registering and replacing bean definitions as defined
+by the corresponding `BeanOverrideStrategy`:
+
+* `REPLACE_DEFINITION`: Replaces the bean definition. Throws an exception if a
+  corresponding bean definition does not exist.
+* `REPLACE_OR_CREATE_DEFINITION`: Replaces the bean definition if it exists. Creates a
+  new bean definition if a corresponding bean definition does not exist.
+* `WRAP_BEAN`: Retrieves the original bean instance and wraps it.
+
+[NOTE]
+====
+In contrast to Spring's autowiring mechanism (for example, resolution of an `@Autowired`
+field), the bean overriding infrastructure in the TestContext framework does not perform
+any heuristics to locate a bean. Instead, the name of the bean to override must be
+explicitly provided to or computed by the `BeanOverrideProcessor`.
+
+Typically, the user provides the bean name via a custom annotation, or the
+`BeanOverrideProcessor` determines the bean name based on some convention.
+====

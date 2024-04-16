@@ -1,24 +1,24 @@
 [[spring-testing-annotation-beanoverriding-mockitobean]]
 = `@MockitoBean` and `@MockitoSpyBean`
 
-`@MockitoBean` and `@MockitoSpyBean` are used on a test class field to override a bean
-with a mocking and spying instance, respectively. In the later case, the original bean
-definition is not replaced but instead an early instance is captured and wrapped by the
-spy.
+`@MockitoBean` and `@MockitoSpyBean` are used on test class fields to override beans in
+the test's `ApplicationContext` with a Mockito mock or spy, respectively. In the latter
+case, the original bean definition is not replaced, but instead an early instance of the
+bean is captured and wrapped by the spy.
 
 By default, the name of the bean to override is derived from the annotated field's name,
-but both annotations allows for a specific `name` to be provided. Each annotation also
+but both annotations allow for a specific `name` to be provided. Each annotation also
 defines Mockito-specific attributes to fine-tune the mocking details.
 
-The `@MockitoBean` annotation uses the `CREATE_OR_REPLACE_DEFINITION`
+The `@MockitoBean` annotation uses the `REPLACE_OR_CREATE_DEFINITION`
 xref:testing/testcontext-framework/bean-overriding.adoc#spring-testing-beanoverriding-extending[strategy for test bean overriding].
 
-The `@MockitoSpyBean` annotation uses the `WRAP_EARLY_BEAN`
-xref:testing/testcontext-framework/bean-overriding.adoc#spring-testing-beanoverriding-extending[strategy]
+The `@MockitoSpyBean` annotation uses the `WRAP_BEAN`
+xref:testing/testcontext-framework/bean-overriding.adoc#spring-testing-beanoverriding-extending[strategy],
 and the original instance is wrapped in a Mockito spy.
 
-The following example shows how to configure the bean name for both `@MockitoBean` and
-`@MockitoSpyBean` annotations:
+The following example shows how to configure the bean name via `@MockitoBean` and
+`@MockitoSpyBean`:
 
 [tabs]
 ======
@@ -27,6 +27,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	class OverrideBeanTests {
+
 		@MockitoBean(name = "service1")  // <1>
 		private CustomService mockService;
 
@@ -36,7 +37,7 @@ Java::
 		// test case body...
 	}
 ----
-<1> Mark `mockService` as a Mockito mock override of bean `service1` in this test class
-<2> Mark `spyService` as a Mockito spy override of bean `service2` in this test class
-<3> Both fields will be injected with the Mockito values (the mock and the spy respectively)
+<1> Mark `mockService` as a Mockito mock override of bean `service1` in this test class.
+<2> Mark `spyService` as a Mockito spy override of bean `service2` in this test class.
+<3> The fields will be injected with the Mockito mock and spy, respectively.
 ======
