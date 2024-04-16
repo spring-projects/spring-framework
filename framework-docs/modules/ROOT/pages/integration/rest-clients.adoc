@@ -468,6 +468,9 @@ If no request factory is specified when the `RestClient` was built, it will use 
 Otherwise, if the `java.net.http` module is loaded, it will use Java's `HttpClient`.
 Finally, it will resort to the simple default.
 
+TIP: Note that the `SimpleClientHttpRequestFactory` may raise an exception when accessing the status of a response that represents an error (e.g. 401).
+If this is an issue, use any of the alternative request factories.
+
 [[rest-webclient]]
 == `WebClient`
 
