@@ -45,6 +45,7 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @author Sergey Tsypanov
+ * @author Onji Kim
  * @since 5.0
  * @see <a href="https://tools.ietf.org/html/rfc6266">RFC 6266</a>
  */
@@ -123,7 +124,7 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public boolean isAttachment() {
-		return (this.type != null && this.type.equalsIgnoreCase("attachment"));
+		return (this.type != null && this.type.equalsIgnoreCase(Type.ATTACHMENT));
 	}
 
 	/**
@@ -131,7 +132,7 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public boolean isFormData() {
-		return (this.type != null && this.type.equalsIgnoreCase("form-data"));
+		return (this.type != null && this.type.equalsIgnoreCase(Type.FORM_DATA));
 	}
 
 	/**
@@ -139,7 +140,7 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public boolean isInline() {
-		return (this.type != null && this.type.equalsIgnoreCase("inline"));
+		return (this.type != null && this.type.equalsIgnoreCase(Type.INLINE));
 	}
 
 	/**
@@ -300,11 +301,11 @@ public final class ContentDisposition {
 
 
 	/**
-	 * Return a builder for a {@code ContentDisposition} of type {@literal "attachment"}.
+	 * Return a builder for a {@code ContentDisposition} of type {@literal Type.ATTACHMENT}.
 	 * @since 5.3
 	 */
 	public static Builder attachment() {
-		return builder("attachment");
+		return builder(Type.ATTACHMENT);
 	}
 
 	/**
@@ -312,7 +313,7 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public static Builder formData() {
-		return builder("form-data");
+		return builder(Type.FORM_DATA);
 	}
 
 	/**
@@ -320,7 +321,7 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public static Builder inline() {
-		return builder("inline");
+		return builder(Type.INLINE);
 	}
 
 	/**
@@ -328,6 +329,12 @@ public final class ContentDisposition {
 	 * @param type the disposition type like for example {@literal inline},
 	 * {@literal attachment}, or {@literal form-data}
 	 * @return the builder
+	 * @see ContentDisposition.Type#ATTACHMENT
+	 * @see ContentDisposition.Type#INLINE
+	 * @see ContentDisposition.Type#FORM_DATA
+	 * @see #attachment()
+	 * @see #formData()
+	 * @see #inline()
 	 */
 	public static Builder builder(String type) {
 		return new BuilderImpl(type);
@@ -846,6 +853,30 @@ public final class ContentDisposition {
 			return new ContentDisposition(this.type, this.name, this.filename, this.charset,
 					this.size, this.creationDate, this.modificationDate, this.readDate);
 		}
+	}
+
+	/**
+	 * Common Content-Disposition's Disposition-Type values.
+	 */
+	public interface Type {
+		/**
+		 * The {@literal "attachment"} type.<br>
+		 * Indicates that the content should be offered as a download.<br>
+		 * Most browsers will present a "Save As" dialog to the user.
+		 */
+		String ATTACHMENT = "attachment";
+		/**
+		 * The {@literal "inline"} type.<br>
+		 * Indicates that the content should be displayed automatically.<br>
+		 * Most browsers will display the content inline.
+		 */
+		String INLINE = "inline";
+		/**
+		 * The {@literal "form-data"} type.<br>
+		 * When Content-Disposition is used to provide information for each subpart of {@literal multipart/form-data} request body,
+		 * the type of {@literal Content-Disposition} header should always be {@literal "form-data"}.
+		 */
+		String FORM_DATA = "form-data";
 	}
 
 }
