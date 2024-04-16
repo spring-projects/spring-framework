@@ -347,6 +347,7 @@ public final class ContentDisposition {
 	 * @see #toString()
 	 */
 	public static ContentDisposition parse(String contentDisposition) {
+		Assert.notNull(contentDisposition, "'contentDisposition' must not be null");
 		List<String> parts = tokenize(contentDisposition);
 		String type = parts.get(0);
 		String name = null;
