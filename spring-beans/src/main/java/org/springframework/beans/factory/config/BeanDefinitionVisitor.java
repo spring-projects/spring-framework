@@ -151,7 +151,10 @@ public class BeanDefinitionVisitor {
 		}
 	}
 
-	protected void visitIndexedArgumentValues(Map<Integer, ConstructorArgumentValues.ValueHolder> ias) {
+	protected void visitIndexedArgumentValues(@Nullable Map<Integer, ConstructorArgumentValues.ValueHolder> ias) {
+		if(ias == null) {
+			return;
+		}
 		for (ConstructorArgumentValues.ValueHolder valueHolder : ias.values()) {
 			Object newVal = resolveValue(valueHolder.getValue());
 			if (!ObjectUtils.nullSafeEquals(newVal, valueHolder.getValue())) {
