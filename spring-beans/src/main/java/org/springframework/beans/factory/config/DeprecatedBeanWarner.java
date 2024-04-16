@@ -85,7 +85,7 @@ public class DeprecatedBeanWarner implements BeanFactoryPostProcessor {
 		builder.append(beanName);
 		builder.append('\'');
 		String resourceDescription = beanDefinition.getResourceDescription();
-		if (StringUtils.hasLength(resourceDescription)) {
+		if (StringUtils.hasText(resourceDescription)) {
 			builder.append(" in ");
 			builder.append(resourceDescription);
 		}
