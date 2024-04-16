@@ -63,15 +63,23 @@ class ServerResponseExtensionsTests {
 	}
 
 	@Test
-	fun `BodyBuilder#bodyAndAwait with object parameter`() {
+	fun `BodyBuilder#bodyValueAndAwait with reified type parameter`() {
 		val response = mockk<ServerResponse>()
 		val body = "foo"
-		every { bodyBuilder.bodyValue(ofType<String>()) } returns Mono.just(response)
+		every {
+			bodyBuilder.body(
+				ofType<Mono<String>>(),
+				object : ParameterizedTypeReference<String>() {}
+			)
+		} returns Mono.just(response)
 		runBlocking {
-			bodyBuilder.bodyValueAndAwait(body)
+			bodyBuilder.bodyValueAndAwait<String>(body)
 		}
 		verify {
-			bodyBuilder.bodyValue(ofType<String>())
+			bodyBuilder.body(
+				ofType<Mono<String>>(),
+				object : ParameterizedTypeReference<String>() {}
+			)
 		}
 	}
 

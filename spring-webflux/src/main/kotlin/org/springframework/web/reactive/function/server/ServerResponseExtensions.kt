@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactor.awaitSingle
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.core.ReactiveAdapterRegistry
 import org.springframework.http.MediaType
 import reactor.core.publisher.Mono
 
@@ -54,13 +55,50 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.body(producer: Any): Mon
  * Set the body of the response to the given {@code Object} and return it.
  * This convenience method combines [body] and
  * [org.springframework.web.reactive.function.BodyInserters.fromValue].
+ *
+ * ### Deprecation
+ *
+ * This extension is deprecated because it is subject to type erasure.
+ * If an application uses for serialization the `kotlinx.serialization` library and the provided
+ * body uses generics, then the library is unable to serialize the body and spring falls back
+ * to default one. This could be confusing to those who expect data types with generics to be serialized properly
+ * and can lead to unexpected behaviors.
+ *
  * @param body the body of the response
  * @return the built response
  * @throws IllegalArgumentException if `body` is a [Publisher] or an
- * instance of a type supported by [org.springframework.core.ReactiveAdapterRegistry.getSharedInstance],
+ * instance of a type supported by [org.springframework.core.ReactiveAdapterRegistry.getSharedInstance].
  */
+@Suppress("DeprecatedCallableAddReplaceWith")
+@Deprecated(
+	message = "Use `bodyValueAndAwait<T>()` instead, which is not subject to type erasure.",
+	level = DeprecationLevel.WARNING
+)
+@JvmName("bodyValueAndAwait0") // to avoid platform declaration clash
 suspend fun ServerResponse.BodyBuilder.bodyValueAndAwait(body: Any): ServerResponse =
 		bodyValue(body).awaitSingle()
+
+/**
+ * Coroutines variant of [ServerResponse.BodyBuilder.bodyValue].
+ * This extension is not subject to type erasure and retains actual generic type arguments.
+ *
+ * Throws [IllegalArgumentException] if the provided [body] is a type of [Publisher] or an
+ * instance of a type supported by [org.springframework.core.ReactiveAdapterRegistry.getSharedInstance].
+ * Use `ServerResponse.BodyBuilder.body(publisher: Publisher<T>)` or `ServerResponse.BodyBuilder.body(producer: Any)`
+ * variants when body is one of those types.
+ *
+ * @author George Papadopoulos
+ */
+suspend inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyValueAndAwait(body: T): ServerResponse {
+	require(body !is Publisher<*> && registry.getAdapter(body::class.java) == null) {
+		"'body' cannot be a reactive type. For reactive types use a variant" +
+				" specifying a publisher/producer"
+	}
+	return body(Mono.just(body), object : ParameterizedTypeReference<T>() {}).awaitSingle()
+}
+
+@PublishedApi
+internal val registry = ReactiveAdapterRegistry.getSharedInstance()
 
 /**
  * Coroutines variant of [ServerResponse.BodyBuilder.body] with [Any] and

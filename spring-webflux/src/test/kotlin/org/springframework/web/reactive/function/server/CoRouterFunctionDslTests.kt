@@ -334,7 +334,7 @@ class CoRouterFunctionDslTests {
 			}
 		}
 		GET(pathExtension { it == "properties" }) {
-			ok().bodyValueAndAwait("foo=bar")
+			ok().bodyValueAndAwait<String>("foo=bar")
 		}
 		path("/baz", ::handle)
 		GET("/rendering") { RenderingResponse.create("index").buildAndAwait() }
