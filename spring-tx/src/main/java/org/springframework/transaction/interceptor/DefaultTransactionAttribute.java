@@ -206,7 +206,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 				}
 				catch (RuntimeException ex) {
 					throw new IllegalArgumentException(
-							"Invalid timeoutString value \"" + timeoutString + "\": " + ex);
+							"Invalid timeoutString value \"" + timeoutString + "\"; " + ex);
 				}
 			}
 		}
