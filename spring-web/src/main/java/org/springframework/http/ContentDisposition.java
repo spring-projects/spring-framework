@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,8 @@ public final class ContentDisposition {
 
 	private static final BitSet PRINTABLE = new BitSet(256);
 
+	private static final ContentDisposition EMPTY =
+			new ContentDisposition(null, null, null, null, null, null, null, null); // toString() returns ""
 
 	static {
 		// RFC 2045, Section 6.7, and RFC 2047, Section 4.2
@@ -149,6 +151,10 @@ public final class ContentDisposition {
 	@Nullable
 	public String getType() {
 		return this.type;
+	}
+
+	public boolean isEmpty(){
+		return this.equals(EMPTY);
 	}
 
 	/**
@@ -331,7 +337,7 @@ public final class ContentDisposition {
 	 * Return an empty content disposition.
 	 */
 	public static ContentDisposition empty() {
-		return new ContentDisposition("", null, null, null, null, null, null, null);
+		return EMPTY;
 	}
 
 	/**

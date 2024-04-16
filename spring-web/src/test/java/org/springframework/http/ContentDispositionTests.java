@@ -347,4 +347,23 @@ class ContentDispositionTests {
 				.isEqualTo(filename);
 	}
 
+	@Test
+	void emptyToStringReturnsBlankString(){
+		ContentDisposition emptyContentDisposition = ContentDisposition.empty();
+		assertThat(emptyContentDisposition.toString()).isEqualTo("");
+	}
+
+	@Test
+	void isEmptyReturnTrueWithEmptyContentDisposition(){
+		ContentDisposition emptyContentDisposition = ContentDisposition.empty();
+		assertThat(emptyContentDisposition.isEmpty()).isTrue();
+	}
+
+	@Test
+	void isEmptyReturnFalseWithNonEmptyContentDisposition(){
+		ContentDisposition nonEmptyContentDisposition = ContentDisposition.builder("form-data")
+				.name("foo")
+				.filename("foo.txt").build();
+		assertThat(nonEmptyContentDisposition.isEmpty()).isFalse();
+	}
 }
