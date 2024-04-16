@@ -204,9 +204,9 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 				try {
 					setTimeout(Integer.parseInt(timeoutString));
 				}
-				catch (NumberFormatException ex) {
+				catch (RuntimeException ex) {
 					throw new IllegalArgumentException(
-							"Invalid timeoutString value \"" + timeoutString + "\" - cannot parse into int");
+							"Invalid timeoutString value \"" + timeoutString + "\": " + ex);
 				}
 			}
 		}
