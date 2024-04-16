@@ -65,7 +65,6 @@ import org.springframework.util.MultiValueMap;
  * @author Lachlan Roberts
  * @since 6.2
  */
-// TODO: extend AbstractServerHttpResponse for websocket.
 class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOutputMessage {
 	private final AtomicBoolean committed = new AtomicBoolean(false);
 
@@ -133,8 +132,8 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		Callback.Completable callback = new Callback.Completable();
 		mono = Mono.fromFuture(callback);
 		try {
-			// TODO: Why does intellij warn about possible blocking call?
-			//       Because it can block and we want to be fully asynchronous.  Use AsynchronousFileChannel?
+			// The method can block, but it is not expected to do so for any significant time.
+			@SuppressWarnings("BlockingMethodInNonBlockingContext")
 			SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ);
 			new ContentWriterIteratingCallback(channel, position, count, this.response, callback).iterate();
 		}
