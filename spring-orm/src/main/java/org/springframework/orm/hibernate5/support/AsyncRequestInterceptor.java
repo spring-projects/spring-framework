@@ -67,8 +67,10 @@ class AsyncRequestInterceptor implements CallableProcessingInterceptor, Deferred
 	}
 
 	public void bindSession() {
-		this.timeoutInProgress = false;
-		this.errorInProgress = false;
+		synchronized (this) {
+			this.timeoutInProgress = false;
+			this.errorInProgress = false;
+		}
 		TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
 	}
 
@@ -79,13 +81,17 @@ class AsyncRequestInterceptor implements CallableProcessingInterceptor, Deferred
 
 	@Override
 	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) {
-		this.timeoutInProgress = true;
+		synchronized (this) {
+			this.timeoutInProgress = true;
+		}
 		return RESULT_NONE;  // give other interceptors a chance to handle the timeout
 	}
 
 	@Override
 	public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) {
-		this.errorInProgress = true;
+		synchronized (this) {
+			this.errorInProgress = true;
+		}
 		return RESULT_NONE;  // give other interceptors a chance to handle the error
 	}
 
@@ -106,13 +112,17 @@ class AsyncRequestInterceptor implements CallableProcessingInterceptor, Deferred
 
 	@Override
 	public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) {
-		this.timeoutInProgress = true;
+		synchronized (this) {
+			this.timeoutInProgress = true;
+		}
 		return true;  // give other interceptors a chance to handle the timeout
 	}
 
 	@Override
 	public <T> boolean handleError(NativeWebRequest request, DeferredResult<T> deferredResult, Throwable t) {
-		this.errorInProgress = true;
+		synchronized (this) {
+			this.errorInProgress = true;
+		}
 		return true;  // give other interceptors a chance to handle the error
 	}
 
