@@ -99,13 +99,22 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			ResultSetMetaData rsmd = resultSet.getMetaData();
 			if (rsmd != null) {
 				int columnCount = rsmd.getColumnCount();
-				this.columnLabelMap = CollectionUtils.newHashMap(columnCount);
+				this.columnLabelMap = CollectionUtils.newHashMap(columnCount * 2);
 				for (int i = 1; i <= columnCount; i++) {
 					String key = rsmd.getColumnLabel(i);
 					// Make sure to preserve first matching column for any given name,
 					// as defined in ResultSet's type-level javadoc (lines 81 to 83).
 					if (!this.columnLabelMap.containsKey(key)) {
 						this.columnLabelMap.put(key, i);
+					}
+					// Also support column names prefixed with table name
+					// as in {table_name}.{column.name}.
+					String table = rsmd.getTableName(i);
+					if (table != null && !table.isEmpty()) {
+						key = table + "." + rsmd.getColumnName(i);
+						if (!this.columnLabelMap.containsKey(key)) {
+							this.columnLabelMap.put(key, i);
+						}
 					}
 				}
 			}
