@@ -54,7 +54,13 @@ class UrlParserTests {
 		else {
 			assertThat(result.host()).as("Host is not null").isNull();
 		}
-		assertThat(result.port()).as("Invalid port").isEqualTo(port);
+		if (port != null) {
+			assertThat(result.port()).as("Port is null").isNotNull();
+			assertThat(result.port().toString()).as("Invalid port").isEqualTo(port);
+		}
+		else {
+			assertThat(result.port()).as("Port is not null").isNull();
+		}
 		assertThat(result.path().toString()).as("Invalid path").isEqualTo(path);
 		assertThat(result.query()).as("Invalid query").isEqualTo(query);
 		assertThat(result.fragment()).as("Invalid fragment").isEqualTo(fragment);

@@ -235,7 +235,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				builder.host(urlRecord.host().toString());
 			}
 			if (urlRecord.port() != null) {
-				builder.port(urlRecord.port());
+				builder.port(urlRecord.port().toString());
 			}
 			if (urlRecord.path().isOpaque()) {
 				builder.schemeSpecificPart(urlRecord.path().toString());

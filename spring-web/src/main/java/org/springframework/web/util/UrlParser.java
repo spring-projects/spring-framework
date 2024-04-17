@@ -85,6 +85,9 @@ final class UrlParser {
 	@Nullable
 	private State previousState;
 
+	@Nullable
+	private State stateOverride;
+
 	private boolean atSignSeen;
 
 	private boolean passwordTokenSeen;
@@ -142,6 +145,7 @@ final class UrlParser {
 		sanitizeInput();
 		// Let state be state override if given, or scheme start state otherwise.
 		this.state = stateOverride != null ? stateOverride : State.SCHEME_START;
+		this.stateOverride = stateOverride;
 
 		// Keep running the following state machine by switching on state.
 		// If after a run pointer points to the EOF code point, go to the next step.
@@ -279,7 +283,7 @@ final class UrlParser {
 				(ch >= 'a' && ch <= 'z');
 	}
 
-	private static boolean containsOnlyAsciiDigits(String string) {
+	private static boolean containsOnlyAsciiDigits(CharSequence string) {
 		for (int i=0; i< string.length(); i++ ) {
 			char ch = string.charAt(i);
 			if (!isAsciiDigit(ch)) {
@@ -329,6 +333,16 @@ final class UrlParser {
 				|| ch == '@' || ch == '_' || ch == '~' ||
 				(ch >= 0x00A0 && ch <= 0x10FFFD && !Character.isSurrogate((char) ch) && !isNonCharacter(ch));
 	}
+
+	private static boolean isSpecialScheme(String scheme) {
+		return "ftp".equals(scheme) ||
+				"file".equals(scheme) ||
+				"http".equals(scheme) ||
+				"https".equals(scheme) ||
+				"ws".equals(scheme) ||
+				"wss".equals(scheme);
+	}
+
 
 	private static int defaultPort(@Nullable String scheme) {
 		if (scheme != null) {
@@ -483,10 +497,14 @@ final class UrlParser {
 					p.previousState = SCHEME;
 					p.state = URL_TEMPLATE;
 				}
-				// Otherwise, set state to no scheme state and decrease pointer by 1.
-				else {
+				// Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
+				else if (p.stateOverride == null) {
 					p.setState(NO_SCHEME);
 					p.pointer--;
+				}
+				// Otherwise, return failure.
+				else {
+					p.failure(null);
 				}
 			}
 		},
@@ -504,8 +522,40 @@ final class UrlParser {
 				}
 				// Otherwise, if c is U+003A (:), then:
 				else if (c == ':') {
+					// If state override is given, then:
+					if (p.stateOverride != null) {
+						boolean urlSpecialScheme = url.isSpecial();
+						String bufferString = p.buffer.toString();
+						boolean bufferSpecialScheme = isSpecialScheme(bufferString);
+						// If url’s scheme is a special scheme and buffer is not a special scheme, then return.
+						if (urlSpecialScheme && !bufferSpecialScheme) {
+							return;
+						}
+						// If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+						if (!urlSpecialScheme && bufferSpecialScheme) {
+							return;
+						}
+						// If url includes credentials or has a non-null port, and buffer is "file", then return.
+						if ((url.includesCredentials() || url.port() != null) && "file".equals(bufferString)) {
+							return;
+						}
+						// If url’s scheme is "file" and its host is an empty host, then return.
+						if ("file".equals(url.scheme()) && (url.host() == null || url.host() == EmptyHost.INSTANCE)) {
+							return;
+						}
+					}
 					// Set url’s scheme to buffer.
 					url.scheme = p.buffer.toString();
+					// If state override is given, then:
+					if (p.stateOverride != null) {
+						// If url’s port is url’s scheme’s default port, then set url’s port to null.
+						if (url.port instanceof IntPort intPort &&
+								intPort.value() == defaultPort(url.scheme)) {
+							url.port = null;
+							// Return.
+							return;
+						}
+					}
 					// Set buffer to the empty string.
 					p.emptyBuffer();
 					// If url’s scheme is "file", then:
@@ -539,11 +589,15 @@ final class UrlParser {
 						p.setState(OPAQUE_PATH);
 					}
 				}
-				// Otherwise, set buffer to the empty string, state to no scheme state, and start over (from the first code point in input).
-				else {
+				// Otherwise, if state override is not given, set buffer to the empty string, state to no scheme state, and start over (from the first code point in input).
+				else if (p.stateOverride == null) {
 					p.emptyBuffer();
 					p.setState(NO_SCHEME);
 					p.pointer = -1;
+				}
+				// Otherwise, return failure.
+				else {
+					p.failure(null);
 				}
 
 			}
@@ -798,11 +852,20 @@ final class UrlParser {
 		HOST {
 			@Override
 			public void handle(int c, UrlRecord url, UrlParser p) {
+				// If state override is given and url’s scheme is "file", then decrease pointer by 1 and set state to file host state.
+				if (p.stateOverride != null && "file".equals(url.scheme())) {
+					p.pointer--;
+					p.setState(FILE_HOST);
+				}
 				// Otherwise, if c is U+003A (:) and insideBrackets is false, then:
-				if (c == ':' && !p.insideBrackets) {
+				else if (c == ':' && !p.insideBrackets) {
 					// If buffer is the empty string, host-missing validation error, return failure.
 					if (p.buffer.isEmpty()) {
 						p.failure("Missing host.");
+					}
+					// If state override is given and state override is hostname state, then return.
+					if (p.stateOverride == HOST) {
+						return;
 					}
 					// Let host be the result of host parsing buffer with url is not special.
 					Host host = Host.parse(p.buffer.toString(), false, p.validationErrorHandler);
@@ -822,6 +885,12 @@ final class UrlParser {
 					if (url.isSpecial() && p.buffer.isEmpty()) {
 						p.failure("The input has a special scheme, but does not contain a host.");
 					}
+					// Otherwise, if state override is given, buffer is the empty string, and either url includes credentials or url’s port is non-null, return.
+					else if (p.stateOverride != null && p.buffer.isEmpty() &&
+							(url.includesCredentials() || url.port() != null )) {
+						return;
+					}
+					// EXTRA: if buffer is not empty
 					if (!p.buffer.isEmpty()) {
 						// Let host be the result of host parsing buffer with url is not special.
 						Host host = Host.parse(p.buffer.toString(), false, p.validationErrorHandler);
@@ -833,6 +902,10 @@ final class UrlParser {
 					}
 					p.emptyBuffer();
 					p.setState(PATH_START);
+					// If state override is given, then return.
+					if (p.stateOverride != null) {
+						return;
+					}
 				}
 				// Otherwise:
 				else {
@@ -864,19 +937,14 @@ final class UrlParser {
 				// Otherwise, if one of the following is true:
 				// - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
 				// - url is special and c is U+005C (\)
+				// - state override is given
 				else if (c == EOF || c == '/' || c == '?' || c == '#' ||
-						(url.isSpecial() && c == '\\')) {
+						(url.isSpecial() && c == '\\') ||
+						(p.stateOverride != null)) {
 					// If buffer is not the empty string, then:
 					if (!p.buffer.isEmpty()) {
-						boolean isNumber = true;
-						for (int i=0; i < p.buffer.length(); i++) {
-							if (!isAsciiDigit(p.buffer.charAt(i))) {
-								isNumber = false;
-								break;
-							}
-						}
 						// EXTRA: if buffer contains only ASCII digits, then
-						if (isNumber) {
+						if (containsOnlyAsciiDigits(p.buffer)) {
 							try {
 								// Let port be the mathematical integer value that is represented by buffer in radix-10 using ASCII digits for digits with values 0 through 9.
 								int port = Integer.parseInt(p.buffer, 0, p.buffer.length(), 10);
@@ -890,7 +958,7 @@ final class UrlParser {
 									url.port = null;
 								}
 								else {
-									url.port = Integer.toString(port);
+									url.port = new IntPort(port);
 								}
 							}
 							catch (NumberFormatException ex) {
@@ -899,10 +967,14 @@ final class UrlParser {
 						}
 						// EXTRA: otherwise, set url's port to buffer
 						else {
-							url.port = p.buffer.toString();
+							url.port = new StringPort(p.buffer.toString());
 						}
 						// Set buffer to the empty string.
 						p.emptyBuffer();
+					}
+					// If state override is given, then return.
+					if (p.stateOverride != null) {
+						return;
 					}
 					// Set state to path start state and decrease pointer by 1.
 					p.setState(PATH_START);
@@ -1016,8 +1088,8 @@ final class UrlParser {
 				// If c is the EOF code point, U+002F (/), U+005C (\), U+003F (?), or U+0023 (#), then decrease pointer by 1 and then:
 				if (c == EOF || c == '/' || c == '\\' || c == '?' || c == '#') {
 					p.pointer--;
-					// If buffer is a Windows drive letter, file-invalid-Windows-drive-letter-host validation error, set state to path state.
-					if (isWindowsDriveLetter(p.buffer, false)) {
+					// If state override is not given and buffer is a Windows drive letter, file-invalid-Windows-drive-letter-host validation error, set state to path state.
+					if (p.stateOverride == null && isWindowsDriveLetter(p.buffer, false)) {
 						p.validationError("A file: URL’s host is a Windows drive letter.");
 						p.setState(PATH);
 					}
@@ -1025,10 +1097,14 @@ final class UrlParser {
 					else if (p.buffer.isEmpty()) {
 						// Set url’s host to the empty string.
 						url.host = EmptyHost.INSTANCE;
+						// If state override is given, then return.
+						if (p.stateOverride != null) {
+							return;
+						}
 						// Set state to path start state.
 						p.setState(PATH_START);
 					}
-					// Otherwise, basicUrlParser these steps:
+					// Otherwise, run these steps:
 					else {
 						// Let host be the result of host parsing buffer with url is not special.
 						Host host = Host.parse(p.buffer.toString(), false, p.validationErrorHandler);
@@ -1038,6 +1114,10 @@ final class UrlParser {
 						}
 						// Set url’s host to host.
 						url.host = host;
+						// If state override is given, then return.
+						if (p.stateOverride != null) {
+							return;
+						}
 						// Set buffer to the empty string and state to path start state.
 						p.emptyBuffer();
 						p.setState(PATH_START);
@@ -1068,13 +1148,13 @@ final class UrlParser {
 						p.append('/');
 					}
 				}
-				// Otherwise, if c is U+003F (?), set url’s query to the empty string and state to query state.
-				else if (c == '?') {
+				// Otherwise, if state override is not given and if c is U+003F (?), set url’s query to the empty string and state to query state.
+				else if (p.stateOverride == null && c == '?') {
 					url.query = "";
 					p.setState(QUERY);
 				}
-				// Otherwise, if c is U+0023 (#), set url’s fragment to the empty string and state to fragment state.
-				else if (c =='#') {
+				// Otherwise, if state override is not given and if c is U+0023 (#), set url’s fragment to the empty string and state to fragment state.
+				else if (p.stateOverride == null && c =='#') {
 					url.fragment = "";
 					p.setState(FRAGMENT);
 				}
@@ -1090,10 +1170,10 @@ final class UrlParser {
 					else {
 						p.append('/');
 					}
-
 				}
-				else {
-					throw new IllegalStateException();
+				// Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
+				else if (p.stateOverride != null && url.host() == null) {
+					url.path().append("");
 				}
 			}
 		},
@@ -1103,11 +1183,11 @@ final class UrlParser {
 				// If one of the following is true:
 				// - c is the EOF code point or U+002F (/)
 				// - url is special and c is U+005C (\)
-				// - c is U+003F (?) or U+0023 (#)
+				// - state override is not given and c is U+003F (?) or U+0023 (#)
 				// then:
 				if (c == EOF || c == '/' ||
 						url.isSpecial() && c == '\\' ||
-						c == '?' || c == '#') {
+						(p.stateOverride == null && (c == '?' || c == '#'))) {
 					// If url is special and c is U+005C (\), invalid-reverse-solidus validation error.
 					if (p.validate() && url.isSpecial() && c == '\\') {
 						p.validationError("URL uses \"\\\" instead of \"/\"");
@@ -1238,9 +1318,9 @@ final class UrlParser {
 					p.encoding = StandardCharsets.UTF_8;
 				}
 				// If one of the following is true:
-				// - c is U+0023 (#)
+				// - state override is not given and c is U+0023 (#)
 				// - c is the EOF code point
-				if (c == '#' || c == EOF) {
+				if ( (p.stateOverride == null && c == '#') || c == EOF) {
 					// Let queryPercentEncodeSet be the special-query percent-encode set if url is special; otherwise the query percent-encode set.
 					// Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet, and append the result to url’s query.
 					String encoded = p.percentEncode(p.buffer.toString(), HierarchicalUriComponents.Type.QUERY);
@@ -1346,7 +1426,7 @@ final class UrlParser {
 		private Host host = null;
 
 		@Nullable
-		private String port = null;
+		private Port port = null;
 
 		private Path path = new PathSegments();
 
@@ -1364,12 +1444,7 @@ final class UrlParser {
 		 * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
 		 */
 		public boolean isSpecial() {
-			return "ftp".equals(this.scheme) ||
-					"file".equals(this.scheme) ||
-					"http".equals(this.scheme) ||
-					"https".equals(this.scheme) ||
-					"ws".equals(this.scheme) ||
-					"wss".equals(this.scheme);
+			return isSpecialScheme(this.scheme);
 		}
 
 
@@ -1423,7 +1498,7 @@ final class UrlParser {
 		 * port, or a string containing a uri template . It is initially {@code null}.
 		 */
 		@Nullable
-		public String port() {
+		public Port port() {
 			return this.port;
 		}
 
@@ -2173,6 +2248,47 @@ final class UrlParser {
 		public String toString() {
 			return this.string;
 		}
+	}
+
+	sealed interface Port permits StringPort, IntPort {
+
+	}
+
+	static final class StringPort implements Port {
+
+		private final String port;
+
+		public StringPort(String port) {
+			this.port = port;
+		}
+
+		public String value() {
+			return this.port;
+		}
+
+		@Override
+		public String toString() {
+			return this.port;
+		}
+	}
+
+	static final class IntPort implements Port {
+
+		private final int port;
+
+		public IntPort(int port) {
+			this.port = port;
+		}
+
+		public int value() {
+			return this.port;
+		}
+
+		@Override
+		public String toString() {
+			return Integer.toString(this.port);
+		}
+
 	}
 
 	sealed interface Path permits PathSegment, PathSegments {
