@@ -969,8 +969,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the length of the body in bytes, as specified by the
 	 * {@code Content-Length} header.
+	 * @param contentLength content length (greater than or equal to zero)
+	 * @throws IllegalArgumentException if the content length is negative
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc2616#section-14.13">RFC 2616, section 14.13</a>
 	 */
 	public void setContentLength(long contentLength) {
+		if (contentLength < 0){
+			throw new IllegalArgumentException("Content-Length must be a non-negative number");
+		}
 		set(CONTENT_LENGTH, Long.toString(contentLength));
 	}
 
