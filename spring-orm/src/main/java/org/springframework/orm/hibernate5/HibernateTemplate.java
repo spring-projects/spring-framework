@@ -415,11 +415,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 */
 	protected void applyFilters(Session session, boolean enable) {
 		String[] filterNames = getFilterNames();
-		if(filterNames != null) {
+		if (filterNames != null) {
 			for (String filterName : filterNames) {
-				if(enable) {
+				if (enable) {
 					session.enableFilter(filterName);
-				}else {
+				} else {
 					session.disableFilter(filterName);
 				}
 			}
