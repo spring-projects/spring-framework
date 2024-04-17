@@ -491,7 +491,7 @@ public abstract class AbstractPlatformTransactionManager
 			}
 		}
 
-		// Assumably PROPAGATION_SUPPORTS or PROPAGATION_REQUIRED.
+		// Assumably PROPAGATION_MANDATORY, PROPAGATION_SUPPORTS or PROPAGATION_REQUIRED.
 		if (debugEnabled) {
 			logger.debug("Participating in existing transaction");
 		}
