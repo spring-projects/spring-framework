@@ -276,155 +276,156 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * <p>Default is 0, indicating to use the JDBC driver's default.
 	 */
 	public void setFetchSize(int fetchSize) {
-		this.fetchSize = fetchSize;
-	}
-
-	/**
-	 * Return the fetch size specified for this HibernateTemplate.
-	 */
-	public int getFetchSize() {
-		return this.fetchSize;
-	}
-
-	/**
-	 * Set the maximum number of rows for this HibernateTemplate. This is important
-	 * for processing subsets of large result sets, avoiding to read and hold
-	 * the entire result set in the database or in the JDBC driver if we're
-	 * never interested in the entire result in the first place (for example,
-	 * when performing searches that might return a large number of matches).
-	 * <p>Default is 0, indicating to use the JDBC driver's default.
-	 */
-	public void setMaxResults(int maxResults) {
-		this.maxResults = maxResults;
-	}
-
-	/**
-	 * Return the maximum number of rows specified for this HibernateTemplate.
-	 */
-	public int getMaxResults() {
-		return this.maxResults;
-	}
-
-	@Override
-	public void afterPropertiesSet() {
-		if (getSessionFactory() == null) {
-			throw new IllegalArgumentException("Property 'sessionFactory' is required");
+			this.fetchSize = fetchSize;
 		}
-	}
-
-
-	@Override
-	@Nullable
-	public <T> T execute(HibernateCallback<T> action) throws DataAccessException {
-		return doExecute(action, false);
-	}
-
-	/**
-	 * Execute the action specified by the given action object within a
-	 * native {@link Session}.
-	 * <p>This execute variant overrides the template-wide
-	 * {@link #isExposeNativeSession() "exposeNativeSession"} setting.
-	 * @param action callback object that specifies the Hibernate action
-	 * @return a result object returned by the action, or {@code null}
-	 * @throws DataAccessException in case of Hibernate errors
-	 */
-	@Nullable
-	public <T> T executeWithNativeSession(HibernateCallback<T> action) {
-		return doExecute(action, true);
-	}
-
-	/**
-	 * Execute the action specified by the given action object within a Session.
-	 * @param action callback object that specifies the Hibernate action
-	 * @param enforceNativeSession whether to enforce exposure of the native
-	 * Hibernate Session to callback code
-	 * @return a result object returned by the action, or {@code null}
-	 * @throws DataAccessException in case of Hibernate errors
-	 */
-	@Nullable
-	protected <T> T doExecute(HibernateCallback<T> action, boolean enforceNativeSession) throws DataAccessException {
-		Assert.notNull(action, "Callback object must not be null");
-
-		Session session = null;
-		boolean isNew = false;
-		try {
-			session = obtainSessionFactory().getCurrentSession();
+	
+		/**
+		 * Return the fetch size specified for this HibernateTemplate.
+		 */
+		public int getFetchSize() {
+			return this.fetchSize;
 		}
-		catch (HibernateException ex) {
-			logger.debug("Could not retrieve pre-bound Hibernate session", ex);
+	
+		/**
+		 * Set the maximum number of rows for this HibernateTemplate. This is important
+		 * for processing subsets of large result sets, avoiding to read and hold
+		 * the entire result set in the database or in the JDBC driver if we're
+		 * never interested in the entire result in the first place (for example,
+		 * when performing searches that might return a large number of matches).
+		 * <p>Default is 0, indicating to use the JDBC driver's default.
+		 */
+		public void setMaxResults(int maxResults) {
+			this.maxResults = maxResults;
 		}
-		if (session == null) {
-			session = obtainSessionFactory().openSession();
-			session.setHibernateFlushMode(FlushMode.MANUAL);
-			isNew = true;
+	
+		/**
+		 * Return the maximum number of rows specified for this HibernateTemplate.
+		 */
+		public int getMaxResults() {
+			return this.maxResults;
 		}
-
-		try {
-			applyFilters(session, true);
-			Session sessionToExpose =
-					(enforceNativeSession || isExposeNativeSession() ? session : createSessionProxy(session));
-			return action.doInHibernate(sessionToExpose);
-		}
-		catch (HibernateException ex) {
-			throw SessionFactoryUtils.convertHibernateAccessException(ex);
-		}
-		catch (PersistenceException ex) {
-			if (ex.getCause() instanceof HibernateException hibernateEx) {
-				throw SessionFactoryUtils.convertHibernateAccessException(hibernateEx);
-			}
-			throw ex;
-		}
-		catch (RuntimeException ex) {
-			// Callback code threw application exception...
-			throw ex;
-		}
-		finally {
-			if (isNew) {
-				SessionFactoryUtils.closeSession(session);
-			}
-			else {
-				applyFilters(session, false);
+	
+		@Override
+		public void afterPropertiesSet() {
+			if (getSessionFactory() == null) {
+				throw new IllegalArgumentException("Property 'sessionFactory' is required");
 			}
 		}
-	}
-
-	/**
-	 * Create a close-suppressing proxy for the given Hibernate Session.
-	 * The proxy also prepares returned Query and Criteria objects.
-	 * @param session the Hibernate Session to create a proxy for
-	 * @return the Session proxy
-	 * @see Session#close()
-	 * @see #prepareQuery
-	 * @see #prepareCriteria
-	 */
-	protected Session createSessionProxy(Session session) {
-		return (Session) Proxy.newProxyInstance(
-				session.getClass().getClassLoader(), new Class<?>[] {Session.class},
-				new CloseSuppressingInvocationHandler(session));
-	}
-
-	/**
-	 * Apply the specified filters on the given Session.
-	 * This method can enable or disable the specified filters based on the 'enable' parameter.
-	 * 
-	 * @param session the current Hibernate Session
-	 * @param enable true to enable filters, false to disable filters
-	 * @see #setFilterNames
-	 * @see Session#enableFilter(String)
-	 * @see Session#disableFilter(String)
-	 */
-	protected void applyFilters(Session session, boolean enable) {
-		String[] filterNames = getFilterNames();
-		if (filterNames != null) {
-			for (String filterName : filterNames) {
-				if (enable) {
-					session.enableFilter(filterName);
-				} else {
-					session.disableFilter(filterName);
+	
+	
+		@Override
+		@Nullable
+		public <T> T execute(HibernateCallback<T> action) throws DataAccessException {
+			return doExecute(action, false);
+		}
+	
+		/**
+		 * Execute the action specified by the given action object within a
+		 * native {@link Session}.
+		 * <p>This execute variant overrides the template-wide
+		 * {@link #isExposeNativeSession() "exposeNativeSession"} setting.
+		 * @param action callback object that specifies the Hibernate action
+		 * @return a result object returned by the action, or {@code null}
+		 * @throws DataAccessException in case of Hibernate errors
+		 */
+		@Nullable
+		public <T> T executeWithNativeSession(HibernateCallback<T> action) {
+			return doExecute(action, true);
+		}
+	
+		/**
+		 * Execute the action specified by the given action object within a Session.
+		 * @param action callback object that specifies the Hibernate action
+		 * @param enforceNativeSession whether to enforce exposure of the native
+		 * Hibernate Session to callback code
+		 * @return a result object returned by the action, or {@code null}
+		 * @throws DataAccessException in case of Hibernate errors
+		 */
+		@Nullable
+		protected <T> T doExecute(HibernateCallback<T> action, boolean enforceNativeSession) throws DataAccessException {
+			Assert.notNull(action, "Callback object must not be null");
+	
+			Session session = null;
+			boolean isNew = false;
+			try {
+				session = obtainSessionFactory().getCurrentSession();
+			}
+			catch (HibernateException ex) {
+				logger.debug("Could not retrieve pre-bound Hibernate session", ex);
+			}
+			if (session == null) {
+				session = obtainSessionFactory().openSession();
+				session.setHibernateFlushMode(FlushMode.MANUAL);
+				isNew = true;
+			}
+	
+			try {
+				applyFilters(session, true);
+				Session sessionToExpose =
+						(enforceNativeSession || isExposeNativeSession() ? session : createSessionProxy(session));
+				return action.doInHibernate(sessionToExpose);
+			}
+			catch (HibernateException ex) {
+				throw SessionFactoryUtils.convertHibernateAccessException(ex);
+			}
+			catch (PersistenceException ex) {
+				if (ex.getCause() instanceof HibernateException hibernateEx) {
+					throw SessionFactoryUtils.convertHibernateAccessException(hibernateEx);
+				}
+				throw ex;
+			}
+			catch (RuntimeException ex) {
+				// Callback code threw application exception...
+				throw ex;
+			}
+			finally {
+				if (isNew) {
+					SessionFactoryUtils.closeSession(session);
+				}
+				else {
+					applyFilters(session, false);
 				}
 			}
 		}
-	}
+	
+		/**
+		 * Create a close-suppressing proxy for the given Hibernate Session.
+		 * The proxy also prepares returned Query and Criteria objects.
+		 * @param session the Hibernate Session to create a proxy for
+		 * @return the Session proxy
+		 * @see Session#close()
+		 * @see #prepareQuery
+		 * @see #prepareCriteria
+		 */
+		protected Session createSessionProxy(Session session) {
+			return (Session) Proxy.newProxyInstance(
+					session.getClass().getClassLoader(), new Class<?>[] {Session.class},
+					new CloseSuppressingInvocationHandler(session));
+		}
+	
+		/**
+		 * Apply the specified filters on the given Session.
+		 * This method can enable or disable the specified filters based on the 'enable' parameter.
+		 * 
+		 * @param session the current Hibernate Session
+		 * @param enable true to enable filters, false to disable filters
+		 * @see #setFilterNames
+		 * @see Session#enableFilter(String)
+		 * @see Session#disableFilter(String)
+		 */
+		protected void applyFilters(Session session, boolean enable) {
+			String[] filterNames = getFilterNames();
+			if (filterNames != null) {
+				for (String filterName : filterNames) {
+					if (enable) {
+						session.enableFilter(filterName);
+					}
+					else {
+						session.disableFilter(filterName);
+					}
+				}
+			}
+		}
 
 	//-------------------------------------------------------------------------
 	// Convenience methods for loading individual objects
