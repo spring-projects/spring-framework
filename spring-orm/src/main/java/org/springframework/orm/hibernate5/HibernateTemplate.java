@@ -360,7 +360,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 
 		try {
-			enableFilters(session);
+			applyFilters(session, true);
 			Session sessionToExpose =
 					(enforceNativeSession || isExposeNativeSession() ? session : createSessionProxy(session));
 			return action.doInHibernate(sessionToExpose);
@@ -383,7 +383,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 				SessionFactoryUtils.closeSession(session);
 			}
 			else {
-				disableFilters(session);
+				applyFilters(session, false);
 			}
 		}
 	}
@@ -404,35 +404,27 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	/**
-	 * Enable the specified filters on the given Session.
+	 * Apply the specified filters on the given Session.
+	 * This method can enable or disable the specified filters based on the 'enable' parameter.
+	 * 
 	 * @param session the current Hibernate Session
+	 * @param enable true to enable filters, false to disable filters
 	 * @see #setFilterNames
 	 * @see Session#enableFilter(String)
-	 */
-	protected void enableFilters(Session session) {
-		String[] filterNames = getFilterNames();
-		if (filterNames != null) {
-			for (String filterName : filterNames) {
-				session.enableFilter(filterName);
-			}
-		}
-	}
-
-	/**
-	 * Disable the specified filters on the given Session.
-	 * @param session the current Hibernate Session
-	 * @see #setFilterNames
 	 * @see Session#disableFilter(String)
 	 */
-	protected void disableFilters(Session session) {
+	protected void applyFilters(Session session, boolean enable) {
 		String[] filterNames = getFilterNames();
-		if (filterNames != null) {
+		if(filterNames != null) {
 			for (String filterName : filterNames) {
-				session.disableFilter(filterName);
+				if(enable) {
+					session.enableFilter(filterName);
+				}else {
+					session.disableFilter(filterName);
+				}
 			}
 		}
 	}
-
 
 	//-------------------------------------------------------------------------
 	// Convenience methods for loading individual objects
