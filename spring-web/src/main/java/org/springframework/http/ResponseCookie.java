@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public final class ResponseCookie extends HttpCookie {
 
 	/**
 	 * Return {@code true} if the cookie has the "HttpOnly" attribute.
-	 * @see <a href="https://www.owasp.org/index.php/HTTPOnly">https://www.owasp.org/index.php/HTTPOnly</a>
+	 * @see <a href="https://owasp.org/www-community/HttpOnly">https://owasp.org/www-community/HttpOnly</a>
 	 */
 	public boolean isHttpOnly() {
 		return this.httpOnly;
@@ -326,7 +326,7 @@ public final class ResponseCookie extends HttpCookie {
 
 		/**
 		 * Add the "HttpOnly" attribute to the cookie.
-		 * @see <a href="https://www.owasp.org/index.php/HTTPOnly">https://www.owasp.org/index.php/HTTPOnly</a>
+		 * @see <a href="https://owasp.org/www-community/HttpOnly">https://owasp.org/www-community/HttpOnly</a>
 		 */
 		ResponseCookieBuilder httpOnly(boolean httpOnly);
 
