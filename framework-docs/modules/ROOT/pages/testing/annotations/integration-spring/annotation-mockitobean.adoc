@@ -11,10 +11,10 @@ but both annotations allow for a specific `name` to be provided. Each annotation
 defines Mockito-specific attributes to fine-tune the mocking details.
 
 The `@MockitoBean` annotation uses the `REPLACE_OR_CREATE_DEFINITION`
-xref:testing/testcontext-framework/bean-overriding.adoc#spring-testing-beanoverriding-extending[strategy for test bean overriding].
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy for test bean overriding].
 
 The `@MockitoSpyBean` annotation uses the `WRAP_BEAN`
-xref:testing/testcontext-framework/bean-overriding.adoc#spring-testing-beanoverriding-extending[strategy],
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy],
 and the original instance is wrapped in a Mockito spy.
 
 The following example shows how to configure the bean name via `@MockitoBean` and

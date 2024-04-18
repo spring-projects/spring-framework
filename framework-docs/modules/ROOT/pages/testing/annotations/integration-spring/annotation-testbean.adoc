@@ -9,7 +9,7 @@ By default, the bean name and the associated factory method name are derived fro
 annotated field's name, but the annotation allows for specific values to be provided.
 
 The `@TestBean` annotation uses the `REPLACE_DEFINITION`
-xref:testing/testcontext-framework/bean-overriding.adoc#spring-testing-beanoverriding-extending[strategy for test bean overriding].
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy for test bean overriding].
 
 The following example shows how to fully configure the `@TestBean` annotation, with
 explicit values equivalent to the defaults:
