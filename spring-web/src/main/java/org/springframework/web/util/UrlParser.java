@@ -94,6 +94,8 @@ final class UrlParser {
 
 	private boolean insideBrackets;
 
+	private boolean stopMainLoop = false;
+
 
 	private UrlParser(String input, @Nullable UrlRecord base, @Nullable Charset encoding, @Nullable Consumer<String> validationErrorHandler) {
 		this.input = new StringBuilder(input);
@@ -141,8 +143,12 @@ final class UrlParser {
 		if (url == null) {
 			// Set url to a new URL.
 			url = new UrlRecord();
+			sanitizeInput(true);
 		}
-		sanitizeInput();
+		else {
+			sanitizeInput(false);
+		}
+
 		// Let state be state override if given, or scheme start state otherwise.
 		this.state = stateOverride != null ? stateOverride : State.SCHEME_START;
 		this.stateOverride = stateOverride;
@@ -150,7 +156,7 @@ final class UrlParser {
 		// Keep running the following state machine by switching on state.
 		// If after a run pointer points to the EOF code point, go to the next step.
 		// Otherwise, increase pointer by 1 and continue with the state machine.
-		while (this.pointer <= this.input.length()) {
+		while (!this.stopMainLoop && this.pointer <= this.input.length()) {
 			int c;
 			if (this.pointer < this.input.length()) {
 				c = this.input.charAt(this.pointer);
@@ -168,38 +174,46 @@ final class UrlParser {
 		return url;
 	}
 
-	void sanitizeInput() {
+	void sanitizeInput(boolean removeC0ControlOrSpace) {
 		boolean strip = true;
 		for (int i = 0; i < this.input.length(); i++) {
-			char ch = this.input.charAt(i);
-			if ((strip && (ch == ' ' || isC0Control(ch)))
-					|| (ch == '\t' || isNewline(ch))) {
+			char c = this.input.charAt(i);
+			boolean isSpaceOrC0 = c == ' ' || isC0Control(c);
+			boolean isTabOrNL = c == '\t' || isNewline(c);
+			if ((strip && isSpaceOrC0) || isTabOrNL) {
 				if (validate()) {
 					// If input contains any leading (or trailing) C0 control or space, invalid-URL-unit validation error.
 					// If input contains any ASCII tab or newline, invalid-URL-unit validation error.
-					validationError("Code point \"" + ch + "\" is not a URL unit.");
+					validationError("Code point \"" + c + "\" is not a URL unit.");
 				}
-				// Remove any leading (and trailing) C0 control or space from input.
-				// Remove all ASCII tab or newline from input.
-				this.input.deleteCharAt(i);
+				// Remove any leading C0 control or space from input.
+				if (removeC0ControlOrSpace && isSpaceOrC0) {
+					this.input.deleteCharAt(i);
+				}
+				else if (isTabOrNL) {
+					// Remove all ASCII tab or newline from input.
+					this.input.deleteCharAt(i);
+				}
 				i--;
 			}
 			else {
 				strip = false;
 			}
 		}
-		for (int i = this.input.length() - 1; i >= 0; i--) {
-			char ch = this.input.charAt(i);
-			if (ch == ' ' || isC0Control(ch)) {
-				if (validate()) {
-					// If input contains any (leading or) trailing C0 control or space, invalid-URL-unit validation error.
-					validationError("Code point \"" + ch + "\" is not a URL unit.");
+		if (removeC0ControlOrSpace) {
+			for (int i = this.input.length() - 1; i >= 0; i--) {
+				char c = this.input.charAt(i);
+				if (c == ' ' || isC0Control(c)) {
+					if (validate()) {
+						// If input contains any (leading or) trailing C0 control or space, invalid-URL-unit validation error.
+						validationError("Code point \"" + c + "\" is not a URL unit.");
+					}
+					// Remove any trailing C0 control or space from input.
+					this.input.deleteCharAt(i);
 				}
-				// Remove any (leading and) trailing C0 control or space from input.
-				this.input.deleteCharAt(i);
-			}
-			else {
-				break;
+				else {
+					break;
+				}
 			}
 		}
 	}
@@ -377,7 +391,7 @@ final class UrlParser {
 	}
 
 	private int remaining(int deltaPos) {
-		int pos = this.pointer + deltaPos;
+		int pos = this.pointer + deltaPos + 1;
 		if (pos < this.input.length()) {
 			return this.input.charAt(pos);
 		}
@@ -460,10 +474,43 @@ final class UrlParser {
 	}
 
 
-	private static boolean isWindowsDriveLetter(CharSequence s, boolean normalized) {
-		if (s.length() != 2) {
+	/**
+	 * A Windows drive letter is two code points, of which the first is an ASCII alpha and the second is either U+003A (:) or U+007C (|).
+	 *
+	 * A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
+	 */
+	private static boolean isWindowsDriveLetter(CharSequence input, boolean normalized) {
+		if (input.length() != 2) {
 			return false;
 		}
+		return isWindowsDriveLetterInternal(input, normalized);
+	}
+
+	/**
+	 * A string starts with a Windows drive letter if all of the following are true:
+	 *
+	 * its length is greater than or equal to 2
+	 * its first two code points are a Windows drive letter
+	 * its length is 2 or its third code point is U+002F (/), U+005C (\), U+003F (?), or U+0023 (#).
+	 */
+	private static boolean startsWithWindowsDriveLetter(CharSequence input) {
+		int len = input.length();
+		if (len < 2) {
+			return false;
+		}
+		if (!isWindowsDriveLetterInternal(input, false)) {
+			return false;
+		}
+		if (len == 2) {
+			return true;
+		}
+		else {
+			char ch2 = input.charAt(2);
+			return ch2 == '/' || ch2 == '\\' || ch2 == '?' || ch2 == '#';
+		}
+	}
+
+	private static boolean isWindowsDriveLetterInternal(CharSequence s, boolean normalized) {
 		char ch0 = s.charAt(0);
 		if (!isAsciiAlpha(ch0)) {
 			return false;
@@ -553,6 +600,7 @@ final class UrlParser {
 								intPort.value() == defaultPort(url.scheme)) {
 							url.port = null;
 							// Return.
+							p.stopMainLoop = true;
 							return;
 						}
 					}
@@ -561,7 +609,7 @@ final class UrlParser {
 					// If url’s scheme is "file", then:
 					if (url.scheme.equals("file")) {
 						// If remaining does not start with "//", special-scheme-missing-following-solidus validation error.
-						if (p.validate() && p.remaining(0) != '/' && p.remaining(1) != '/') {
+						if (p.validate() && (p.remaining(0) != '/' || p.remaining(1) != '/')) {
 							p.validationError("\"file\" scheme not followed by \"//\".");
 						}
 						// Set state to file state.
@@ -636,7 +684,7 @@ final class UrlParser {
 			@Override
 			public void handle(int c, UrlRecord url, UrlParser p) {
 				// If c is U+002F (/) and remaining starts with U+002F (/), then set state to special authority ignore slashes state and increase pointer by 1.
-				if (c == '/' && p.remaining(1) == '/') {
+				if (c == '/' && p.remaining(0) == '/') {
 					p.setState(SPECIAL_AUTHORITY_IGNORE_SLASHES);
 					p.pointer++;
 				}
@@ -865,6 +913,7 @@ final class UrlParser {
 					}
 					// If state override is given and state override is hostname state, then return.
 					if (p.stateOverride == HOST) {
+						p.stopMainLoop = true;
 						return;
 					}
 					// Let host be the result of host parsing buffer with url is not special.
@@ -888,6 +937,7 @@ final class UrlParser {
 					// Otherwise, if state override is given, buffer is the empty string, and either url includes credentials or url’s port is non-null, return.
 					else if (p.stateOverride != null && p.buffer.isEmpty() &&
 							(url.includesCredentials() || url.port() != null )) {
+						p.stopMainLoop = true;
 						return;
 					}
 					// EXTRA: if buffer is not empty
@@ -904,6 +954,7 @@ final class UrlParser {
 					p.setState(PATH_START);
 					// If state override is given, then return.
 					if (p.stateOverride != null) {
+						p.stopMainLoop = true;
 						return;
 					}
 				}
@@ -974,6 +1025,7 @@ final class UrlParser {
 					}
 					// If state override is given, then return.
 					if (p.stateOverride != null) {
+						p.stopMainLoop = true;
 						return;
 					}
 					// Set state to path start state and decrease pointer by 1.
@@ -1023,8 +1075,8 @@ final class UrlParser {
 						// Set url’s query to null.
 						url.query = null;
 						// If the code point substring from pointer to the end of input does not start with a Windows drive letter, then shorten url’s path.
-						String substring = p.input.substring(p.pointer, Math.min(p.pointer + 2, p.input.length()));
-						if (!isWindowsDriveLetter(substring, false)) {
+						String substring = p.input.substring(p.pointer);
+						if (!startsWithWindowsDriveLetter(substring)) {
 							url.shortenPath();
 						}
 						// Otherwise:
@@ -1068,11 +1120,11 @@ final class UrlParser {
 						// Set url’s host to base’s host.
 						url.host = p.base.host;
 						// If the code point substring from pointer to the end of input does not start with a Windows drive letter and base’s path[0] is a normalized Windows drive letter, then append base’s path[0] to url’s path.
-						String substring = p.input.substring(p.pointer, Math.min(p.pointer + 2, p.input.length()));
-						if (!isWindowsDriveLetter(substring, false) &&
+						String substring = p.input.substring(p.pointer);
+						if (!startsWithWindowsDriveLetter(substring) &&
 								p.base.path instanceof PathSegments basePath &&
 								!basePath.isEmpty() &&
-								isWindowsDriveLetter(basePath.get(0), false)) {
+								isWindowsDriveLetter(basePath.get(0), true)) {
 							url.path.append(basePath.get(0));
 						}
 					}
@@ -1099,6 +1151,7 @@ final class UrlParser {
 						url.host = EmptyHost.INSTANCE;
 						// If state override is given, then return.
 						if (p.stateOverride != null) {
+							p.stopMainLoop = true;
 							return;
 						}
 						// Set state to path start state.
@@ -1116,6 +1169,7 @@ final class UrlParser {
 						url.host = host;
 						// If state override is given, then return.
 						if (p.stateOverride != null) {
+							p.stopMainLoop = true;
 							return;
 						}
 						// Set buffer to the empty string and state to path start state.
@@ -1186,7 +1240,7 @@ final class UrlParser {
 				// - state override is not given and c is U+003F (?) or U+0023 (#)
 				// then:
 				if (c == EOF || c == '/' ||
-						url.isSpecial() && c == '\\' ||
+						(url.isSpecial() && c == '\\') ||
 						(p.stateOverride == null && (c == '?' || c == '#'))) {
 					// If url is special and c is U+005C (\), invalid-reverse-solidus validation error.
 					if (p.validate() && url.isSpecial() && c == '\\') {
@@ -1238,7 +1292,7 @@ final class UrlParser {
 					p.append(c);
 					p.setState(URL_TEMPLATE);
 				}
-				// Otherwise, basicUrlParser these steps:
+				// Otherwise, run these steps:
 				else {
 					if (p.validate()) {
 						// If c is not a URL code point and not U+0025 (%), invalid-URL-unit validation error.
