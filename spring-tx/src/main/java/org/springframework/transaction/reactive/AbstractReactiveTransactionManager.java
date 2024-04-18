@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,11 +210,13 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 					prepareSynchronization(synchronizationManager, status, definition)).thenReturn(status);
 		}
 
-		// Assumably PROPAGATION_SUPPORTS or PROPAGATION_REQUIRED.
+		// PROPAGATION_REQUIRED, PROPAGATION_SUPPORTS, PROPAGATION_MANDATORY:
+		// regular participation in existing transaction.
 		if (debugEnabled) {
 			logger.debug("Participating in existing transaction");
 		}
-		return Mono.just(prepareReactiveTransaction(synchronizationManager, definition, transaction, false, debugEnabled, null));
+		return Mono.just(prepareReactiveTransaction(
+				synchronizationManager, definition, transaction, false, debugEnabled, null));
 	}
 
 	/**
@@ -330,7 +332,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 		if (resourcesHolder != null) {
 			Object suspendedResources = resourcesHolder.suspendedResources;
 			if (suspendedResources != null) {
-				resume =  doResume(synchronizationManager, transaction, suspendedResources);
+				resume = doResume(synchronizationManager, transaction, suspendedResources);
 			}
 			List<TransactionSynchronization> suspendedSynchronizations = resourcesHolder.suspendedSynchronizations;
 			if (suspendedSynchronizations != null) {

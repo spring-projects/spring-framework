@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -835,11 +835,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * This implementation attempts to query the FactoryBean's generic parameter metadata
 	 * if present to determine the object type. If not present, i.e. the FactoryBean is
-	 * declared as a raw type, checks the FactoryBean's {@code getObjectType} method
+	 * declared as a raw type, it checks the FactoryBean's {@code getObjectType} method
 	 * on a plain instance of the FactoryBean, without bean properties applied yet.
-	 * If this doesn't return a type yet, and {@code allowInit} is {@code true} a
-	 * full creation of the FactoryBean is used as fallback (through delegation to the
-	 * superclass's implementation).
+	 * If this doesn't return a type yet and {@code allowInit} is {@code true}, full
+	 * creation of the FactoryBean is attempted as fallback (through delegation to the
+	 * superclass implementation).
 	 * <p>The shortcut check for a FactoryBean is only applied in case of a singleton
 	 * FactoryBean. If the FactoryBean instance itself is not kept as singleton,
 	 * it will be fully created to check the type of its exposed object.
