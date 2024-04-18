@@ -29,7 +29,9 @@ import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.type.AnnotationMetadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,8 +41,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@link FactoryBean FactoryBeans} defined in the configuration.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
-class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
+class ConfigurationWithFactoryBeanEarlyDeductionTests {
 
 	@Test
 	void preFreezeDirect() {
@@ -83,6 +86,16 @@ class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 	}
 
 	@Test
+	void preFreezeTargetType() {
+		assertPreFreeze(TargetTypeConfiguration.class);
+	}
+
+	@Test
+	void postFreezeTargetType() {
+		assertPostFreeze(TargetTypeConfiguration.class);
+	}
+
+	@Test
 	void preFreezeUnresolvedGenericFactoryBean() {
 		// Covers the case where a @Configuration is picked up via component scanning
 		// and its bean definition only has a String bean class. In such cases
@@ -105,14 +118,13 @@ class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 		}
 	}
 
+
 	private void assertPostFreeze(Class<?> configurationClass) {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				configurationClass);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(configurationClass);
 		assertContainsMyBeanName(context);
 	}
 
-	private void assertPreFreeze(Class<?> configurationClass,
-			BeanFactoryPostProcessor... postProcessors) {
+	private void assertPreFreeze(Class<?> configurationClass, BeanFactoryPostProcessor... postProcessors) {
 		NameCollectingBeanFactoryPostProcessor postProcessor = new NameCollectingBeanFactoryPostProcessor();
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		try (context) {
@@ -132,41 +144,38 @@ class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 		assertThat(names).containsExactly("myBean");
 	}
 
-	private static class NameCollectingBeanFactoryPostProcessor
-			implements BeanFactoryPostProcessor {
+
+	private static class NameCollectingBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
 		private String[] names;
 
 		@Override
-		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-				throws BeansException {
-			this.names = beanFactory.getBeanNamesForType(MyBean.class, true, false);
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+			ResolvableType typeToMatch = ResolvableType.forClassWithGenerics(MyBean.class, String.class);
+			this.names = beanFactory.getBeanNamesForType(typeToMatch, true, false);
 		}
 
 		public String[] getNames() {
 			return this.names;
 		}
-
 	}
 
 	@Configuration
 	static class DirectConfiguration {
 
 		@Bean
-		MyBean myBean() {
-			return new MyBean();
+		MyBean<String> myBean() {
+			return new MyBean<>();
 		}
-
 	}
 
 	@Configuration
 	static class GenericMethodConfiguration {
 
 		@Bean
-		FactoryBean<MyBean> myBean() {
-			return new TestFactoryBean<>(new MyBean());
+		FactoryBean<MyBean<String>> myBean() {
+			return new TestFactoryBean<>(new MyBean<>());
 		}
-
 	}
 
 	@Configuration
@@ -176,13 +185,11 @@ class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 		MyFactoryBean myBean() {
 			return new MyFactoryBean();
 		}
-
 	}
 
 	@Configuration
 	@Import(AttributeClassRegistrar.class)
 	static class AttributeClassConfiguration {
-
 	}
 
 	static class AttributeClassRegistrar implements ImportBeanDefinitionRegistrar {
@@ -191,16 +198,32 @@ class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 			BeanDefinition definition = BeanDefinitionBuilder.genericBeanDefinition(
 					RawWithAbstractObjectTypeFactoryBean.class).getBeanDefinition();
-			definition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, MyBean.class);
+			definition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE,
+					ResolvableType.forClassWithGenerics(MyBean.class, String.class));
 			registry.registerBeanDefinition("myBean", definition);
 		}
+	}
 
+	@Configuration
+	@Import(TargetTypeRegistrar.class)
+	static class TargetTypeConfiguration {
+	}
+
+	static class TargetTypeRegistrar implements ImportBeanDefinitionRegistrar {
+
+		@Override
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+			RootBeanDefinition definition = new RootBeanDefinition(RawWithAbstractObjectTypeFactoryBean.class);
+			definition.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class,
+					ResolvableType.forClassWithGenerics(MyBean.class, String.class)));
+			registry.registerBeanDefinition("myBean", definition);
+		}
 	}
 
 	abstract static class AbstractMyBean {
 	}
 
-	static class MyBean extends AbstractMyBean {
+	static class MyBean<T> extends AbstractMyBean {
 	}
 
 	static class TestFactoryBean<T> implements FactoryBean<T> {
@@ -220,31 +243,26 @@ class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 		public Class<?> getObjectType() {
 			return this.instance.getClass();
 		}
-
 	}
 
-	static class MyFactoryBean extends TestFactoryBean<MyBean> {
+	static class MyFactoryBean extends TestFactoryBean<MyBean<String>> {
 
 		public MyFactoryBean() {
-			super(new MyBean());
+			super(new MyBean<>());
 		}
-
 	}
 
 	static class RawWithAbstractObjectTypeFactoryBean implements FactoryBean<Object> {
 
-		private final Object object = new MyBean();
-
 		@Override
-		public Object getObject() {
-			return object;
+		public Object getObject() throws Exception {
+			throw new IllegalStateException();
 		}
 
 		@Override
 		public Class<?> getObjectType() {
 			return MyBean.class;
 		}
-
 	}
 
 }
