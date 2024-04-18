@@ -61,6 +61,7 @@ import static org.springframework.core.annotation.AnnotationUtils.getValue;
 import static org.springframework.core.annotation.AnnotationUtils.isAnnotationDeclaredLocally;
 import static org.springframework.core.annotation.AnnotationUtils.isAnnotationInherited;
 import static org.springframework.core.annotation.AnnotationUtils.isAnnotationMetaPresent;
+import static org.springframework.core.annotation.AnnotationUtils.isCandidateClass;
 import static org.springframework.core.annotation.AnnotationUtils.synthesizeAnnotation;
 
 /**
@@ -81,6 +82,57 @@ class AnnotationUtilsTests {
 		AnnotationUtils.clearCache();
 	}
 
+	@Test
+	void isCandidateClassAnnotationsOnClass() {
+		assertThat(isCandidateClass(SubSubClassWithInheritedMetaAnnotation.class, Meta1.class)).isTrue();
+		assertThat(isCandidateClass(SubSubClassWithInheritedMetaAnnotation.class, Meta2.class)).isTrue();
+		assertThat(isCandidateClass(SubSubClassWithInheritedMetaAnnotation.class, Component.class)).isTrue();
+		assertThat(isCandidateClass(SubSubClassWithInheritedMetaAnnotation.class, MetaMeta.class)).isFalse();
+
+		assertThat(isCandidateClass(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Meta1.class)).isTrue();
+		assertThat(isCandidateClass(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Meta2.class)).isTrue();
+		assertThat(isCandidateClass(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class)).isTrue();
+		assertThat(isCandidateClass(ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, MetaMeta.class)).isFalse();
+	}
+
+	@Test
+	void isCandidateClassAnnotationsOnMethods() {
+		assertThat(isCandidateClass(Root.class, Meta1.class)).isTrue();
+		assertThat(isCandidateClass(Root.class, Order.class)).isTrue();
+		assertThat(isCandidateClass(Root.class, Component.class)).isTrue();
+		assertThat(isCandidateClass(Root.class, Meta2.class)).isFalse();
+
+		assertThat(isCandidateClass(Leaf.class, Meta1.class)).isTrue();
+		assertThat(isCandidateClass(Leaf.class, Meta2.class)).isTrue();
+		assertThat(isCandidateClass(Leaf.class, MetaMeta.class)).isTrue();
+		assertThat(isCandidateClass(Leaf.class, MetaMetaMeta.class)).isFalse();
+	}
+
+	@Test
+	void isCandidateClassAnnotationsOnSuperMethodsOnly() {
+		assertThat(isCandidateClass(InterfaceWithAnnotatedMethod.class, Order.class)).isTrue();
+		assertThat(isCandidateClass(InterfaceWithAnnotatedMethod.class, Meta1.class)).isFalse();
+
+		assertThat(isCandidateClass(ImplementsInterfaceWithAnnotatedMethod.class, Order.class)).isTrue();
+		assertThat(isCandidateClass(ImplementsInterfaceWithAnnotatedMethod.class, Meta1.class)).isFalse();
+		assertThat(isCandidateClass(SubOfImplementsInterfaceWithAnnotatedMethod.class, Order.class)).isTrue();
+		assertThat(isCandidateClass(SubOfImplementsInterfaceWithAnnotatedMethod.class, Meta1.class)).isFalse();
+
+		assertThat(isCandidateClass(AbstractDoesNotImplementInterfaceWithAnnotatedMethod.class, Meta1.class)).isFalse();
+		assertThat(isCandidateClass(AbstractDoesNotImplementInterfaceWithAnnotatedMethod.class, Order.class)).isTrue();
+	}
+
+	@Test
+	void isCandidateClassAnnotationsOnFields() {
+		assertThat(isCandidateClass(ClassWithMetaAnnotatedFields.class, Meta1.class)).isTrue();
+		assertThat(isCandidateClass(ClassWithMetaAnnotatedFields.class, Component.class)).isTrue();
+		assertThat(isCandidateClass(ClassWithMetaAnnotatedFields.class, MetaMeta.class)).isFalse();
+
+		assertThat(isCandidateClass(SubClassWithMetaAnnotatedFields.class, Meta1.class)).isTrue();
+		assertThat(isCandidateClass(SubClassWithMetaAnnotatedFields.class, Meta2.class)).isTrue();
+		assertThat(isCandidateClass(SubClassWithMetaAnnotatedFields.class, Component.class)).isTrue();
+		assertThat(isCandidateClass(SubClassWithMetaAnnotatedFields.class, MetaMeta.class)).isFalse();
+	}
 
 	@Test
 	void findMethodAnnotationOnLeaf() throws Exception {
@@ -1026,6 +1078,16 @@ class AnnotationUtilsTests {
 	@MetaCycle2
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface MetaCycle3 {
+	}
+
+	static class ClassWithMetaAnnotatedFields {
+		@Meta1
+		String foo = "bar";
+	}
+
+	static class SubClassWithMetaAnnotatedFields extends ClassWithMetaAnnotatedFields {
+		@Meta2
+		String baz = "qux";
 	}
 
 	@Meta1

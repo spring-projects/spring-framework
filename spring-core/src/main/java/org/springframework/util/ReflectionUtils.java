@@ -597,7 +597,7 @@ public abstract class ReflectionUtils {
 		Assert.isTrue(name != null || type != null, "Either name or type of the field must be specified");
 		Class<?> searchType = clazz;
 		while (Object.class != searchType && searchType != null) {
-			Field[] fields = getDeclaredFields(searchType);
+			Field[] fields = getDeclaredFields(searchType, false);
 			for (Field field : fields) {
 				if ((name == null || name.equals(field.getName())) &&
 						(type == null || type.equals(field.getType()))) {
@@ -623,7 +623,7 @@ public abstract class ReflectionUtils {
 		Assert.notNull(name, "Name must not be null");
 		Class<?> searchType = clazz;
 		while (Object.class != searchType && searchType != null) {
-			Field[] fields = getDeclaredFields(searchType);
+			Field[] fields = getDeclaredFields(searchType, false);
 			for (Field field : fields) {
 				if (name.equalsIgnoreCase(field.getName())) {
 					return field;
@@ -686,7 +686,7 @@ public abstract class ReflectionUtils {
 	 * @see #doWithFields
 	 */
 	public static void doWithLocalFields(Class<?> clazz, FieldCallback fc) {
-		for (Field field : getDeclaredFields(clazz)) {
+		for (Field field : getDeclaredFields(clazz, false)) {
 			try {
 				fc.doWith(field);
 			}
@@ -719,7 +719,7 @@ public abstract class ReflectionUtils {
 		// Keep backing up the inheritance hierarchy.
 		Class<?> targetClass = clazz;
 		do {
-			Field[] fields = getDeclaredFields(targetClass);
+			Field[] fields = getDeclaredFields(targetClass, false);
 			for (Field field : fields) {
 				if (ff != null && !ff.matches(field)) {
 					continue;
@@ -744,7 +744,20 @@ public abstract class ReflectionUtils {
 	 * @throws IllegalStateException if introspection fails
 	 * @see Class#getDeclaredFields()
 	 */
-	private static Field[] getDeclaredFields(Class<?> clazz) {
+	public static Field[] getDeclaredFields(Class<?> clazz) {
+		return getDeclaredFields(clazz, true);
+	}
+
+	/**
+	 * This variant retrieves {@link Class#getDeclaredFields()} from a local cache
+	 * in order to avoid defensive array copying.
+	 * @param clazz the class to introspect
+	 * @param defensive whether the results will be copy
+	 * @return the cached array of fields
+	 * @throws IllegalStateException if introspection fails
+	 * @see Class#getDeclaredFields()
+	 */
+	private static Field[] getDeclaredFields(Class<?> clazz, boolean defensive) {
 		Assert.notNull(clazz, "Class must not be null");
 		Field[] result = declaredFieldsCache.get(clazz);
 		if (result == null) {
@@ -757,7 +770,7 @@ public abstract class ReflectionUtils {
 						"] from ClassLoader [" + clazz.getClassLoader() + "]", ex);
 			}
 		}
-		return result;
+		return (result.length == 0 || !defensive) ? result : result.clone();
 	}
 
 	/**

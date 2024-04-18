@@ -19,22 +19,26 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -165,13 +169,41 @@ public abstract class AnnotationUtils {
 	 * @see #isCandidateClass(Class, Class)
 	 */
 	public static boolean isCandidateClass(Class<?> clazz, String annotationName) {
+		return isCandidateClass(clazz, annotationName, true);
+	}
+
+	private static boolean isCandidateClass(Class<?> clazz, String annotationName, boolean introspectInterfaces) {
 		if (annotationName.startsWith("java.")) {
 			return true;
 		}
 		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
 			return false;
 		}
-		return true;
+		if (AnnotatedElementUtils.isAnnotated(clazz, annotationName)) {
+			return true;
+		}
+		Stream<Method> methods = Arrays.stream(ReflectionUtils.getDeclaredMethods(clazz));
+		if (methods.anyMatch(method -> AnnotatedElementUtils.isAnnotated(method, annotationName))) {
+			return true;
+		}
+		Stream<Field> fields = Arrays.stream(ReflectionUtils.getDeclaredFields(clazz));
+		if (fields.anyMatch(field -> AnnotatedElementUtils.isAnnotated(field, annotationName))) {
+			return true;
+		}
+		if (clazz.getSuperclass() != null && clazz.getSuperclass() != Object.class) {
+			if (isCandidateClass(clazz.getSuperclass(), annotationName, false)) {
+				return true;
+			}
+		}
+		if (introspectInterfaces) {
+			Set<Class<?>> interfaces = ClassUtils.getAllInterfacesForClassAsSet(clazz);
+			for (Class<?> interfaceClass : interfaces) {
+				if (isCandidateClass(interfaceClass, annotationName, false)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
