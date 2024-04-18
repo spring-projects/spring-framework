@@ -39,9 +39,9 @@ import static org.mockito.Mockito.mock;
  */
 class ResultSetWrappingRowSetTests {
 
-	private ResultSet resultSet = mock();
+	private final ResultSet resultSet = mock();
 
-	private ResultSetWrappingSqlRowSet rowSet = new ResultSetWrappingSqlRowSet(resultSet);
+	private final ResultSetWrappingSqlRowSet rowSet = new ResultSetWrappingSqlRowSet(resultSet);
 
 
 	@Test
@@ -198,6 +198,7 @@ class ResultSetWrappingRowSetTests {
 		doTest(rset, rowset, "test", true);
 	}
 
+
 	private void doTest(Method rsetMethod, Method rowsetMethod, Object arg, Object ret) throws Exception {
 		if (arg instanceof String) {
 			given(resultSet.findColumn((String) arg)).willReturn(1);
@@ -207,9 +208,9 @@ class ResultSetWrappingRowSetTests {
 			given(rsetMethod.invoke(resultSet, arg)).willReturn(ret).willThrow(new SQLException("test"));
 		}
 		rowsetMethod.invoke(rowSet, arg);
-		assertThatExceptionOfType(InvocationTargetException.class).isThrownBy(() ->
-				rowsetMethod.invoke(rowSet, arg)).
-			satisfies(ex -> assertThat(ex.getTargetException()).isExactlyInstanceOf(InvalidResultSetAccessException.class));
+		assertThatExceptionOfType(InvocationTargetException.class)
+				.isThrownBy(() -> rowsetMethod.invoke(rowSet, arg))
+				.satisfies(ex -> assertThat(ex.getTargetException()).isExactlyInstanceOf(InvalidResultSetAccessException.class));
 	}
 
 }
