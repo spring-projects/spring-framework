@@ -18,12 +18,11 @@ package org.springframework.aot.hint.predicate;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 
-import org.springframework.aot.hint.ProxyHints;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.TypeReference;
-import org.springframework.util.Assert;
+import src.main.java.org.springframework.aot.hint.ProxyHints;
+import src.main.java.org.springframework.aot.hint.RuntimeHints;
+import src.main.java.org.springframework.cglib.core.Predicate;
+import src.main.java.org.springframework.util.Assert;
 
 /**
  * Generator of {@link ProxyHints} predicates, testing whether the given hints
@@ -60,7 +59,7 @@ public class ProxyHintsPredicates {
 	 */
 	public Predicate<RuntimeHints> forInterfaces(TypeReference... interfaces) {
 		Assert.notEmpty(interfaces, "'interfaces' should not be empty");
-		List<TypeReference> interfaceList = Arrays.asList(interfaces);
+		List<TypeReference> interfaceList = List.of(interfaces);
 		return hints -> hints.proxies().jdkProxyHints().anyMatch(proxyHint ->
 				proxyHint.getProxiedInterfaces().equals(interfaceList));
 	}
