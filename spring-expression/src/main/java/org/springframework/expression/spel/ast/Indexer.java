@@ -445,7 +445,7 @@ public class Indexer extends SpelNodeImpl {
 			}
 			CompilablePropertyAccessor compilablePropertyAccessor =
 					(CompilablePropertyAccessor) this.cachedPropertyReadAccessor;
-			Assert.state(compilablePropertyAccessor != null, "No cached read accessor");
+			Assert.state(compilablePropertyAccessor != null, "No cached PropertyAccessor for reading");
 			String propertyName = (String) stringLiteral.getLiteralValue().getValue();
 			Assert.state(propertyName != null, "No property name");
 			compilablePropertyAccessor.generateCode(propertyName, mv, cf);
