@@ -60,7 +60,7 @@ public class ProxyHintsPredicates {
 	 */
 	public Predicate<RuntimeHints> forInterfaces(TypeReference... interfaces) {
 		Assert.notEmpty(interfaces, "'interfaces' should not be empty");
-		List<TypeReference> interfaceList = Arrays.asList(interfaces);
+		List<TypeReference> interfaceList = List.of(interfaces);
 		return hints -> hints.proxies().jdkProxyHints().anyMatch(proxyHint ->
 				proxyHint.getProxiedInterfaces().equals(interfaceList));
 	}
