@@ -355,8 +355,11 @@ public class Indexer extends SpelNodeImpl {
 
 	@Override
 	public boolean isCompilable() {
+		if (this.exitTypeDescriptor == null) {
+			return false;
+		}
 		if (this.indexedType == IndexedType.ARRAY) {
-			return (this.exitTypeDescriptor != null && this.arrayTypeDescriptor != null);
+			return (this.arrayTypeDescriptor != null);
 		}
 		SpelNodeImpl index = this.children[0];
 		if (this.indexedType == IndexedType.LIST) {
@@ -792,10 +795,11 @@ public class Indexer extends SpelNodeImpl {
 									this.evaluationContext, this.targetObject, this.name);
 						}
 						updatePropertyReadState(accessor, this.name, targetType);
+						TypedValue result = accessor.read(this.evaluationContext, this.targetObject, this.name);
 						if (accessor instanceof CompilablePropertyAccessor compilablePropertyAccessor) {
 							setExitTypeDescriptor(CodeFlow.toDescriptor(compilablePropertyAccessor.getPropertyType()));
 						}
-						return accessor.read(this.evaluationContext, this.targetObject, this.name);
+						return result;
 					}
 				}
 			}
