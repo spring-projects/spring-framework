@@ -42,7 +42,7 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.core.annotation.AnnotatedMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
@@ -538,6 +538,7 @@ public class MvcUriComponentsBuilder {
 	private static UriComponentsBuilder fromMethodInternal(@Nullable UriComponentsBuilder builder,
 			Class<?> controllerType, Method method, Object... args) {
 
+		AnnotatedMethod annotatedMethod = new AnnotatedMethod(method);
 		builder = getBaseUrlToUse(builder);
 
 		// Externally configured prefix via PathConfigurer..
@@ -545,7 +546,7 @@ public class MvcUriComponentsBuilder {
 		builder.path(prefix);
 
 		String typePath = getClassMapping(controllerType);
-		String methodPath = getMethodMapping(method);
+		String methodPath = getMethodMapping(annotatedMethod);
 		String path = pathMatcher.combine(typePath, methodPath);
 		path = PathPatternParser.defaultInstance.initFullPathPattern(path);
 		if (!StringUtils.hasText(prefix + path)) {
@@ -553,7 +554,7 @@ public class MvcUriComponentsBuilder {
 		}
 		builder.path(path);
 
-		return applyContributors(builder, method, args);
+		return applyContributors(builder, annotatedMethod, args);
 	}
 
 	private static UriComponentsBuilder getBaseUrlToUse(@Nullable UriComponentsBuilder baseUrl) {
@@ -587,13 +588,12 @@ public class MvcUriComponentsBuilder {
 		return getPathMapping(mapping, controllerType.getName());
 	}
 
-	private static String getMethodMapping(Method method) {
-		Assert.notNull(method, "'method' must not be null");
-		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
+	private static String getMethodMapping(AnnotatedMethod annotatedMethod) {
+		RequestMapping requestMapping = annotatedMethod.getMethodAnnotation(RequestMapping.class);
 		if (requestMapping == null) {
-			throw new IllegalArgumentException("No @RequestMapping on: " + method.toGenericString());
+			throw new IllegalArgumentException("No @RequestMapping on: " + annotatedMethod.getMethod().toGenericString());
 		}
-		return getPathMapping(requestMapping, method.toGenericString());
+		return getPathMapping(requestMapping, annotatedMethod.getMethod().toGenericString());
 	}
 
 	private static String getPathMapping(RequestMapping requestMapping, String source) {
@@ -628,10 +628,12 @@ public class MvcUriComponentsBuilder {
 		}
 	}
 
-	private static UriComponentsBuilder applyContributors(UriComponentsBuilder builder, Method method, Object... args) {
+	private static UriComponentsBuilder applyContributors(UriComponentsBuilder builder,
+			AnnotatedMethod annotatedMethod, Object... args) {
+
 		CompositeUriComponentsContributor contributor = getUriComponentsContributor();
 
-		int paramCount = method.getParameterCount();
+		int paramCount = annotatedMethod.getMethodParameters().length;
 		int argCount = args.length;
 		if (paramCount != argCount) {
 			throw new IllegalArgumentException("Number of method parameters " + paramCount +
@@ -640,7 +642,7 @@ public class MvcUriComponentsBuilder {
 
 		final Map<String, Object> uriVars = new HashMap<>();
 		for (int i = 0; i < paramCount; i++) {
-			MethodParameter param = new SynthesizingMethodParameter(method, i);
+			MethodParameter param = annotatedMethod.getMethodParameters()[i];
 			param.initParameterNameDiscovery(parameterNameDiscoverer);
 			contributor.contributeMethodArgument(param, args[i], builder, uriVars);
 		}
