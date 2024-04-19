@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import example.Color;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -455,6 +456,58 @@ class IndexingTests {
 			assertThat(expression.getValue(context)).isEqualTo("Jane");
 		}
 
+		@Test
+		void nullSafeIndexWithCustomIndexAccessor() {
+			context.addIndexAccessor(new BirdsIndexAccessor());
+			context.setVariable("color", Color.RED);
+
+			expression = parser.parseExpression("birds?.[#color]");
+			assertThat(expression.getValue(context)).isNull();
+			rootContext.birds = new Birds();
+			assertThat(expression.getValue(context)).isEqualTo("cardinal");
+		}
+
+		static class Birds {
+
+			public String get(Color color) {
+				return switch (color) {
+					case RED -> "cardinal";
+					case BLUE -> "blue jay";
+					default -> throw new RuntimeException("unknown bird color: " + color);
+				};
+			}
+		}
+
+		static class BirdsIndexAccessor implements IndexAccessor {
+
+			@Override
+			public Class<?>[] getSpecificTargetClasses() {
+				return new Class[] { Birds.class };
+			}
+
+			@Override
+			public boolean canRead(EvaluationContext context, Object target, Object index) {
+				return (target instanceof Birds && index instanceof Color);
+			}
+
+			@Override
+			public TypedValue read(EvaluationContext context, Object target, Object index) {
+				Birds birds = (Birds) target;
+				Color color = (Color) index;
+				return new TypedValue(birds.get(color));
+			}
+
+			@Override
+			public boolean canWrite(EvaluationContext context, Object target, Object index) {
+				return false;
+			}
+
+			@Override
+			public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
+				throw new UnsupportedOperationException();
+			}
+		}
+
 		static class RootContextWithIndexedProperties {
 			public int[] array;
 			public List<Integer> list;
@@ -462,6 +515,7 @@ class IndexingTests {
 			public String string;
 			public Map<String, Integer> map;
 			public Person person;
+			public Birds birds;
 		}
 
 	}
