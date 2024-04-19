@@ -18,11 +18,12 @@ package org.springframework.aot.hint.predicate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
-import src.main.java.org.springframework.aot.hint.ProxyHints;
-import src.main.java.org.springframework.aot.hint.RuntimeHints;
-import src.main.java.org.springframework.cglib.core.Predicate;
-import src.main.java.org.springframework.util.Assert;
+import org.springframework.aot.hint.ProxyHints;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeReference;
+import org.springframework.util.Assert;
 
 /**
  * Generator of {@link ProxyHints} predicates, testing whether the given hints
