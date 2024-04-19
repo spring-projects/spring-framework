@@ -129,7 +129,7 @@ public final class ExecutableHint extends MemberHint implements Comparable<Execu
 		 */
 		public Builder withMode(ExecutableMode mode) {
 			Assert.notNull(mode, "'mode' must not be null");
-			if ((this.mode == null) || !this.mode.includes(mode)) {
+			if (!this.mode.includes(mode)) {
 				this.mode = mode;
 			}
 			return this;
