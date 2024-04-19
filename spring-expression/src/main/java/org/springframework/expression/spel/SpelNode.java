@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import org.springframework.expression.TypedValue;
 import org.springframework.lang.Nullable;
 
 /**
- * Represents a node in the AST for a parsed expression.
+ * Represents a node in the abstract syntax tree (AST) for a parsed Spring
+ * Expression Language (SpEL) expression.
  *
  * @author Andy Clement
  * @since 3.0
@@ -33,6 +34,7 @@ public interface SpelNode {
 	 * and return the value.
 	 * @param expressionState the current expression state (includes the context)
 	 * @return the value of this node evaluated against the specified state
+	 * @throws EvaluationException if any problem occurs evaluating the expression
 	 */
 	@Nullable
 	Object getValue(ExpressionState expressionState) throws EvaluationException;
@@ -41,7 +43,8 @@ public interface SpelNode {
 	 * Evaluate the expression node in the context of the supplied expression state
 	 * and return the typed value.
 	 * @param expressionState the current expression state (includes the context)
-	 * @return the type value of this node evaluated against the specified state
+	 * @return the typed value of this node evaluated against the specified state
+	 * @throws EvaluationException if any problem occurs evaluating the expression
 	 */
 	TypedValue getTypedValue(ExpressionState expressionState) throws EvaluationException;
 
@@ -74,12 +77,14 @@ public interface SpelNode {
 	/**
 	 * Return the number of children under this node.
 	 * @return the child count
+	 * @see #getChild(int)
 	 */
 	int getChildCount();
 
 	/**
-	 * Helper method that returns a SpelNode rather than an Antlr Tree node.
-	 * @return the child node cast to a SpelNode
+	 * Return the n<sup>th</sup> child under this node.
+	 * @return the child node
+	 * @see #getChildCount()
 	 */
 	SpelNode getChild(int index);
 
