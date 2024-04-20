@@ -66,8 +66,6 @@ class RestClientObservationTests {
 
 	private final ClientHttpResponse response = mock();
 
-	private final ResponseErrorHandler errorHandler = mock();
-
 	private final HttpMessageConverter<String> converter = mock();
 
 	private RestClient client;
@@ -79,7 +77,6 @@ class RestClientObservationTests {
 		this.client = RestClient.builder()
 				.messageConverters(converters -> converters.add(0, this.converter))
 				.requestFactory(this.requestFactory)
-				.defaultStatusHandler(this.errorHandler)
 				.observationRegistry(this.observationRegistry)
 				.build();
 		this.observationRegistry.observationConfig().observationHandler(new ContextAssertionObservationHandler());
@@ -122,6 +119,10 @@ class RestClientObservationTests {
 
 	@Test
 	void shouldContributeServerErrorOutcome() throws Exception {
+		ResponseErrorHandler errorHandler = mock();
+		given(errorHandler.hasError(response)).willReturn(true);
+		this.client = this.client.mutate().defaultStatusHandler(errorHandler).build();
+
 		String url = "https://example.org";
 		mockSentRequest(GET, url);
 		mockResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -202,6 +203,19 @@ class RestClientObservationTests {
 	}
 
 	@Test
+	void shouldAddRestClientExceptionAsError() throws Exception {
+		String url = "https://example.org";
+		mockSentRequest(GET, url);
+		mockResponseStatus(HttpStatus.NOT_FOUND);
+		mockResponseBody("Not Found", MediaType.TEXT_HTML);
+
+		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+				client.get().uri(url).retrieve().toEntity(String.class));
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "NotFound");
+	}
+
+	@Test
 	void registerObservationWhenReadingBody() throws Exception {
 		mockSentRequest(GET, "https://example.org");
 		mockResponseStatus(HttpStatus.OK);
@@ -239,7 +253,6 @@ class RestClientObservationTests {
 
 	private void mockResponseStatus(HttpStatus responseStatus) throws Exception {
 		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(responseStatus.isError());
 		given(response.getStatusCode()).willReturn(responseStatus);
 		given(response.getStatusText()).willReturn(responseStatus.getReasonPhrase());
 	}
