@@ -228,16 +228,22 @@ final class DefaultRestClient implements RestClient {
 			}
 			throw unknownContentTypeException;
 		}
-		catch (UncheckedIOException | IOException | HttpMessageNotReadableException ex) {
+		catch (UncheckedIOException | IOException | HttpMessageNotReadableException exc) {
 			Throwable cause;
-			if (ex instanceof UncheckedIOException uncheckedIOException) {
+			if (exc instanceof UncheckedIOException uncheckedIOException) {
 				cause = uncheckedIOException.getCause();
 			}
 			else {
-				cause = ex;
+				cause = exc;
 			}
 			RestClientException restClientException = new RestClientException("Error while extracting response for type [" +
 					ResolvableType.forType(bodyType) + "] and content type [" + contentType + "]", cause);
+			if (observation != null) {
+				observation.error(restClientException);
+			}
+			throw restClientException;
+		}
+		catch (RestClientException restClientException) {
 			if (observation != null) {
 				observation.error(restClientException);
 			}
