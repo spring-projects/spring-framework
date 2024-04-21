@@ -925,8 +925,8 @@ supposed to receive an exception from an accompanying `@After`/`@AfterReturning`
 
 As of Spring Framework 5.2.7, advice methods defined in the same `@Aspect` class that
 need to run at the same join point are assigned precedence based on their advice type in
-the following order, from highest to lowest precedence: `@Around`, `@Before`, `@After`,
-`@AfterReturning`, `@AfterThrowing`. Note, however, that an `@After` advice method will
+the following order, from highest to lowest precedence: `@Around`, `@Before`, `@AfterReturning',
+`@AfterThrowing`, `@After`. Note, however, that an `@After` advice method will
 effectively be invoked after any `@AfterReturning` or `@AfterThrowing` advice methods
 in the same aspect, following AspectJ's "after finally advice" semantics for `@After`.
 
