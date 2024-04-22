@@ -75,6 +75,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.beans.factory.support.RegisteredBean.InstantiationDescriptor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationStartupAware;
 import org.springframework.context.EnvironmentAware;
@@ -800,24 +801,26 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
 				BeanRegistrationCode beanRegistrationCode, boolean allowDirectSupplierShortcut) {
 
-			Executable executableToUse = proxyExecutable(generationContext.getRuntimeHints(),
-					this.registeredBean.resolveConstructorOrFactoryMethod());
+			InstantiationDescriptor instantiationDescriptor = proxyInstantiationDescriptor(
+					generationContext.getRuntimeHints(), this.registeredBean.resolveInstantiationDescriptor());
 			return new InstanceSupplierCodeGenerator(generationContext,
 					beanRegistrationCode.getClassName(), beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
-					.generateCode(this.registeredBean, executableToUse);
+					.generateCode(this.registeredBean, instantiationDescriptor);
 		}
 
-		private Executable proxyExecutable(RuntimeHints runtimeHints, Executable userExecutable) {
+		private InstantiationDescriptor proxyInstantiationDescriptor(RuntimeHints runtimeHints, InstantiationDescriptor instantiationDescriptor) {
+			Executable userExecutable = instantiationDescriptor.executable();
 			if (userExecutable instanceof Constructor<?> userConstructor) {
 				try {
 					runtimeHints.reflection().registerConstructor(userConstructor, ExecutableMode.INTROSPECT);
-					return this.proxyClass.getConstructor(userExecutable.getParameterTypes());
+					Constructor<?> constructor = this.proxyClass.getConstructor(userExecutable.getParameterTypes());
+					return new InstantiationDescriptor(constructor);
 				}
 				catch (NoSuchMethodException ex) {
 					throw new IllegalStateException("No matching constructor found on proxy " + this.proxyClass, ex);
 				}
 			}
-			return userExecutable;
+			return instantiationDescriptor;
 		}
 	}
 

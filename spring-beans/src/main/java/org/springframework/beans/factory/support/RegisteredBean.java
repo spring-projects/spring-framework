@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -206,10 +208,31 @@ public final class RegisteredBean {
 	/**
 	 * Resolve the constructor or factory method to use for this bean.
 	 * @return the {@link java.lang.reflect.Constructor} or {@link java.lang.reflect.Method}
+	 * @deprecated in favor of {@link #resolveInstantiationDescriptor()}
 	 */
+	@Deprecated(since = "6.1.7")
 	public Executable resolveConstructorOrFactoryMethod() {
 		return new ConstructorResolver((AbstractAutowireCapableBeanFactory) getBeanFactory())
 				.resolveConstructorOrFactoryMethod(getBeanName(), getMergedBeanDefinition());
+	}
+
+	/**
+	 * Resolve the {@linkplain InstantiationDescriptor descriptor} to use to
+	 * instantiate this bean. It defines the {@link java.lang.reflect.Constructor}
+	 * or {@link java.lang.reflect.Method} to use as well as additional metadata.
+	 * @since 6.1.7
+	 */
+	public InstantiationDescriptor resolveInstantiationDescriptor() {
+		Executable executable = resolveConstructorOrFactoryMethod();
+		if (executable instanceof Method method && !Modifier.isStatic(method.getModifiers())) {
+			String factoryBeanName = getMergedBeanDefinition().getFactoryBeanName();
+			if (factoryBeanName != null && this.beanFactory.containsBean(factoryBeanName)) {
+				Class<?> target = this.beanFactory.getMergedBeanDefinition(factoryBeanName)
+						.getResolvableType().toClass();
+				return new InstantiationDescriptor(executable, target);
+			}
+		}
+		return new InstantiationDescriptor(executable, executable.getDeclaringClass());
 	}
 
 	/**
@@ -237,6 +260,20 @@ public final class RegisteredBean {
 				.append("mergedBeanDefinition", getMergedBeanDefinition()).toString();
 	}
 
+	/**
+	 * Describe how a bean should be instantiated. While the {@code targetClass}
+	 * is usually the declaring class of the {@code executable}, there are cases
+	 * where retaining the actual concrete type is necessary.
+	 * @param executable the {@link Executable} to invoke
+	 * @param targetClass the target {@link Class} of the executable
+	 * @since 6.1.7
+	 */
+	public record InstantiationDescriptor(Executable executable, Class<?> targetClass) {
+
+		public InstantiationDescriptor(Executable executable) {
+			this(executable, executable.getDeclaringClass());
+		}
+	}
 
 	/**
 	 * Resolver used to obtain inner-bean details.

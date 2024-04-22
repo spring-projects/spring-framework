@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,8 @@ class BeanDefinitionMethodGeneratorTests {
 
 	@Test
 	void generateWithBeanClassAndFactoryMethodNameSetsTargetTypeAndBeanClass() {
-		this.beanFactory.registerSingleton("factory", new SimpleBeanConfiguration());
+		this.beanFactory.registerBeanDefinition("factory",
+				new RootBeanDefinition(SimpleBeanConfiguration.class));
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(SimpleBean.class);
 		beanDefinition.setFactoryBeanName("factory");
 		beanDefinition.setFactoryMethodName("simpleBean");
@@ -182,7 +183,8 @@ class BeanDefinitionMethodGeneratorTests {
 
 	@Test
 	void generateWithTargetTypeAndFactoryMethodNameSetsOnlyBeanClass() {
-		this.beanFactory.registerSingleton("factory", new SimpleBeanConfiguration());
+		this.beanFactory.registerBeanDefinition("factory",
+				new RootBeanDefinition(SimpleBeanConfiguration.class));
 		RootBeanDefinition beanDefinition = new RootBeanDefinition();
 		beanDefinition.setTargetType(SimpleBean.class);
 		beanDefinition.setFactoryBeanName("factory");
