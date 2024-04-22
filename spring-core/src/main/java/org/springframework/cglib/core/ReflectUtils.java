@@ -75,7 +75,7 @@ public class ReflectUtils {
 		Throwable throwable = null;
 		try {
 			classLoaderDefineClass = ClassLoader.class.getDeclaredMethod("defineClass",
-							String.class, byte[].class, Integer.TYPE, Integer.TYPE, ProtectionDomain.class);
+					String.class, byte[].class, Integer.TYPE, Integer.TYPE, ProtectionDomain.class);
 		}
 		catch (Throwable t) {
 			classLoaderDefineClass = null;
