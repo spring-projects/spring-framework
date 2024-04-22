@@ -31,6 +31,7 @@ import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.beans.testfixture.beans.factory.StringFactoryBean;
+import org.springframework.beans.testfixture.beans.factory.aot.DefaultSimpleBeanContract;
 import org.springframework.beans.testfixture.beans.factory.aot.GenericFactoryBean;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationCode;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanRegistrationsCode;
@@ -38,6 +39,7 @@ import org.springframework.beans.testfixture.beans.factory.aot.NumberFactoryBean
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBean;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanArrayFactoryBean;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanConfiguration;
+import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanContract;
 import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanFactoryBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.ClassName;
@@ -126,6 +128,21 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 				SimpleBeanConfiguration.class);
 	}
 
+	@Test // gh-32609
+	void getTargetOnMethodFromInterface() {
+		this.beanFactory.registerBeanDefinition("configuration",
+				new RootBeanDefinition(DefaultSimpleBeanContract.class));
+		Method method = ReflectionUtils.findMethod(SimpleBeanContract.class, "simpleBean");
+		assertThat(method).isNotNull();
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(SimpleBean.class);
+		applyConstructorOrFactoryMethod(beanDefinition, method);
+		beanDefinition.setFactoryBeanName("configuration");
+		this.beanFactory.registerBeanDefinition("testBean", beanDefinition);
+		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, "testBean");
+		assertTarget(createInstance(registeredBean).getTarget(registeredBean),
+				DefaultSimpleBeanContract.class);
+	}
+
 	@Test
 	void getTargetOnMethodWithInnerBeanInJavaPackage() {
 		RegisteredBean registeredBean = registerTestBean(SimpleBean.class);
@@ -190,7 +207,7 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 	}
 
 	@Test
-	void customizedGetTargetDoesNotResolveConstructorOrFactoryMethod() {
+	void customizedGetTargetDoesNotResolveInstantiationDescriptor() {
 		RegisteredBean registeredBean = spy(registerTestBean(SimpleBean.class));
 		BeanRegistrationCodeFragments customCodeFragments = createCustomCodeFragments(registeredBean, codeFragments -> new BeanRegistrationCodeFragmentsDecorator(codeFragments) {
 			@Override
@@ -199,11 +216,11 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 			}
 		});
 		assertTarget(customCodeFragments.getTarget(registeredBean), String.class);
-		verify(registeredBean, never()).resolveConstructorOrFactoryMethod();
+		verify(registeredBean, never()).resolveInstantiationDescriptor();
 	}
 
 	@Test
-	void customizedGenerateInstanceSupplierCodeDoesNotResolveConstructorOrFactoryMethod() {
+	void customizedGenerateInstanceSupplierCodeDoesNotResolveInstantiationDescriptor() {
 		RegisteredBean registeredBean = spy(registerTestBean(SimpleBean.class));
 		BeanRegistrationCodeFragments customCodeFragments = createCustomCodeFragments(registeredBean, codeFragments -> new BeanRegistrationCodeFragmentsDecorator(codeFragments) {
 			@Override
@@ -214,7 +231,7 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		});
 		assertThat(customCodeFragments.generateInstanceSupplierCode(this.generationContext,
 				new MockBeanRegistrationCode(this.generationContext), false)).hasToString("// Hello");
-		verify(registeredBean, never()).resolveConstructorOrFactoryMethod();
+		verify(registeredBean, never()).resolveInstantiationDescriptor();
 	}
 
 	private BeanRegistrationCodeFragments createCustomCodeFragments(RegisteredBean registeredBean, UnaryOperator<BeanRegistrationCodeFragments> customFragments) {

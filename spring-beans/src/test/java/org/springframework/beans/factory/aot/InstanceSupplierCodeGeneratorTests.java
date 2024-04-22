@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.aot;
 
-import java.lang.reflect.Executable;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -38,10 +37,14 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.beans.factory.support.RegisteredBean.InstantiationDescriptor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.TestBeanWithPrivateConstructor;
+import org.springframework.beans.testfixture.beans.factory.aot.DefaultSimpleBeanContract;
 import org.springframework.beans.testfixture.beans.factory.aot.DeferredTypeBuilder;
+import org.springframework.beans.testfixture.beans.factory.aot.SimpleBean;
+import org.springframework.beans.testfixture.beans.factory.aot.SimpleBeanContract;
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration;
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration.EnvironmentAwareComponent;
 import org.springframework.beans.testfixture.beans.factory.generator.InnerComponentConfiguration.NoDependencyComponent;
@@ -182,6 +185,23 @@ class InstanceSupplierCodeGeneratorTests {
 					"getBeanFactory().getBean(SimpleConfiguration.class).stringBean()");
 		});
 		assertThat(getReflectionHints().getTypeHint(SimpleConfiguration.class))
+				.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT));
+	}
+
+	@Test
+	void generateWhenHasFactoryMethodOnInterface() {
+		BeanDefinition beanDefinition = BeanDefinitionBuilder
+				.rootBeanDefinition(SimpleBean.class)
+				.setFactoryMethodOnBean("simpleBean", "config").getBeanDefinition();
+		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+				.rootBeanDefinition(DefaultSimpleBeanContract.class).getBeanDefinition());
+		compile(beanDefinition, (instanceSupplier, compiled) -> {
+			Object bean = getBean(beanDefinition, instanceSupplier);
+			assertThat(bean).isInstanceOf(SimpleBean.class);
+			assertThat(compiled.getSourceFile()).contains(
+					"getBeanFactory().getBean(DefaultSimpleBeanContract.class).simpleBean()");
+		});
+		assertThat(getReflectionHints().getTypeHint(SimpleBeanContract.class))
 				.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT));
 	}
 
@@ -402,9 +422,9 @@ class InstanceSupplierCodeGeneratorTests {
 		InstanceSupplierCodeGenerator generator = new InstanceSupplierCodeGenerator(
 				this.generationContext, generateClass.getName(),
 				generateClass.getMethods(), false);
-		Executable constructorOrFactoryMethod = registeredBean.resolveConstructorOrFactoryMethod();
-		assertThat(constructorOrFactoryMethod).isNotNull();
-		CodeBlock generatedCode = generator.generateCode(registeredBean, constructorOrFactoryMethod);
+		InstantiationDescriptor instantiationDescriptor = registeredBean.resolveInstantiationDescriptor();
+		assertThat(instantiationDescriptor).isNotNull();
+		CodeBlock generatedCode = generator.generateCode(registeredBean, instantiationDescriptor);
 		typeBuilder.set(type -> {
 			type.addModifiers(Modifier.PUBLIC);
 			type.addSuperinterface(ParameterizedTypeName.get(Supplier.class, InstanceSupplier.class));

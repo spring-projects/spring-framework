@@ -432,7 +432,6 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 			"org/springframework/test/context/aot/samples/web/WebTestConfiguration__TestContext006_BeanDefinitions.java",
 			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext006_Autowiring.java",
 			"org/springframework/web/servlet/config/annotation/DelegatingWebMvcConfiguration__TestContext006_BeanDefinitions.java",
-			"org/springframework/web/servlet/config/annotation/WebMvcConfigurationSupport__TestContext006_BeanDefinitions.java",
 			// XmlSpringJupiterTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext007_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext007_BeanDefinitions.java",

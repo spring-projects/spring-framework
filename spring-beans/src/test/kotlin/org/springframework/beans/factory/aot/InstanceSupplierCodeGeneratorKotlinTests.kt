@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,9 +116,9 @@ class InstanceSupplierCodeGeneratorKotlinTests {
             generationContext, generateClass.name,
             generateClass.methods, false
         )
-        val constructorOrFactoryMethod = registeredBean.resolveConstructorOrFactoryMethod()
-        Assertions.assertThat(constructorOrFactoryMethod).isNotNull()
-        val generatedCode = generator.generateCode(registeredBean, constructorOrFactoryMethod)
+        val instantiationDescriptor = registeredBean.resolveInstantiationDescriptor()
+        Assertions.assertThat(instantiationDescriptor).isNotNull()
+        val generatedCode = generator.generateCode(registeredBean, instantiationDescriptor)
         typeBuilder.set { type: TypeSpec.Builder ->
             type.addModifiers(Modifier.PUBLIC)
             type.addSuperinterface(

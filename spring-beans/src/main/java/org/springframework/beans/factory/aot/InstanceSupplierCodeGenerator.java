@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.beans.factory.support.RegisteredBean.InstantiationDescriptor;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -120,14 +121,29 @@ public class InstanceSupplierCodeGenerator {
 	 * @param registeredBean the bean to handle
 	 * @param constructorOrFactoryMethod the executable to use to create the bean
 	 * @return the generated code
+	 * @deprecated in favor of {@link #generateCode(RegisteredBean, InstantiationDescriptor)}
 	 */
+	@Deprecated(since = "6.1.7")
 	public CodeBlock generateCode(RegisteredBean registeredBean, Executable constructorOrFactoryMethod) {
+		return generateCode(registeredBean, new InstantiationDescriptor(
+				constructorOrFactoryMethod, constructorOrFactoryMethod.getDeclaringClass()));
+	}
+
+	/**
+	 * Generate the instance supplier code.
+	 * @param registeredBean the bean to handle
+	 * @param instantiationDescriptor the executable to use to create the bean
+	 * @return the generated code
+	 * @since 6.1.7
+	 */
+	public CodeBlock generateCode(RegisteredBean registeredBean, InstantiationDescriptor instantiationDescriptor) {
+		Executable constructorOrFactoryMethod = instantiationDescriptor.executable();
 		registerRuntimeHintsIfNecessary(registeredBean, constructorOrFactoryMethod);
 		if (constructorOrFactoryMethod instanceof Constructor<?> constructor) {
 			return generateCodeForConstructor(registeredBean, constructor);
 		}
 		if (constructorOrFactoryMethod instanceof Method method) {
-			return generateCodeForFactoryMethod(registeredBean, method);
+			return generateCodeForFactoryMethod(registeredBean, method, instantiationDescriptor.targetClass());
 		}
 		throw new IllegalStateException(
 				"No suitable executor found for " + registeredBean.getBeanName());
@@ -253,21 +269,21 @@ public class InstanceSupplierCodeGenerator {
 				declaringClass.getSimpleName(), args);
 	}
 
-	private CodeBlock generateCodeForFactoryMethod(RegisteredBean registeredBean, Method factoryMethod) {
+	private CodeBlock generateCodeForFactoryMethod(RegisteredBean registeredBean, Method factoryMethod, Class<?> targetClass) {
 		String beanName = registeredBean.getBeanName();
-		Class<?> declaringClass = ClassUtils.getUserClass(factoryMethod.getDeclaringClass());
+		Class<?> targetClassToUse = ClassUtils.getUserClass(targetClass);
 		boolean dependsOnBean = !Modifier.isStatic(factoryMethod.getModifiers());
 
 		Visibility accessVisibility = getAccessVisibility(registeredBean, factoryMethod);
 		if (accessVisibility != Visibility.PRIVATE) {
 			return generateCodeForAccessibleFactoryMethod(
-					beanName, factoryMethod, declaringClass, dependsOnBean);
+					beanName, factoryMethod, targetClassToUse, dependsOnBean);
 		}
-		return generateCodeForInaccessibleFactoryMethod(beanName, factoryMethod, declaringClass);
+		return generateCodeForInaccessibleFactoryMethod(beanName, factoryMethod, targetClassToUse);
 	}
 
 	private CodeBlock generateCodeForAccessibleFactoryMethod(String beanName,
-			Method factoryMethod, Class<?> declaringClass, boolean dependsOnBean) {
+			Method factoryMethod, Class<?> targetClass, boolean dependsOnBean) {
 
 		this.generationContext.getRuntimeHints().reflection().registerMethod(
 				factoryMethod, ExecutableMode.INTROSPECT);
@@ -276,20 +292,20 @@ public class InstanceSupplierCodeGenerator {
 			Class<?> suppliedType = ClassUtils.resolvePrimitiveIfNecessary(factoryMethod.getReturnType());
 			CodeBlock.Builder code = CodeBlock.builder();
 			code.add("$T.<$T>forFactoryMethod($T.class, $S)", BeanInstanceSupplier.class,
-					suppliedType, declaringClass, factoryMethod.getName());
+					suppliedType, targetClass, factoryMethod.getName());
 			code.add(".withGenerator(($L) -> $T.$L())", REGISTERED_BEAN_PARAMETER_NAME,
-					declaringClass, factoryMethod.getName());
+					targetClass, factoryMethod.getName());
 			return code.build();
 		}
 
 		GeneratedMethod getInstanceMethod = generateGetInstanceSupplierMethod(method ->
 				buildGetInstanceMethodForFactoryMethod(method, beanName, factoryMethod,
-						declaringClass, dependsOnBean, PRIVATE_STATIC));
+						targetClass, dependsOnBean, PRIVATE_STATIC));
 		return generateReturnStatement(getInstanceMethod);
 	}
 
 	private CodeBlock generateCodeForInaccessibleFactoryMethod(
-			String beanName, Method factoryMethod, Class<?> declaringClass) {
+			String beanName, Method factoryMethod, Class<?> targetClass) {
 
 		this.generationContext.getRuntimeHints().reflection().registerMethod(factoryMethod, ExecutableMode.INVOKE);
 		GeneratedMethod getInstanceMethod = generateGetInstanceSupplierMethod(method -> {
@@ -298,19 +314,19 @@ public class InstanceSupplierCodeGenerator {
 			method.addModifiers(PRIVATE_STATIC);
 			method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, suppliedType));
 			method.addStatement(generateInstanceSupplierForFactoryMethod(
-					factoryMethod, suppliedType, declaringClass, factoryMethod.getName()));
+					factoryMethod, suppliedType, targetClass, factoryMethod.getName()));
 		});
 		return generateReturnStatement(getInstanceMethod);
 	}
 
 	private void buildGetInstanceMethodForFactoryMethod(MethodSpec.Builder method,
-			String beanName, Method factoryMethod, Class<?> declaringClass,
+			String beanName, Method factoryMethod, Class<?> targetClass,
 			boolean dependsOnBean, javax.lang.model.element.Modifier... modifiers) {
 
 		String factoryMethodName = factoryMethod.getName();
 		Class<?> suppliedType = ClassUtils.resolvePrimitiveIfNecessary(factoryMethod.getReturnType());
 		CodeWarnings codeWarnings = new CodeWarnings();
-		codeWarnings.detectDeprecation(declaringClass, factoryMethod, suppliedType)
+		codeWarnings.detectDeprecation(targetClass, factoryMethod, suppliedType)
 				.detectDeprecation(Arrays.stream(factoryMethod.getParameters()).map(Parameter::getType));
 
 		method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
@@ -320,41 +336,41 @@ public class InstanceSupplierCodeGenerator {
 
 		CodeBlock.Builder code = CodeBlock.builder();
 		code.add(generateInstanceSupplierForFactoryMethod(
-				factoryMethod, suppliedType, declaringClass, factoryMethodName));
+				factoryMethod, suppliedType, targetClass, factoryMethodName));
 
 		boolean hasArguments = factoryMethod.getParameterCount() > 0;
 		CodeBlock arguments = hasArguments ?
-				new AutowiredArgumentsCodeGenerator(declaringClass, factoryMethod)
+				new AutowiredArgumentsCodeGenerator(targetClass, factoryMethod)
 						.generateCode(factoryMethod.getParameterTypes())
 				: NO_ARGS;
 
 		CodeBlock newInstance = generateNewInstanceCodeForMethod(
-				dependsOnBean, declaringClass, factoryMethodName, arguments);
+				dependsOnBean, targetClass, factoryMethodName, arguments);
 		code.add(generateWithGeneratorCode(hasArguments, newInstance));
 		method.addStatement(code.build());
 	}
 
 	private CodeBlock generateInstanceSupplierForFactoryMethod(Method factoryMethod,
-			Class<?> suppliedType, Class<?> declaringClass, String factoryMethodName) {
+			Class<?> suppliedType, Class<?> targetClass, String factoryMethodName) {
 
 		if (factoryMethod.getParameterCount() == 0) {
 			return CodeBlock.of("return $T.<$T>forFactoryMethod($T.class, $S)",
-					BeanInstanceSupplier.class, suppliedType, declaringClass, factoryMethodName);
+					BeanInstanceSupplier.class, suppliedType, targetClass, factoryMethodName);
 		}
 
 		CodeBlock parameterTypes = generateParameterTypesCode(factoryMethod.getParameterTypes(), 0);
 		return CodeBlock.of("return $T.<$T>forFactoryMethod($T.class, $S, $L)",
-				BeanInstanceSupplier.class, suppliedType, declaringClass, factoryMethodName, parameterTypes);
+				BeanInstanceSupplier.class, suppliedType, targetClass, factoryMethodName, parameterTypes);
 	}
 
 	private CodeBlock generateNewInstanceCodeForMethod(boolean dependsOnBean,
-			Class<?> declaringClass, String factoryMethodName, CodeBlock args) {
+			Class<?> targetClass, String factoryMethodName, CodeBlock args) {
 
 		if (!dependsOnBean) {
-			return CodeBlock.of("$T.$L($L)", declaringClass, factoryMethodName, args);
+			return CodeBlock.of("$T.$L($L)", targetClass, factoryMethodName, args);
 		}
 		return CodeBlock.of("$L.getBeanFactory().getBean($T.class).$L($L)",
-				REGISTERED_BEAN_PARAMETER_NAME, declaringClass, factoryMethodName, args);
+				REGISTERED_BEAN_PARAMETER_NAME, targetClass, factoryMethodName, args);
 	}
 
 	private CodeBlock generateReturnStatement(GeneratedMethod generatedMethod) {

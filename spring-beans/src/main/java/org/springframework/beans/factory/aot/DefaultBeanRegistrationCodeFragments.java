@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.aot;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.function.Predicate;
@@ -35,6 +34,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.beans.factory.support.RegisteredBean.InstantiationDescriptor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.ClassName;
@@ -62,7 +62,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 
 	private final BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory;
 
-	private final Supplier<Executable> constructorOrFactoryMethod;
+	private final Supplier<InstantiationDescriptor> instantiationDescriptor;
 
 
 	DefaultBeanRegistrationCodeFragments(BeanRegistrationsCode beanRegistrationsCode,
@@ -72,7 +72,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 		this.beanRegistrationsCode = beanRegistrationsCode;
 		this.registeredBean = registeredBean;
 		this.beanDefinitionMethodGeneratorFactory = beanDefinitionMethodGeneratorFactory;
-		this.constructorOrFactoryMethod = SingletonSupplier.of(registeredBean::resolveConstructorOrFactoryMethod);
+		this.instantiationDescriptor = SingletonSupplier.of(registeredBean::resolveInstantiationDescriptor);
 	}
 
 
@@ -82,7 +82,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 			throw new IllegalStateException("Default code generation is not supported for bean definitions "
 					+ "declaring an instance supplier callback: " + registeredBean.getMergedBeanDefinition());
 		}
-		Class<?> target = extractDeclaringClass(registeredBean.getBeanType(), this.constructorOrFactoryMethod.get());
+		Class<?> target = extractDeclaringClass(registeredBean, this.instantiationDescriptor.get());
 		while (target.getName().startsWith("java.") && registeredBean.isInnerBean()) {
 			RegisteredBean parent = registeredBean.getParent();
 			Assert.state(parent != null, "No parent available for inner bean");
@@ -91,14 +91,14 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 		return (target.isArray() ? ClassName.get(target.getComponentType()) : ClassName.get(target));
 	}
 
-	private Class<?> extractDeclaringClass(ResolvableType beanType, Executable executable) {
-		Class<?> declaringClass = ClassUtils.getUserClass(executable.getDeclaringClass());
-		if (executable instanceof Constructor<?>
-				&& AccessControl.forMember(executable).isPublic()
+	private Class<?> extractDeclaringClass(RegisteredBean registeredBean, InstantiationDescriptor instantiationDescriptor) {
+		Class<?> declaringClass = ClassUtils.getUserClass(instantiationDescriptor.targetClass());
+		if (instantiationDescriptor.executable() instanceof Constructor<?>
+				&& AccessControl.forMember(instantiationDescriptor.executable()).isPublic()
 				&& FactoryBean.class.isAssignableFrom(declaringClass)) {
-			return extractTargetClassFromFactoryBean(declaringClass, beanType);
+			return extractTargetClassFromFactoryBean(declaringClass, registeredBean.getBeanType());
 		}
-		return executable.getDeclaringClass();
+		return declaringClass;
 	}
 
 	/**
@@ -238,9 +238,9 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 			throw new IllegalStateException("Default code generation is not supported for bean definitions declaring "
 					+ "an instance supplier callback: " + this.registeredBean.getMergedBeanDefinition());
 		}
-		return new InstanceSupplierCodeGenerator(generationContext,
-				beanRegistrationCode.getClassName(), beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
-				.generateCode(this.registeredBean, this.constructorOrFactoryMethod.get());
+		return new InstanceSupplierCodeGenerator(generationContext, beanRegistrationCode.getClassName(),
+				beanRegistrationCode.getMethods(), allowDirectSupplierShortcut).generateCode(
+						this.registeredBean, this.instantiationDescriptor.get());
 	}
 
 	@Override
