@@ -101,8 +101,8 @@ class ConfigurationClassPostProcessorAotContributionTests {
 				initializer.accept(freshBeanFactory);
 				freshContext.refresh();
 				assertThat(freshBeanFactory.getBeanPostProcessors()).filteredOn(ImportAwareAotBeanPostProcessor.class::isInstance)
-						.singleElement().satisfies(postProcessor -> assertPostProcessorEntry(postProcessor, ImportAwareConfiguration.class,
-								ImportConfiguration.class));
+						.singleElement().satisfies(postProcessor ->
+								assertPostProcessorEntry(postProcessor, ImportAwareConfiguration.class, ImportConfiguration.class));
 				freshContext.close();
 			});
 		}
@@ -244,6 +244,7 @@ class ConfigurationClassPostProcessorAotContributionTests {
 
 		}
 	}
+
 
 	@Nested
 	class PropertySourceTests {
@@ -410,8 +411,8 @@ class ConfigurationClassPostProcessorAotContributionTests {
 		@PropertySource("classpath:org/springframework/context/annotation/p?.properties")
 		static class PropertySourceWithWildcardLocationPatternConfiguration {
 		}
-
 	}
+
 
 	@Nested
 	class ConfigurationClassProxyTests {
@@ -432,14 +433,13 @@ class ConfigurationClassPostProcessorAotContributionTests {
 					getRegisteredBean(CglibConfiguration.class))).isNotNull();
 		}
 
-
 		private RegisteredBean getRegisteredBean(Class<?> bean) {
 			this.beanFactory.registerBeanDefinition("test", new RootBeanDefinition(bean));
 			this.processor.postProcessBeanFactory(this.beanFactory);
 			return RegisteredBean.of(this.beanFactory, "test");
 		}
-
 	}
+
 
 	@Nullable
 	private BeanFactoryInitializationAotContribution getContribution(Class<?>... types) {
@@ -458,8 +458,8 @@ class ConfigurationClassPostProcessorAotContributionTests {
 				.containsExactly(entry(key.getName(), value.getName()));
 	}
 
-	static class CustomPropertySourcesFactory extends DefaultPropertySourceFactory {
 
+	static class CustomPropertySourcesFactory extends DefaultPropertySourceFactory {
 	}
 
 }
