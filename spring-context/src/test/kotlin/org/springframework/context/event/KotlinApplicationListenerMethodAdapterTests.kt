@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,9 +64,9 @@ class KotlinApplicationListenerMethodAdapterTests {
 	private class StaticApplicationListenerMethodAdapter(method: Method, private val targetBean: Any) :
 		ApplicationListenerMethodAdapter("unused", targetBean.javaClass, method) {
 			public override fun getTargetBean(): Any {
-			return targetBean
+				return targetBean
+			}
 		}
-	}
 
 	@Suppress("RedundantSuspendModifier", "UNUSED_PARAMETER")
 	private class SampleEvents {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
  * <li>{@code **} matches zero or more <em>path segments</em> until the end of the path</li>
  * <li><code>{spring}</code> matches a <em>path segment</em> and captures it as a variable named "spring"</li>
  * <li><code>{spring:[a-z]+}</code> matches the regexp {@code [a-z]+} against a path segment
- * and captures it a path variable named "spring"</li>
+ * and captures it as a path variable named "spring"</li>
  * <li><code>{*spring}</code> matches zero or more <em>path segments</em> until the end of the path
  * and captures it as a variable named "spring"</li>
  * </ul>

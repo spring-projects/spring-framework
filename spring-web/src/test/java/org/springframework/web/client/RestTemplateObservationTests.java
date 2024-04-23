@@ -238,7 +238,7 @@ class RestTemplateObservationTests {
 		@Nullable
 		Observation currentObservation;
 
-		public ObservationErrorHandler(TestObservationRegistry observationRegistry) {
+		ObservationErrorHandler(TestObservationRegistry observationRegistry) {
 			this.observationRegistry = observationRegistry;
 		}
 
