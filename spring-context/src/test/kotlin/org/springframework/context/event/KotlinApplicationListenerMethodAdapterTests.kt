@@ -64,9 +64,9 @@ class KotlinApplicationListenerMethodAdapterTests {
 	private class StaticApplicationListenerMethodAdapter(method: Method, private val targetBean: Any) :
 		ApplicationListenerMethodAdapter("unused", targetBean.javaClass, method) {
 			public override fun getTargetBean(): Any {
-			return targetBean
+				return targetBean
+			}
 		}
-	}
 
 	@Suppress("RedundantSuspendModifier", "UNUSED_PARAMETER")
 	private class SampleEvents {
