@@ -31,6 +31,7 @@ import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.PreFlightRequestHandler;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.support.WebContentGenerator;
@@ -72,7 +73,7 @@ class CorsAbstractHandlerMappingTests {
 
 		assertThat(chain).isNotNull();
 		assertThat(chain.getHandler()).isNotNull();
-		assertThat(chain.getHandler().getClass().getSimpleName()).isEqualTo("PreFlightHandler");
+		assertThat(chain.getHandler()).isInstanceOf(PreFlightRequestHandler.class);
 		assertThat(mapping.hasSavedCorsConfig()).isFalse();
 	}
 
@@ -103,7 +104,7 @@ class CorsAbstractHandlerMappingTests {
 
 		assertThat(chain).isNotNull();
 		assertThat(chain.getHandler()).isNotNull();
-		assertThat(chain.getHandler().getClass().getSimpleName()).isEqualTo("PreFlightHandler");
+		assertThat(chain.getHandler()).isInstanceOf(PreFlightRequestHandler.class);
 		assertThat(mapping.getRequiredCorsConfig().getAllowedOrigins()).containsExactly("*");
 	}
 
@@ -144,7 +145,7 @@ class CorsAbstractHandlerMappingTests {
 
 		assertThat(chain).isNotNull();
 		assertThat(chain.getHandler()).isNotNull();
-		assertThat(chain.getHandler().getClass().getSimpleName()).isEqualTo("PreFlightHandler");
+		assertThat(chain.getHandler()).isInstanceOf(PreFlightRequestHandler.class);
 		assertThat(mapping.getRequiredCorsConfig().getAllowedOrigins()).containsExactly("*");
 	}
 
@@ -172,7 +173,7 @@ class CorsAbstractHandlerMappingTests {
 
 		assertThat(chain).isNotNull();
 		assertThat(chain.getHandler()).isNotNull();
-		assertThat(chain.getHandler().getClass().getSimpleName()).isEqualTo("PreFlightHandler");
+		assertThat(chain.getHandler()).isInstanceOf(PreFlightRequestHandler.class);
 
 		CorsConfiguration config = mapping.getRequiredCorsConfig();
 		assertThat(config).isNotNull();

@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,6 +48,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsProcessor;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.DefaultCorsProcessor;
+import org.springframework.web.cors.PreFlightRequestHandler;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -679,9 +681,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			HttpServletRequest request, HandlerExecutionChain chain, @Nullable CorsConfiguration config) {
 
 		if (CorsUtils.isPreFlightRequest(request)) {
-			PreFlightHandler preFlightHandler = new PreFlightHandler(config);
-			chain.addInterceptor(0, preFlightHandler);
-			return new HandlerExecutionChain(preFlightHandler, chain.getInterceptors());
+			PreFlightHttpRequestHandler handler = new PreFlightHttpRequestHandler(config);
+			chain.addInterceptor(0, handler);
+			return new HandlerExecutionChain(handler, chain.getInterceptors());
 		}
 		else {
 			chain.addInterceptor(0, new CorsInterceptor(config));
@@ -700,6 +702,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		@Override
+		@Nullable
+		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+			return this.config;
+		}
+
+		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 				throws Exception {
 
@@ -709,26 +717,32 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				return true;
 			}
 
-			return corsProcessor.processRequest(this.config, request, response);
+			return invokeCorsProcessor(request, response);
 		}
 
-		@Override
-		@Nullable
-		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-			return this.config;
+		protected boolean invokeCorsProcessor(
+				HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+			return corsProcessor.processRequest(this.config, request, response);
 		}
 	}
 
 
-	private class PreFlightHandler extends CorsInterceptor implements HttpRequestHandler {
+	private final class PreFlightHttpRequestHandler
+			extends CorsInterceptor implements HttpRequestHandler, PreFlightRequestHandler {
 
-		public PreFlightHandler(@Nullable CorsConfiguration config) {
+		public PreFlightHttpRequestHandler(@Nullable CorsConfiguration config) {
 			super(config);
 		}
 
 		@Override
 		public void handleRequest(HttpServletRequest request, HttpServletResponse response) {
 			// no-op
+		}
+
+		@Override
+		public void handlePreFlight(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			invokeCorsProcessor(request, response);
 		}
 	}
 
