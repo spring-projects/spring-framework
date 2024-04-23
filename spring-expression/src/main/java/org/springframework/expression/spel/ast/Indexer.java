@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,6 +225,8 @@ public class Indexer extends SpelNodeImpl {
 			cf.loadTarget(mv);
 		}
 
+		SpelNodeImpl index = this.children[0];
+
 		if (this.indexedType == IndexedType.ARRAY) {
 			int insn;
 			if ("D".equals(this.exitTypeDescriptor)) {
@@ -261,18 +263,14 @@ public class Indexer extends SpelNodeImpl {
 						//depthPlusOne(exitTypeDescriptor)+"Ljava/lang/Object;");
 				insn = AALOAD;
 			}
-			SpelNodeImpl index = this.children[0];
-			cf.enterCompilationScope();
-			index.generateCode(mv, cf);
-			cf.exitCompilationScope();
+
+			generateIndexCode(mv, cf, index, int.class);
 			mv.visitInsn(insn);
 		}
 
 		else if (this.indexedType == IndexedType.LIST) {
 			mv.visitTypeInsn(CHECKCAST, "java/util/List");
-			cf.enterCompilationScope();
-			this.children[0].generateCode(mv, cf);
-			cf.exitCompilationScope();
+			generateIndexCode(mv, cf, index, int.class);
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
 		}
 
@@ -280,13 +278,13 @@ public class Indexer extends SpelNodeImpl {
 			mv.visitTypeInsn(CHECKCAST, "java/util/Map");
 			// Special case when the key is an unquoted string literal that will be parsed as
 			// a property/field reference
-			if ((this.children[0] instanceof PropertyOrFieldReference reference)) {
+			if (index instanceof PropertyOrFieldReference reference) {
 				String mapKeyName = reference.getName();
 				mv.visitLdcInsn(mapKeyName);
 			}
 			else {
 				cf.enterCompilationScope();
-				this.children[0].generateCode(mv, cf);
+				index.generateCode(mv, cf);
 				cf.exitCompilationScope();
 			}
 			mv.visitMethodInsn(
@@ -321,6 +319,11 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		cf.pushDescriptor(this.exitTypeDescriptor);
+	}
+
+	private void generateIndexCode(MethodVisitor mv, CodeFlow cf, SpelNodeImpl indexNode, Class<?> indexType) {
+		String indexDesc = CodeFlow.toDescriptor(indexType);
+		generateCodeForArgument(mv, cf, indexNode, indexDesc);
 	}
 
 	@Override
