@@ -706,6 +706,32 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
 		}
 
+		@Test  // gh-32694
+		void indexIntoArrayUsingIntegerWrapper() {
+			context.setVariable("array", new int[] {1, 2, 3, 4});
+			context.setVariable("index", 2);
+
+			expression = parser.parseExpression("#array[#index]");
+
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
+		}
+
+		@Test  // gh-32694
+		void indexIntoListUsingIntegerWrapper() {
+			context.setVariable("list", List.of(1, 2, 3, 4));
+			context.setVariable("index", 2);
+
+			expression = parser.parseExpression("#list[#index]");
+
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
 		private String stringify(Object object) {
 			Stream<? extends Object> stream;
 			if (object instanceof Collection<?> collection) {

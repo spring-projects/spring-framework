@@ -416,13 +416,13 @@ public class Indexer extends SpelNodeImpl {
 				default -> AALOAD;
 			};
 
-			generateIndexCode(index, mv, cf);
+			generateIndexCode(index, int.class, mv, cf);
 			mv.visitInsn(insn);
 		}
 
 		else if (this.indexedType == IndexedType.LIST) {
 			mv.visitTypeInsn(CHECKCAST, "java/util/List");
-			generateIndexCode(index, mv, cf);
+			generateIndexCode(index, int.class, mv, cf);
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
 		}
 
@@ -471,6 +471,11 @@ public class Indexer extends SpelNodeImpl {
 		cf.enterCompilationScope();
 		index.generateCode(mv, cf);
 		cf.exitCompilationScope();
+	}
+
+	private void generateIndexCode(SpelNodeImpl indexNode, Class<?> indexType, MethodVisitor mv, CodeFlow cf) {
+		String indexDesc = CodeFlow.toDescriptor(indexType);
+		generateCodeForArgument(mv, cf, indexNode, indexDesc);
 	}
 
 	@Override
