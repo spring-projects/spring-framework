@@ -82,6 +82,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		if (this.supportsReadStreaming && InputStreamResource.class == clazz) {
 			return new InputStreamResource(inputMessage.getBody()) {
 				@Override
+				@Nullable
 				public String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
@@ -108,6 +109,23 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	}
 
 	@Override
+	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException {
+
+		writeContent(resource, outputMessage);
+	}
+
+	/**
+	 * Add the default headers for the given resource to the given message.
+	 * @since 6.0
+	 */
+	public void addDefaultHeaders(HttpOutputMessage message, Resource resource, @Nullable MediaType contentType)
+			throws IOException {
+
+		addDefaultHeaders(message.getHeaders(), resource, contentType);
+	}
+
+	@Override
 	protected MediaType getDefaultContentType(Resource resource) {
 		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
 	}
@@ -124,23 +142,10 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		return (contentLength < 0 ? null : contentLength);
 	}
 
-	/**
-	 * Adds the default headers for the given resource to the given message.
-	 * @since 6.0
-	 */
-	public void addDefaultHeaders(HttpOutputMessage message, Resource resource, @Nullable MediaType contentType) throws IOException {
-		addDefaultHeaders(message.getHeaders(), resource, contentType);
-	}
-
-	@Override
-	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
-			throws IOException, HttpMessageNotWritableException {
-
-		writeContent(resource, outputMessage);
-	}
 
 	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+
 		// We cannot use try-with-resources here for the InputStream, since we have
 		// custom handling of the close() method in a finally-block.
 		try {
