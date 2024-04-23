@@ -4221,16 +4221,27 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(tc.s).isEqualTo("aaabbbccc");
 		tc.reset();
 
-		// TODO Fails related to conversion service converting a String[] to satisfy Object...
-//		expression = parser.parseExpression("sixteen(stringArray)");
-//		assertCantCompile(expression);
-//		expression.getValue(tc);
-//		assertEquals("aaabbbccc", tc.s);
-//		assertCanCompile(expression);
-//		tc.reset();
-//		expression.getValue(tc);
-//		assertEquals("aaabbbccc", tc.s);
-//		tc.reset();
+		expression = parser.parseExpression("sixteen(seventeen)");
+		assertCantCompile(expression);
+		expression.getValue(tc);
+		assertThat(tc.s).isEqualTo("aaabbbccc");
+		assertCanCompile(expression);
+		tc.reset();
+		// see TODO below
+		// expression.getValue(tc);
+		// assertThat(tc.s).isEqualTo("aaabbbccc");
+		// tc.reset();
+
+		// TODO Determine why the String[] is passed as the first element of the Object... varargs array instead of the entire varargs array.
+		// expression = parser.parseExpression("sixteen(stringArray)");
+		// assertCantCompile(expression);
+		// expression.getValue(tc);
+		// assertThat(tc.s).isEqualTo("aaabbbccc");
+		// assertCanCompile(expression);
+		// tc.reset();
+		// expression.getValue(tc);
+		// assertThat(tc.s).isEqualTo("aaabbbccc");
+		// tc.reset();
 
 		// varargs int
 		expression = parser.parseExpression("twelve(1,2,3)");
@@ -6088,6 +6099,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 					s += varg;
 				}
 			}
+		}
+
+		public String[] seventeen() {
+			return new String[] { "aaa", "bbb", "ccc" };
 		}
 	}
 
