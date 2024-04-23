@@ -16,29 +16,6 @@
 
 package org.springframework.http.codec;
 
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.Encoder;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ReactiveHttpOutputMessage;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
-import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +23,26 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.codec.Encoder;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.MediaType;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -205,32 +202,27 @@ class EncoderHttpMessageWriterTests {
 	}
 
 	@Test
-	public void ifBodyPublisherEmpty_noContentTypeHeader() {
+	public void noContentTypeWithEmptyBody() {
 		Encoder<CharSequence> encoder = CharSequenceEncoder.textPlainOnly();
-		EncoderHttpMessageWriter<CharSequence> writer = new EncoderHttpMessageWriter<>(encoder);
-		ReactiveHttpOutputMessage outputMessage = new MockClientHttpRequest(HttpMethod.POST, "/");
+		HttpMessageWriter<CharSequence> writer = new EncoderHttpMessageWriter<>(encoder);
 		Mono<Void> writerMono = writer.write(Mono.empty(), ResolvableType.forClass(String.class),
-				null, outputMessage, NO_HINTS);
+				null, this.response, NO_HINTS);
 
 		StepVerifier.create(writerMono)
 				.verifyComplete();
-		assertThat(outputMessage.getHeaders()).doesNotContainKey(HttpHeaders.CONTENT_TYPE);
+		assertThat(response.getHeaders().getContentType()).isNull();
 	}
 
 	@Test
-	public void ifBodyPublisherEmpty_contentLengthZero() {
+	public void zeroContentLengthWithEmptyBody() {
 		Encoder<CharSequence> encoder = CharSequenceEncoder.textPlainOnly();
-		EncoderHttpMessageWriter<CharSequence> writer = new EncoderHttpMessageWriter<>(encoder);
-		ReactiveHttpOutputMessage outputMessage = new MockClientHttpRequest(HttpMethod.POST, "/");
+		HttpMessageWriter<CharSequence> writer = new EncoderHttpMessageWriter<>(encoder);
 		Mono<Void> writerMono = writer.write(Mono.empty(), ResolvableType.forClass(String.class),
-				null, outputMessage, NO_HINTS);
+				null, this.response, NO_HINTS);
 
 		StepVerifier.create(writerMono)
 				.verifyComplete();
-		List<String> contentLengthValues = outputMessage.getHeaders().get(HttpHeaders.CONTENT_LENGTH);
-		assertThat(contentLengthValues).hasSize(1);
-		int contentLength = Integer.parseInt(contentLengthValues.get(0));
-		assertThat(contentLength).isEqualTo(0);
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(0);
 	}
 
 	private void configureEncoder(MimeType... mimeTypes) {
