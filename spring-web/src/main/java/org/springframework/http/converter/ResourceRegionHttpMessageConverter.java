@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can write a single {@link ResourceRegion},
- * or Collections of {@link ResourceRegion ResourceRegions}.
+ * Implementation of {@link HttpMessageConverter} that can write a single
+ * {@link ResourceRegion} or Collections of {@link ResourceRegion ResourceRegions}.
  *
  * @author Brian Clozel
  * @author Juergen Hoeller
@@ -50,22 +50,6 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		super(MediaType.ALL);
 	}
 
-
-	@Override
-	@SuppressWarnings("unchecked")
-	protected MediaType getDefaultContentType(Object object) {
-		Resource resource = null;
-		if (object instanceof ResourceRegion) {
-			resource = ((ResourceRegion) object).getResource();
-		}
-		else {
-			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
-			if (!regions.isEmpty()) {
-				resource = regions.iterator().next().getResource();
-			}
-		}
-		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
-	}
 
 	@Override
 	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
@@ -123,7 +107,6 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
@@ -131,14 +114,31 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 			writeResourceRegion((ResourceRegion) object, outputMessage);
 		}
 		else {
+			@SuppressWarnings("unchecked")
 			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
 			if (regions.size() == 1) {
 				writeResourceRegion(regions.iterator().next(), outputMessage);
 			}
 			else {
-				writeResourceRegionCollection((Collection<ResourceRegion>) object, outputMessage);
+				writeResourceRegionCollection(regions, outputMessage);
 			}
 		}
+	}
+
+	@Override
+	protected MediaType getDefaultContentType(Object object) {
+		Resource resource = null;
+		if (object instanceof ResourceRegion) {
+			resource = ((ResourceRegion) object).getResource();
+		}
+		else {
+			@SuppressWarnings("unchecked")
+			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
+			if (!regions.isEmpty()) {
+				resource = regions.iterator().next().getResource();
+			}
+		}
+		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
 	}
 
 

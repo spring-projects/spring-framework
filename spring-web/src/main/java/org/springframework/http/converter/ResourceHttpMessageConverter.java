@@ -81,6 +81,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		if (this.supportsReadStreaming && InputStreamResource.class == clazz) {
 			return new InputStreamResource(inputMessage.getBody()) {
 				@Override
+				@Nullable
 				public String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
@@ -107,6 +108,13 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	}
 
 	@Override
+	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException {
+
+		writeContent(resource, outputMessage);
+	}
+
+	@Override
 	protected MediaType getDefaultContentType(Resource resource) {
 		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
 	}
@@ -123,15 +131,10 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		return (contentLength < 0 ? null : contentLength);
 	}
 
-	@Override
-	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
-			throws IOException, HttpMessageNotWritableException {
-
-		writeContent(resource, outputMessage);
-	}
 
 	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+
 		// We cannot use try-with-resources here for the InputStream, since we have
 		// custom handling of the close() method in a finally-block.
 		try {
