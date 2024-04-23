@@ -36,6 +36,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MethodInvoker;
 
+import static org.springframework.util.ObjectUtils.isArray;
+
 /**
  * Utility methods used by the reflection resolver code to discover the appropriate
  * methods, constructors, and fields that should be used in expressions.
@@ -457,14 +459,18 @@ public abstract class ReflectionHelper {
 	 * @return a repackaged array of arguments where any varargs setup has been done
 	 */
 	public static Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args) {
-		// Check if array already built for final argument
 		int parameterCount = requiredParameterTypes.length;
+		Assert.notEmpty(requiredParameterTypes, "Required parameter types must not be empty");
+
+		Class<?> lastRequiredParameterType = requiredParameterTypes[parameterCount - 1];
+		Assert.isTrue(lastRequiredParameterType.isArray(), "Method must be varargs");
+
 		int argumentCount = args.length;
+		Object lastArgument = argumentCount > 0 ? args[argumentCount - 1] : null;
 
 		// Check if repackaging is needed...
 		if (parameterCount != args.length ||
-				requiredParameterTypes[parameterCount - 1] !=
-						(args[argumentCount - 1] != null ? args[argumentCount - 1].getClass() : null)) {
+			(!isArray(lastArgument) && differentTypes(lastRequiredParameterType, lastArgument))) {
 
 			// Create an array for the leading arguments plus the varargs array argument.
 			Object[] newArgs = new Object[parameterCount];
@@ -477,7 +483,7 @@ public abstract class ReflectionHelper {
 			if (argumentCount >= parameterCount) {
 				varargsArraySize = argumentCount - (parameterCount - 1);
 			}
-			Class<?> componentType = requiredParameterTypes[parameterCount - 1].componentType();
+			Class<?> componentType = lastRequiredParameterType.componentType();
 			Object varargsArray = Array.newInstance(componentType, varargsArraySize);
 			for (int i = 0; i < varargsArraySize; i++) {
 				Array.set(varargsArray, i, args[parameterCount - 1 + i]);
@@ -489,6 +495,9 @@ public abstract class ReflectionHelper {
 		return args;
 	}
 
+	private static boolean differentTypes(Class<?> lastRequiredParameterType, @Nullable Object lastArgument) {
+		return lastArgument == null || lastRequiredParameterType != lastArgument.getClass();
+	}
 
 	/**
 	 * Arguments match kinds.

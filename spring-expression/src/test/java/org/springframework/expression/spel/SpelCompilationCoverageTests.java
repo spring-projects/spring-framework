@@ -4648,6 +4648,17 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(tc.s).isEqualTo("aaabbbccc");
 		tc.reset();
 
+		expression = parser.parseExpression("sixteen(seventeen)");
+		assertCannotCompile(expression);
+		expression.getValue(tc);
+		assertThat(tc.s).isEqualTo("aaabbbccc");
+		assertCanCompile(expression);
+		tc.reset();
+		// see TODO below
+		// expression.getValue(tc);
+		// assertThat(tc.s).isEqualTo("aaabbbccc");
+		// tc.reset();
+
 		// TODO Determine why the String[] is passed as the first element of the Object... varargs array instead of the entire varargs array.
 		// expression = parser.parseExpression("sixteen(stringArray)");
 		// assertCantCompile(expression);
@@ -6501,6 +6512,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 					s += varg;
 				}
 			}
+		}
+
+		public String[] seventeen() {
+			return new String[] { "aaa", "bbb", "ccc" };
 		}
 	}
 
