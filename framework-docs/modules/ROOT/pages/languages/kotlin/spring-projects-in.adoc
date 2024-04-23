@@ -166,7 +166,7 @@ public class SampleConfiguration {
 	@Bean
 	@NotNull
 	public SampleBean sampleBean$demo_kotlin_internal_test() {
-        return new SampleBean();
+		return new SampleBean();
 	}
 }
 ----

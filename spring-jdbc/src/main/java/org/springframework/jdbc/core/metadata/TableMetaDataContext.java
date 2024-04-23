@@ -432,12 +432,12 @@ public class TableMetaDataContext {
 
 		private final boolean quoting;
 
-		public QuoteHandler(@Nullable String identifierQuoteString) {
+		QuoteHandler(@Nullable String identifierQuoteString) {
 			this.identifierQuoteString = identifierQuoteString;
 			this.quoting = StringUtils.hasText(identifierQuoteString);
 		}
 
-		public void appendTo(StringBuilder stringBuilder, @Nullable String item) {
+		void appendTo(StringBuilder stringBuilder, @Nullable String item) {
 			if (this.quoting) {
 				stringBuilder.append(this.identifierQuoteString)
 						.append(item).append(this.identifierQuoteString);
