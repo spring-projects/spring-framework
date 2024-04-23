@@ -280,7 +280,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Invoke the given Kotlin coroutine suspended function.
-	 *
 	 * <p>The default implementation invokes
 	 * {@link CoroutinesUtils#invokeSuspendingFunction(Method, Object, Object...)},
 	 * but subclasses can override this method to use
@@ -291,6 +290,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	protected Object invokeSuspendingFunction(Method method, Object target, Object[] args) {
 		return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
 	}
+
 
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
@@ -334,7 +334,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			Object result = function.callBy(argMap);
 			return (result == Unit.INSTANCE ? null : result);
 		}
-
 	}
 
 }
