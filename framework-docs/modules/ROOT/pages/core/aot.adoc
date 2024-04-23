@@ -326,6 +326,19 @@ However, this is not a best practice and flagging the preferred constructor with
 
 In case you are working on a code base that you cannot modify, you can set the {spring-framework-api}/beans/factory/support/AbstractBeanDefinition.html#PREFERRED_CONSTRUCTORS_ATTRIBUTE[`preferredConstructors` attribute] on the related bean definition to indicate which constructor should be used.
 
+[[aot.bestpractices.custom-arguments]]
+=== Avoid Creating Bean with Custom Arguments
+
+Spring AOT detects what needs to be done to create a bean and translates that in generated code using an instance supplier.
+The container also supports creating a bean with {spring-framework-api}++/beans/factory/BeanFactory.html#getBean(java.lang.String,java.lang.Object...)++[custom arguments] that leads to several issues with AOT:
+
+. The custom arguments require a dynamic introspection of a matching constructor or factory method.
+Those arguments can't be detected by AOT so the necessary reflection hints will have to be provided manually.
+. By-passing the instance supplier means that all the other optimizations after creation are skipped as well.
+For instance, autowiring on fields and methods will be skipped as they are handled in the instance supplier.
+
+Rather than having prototype-scoped beans created with custom arguments, we recommend a manual factory pattern where a bean is responsible of the creation of the instance.
+
 [[aot.bestpractices.factory-bean]]
 === FactoryBean
 
