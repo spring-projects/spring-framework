@@ -311,6 +311,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return false;
 	}
 
+
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
@@ -369,7 +370,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				return (result == Unit.INSTANCE ? null : result);
 			}
 		}
-
 	}
 
 }
