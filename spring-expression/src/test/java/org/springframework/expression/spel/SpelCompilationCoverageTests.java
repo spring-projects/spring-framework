@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.asm.MethodVisitor;
@@ -55,6 +60,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
  * Checks SpelCompiler behavior. This should cover compilation all compiled node types.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 4.1
  */
 public class SpelCompilationCoverageTests extends AbstractExpressionTests {
@@ -128,6 +134,442 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	private SpelNodeImpl ast;
 
+
+	@Nested
+	class VariableReferenceTests {
+
+		@Test
+		void userDefinedVariable() {
+			EvaluationContext ctx = new StandardEvaluationContext();
+			ctx.setVariable("target", "abc");
+			expression = parser.parseExpression("#target");
+			assertThat(expression.getValue(ctx)).isEqualTo("abc");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(ctx)).isEqualTo("abc");
+			ctx.setVariable("target", "123");
+			assertThat(expression.getValue(ctx)).isEqualTo("123");
+
+			// Changing the variable type from String to Integer results in a
+			// ClassCastException in the compiled code.
+			ctx.setVariable("target", 42);
+			assertThatExceptionOfType(SpelEvaluationException.class)
+				.isThrownBy(() -> expression.getValue(ctx))
+				.withCauseInstanceOf(ClassCastException.class);
+
+			ctx.setVariable("target", "abc");
+			expression = parser.parseExpression("#target.charAt(0)");
+			assertThat(expression.getValue(ctx)).isEqualTo('a');
+			assertCanCompile(expression);
+			assertThat(expression.getValue(ctx)).isEqualTo('a');
+			ctx.setVariable("target", "1");
+			assertThat(expression.getValue(ctx)).isEqualTo('1');
+
+			// Changing the variable type from String to Integer results in a
+			// ClassCastException in the compiled code.
+			ctx.setVariable("target", 42);
+			assertThatExceptionOfType(SpelEvaluationException.class)
+				.isThrownBy(() -> expression.getValue(ctx))
+				.withCauseInstanceOf(ClassCastException.class);
+		}
+
+	}
+
+	@Nested
+	class IndexingTests {
+
+		@Test
+		void indexIntoPrimitiveShortArray() {
+			short[] shorts = { (short) 33, (short) 44, (short) 55 };
+
+			expression = parser.parseExpression("[2]");
+
+			assertThat(expression.getValue(shorts)).isEqualTo((short) 55);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(shorts)).isEqualTo((short) 55);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("S");
+		}
+
+		@Test
+		void indexIntoPrimitiveByteArray() {
+			byte[] bytes = { (byte) 2, (byte) 3, (byte) 4 };
+
+			expression = parser.parseExpression("[2]");
+
+			assertThat(expression.getValue(bytes)).isEqualTo((byte) 4);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(bytes)).isEqualTo((byte) 4);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("B");
+		}
+
+		@Test
+		void indexIntoPrimitiveIntArray() {
+			int[] ints = { 8, 9, 10 };
+
+			expression = parser.parseExpression("[2]");
+
+			assertThat(expression.getValue(ints)).isEqualTo(10);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(ints)).isEqualTo(10);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
+		}
+
+		@Test
+		void indexIntoPrimitiveLongArray() {
+			long[] longs = { 2L, 3L, 4L };
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(expression.getValue(longs)).isEqualTo(2L);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(longs)).isEqualTo(2L);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("J");
+		}
+
+		@Test
+		void indexIntoPrimitiveFloatArray() {
+			float[] floats = { 6.0f, 7.0f, 8.0f };
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(expression.getValue(floats)).isEqualTo(6.0f);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(floats)).isEqualTo(6.0f);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("F");
+		}
+
+		@Test
+		void indexIntoPrimitiveDoubleArray() {
+			double[] doubles = { 3.0d, 4.0d, 5.0d };
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(expression.getValue(doubles)).isEqualTo(4.0d);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(doubles)).isEqualTo(4.0d);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("D");
+		}
+
+		@Test
+		void indexIntoPrimitiveCharArray() {
+			char[] chars = { 'a', 'b', 'c' };
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(expression.getValue(chars)).isEqualTo('b');
+			assertCanCompile(expression);
+			assertThat(expression.getValue(chars)).isEqualTo('b');
+			assertThat(getAst().getExitDescriptor()).isEqualTo("C");
+		}
+
+		@Test
+		void indexIntoStringArray() {
+			String[] strings = { "a", "b", "c" };
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(expression.getValue(strings)).isEqualTo("a");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(strings)).isEqualTo("a");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+		}
+
+		@Test
+		void indexIntoNumberArray() {
+			Number[] numbers = { 2, 8, 9 };
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(expression.getValue(numbers)).isEqualTo(8);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(numbers)).isEqualTo(8);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Number");
+		}
+
+		@Test
+		void indexInto2DPrimitiveIntArray() {
+			int[][] array = new int[][] {
+				{ 1, 2, 3 },
+				{ 4, 5, 6 }
+			};
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("4 5 6");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("4 5 6");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("[I");
+
+			expression = parser.parseExpression("[1][2]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("6");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("6");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
+		}
+
+		@Test
+		void indexInto2DStringArray() {
+			String[][] array = new String[][] {
+				{ "a", "b", "c" },
+				{ "d", "e", "f" }
+			};
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("d e f");
+			assertCanCompile(expression);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("[Ljava/lang/String");
+			assertThat(stringify(expression.getValue(array))).isEqualTo("d e f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("[Ljava/lang/String");
+
+			expression = parser.parseExpression("[1][2]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("f");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void indexIntoArrayOfListOfString() {
+			List<String>[] array = new List[] {
+				Arrays.asList("a", "b", "c"),
+				Arrays.asList("d", "e", "f")
+			};
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("d e f");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("d e f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/util/List");
+
+			expression = parser.parseExpression("[1][2]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("f");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void indexIntoArrayOfMap() {
+			Map<String, String>[] array = new Map[] { Collections.singletonMap("key", "value1") };
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("{key=value1}");
+			assertCanCompile(expression);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/util/Map");
+			assertThat(stringify(expression.getValue(array))).isEqualTo("{key=value1}");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/util/Map");
+
+			expression = parser.parseExpression("[0]['key']");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("value1");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("value1");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoListOfString() {
+			List<String> list = Arrays.asList("aaa", "bbb", "ccc");
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(expression.getValue(list)).isEqualTo("bbb");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(list)).isEqualTo("bbb");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoListOfInteger() {
+			List<Integer> list = Arrays.asList(123, 456, 789);
+
+			expression = parser.parseExpression("[2]");
+
+			assertThat(expression.getValue(list)).isEqualTo(789);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(list)).isEqualTo(789);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoListOfStringArray() {
+			List<String[]> list = Arrays.asList(
+				new String[] { "a", "b", "c" },
+				new String[] { "d", "e", "f" }
+			);
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d e f");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d e f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			expression = parser.parseExpression("[1][0]");
+
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+		}
+
+		@Test
+		void indexIntoListOfIntegerArray() {
+			List<Integer[]> list = Arrays.asList(
+				new Integer[] { 1, 2, 3 },
+				new Integer[] { 4, 5, 6 }
+			);
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(stringify(expression.getValue(list))).isEqualTo("1 2 3");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(list))).isEqualTo("1 2 3");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			expression = parser.parseExpression("[0][1]");
+
+			assertThat(expression.getValue(list)).isEqualTo(2);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(list)).isEqualTo(2);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Integer");
+		}
+
+		@Test
+		void indexIntoListOfListOfString() {
+			List<List<String>> list = Arrays.asList(
+					Arrays.asList("a", "b", "c"),
+					Arrays.asList("d", "e", "f")
+			);
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d e f");
+			assertCanCompile(expression);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d e f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			expression = parser.parseExpression("[1][2]");
+
+			assertThat(stringify(expression.getValue(list))).isEqualTo("f");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(list))).isEqualTo("f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoMap() {
+			Map<String, Integer> map = Collections.singletonMap("aaa", 111);
+
+			expression = parser.parseExpression("['aaa']");
+
+			assertThat(expression.getValue(map)).isEqualTo(111);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(map)).isEqualTo(111);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoMapOfListOfString() {
+			Map<String, List<String>> map = Collections.singletonMap("foo", Arrays.asList("a", "b", "c"));
+
+			expression = parser.parseExpression("['foo']");
+
+			assertThat(stringify(expression.getValue(map))).isEqualTo("a b c");
+			assertCanCompile(expression);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+			assertThat(stringify(expression.getValue(map))).isEqualTo("a b c");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			expression = parser.parseExpression("['foo'][2]");
+
+			assertThat(stringify(expression.getValue(map))).isEqualTo("c");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(map))).isEqualTo("c");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoObject() {
+			TestClass6 tc = new TestClass6();
+
+			// field access
+			expression = parser.parseExpression("['orange']");
+
+			assertThat(expression.getValue(tc)).isEqualTo("value1");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(tc)).isEqualTo("value1");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+
+			// field access
+			expression = parser.parseExpression("['peach']");
+
+			assertThat(expression.getValue(tc)).isEqualTo(34L);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(tc)).isEqualTo(34L);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("J");
+
+			// property access (getter)
+			expression = parser.parseExpression("['banana']");
+
+			assertThat(expression.getValue(tc)).isEqualTo("value3");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(tc)).isEqualTo("value3");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+		}
+
+		@Test  // gh-32694, gh-32908
+		void indexIntoArrayUsingIntegerWrapper() {
+			context.setVariable("array", new int[] {1, 2, 3, 4});
+			context.setVariable("index", 2);
+
+			expression = parser.parseExpression("#array[#index]");
+
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
+		}
+
+		@Test  // gh-32694, gh-32908
+		void indexIntoListUsingIntegerWrapper() {
+			context.setVariable("list", Arrays.asList(1, 2, 3, 4));
+			context.setVariable("index", 2);
+
+			expression = parser.parseExpression("#list[#index]");
+
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		private String stringify(Object object) {
+			Stream<? extends Object> stream;
+			if (object instanceof Collection) {
+				stream = ((Collection<?>) object).stream();
+			}
+			else if (object instanceof Object[]) {
+				stream = Arrays.stream((Object[]) object);
+			}
+			else if (object instanceof int[]) {
+				stream = Arrays.stream((int[]) object).mapToObj(Integer::valueOf);
+			}
+			else {
+				return String.valueOf(object);
+			}
+			return stream.map(Object::toString).collect(Collectors.joining(" "));
+		}
+
+	}
 
 	@Test
 	void typeReference() {
