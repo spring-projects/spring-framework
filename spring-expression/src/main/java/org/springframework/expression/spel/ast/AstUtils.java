@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TargetedAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
@@ -32,7 +31,7 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 3.0.2
  */
-public abstract class AstUtils {
+abstract class AstUtils {
 
 	/**
 	 * Determine the set of accessors that should be used to try to access an
@@ -52,7 +51,7 @@ public abstract class AstUtils {
 	 * accessor could be found
 	 * @since 6.2
 	 */
-	public static <T extends TargetedAccessor> List<T> getAccessorsToTry(
+	static <T extends TargetedAccessor> List<T> getAccessorsToTry(
 			@Nullable Class<?> targetType, List<T> accessors) {
 
 		if (accessors.isEmpty()) {
@@ -91,30 +90,6 @@ public abstract class AstUtils {
 			result.addAll(genericMatches);
 			return result;
 		}
-	}
-
-	/**
-	 * Determine the set of property accessors that should be used to try to
-	 * access a property on the specified target type.
-	 * <p>The accessors are considered to be in an ordered list; however, in the
-	 * returned list any accessors that are exact matches for the input target
-	 * type (as opposed to 'generic' accessors that could work for any type) are
-	 * placed at the start of the list. In addition, if there are specific
-	 * accessors that exactly name the class in question and accessors that name
-	 * a specific class which is a supertype of the class in question, the latter
-	 * are put at the end of the specific accessors set and will be tried after
-	 * exactly matching accessors but before generic accessors.
-	 * @param targetType the type upon which property access is being attempted
-	 * @param propertyAccessors the list of property accessors to process
-	 * @return a list of accessors that should be tried in order to access the
-	 * property on the specified target type, or an empty list if no suitable
-	 * accessor could be found
-	 * @see #getAccessorsToTry(Class, List)
-	 */
-	public static List<PropertyAccessor> getPropertyAccessorsToTry(
-			@Nullable Class<?> targetType, List<PropertyAccessor> propertyAccessors) {
-
-		return getAccessorsToTry(targetType, propertyAccessors);
 	}
 
 }
