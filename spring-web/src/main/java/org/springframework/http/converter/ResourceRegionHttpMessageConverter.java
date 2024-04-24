@@ -104,7 +104,6 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
@@ -112,6 +111,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 			writeResourceRegion(resourceRegion, outputMessage);
 		}
 		else {
+			@SuppressWarnings("unchecked")
 			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
 			if (regions.size() == 1) {
 				writeResourceRegion(regions.iterator().next(), outputMessage);

@@ -864,11 +864,13 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
+
 	interface HelloInterface {
 
 		@GetMapping("/hello/{name}")
 		ResponseEntity<String> get(@PathVariable String name);
 	}
+
 
 	@Controller
 	static class HelloController implements HelloInterface {
@@ -877,7 +879,6 @@ public class MvcUriComponentsBuilderTests {
 		public ResponseEntity<String> get(String name) {
 			return ResponseEntity.ok("Hello " + name);
 		}
-
 	}
 
 }
