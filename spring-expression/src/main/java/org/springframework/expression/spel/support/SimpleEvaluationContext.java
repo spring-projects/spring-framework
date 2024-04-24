@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
-import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.OperatorOverloader;
@@ -144,15 +143,6 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	@Override
 	public List<PropertyAccessor> getPropertyAccessors() {
 		return this.propertyAccessors;
-	}
-
-	/**
-	 * Return an empty list, always, since this context does not support the
-	 * use of type references.
-	 */
-	@Override
-	public List<ConstructorResolver> getConstructorResolvers() {
-		return Collections.emptyList();
 	}
 
 	/**
