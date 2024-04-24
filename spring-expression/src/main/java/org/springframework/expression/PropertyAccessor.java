@@ -44,18 +44,6 @@ import org.springframework.lang.Nullable;
 public interface PropertyAccessor extends TargetedAccessor {
 
 	/**
-	 * Get the set of classes for which this property accessor should be called.
-	 * <p>Returning {@code null} or an empty array indicates this is a generic
-	 * property accessor that can be called in an attempt to access a property on
-	 * any type.
-	 * @return an array of classes that this property accessor is suitable for
-	 * (or {@code null} if a generic property accessor)
-	 */
-	@Override
-	@Nullable
-	Class<?>[] getSpecificTargetClasses();
-
-	/**
 	 * Called to determine if this property accessor is able to read a specified
 	 * property on a specified target object.
 	 * @param context the evaluation context in which the access is being attempted

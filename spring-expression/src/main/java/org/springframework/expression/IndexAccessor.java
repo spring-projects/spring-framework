@@ -46,18 +46,6 @@ import org.springframework.lang.Nullable;
 public interface IndexAccessor extends TargetedAccessor {
 
 	/**
-	 * Get the set of classes for which this index accessor should be called.
-	 * <p>Returning {@code null} or an empty array indicates this is a generic
-	 * index accessor that can be called in an attempt to access an index on any
-	 * type.
-	 * @return an array of classes that this index accessor is suitable for
-	 * (or {@code null} or an empty array if a generic index accessor)
-	 */
-	@Override
-	@Nullable
-	Class<?>[] getSpecificTargetClasses();
-
-	/**
 	 * Determine if this index accessor is able to read a specified index on a
 	 * specified target object.
 	 * @param context the evaluation context in which the access is being attempted
