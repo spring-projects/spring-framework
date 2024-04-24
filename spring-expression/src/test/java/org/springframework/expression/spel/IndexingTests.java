@@ -43,6 +43,7 @@ import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Person;
 import org.springframework.lang.Nullable;
@@ -696,6 +697,31 @@ class IndexingTests {
 			assertThat(expr.getValue(context, arrayNode)).isNull();
 		}
 
+		@Test
+		void readAndWriteIndexWithSimpleEvaluationContext() {
+			ObjectMapper objectMapper = new ObjectMapper();
+			SimpleEvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding()
+					.withIndexAccessors(new JacksonArrayNodeIndexAccessor(objectMapper))
+					.build();
+			SpelExpressionParser parser = new SpelExpressionParser();
+
+			TextNode node0 = new TextNode("node0");
+			TextNode node1 = new TextNode("node1");
+			ArrayNode arrayNode = objectMapper.createArrayNode();
+			arrayNode.addAll(List.of(node0, node1));
+
+			Expression expr = parser.parseExpression("[0]");
+			assertThat(expr.getValue(context, arrayNode)).isSameAs(node0);
+
+			TextNode nodeX = new TextNode("nodeX");
+			expr.setValue(context, arrayNode, nodeX);
+			// We use isEqualTo() instead of isSameAs(), since ObjectMapper.convertValue()
+			// converts the supplied TextNode to an equivalent JsonNode.
+			assertThat(expr.getValue(context, arrayNode)).isEqualTo(nodeX);
+
+			expr = parser.parseExpression("[1]");
+			assertThat(expr.getValue(context, arrayNode)).isSameAs(node1);
+		}
 
 		/**
 		 * {@link IndexAccessor} that knows how to read and write indexes in a
