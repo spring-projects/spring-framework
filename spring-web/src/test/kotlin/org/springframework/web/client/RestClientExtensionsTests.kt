@@ -16,9 +16,11 @@
 
 package org.springframework.web.client
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.core.ParameterizedTypeReference
 
 /**
@@ -43,6 +45,18 @@ class RestClientExtensionsTests {
 	fun `ResponseSpec#body with reified type parameters`() {
 		responseSpec.body<List<Foo>>()
 		verify { responseSpec.body(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `ResponseSpec#bodyNotNull with reified type parameters`() {
+		responseSpec.bodyNotNull<List<Foo>>()
+		verify { responseSpec.body(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `ResponseSpec#bodyNotNull with null response throws NoSuchElementException`() {
+		every { responseSpec.body(any<ParameterizedTypeReference<Foo>>()) } returns null
+		assertThrows<NoSuchElementException> { responseSpec.bodyNotNull<Foo>() }
 	}
 
 	@Test
