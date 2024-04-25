@@ -355,13 +355,13 @@ public class Indexer extends SpelNodeImpl {
 				default -> AALOAD;
 			};
 
-			generateIndexCode(index, int.class, mv, cf);
+			generateIndexCode(mv, cf, index, int.class);
 			mv.visitInsn(insn);
 		}
 
 		else if (this.indexedType == IndexedType.LIST) {
 			mv.visitTypeInsn(CHECKCAST, "java/util/List");
-			generateIndexCode(index, int.class, mv, cf);
+			generateIndexCode(mv, cf, index, int.class);
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
 		}
 
@@ -374,7 +374,7 @@ public class Indexer extends SpelNodeImpl {
 				mv.visitLdcInsn(mapKeyName);
 			}
 			else {
-				generateIndexCode(index, mv, cf);
+				generateIndexCode(mv, cf, index);
 			}
 			mv.visitMethodInsn(
 					INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
@@ -411,13 +411,13 @@ public class Indexer extends SpelNodeImpl {
 		}
 	}
 
-	private void generateIndexCode(SpelNodeImpl index, MethodVisitor mv, CodeFlow cf) {
+	private void generateIndexCode(MethodVisitor mv, CodeFlow cf, SpelNodeImpl index) {
 		cf.enterCompilationScope();
 		index.generateCode(mv, cf);
 		cf.exitCompilationScope();
 	}
 
-	private void generateIndexCode(SpelNodeImpl indexNode, Class<?> indexType, MethodVisitor mv, CodeFlow cf) {
+	private void generateIndexCode(MethodVisitor mv, CodeFlow cf, SpelNodeImpl indexNode, Class<?> indexType) {
 		String indexDesc = CodeFlow.toDescriptor(indexType);
 		generateCodeForArgument(mv, cf, indexNode, indexDesc);
 	}
