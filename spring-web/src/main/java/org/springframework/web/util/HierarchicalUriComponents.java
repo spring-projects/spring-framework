@@ -657,12 +657,6 @@ final class HierarchicalUriComponents extends UriComponents {
 			public boolean isAllowed(int c) {
 				return isUnreserved(c);
 			}
-		},
-		C0 {
-			@Override
-			public boolean isAllowed(int c) {
-				return !(c >= 0 && c <= 0x1f) && !(c > '~');
-			}
 		};
 
 		/**
