@@ -524,13 +524,15 @@ class IndexingTests {
 	@Nested
 	class IndexAccessorTests {  // gh-26478
 
+		private final StandardEvaluationContext context = new StandardEvaluationContext();
+		private final SpelExpressionParser parser = new SpelExpressionParser();
+
 		@Test
 		void addingAndRemovingIndexAccessors() {
 			ObjectMapper objectMapper = new ObjectMapper();
 			IndexAccessor accessor1 = new JacksonArrayNodeIndexAccessor(objectMapper);
 			IndexAccessor accessor2 = new JacksonArrayNodeIndexAccessor(objectMapper);
 
-			StandardEvaluationContext context = new StandardEvaluationContext();
 			List<IndexAccessor> indexAccessors = context.getIndexAccessors();
 			assertThat(indexAccessors).isEmpty();
 
@@ -551,10 +553,8 @@ class IndexingTests {
 
 		@Test
 		void noSuitableIndexAccessorResultsInException() {
-			StandardEvaluationContext context = new StandardEvaluationContext();
 			assertThat(context.getIndexAccessors()).isEmpty();
 
-			SpelExpressionParser parser = new SpelExpressionParser();
 			Expression expr = parser.parseExpression("[0]");
 			assertThatExceptionOfType(SpelEvaluationException.class)
 					.isThrownBy(() -> expr.getValue(context, this))
@@ -564,7 +564,6 @@ class IndexingTests {
 
 		@Test
 		void canReadThrowsException() throws Exception {
-			StandardEvaluationContext context = new StandardEvaluationContext();
 			RuntimeException exception = new RuntimeException("Boom!");
 
 			IndexAccessor mock = mock();
@@ -572,7 +571,6 @@ class IndexingTests {
 			given(mock.canRead(any(), eq(this), any())).willThrow(exception);
 			context.addIndexAccessor(mock);
 
-			SpelExpressionParser parser = new SpelExpressionParser();
 			Expression expr = parser.parseExpression("[0]");
 			assertThatExceptionOfType(SpelEvaluationException.class)
 					.isThrownBy(() -> expr.getValue(context, this))
@@ -588,7 +586,6 @@ class IndexingTests {
 
 		@Test
 		void readThrowsException() throws Exception {
-			StandardEvaluationContext context = new StandardEvaluationContext();
 			RuntimeException exception = new RuntimeException("Boom!");
 
 			IndexAccessor mock = mock();
@@ -597,7 +594,6 @@ class IndexingTests {
 			given(mock.read(any(), eq(this), any())).willThrow(exception);
 			context.addIndexAccessor(mock);
 
-			SpelExpressionParser parser = new SpelExpressionParser();
 			Expression expr = parser.parseExpression("[0]");
 			assertThatExceptionOfType(SpelEvaluationException.class)
 					.isThrownBy(() -> expr.getValue(context, this))
@@ -614,7 +610,6 @@ class IndexingTests {
 
 		@Test
 		void canWriteThrowsException() throws Exception {
-			StandardEvaluationContext context = new StandardEvaluationContext();
 			RuntimeException exception = new RuntimeException("Boom!");
 
 			IndexAccessor mock = mock();
@@ -622,7 +617,6 @@ class IndexingTests {
 			given(mock.canWrite(eq(context), eq(this), eq(0))).willThrow(exception);
 			context.addIndexAccessor(mock);
 
-			SpelExpressionParser parser = new SpelExpressionParser();
 			Expression expr = parser.parseExpression("[0]");
 			assertThatExceptionOfType(SpelEvaluationException.class)
 					.isThrownBy(() -> expr.setValue(context, this, 999))
@@ -638,7 +632,6 @@ class IndexingTests {
 
 		@Test
 		void writeThrowsException() throws Exception {
-			StandardEvaluationContext context = new StandardEvaluationContext();
 			RuntimeException exception = new RuntimeException("Boom!");
 
 			IndexAccessor mock = mock();
@@ -647,7 +640,6 @@ class IndexingTests {
 			doThrow(exception).when(mock).write(any(), any(), any(), any());
 			context.addIndexAccessor(mock);
 
-			SpelExpressionParser parser = new SpelExpressionParser();
 			Expression expr = parser.parseExpression("[0]");
 			assertThatExceptionOfType(SpelEvaluationException.class)
 					.isThrownBy(() -> expr.setValue(context, this, 999))
@@ -664,8 +656,6 @@ class IndexingTests {
 
 		@Test
 		void readAndWriteIndex() {
-			StandardEvaluationContext context = new StandardEvaluationContext();
-
 			ObjectMapper objectMapper = new ObjectMapper();
 			context.addIndexAccessor(new JacksonArrayNodeIndexAccessor(objectMapper));
 
@@ -674,7 +664,6 @@ class IndexingTests {
 			ArrayNode arrayNode = objectMapper.createArrayNode();
 			arrayNode.addAll(List.of(node0, node1));
 
-			SpelExpressionParser parser = new SpelExpressionParser();
 			Expression expr = parser.parseExpression("[0]");
 			assertThat(expr.getValue(context, arrayNode)).isSameAs(node0);
 
@@ -703,7 +692,6 @@ class IndexingTests {
 			SimpleEvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding()
 					.withIndexAccessors(new JacksonArrayNodeIndexAccessor(objectMapper))
 					.build();
-			SpelExpressionParser parser = new SpelExpressionParser();
 
 			TextNode node0 = new TextNode("node0");
 			TextNode node1 = new TextNode("node1");
