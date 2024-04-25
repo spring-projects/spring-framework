@@ -418,8 +418,7 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 	private void generateIndexCode(MethodVisitor mv, CodeFlow cf, SpelNodeImpl indexNode, Class<?> indexType) {
-		String indexDesc = CodeFlow.toDescriptor(indexType);
-		generateCodeForArgument(mv, cf, indexNode, indexDesc);
+		cf.generateCodeForArgument(mv, indexNode, indexType);
 	}
 
 	@Override
