@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
@@ -381,6 +382,9 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	protected void handleNoMatch(@Nullable RouteMatcher.Route destination, Message<?> message) {
 		FrameType frameType = RSocketFrameTypeMessageCondition.getFrameType(message);
 		if (frameType == FrameType.SETUP || frameType == FrameType.METADATA_PUSH) {
+			if (frameType == FrameType.SETUP && message.getPayload() instanceof PooledDataBuffer pooledDataBuffer) {
+				pooledDataBuffer.release();
+			}
 			return;  // optional handling
 		}
 		if (frameType == FrameType.REQUEST_FNF) {
