@@ -191,27 +191,6 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		return false;
 	}
 
-	/**
-	 * Check whether a node can be compiled to bytecode. The reasoning in each node may
-	 * be different but will typically involve checking whether the exit type descriptor
-	 * of the node is known and any relevant child nodes are compilable.
-	 * @return {@code true} if this node can be compiled to bytecode
-	 */
-	public boolean isCompilable() {
-		return false;
-	}
-
-	/**
-	 * Generate the bytecode for this node into the supplied visitor. Context info about
-	 * the current expression being compiled is available in the codeflow object, e.g.
-	 * including information about the type of the object currently on the stack.
-	 * @param mv the ASM MethodVisitor into which code should be generated
-	 * @param cf a context object with info about what is on the stack
-	 */
-	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		throw new IllegalStateException(getClass().getName() +" has no generateCode(..) method");
-	}
-
 	@Nullable
 	public String getExitDescriptor() {
 		return this.exitTypeDescriptor;

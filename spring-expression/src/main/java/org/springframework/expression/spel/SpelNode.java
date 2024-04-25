@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.lang.Nullable;
@@ -25,6 +26,7 @@ import org.springframework.lang.Nullable;
  * Expression Language (SpEL) expression.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 3.0
  */
 public interface SpelNode {
@@ -108,5 +110,41 @@ public interface SpelNode {
 	 * @return the end position
 	 */
 	int getEndPosition();
+
+	/**
+	 * Determine if this node can be compiled to bytecode.
+	 * <p>The reasoning in each node may be different but will typically involve
+	 * checking whether the exit type descriptor of the node is known and any
+	 * relevant child nodes are compilable.
+	 * <p>The default implementation returns {@code false}.
+	 * <p>If you override this method, you must also override
+	 * {@link #generateCode(MethodVisitor, CodeFlow)}.
+	 * @return {@code true} if this node can be compiled to bytecode
+	 * @since 6.2
+	 * @see #generateCode(MethodVisitor, CodeFlow)
+	 */
+	default boolean isCompilable() {
+		return false;
+	}
+
+	/**
+	 * Generate the bytecode for this node into the supplied {@link MethodVisitor}.
+	 * <p>Context information about the current expression being compiled is
+	 * available in the supplied {@link CodeFlow} object &mdash; for example,
+	 * information about the type of the object currently on the stack.
+	 * <p>This method will not be invoked unless {@link #isCompilable()} returns
+	 * {@code true}.
+	 * <p>The default implementation throws an {@link IllegalStateException}
+	 * since {@link #isCompilable()} returns {@code false} by default.
+	 * <p>If you override this method, you must also override {@link #isCompilable()}.
+	 * @param methodVisitor the ASM {@code MethodVisitor} into which code should
+	 * be generated
+	 * @param codeFlow a context object with information about what is on the stack
+	 * @since 6.2
+	 * @see #isCompilable()
+	 */
+	default void generateCode(MethodVisitor methodVisitor, CodeFlow codeFlow) {
+		throw new IllegalStateException(getClass().getName() + " does not support bytecode generation");
+	}
 
 }
