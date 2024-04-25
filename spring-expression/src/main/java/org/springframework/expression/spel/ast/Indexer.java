@@ -244,14 +244,7 @@ public class Indexer extends SpelNodeImpl {
 			}
 		}
 
-		// Try to treat the index value as a property of the context object.
-		TypeDescriptor valueType = indexValue.getTypeDescriptor();
-		if (valueType != null && String.class == valueType.getType()) {
-			this.indexedType = IndexedType.OBJECT;
-			return new PropertyAccessorValueRef(
-					target, (String) index, state.getEvaluationContext(), targetDescriptor);
-		}
-
+		// Check for a custom IndexAccessor.
 		EvaluationContext evalContext = state.getEvaluationContext();
 		List<IndexAccessor> accessorsToTry = getIndexAccessorsToTry(target, evalContext.getIndexAccessors());
 		if (accessMode.supportsReads) {
@@ -283,6 +276,14 @@ public class Indexer extends SpelNodeImpl {
 						getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_INDEX_WRITE,
 						index, target.getClass().getTypeName());
 			}
+		}
+
+		// As a last resort, try to treat the index value as a property of the context object.
+		TypeDescriptor valueType = indexValue.getTypeDescriptor();
+		if (valueType != null && String.class == valueType.getType()) {
+			this.indexedType = IndexedType.OBJECT;
+			return new PropertyAccessorValueRef(
+					target, (String) index, state.getEvaluationContext(), targetDescriptor);
 		}
 
 		throw new SpelEvaluationException(

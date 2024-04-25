@@ -711,6 +711,72 @@ class IndexingTests {
 			assertThat(expr.getValue(context, arrayNode)).isSameAs(node1);
 		}
 
+		@Test  // gh-32706
+		void readIndexWithStringIndexType() {
+			BirdNameToColorMappings birdNameMappings = new BirdNameToColorMappings();
+
+			// Without a registered BirdNameToColorMappingsIndexAccessor, we should
+			// be able to index into an object via a property name.
+			Expression propertyExpression = parser.parseExpression("['property']");
+			assertThat(propertyExpression.getValue(context, birdNameMappings)).isEqualTo("enigma");
+
+			context.addIndexAccessor(new BirdNameToColorMappingsIndexAccessor());
+
+			Expression expression = parser.parseExpression("['cardinal']");
+			assertThat(expression.getValue(context, birdNameMappings)).isEqualTo(Color.RED);
+
+			// With a registered BirdNameToColorMappingsIndexAccessor, an attempt
+			// to index into an object via a property name should fail.
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> propertyExpression.getValue(context, birdNameMappings))
+					.withMessageEndingWith("A problem occurred while attempting to read index '%s' in '%s'",
+							"property", BirdNameToColorMappings.class.getName())
+					.havingCause().withMessage("unknown bird color: property");
+		}
+
+		static class BirdNameToColorMappings {
+
+			public final String property = "enigma";
+
+			public Color get(String name) {
+				return switch (name) {
+					case "cardinal" -> Color.RED;
+					case "blue jay" -> Color.BLUE;
+					default -> throw new RuntimeException("unknown bird color: " + name);
+				};
+			}
+		}
+
+		static class BirdNameToColorMappingsIndexAccessor implements IndexAccessor {
+
+			@Override
+			public Class<?>[] getSpecificTargetClasses() {
+				return new Class[] { BirdNameToColorMappings.class };
+			}
+
+			@Override
+			public boolean canRead(EvaluationContext context, Object target, Object index) {
+				return (target instanceof BirdNameToColorMappings && index instanceof String);
+			}
+
+			@Override
+			public TypedValue read(EvaluationContext context, Object target, Object index) {
+				BirdNameToColorMappings mappings = (BirdNameToColorMappings) target;
+				String name = (String) index;
+				return new TypedValue(mappings.get(name));
+			}
+
+			@Override
+			public boolean canWrite(EvaluationContext context, Object target, Object index) {
+				return false;
+			}
+
+			@Override
+			public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
+				throw new UnsupportedOperationException();
+			}
+		}
+
 		/**
 		 * {@link IndexAccessor} that knows how to read and write indexes in a
 		 * Jackson {@link ArrayNode}.
