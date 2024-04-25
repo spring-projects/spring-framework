@@ -246,7 +246,8 @@ public class Indexer extends SpelNodeImpl {
 
 		// Check for a custom IndexAccessor.
 		EvaluationContext evalContext = state.getEvaluationContext();
-		List<IndexAccessor> accessorsToTry = getIndexAccessorsToTry(target, evalContext.getIndexAccessors());
+		List<IndexAccessor> accessorsToTry =
+				AstUtils.getAccessorsToTry(target, evalContext.getIndexAccessors());
 		if (accessMode.supportsReads) {
 			try {
 				for (IndexAccessor indexAccessor : accessorsToTry) {
@@ -442,22 +443,6 @@ public class Indexer extends SpelNodeImpl {
 
 	private static Class<?> getObjectType(Object obj) {
 		return (obj instanceof Class<?> clazz ? clazz : obj.getClass());
-	}
-
-	/**
-	 * Determine the set of index accessors that should be used to try to access
-	 * an index on the specified context object.
-	 * <p>Delegates to {@link AstUtils#getAccessorsToTry(Class, List)}.
-	 * @param targetObject the object upon which index access is being attempted
-	 * @param indexAccessors the list of index accessors to process
-	 * @return a list of accessors that should be tried in order to access the
-	 * index, or an empty list if no suitable accessor could be found
-	 */
-	private static List<IndexAccessor> getIndexAccessorsToTry(
-			@Nullable Object targetObject, List<IndexAccessor> indexAccessors) {
-
-		Class<?> targetType = (targetObject != null ? targetObject.getClass() : null);
-		return AstUtils.getAccessorsToTry(targetType, indexAccessors);
 	}
 
 
@@ -740,8 +725,8 @@ public class Indexer extends SpelNodeImpl {
 					// we need to reset our cached state.
 					Indexer.this.cachedPropertyReadState = null;
 				}
-				List<PropertyAccessor> accessorsToTry = AstUtils.getAccessorsToTry(targetType,
-						this.evaluationContext.getPropertyAccessors());
+				List<PropertyAccessor> accessorsToTry =
+						AstUtils.getAccessorsToTry(targetType, this.evaluationContext.getPropertyAccessors());
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canRead(this.evaluationContext, this.targetObject, this.name)) {
 						if (accessor instanceof ReflectivePropertyAccessor reflectivePropertyAccessor) {
@@ -783,8 +768,8 @@ public class Indexer extends SpelNodeImpl {
 					// we need to reset our cached state.
 					Indexer.this.cachedPropertyWriteState = null;
 				}
-				List<PropertyAccessor> accessorsToTry = AstUtils.getAccessorsToTry(targetType,
-						this.evaluationContext.getPropertyAccessors());
+				List<PropertyAccessor> accessorsToTry =
+						AstUtils.getAccessorsToTry(targetType, this.evaluationContext.getPropertyAccessors());
 				for (PropertyAccessor accessor : accessorsToTry) {
 					if (accessor.canWrite(this.evaluationContext, this.targetObject, this.name)) {
 						accessor.write(this.evaluationContext, this.targetObject, this.name, newValue);
@@ -998,7 +983,7 @@ public class Indexer extends SpelNodeImpl {
 					Indexer.this.cachedIndexReadState = null;
 				}
 				List<IndexAccessor> accessorsToTry =
-						getIndexAccessorsToTry(this.target, this.evaluationContext.getIndexAccessors());
+						AstUtils.getAccessorsToTry(this.target, this.evaluationContext.getIndexAccessors());
 				for (IndexAccessor indexAccessor : accessorsToTry) {
 					if (indexAccessor.canRead(this.evaluationContext, this.target, this.index)) {
 						TypedValue result = indexAccessor.read(this.evaluationContext, this.target, this.index);
@@ -1050,7 +1035,7 @@ public class Indexer extends SpelNodeImpl {
 					Indexer.this.cachedIndexWriteState = null;
 				}
 				List<IndexAccessor> accessorsToTry =
-						getIndexAccessorsToTry(this.target, this.evaluationContext.getIndexAccessors());
+						AstUtils.getAccessorsToTry(this.target, this.evaluationContext.getIndexAccessors());
 				for (IndexAccessor indexAccessor : accessorsToTry) {
 					if (indexAccessor.canWrite(this.evaluationContext, this.target, this.index)) {
 						indexAccessor.write(this.evaluationContext, this.target, this.index, newValue);

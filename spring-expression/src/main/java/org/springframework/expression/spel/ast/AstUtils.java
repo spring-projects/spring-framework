@@ -35,6 +35,25 @@ abstract class AstUtils {
 
 	/**
 	 * Determine the set of accessors that should be used to try to access an
+	 * element on the specified target object.
+	 * <p>Delegates to {@link #getAccessorsToTry(Class, List)} with the type of
+	 * the supplied target object.
+	 * @param targetObject the object upon which element access is being attempted
+	 * @param accessors the list of element accessors to process
+	 * @return a list of accessors that should be tried in order to access the
+	 * element on the specified target type, or an empty list if no suitable
+	 * accessor could be found
+	 * @since 6.2
+	 */
+	static <T extends TargetedAccessor> List<T> getAccessorsToTry(
+			@Nullable Object targetObject, List<T> accessors) {
+
+		Class<?> targetType = (targetObject != null ? targetObject.getClass() : null);
+		return getAccessorsToTry(targetType, accessors);
+	}
+
+	/**
+	 * Determine the set of accessors that should be used to try to access an
 	 * element on the specified target type.
 	 * <p>The accessors are considered to be in an ordered list; however, in the
 	 * returned list any accessors that are exact matches for the input target
