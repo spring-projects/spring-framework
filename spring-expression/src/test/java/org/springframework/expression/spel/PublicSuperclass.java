@@ -37,4 +37,12 @@ public class PublicSuperclass {
 		return "Super, " + name;
 	}
 
+	public String getIndex(int index) {
+		return "value-" + index;
+	}
+
+	public String getIndex2(int index) {
+		return "value-" + (2 * index);
+	}
+
 }

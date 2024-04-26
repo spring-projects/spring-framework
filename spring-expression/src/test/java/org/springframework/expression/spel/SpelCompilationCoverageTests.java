@@ -54,12 +54,11 @@ import org.springframework.expression.spel.ast.Ternary;
 import org.springframework.expression.spel.standard.SpelCompiler;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.ReflectiveIndexAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 import org.springframework.expression.spel.testresources.Person;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static java.util.stream.Collectors.joining;
@@ -131,6 +130,7 @@ import static org.springframework.expression.spel.standard.SpelExpressionTestUti
  * @author Sam Brannen
  * @since 4.1
  * @see org.springframework.expression.spel.standard.SpelCompilerTests
+ * @see org.springframework.expression.spel.support.ReflectiveIndexAccessorTests
  */
 public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
@@ -823,6 +823,12 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				assertCanCompile(expression);
 				assertThat(expression.getValue(context, colors)).isEqualTo(Color.ORANGE);
 				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// Set color at index 3.
+				expression.setValue(context, colors, Color.RED);
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context, colors)).isEqualTo(Color.RED);
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
 			}
 
 			@Test
@@ -1321,29 +1327,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			result = expression.getValue(context, privateSubclass, Integer.class);
 			assertThat(result).isEqualTo(2);
 		}
-
-		private interface PrivateInterface {
-
-			String getMessage();
-		}
-
-		private static class PrivateSubclass extends PublicSuperclass implements PublicInterface, PrivateInterface {
-
-			@Override
-			public int getNumber() {
-				return 2;
-			}
-
-			@Override
-			public String getText() {
-				return "enigma";
-			}
-
-			@Override
-			public String getMessage() {
-				return "hello";
-			}
-		}
 	}
 
 	@Nested
@@ -1374,7 +1357,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		@Test
 		void packagePrivateSubclassOverridesMethodInPrivateInterface() {
 			expression = parser.parseExpression("greet('Jane')");
-			PrivateSubclass privateSubclass = new PrivateSubclass();
+			LocalPrivateSubclass privateSubclass = new LocalPrivateSubclass();
 
 			// Prerequisite: type must not be public for this use case.
 			assertNotPublic(privateSubclass.getClass());
@@ -1390,7 +1373,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		@Test
 		void privateSubclassOverridesMethodInPublicSuperclass() {
 			expression = parser.parseExpression("process(2)");
-			PrivateSubclass privateSubclass = new PrivateSubclass();
+			LocalPrivateSubclass privateSubclass = new LocalPrivateSubclass();
 
 			// Prerequisite: type must not be public for this use case.
 			assertNotPublic(privateSubclass.getClass());
@@ -1403,12 +1386,14 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(result).isEqualTo(2 * 2);
 		}
 
-		private interface PrivateInterface {
+		// Cannot be named PrivateInterface due to issues with the Kotlin compiler.
+		private interface LocalPrivateInterface {
 
 			String greet(String name);
 		}
 
-		private static class PrivateSubclass extends PublicSuperclass implements PrivateInterface {
+		// Cannot be named PrivateSubclass due to issues with the Kotlin compiler.
+		private static class LocalPrivateSubclass extends PublicSuperclass implements LocalPrivateInterface {
 
 			@Override
 			public int process(int num) {
@@ -1419,6 +1404,61 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			public String greet(String name) {
 				return "Hello, " + name;
 			}
+		}
+	}
+
+	@Nested
+	class ReflectiveIndexAccessorVisibilityTests {
+
+		@Test
+		void privateSubclassOverridesIndexReadMethodInPublicInterface() {
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+			Class<?> targetType = privateSubclass.getClass();
+			assertNotPublic(targetType);
+
+			context.addIndexAccessor(new ReflectiveIndexAccessor(targetType, int.class, "getFruit"));
+			expression = parser.parseExpression("[1]");
+
+			String result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("fruit-1");
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("fruit-1");
+		}
+
+		@Test
+		void privateSubclassOverridesIndexReadMethodInPrivateInterface() {
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+			Class<?> targetType = privateSubclass.getClass();
+			assertNotPublic(targetType);
+
+			context.addIndexAccessor(new ReflectiveIndexAccessor(targetType, int.class, "getIndex"));
+			expression = parser.parseExpression("[1]");
+
+			String result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("value-1");
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("value-1");
+		}
+
+		@Test
+		void privateSubclassOverridesIndexReadMethodInPublicSuperclass() {
+			PrivateSubclass privateSubclass = new PrivateSubclass();
+			Class<?> targetType = privateSubclass.getClass();
+			assertNotPublic(targetType);
+
+			context.addIndexAccessor(new ReflectiveIndexAccessor(targetType, int.class, "getIndex2"));
+			expression = parser.parseExpression("[2]");
+
+			String result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("sub-4"); // 2 * 2
+
+			assertCanCompile(expression);
+			result = expression.getValue(context, privateSubclass, String.class);
+			assertThat(result).isEqualTo("sub-4"); // 2 * 2
 		}
 	}
 
@@ -7234,6 +7274,41 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 	}
 
+	private interface PrivateInterface {
+
+		String getMessage();
+
+		String getIndex(int index);
+	}
+
+	private static class PrivateSubclass extends PublicSuperclass implements PublicInterface, PrivateInterface {
+
+		@Override
+		public int getNumber() {
+			return 2;
+		}
+
+		@Override
+		public String getText() {
+			return "enigma";
+		}
+
+		@Override
+		public String getMessage() {
+			return "hello";
+		}
+
+		@Override
+		public String getIndex2(int index) {
+			return "sub-" + (2 * index);
+		}
+
+		@Override
+		public String getFruit(int index) {
+			return "fruit-" + index;
+		}
+	}
+
 	// Must be public with public fields/properties.
 	public static class RootContextWithIndexedProperties {
 		public int[] intArray;
@@ -7246,133 +7321,29 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	/**
-	 * {@link CompilableIndexAccessor} that uses reflection to invoke the
-	 * configured read-method for index access operations.
-	 */
-	static class ReflectiveIndexAccessor implements CompilableIndexAccessor {
-
-		private final Class<?> targetType;
-
-		private final Class<?> indexType;
-
-		private final Method readMethod;
-
-		private final Method readMethodToInvoke;
-
-		@Nullable
-		private final Method writeMethodToInvoke;
-
-		private final String targetTypeDesc;
-
-		private final String methodDescr;
-
-
-		public ReflectiveIndexAccessor(Class<?> targetType, Class<?> indexType, String readMethodName,
-				@Nullable String writeMethodName) {
-
-			this.targetType = targetType;
-			this.indexType = indexType;
-			this.readMethod = ReflectionUtils.findMethod(targetType, readMethodName, indexType);
-			Assert.notNull(this.readMethod, () -> "Failed to find read-method '%s(%s)' in class '%s'."
-					.formatted(readMethodName, indexType.getTypeName(), targetType.getTypeName()));
-			this.readMethodToInvoke = ClassUtils.getInterfaceMethodIfPossible(this.readMethod, targetType);
-			if (writeMethodName != null) {
-				Class<?> indexedValueType = this.readMethod.getReturnType();
-				Method writeMethod = ReflectionUtils.findMethod(targetType, writeMethodName, indexType, indexedValueType);
-				Assert.notNull(writeMethod, () -> "Failed to find write-method '%s(%s, %s)' in class '%s'."
-						.formatted(writeMethodName, indexType.getTypeName(), indexedValueType.getTypeName(),
-								targetType.getTypeName()));
-				this.writeMethodToInvoke = ClassUtils.getInterfaceMethodIfPossible(writeMethod, targetType);
-			}
-			else {
-				this.writeMethodToInvoke = null;
-			}
-			this.targetTypeDesc = CodeFlow.toDescriptor(targetType);
-			this.methodDescr = CodeFlow.createSignatureDescriptor(this.readMethod);
-		}
-
-
-		@Override
-		public Class<?>[] getSpecificTargetClasses() {
-			return new Class<?>[] { this.targetType };
-		}
-
-		@Override
-		public boolean canRead(EvaluationContext context, Object target, Object index) {
-			return (ClassUtils.isAssignableValue(this.targetType, target) &&
-					ClassUtils.isAssignableValue(this.indexType, index));
-		}
-
-		@Override
-		public TypedValue read(EvaluationContext context, Object target, Object index) {
-			ReflectionUtils.makeAccessible(this.readMethodToInvoke);
-			Object value = ReflectionUtils.invokeMethod(this.readMethodToInvoke, target, index);
-			return new TypedValue(value);
-		}
-
-		@Override
-		public boolean canWrite(EvaluationContext context, Object target, Object index) {
-			return (this.writeMethodToInvoke != null && canRead(context, target, index));
-		}
-
-		@Override
-		public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
-			Assert.state(this.writeMethodToInvoke != null, "Write-method cannot be null");
-			ReflectionUtils.invokeMethod(this.writeMethodToInvoke, target, index, newValue);
-		}
-
-		@Override
-		public boolean isCompilable() {
-			return true;
-		}
-
-		@Override
-		public Class<?> getIndexedValueType() {
-			return this.readMethod.getReturnType();
-		}
-
-		@Override
-		public void generateCode(SpelNode index, MethodVisitor mv, CodeFlow cf) {
-			// Determine the public declaring class.
-			Class<?> publicDeclaringClass = this.readMethodToInvoke.getDeclaringClass();
-			if (!Modifier.isPublic(publicDeclaringClass.getModifiers()) && this.readMethod != null) {
-				publicDeclaringClass = CodeFlow.findPublicDeclaringClass(this.readMethod);
-			}
-			Assert.state(publicDeclaringClass != null && Modifier.isPublic(publicDeclaringClass.getModifiers()),
-					() -> "Failed to find public declaring class for: " + this.readMethod);
-
-			// Ensure the current object on the stack is the target type.
-			String lastDesc = cf.lastDescriptor();
-			if (lastDesc == null || !lastDesc.equals(this.targetTypeDesc)) {
-				CodeFlow.insertCheckCast(mv, this.targetTypeDesc);
-			}
-
-			// Push the index onto the stack.
-			cf.generateCodeForArgument(mv, index, this.indexType);
-
-			// Invoke the read method.
-			String classDesc = publicDeclaringClass.getName().replace('.', '/');
-			boolean isStatic = Modifier.isStatic(this.readMethod.getModifiers());
-			boolean isInterface = publicDeclaringClass.isInterface();
-			int opcode = (isStatic ? INVOKESTATIC : isInterface ? INVOKEINTERFACE : INVOKEVIRTUAL);
-			mv.visitMethodInsn(opcode, classDesc, this.readMethod.getName(), this.methodDescr, isInterface);
-		}
-	}
-
-	/**
 	 * Type that can be indexed by an int or an Integer and whose indexed values
 	 * are enums.
 	 */
 	public static class Colors {
 
+		private final Map<Integer, Color> map = new HashMap<>();
+
+		{
+			this.map.put(1, Color.BLUE);
+			this.map.put(2, Color.GREEN);
+			this.map.put(3, Color.ORANGE);
+			this.map.put(42, Color.PURPLE);
+		}
+
 		public Color get(int index) {
-			return switch (index) {
-				case 1 -> Color.BLUE;
-				case 2 -> Color.GREEN;
-				case 3 -> Color.ORANGE;
-				case 42 -> Color.PURPLE;
-				default -> throw new IndexOutOfBoundsException("No color for index " + index);
-			};
+			if (!this.map.containsKey(index)) {
+				throw new IndexOutOfBoundsException("No color for index " + index);
+			}
+			return this.map.get(index);
+		}
+
+		public void set(int index, Color color) {
+			this.map.put(index, color);
 		}
 	}
 
@@ -7382,7 +7353,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	private static class ColorsIndexAccessor extends ReflectiveIndexAccessor {
 
 		ColorsIndexAccessor() {
-			super(Colors.class, int.class, "get", null);
+			super(Colors.class, int.class, "get", "set");
 		}
 	}
 
@@ -7403,23 +7374,19 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	private static class ColorOrdinalsIndexAccessor extends ReflectiveIndexAccessor {
 
 		ColorOrdinalsIndexAccessor() {
-			super(ColorOrdinals.class, Color.class, "get", null);
+			super(ColorOrdinals.class, Color.class, "get");
 		}
 	}
 
 	/**
 	 * Manually implemented {@link CompilableIndexAccessor} that knows how to
-	 * index into {@link FruitMap}.
+	 * index into {@link FruitMap} for reading, writing, and compilation.
 	 */
 	private static class FruitMapIndexAccessor implements CompilableIndexAccessor {
 
-		private final Class<?> targetType = FruitMap.class;
+		private final Method method = ReflectionUtils.findMethod(FruitMap.class, "getFruit", Color.class);
 
-		private final Class<?> indexType = Color.class;
-
-		private final Method method = ReflectionUtils.findMethod(this.targetType, "getFruit", this.indexType);
-
-		private final String targetTypeDesc = CodeFlow.toDescriptor(this.targetType);
+		private final String targetTypeDesc = CodeFlow.toDescriptor(FruitMap.class);
 
 		private final String classDesc = this.targetTypeDesc.substring(1);
 
@@ -7428,12 +7395,12 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class<?>[] { this.targetType };
+			return new Class<?>[] { FruitMap.class };
 		}
 
 		@Override
 		public boolean canRead(EvaluationContext context, Object target, Object index) {
-			return (this.targetType.isInstance(target) && this.indexType.isInstance(index));
+			return (target instanceof FruitMap && index instanceof Color);
 		}
 
 		@Override
@@ -7463,7 +7430,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		@Override
 		public Class<?> getIndexedValueType() {
-			return this.method.getReturnType();
+			return String.class;
 		}
 
 		@Override
@@ -7478,7 +7445,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			// Invoke the read-method.
 			mv.visitMethodInsn(INVOKEVIRTUAL, this.classDesc, this.method.getName(), this.methodDescr, false);
 		}
-
 	}
 
 }
