@@ -48,15 +48,15 @@ class RestClientExtensionsTests {
 	}
 
 	@Test
-	fun `ResponseSpec#bodyNotNull with reified type parameters`() {
-		responseSpec.bodyNotNull<List<Foo>>()
+	fun `ResponseSpec#requiredBody with reified type parameters`() {
+		responseSpec.requiredBody<List<Foo>>()
 		verify { responseSpec.body(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
-	fun `ResponseSpec#bodyNotNull with null response throws NoSuchElementException`() {
+	fun `ResponseSpec#requiredBody with null response throws NoSuchElementException`() {
 		every { responseSpec.body(any<ParameterizedTypeReference<Foo>>()) } returns null
-		assertThrows<NoSuchElementException> { responseSpec.bodyNotNull<Foo>() }
+		assertThrows<NoSuchElementException> { responseSpec.requiredBody<Foo>() }
 	}
 
 	@Test

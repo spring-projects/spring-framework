@@ -43,10 +43,10 @@ inline fun <reified T : Any> RestClient.ResponseSpec.body(): T? =
 	body(object : ParameterizedTypeReference<T>() {})
 
 /**
- * Extension for [RestClient.ResponseSpec.body] providing a `bodyNotNull<Foo>()` variant
+ * Extension for [RestClient.ResponseSpec.body] providing a `requiredBody<Foo>()` variant
  * To leverage Kotlin null safety, this extension throws a [NoSuchElementException] if the response body is null.
  */
-inline fun <reified T : Any> RestClient.ResponseSpec.bodyNotNull(): T =
+inline fun <reified T : Any> RestClient.ResponseSpec.requiredBody(): T =
     body(object : ParameterizedTypeReference<T>() {}) ?: throw NoSuchElementException("Response body is null when a non-null type was expected.")
 
 /**
