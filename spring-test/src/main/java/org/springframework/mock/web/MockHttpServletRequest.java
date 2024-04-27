@@ -409,11 +409,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private void updateContentTypeHeader() {
 		if (StringUtils.hasLength(this.contentType)) {
-			if (isJsonContentType(this.contentType) {
+			String value = this.contentType;
+			if (isJsonContentType(value) {
 				return;	
 			}
 			
-			String value = this.contentType;
 			if (StringUtils.hasLength(this.characterEncoding) && !this.contentType.toLowerCase().contains(CHARSET_PREFIX)) {
 				value += ';' + CHARSET_PREFIX + this.characterEncoding;
 			}
