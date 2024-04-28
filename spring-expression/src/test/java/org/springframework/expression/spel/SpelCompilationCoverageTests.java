@@ -5644,7 +5644,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	void variantGetter() {
 		Payload2Holder holder = new Payload2Holder();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		ctx.addPropertyAccessor(new MyAccessor());
+		ctx.addPropertyAccessor(new MyPropertyAccessor());
 		expression = parser.parseExpression("payload2.var1");
 		Object v = expression.getValue(ctx,holder);
 		assertThat(v).isEqualTo("abc");
@@ -6296,7 +6296,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 
-	static class MyAccessor implements CompilablePropertyAccessor {
+	static class MyPropertyAccessor implements CompilablePropertyAccessor {
 
 		private Method method;
 
@@ -7268,7 +7268,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] { this.targetType };
+			return new Class<?>[] { this.targetType };
 		}
 
 		@Override
@@ -7421,7 +7421,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] { this.targetType };
+			return new Class<?>[] { this.targetType };
 		}
 
 		@Override

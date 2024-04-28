@@ -483,7 +483,7 @@ class IndexingTests {
 
 			@Override
 			public Class<?>[] getSpecificTargetClasses() {
-				return new Class[] { Birds.class };
+				return new Class<?>[] { Birds.class };
 			}
 
 			@Override
@@ -751,7 +751,7 @@ class IndexingTests {
 
 			@Override
 			public Class<?>[] getSpecificTargetClasses() {
-				return new Class[] { BirdNameToColorMappings.class };
+				return new Class<?>[] { BirdNameToColorMappings.class };
 			}
 
 			@Override
@@ -791,7 +791,7 @@ class IndexingTests {
 
 			@Override
 			public Class<?>[] getSpecificTargetClasses() {
-				return new Class[] { ArrayNode.class };
+				return new Class<?>[] { ArrayNode.class };
 			}
 
 			@Override
