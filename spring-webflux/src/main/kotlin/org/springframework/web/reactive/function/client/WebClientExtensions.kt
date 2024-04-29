@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,18 @@ inline fun <reified T : Any> RequestBodySpec.body(flow: Flow<T>): RequestHeaders
  */
 inline fun <reified T : Any> RequestBodySpec.body(producer: Any): RequestHeadersSpec<*> =
 		body(producer, object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Extension for [WebClient.RequestBodySpec.bodyValue] providing a `bodyValueWithType<T>(Any)` variant
+ * leveraging Kotlin reified type parameters. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
+ * @param body the value to write to the request body
+ * @param T the type of the body
+ * @author Sebastien Deleuze
+ * @since 6.2
+ */
+inline fun <reified T : Any> RequestBodySpec.bodyValueWithType(body: T): RequestHeadersSpec<*> =
+	bodyValue(body, object : ParameterizedTypeReference<T>() {})
 
 /**
  * Coroutines variant of [WebClient.RequestHeadersSpec.exchange].
