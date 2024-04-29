@@ -7,8 +7,8 @@ pluginManagement {
 }
 
 plugins {
-	id "com.gradle.enterprise" version "3.12.1"
-	id "io.spring.ge.conventions" version "0.0.13"
+	id "com.gradle.develocity" version "3.17.2"
+	id "io.spring.ge.conventions" version "0.0.17"
 }
 
 include "spring-aop"

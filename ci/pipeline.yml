@@ -5,9 +5,7 @@ anchors:
     password: ((github-ci-release-token))
     branch: ((branch))
   gradle-enterprise-task-params: &gradle-enterprise-task-params
-    GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
-    GRADLE_ENTERPRISE_CACHE_USERNAME: ((gradle_enterprise_cache_user.username))
-    GRADLE_ENTERPRISE_CACHE_PASSWORD: ((gradle_enterprise_cache_user.password))
+    DEVELOCITY_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
   sonatype-task-params: &sonatype-task-params
     SONATYPE_USERNAME: ((sonatype-username))
     SONATYPE_PASSWORD: ((sonatype-password))
