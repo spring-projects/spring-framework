@@ -321,7 +321,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 								// requested (indicated by required type), not for depends-on cascades.
 								throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 										"Failed to initialize dependency '" + ex.getBeanName() + "' of " +
-												requiredType.getSimpleName() + " bean '" + beanName + "'", ex);
+												requiredType.getSimpleName() + " bean '" + beanName + "': " +
+												ex.getMessage(), ex);
 							}
 							throw ex;
 						}

@@ -227,9 +227,8 @@ public final class RegisteredBean {
 		if (executable instanceof Method method && !Modifier.isStatic(method.getModifiers())) {
 			String factoryBeanName = getMergedBeanDefinition().getFactoryBeanName();
 			if (factoryBeanName != null && this.beanFactory.containsBean(factoryBeanName)) {
-				Class<?> target = this.beanFactory.getMergedBeanDefinition(factoryBeanName)
-						.getResolvableType().toClass();
-				return new InstantiationDescriptor(executable, target);
+				return new InstantiationDescriptor(executable,
+						this.beanFactory.getMergedBeanDefinition(factoryBeanName).getResolvableType().toClass());
 			}
 		}
 		return new InstantiationDescriptor(executable, executable.getDeclaringClass());
@@ -260,8 +259,9 @@ public final class RegisteredBean {
 				.append("mergedBeanDefinition", getMergedBeanDefinition()).toString();
 	}
 
+
 	/**
-	 * Describe how a bean should be instantiated. While the {@code targetClass}
+	 * Descriptor for how a bean should be instantiated. While the {@code targetClass}
 	 * is usually the declaring class of the {@code executable}, there are cases
 	 * where retaining the actual concrete type is necessary.
 	 * @param executable the {@link Executable} to invoke
@@ -274,6 +274,7 @@ public final class RegisteredBean {
 			this(executable, executable.getDeclaringClass());
 		}
 	}
+
 
 	/**
 	 * Resolver used to obtain inner-bean details.
