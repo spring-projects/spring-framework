@@ -20,6 +20,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -91,8 +93,9 @@ class AspectJEnableCachingIsolatedTests {
 		try {
 			load(MultiCacheManagerConfig.class);
 		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage()).contains("bean of type CacheManager");
+		catch (NoUniqueBeanDefinitionException ex) {
+			assertThat(ex.getMessage()).contains(
+					"no CacheResolver specified and expected a single CacheManager bean, but found 2: [cm1,cm2]");
 		}
 	}
 
@@ -116,8 +119,8 @@ class AspectJEnableCachingIsolatedTests {
 		try {
 			load(EmptyConfig.class);
 		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage()).contains("no bean of type CacheManager");
+		catch (NoSuchBeanDefinitionException ex) {
+			assertThat(ex.getMessage()).contains("no CacheResolver specified");
 		}
 	}
 

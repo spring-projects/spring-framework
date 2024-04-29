@@ -270,12 +270,17 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				setCacheManager(this.beanFactory.getBean(CacheManager.class));
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
-				throw new IllegalStateException("No CacheResolver specified, and no unique bean of type " +
-						"CacheManager found. Mark one as primary or declare a specific CacheManager to use.", ex);
+				StringBuilder message = new StringBuilder("no CacheResolver specified and expected a single CacheManager bean, but found ");
+				message.append(ex.getNumberOfBeansFound());
+				if (ex.getBeanNamesFound() != null) {
+					message.append(": [").append(StringUtils.collectionToCommaDelimitedString(ex.getBeanNamesFound())).append("]");
+				}
+				message.append(" - mark one as primary or declare a specific CacheManager to use.");
+				throw new NoUniqueBeanDefinitionException(CacheManager.class, ex.getNumberOfBeansFound(), message.toString());
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				throw new IllegalStateException("No CacheResolver specified, and no bean of type CacheManager found. " +
-						"Register a CacheManager bean or remove the @EnableCaching annotation from your configuration.", ex);
+				throw new NoSuchBeanDefinitionException(CacheManager.class, "no CacheResolver specified - "
+						+ "register a CacheManager bean or remove the @EnableCaching annotation from your configuration.");
 			}
 		}
 		this.initialized = true;
