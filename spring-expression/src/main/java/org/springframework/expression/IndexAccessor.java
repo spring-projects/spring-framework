@@ -19,8 +19,8 @@ package org.springframework.expression;
 import org.springframework.lang.Nullable;
 
 /**
- * An index accessor is able to read from (and possibly write to) an indexed
- * structure of an object.
+ * An index accessor is able to read from and possibly write to an indexed
+ * structure of a target object.
  *
  * <p>This interface places no restrictions on what constitutes an indexed
  * structure. Implementors are therefore free to access indexed values any way

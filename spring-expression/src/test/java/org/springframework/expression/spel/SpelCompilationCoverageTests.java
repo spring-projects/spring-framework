@@ -33,6 +33,7 @@ import java.util.StringTokenizer;
 import java.util.stream.Stream;
 
 import example.Color;
+import example.FruitMap;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -900,13 +901,13 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			}
 
 			@ParameterizedTest(name = "{0}")
-			@MethodSource("fruitsIndexAccessors")
+			@MethodSource("fruitMapIndexAccessors")
 			void indexWithReferenceIndexTypeAndReferenceValueType(IndexAccessor indexAccessor) {
 				String exitTypeDescriptor = CodeFlow.toDescriptor(String.class);
 
 				StandardEvaluationContext context = new StandardEvaluationContext();
 				context.addIndexAccessor(indexAccessor);
-				context.setVariable("list", List.of(new Fruits()));
+				context.setVariable("list", List.of(new FruitMap()));
 
 				expression = parser.parseExpression("#list.get(0)[T(example.Color).PURPLE]");
 				assertCannotCompile(expression);
@@ -914,8 +915,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				assertThatExceptionOfType(SpelEvaluationException.class)
 						.isThrownBy(() -> expression.getValue(context))
 						.withMessageEndingWith("A problem occurred while attempting to read index '%s' in '%s'",
-								Color.PURPLE, Fruits.class.getName())
-						.withCauseInstanceOf(IndexOutOfBoundsException.class)
+								Color.PURPLE, FruitMap.class.getName())
+						.withCauseInstanceOf(IllegalArgumentException.class)
 						.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_READ);
 				assertCannotCompile(expression);
 
@@ -943,12 +944,21 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				assertCanCompile(expression);
 				assertThat(expression.getValue(context)).isEqualTo("blueberry");
 				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
+
+				// Set fruit for purple
+				context.setVariable("color", Color.PURPLE);
+				expression.setValue(context, "plum");
+				assertCanCompile(expression);
+				assertThat(expression.getValue(context)).isEqualTo("plum");
+				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
 			}
 
-			static Stream<Arguments> fruitsIndexAccessors() {
+			static Stream<Arguments> fruitMapIndexAccessors() {
 				return Stream.of(
-					arguments(named("FruitsIndexAccessor", new FruitsIndexAccessor())),
-					arguments(named("ReflectiveIndexAccessor", new ReflectiveIndexAccessor(Fruits.class, Color.class, "get")))
+					arguments(named("FruitMapIndexAccessor",
+							new FruitMapIndexAccessor())),
+					arguments(named("ReflectiveIndexAccessor",
+							new ReflectiveIndexAccessor(FruitMap.class, Color.class, "getFruit", "setFruit")))
 				);
 			}
 		}
@@ -1185,10 +1195,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				String exitTypeDescriptor = CodeFlow.toDescriptor(String.class);
 
 				StandardEvaluationContext context = new StandardEvaluationContext();
-				context.addIndexAccessor(new FruitsIndexAccessor());
+				context.addIndexAccessor(new FruitMapIndexAccessor());
 				context.setVariable("color", Color.RED);
 
-				expression = parser.parseExpression("#fruits?.[#color]");
+				expression = parser.parseExpression("#fruitMap?.[#color]");
 
 				// Cannot compile before the indexed value type is known.
 				assertThat(expression.getValue(context)).isNull();
@@ -1196,7 +1206,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				assertThat(expression.getValue(context)).isNull();
 				assertThat(getAst().getExitDescriptor()).isNull();
 
-				context.setVariable("fruits", new Fruits());
+				context.setVariable("fruitMap", new FruitMap());
 
 				assertThat(expression.getValue(context)).isEqualTo("cherry");
 				assertCanCompile(expression);
@@ -1204,7 +1214,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
 
 				// Null-safe support should have been compiled once the indexed value type is known.
-				context.setVariable("fruits", null);
+				context.setVariable("fruitMap", null);
 				assertThat(expression.getValue(context)).isNull();
 				assertCanCompile(expression);
 				assertThat(expression.getValue(context)).isNull();
@@ -7249,18 +7259,34 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		private final Method readMethodToInvoke;
 
+		@Nullable
+		private final Method writeMethodToInvoke;
+
 		private final String targetTypeDesc;
 
 		private final String methodDescr;
 
 
-		public ReflectiveIndexAccessor(Class<?> targetType, Class<?> indexType, String readMethodName) {
+		public ReflectiveIndexAccessor(Class<?> targetType, Class<?> indexType, String readMethodName,
+				@Nullable String writeMethodName) {
+
 			this.targetType = targetType;
 			this.indexType = indexType;
 			this.readMethod = ReflectionUtils.findMethod(targetType, readMethodName, indexType);
-			Assert.notNull(this.readMethod, () -> "Failed to find method '%s(%s)' in class '%s'."
+			Assert.notNull(this.readMethod, () -> "Failed to find read-method '%s(%s)' in class '%s'."
 					.formatted(readMethodName, indexType.getTypeName(), targetType.getTypeName()));
 			this.readMethodToInvoke = ClassUtils.getInterfaceMethodIfPossible(this.readMethod, targetType);
+			if (writeMethodName != null) {
+				Class<?> indexedValueType = this.readMethod.getReturnType();
+				Method writeMethod = ReflectionUtils.findMethod(targetType, writeMethodName, indexType, indexedValueType);
+				Assert.notNull(writeMethod, () -> "Failed to find write-method '%s(%s, %s)' in class '%s'."
+						.formatted(writeMethodName, indexType.getTypeName(), indexedValueType.getTypeName(),
+								targetType.getTypeName()));
+				this.writeMethodToInvoke = ClassUtils.getInterfaceMethodIfPossible(writeMethod, targetType);
+			}
+			else {
+				this.writeMethodToInvoke = null;
+			}
 			this.targetTypeDesc = CodeFlow.toDescriptor(targetType);
 			this.methodDescr = CodeFlow.createSignatureDescriptor(this.readMethod);
 		}
@@ -7286,12 +7312,13 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		@Override
 		public boolean canWrite(EvaluationContext context, Object target, Object index) {
-			return false;
+			return (this.writeMethodToInvoke != null && canRead(context, target, index));
 		}
 
 		@Override
 		public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
-			throw new UnsupportedOperationException();
+			Assert.state(this.writeMethodToInvoke != null, "Write-method cannot be null");
+			ReflectionUtils.invokeMethod(this.writeMethodToInvoke, target, index, newValue);
 		}
 
 		@Override
@@ -7355,7 +7382,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	private static class ColorsIndexAccessor extends ReflectiveIndexAccessor {
 
 		ColorsIndexAccessor() {
-			super(Colors.class, int.class, "get");
+			super(Colors.class, int.class, "get", null);
 		}
 	}
 
@@ -7376,41 +7403,21 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	private static class ColorOrdinalsIndexAccessor extends ReflectiveIndexAccessor {
 
 		ColorOrdinalsIndexAccessor() {
-			super(ColorOrdinals.class, Color.class, "get");
-		}
-	}
-
-	/**
-	 * Type that can be indexed by the {@link Color} enum (i.e., something other
-	 * than an int, Integer, or String) and whose indexed values are Strings.
-	 */
-	public static class Fruits {
-
-		public String get(Color color) {
-			return switch (color) {
-				case RED -> "cherry";
-				case ORANGE -> "orange";
-				case YELLOW -> "banana";
-				case GREEN -> "kiwi";
-				case BLUE -> "blueberry";
-				// We don't map PURPLE so that we can test for IndexOutOfBoundsException.
-				// case PURPLE -> "plum";
-				default -> throw new IndexOutOfBoundsException("color " + color + " is not supported");
-			};
+			super(ColorOrdinals.class, Color.class, "get", null);
 		}
 	}
 
 	/**
 	 * Manually implemented {@link CompilableIndexAccessor} that knows how to
-	 * index into {@link Fruits}.
+	 * index into {@link FruitMap}.
 	 */
-	private static class FruitsIndexAccessor implements CompilableIndexAccessor {
+	private static class FruitMapIndexAccessor implements CompilableIndexAccessor {
 
-		private final Class<?> targetType = Fruits.class;
+		private final Class<?> targetType = FruitMap.class;
 
 		private final Class<?> indexType = Color.class;
 
-		private final Method method = ReflectionUtils.findMethod(this.targetType, "get", this.indexType);
+		private final Method method = ReflectionUtils.findMethod(this.targetType, "getFruit", this.indexType);
 
 		private final String targetTypeDesc = CodeFlow.toDescriptor(this.targetType);
 
@@ -7431,19 +7438,22 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		@Override
 		public TypedValue read(EvaluationContext context, Object target, Object index) {
-			Fruits fruits = (Fruits) target;
+			FruitMap fruitMap = (FruitMap) target;
 			Color color = (Color) index;
-			return new TypedValue(fruits.get(color));
+			return new TypedValue(fruitMap.getFruit(color));
 		}
 
 		@Override
 		public boolean canWrite(EvaluationContext context, Object target, Object index) {
-			return false;
+			return canRead(context, target, index);
 		}
 
 		@Override
 		public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
-			throw new UnsupportedOperationException();
+			FruitMap fruitMap = (FruitMap) target;
+			Color color = (Color) index;
+			String fruit = String.valueOf(newValue);
+			fruitMap.setFruit(color, fruit);
 		}
 
 		@Override
@@ -7465,7 +7475,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			}
 			// Push the index onto the stack.
 			cf.generateCodeForArgument(mv, index, Color.class);
-			// Invoke the read-index method.
+			// Invoke the read-method.
 			mv.visitMethodInsn(INVOKEVIRTUAL, this.classDesc, this.method.getName(), this.methodDescr, false);
 		}
 
