@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,12 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 	}
 
 	@Override
-	public void handleError(ClientHttpResponse response, HttpStatusCode statusCode) throws IOException {
+	public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
+		handleError(response, response.getStatusCode(), url, method);
+	}
+
+	@Override
+	protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode, @Nullable URI url, @Nullable HttpMethod method) throws IOException {
 		if (this.statusMapping.containsKey(statusCode)) {
 			extract(this.statusMapping.get(statusCode), response);
 		}
@@ -147,17 +152,12 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 			extract(this.seriesMapping.get(series), response);
 		}
 		else {
-			super.handleError(response, statusCode);
+			super.handleError(response, statusCode, url, method);
 		}
 	}
 
-	@Override
-	public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
-		handleError(response, response.getStatusCode());
-	}
-
 	private void extract(@Nullable Class<? extends RestClientException> exceptionClass,
-						ClientHttpResponse response) throws IOException {
+			ClientHttpResponse response) throws IOException {
 
 		if (exceptionClass == null) {
 			return;

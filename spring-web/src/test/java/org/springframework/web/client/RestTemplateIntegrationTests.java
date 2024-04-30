@@ -241,13 +241,16 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	void notFound(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
+		String url = baseUrl + "/status/notfound";
 		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
-				template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null))
+				template.execute(url, HttpMethod.GET, null, null))
 			.satisfies(ex -> {
 				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				assertThat(ex.getStatusText()).isNotNull();
 				assertThat(ex.getResponseBodyAsString()).isNotNull();
-				assertThat(ex.getMessage()).isEqualTo("404 Client Error after GET http://localhost:" + port + "/status/notfound : [no body]");
+				assertThat(ex.getMessage()).containsSubsequence("404", "on GET request for \"" + url + "\": [no body]");
+				assumeFalse(clientHttpRequestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
+				assertThat(ex.getMessage()).isEqualTo("404 Client Error on GET request for \"" + url + "\": [no body]");
 			});
 	}
 
@@ -255,12 +258,14 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	void badRequest(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
+		String url = baseUrl + "/status/badrequest";
 		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
-				template.execute(baseUrl + "/status/badrequest", HttpMethod.GET, null, null))
+				template.execute(url, HttpMethod.GET, null, null))
 			.satisfies(ex -> {
 				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+				assertThat(ex.getMessage()).containsSubsequence("400", "on GET request for \""+url+ "\": [no body]");
 				assumeFalse(clientHttpRequestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
-				assertThat(ex.getMessage()).isEqualTo("400 Client Error after GET http://localhost:" + port + "/status/badrequest : [no body]");
+				assertThat(ex.getMessage()).isEqualTo("400 Client Error on GET request for \""+url+ "\": [no body]");
 			});
 	}
 
@@ -268,13 +273,16 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	void serverError(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
 
+		String url = baseUrl + "/status/server";
 		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
-				template.execute(baseUrl + "/status/server", HttpMethod.GET, null, null))
+				template.execute(url, HttpMethod.GET, null, null))
 			.satisfies(ex -> {
 				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 				assertThat(ex.getStatusText()).isNotNull();
 				assertThat(ex.getResponseBodyAsString()).isNotNull();
-				assertThat(ex.getMessage()).isEqualTo("500 Server Error after GET http://localhost:" + port + "/status/server : [no body]");
+				assertThat(ex.getMessage()).containsSubsequence("500", "on GET request for \"" + url + "\": [no body]");
+				assumeFalse(clientHttpRequestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
+				assertThat(ex.getMessage()).isEqualTo("500 Server Error on GET request for \"" + url + "\": [no body]");
 			});
 	}
 

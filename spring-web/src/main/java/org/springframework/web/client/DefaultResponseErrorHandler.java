@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,15 +131,17 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link HttpStatus} enum range.
 	 * </ul>
 	 * @throws UnknownHttpStatusCodeException in case of an unresolvable status code
-	 * @see #handleError(URI, HttpMethod, ClientHttpResponse, HttpStatusCode)
+	 * @see #handleError(ClientHttpResponse, HttpStatusCode, URI, HttpMethod)
 	 */
 	@Override
 	public void handleError(ClientHttpResponse response) throws IOException {
-		handleError(null, null, response);
+		HttpStatusCode statusCode = response.getStatusCode();
+		handleError(response, statusCode, null, null);
 	}
 
 	/**
-	 * Handle the error in the given response with the given resolved status code.
+	 * Handle the error in the given response with the given resolved status code
+	 * and extra information providing access to the request URL and HTTP method.
 	 * <p>The default implementation throws:
 	 * <ul>
 	 * <li>{@link HttpClientErrorException} if the status code is in the 4xx
@@ -152,43 +154,51 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link HttpStatus} enum range.
 	 * </ul>
 	 * @throws UnknownHttpStatusCodeException in case of an unresolvable status code
-	 * @see #handleError(URI, HttpMethod, ClientHttpResponse, HttpStatusCode)
+	 * @since 6.2
+	 * @see #handleError(ClientHttpResponse, HttpStatusCode, URI, HttpMethod)
 	 */
 	@Override
 	public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
 		HttpStatusCode statusCode = response.getStatusCode();
-		handleError(url, method, response, statusCode);
+		handleError(response, statusCode, url, method);
 	}
 
 	/**
 	 * Return error message with details from the response body. For example:
 	 * <pre>
-	 * 404 Not Found: [{'id': 123, 'message': 'my message'}]
+	 * 404 Not Found on GET request for "https://example.com": [{'id': 123, 'message': 'my message'}]
 	 * </pre>
 	 */
-	private String getErrorMessage(
-			int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset, @Nullable URI url, @Nullable HttpMethod method) {
+	private String getErrorMessage(int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset,
+			@Nullable URI url, @Nullable HttpMethod method) {
 
-		String preface = getPreface(rawStatusCode, statusText, url, method);
+		StringBuilder msg = new StringBuilder(rawStatusCode + " " + statusText);
+		if (method != null) {
+			msg.append(" on ").append(method).append(" request");
+		}
+		if (url != null) {
+			msg.append(" for \"");
+			String urlString = url.toString();
+			int idx = urlString.indexOf('?');
+			if (idx != -1) {
+				msg.append(urlString, 0, idx);
+			}
+			else {
+				msg.append(urlString);
+			}
+			msg.append("\"");
+		}
+		msg.append(": ");
 		if (ObjectUtils.isEmpty(responseBody)) {
-			return preface + "[no body]";
+			msg.append("[no body]");
 		}
-
-		charset = (charset != null ? charset : StandardCharsets.UTF_8);
-
-		String bodyText = new String(responseBody, charset);
-		bodyText = LogFormatUtils.formatValue(bodyText, -1, true);
-
-		return preface + bodyText;
-	}
-
-	private String getPreface(int rawStatusCode, String statusText, @Nullable URI url, @Nullable HttpMethod method) {
-		StringBuilder preface = new StringBuilder(rawStatusCode + " " + statusText);
-		if (!ObjectUtils.isEmpty(method) && !ObjectUtils.isEmpty(url)) {
-			preface.append(" after ").append(method).append(" ").append(url).append(" ");
+		else {
+			charset = (charset != null ? charset : StandardCharsets.UTF_8);
+			String bodyText = new String(responseBody, charset);
+			bodyText = LogFormatUtils.formatValue(bodyText, -1, true);
+			msg.append(bodyText);
 		}
-		preface.append(": ");
-		return preface.toString();
+		return msg.toString();
 	}
 
 	/**
@@ -198,27 +208,11 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link HttpClientErrorException#create} for errors in the 4xx range, to
 	 * {@link HttpServerErrorException#create} for errors in the 5xx range,
 	 * or otherwise raises {@link UnknownHttpStatusCodeException}.
-	 * @since 5.0
+	 * @since 6.2
 	 * @see HttpClientErrorException#create
 	 * @see HttpServerErrorException#create
 	 */
-	protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode) throws IOException {
-		handleError(null, null, response, statusCode);
-	}
-
-	/**
-	 * Handle the error based on the resolved status code.
-	 *
-	 * <p>The default implementation delegates to
-	 * {@link HttpClientErrorException#create} for errors in the 4xx range, to
-	 * {@link HttpServerErrorException#create} for errors in the 5xx range,
-	 * or otherwise raises {@link UnknownHttpStatusCodeException}.
-	 * @since 5.0
-	 * @see HttpClientErrorException#create
-	 * @see HttpServerErrorException#create
-	 */
-	protected void handleError(@Nullable URI url, @Nullable HttpMethod method, ClientHttpResponse response,
-			HttpStatusCode statusCode) throws IOException {
+	protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode, @Nullable URI url, @Nullable HttpMethod method) throws IOException {
 		String statusText = response.getStatusText();
 		HttpHeaders headers = response.getHeaders();
 		byte[] body = getResponseBody(response);

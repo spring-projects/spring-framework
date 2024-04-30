@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -80,19 +81,38 @@ class DefaultResponseErrorHandlerTests {
 	}
 
 	@Test
-	public void handleErrorWithUrlAndMethod() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.TEXT_PLAIN);
-
-		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
-		given(response.getStatusText()).willReturn("Not Found");
-		given(response.getHeaders()).willReturn(headers);
-		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes(StandardCharsets.UTF_8)));
-
+	void handleErrorWithUrlAndMethod() throws Exception {
+		setupClientHttpResponse(HttpStatus.NOT_FOUND, "Hello World");
 		assertThatExceptionOfType(HttpClientErrorException.class)
 				.isThrownBy(() -> handler.handleError(URI.create("https://example.com"), HttpMethod.GET, response))
-				.withMessage("404 Not Found after GET https://example.com : \"Hello World\"")
-				.satisfies(ex -> assertThat(ex.getResponseHeaders()).isSameAs(headers));
+				.withMessage("404 Not Found on GET request for \"https://example.com\": \"Hello World\"");
+	}
+
+	@Test
+	void handleErrorWithUrlAndQueryParameters() throws Exception {
+		setupClientHttpResponse(HttpStatus.NOT_FOUND, "Hello World");
+		assertThatExceptionOfType(HttpClientErrorException.class)
+				.isThrownBy(() -> handler.handleError(URI.create("https://example.com/resource?access_token=123"), HttpMethod.GET, response))
+				.withMessage("404 Not Found on GET request for \"https://example.com/resource\": \"Hello World\"");
+	}
+
+	@Test
+	void handleErrorWithUrlAndNoBody() throws Exception {
+		setupClientHttpResponse(HttpStatus.NOT_FOUND, null);
+		assertThatExceptionOfType(HttpClientErrorException.class)
+				.isThrownBy(() -> handler.handleError(URI.create("https://example.com"), HttpMethod.GET, response))
+				.withMessage("404 Not Found on GET request for \"https://example.com\": [no body]");
+	}
+
+	private void setupClientHttpResponse(HttpStatus status, @Nullable String textBody) throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		given(response.getStatusCode()).willReturn(status);
+		given(response.getStatusText()).willReturn(status.getReasonPhrase());
+		if (textBody != null) {
+			headers.setContentType(MediaType.TEXT_PLAIN);
+			given(response.getBody()).willReturn(new ByteArrayInputStream(textBody.getBytes(StandardCharsets.UTF_8)));
+		}
+		given(response.getHeaders()).willReturn(headers);
 	}
 
 	@Test
