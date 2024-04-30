@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,6 +136,116 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	public void setLazyInitHandlers(boolean lazyInitHandlers) {
 		this.lazyInitHandlers = lazyInitHandlers;
 	}
+
+	/**
+	 * Register the specified handler for the given URL paths.
+	 * @param urlPaths the URLs that the bean should be mapped to
+	 * @param beanName the name of the handler bean
+	 * @throws BeansException if the handler couldn't be registered
+	 * @throws IllegalStateException if there is a conflicting handler registered
+	 */
+	public void registerHandler(String[] urlPaths, String beanName) throws BeansException, IllegalStateException {
+		Assert.notNull(urlPaths, "URL path array must not be null");
+		for (String urlPath : urlPaths) {
+			registerHandler(urlPath, beanName);
+		}
+	}
+
+	/**
+	 * Register the specified handler for the given URL path.
+	 * @param urlPath the URL the bean should be mapped to
+	 * @param handler the handler instance or handler bean name String
+	 * (a bean name will automatically be resolved into the corresponding handler bean)
+	 * @throws BeansException if the handler couldn't be registered
+	 * @throws IllegalStateException if there is a conflicting handler registered
+	 */
+	public void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
+		Assert.notNull(urlPath, "URL path must not be null");
+		Assert.notNull(handler, "Handler object must not be null");
+		Object resolvedHandler = handler;
+
+		// Eagerly resolve handler if referencing singleton via name.
+		if (!this.lazyInitHandlers && handler instanceof String handlerName) {
+			ApplicationContext applicationContext = obtainApplicationContext();
+			if (applicationContext.isSingleton(handlerName)) {
+				resolvedHandler = applicationContext.getBean(handlerName);
+			}
+		}
+
+		Object mappedHandler = this.handlerMap.get(urlPath);
+		if (mappedHandler != null) {
+			if (mappedHandler != resolvedHandler) {
+				throw new IllegalStateException(
+						"Cannot map " + getHandlerDescription(handler) + " to URL path [" + urlPath +
+								"]: There is already " + getHandlerDescription(mappedHandler) + " mapped.");
+			}
+		}
+		else {
+			if (urlPath.equals("/")) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Root mapping to " + getHandlerDescription(handler));
+				}
+				setRootHandler(resolvedHandler);
+			}
+			else if (urlPath.equals("/*")) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Default mapping to " + getHandlerDescription(handler));
+				}
+				setDefaultHandler(resolvedHandler);
+			}
+			else {
+				this.handlerMap.put(urlPath, resolvedHandler);
+				if (getPatternParser() != null) {
+					this.pathPatternHandlerMap.put(getPatternParser().parse(urlPath), resolvedHandler);
+				}
+				if (logger.isTraceEnabled()) {
+					logger.trace("Mapped [" + urlPath + "] onto " + getHandlerDescription(handler));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Remove the mapping for the handler registered for the given URL path.
+	 * @param urlPath the mapping to remove
+	 */
+	public void unregisterHandler(String urlPath) {
+		Assert.notNull(urlPath, "URL path must not be null");
+		if (urlPath.equals("/")) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Removing root mapping: " + getRootHandler());
+			}
+			setRootHandler(null);
+		}
+		else if (urlPath.equals("/*")) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Removing default mapping: " + getDefaultHandler());
+			}
+			setDefaultHandler(null);
+		}
+		else {
+			Object mappedHandler = this.handlerMap.get(urlPath);
+			if (mappedHandler == null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("No mapping for [" + urlPath + "]");
+				}
+			}
+			else {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Removing mapping \"" + urlPath + "\": " + getHandlerDescription(mappedHandler));
+				}
+				this.handlerMap.remove(urlPath);
+				if (getPatternParser() != null) {
+					this.pathPatternHandlerMap.remove(getPatternParser().parse(urlPath));
+				}
+			}
+		}
+	}
+
+	private String getHandlerDescription(Object handler) {
+		return (handler instanceof String ? "'" + handler + "'" : handler.toString());
+	}
+
 
 	/**
 	 * Look up a handler for the URL path of the given request.
@@ -386,78 +496,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Register the specified handler for the given URL paths.
-	 * @param urlPaths the URLs that the bean should be mapped to
-	 * @param beanName the name of the handler bean
-	 * @throws BeansException if the handler couldn't be registered
-	 * @throws IllegalStateException if there is a conflicting handler registered
-	 */
-	protected void registerHandler(String[] urlPaths, String beanName) throws BeansException, IllegalStateException {
-		Assert.notNull(urlPaths, "URL path array must not be null");
-		for (String urlPath : urlPaths) {
-			registerHandler(urlPath, beanName);
-		}
-	}
-
-	/**
-	 * Register the specified handler for the given URL path.
-	 * @param urlPath the URL the bean should be mapped to
-	 * @param handler the handler instance or handler bean name String
-	 * (a bean name will automatically be resolved into the corresponding handler bean)
-	 * @throws BeansException if the handler couldn't be registered
-	 * @throws IllegalStateException if there is a conflicting handler registered
-	 */
-	protected void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
-		Assert.notNull(urlPath, "URL path must not be null");
-		Assert.notNull(handler, "Handler object must not be null");
-		Object resolvedHandler = handler;
-
-		// Eagerly resolve handler if referencing singleton via name.
-		if (!this.lazyInitHandlers && handler instanceof String handlerName) {
-			ApplicationContext applicationContext = obtainApplicationContext();
-			if (applicationContext.isSingleton(handlerName)) {
-				resolvedHandler = applicationContext.getBean(handlerName);
-			}
-		}
-
-		Object mappedHandler = this.handlerMap.get(urlPath);
-		if (mappedHandler != null) {
-			if (mappedHandler != resolvedHandler) {
-				throw new IllegalStateException(
-						"Cannot map " + getHandlerDescription(handler) + " to URL path [" + urlPath +
-						"]: There is already " + getHandlerDescription(mappedHandler) + " mapped.");
-			}
-		}
-		else {
-			if (urlPath.equals("/")) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Root mapping to " + getHandlerDescription(handler));
-				}
-				setRootHandler(resolvedHandler);
-			}
-			else if (urlPath.equals("/*")) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Default mapping to " + getHandlerDescription(handler));
-				}
-				setDefaultHandler(resolvedHandler);
-			}
-			else {
-				this.handlerMap.put(urlPath, resolvedHandler);
-				if (getPatternParser() != null) {
-					this.pathPatternHandlerMap.put(getPatternParser().parse(urlPath), resolvedHandler);
-				}
-				if (logger.isTraceEnabled()) {
-					logger.trace("Mapped [" + urlPath + "] onto " + getHandlerDescription(handler));
-				}
-			}
-		}
-	}
-
-	private String getHandlerDescription(Object handler) {
-		return (handler instanceof String ? "'" + handler + "'" : handler.toString());
 	}
 
 
