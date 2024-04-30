@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.docs.dataaccess.jdbc.jdbcJdbcTemplateidioms;
+package org.springframework.docs.dataaccess.jdbc.jdbcjdbctemplateidioms;
 
-public interface CorporateEventDao {
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+
+public class JdbcCorporateEventDao implements CorporateEventDao {
+
+	private JdbcTemplate jdbcTemplate;
+
+	public void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 }

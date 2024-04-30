@@ -1,20 +1,15 @@
-package org.springframework.docs.dataaccess.jdbc.jdbcJdbcTemplateidioms;
-
-import javax.sql.DataSource;
+package org.springframework.docs.dataaccess.jdbc.jdbcjdbctemplateidioms;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+// tag::snippet[]
 @Configuration
-public class JdbcCorporateEventDaoConfiguration {
-
-	// tag::snippet[]
-	@Bean
-	JdbcCorporateEventDao corporateEventDao(DataSource dataSource) {
-		return new JdbcCorporateEventDao();
-	}
+@ComponentScan("org.springframework.docs.dataaccess.jdbc")
+public class JdbcCorporateEventRepositoryConfiguration {
 
 	@Bean(destroyMethod = "close")
 	BasicDataSource dataSource() {
@@ -25,6 +20,6 @@ public class JdbcCorporateEventDaoConfiguration {
 		dataSource.setPassword("");
 		return dataSource;
 	}
-	// end::snippet[]
 
 }
+// end::snippet[]

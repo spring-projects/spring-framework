@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.docs.dataaccess.jdbc.jdbcJdbcTemplateidioms;
+package org.springframework.docs.dataaccess.jdbc.jdbcjdbctemplateidioms;
 
 public interface CorporateEventRepository {
 }

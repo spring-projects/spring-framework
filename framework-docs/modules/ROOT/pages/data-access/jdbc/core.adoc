@@ -339,7 +339,7 @@ Kotlin::
 
 More sophisticated stored procedure support is xref:data-access/jdbc/object.adoc#jdbc-StoredProcedure[covered later].
 
-[[jdbc-JdbcTemplate-idioms]]
+[[jdbc-jdbctemplate-idioms]]
 === `JdbcTemplate` Best Practices
 
 Instances of the `JdbcTemplate` class are thread-safe, once configured. This is
@@ -605,7 +605,7 @@ functionality that is present only in the `JdbcTemplate` class, you can use the
 `getJdbcOperations()` method to access the wrapped `JdbcTemplate` through the
 `JdbcOperations` interface.
 
-See also xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate-idioms[`JdbcTemplate` Best Practices]
+See also xref:data-access/jdbc/core.adoc#jdbc-jdbctemplate-idioms[`JdbcTemplate` Best Practices]
 for guidelines on using the `NamedParameterJdbcTemplate` class in the context of an application.
 
 

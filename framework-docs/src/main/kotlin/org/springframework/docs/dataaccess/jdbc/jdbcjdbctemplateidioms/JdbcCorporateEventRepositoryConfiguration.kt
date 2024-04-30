@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package org.springframework.docs.dataaccess.jdbc.jdbcJdbcTemplateidioms;
+package org.springframework.docs.dataaccess.jdbc.jdbcjdbctemplateidioms
 
-import javax.sql.DataSource;
-
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
+import org.apache.commons.dbcp2.BasicDataSource
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Configuration
 
 // tag::snippet[]
-@Repository
-public class JdbcCorporateEventRepository implements CorporateEventRepository {
+@Configuration
+@ComponentScan("org.springframework.docs.dataaccess.jdbc")
+class JdbcCorporateEventRepositoryConfiguration {
 
-	private JdbcTemplate jdbcTemplate;
-
-	// Implicitly autowire the DataSource constructor parameter
-	public JdbcCorporateEventRepository(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	@Bean(destroyMethod = "close")
+	fun dataSource() = BasicDataSource().apply {
+		driverClassName = "org.hsqldb.jdbcDriver"
+		url = "jdbc:hsqldb:hsql://localhost:"
+		username = "sa"
+		password = ""
 	}
 
-	// JDBC-backed implementations of the methods on the CorporateEventRepository follow...
 }
 // end::snippet[]
