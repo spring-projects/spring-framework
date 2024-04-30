@@ -369,8 +369,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private void validateIntroductionAdvisor(IntroductionAdvisor advisor) {
 		advisor.validateInterfaces();
 		// If the advisor passed validation, we can make the change.
-		Class<?>[] ifcs = advisor.getInterfaces();
-		for (Class<?> ifc : ifcs) {
+		for (Class<?> ifc : advisor.getInterfaces()) {
 			addInterface(ifc);
 		}
 	}

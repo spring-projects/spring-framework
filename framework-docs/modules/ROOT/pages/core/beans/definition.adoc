@@ -250,6 +250,10 @@ For details about the mechanism for supplying arguments to the constructor (if r
 and setting object instance properties after the object is constructed, see
 xref:core/beans/dependencies/factory-collaborators.adoc[Injecting Dependencies].
 
+NOTE: In the case of constructor arguments, the container can select a corresponding
+constructor among several overloaded constructors. That said, to avoid ambiguities,
+it is recommended to keep your constructor signatures as straightforward as possible.
+
 
 [[beans-factory-class-static-factory-method]]
 === Instantiation with a Static Factory Method
@@ -309,6 +313,24 @@ Kotlin::
 For details about the mechanism for supplying (optional) arguments to the factory method
 and setting object instance properties after the object is returned from the factory,
 see xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail].
+
+NOTE: In the case of factory method arguments, the container can select a corresponding
+method among several overloaded methods of the same name. That said, to avoid ambiguities,
+it is recommended to keep your factory method signatures as straightforward as possible.
+
+[TIP]
+====
+A typical problematic case with factory method overloading is Mockito with its many
+overloads of the `mock` method. Choose the most specific variant of `mock` possible:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="clientService" class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg type="java.lang.Class" value="examples.ClientService"/>
+		<constructor-arg type="java.lang.String" value="clientService"/>
+	</bean>
+----
+====
 
 
 [[beans-factory-class-instance-factory-method]]
@@ -432,8 +454,8 @@ Kotlin::
 ======
 
 This approach shows that the factory bean itself can be managed and configured through
-dependency injection (DI). See xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail]
-.
+dependency injection (DI).
+See xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail].
 
 NOTE: In Spring documentation, "factory bean" refers to a bean that is configured in the
 Spring container and that creates objects through an
@@ -458,7 +480,5 @@ The recommended way to find out about the actual runtime type of a particular be
 a `BeanFactory.getType` call for the specified bean name. This takes all of the above
 cases into account and returns the type of object that a `BeanFactory.getBean` call is
 going to return for the same bean name.
-
-
 
 

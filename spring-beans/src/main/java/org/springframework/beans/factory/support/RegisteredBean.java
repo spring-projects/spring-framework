@@ -43,6 +43,8 @@ import org.springframework.util.StringUtils;
  * In the case of inner-beans, the bean name may have been generated.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 6.0
  */
 public final class RegisteredBean {
@@ -262,9 +264,11 @@ public final class RegisteredBean {
 
 	/**
 	 * Descriptor for how a bean should be instantiated. While the {@code targetClass}
-	 * is usually the declaring class of the {@code executable}, there are cases
-	 * where retaining the actual concrete type is necessary.
-	 * @param executable the {@link Executable} to invoke
+	 * is usually the declaring class of the {@code executable} (in case of a constructor
+	 * or a locally declared factory method), there are cases where retaining the actual
+	 * concrete class is necessary (e.g. for an inherited factory method).
+	 * @param executable the {@link Executable} ({@link java.lang.reflect.Constructor}
+	 * or {@link java.lang.reflect.Method}) to invoke
 	 * @param targetClass the target {@link Class} of the executable
 	 * @since 6.1.7
 	 */
