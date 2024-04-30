@@ -45,7 +45,7 @@ rootProject.children.each {project ->
 }
 
 settings.gradle.projectsLoaded {
-	gradleEnterprise {
+	develocity {
 		buildScan {
 			File buildDir = settings.gradle.rootProject
 					.getLayout().getBuildDirectory().getAsFile().get()
