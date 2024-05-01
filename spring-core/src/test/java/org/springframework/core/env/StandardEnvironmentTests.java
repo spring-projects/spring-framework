@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ package org.springframework.core.env;
 
 import java.security.AccessControlException;
 import java.security.Permission;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -307,6 +310,12 @@ class StandardEnvironmentTests {
 				// non-string keys and values work fine... until the security manager is introduced below
 				assertThat(systemProperties.get(STRING_PROPERTY_NAME)).isEqualTo(NON_STRING_PROPERTY_VALUE);
 				assertThat(systemProperties.get(NON_STRING_PROPERTY_NAME)).isEqualTo(STRING_PROPERTY_VALUE);
+
+				PropertiesPropertySource systemPropertySource = (PropertiesPropertySource)
+						environment.getPropertySources().get(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
+				Set<String> expectedKeys = new HashSet<>(System.getProperties().stringPropertyNames());
+				expectedKeys.add(STRING_PROPERTY_NAME);  // filtered out by stringPropertyNames due to non-String value
+				assertThat(new HashSet<>(Arrays.asList(systemPropertySource.getPropertyNames()))).isEqualTo(expectedKeys);
 			}
 
 			SecurityManager securityManager = new SecurityManager() {
@@ -407,6 +416,7 @@ class StandardEnvironmentTests {
 		EnvironmentTestUtils.getModifiableSystemEnvironment().remove(DISALLOWED_PROPERTY_NAME);
 	}
 
+
 	@Nested
 	class GetActiveProfiles {
 
@@ -455,6 +465,7 @@ class StandardEnvironmentTests {
 			}
 		}
 	}
+
 
 	@Nested
 	class AcceptsProfilesTests {
@@ -538,8 +549,8 @@ class StandardEnvironmentTests {
 			environment.addActiveProfile("p2");
 			assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2"))).isTrue();
 		}
-
 	}
+
 
 	@Nested
 	class MatchesProfilesTests {
@@ -650,7 +661,6 @@ class StandardEnvironmentTests {
 			assertThat(environment.matchesProfiles("p2 & (foo | p1)")).isTrue();
 			assertThat(environment.matchesProfiles("foo", "(p2 & p1)")).isTrue();
 		}
-
 	}
 
 }
