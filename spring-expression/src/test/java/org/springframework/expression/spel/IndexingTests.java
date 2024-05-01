@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -731,7 +732,7 @@ class IndexingTests {
 					.isThrownBy(() -> propertyExpression.getValue(context, birdNameMappings))
 					.withMessageEndingWith("A problem occurred while attempting to read index '%s' in '%s'",
 							"property", BirdNameToColorMappings.class.getName())
-					.havingCause().withMessage("unknown bird color: property");
+					.havingCause().withMessage("unknown bird: property");
 		}
 
 		static class BirdNameToColorMappings {
@@ -742,38 +743,15 @@ class IndexingTests {
 				return switch (name) {
 					case "cardinal" -> Color.RED;
 					case "blue jay" -> Color.BLUE;
-					default -> throw new RuntimeException("unknown bird color: " + name);
+					default -> throw new NoSuchElementException("unknown bird: " + name);
 				};
 			}
 		}
 
-		static class BirdNameToColorMappingsIndexAccessor implements IndexAccessor {
+		static class BirdNameToColorMappingsIndexAccessor extends ReflectiveIndexAccessor {
 
-			@Override
-			public Class<?>[] getSpecificTargetClasses() {
-				return new Class<?>[] { BirdNameToColorMappings.class };
-			}
-
-			@Override
-			public boolean canRead(EvaluationContext context, Object target, Object index) {
-				return (target instanceof BirdNameToColorMappings && index instanceof String);
-			}
-
-			@Override
-			public TypedValue read(EvaluationContext context, Object target, Object index) {
-				BirdNameToColorMappings mappings = (BirdNameToColorMappings) target;
-				String name = (String) index;
-				return new TypedValue(mappings.get(name));
-			}
-
-			@Override
-			public boolean canWrite(EvaluationContext context, Object target, Object index) {
-				return false;
-			}
-
-			@Override
-			public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
-				throw new UnsupportedOperationException();
+			BirdNameToColorMappingsIndexAccessor() {
+				super(BirdNameToColorMappings.class, String.class, "get");
 			}
 		}
 
