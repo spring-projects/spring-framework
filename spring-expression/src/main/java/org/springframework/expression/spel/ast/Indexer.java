@@ -212,6 +212,22 @@ public class Indexer extends SpelNodeImpl {
 		// At this point, we need a TypeDescriptor for a non-null target object
 		Assert.state(targetDescriptor != null, "No type descriptor");
 
+		// Indexing into an array
+		if (target.getClass().isArray()) {
+			int intIndex = convertIndexToInt(state, index);
+			this.indexedType = IndexedType.ARRAY;
+			return new ArrayIndexingValueRef(state.getTypeConverter(), target, intIndex, targetDescriptor);
+		}
+
+		// Indexing into a List
+		if (target instanceof List<?> list) {
+			int intIndex = convertIndexToInt(state, index);
+			this.indexedType = IndexedType.LIST;
+			return new CollectionIndexingValueRef(list, intIndex, targetDescriptor,
+					state.getTypeConverter(), state.getConfiguration().isAutoGrowCollections(),
+					state.getConfiguration().getMaximumAutoGrowSize());
+		}
+
 		// Indexing into a Map
 		if (target instanceof Map<?, ?> map) {
 			Object key = index;
@@ -223,26 +239,11 @@ public class Indexer extends SpelNodeImpl {
 			return new MapIndexingValueRef(state.getTypeConverter(), map, key, targetDescriptor);
 		}
 
-		// If the object is something that looks indexable by an integer,
-		// attempt to treat the index value as a number
-		if (target.getClass().isArray() || target instanceof Collection || target instanceof String) {
-			int idx = (Integer) state.convertValue(index, TypeDescriptor.valueOf(Integer.class));
-			if (target.getClass().isArray()) {
-				this.indexedType = IndexedType.ARRAY;
-				return new ArrayIndexingValueRef(state.getTypeConverter(), target, idx, targetDescriptor);
-			}
-			else if (target instanceof Collection<?> collection) {
-				if (target instanceof List) {
-					this.indexedType = IndexedType.LIST;
-				}
-				return new CollectionIndexingValueRef(collection, idx, targetDescriptor,
-						state.getTypeConverter(), state.getConfiguration().isAutoGrowCollections(),
-						state.getConfiguration().getMaximumAutoGrowSize());
-			}
-			else {
-				this.indexedType = IndexedType.STRING;
-				return new StringIndexingValueRef((String) target, idx, targetDescriptor);
-			}
+		// Indexing into a String
+		if (target instanceof String string) {
+			int intIndex = convertIndexToInt(state, index);
+			this.indexedType = IndexedType.STRING;
+			return new StringIndexingValueRef(string, intIndex, targetDescriptor);
 		}
 
 		// Check for a custom IndexAccessor.
@@ -278,6 +279,14 @@ public class Indexer extends SpelNodeImpl {
 						getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_INDEX_WRITE,
 						index, target.getClass().getTypeName());
 			}
+		}
+
+		// Fallback indexing support for collections
+		if (target instanceof Collection<?> collection) {
+			int intIndex = convertIndexToInt(state, index);
+			return new CollectionIndexingValueRef(collection, intIndex, targetDescriptor,
+					state.getTypeConverter(), state.getConfiguration().isAutoGrowCollections(),
+					state.getConfiguration().getMaximumAutoGrowSize());
 		}
 
 		// As a last resort, try to treat the index value as a property of the context object.
@@ -456,6 +465,10 @@ public class Indexer extends SpelNodeImpl {
 		else {
 			this.exitTypeDescriptor = descriptor;
 		}
+	}
+
+	private static int convertIndexToInt(ExpressionState state, Object index) {
+		return (Integer) state.convertValue(index, TypeDescriptor.valueOf(Integer.class));
 	}
 
 	private static Class<?> getObjectType(Object obj) {

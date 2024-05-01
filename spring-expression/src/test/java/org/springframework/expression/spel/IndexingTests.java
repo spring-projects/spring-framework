@@ -21,11 +21,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.math.BigDecimal;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,6 +47,7 @@ import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.ReflectiveIndexAccessor;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Person;
@@ -731,7 +736,26 @@ class IndexingTests {
 					.isThrownBy(() -> propertyExpression.getValue(context, birdNameMappings))
 					.withMessageEndingWith("A problem occurred while attempting to read index '%s' in '%s'",
 							"property", BirdNameToColorMappings.class.getName())
-					.havingCause().withMessage("unknown bird color: property");
+					.havingCause().withMessage("unknown bird: property");
+		}
+
+		@Test  // gh-32736
+		void readIndexWithCollectionTargetType() {
+			context.addIndexAccessor(new ColorCollectionIndexAccessor());
+
+			Expression expression = parser.parseExpression("[0]");
+
+			// List.of() relies on built-in list support.
+			assertThat(expression.getValue(context, List.of(Color.RED))).isEqualTo(Color.RED);
+
+			ColorCollection colorCollection = new ColorCollection();
+
+			// Preconditions for this use case.
+			assertThat(colorCollection).isInstanceOf(Collection.class);
+			assertThat(colorCollection).isNotInstanceOf(List.class);
+
+			// ColorCollection relies on custom ColorCollectionIndexAccessor.
+			assertThat(expression.getValue(context, colorCollection)).isEqualTo(Color.RED);
 		}
 
 		static class BirdNameToColorMappings {
@@ -742,38 +766,43 @@ class IndexingTests {
 				return switch (name) {
 					case "cardinal" -> Color.RED;
 					case "blue jay" -> Color.BLUE;
-					default -> throw new RuntimeException("unknown bird color: " + name);
+					default -> throw new NoSuchElementException("unknown bird: " + name);
 				};
 			}
 		}
 
-		static class BirdNameToColorMappingsIndexAccessor implements IndexAccessor {
+		static class BirdNameToColorMappingsIndexAccessor extends ReflectiveIndexAccessor {
 
-			@Override
-			public Class<?>[] getSpecificTargetClasses() {
-				return new Class<?>[] { BirdNameToColorMappings.class };
+			BirdNameToColorMappingsIndexAccessor() {
+				super(BirdNameToColorMappings.class, String.class, "get");
+			}
+		}
+
+		static class ColorCollection extends AbstractCollection<Color> {
+
+			public Color get(int index) {
+				return switch (index) {
+					case 0 -> Color.RED;
+					case 1 -> Color.BLUE;
+					default -> throw new NoSuchElementException("No color at index " + index);
+				};
 			}
 
 			@Override
-			public boolean canRead(EvaluationContext context, Object target, Object index) {
-				return (target instanceof BirdNameToColorMappings && index instanceof String);
-			}
-
-			@Override
-			public TypedValue read(EvaluationContext context, Object target, Object index) {
-				BirdNameToColorMappings mappings = (BirdNameToColorMappings) target;
-				String name = (String) index;
-				return new TypedValue(mappings.get(name));
-			}
-
-			@Override
-			public boolean canWrite(EvaluationContext context, Object target, Object index) {
-				return false;
-			}
-
-			@Override
-			public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
+			public Iterator<Color> iterator() {
 				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public int size() {
+				throw new UnsupportedOperationException();
+			}
+		}
+
+		static class ColorCollectionIndexAccessor extends ReflectiveIndexAccessor {
+
+			ColorCollectionIndexAccessor() {
+				super(ColorCollection.class, int.class, "get");
 			}
 		}
 

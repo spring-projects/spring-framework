@@ -16,7 +16,9 @@
 
 package org.springframework.core.env;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -302,6 +304,12 @@ class StandardEnvironmentTests {
 			assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME)).isEqualTo(DISALLOWED_PROPERTY_VALUE);
 			assertThat(systemProperties.get(STRING_PROPERTY_NAME)).isEqualTo(NON_STRING_PROPERTY_VALUE);
 			assertThat(systemProperties.get(NON_STRING_PROPERTY_NAME)).isEqualTo(STRING_PROPERTY_VALUE);
+
+			PropertiesPropertySource systemPropertySource = (PropertiesPropertySource)
+					environment.getPropertySources().get(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
+			Set<String> expectedKeys = new HashSet<>(System.getProperties().stringPropertyNames());
+			expectedKeys.add(STRING_PROPERTY_NAME);  // filtered out by stringPropertyNames due to non-String value
+			assertThat(Set.of(systemPropertySource.getPropertyNames())).isEqualTo(expectedKeys);
 		}
 		finally {
 			System.clearProperty(ALLOWED_PROPERTY_NAME);
@@ -317,6 +325,7 @@ class StandardEnvironmentTests {
 		assertThat(systemEnvironment).isNotNull();
 		assertThat(System.getenv()).isSameAs(systemEnvironment);
 	}
+
 
 	@Nested
 	class GetActiveProfiles {
@@ -366,6 +375,7 @@ class StandardEnvironmentTests {
 			}
 		}
 	}
+
 
 	@Nested
 	class AcceptsProfilesTests {
@@ -449,8 +459,8 @@ class StandardEnvironmentTests {
 			environment.addActiveProfile("p2");
 			assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2"))).isTrue();
 		}
-
 	}
+
 
 	@Nested
 	class MatchesProfilesTests {
@@ -551,7 +561,6 @@ class StandardEnvironmentTests {
 			assertThat(environment.matchesProfiles("p2 & (foo | p1)")).isTrue();
 			assertThat(environment.matchesProfiles("foo", "(p2 & p1)")).isTrue();
 		}
-
 	}
 
 }
