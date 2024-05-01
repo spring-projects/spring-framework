@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,8 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Base class for AOP proxy configuration managers.
- * These are not themselves AOP proxies, but subclasses of this class are
+ *
+ * <p>These are not themselves AOP proxies, but subclasses of this class are
  * normally factories from which AOP proxy instances are obtained directly.
  *
  * <p>This class frees subclasses of the housekeeping of Advices
@@ -52,7 +53,8 @@ import org.springframework.util.CollectionUtils;
  * methods, which are provided by subclasses.
  *
  * <p>This class is serializable; subclasses need not be.
- * This class is used to hold snapshots of proxies.
+ *
+ * <p>This class is used to hold snapshots of proxies.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -104,7 +106,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Create a AdvisedSupport instance with the given parameters.
+	 * Create an {@code AdvisedSupport} instance with the given parameters.
 	 * @param interfaces the proxied interfaces
 	 */
 	public AdvisedSupport(Class<?>... interfaces) {
@@ -115,7 +117,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * Set the given object as target.
-	 * Will create a SingletonTargetSource for the object.
+	 * <p>Will create a SingletonTargetSource for the object.
 	 * @see #setTargetSource
 	 * @see org.springframework.aop.target.SingletonTargetSource
 	 */
@@ -344,8 +346,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private void validateIntroductionAdvisor(IntroductionAdvisor advisor) {
 		advisor.validateInterfaces();
 		// If the advisor passed validation, we can make the change.
-		Class<?>[] ifcs = advisor.getInterfaces();
-		for (Class<?> ifc : ifcs) {
+		for (Class<?> ifc : advisor.getInterfaces()) {
 			addInterface(ifc);
 		}
 	}
@@ -491,9 +492,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Copy the AOP configuration from the given AdvisedSupport object,
-	 * but allow substitution of a fresh TargetSource and a given interceptor chain.
-	 * @param other the AdvisedSupport object to take proxy configuration from
+	 * Copy the AOP configuration from the given {@link AdvisedSupport} object,
+	 * but allow substitution of a fresh {@link TargetSource} and a given interceptor chain.
+	 * @param other the {@code AdvisedSupport} object to take proxy configuration from
 	 * @param targetSource the new TargetSource
 	 * @param advisors the Advisors for the chain
 	 */
@@ -513,8 +514,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Build a configuration-only copy of this AdvisedSupport,
-	 * replacing the TargetSource.
+	 * Build a configuration-only copy of this {@link AdvisedSupport},
+	 * replacing the {@link TargetSource}.
 	 */
 	AdvisedSupport getConfigurationOnlyCopy() {
 		AdvisedSupport copy = new AdvisedSupport();
