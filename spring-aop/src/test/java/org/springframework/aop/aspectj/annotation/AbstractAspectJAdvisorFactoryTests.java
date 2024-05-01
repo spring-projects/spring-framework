@@ -480,6 +480,16 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
+	void orderedAdvice() {
+		OrderedAspect aspect = new OrderedAspect();
+		List<Advisor> advisors = getAdvisorFactory().getAdvisors(aspectInstanceFactory(aspect, "orderedAspect"));
+		OrderObject orderObject = createProxy(new OrderObject(), OrderObject.class, advisors);
+		orderObject.ordered();
+		List<Integer> orders = aspect.orders;
+		assertThat(orders).containsExactly(1, 2, 3);
+	}
+
+	@Test
 	void nonAbstractParentAspect() {
 		IncrementingAspect aspect = new IncrementingAspect();
 
@@ -760,6 +770,11 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		}
 	}
 
+	static class OrderObject {
+
+		void ordered() {}
+	}
+
 
 	@Aspect
 	static class DoublingAspect {
@@ -821,6 +836,37 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		void after() {
 			invocations.add("after");
 		}
+	}
+
+	@Aspect
+	private static class OrderedAspect {
+
+		private final List<Integer> orders = new ArrayList<>();
+
+		@Pointcut("execution(* ordered())")
+		void ordered() {
+		}
+
+		@Before("ordered()")
+		@Order(2)
+		void order2() {
+			orders.add(2);
+		}
+
+
+		@Before("ordered()")
+		@Order(1)
+		void order1() {
+			orders.add(1);
+		}
+
+
+		@Before("ordered()")
+		@Order(3)
+		void order3() {
+			orders.add(3);
+		}
+
 	}
 
 

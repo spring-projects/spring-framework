@@ -31,6 +31,8 @@ import org.springframework.aop.aspectj.InstantiationModelAwarePointcutAdvisor;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactory.AspectJAnnotation;
 import org.springframework.aop.support.DynamicMethodMatcherPointcut;
 import org.springframework.aop.support.Pointcuts;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
@@ -42,6 +44,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Tang Xiong
  * @since 2.0
  */
 @SuppressWarnings("serial")
@@ -181,6 +184,10 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 	@Override
 	public int getOrder() {
+		Order order = AnnotationUtils.getAnnotation(this.aspectJAdviceMethod, Order.class);
+		if (order != null) {
+			return order.value();
+		}
 		return this.aspectInstanceFactory.getOrder();
 	}
 
