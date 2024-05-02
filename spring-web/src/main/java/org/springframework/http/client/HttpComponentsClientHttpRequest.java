@@ -30,6 +30,8 @@ import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.Method;
+import org.apache.hc.core5.http.io.entity.NullEntity;
 import org.apache.hc.core5.http.protocol.HttpContext;
 
 import org.springframework.http.HttpHeaders;
@@ -89,8 +91,10 @@ final class HttpComponentsClientHttpRequest extends AbstractStreamingClientHttpR
 		addHeaders(this.httpRequest, headers);
 
 		if (body != null) {
-			HttpEntity requestEntity = new BodyEntity(headers, body);
-			this.httpRequest.setEntity(requestEntity);
+			this.httpRequest.setEntity(new BodyEntity(headers, body));
+		}
+		else if (!Method.isSafe(this.httpRequest.getMethod())) {
+			this.httpRequest.setEntity(NullEntity.INSTANCE);
 		}
 		ClassicHttpResponse httpResponse = this.httpClient.executeOpen(null, this.httpRequest, this.httpContext);
 		return new HttpComponentsClientHttpResponse(httpResponse);
