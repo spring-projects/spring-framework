@@ -220,7 +220,7 @@ final class UrlParser {
 	}
 
 	private void setState(State newState) {
-		if (logger.isDebugEnabled()) {
+		if (logger.isTraceEnabled()) {
 			String c;
 			if (this.pointer < this.input.length()) {
 				c = Character.toString(this.input.charAt(this.pointer));
@@ -228,7 +228,7 @@ final class UrlParser {
 			else {
 				c = "EOF";
 			}
-			logger.debug("Changing state from " + this.state + " to " + newState + " (cur: " + c + " prev: " + this.previousState + ")");
+			logger.trace("Changing state from " + this.state + " to " + newState + " (cur: " + c + " prev: " + this.previousState + ")");
 		}
 		// EXTRA: we keep the previous state, to ensure that the parser can escape from malformed URI templates
 		this.previousState = this.state;
@@ -2847,7 +2847,6 @@ final class UrlParser {
 
 		@Override
 		public void append(String segment) {
-			logger.debug("Adding \"" + segment + "\"");
 			this.segments.add(new PathSegment(segment));
 		}
 
