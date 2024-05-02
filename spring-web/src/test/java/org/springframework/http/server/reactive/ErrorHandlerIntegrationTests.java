@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.NoOpResponseErrorHandler;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
@@ -35,6 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  */
 class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+
+	private static final ResponseErrorHandler NO_OP_ERROR_HANDLER = new NoOpResponseErrorHandler();
 
 	private final ErrorHandler handler = new ErrorHandler();
 
@@ -109,18 +111,5 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 			}
 		}
 	}
-
-
-	private static final ResponseErrorHandler NO_OP_ERROR_HANDLER = new ResponseErrorHandler() {
-
-		@Override
-		public boolean hasError(ClientHttpResponse response) {
-			return false;
-		}
-
-		@Override
-		public void handleError(ClientHttpResponse response) {
-		}
-	};
 
 }
