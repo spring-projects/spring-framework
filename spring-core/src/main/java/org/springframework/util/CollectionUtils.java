@@ -515,6 +515,10 @@ public abstract class CollectionUtils {
 	 * Return a (partially unmodifiable) map that combines the provided two
 	 * maps. Invoking {@link Map#put(Object, Object)} or {@link Map#putAll(Map)}
 	 * on the returned map results in an {@link UnsupportedOperationException}.
+	 *
+	 * <p>In the case of a key collision, {@code first} takes precedence over
+	 * {@code second}. In other words, entries in {@code second} with a key
+	 * that is also mapped by {@code first} are effectively ignored.
 	 * @param first the first map to compose
 	 * @param second the second map to compose
 	 * @return a new map that composes the given two maps
@@ -531,6 +535,10 @@ public abstract class CollectionUtils {
 	 * {@link UnsupportedOperationException} {@code putFunction} is
 	 * {@code null}. The same applies to {@link Map#putAll(Map)} and
 	 * {@code putAllFunction}.
+	 *
+	 * <p>In the case of a key collision, {@code first} takes precedence over
+	 * {@code second}. In other words, entries in {@code second} with a key
+	 * that is also mapped by {@code first} are effectively ignored.
 	 * @param first the first map to compose
 	 * @param second the second map to compose
 	 * @param putFunction applied when {@code Map::put} is invoked. If
