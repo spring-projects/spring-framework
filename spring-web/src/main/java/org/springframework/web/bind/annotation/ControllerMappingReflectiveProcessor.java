@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,10 @@ class ControllerMappingReflectiveProcessor implements ReflectiveProcessor {
 			this.bindingRegistrar.registerReflectionHints(hints, methodParameter.getGenericParameterType());
 		}
 		else if (HttpEntity.class.isAssignableFrom(methodParameter.getParameterType())) {
-			this.bindingRegistrar.registerReflectionHints(hints, getHttpEntityType(methodParameter));
+			Type httpEntityType = getHttpEntityType(methodParameter);
+			if (httpEntityType != null) {
+				this.bindingRegistrar.registerReflectionHints(hints, httpEntityType);
+			}
 		}
 	}
 
@@ -94,7 +97,10 @@ class ControllerMappingReflectiveProcessor implements ReflectiveProcessor {
 			this.bindingRegistrar.registerReflectionHints(hints, returnTypeParameter.getGenericParameterType());
 		}
 		else if (HttpEntity.class.isAssignableFrom(returnTypeParameter.getParameterType())) {
-			this.bindingRegistrar.registerReflectionHints(hints, getHttpEntityType(returnTypeParameter));
+			Type httpEntityType = getHttpEntityType(returnTypeParameter);
+			if (httpEntityType != null) {
+				this.bindingRegistrar.registerReflectionHints(hints, httpEntityType);
+			}
 		}
 	}
 
