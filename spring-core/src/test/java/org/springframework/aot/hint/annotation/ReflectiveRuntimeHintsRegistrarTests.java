@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.FieldHint;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -119,6 +120,18 @@ class ReflectiveRuntimeHintsRegistrarTests {
 	}
 
 	@Test
+	void shouldProcessDifferentAnnotationsOnTypeAndField() {
+		process(SampleTypeAndFieldAnnotatedBean.class);
+		assertThat(this.runtimeHints.reflection().getTypeHint(SampleTypeAndFieldAnnotatedBean.class))
+				.satisfies(typeHint -> {
+					assertThat(typeHint.fields().map(FieldHint::getName)).containsOnly("MESSAGE");
+					assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+					assertThat(typeHint.methods()).isEmpty();
+					assertThat(typeHint.constructors()).isEmpty();
+				});
+	}
+
+	@Test
 	void shouldInvokeCustomProcessor() {
 		process(SampleCustomProcessor.class);
 		assertThat(RuntimeHintsPredicates.reflection()
@@ -173,6 +186,14 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 		void notManaged() {
 		}
+	}
+
+	@RegisterReflection(memberCategories = MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
+	static class SampleTypeAndFieldAnnotatedBean {
+
+		@Reflective
+		private static final String MESSAGE = "Hello";
+
 	}
 
 	@SuppressWarnings("unused")
