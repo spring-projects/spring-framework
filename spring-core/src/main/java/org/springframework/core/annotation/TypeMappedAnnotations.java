@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -410,7 +410,10 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 			Annotation[] repeatedAnnotations = repeatableContainers.findRepeatedAnnotations(annotation);
 			if (repeatedAnnotations != null) {
-				return doWithAnnotations(type, aggregateIndex, source, repeatedAnnotations);
+				MergedAnnotation<A> result = doWithAnnotations(type, aggregateIndex, source, repeatedAnnotations);
+				if (result != null) {
+					return result;
+				}
 			}
 			AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 					annotation.annotationType(), repeatableContainers, annotationFilter);
