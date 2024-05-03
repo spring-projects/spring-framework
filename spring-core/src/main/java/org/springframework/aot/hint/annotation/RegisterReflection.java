@@ -36,26 +36,28 @@ import org.springframework.aot.hint.MemberCategory;
  * <p>This annotation can be used as a meta-annotation to customize how hints
  * are registered against each target class.
  *
- * <p>The annotated element can be any bean:
+ * <p>You can use this annotation on any bean that is contributed to the context:
  * <pre><code class="java">
  * &#064;Configuration
  * &#064;RegisterReflection(classes = CustomerEntry.class, memberCategories = PUBLIC_FIELDS)
- * public class MyConfig {
+ * class MyConfig {
  *     // ...
  * }</code></pre>
+ *
+ * <p>If scanning of {@link Reflective} is enabled, any type in the configured
+ * packages can use this annotation as well.
  *
  * <p>To register reflection hints for the type itself, only member categories
  * should be specified:<pre><code class="java">
  * &#064;Component
  * &#064;RegisterReflection(memberCategories = INVOKE_PUBLIC_METHODS)
- * public class MyComponent {
+ * class MyComponent {
  *     // ...
  * }</code></pre>
  *
  * <p>Reflection hints can be registered from a method. In this case, at least
  * one target class should be specified:<pre><code class="java">
- * &#064;Component
- * public class MyComponent {
+ * class MyProcessor {
  *
  *     &#064;RegisterReflection(classes = CustomerEntry.class, memberCategories = PUBLIC_FIELDS)
  *     CustomerEntry process() { ... }
@@ -64,6 +66,9 @@ import org.springframework.aot.hint.MemberCategory;
  *
  * <p>If the class is not available, {@link #classNames()} allows to specify the
  * fully qualified name, rather than the {@link Class} reference.
+ *
+ * <p>The annotated element can also be any test class that uses the <em>Spring
+ * TestContext Framework</em> to load an {@code ApplicationContext}.
  *
  * @author Stephane Nicoll
  * @since 6.2

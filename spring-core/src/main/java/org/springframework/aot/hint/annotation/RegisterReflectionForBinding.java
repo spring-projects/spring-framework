@@ -32,26 +32,29 @@ import org.springframework.core.annotation.AliasFor;
  * and record components. Hints are also registered for types transitively used
  * on properties and record components.
  *
- * <p>The annotated element can be a configuration class &mdash; for example:
+ * <p>You can use this annotation on any bean that is contributed to the context:
  * <pre><code class="java">
  * &#064;Configuration
  * &#064;RegisterReflectionForBinding({Foo.class, Bar.class})
- * public class MyConfig {
+ * class MyConfig {
  *     // ...
  * }</code></pre>
+ *
+ * <p>If scanning of {@link Reflective} is enabled, any type in the configured
+ * packages can use this annotation as well.
  *
  * <p>When the annotated element is a type, the type itself is registered if no
  * candidates are provided:<pre><code class="java">
  * &#064;Component
  * &#064;RegisterReflectionForBinding
- * public class MyBean {
+ * class MyBean {
  *     // ...
  * }</code></pre>
  *
  * The annotation can also be specified on a method. In that case, at least one
  * target class must be specified:<pre><code class="java">
  * &#064;Component
- * public class MyService {
+ * class MyService {
  *
  *     &#064;RegisterReflectionForBinding(Baz.class)
  *     public Baz process() {

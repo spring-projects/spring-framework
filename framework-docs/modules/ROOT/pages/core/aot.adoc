@@ -509,12 +509,19 @@ It is also possible to register an implementation statically by adding an entry 
 {spring-framework-api}/aot/hint/annotation/Reflective.html[`@Reflective`] provides an idiomatic way to flag the need for reflection on an annotated element.
 For instance, `@EventListener` is meta-annotated with `@Reflective` since the underlying implementation invokes the annotated method using reflection.
 
-By default, only Spring beans are considered, and an invocation hint is registered for the annotated element.
-This can be tuned by specifying a custom `ReflectiveProcessor` implementation via the
-`@Reflective` annotation.
+Out-of-the-box, only Spring beans are considered but you can opt-in for scanning using `@ReflectiveScan`.
+In the example below, all types of the package `com.example.app` and their subpackages are considered:
+
+include-code::./MyConfiguration[]
+
+Scanning happens during AOT processing and the types in the target packages do not need to have a class-level annotation to be considered.
+This performs a "deep scan" and the presence of `@Reflective`, either directly or as a meta-annotation, is checked on types, fields, constructors, methods, and enclosed elements.
+
+By default, `@Reflective` registers an invocation hint for the annotated element.
+This can be tuned by specifying a custom `ReflectiveProcessor` implementation via the `@Reflective` annotation.
 
 Library authors can reuse this annotation for their own purposes.
-If components other than Spring beans need to be processed, a `BeanFactoryInitializationAotProcessor` can detect the relevant types and use `ReflectiveRuntimeHintsRegistrar` to process them.
+An example of such customization is covered in the next section.
 
 
 [[aot.hints.register-reflection]]
@@ -522,11 +529,13 @@ If components other than Spring beans need to be processed, a `BeanFactoryInitia
 
 {spring-framework-api}/aot/hint/annotation/RegisterReflection.html[`@RegisterReflection`] is a specialization of `@Reflective` that provides a declarative way of registering reflection for arbitrary types.
 
+NOTE: As a specialization of `@Reflective`, this is also detected if you're using `@ReflectiveScan`.
+
 In the following example, public constructors and public methods can be invoked via reflection on `AccountService`:
 
 include-code::./MyConfiguration[tag=snippet,indent=0]
 
-`@RegisterReflection` can be applied to any Spring bean at the class level, but it can also be applied directly to a method to better indicate where the hints are actually required.
+`@RegisterReflection` can be applied to any target type at the class level, but it can also be applied directly to a method to better indicate where the hints are actually required.
 
 `@RegisterReflection` can be used as a meta-annotation to provide more specific needs.
 {spring-framework-api}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`] is such composed annotation and registers the need for serializing arbitrary types.

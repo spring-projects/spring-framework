@@ -16,6 +16,7 @@
 
 package org.springframework.aot.hint.annotation;
 
+import java.io.Closeable;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -24,6 +25,8 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.aot.hint.FieldHint;
 import org.springframework.aot.hint.MemberCategory;
@@ -49,6 +52,20 @@ class ReflectiveRuntimeHintsRegistrarTests {
 	private final ReflectiveRuntimeHintsRegistrar registrar = new ReflectiveRuntimeHintsRegistrar();
 
 	private final RuntimeHints runtimeHints = new RuntimeHints();
+
+	@ParameterizedTest
+	@ValueSource(classes = { SampleTypeAnnotatedBean.class, SampleFieldAnnotatedBean.class,
+			SampleConstructorAnnotatedBean.class, SampleMethodAnnotatedBean.class, SampleInterface.class,
+			SampleMethodMetaAnnotatedBeanWithAlias.class, SampleMethodAnnotatedBeanWithInterface.class })
+	void isCandidateWithMatchingAnnotatedElement(Class<?> candidate) {
+		assertThat(this.registrar.isCandidate(candidate)).isTrue();
+	}
+
+	@ParameterizedTest
+	@ValueSource(classes = { String.class, Closeable.class })
+	void isCandidateWithNonMatchingAnnotatedElement(Class<?> candidate) {
+		assertThat(this.registrar.isCandidate(candidate)).isFalse();
+	}
 
 	@Test
 	void shouldIgnoreNonAnnotatedType() {
