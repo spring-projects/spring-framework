@@ -40,7 +40,7 @@ import org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMat
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.InstanceOfAssertFactories.array;
 import static org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind.CLOSE;
 import static org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind.EXACT;
@@ -253,18 +253,28 @@ class ReflectionHelperTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	void setupArgumentsForVarargsInvocationPreconditions() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> ReflectionHelper.setupArgumentsForVarargsInvocation(new Class[] {}, "a"))
+				.withMessage("Required parameter types array must not be empty");
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> ReflectionHelper.setupArgumentsForVarargsInvocation(
+						new Class<?>[] { Integer.class, Integer.class }, 123))
+				.withMessage("The last required parameter type must be an array to support varargs invocation");
+	}
+
+	@Test
 	void setupArgumentsForVarargsInvocation() {
 		Object[] newArray;
 
-		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
-				new Class<?>[] {String[].class}, "a", "b", "c");
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class<?>[] { String[].class }, "a", "b", "c");
 		assertThat(newArray)
 				.singleElement()
 				.asInstanceOf(array(String[].class))
 				.containsExactly("a", "b", "c");
 
-		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
-				new Class<?>[] { Object[].class }, "a", "b", "c");
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class<?>[] { Object[].class }, "a", "b", "c");
 		assertThat(newArray)
 				.singleElement()
 				.asInstanceOf(array(Object[].class))
@@ -272,14 +282,12 @@ class ReflectionHelperTests extends AbstractExpressionTests {
 
 		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
 				new Class<?>[] { Integer.class, Integer.class, String[].class }, 123, 456, "a", "b", "c");
-		assertThat(newArray)
-				.satisfiesExactly(
-						i -> assertThat(i).isEqualTo(123),
-						i -> assertThat(i).isEqualTo(456),
-						i -> assertThat(i).asInstanceOf(array(String[].class)).containsExactly("a", "b", "c"));
+		assertThat(newArray).satisfiesExactly(
+				one -> assertThat(one).isEqualTo(123),
+				two -> assertThat(two).isEqualTo(456),
+				three -> assertThat(three).asInstanceOf(array(String[].class)).containsExactly("a", "b", "c"));
 
-		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
-				new Class<?>[] { String[].class });
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class<?>[] { String[].class });
 		assertThat(newArray)
 				.singleElement()
 				.asInstanceOf(array(String[].class))
@@ -299,30 +307,18 @@ class ReflectionHelperTests extends AbstractExpressionTests {
 				.asInstanceOf(array(Object[].class))
 				.containsExactly("a", "b", "c");
 
-		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
-				new Class<?>[] { String[].class }, "a");
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class<?>[] { String[].class }, "a");
 		assertThat(newArray)
 				.singleElement()
 				.asInstanceOf(array(String[].class))
 				.containsExactly("a");
 
-
-		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
-				new Class<?>[] { String[].class }, new Object[]{null});
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class<?>[] { String[].class }, new Object[] { null });
 		assertThat(newArray)
 				.singleElement()
 				.asInstanceOf(array(String[].class))
 				.singleElement()
 				.isNull();
-
-		assertThatThrownBy(() -> ReflectionHelper.setupArgumentsForVarargsInvocation(
-				new Class<?>[] { Integer.class, Integer.class }, 123, 456))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("Method must be varargs");
-
-		assertThatThrownBy(() -> ReflectionHelper.setupArgumentsForVarargsInvocation(new Class[] {}, "a", "b", "c"))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("Required parameter types must not be empty");
 	}
 
 	@Test

@@ -36,8 +36,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MethodInvoker;
 
-import static org.springframework.util.ObjectUtils.isArray;
-
 /**
  * Utility methods used by the reflection resolver code to discover the appropriate
  * methods/constructors and fields that should be used in expressions.
@@ -453,19 +451,18 @@ public abstract class ReflectionHelper {
 	 * @return a repackaged array of arguments where any varargs setup has performed
 	 */
 	public static Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args) {
-		int parameterCount = requiredParameterTypes.length;
-		Assert.notEmpty(requiredParameterTypes, "Required parameter types must not be empty");
+		Assert.notEmpty(requiredParameterTypes, "Required parameter types array must not be empty");
 
+		int parameterCount = requiredParameterTypes.length;
 		Class<?> lastRequiredParameterType = requiredParameterTypes[parameterCount - 1];
-		Assert.isTrue(lastRequiredParameterType.isArray(), "Method must be varargs");
+		Assert.isTrue(lastRequiredParameterType.isArray(),
+				"The last required parameter type must be an array to support varargs invocation");
 
 		int argumentCount = args.length;
-		Object lastArgument = argumentCount > 0 ? args[argumentCount - 1] : null;
+		Object lastArgument = (argumentCount > 0 ? args[argumentCount - 1] : null);
 
 		// Check if repackaging is needed...
-		if (parameterCount != args.length ||
-			(!isArray(lastArgument) && differentTypes(lastRequiredParameterType, lastArgument))) {
-
+		if (parameterCount != argumentCount || !lastRequiredParameterType.isInstance(lastArgument)) {
 			// Create an array for the leading arguments plus the varargs array argument.
 			Object[] newArgs = new Object[parameterCount];
 			// Copy all leading arguments to the new array, omitting the varargs array argument.
@@ -486,12 +483,10 @@ public abstract class ReflectionHelper {
 			newArgs[newArgs.length - 1] = varargsArray;
 			return newArgs;
 		}
+
 		return args;
 	}
 
-	private static boolean differentTypes(Class<?> lastRequiredParameterType, @Nullable Object lastArgument) {
-		return lastArgument == null || lastRequiredParameterType != lastArgument.getClass();
-	}
 
 	/**
 	 * Arguments match kinds.
