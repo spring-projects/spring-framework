@@ -16,9 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
+import java.lang.reflect.Executable;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.springframework.asm.MethodVisitor;
@@ -214,60 +213,65 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * and if it is then the argument values will be appropriately packaged into an array.
 	 * @param mv the method visitor where code should be generated
 	 * @param cf the current codeflow
-	 * @param member the method or constructor for which arguments are being set up
+	 * @param executable the method or constructor for which arguments are being set up
 	 * @param arguments the expression nodes for the expression supplied argument values
 	 */
-	protected static void generateCodeForArguments(MethodVisitor mv, CodeFlow cf, Member member, SpelNodeImpl[] arguments) {
-		String[] paramDescriptors = null;
-		boolean isVarargs = false;
-		if (member instanceof Constructor<?> ctor) {
-			paramDescriptors = CodeFlow.toDescriptors(ctor.getParameterTypes());
-			isVarargs = ctor.isVarArgs();
-		}
-		else { // Method
-			Method method = (Method)member;
-			paramDescriptors = CodeFlow.toDescriptors(method.getParameterTypes());
-			isVarargs = method.isVarArgs();
-		}
-		if (isVarargs) {
+	protected static void generateCodeForArguments(MethodVisitor mv, CodeFlow cf, Executable executable, SpelNodeImpl[] arguments) {
+		String[] paramDescriptors = CodeFlow.toDescriptors(executable.getParameterTypes());
+		int paramCount = paramDescriptors.length;
+
+		if (executable.isVarArgs()) {
 			// The final parameter may or may not need packaging into an array, or nothing may
 			// have been passed to satisfy the varargs and so something needs to be built.
-			int p = 0; // Current supplied argument being processed
-			int childCount = arguments.length;
 
 			// Fulfill all the parameter requirements except the last one
-			for (p = 0; p < paramDescriptors.length - 1; p++) {
-				cf.generateCodeForArgument(mv, arguments[p], paramDescriptors[p]);
+			for (int i = 0; i < paramCount - 1; i++) {
+				cf.generateCodeForArgument(mv, arguments[i], paramDescriptors[i]);
 			}
 
-			SpelNodeImpl lastChild = (childCount == 0 ? null : arguments[childCount - 1]);
-			String arrayType = paramDescriptors[paramDescriptors.length - 1];
-			// Determine if the final passed argument is already suitably packaged in array
-			// form to be passed to the method
-			if (lastChild != null && arrayType.equals(lastChild.getExitDescriptor())) {
-				cf.generateCodeForArgument(mv, lastChild, paramDescriptors[p]);
+			int argCount = arguments.length;
+			String varargsType = paramDescriptors[paramCount - 1];
+			String varargsComponentType = varargsType.substring(1); // trim the leading '[', may leave other '['
+
+			if (needsVarargsArrayWrapping(arguments, paramDescriptors)) {
+				// Package up the remaining arguments into an array
+				CodeFlow.insertNewArrayCode(mv, argCount - paramCount + 1, varargsComponentType);
+				for (int argIndex = paramCount - 1, arrayIndex = 0; argIndex < argCount; argIndex++, arrayIndex++) {
+					SpelNodeImpl child = arguments[argIndex];
+					mv.visitInsn(DUP);
+					CodeFlow.insertOptimalLoad(mv, arrayIndex);
+					cf.generateCodeForArgument(mv, child, varargsComponentType);
+					CodeFlow.insertArrayStore(mv, varargsComponentType);
+				}
+			}
+			else if (varargsType.equals(arguments[argCount - 1].getExitDescriptor())) {
+				// varargs type matches type of last argument
+				cf.generateCodeForArgument(mv, arguments[argCount - 1], paramDescriptors[paramCount - 1]);
 			}
 			else {
-				arrayType = arrayType.substring(1); // trim the leading '[', may leave other '['
-				// build array big enough to hold remaining arguments
-				CodeFlow.insertNewArrayCode(mv, childCount - p, arrayType);
-				// Package up the remaining arguments into the array
-				int arrayindex = 0;
-				while (p < childCount) {
-					SpelNodeImpl child = arguments[p];
-					mv.visitInsn(DUP);
-					CodeFlow.insertOptimalLoad(mv, arrayindex++);
-					cf.generateCodeForArgument(mv, child, arrayType);
-					CodeFlow.insertArrayStore(mv, arrayType);
-					p++;
-				}
+				// last argument is an array and varargs component type is a supertype of argument component type
+				cf.generateCodeForArgument(mv, arguments[argCount - 1], varargsComponentType);
 			}
 		}
 		else {
-			for (int i = 0; i < paramDescriptors.length;i++) {
+			for (int i = 0; i < paramCount; i++) {
 				cf.generateCodeForArgument(mv, arguments[i], paramDescriptors[i]);
 			}
 		}
+	}
+
+	private static boolean needsVarargsArrayWrapping(SpelNodeImpl[] arguments, String[] paramDescriptors) {
+		if (arguments.length == 0) {
+			return true;
+		}
+
+		String lastExitTypeDescriptor = arguments[arguments.length - 1].exitTypeDescriptor;
+		String lastParamDescriptor = paramDescriptors[paramDescriptors.length - 1];
+		return countLeadingOpeningBrackets(Objects.requireNonNull(lastExitTypeDescriptor)) != countLeadingOpeningBrackets(lastParamDescriptor);
+	}
+
+	private static long countLeadingOpeningBrackets(String lastExitTypeDescriptor) {
+		return lastExitTypeDescriptor.chars().takeWhile(c -> c == '[').count();
 	}
 
 	/**

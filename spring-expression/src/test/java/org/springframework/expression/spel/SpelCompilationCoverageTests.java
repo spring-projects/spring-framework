@@ -28,8 +28,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import example.Color;
@@ -2267,6 +2269,12 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		return a+b;
 	}
 
+	public static String concat2(Object... args) {
+		return Arrays.stream(args)
+				.map(Objects::toString)
+				.collect(Collectors.joining());
+	}
+
 	public static String join(String...strings) {
 		StringBuilder buf = new StringBuilder();
 		for (String string: strings) {
@@ -2279,7 +2287,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	void compiledExpressionShouldWorkWhenUsingCustomFunctionWithVarargs() throws Exception {
 		StandardEvaluationContext context;
 
-		// Here the target method takes Object... and we are passing a string
+		// single string argument
 		expression = parser.parseExpression("#doFormat('hey %s', 'there')");
 		context = new StandardEvaluationContext();
 		context.registerFunction("doFormat",
@@ -2291,6 +2299,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertThat(expression.getValue(String.class)).isEqualTo("hey there");
 
+		// single string argument from root array access
 		expression = parser.parseExpression("#doFormat([0], 'there')");
 		context = new StandardEvaluationContext(new Object[] {"hey %s"});
 		context.registerFunction("doFormat",
@@ -2302,6 +2311,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertThat(expression.getValue(String.class)).isEqualTo("hey there");
 
+		// single string from variable
 		expression = parser.parseExpression("#doFormat([0], #arg)");
 		context = new StandardEvaluationContext(new Object[] {"hey %s"});
 		context.registerFunction("doFormat",
@@ -2313,13 +2323,29 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(((SpelExpression) expression).getAST().isCompilable()).isTrue();
 		assertCanCompile(expression);
 		assertThat(expression.getValue(String.class)).isEqualTo("hey there");
+
+		// string array argument
+		expression = parser.parseExpression("#doFormat('hey %s', #arg)");
+		context = new StandardEvaluationContext();
+		context.registerFunction("doFormat",
+				DelegatingStringFormat.class.getDeclaredMethod("format", String.class, Object[].class));
+		context.setVariable("arg", new String[] { "there" });
+		((SpelExpression) expression).setEvaluationContext(context);
+		assertThat(expression.getValue(String.class)).isEqualTo("hey there");
+		assertThat(((SpelExpression) expression).getAST().isCompilable()).isTrue();
+		assertCanCompile(expression);
+		assertThat(expression.getValue(String.class)).isEqualTo("hey there");
 	}
 
 	@Test
 	void functionReference() throws Exception {
 		EvaluationContext ctx = new StandardEvaluationContext();
 		Method m = getClass().getDeclaredMethod("concat", String.class, String.class);
-		ctx.setVariable("concat",m);
+		ctx.setVariable("concat", m);
+		Method m2 = getClass().getDeclaredMethod("concat2", Object[].class);
+		ctx.setVariable("concat2", m2);
+		Method m3 = getClass().getDeclaredMethod("join", String[].class);
+		ctx.setVariable("join", m3);
 
 		expression = parser.parseExpression("#concat('a','b')");
 		assertThat(expression.getValue(ctx)).isEqualTo("ab");
@@ -2330,6 +2356,20 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(ctx)).isEqualTo('b');
 		assertCanCompile(expression);
 		assertThat(expression.getValue(ctx)).isEqualTo('b');
+
+		// varargs
+		expression = parser.parseExpression("#join(#stringArray)");
+		ctx.setVariable("stringArray", new String[] { "a", "b", "c" });
+		assertThat(expression.getValue(ctx)).isEqualTo("abc");
+		assertCanCompile(expression);
+		assertThat(expression.getValue(ctx)).isEqualTo("abc");
+
+		// varargs with argument component type that is a subtype of the varargs component type.
+		expression = parser.parseExpression("#concat2(#stringArray)");
+		ctx.setVariable("stringArray", new String[] { "a", "b", "c" });
+		assertThat(expression.getValue(ctx)).isEqualTo("abc");
+		assertCanCompile(expression);
+		assertThat(expression.getValue(ctx)).isEqualTo("abc");
 
 		expression = parser.parseExpression("#concat(#a,#b)");
 		ctx.setVariable("a", "foo");
@@ -2524,12 +2564,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertThat(expression.getValue(context, new SomeCompareMethod2()).toString()).isEqualTo("xyz");
 
-		// TODO Determine why the String[] is passed as the first element of the Object... varargs array instead of the entire varargs array.
-		// expression = parser.parseExpression("#append2(#stringArray)");
-		// assertThat(expression.getValue(context)).hasToString("xyz");
-		// assertThat(((SpelExpression) expression).getAST().isCompilable()).isTrue();
-		// assertCanCompile(expression);
-		// assertThat(expression.getValue(context)).hasToString("xyz");
+		expression = parser.parseExpression("#append2(#stringArray)");
+		assertThat(expression.getValue(context)).hasToString("xyz");
+		assertThat(((SpelExpression) expression).getAST().isCompilable()).isTrue();
+		assertCanCompile(expression);
+		assertThat(expression.getValue(context)).hasToString("xyz");
 
 		expression = parser.parseExpression("#sum(1,2,3)");
 		assertThat(expression.getValue(context)).isEqualTo(6);
@@ -4878,6 +4917,25 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		tc8 = (TestClass8) o;
 		assertThat(tc8.i).isEqualTo(42);
 
+		// varargs
+		expression = parser.parseExpression("new " + testclass8 + "(#root)");
+		Object[] objectArray = { "a", "b", "c" };
+		assertThat(expression.getValue(objectArray).getClass().getName()).isEqualTo(testclass8);
+		assertCanCompile(expression);
+		o = expression.getValue(objectArray);
+		assertThat(o.getClass().getName()).isEqualTo(testclass8);
+		tc8 = (TestClass8) o;
+		assertThat(tc8.args).containsExactly("a", "b", "c");
+
+		// varargs with argument component type that is a subtype of the varargs component type.
+		expression = parser.parseExpression("new " + testclass8 + "(#root)");
+		assertThat(expression.getValue(objectArray).getClass().getName()).isEqualTo(testclass8);
+		assertCanCompile(expression);
+		o = expression.getValue(new String[] { "a", "b", "c" });
+		assertThat(o.getClass().getName()).isEqualTo(testclass8);
+		tc8 = (TestClass8) o;
+		assertThat(tc8.args).containsExactly("a", "b", "c");
+
 		// private class, can't compile it
 		String testclass9 = "org.springframework.expression.spel.SpelCompilationCoverageTests$TestClass9";
 		expression = parser.parseExpression("new " + testclass9 + "(42)");
@@ -4984,6 +5042,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(tc.s).isEqualTo("aaabbbccc");
 		tc.reset();
 
+		// varargs object
 		expression = parser.parseExpression("sixteen('aaa','bbb','ccc')");
 		assertCannotCompile(expression);
 		expression.getValue(tc);
@@ -4994,27 +5053,38 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(tc.s).isEqualTo("aaabbbccc");
 		tc.reset();
 
+		// string array from property in varargs object
 		expression = parser.parseExpression("sixteen(seventeen)");
 		assertCannotCompile(expression);
 		expression.getValue(tc);
 		assertThat(tc.s).isEqualTo("aaabbbccc");
 		assertCanCompile(expression);
 		tc.reset();
-		// see TODO below
-		// expression.getValue(tc);
-		// assertThat(tc.s).isEqualTo("aaabbbccc");
-		// tc.reset();
+		expression.getValue(tc);
+		assertThat(tc.s).isEqualTo("aaabbbccc");
+		tc.reset();
 
-		// TODO Determine why the String[] is passed as the first element of the Object... varargs array instead of the entire varargs array.
-		// expression = parser.parseExpression("sixteen(stringArray)");
-		// assertCannotCompile(expression);
-		// expression.getValue(tc);
-		// assertThat(tc.s).isEqualTo("aaabbbccc");
-		// assertCanCompile(expression);
-		// tc.reset();
-		// expression.getValue(tc);
-		// assertThat(tc.s).isEqualTo("aaabbbccc");
-		// tc.reset();
+		// string array from variable in varargs object
+		expression = parser.parseExpression("sixteen(stringArray)");
+		assertCannotCompile(expression);
+		expression.getValue(tc);
+		assertThat(tc.s).isEqualTo("aaabbbccc");
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertThat(tc.s).isEqualTo("aaabbbccc");
+		tc.reset();
+
+		// string array in varargs object with other parameter
+		expression = parser.parseExpression("eighteen('AAA', stringArray)");
+		assertCannotCompile(expression);
+		expression.getValue(tc);
+		assertThat(tc.s).isEqualTo("AAA::aaabbbccc");
+		assertCanCompile(expression);
+		tc.reset();
+		expression.getValue(tc);
+		assertThat(tc.s).isEqualTo("AAA::aaabbbccc");
+		tc.reset();
 
 		// varargs int
 		expression = parser.parseExpression("twelve(1,2,3)");
@@ -6863,6 +6933,18 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public String[] seventeen() {
 			return new String[] { "aaa", "bbb", "ccc" };
 		}
+
+		public void eighteen(String a, Object... vargs) {
+			if (vargs == null) {
+				s = a + "::";
+			}
+			else {
+				s = a+"::";
+				for (Object varg: vargs) {
+					s += varg;
+				}
+			}
+		}
 	}
 
 
@@ -6911,6 +6993,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public String s;
 		public double d;
 		public boolean z;
+		public Object[] args;
 
 		public TestClass8(int i, String s, double d, boolean z) {
 			this.i = i;
@@ -6924,6 +7007,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		public TestClass8(Integer i) {
 			this.i = i;
+		}
+
+		public TestClass8(Object... args) {
+			this.args = args;
 		}
 
 		@SuppressWarnings("unused")
