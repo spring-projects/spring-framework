@@ -246,7 +246,7 @@ class MergedAnnotationsRepeatableAnnotationTests {
 		Class<?> clazz = StandardRepeatablesWithContainerWithMultipleAttributesTestCase.class;
 
 		// NO RepeatableContainers
-		MergedAnnotations mergedAnnotations = MergedAnnotations.from(clazz, TYPE_HIERARCHY, RepeatableContainers.none());
+		MergedAnnotations mergedAnnotations = MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none());
 		ContainerWithMultipleAttributes container = mergedAnnotations
 				.get(ContainerWithMultipleAttributes.class)
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
@@ -263,7 +263,7 @@ class MergedAnnotationsRepeatableAnnotationTests {
 				.containsExactly("C");
 
 		// Standard RepeatableContainers
-		mergedAnnotations = MergedAnnotations.from(clazz, TYPE_HIERARCHY, RepeatableContainers.standardRepeatables());
+		mergedAnnotations = MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.standardRepeatables());
 		container = mergedAnnotations
 				.get(ContainerWithMultipleAttributes.class)
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
