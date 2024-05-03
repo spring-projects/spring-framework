@@ -440,13 +440,15 @@ public abstract class ReflectionHelper {
 	}
 
 	/**
-	 * Package up the arguments so that they correctly match what is expected in requiredParameterTypes.
-	 * <p>For example, if requiredParameterTypes is {@code (int, String[])} because the second parameter
-	 * was declared {@code String...}, then if arguments is {@code [1,"a","b"]} then it must be
-	 * repackaged as {@code [1,new String[]{"a","b"}]} in order to match the expected types.
+	 * Package up the supplied {@code args} so that they correctly match what is
+	 * expected in {@code requiredParameterTypes}.
+	 * <p>For example, if {@code requiredParameterTypes} is {@code (int, String[])}
+	 * because the second parameter was declared as {@code String...}, then if
+	 * {@code args} is {@code [1, "a", "b"]} it must be repackaged as
+	 * {@code [1, new String[] {"a", "b"}]} in order to match the expected types.
 	 * @param requiredParameterTypes the types of the parameters for the invocation
-	 * @param args the arguments to be setup ready for the invocation
-	 * @return a repackaged array of arguments where any varargs setup has been done
+	 * @param args the arguments to be set up for the invocation
+	 * @return a repackaged array of arguments where any varargs setup has performed
 	 */
 	public static Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args) {
 		// Check if array already built for final argument
