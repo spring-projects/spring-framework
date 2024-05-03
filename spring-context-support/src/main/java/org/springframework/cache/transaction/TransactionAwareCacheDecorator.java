@@ -23,7 +23,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -234,13 +234,13 @@ public class TransactionAwareCacheDecorator implements Cache {
 	 * Keeps track of the state changes which happened in the current transaction.
 	 */
 	private static class TransactionState {
-		private final Map<Object, ValueWrapper> putValues = new HashMap<>();
+		private final Map<Object, ValueWrapper> modifications = new LinkedHashMap<>();
 
 		boolean clearCalled = false;
 
 		@Nullable
 		ValueWrapper get(Object key) {
-			var result = putValues.get(key);
+			var result = modifications.get(key);
 			if (result == null && clearCalled) {
 				result = new SimpleValueWrapper(EVICTED);
 			}
@@ -250,31 +250,31 @@ public class TransactionAwareCacheDecorator implements Cache {
 
 		void clear() {
 			clearCalled = true;
-			putValues.clear();
+			modifications.clear();
 		}
 
 		void reset() {
 			clearCalled = false;
-			putValues.clear();
+			modifications.clear();
 		}
 
 		void revert(Object key) {
-			putValues.remove(key);
+			modifications.remove(key);
 		}
 
 		void evict(Object key) {
-			putValues.put(key, new SimpleValueWrapper(EVICTED));
+			modifications.put(key, new SimpleValueWrapper(EVICTED));
 		}
 
 		void put(Object key, @Nullable Object value) {
-			putValues.put(key, new SimpleValueWrapper(value));
+			modifications.put(key, new SimpleValueWrapper(value));
 		}
 
 		void commitTo(Cache cache) {
 			if (clearCalled) {
 				cache.clear();
 			}
-			putValues.forEach((key, valueWrapper) -> {
+			modifications.forEach((key, valueWrapper) -> {
 				final var value = valueWrapper.get();
 				if (value == EVICTED) {
 					cache.evict(key);
