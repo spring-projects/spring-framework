@@ -175,7 +175,7 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 	 * Atom).
 	 */
 	public RouterFunctionMockMvcBuilder setSingleView(View view) {
-		this.viewResolvers = Collections.<ViewResolver>singletonList(new StaticViewResolver(view));
+		this.viewResolvers = Collections.singletonList(new StaticViewResolver(view));
 		return this;
 	}
 
@@ -226,7 +226,7 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 		ContentNegotiationManager mvcContentNegotiationManager = config.mvcContentNegotiationManager();
 		wac.addBean("mvcContentNegotiationManager", mvcContentNegotiationManager);
 
-		RouterFunctionMapping hm = config.routerFunctionMapping(mvcConversionService, resourceUrlProvider);
+		RouterFunctionMapping hm = config.getHandlerMapping(mvcConversionService, resourceUrlProvider);
 		if (sc != null) {
 			hm.setServletContext(sc);
 		}
