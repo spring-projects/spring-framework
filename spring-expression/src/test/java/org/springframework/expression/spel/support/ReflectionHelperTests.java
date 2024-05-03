@@ -40,6 +40,8 @@ import org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMat
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.array;
 import static org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind.CLOSE;
 import static org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind.EXACT;
 import static org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind.REQUIRES_CONVERSION;
@@ -251,15 +253,72 @@ class ReflectionHelperTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void setupArgumentsForVarargsInvocation() {
-		Object[] newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
-				new Class<?>[] {String[].class}, "a", "b", "c");
+	void setupArgumentsForVarargsInvocationPreconditions() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> ReflectionHelper.setupArgumentsForVarargsInvocation(new Class[] {}, "a"))
+				.withMessage("Required parameter types array must not be empty");
 
-		assertThat(newArray).hasSize(1);
-		Object firstParam = newArray[0];
-		assertThat(firstParam.getClass().componentType()).isEqualTo(String.class);
-		Object[] firstParamArray = (Object[]) firstParam;
-		assertThat(firstParamArray).containsExactly("a", "b", "c");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> ReflectionHelper.setupArgumentsForVarargsInvocation(
+						new Class<?>[] { Integer.class, Integer.class }, 123))
+				.withMessage("The last required parameter type must be an array to support varargs invocation");
+	}
+
+	@Test
+	void setupArgumentsForVarargsInvocation() {
+		Object[] newArray;
+
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class<?>[] { String[].class }, "a", "b", "c");
+		assertThat(newArray)
+				.singleElement()
+				.asInstanceOf(array(String[].class))
+				.containsExactly("a", "b", "c");
+
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class<?>[] { Object[].class }, "a", "b", "c");
+		assertThat(newArray)
+				.singleElement()
+				.asInstanceOf(array(Object[].class))
+				.containsExactly("a", "b", "c");
+
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
+				new Class<?>[] { Integer.class, Integer.class, String[].class }, 123, 456, "a", "b", "c");
+		assertThat(newArray).satisfiesExactly(
+				one -> assertThat(one).isEqualTo(123),
+				two -> assertThat(two).isEqualTo(456),
+				three -> assertThat(three).asInstanceOf(array(String[].class)).containsExactly("a", "b", "c"));
+
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class<?>[] { String[].class });
+		assertThat(newArray)
+				.singleElement()
+				.asInstanceOf(array(String[].class))
+				.isEmpty();
+
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
+				new Class<?>[] { String[].class }, new Object[] { new String[] { "a", "b", "c" } });
+		assertThat(newArray)
+				.singleElement()
+				.asInstanceOf(array(String[].class))
+				.containsExactly("a", "b", "c");
+
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(
+				new Class<?>[] { Object[].class }, new Object[] { new String[] { "a", "b", "c" } });
+		assertThat(newArray)
+				.singleElement()
+				.asInstanceOf(array(Object[].class))
+				.containsExactly("a", "b", "c");
+
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class<?>[] { String[].class }, "a");
+		assertThat(newArray)
+				.singleElement()
+				.asInstanceOf(array(String[].class))
+				.containsExactly("a");
+
+		newArray = ReflectionHelper.setupArgumentsForVarargsInvocation(new Class<?>[] { String[].class }, new Object[] { null });
+		assertThat(newArray)
+				.singleElement()
+				.asInstanceOf(array(String[].class))
+				.singleElement()
+				.isNull();
 	}
 
 	@Test
