@@ -92,7 +92,6 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 	@Nullable
 	private PathPatternParser patternParser;
 
-
 	private Supplier<RouterFunctionMapping> handlerMappingFactory = RouterFunctionMapping::new;
 
 
@@ -151,9 +150,8 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 	}
 
 	/**
-	 * Configure factory to create a custom {@link RequestMappingHandlerMapping}.
+	 * Configure the factory to create a custom {@link RequestMappingHandlerMapping}.
 	 * @param factory the factory
-	 * @since 5.0
 	 */
 	public RouterFunctionMockMvcBuilder setCustomHandlerMapping(Supplier<RouterFunctionMapping> factory) {
 		this.handlerMappingFactory = factory;
@@ -162,7 +160,7 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 
 	/**
 	 * Set up view resolution with the given {@link ViewResolver ViewResolvers}.
-	 * If not set, an {@link InternalResourceViewResolver} is used by default.
+	 * <p>If not set, an {@link InternalResourceViewResolver} is used by default.
 	 */
 	public RouterFunctionMockMvcBuilder setViewResolvers(ViewResolver...resolvers) {
 		this.viewResolvers = Arrays.asList(resolvers);
@@ -170,9 +168,11 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 	}
 
 	/**
-	 * Sets up a single {@link ViewResolver} that always returns the provided
-	 * view instance. This is a convenient shortcut if you need to use one
-	 * View instance only -- e.g. rendering generated content (JSON, XML, Atom).
+	 * Set up a single {@link ViewResolver} that always returns the provided
+	 * view instance.
+	 * <p>This is a convenient shortcut if you need to use one {@link View}
+	 * instance only &mdash; for example, rendering generated content (JSON, XML,
+	 * Atom).
 	 */
 	public RouterFunctionMockMvcBuilder setSingleView(View view) {
 		this.viewResolvers = Collections.<ViewResolver>singletonList(new StaticViewResolver(view));
@@ -180,9 +180,10 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 	}
 
 	/**
-	 * Specify the timeout value for async execution. In Spring MVC Test, this
-	 * value is used to determine how to long to wait for async execution to
-	 * complete so that a test can verify the results synchronously.
+	 * Specify the timeout value for async execution.
+	 * <p>In Spring MVC Test, this value is used to determine how long to wait
+	 * for async execution to complete so that a test can verify the results
+	 * synchronously.
 	 * @param timeout the timeout value in milliseconds
 	 */
 	public RouterFunctionMockMvcBuilder setAsyncRequestTimeout(long timeout) {
@@ -195,7 +196,6 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 	 * {@link org.springframework.web.util.pattern.PathPattern PathPatterns}
 	 * instead of String pattern matching with a {@link org.springframework.util.PathMatcher}.
 	 * @param parser the parser to use
-	 * @since 5.3
 	 */
 	public RouterFunctionMockMvcBuilder setPatternParser(@Nullable PathPatternParser parser) {
 		this.patternParser = parser;
