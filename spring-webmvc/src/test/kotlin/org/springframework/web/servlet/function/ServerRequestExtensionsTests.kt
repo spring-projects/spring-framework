@@ -20,6 +20,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
@@ -89,6 +90,27 @@ class ServerRequestExtensionsTests {
 	fun `paramOrNull with null`() {
 		every { request.param("foo") } returns Optional.empty()
 		assertThat(request.paramOrNull("foo")).isNull()
+		verify { request.param("foo") }
+	}
+
+	@Test
+	fun `paramNotNull with value`() {
+		every { request.param("foo") } returns Optional.of("bar")
+		assertThat(request.paramNotNull("foo")).isEqualTo("bar")
+		verify { request.param("foo") }
+	}
+
+	@Test
+	fun `paramNotNull with empty query parameters`() {
+		every { request.param("foo") } returns Optional.of("")
+		assertThat(request.paramNotNull("foo")).isEqualTo("")
+		verify { request.param("foo") }
+	}
+
+	@Test
+	fun `paramNotNull with absent query parameters`() {
+		every { request.param("foo") } returns Optional.empty()
+		assertThatThrownBy { request.paramNotNull("foo") }.isInstanceOf(NullPointerException::class.java)
 		verify { request.param("foo") }
 	}
 

@@ -56,6 +56,14 @@ fun ServerRequest.attributeOrNull(name: String): Any? = attribute(name).orElse(n
 fun ServerRequest.paramOrNull(name: String): String? = param(name).orElse(null)
 
 /**
+ * Non-nullable variant of [ServerRequest.param]
+ * Please use only to retrieve query parameters that match the key corresponding to [RequestPredicates.param].
+ *
+ * @author SangYun Jeong
+*/
+fun ServerRequest.paramNotNull(name: String): String = param(name).get()
+
+/**
  * Nullable variant of [ServerRequest.param]
  *
  * @author Sebastien Deleuze
