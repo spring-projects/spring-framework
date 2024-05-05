@@ -21,6 +21,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
@@ -191,6 +192,27 @@ class ServerRequestExtensionsTests {
 	fun `queryParamOrNull with null`() {
 		every { request.queryParams() } returns CollectionUtils.toMultiValueMap(mapOf("foo" to listOf("bar")))
 		assertThat(request.queryParamOrNull("baz")).isNull()
+		verify { request.queryParams() }
+	}
+
+	@Test
+	fun `queryParamNotNull with value`() {
+		every { request.queryParams() } returns CollectionUtils.toMultiValueMap(mapOf("foo" to listOf("bar")))
+		assertThat(request.queryParamNotNull("foo")).isEqualTo("bar")
+		verify { request.queryParams() }
+	}
+
+	@Test
+	fun `queryParamNotNull with empty query parameters`() {
+		every { request.queryParams() } returns CollectionUtils.toMultiValueMap(mapOf("foo" to listOf("")))
+		assertThat(request.queryParamNotNull("foo")).isEqualTo("")
+		verify { request.queryParams() }
+	}
+
+	@Test
+	fun `queryParamNotNull with absent query parameters`() {
+		every { request.queryParams() } returns CollectionUtils.toMultiValueMap(emptyMap())
+		assertThatThrownBy {  request.queryParamNotNull("foo") }.isInstanceOf(NullPointerException::class.java)
 		verify { request.queryParams() }
 	}
 

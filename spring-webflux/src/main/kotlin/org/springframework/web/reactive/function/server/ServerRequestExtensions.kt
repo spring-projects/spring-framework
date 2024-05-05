@@ -176,6 +176,15 @@ fun ServerRequest.queryParamOrNull(name: String): String? {
 }
 
 /**
+ * Non-nullable variant of [ServerRequest.queryParam].
+ * Please use only to retrieve query parameters that match the key corresponding to [RequestPredicates.queryParam].
+ *
+ * @author SangYun Jeong
+ */
+fun ServerRequest.queryParamNotNull(name: String): String =
+	queryParams()[name]!!.first()
+
+/**
  * Nullable variant of [ServerRequest.Headers.contentLength]
  *
  * @author Sebastien Deleuze
