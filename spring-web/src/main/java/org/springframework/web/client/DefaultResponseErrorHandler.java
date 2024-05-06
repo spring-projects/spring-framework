@@ -203,7 +203,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	/**
 	 * Handle the error based on the resolved status code.
-	 *
 	 * <p>The default implementation delegates to
 	 * {@link HttpClientErrorException#create} for errors in the 4xx range, to
 	 * {@link HttpServerErrorException#create} for errors in the 5xx range,
@@ -212,7 +211,9 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * @see HttpClientErrorException#create
 	 * @see HttpServerErrorException#create
 	 */
-	protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode, @Nullable URI url, @Nullable HttpMethod method) throws IOException {
+	protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode,
+			@Nullable URI url, @Nullable HttpMethod method) throws IOException {
+
 		String statusText = response.getStatusText();
 		HttpHeaders headers = response.getHeaders();
 		byte[] body = getResponseBody(response);
