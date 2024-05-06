@@ -26,7 +26,7 @@ class JdbcCorporateEventDaoConfiguration {
 
 	// tag::snippet[]
 	@Bean
-	fun corporateEventDao(dataSource: DataSource) = JdbcCorporateEventDao()
+	fun corporateEventDao(dataSource: DataSource) = JdbcCorporateEventDao(dataSource)
 
 	@Bean(destroyMethod = "close")
 	fun dataSource() = BasicDataSource().apply {

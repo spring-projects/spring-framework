@@ -9,8 +9,8 @@
 			https://www.springframework.org/schema/context/spring-context.xsd">
 
 	<!-- tag::snippet[] -->
-	<bean id="corporateEventDao" class="org.springframework.docs.dataaccess.jdbc.jdbcjdbctemplateidioms.JdbcCorporateEventDao">
-		<property name="dataSource" ref="dataSource"/>
+	<bean id="corporateEventDao" class="org.example.jdbc.JdbcCorporateEventDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 
 	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">

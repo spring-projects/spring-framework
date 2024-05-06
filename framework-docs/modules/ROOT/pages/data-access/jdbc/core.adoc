@@ -352,40 +352,9 @@ A common practice when using the `JdbcTemplate` class (and the associated
 xref:data-access/jdbc/core.adoc#jdbc-NamedParameterJdbcTemplate[`NamedParameterJdbcTemplate`] class) is to
 configure a `DataSource` in your Spring configuration file and then dependency-inject
 that shared `DataSource` bean into your DAO classes. The `JdbcTemplate` is created in
-the setter for the `DataSource`. This leads to DAOs that resemble the following:
+the setter for the `DataSource` or in the constructor. This leads to DAOs that resemble the following:
 
---
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	public class JdbcCorporateEventDao implements CorporateEventDao {
-
-		private JdbcTemplate jdbcTemplate;
-
-		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
-		}
-
-		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	class JdbcCorporateEventDao(dataSource: DataSource) : CorporateEventDao {
-
-		private val jdbcTemplate = JdbcTemplate(dataSource)
-
-		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
-	}
-----
-======
---
+include-code::./JdbcCorporateEventDao[tag=snippet,indent=0]
 
 The following example shows the corresponding configuration:
 

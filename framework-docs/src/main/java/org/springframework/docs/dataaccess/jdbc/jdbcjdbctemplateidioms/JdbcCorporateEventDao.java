@@ -20,13 +20,15 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
+// tag::snippet[]
 public class JdbcCorporateEventDao implements CorporateEventDao {
 
-	private JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 
-	public void setDataSource(DataSource dataSource) {
+	public JdbcCorporateEventDao(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 }
+// end::snippet[]

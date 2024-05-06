@@ -13,7 +13,7 @@ public class JdbcCorporateEventDaoConfiguration {
 	// tag::snippet[]
 	@Bean
 	JdbcCorporateEventDao corporateEventDao(DataSource dataSource) {
-		return new JdbcCorporateEventDao();
+		return new JdbcCorporateEventDao(dataSource);
 	}
 
 	@Bean(destroyMethod = "close")

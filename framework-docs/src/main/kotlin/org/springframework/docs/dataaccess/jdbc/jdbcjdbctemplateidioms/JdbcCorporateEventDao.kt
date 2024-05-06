@@ -13,26 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.docs.dataaccess.jdbc.jdbcjdbctemplateidioms
 
-import org.apache.commons.dbcp2.BasicDataSource
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.Configuration
+import org.springframework.jdbc.core.JdbcTemplate
+import javax.sql.DataSource
 
 // tag::snippet[]
-@Configuration
-@ComponentScan("org.example.jdbc")
-class JdbcCorporateEventRepositoryConfiguration {
+class JdbcCorporateEventDao(dataSource: DataSource): CorporateEventDao {
 
-	@Bean(destroyMethod = "close")
-	fun dataSource() = BasicDataSource().apply {
-		driverClassName = "org.hsqldb.jdbcDriver"
-		url = "jdbc:hsqldb:hsql://localhost:"
-		username = "sa"
-		password = ""
-	}
+	private val jdbcTemplate = JdbcTemplate(dataSource)
 
+	// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 }
 // end::snippet[]
