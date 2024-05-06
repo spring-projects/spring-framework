@@ -70,7 +70,7 @@ public class HttpHeadersAssert extends AbstractMapAssert<HttpHeadersAssert, Http
 	 * @param name the name of an HTTP header that should not be present
 	 * @see #doesNotContainKey
 	 */
-	public HttpHeadersAssert doesNotContainsHeader(String name) {
+	public HttpHeadersAssert doesNotContainHeader(String name) {
 		return doesNotContainKey(name);
 	}
 
