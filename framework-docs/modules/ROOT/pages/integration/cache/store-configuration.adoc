@@ -13,18 +13,7 @@ The JDK-based `Cache` implementation resides under
 `org.springframework.cache.concurrent` package. It lets you use `ConcurrentHashMap`
 as a backing `Cache` store. The following example shows how to configure two caches:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<!-- simple cache manager -->
-	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
-		<property name="caches">
-			<set>
-				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
-				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="books"/>
-			</set>
-		</property>
-	</bean>
-----
+include-code::./CacheConfiguration[tag=snippet,indent=0]
 
 The preceding snippet uses the `SimpleCacheManager` to create a `CacheManager` for the
 two nested `ConcurrentMapCache` instances named `default` and `books`. Note that the
@@ -52,26 +41,12 @@ of Caffeine.
 
 The following example configures a `CacheManager` that creates the cache on demand:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="cacheManager"
-			class="org.springframework.cache.caffeine.CaffeineCacheManager"/>
-----
+include-code::./CacheConfiguration[tag=snippet,indent=0]
 
 You can also provide the caches to use explicitly. In that case, only those
 are made available by the manager. The following example shows how to do so:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
-		<property name="cacheNames">
-			<set>
-				<value>default</value>
-				<value>books</value>
-			</set>
-		</property>
-	</bean>
-----
+include-code::./CustomCacheConfiguration[tag=snippet,indent=0]
 
 The Caffeine `CacheManager` also supports custom `Caffeine` and `CacheLoader`.
 See the https://github.com/ben-manes/caffeine/wiki[Caffeine documentation]
@@ -97,15 +72,7 @@ implementation is located in the `org.springframework.cache.jcache` package.
 Again, to use it, you need to declare the appropriate `CacheManager`.
 The following example shows how to do so:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="cacheManager"
-			class="org.springframework.cache.jcache.JCacheCacheManager"
-			p:cache-manager-ref="jCacheManager"/>
-
-	<!-- JSR-107 cache manager setup  -->
-	<bean id="jCacheManager" .../>
-----
+include-code::./CacheConfiguration[tag=snippet,indent=0]
 
 
 [[cache-store-configuration-noop]]
@@ -119,18 +86,7 @@ cache declarations (which can prove tedious), you can wire in a simple dummy cac
 performs no caching -- that is, it forces the cached methods to be invoked every time.
 The following example shows how to do so:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="cacheManager" class="org.springframework.cache.support.CompositeCacheManager">
-		<property name="cacheManagers">
-			<list>
-				<ref bean="jdkCache"/>
-				<ref bean="gemfireCache"/>
-			</list>
-		</property>
-		<property name="fallbackToNoOpCache" value="true"/>
-	</bean>
-----
+include-code::./CacheConfiguration[tag=snippet,indent=0]
 
 The `CompositeCacheManager` in the preceding chains multiple `CacheManager` instances and,
 through the `fallbackToNoOpCache` flag, adds a no-op cache for all the definitions not

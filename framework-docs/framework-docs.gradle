@@ -79,6 +79,9 @@ dependencies {
 	api("org.aspectj:aspectjweaver")
 	api("io.projectreactor.netty:reactor-netty-http")
 	api("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
+	api("javax.cache:cache-api")
+	api("jakarta.resource:jakarta.resource-api")
+	api("org.apache.activemq:activemq-ra:6.1.2")
 
 	implementation(project(":spring-core-test"))
 	implementation("org.assertj:assertj-core")

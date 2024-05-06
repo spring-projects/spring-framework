@@ -1,0 +1,24 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jms="http://www.springframework.org/schema/jms"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   https://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms.xsd">
+
+	<!-- tag::snippet[] -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="mail.mycompany.example"/>
+	</bean>
+
+	<!-- this is a template message that we can pre-load with default state -->
+	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
+		<property name="from" value="customerservice@mycompany.example"/>
+		<property name="subject" value="Your order"/>
+	</bean>
+
+	<bean id="orderManager" class="com.mycompany.businessapp.support.SimpleOrderManager">
+		<property name="mailSender" ref="mailSender"/>
+		<property name="templateMessage" ref="templateMessage"/>
+	</bean>
+	<!-- end::snippet[] -->
+
+</beans>

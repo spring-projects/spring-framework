@@ -79,38 +79,7 @@ Spring's `TaskExecutor` implementations are commonly used with dependency inject
 In the following example, we define a bean that uses the `ThreadPoolTaskExecutor`
 to asynchronously print out a set of messages:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	import org.springframework.core.task.TaskExecutor;
-
-	public class TaskExecutorExample {
-
-		private class MessagePrinterTask implements Runnable {
-
-			private String message;
-
-			public MessagePrinterTask(String message) {
-				this.message = message;
-			}
-
-			public void run() {
-				System.out.println(message);
-			}
-		}
-
-		private TaskExecutor taskExecutor;
-
-		public TaskExecutorExample(TaskExecutor taskExecutor) {
-			this.taskExecutor = taskExecutor;
-		}
-
-		public void printMessages() {
-			for(int i = 0; i < 25; i++) {
-				taskExecutor.execute(new MessagePrinterTask("Message" + i));
-			}
-		}
-	}
-----
+include-code::./TaskExecutorExample[tag=snippet,indent=0]
 
 As you can see, rather than retrieving a thread from the pool and executing it yourself,
 you add your `Runnable` to the queue. Then the `TaskExecutor` uses its internal rules to
@@ -118,19 +87,7 @@ decide when the task gets run.
 
 To configure the rules that the `TaskExecutor` uses, we expose simple bean properties:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
-		<property name="corePoolSize" value="5"/>
-		<property name="maxPoolSize" value="10"/>
-		<property name="queueCapacity" value="25"/>
-	</bean>
-
-	<bean id="taskExecutorExample" class="TaskExecutorExample">
-		<constructor-arg ref="taskExecutor"/>
-	</bean>
-----
-
+include-code::./TaskExecutorConfiguration[tag=snippet,indent=0]
 
 
 [[scheduling-task-scheduler]]
@@ -269,16 +226,10 @@ execution.
 === Enable Scheduling Annotations
 
 To enable support for `@Scheduled` and `@Async` annotations, you can add `@EnableScheduling`
-and `@EnableAsync` to one of your `@Configuration` classes, as the following example shows:
+and `@EnableAsync` to one of your `@Configuration` classes, or `<task:annotation-driven>` element,
+as the following example shows:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableAsync
-	@EnableScheduling
-	public class AppConfig {
-	}
-----
+include-code::./SchedulingConfiguration[tag=snippet,indent=0]
 
 You can pick and choose the relevant annotations for your application. For example,
 if you need only support for `@Scheduled`, you can omit `@EnableAsync`. For more
@@ -287,16 +238,6 @@ interface, the `AsyncConfigurer` interface, or both. See the
 {spring-framework-api}/scheduling/annotation/SchedulingConfigurer.html[`SchedulingConfigurer`]
 and {spring-framework-api}/scheduling/annotation/AsyncConfigurer.html[`AsyncConfigurer`]
 javadoc for full details.
-
-If you prefer XML configuration, you can use the `<task:annotation-driven>` element,
-as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
-	<task:executor id="myExecutor" pool-size="5"/>
-	<task:scheduler id="myScheduler" pool-size="10"/>
-----
 
 Note that, with the preceding XML, an executor reference is provided for handling those
 tasks that correspond to methods with the `@Async` annotation, and the scheduler
