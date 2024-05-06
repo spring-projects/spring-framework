@@ -95,8 +95,7 @@ public abstract class AbstractHttpServletRequestAssert<SELF extends AbstractHttp
 	 * Verify whether asynchronous processing has started, usually as a result
 	 * of a controller method returning a {@link Callable} or {@link DeferredResult}.
 	 * <p>The test will await the completion of a {@code Callable} so that
-	 * {@link MvcResultAssert#asyncResult()} can be used to assert the resulting
-	 * value.
+	 * the asynchronous result is available and can be further asserted.
 	 * <p>Neither a {@code Callable} nor a {@code DeferredResult} will complete
 	 * processing all the way since a {@link MockHttpServletRequest} does not
 	 * perform asynchronous dispatches.
