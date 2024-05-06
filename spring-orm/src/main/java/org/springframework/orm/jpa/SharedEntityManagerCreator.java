@@ -395,6 +395,9 @@ public abstract class SharedEntityManagerCreator {
 					else if (targetClass.isInstance(proxy)) {
 						return proxy;
 					}
+					else {
+						return this.target.unwrap(targetClass);
+					}
 				}
 				case "getOutputParameterValue" -> {
 					if (this.entityManager == null) {

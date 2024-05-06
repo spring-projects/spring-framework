@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class SchedulerFactoryBeanRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static final String SCHEDULER_FACTORY_CLASS_NAME = "org.quartz.impl.StdSchedulerFactory";
 
-	private final ReflectiveRuntimeHintsRegistrar reflectiveRegistrar = new ReflectiveRuntimeHintsRegistrar();
+	private static final ReflectiveRuntimeHintsRegistrar registrar = new ReflectiveRuntimeHintsRegistrar();
 
 
 	@Override
@@ -49,7 +49,7 @@ class SchedulerFactoryBeanRuntimeHints implements RuntimeHintsRegistrar {
 				.registerType(TypeReference.of(SCHEDULER_FACTORY_CLASS_NAME), this::typeHint)
 				.registerTypes(TypeReference.listOf(ResourceLoaderClassLoadHelper.class,
 						LocalTaskExecutorThreadPool.class, LocalDataSourceJobStore.class), this::typeHint);
-		this.reflectiveRegistrar.registerRuntimeHints(hints, LocalTaskExecutorThreadPool.class);
+		registrar.registerRuntimeHints(hints, LocalTaskExecutorThreadPool.class);
 	}
 
 	private void typeHint(Builder typeHint) {
