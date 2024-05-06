@@ -16,8 +16,6 @@
 
 package org.springframework.test.json;
 
-import java.nio.charset.Charset;
-
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 
@@ -33,19 +31,11 @@ public class JsonContentAssert extends AbstractJsonContentAssert<JsonContentAsse
 	 * Create an assert for the given JSON document.
 	 * <p>Path can be converted to a value object using the given
 	 * {@linkplain GenericHttpMessageConverter json message converter}.
-	 * <p>Resources to match can be loaded relative to the given
-	 * {@code resourceLoadClass}. If not specified, resources must always be
-	 * absolute. A specific {@link Charset} can be provided if {@code UTF-8} is
-	 * not suitable.
 	 * @param json the JSON document to assert
 	 * @param jsonMessageConverter the converter to use
-	 * @param resourceLoadClass the class used to load resources
-	 * @param charset the charset of the JSON resources
 	 */
-	public JsonContentAssert(@Nullable String json, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter,
-			@Nullable Class<?> resourceLoadClass, @Nullable Charset charset) {
-
-		super(json, jsonMessageConverter, resourceLoadClass, charset, JsonContentAssert.class);
+	public JsonContentAssert(@Nullable String json, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
+		super(json, jsonMessageConverter, JsonContentAssert.class);
 	}
 
 }

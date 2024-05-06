@@ -250,19 +250,19 @@ public class AssertableMockMvcIntegrationTests {
 
 		@Test
 		void jsonPathContent() {
-			assertThat(perform(get("/message"))).body().jsonPath()
+			assertThat(perform(get("/message"))).bodyJson()
 					.extractingPath("$.message").asString().isEqualTo("hello");
 		}
 
 		@Test
 		void jsonContentCanLoadResourceFromClasspath() {
-			assertThat(perform(get("/message"))).body().json().isLenientlyEqualTo(
+			assertThat(perform(get("/message"))).bodyJson().isLenientlyEqualTo(
 					new ClassPathResource("message.json", AssertableMockMvcIntegrationTests.class));
 		}
 
 		@Test
 		void jsonContentUsingResourceLoaderClass() {
-			assertThat(perform(get("/message"))).body().json(AssertableMockMvcIntegrationTests.class)
+			assertThat(perform(get("/message"))).bodyJson().withResourceLoadClass(AssertableMockMvcIntegrationTests.class)
 					.isLenientlyEqualTo("message.json");
 		}
 

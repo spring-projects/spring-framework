@@ -19,7 +19,6 @@ package org.springframework.test.json;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -146,7 +145,6 @@ class AbstractJsonContentAssertTests {
 			assertThat(forJson(NULLS)).doesNotHavePath("$.missing");
 		}
 
-
 		@Test
 		void doesNotHavePathForPresent() {
 			String expression = "$.valuename";
@@ -154,7 +152,6 @@ class AbstractJsonContentAssertTests {
 					.isThrownBy(() -> assertThat(forJson(NULLS)).doesNotHavePath(expression))
 					.satisfies(hasFailedToNotMatchPath(expression));
 		}
-
 	}
 
 	@Nested
@@ -330,13 +327,12 @@ class AbstractJsonContentAssertTests {
 		private record Customer(long id, String username) {}
 
 		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json) {
-			return () -> new TestJsonContentAssert(json, null, null, null);
+			return () -> new TestJsonContentAssert(json, null);
 		}
 
 		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json, GenericHttpMessageConverter<Object> jsonHttpMessageConverter) {
-			return () -> new TestJsonContentAssert(json, jsonHttpMessageConverter, null, null);
+			return () -> new TestJsonContentAssert(json, jsonHttpMessageConverter);
 		}
-
 	}
 
 	@Nested
@@ -548,7 +544,6 @@ class AbstractJsonContentAssertTests {
 					.isThrownBy(() -> assertThat(forJson(SOURCE)).isStrictlyEqualTo(expected));
 		}
 
-
 		@Test
 		void isNotEqualToWhenStringIsMatchingShouldFail() {
 			assertThatExceptionOfType(AssertionError.class)
@@ -720,10 +715,19 @@ class AbstractJsonContentAssertTests {
 			assertThat(forJson(SOURCE)).isNotStrictlyEqualTo(expected);
 		}
 
-		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json) {
-			return () -> new TestJsonContentAssert(json, null, getClass(), null);
+		@Test
+		void withResourceLoadClassShouldAllowToLoadRelativeContent() {
+			AbstractJsonContentAssert<?> jsonAssert = assertThat(forJson(NULLS)).withResourceLoadClass(String.class);
+			assertThatIllegalStateException()
+					.isThrownBy(() -> jsonAssert.isLenientlyEqualTo("nulls.json"))
+					.withMessage("Unable to load JSON from class path resource [java/lang/nulls.json]");
+
+			assertThat(forJson(NULLS)).withResourceLoadClass(JsonContent.class).isLenientlyEqualTo("nulls.json");
 		}
 
+		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json) {
+			return () -> new TestJsonContentAssert(json, null).withResourceLoadClass(getClass());
+		}
 	}
 
 
@@ -768,13 +772,13 @@ class AbstractJsonContentAssertTests {
 	}
 
 	private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json) {
-		return () -> new TestJsonContentAssert(json, null, null, null);
+		return () -> new TestJsonContentAssert(json, null);
 	}
 
 	private static class TestJsonContentAssert extends AbstractJsonContentAssert<TestJsonContentAssert> {
 
-		public TestJsonContentAssert(@Nullable String json, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter, @Nullable Class<?> resourceLoadClass, @Nullable Charset charset) {
-			super(json, jsonMessageConverter, resourceLoadClass, charset, TestJsonContentAssert.class);
+		public TestJsonContentAssert(@Nullable String json, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
+			super(json, jsonMessageConverter, TestJsonContentAssert.class);
 		}
 	}
 

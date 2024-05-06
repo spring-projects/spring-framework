@@ -52,7 +52,10 @@ import org.springframework.util.function.ThrowingBiFunction;
  * assertions} on the value.
  *
  * <p>Also support comparing the JSON document against a target, using
- * {@linkplain JSONCompare JSON Assert}.
+ * {@linkplain JSONCompare JSON Assert}. Resources that are loaded from
+ * the classpath can be relative if a {@linkplain #withResourceLoadClass(Class)
+ * class} is provided. By default, {@code UTF-8} is used to load resources
+ * but this can be overridden using {@link #withCharset(Charset)}.
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
@@ -71,28 +74,27 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	@Nullable
 	private final GenericHttpMessageConverter<Object> jsonMessageConverter;
 
-	private final JsonLoader jsonLoader;
+	@Nullable
+	private Class<?> resourceLoadClass;
+
+	@Nullable
+	private Charset charset;
+
+	private JsonLoader jsonLoader;
 
 	/**
 	 * Create an assert for the given JSON document.
 	 * <p>Path can be converted to a value object using the given
 	 * {@linkplain GenericHttpMessageConverter json message converter}.
-	 * <p>Resources to match can be loaded relative to the given
-	 * {@code resourceLoadClass}. If not specified, resources must always be
-	 * absolute. A specific {@link Charset} can be provided if {@code UTF-8} is
-	 * not suitable.
 	 * @param json the JSON document to assert
 	 * @param jsonMessageConverter the converter to use
-	 * @param resourceLoadClass the class used to load resources
-	 * @param charset the charset of the JSON resources
 	 * @param selfType the implementation type of this assert
 	 */
 	protected AbstractJsonContentAssert(@Nullable String json,
-			@Nullable GenericHttpMessageConverter<Object> jsonMessageConverter, @Nullable Class<?> resourceLoadClass,
-			@Nullable Charset charset, Class<?> selfType) {
+			@Nullable GenericHttpMessageConverter<Object> jsonMessageConverter, Class<?> selfType) {
 		super(json, selfType);
 		this.jsonMessageConverter = jsonMessageConverter;
-		this.jsonLoader = new JsonLoader(resourceLoadClass, charset);
+		this.jsonLoader = new JsonLoader(null, null);
 		as("JSON content");
 	}
 
@@ -374,6 +376,31 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 */
 	public SELF isNotStrictlyEqualTo(Resource expected) {
 		return isNotEqualTo(expected, JSONCompareMode.STRICT);
+	}
+
+	/**
+	 * Override the class used to load resources. Resources can be loaded from
+	 * an absolute location or relative to tpe specified class. For instance,
+	 * specifying {@code com.example.MyClass} as the resource class allows you
+	 * to use "my-file.json" to load {@code /com/example/my-file.json}.
+	 * @param resourceLoadClass the class used to load resources or {@code null}
+	 * to only use absolute paths.
+	 */
+	public SELF withResourceLoadClass(@Nullable Class<?> resourceLoadClass) {
+		this.resourceLoadClass = resourceLoadClass;
+		this.jsonLoader = new JsonLoader(resourceLoadClass, this.charset);
+		return this.myself;
+	}
+
+	/**
+	 * Override the {@link Charset} to use to load resources. By default,
+	 * resources are loaded using {@code UTF-8}.
+	 * @param charset the charset to use, or {@code null} to use the default
+	 */
+	public SELF withCharset(@Nullable Charset charset) {
+		this.charset = charset;
+		this.jsonLoader = new JsonLoader(this.resourceLoadClass, charset);
+		return this.myself;
 	}
 
 
