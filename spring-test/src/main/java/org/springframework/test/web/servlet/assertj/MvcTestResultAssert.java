@@ -30,12 +30,10 @@ import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
 
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.http.MediaTypeAssert;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -85,14 +83,6 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	 */
 	public CookieMapAssert cookies() {
 		return new CookieMapAssert(getMvcResult().getResponse().getCookies());
-	}
-
-	/**
-	 * Return a new {@linkplain MediaTypeAssert assertion} object that uses the
-	 * response's {@linkplain MediaType content type} as the object to test.
-	 */
-	public MediaTypeAssert contentType() {
-		return new MediaTypeAssert(getMvcResult().getResponse().getContentType());
 	}
 
 	/**

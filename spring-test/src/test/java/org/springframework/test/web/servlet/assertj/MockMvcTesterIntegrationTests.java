@@ -139,16 +139,6 @@ public class MockMvcTesterIntegrationTests {
 	}
 
 	@Nested
-	class ContentTypeTests {
-
-		@Test
-		void contentType() {
-			assertThat(perform(get("/greet"))).contentType().isCompatibleWith("text/plain");
-		}
-
-	}
-
-	@Nested
 	class StatusTests {
 
 		@Test
@@ -168,8 +158,8 @@ public class MockMvcTesterIntegrationTests {
 
 		@Test
 		void shouldAssertHeader() {
-			assertThat(perform(get("/greet"))).headers()
-					.hasValue("Content-Type", "text/plain;charset=ISO-8859-1");
+			assertThat(perform(get("/greet")))
+					.hasHeader("Content-Type", "text/plain;charset=ISO-8859-1");
 		}
 
 		@Test
