@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -340,6 +340,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		@SuppressWarnings("DataFlowIssue")
 		@Override
+		@Nullable
 		public Object getAttribute(String name) {
 			if (name.equals(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)) {
 				return this.forwardedPrefixExtractor.getErrorRequestUri();
@@ -480,7 +481,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		@Override
 		public void sendRedirect(String location) throws IOException {
-
 			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(location);
 			UriComponents uriComponents = builder.build();
 
