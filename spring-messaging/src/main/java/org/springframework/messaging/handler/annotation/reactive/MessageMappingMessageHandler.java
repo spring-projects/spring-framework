@@ -305,7 +305,6 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 * @param destinations the destinations
 	 * @return new array with the processed destinations or the same array
 	 */
-	@SuppressWarnings("NullAway")
 	protected String[] processDestinations(String[] destinations) {
 		if (this.valueResolver != null) {
 			destinations = Arrays.stream(destinations)

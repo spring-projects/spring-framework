@@ -13,7 +13,7 @@ dependencies {
 	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 	jmh 'org.openjdk.jmh:jmh-generator-bytecode:1.37'
 	jmh 'net.sf.jopt-simple:jopt-simple'
-	errorprone 'com.uber.nullaway:nullaway:0.10.24'
+	errorprone 'com.uber.nullaway:nullaway:0.10.26'
 	errorprone 'com.google.errorprone:error_prone_core:2.9.0'
 }
 

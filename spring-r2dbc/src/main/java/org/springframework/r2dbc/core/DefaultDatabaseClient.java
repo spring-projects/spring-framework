@@ -383,7 +383,6 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			return fetch().rowsUpdated().then();
 		}
 
-		@SuppressWarnings("NullAway")
 		private ResultFunction getResultFunction(Supplier<String> sqlSupplier) {
 			BiFunction<Connection, String, Statement> statementFunction = (connection, sql) -> {
 				if (logger.isDebugEnabled()) {
