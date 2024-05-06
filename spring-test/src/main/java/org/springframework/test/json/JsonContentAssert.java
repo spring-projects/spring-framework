@@ -16,351 +16,36 @@
 
 package org.springframework.test.json;
 
-import java.io.File;
-import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 
-import org.assertj.core.api.AbstractAssert;
-import org.skyscreamer.jsonassert.JSONCompare;
-import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.skyscreamer.jsonassert.JSONCompareResult;
-import org.skyscreamer.jsonassert.comparator.JSONComparator;
-
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.function.ThrowingBiFunction;
 
 /**
- * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied
- * to a {@link CharSequence} representation of a JSON document, mostly to
- * compare the JSON document against a target, using {@linkplain JSONCompare
- * JSON Assert}.
+ * Default {@link AbstractJsonContentAssert} implementation.
  *
- * @author Phillip Webb
- * @author Andy Wilkinson
- * @author Diego Berrueta
- * @author Camille Vienot
  * @author Stephane Nicoll
  * @since 6.2
  */
-public class JsonContentAssert extends AbstractAssert<JsonContentAssert, CharSequence> {
-
-	private final JsonLoader loader;
+public class JsonContentAssert extends AbstractJsonContentAssert<JsonContentAssert> {
 
 	/**
-	 * Create a new {@link JsonContentAssert} instance that will load resources
-	 * relative to the given {@code resourceLoadClass}, using the given
-	 * {@code charset}.
-	 * @param json the actual JSON content
+	 * Create an assert for the given JSON document.
+	 * <p>Path can be converted to a value object using the given
+	 * {@linkplain GenericHttpMessageConverter json message converter}.
+	 * <p>Resources to match can be loaded relative to the given
+	 * {@code resourceLoadClass}. If not specified, resources must always be
+	 * absolute. A specific {@link Charset} can be provided if {@code UTF-8} is
+	 * not suitable.
+	 * @param json the JSON document to assert
+	 * @param jsonMessageConverter the converter to use
 	 * @param resourceLoadClass the class used to load resources
 	 * @param charset the charset of the JSON resources
 	 */
-	public JsonContentAssert(@Nullable CharSequence json, @Nullable Class<?> resourceLoadClass,
-			@Nullable Charset charset) {
+	public JsonContentAssert(@Nullable String json, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter,
+			@Nullable Class<?> resourceLoadClass, @Nullable Charset charset) {
 
-		super(json, JsonContentAssert.class);
-		this.loader = new JsonLoader(resourceLoadClass, charset);
-	}
-
-	/**
-	 * Create a new {@link JsonContentAssert} instance that will load resources
-	 * relative to the given {@code resourceLoadClass}, using {@code UTF-8}.
-	 * @param json the actual JSON content
-	 * @param resourceLoadClass the class used to load resources
-	 */
-	public JsonContentAssert(@Nullable CharSequence json, @Nullable Class<?> resourceLoadClass) {
-		this(json, resourceLoadClass, null);
-	}
-
-
-	/**
-	 * Verify that the actual value is equal to the given JSON. The
-	 * {@code expected} value can contain the JSON itself or, if it ends with
-	 * {@code .json}, the name of a resource to be loaded from the classpath.
-	 * @param expected the expected JSON or the name of a resource containing
-	 * the expected JSON
-	 * @param compareMode the compare mode used when checking
-	 */
-	public JsonContentAssert isEqualTo(@Nullable CharSequence expected, JSONCompareMode compareMode) {
-		String expectedJson = this.loader.getJson(expected);
-		return assertNotFailed(compare(expectedJson, compareMode));
-	}
-
-	/**
-	 * Verify that the actual value is equal to the given JSON {@link Resource}.
-	 * <p>The resource abstraction allows to provide several input types:
-	 * <ul>
-	 * <li>a {@code byte} array, using {@link ByteArrayResource}</li>
-	 * <li>a {@code classpath} resource, using {@link ClassPathResource}</li>
-	 * <li>a {@link File} or {@link Path}, using {@link FileSystemResource}</li>
-	 * <li>an {@link InputStream}, using {@link InputStreamResource}</li>
-	 * </ul>
-	 * @param expected a resource containing the expected JSON
-	 * @param compareMode the compare mode used when checking
-	 */
-	public JsonContentAssert isEqualTo(Resource expected, JSONCompareMode compareMode) {
-		String expectedJson = this.loader.getJson(expected);
-		return assertNotFailed(compare(expectedJson, compareMode));
-	}
-
-	/**
-	 * Verify that the actual value is equal to the given JSON. The
-	 * {@code expected} value can contain the JSON itself or, if it ends with
-	 * {@code .json}, the name of a resource to be loaded from the classpath.
-	 * @param expected the expected JSON or the name of a resource containing
-	 * the expected JSON
-	 * @param comparator the comparator used when checking
-	 */
-	public JsonContentAssert isEqualTo(@Nullable CharSequence expected, JSONComparator comparator) {
-		String expectedJson = this.loader.getJson(expected);
-		return assertNotFailed(compare(expectedJson, comparator));
-	}
-
-	/**
-	 * Verify that the actual value is equal to the given JSON {@link Resource}.
-	 * <p>The resource abstraction allows to provide several input types:
-	 * <ul>
-	 * <li>a {@code byte} array, using {@link ByteArrayResource}</li>
-	 * <li>a {@code classpath} resource, using {@link ClassPathResource}</li>
-	 * <li>a {@link File} or {@link Path}, using {@link FileSystemResource}</li>
-	 * <li>an {@link InputStream}, using {@link InputStreamResource}</li>
-	 * </ul>
-	 * @param expected a resource containing the expected JSON
-	 * @param comparator the comparator used when checking
-	 */
-	public JsonContentAssert isEqualTo(Resource expected, JSONComparator comparator) {
-		String expectedJson = this.loader.getJson(expected);
-		return assertNotFailed(compare(expectedJson, comparator));
-	}
-
-	/**
-	 * Verify that the actual value is {@link JSONCompareMode#LENIENT leniently}
-	 * equal to the given JSON. The {@code expected} value can contain the JSON
-	 * itself or, if it ends with {@code .json}, the name of a resource to be
-	 * loaded from the classpath.
-	 * @param expected the expected JSON or the name of a resource containing
-	 * the expected JSON
-	 */
-	public JsonContentAssert isLenientlyEqualTo(@Nullable CharSequence expected) {
-		return isEqualTo(expected, JSONCompareMode.LENIENT);
-	}
-
-	/**
-	 * Verify that the actual value is {@link JSONCompareMode#LENIENT leniently}
-	 * equal to the given JSON {@link Resource}.
-	 * <p>The resource abstraction allows to provide several input types:
-	 * <ul>
-	 * <li>a {@code byte} array, using {@link ByteArrayResource}</li>
-	 * <li>a {@code classpath} resource, using {@link ClassPathResource}</li>
-	 * <li>a {@link File} or {@link Path}, using {@link FileSystemResource}</li>
-	 * <li>an {@link InputStream}, using {@link InputStreamResource}</li>
-	 * </ul>
-	 * @param expected a resource containing the expected JSON
-	 */
-	public JsonContentAssert isLenientlyEqualTo(Resource expected) {
-		return isEqualTo(expected, JSONCompareMode.LENIENT);
-	}
-
-	/**
-	 * Verify that the actual value is {@link JSONCompareMode#STRICT strictly}
-	 * equal to the given JSON. The {@code expected} value can contain the JSON
-	 * itself or, if it ends with {@code .json}, the name of a resource to be
-	 * loaded from the classpath.
-	 * @param expected the expected JSON or the name of a resource containing
-	 * the expected JSON
-	 */
-	public JsonContentAssert isStrictlyEqualTo(@Nullable CharSequence expected) {
-		return isEqualTo(expected, JSONCompareMode.STRICT);
-	}
-
-	/**
-	 * Verify that the actual value is {@link JSONCompareMode#STRICT strictly}
-	 * equal to the given JSON {@link Resource}.
-	 * <p>The resource abstraction allows to provide several input types:
-	 * <ul>
-	 * <li>a {@code byte} array, using {@link ByteArrayResource}</li>
-	 * <li>a {@code classpath} resource, using {@link ClassPathResource}</li>
-	 * <li>a {@link File} or {@link Path}, using {@link FileSystemResource}</li>
-	 * <li>an {@link InputStream}, using {@link InputStreamResource}</li>
-	 * </ul>
-	 * @param expected a resource containing the expected JSON
-	 */
-	public JsonContentAssert isStrictlyEqualTo(Resource expected) {
-		return isEqualTo(expected, JSONCompareMode.STRICT);
-	}
-
-	/**
-	 * Verify that the actual value is not equal to the given JSON. The
-	 * {@code expected} value can contain the JSON itself or, if it ends with
-	 * {@code .json}, the name of a resource to be loaded from the classpath.
-	 * @param expected the expected JSON or the name of a resource containing
-	 * the expected JSON
-	 * @param compareMode the compare mode used when checking
-	 */
-	public JsonContentAssert isNotEqualTo(@Nullable CharSequence expected, JSONCompareMode compareMode) {
-		String expectedJson = this.loader.getJson(expected);
-		return assertNotPassed(compare(expectedJson, compareMode));
-	}
-
-	/**
-	 * Verify that the actual value is not equal to the given JSON {@link Resource}.
-	 * <p>The resource abstraction allows to provide several input types:
-	 * <ul>
-	 * <li>a {@code byte} array, using {@link ByteArrayResource}</li>
-	 * <li>a {@code classpath} resource, using {@link ClassPathResource}</li>
-	 * <li>a {@link File} or {@link Path}, using {@link FileSystemResource}</li>
-	 * <li>an {@link InputStream}, using {@link InputStreamResource}</li>
-	 * </ul>
-	 * @param expected a resource containing the expected JSON
-	 * @param compareMode the compare mode used when checking
-	 */
-	public JsonContentAssert isNotEqualTo(Resource expected, JSONCompareMode compareMode) {
-		String expectedJson = this.loader.getJson(expected);
-		return assertNotPassed(compare(expectedJson, compareMode));
-	}
-
-	/**
-	 * Verify that the actual value is not equal to the given JSON. The
-	 * {@code expected} value can contain the JSON itself or, if it ends with
-	 * {@code .json}, the name of a resource to be loaded from the classpath.
-	 * @param expected the expected JSON or the name of a resource containing
-	 * the expected JSON
-	 * @param comparator the comparator used when checking
-	 */
-	public JsonContentAssert isNotEqualTo(@Nullable CharSequence expected, JSONComparator comparator) {
-		String expectedJson = this.loader.getJson(expected);
-		return assertNotPassed(compare(expectedJson, comparator));
-	}
-
-	/**
-	 * Verify that the actual value is not equal to the given JSON {@link Resource}.
-	 * <p>The resource abstraction allows to provide several input types:
-	 * <ul>
-	 * <li>a {@code byte} array, using {@link ByteArrayResource}</li>
-	 * <li>a {@code classpath} resource, using {@link ClassPathResource}</li>
-	 * <li>a {@link File} or {@link Path}, using {@link FileSystemResource}</li>
-	 * <li>an {@link InputStream}, using {@link InputStreamResource}</li>
-	 * </ul>
-	 * @param expected a resource containing the expected JSON
-	 * @param comparator the comparator used when checking
-	 */
-	public JsonContentAssert isNotEqualTo(Resource expected, JSONComparator comparator) {
-		String expectedJson = this.loader.getJson(expected);
-		return assertNotPassed(compare(expectedJson, comparator));
-	}
-
-	/**
-	 * Verify that the actual value is not {@link JSONCompareMode#LENIENT
-	 * leniently} equal to the given JSON. The {@code expected} value can
-	 * contain the JSON itself or, if it ends with {@code .json}, the name of a
-	 * resource to be loaded from the classpath.
-	 * @param expected the expected JSON or the name of a resource containing
-	 * the expected JSON
-	 */
-	public JsonContentAssert isNotLenientlyEqualTo(@Nullable CharSequence expected) {
-		return isNotEqualTo(expected, JSONCompareMode.LENIENT);
-	}
-
-	/**
-	 * Verify that the actual value is not {@link JSONCompareMode#LENIENT
-	 * leniently} equal to the given JSON {@link Resource}.
-	 * <p>The resource abstraction allows to provide several input types:
-	 * <ul>
-	 * <li>a {@code byte} array, using {@link ByteArrayResource}</li>
-	 * <li>a {@code classpath} resource, using {@link ClassPathResource}</li>
-	 * <li>a {@link File} or {@link Path}, using {@link FileSystemResource}</li>
-	 * <li>an {@link InputStream}, using {@link InputStreamResource}</li>
-	 * </ul>
-	 * @param expected a resource containing the expected JSON
-	 */
-	public JsonContentAssert isNotLenientlyEqualTo(Resource expected) {
-		return isNotEqualTo(expected, JSONCompareMode.LENIENT);
-	}
-
-	/**
-	 * Verify that the actual value is not {@link JSONCompareMode#STRICT
-	 * strictly} equal to the given JSON. The {@code expected} value can
-	 * contain the JSON itself or, if it ends with {@code .json}, the name of a
-	 * resource to be loaded from the classpath.
-	 * @param expected the expected JSON or the name of a resource containing
-	 * the expected JSON
-	 */
-	public JsonContentAssert isNotStrictlyEqualTo(@Nullable CharSequence expected) {
-		return isNotEqualTo(expected, JSONCompareMode.STRICT);
-	}
-
-	/**
-	 * Verify that the actual value is not {@link JSONCompareMode#STRICT
-	 * strictly} equal to the given JSON {@link Resource}.
-	 * <p>The resource abstraction allows to provide several input types:
-	 * <ul>
-	 * <li>a {@code byte} array, using {@link ByteArrayResource}</li>
-	 * <li>a {@code classpath} resource, using {@link ClassPathResource}</li>
-	 * <li>a {@link File} or {@link Path}, using {@link FileSystemResource}</li>
-	 * <li>an {@link InputStream}, using {@link InputStreamResource}</li>
-	 * </ul>
-	 * @param expected a resource containing the expected JSON
-	 */
-	public JsonContentAssert isNotStrictlyEqualTo(Resource expected) {
-		return isNotEqualTo(expected, JSONCompareMode.STRICT);
-	}
-
-
-	private JSONCompareResult compare(@Nullable CharSequence expectedJson, JSONCompareMode compareMode) {
-		return compare(this.actual, expectedJson, (actualJsonString, expectedJsonString) ->
-				JSONCompare.compareJSON(expectedJsonString, actualJsonString, compareMode));
-	}
-
-	private JSONCompareResult compare(@Nullable CharSequence expectedJson, JSONComparator comparator) {
-		return compare(this.actual, expectedJson, (actualJsonString, expectedJsonString) ->
-				JSONCompare.compareJSON(expectedJsonString, actualJsonString, comparator));
-	}
-
-	private JSONCompareResult compare(@Nullable CharSequence actualJson, @Nullable CharSequence expectedJson,
-			ThrowingBiFunction<String, String, JSONCompareResult> comparator) {
-
-		if (actualJson == null) {
-			return compareForNull(expectedJson);
-		}
-		if (expectedJson == null) {
-			return compareForNull(actualJson.toString());
-		}
-		try {
-			return comparator.applyWithException(actualJson.toString(), expectedJson.toString());
-		}
-		catch (Exception ex) {
-			if (ex instanceof RuntimeException runtimeException) {
-				throw runtimeException;
-			}
-			throw new IllegalStateException(ex);
-		}
-	}
-
-	private JSONCompareResult compareForNull(@Nullable CharSequence expectedJson) {
-		JSONCompareResult result = new JSONCompareResult();
-		if (expectedJson != null) {
-			result.fail("Expected null JSON");
-		}
-		return result;
-	}
-
-	private JsonContentAssert assertNotFailed(JSONCompareResult result) {
-		if (result.failed()) {
-			failWithMessage("JSON comparison failure: %s", result.getMessage());
-		}
-		return this;
-	}
-
-	private JsonContentAssert assertNotPassed(JSONCompareResult result) {
-		if (result.passed()) {
-			failWithMessage("JSON comparison failure: %s", result.getMessage());
-		}
-		return this;
+		super(json, jsonMessageConverter, resourceLoadClass, charset, JsonContentAssert.class);
 	}
 
 }

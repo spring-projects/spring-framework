@@ -25,8 +25,8 @@ import org.assertj.core.api.AbstractStringAssert;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.test.json.AbstractJsonContentAssert;
 import org.springframework.test.json.JsonContentAssert;
-import org.springframework.test.json.JsonPathAssert;
 
 /**
  * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied to
@@ -53,19 +53,20 @@ public class ResponseBodyAssert extends AbstractByteArrayAssert<ResponseBodyAsse
 	}
 
 	/**
-	 * Return a new {@linkplain JsonPathAssert assertion} object that provides
-	 * {@linkplain com.jayway.jsonpath.JsonPath JSON path} assertions on the
-	 * response body.
+	 * Return a new {@linkplain AbstractJsonContentAssert assertion} object that
+	 * provides {@linkplain com.jayway.jsonpath.JsonPath JSON path} assertions on
+	 * the response body.
 	 */
-	public JsonPathAssert jsonPath() {
-		return new JsonPathAssert(getJson(), this.jsonMessageConverter);
+	public AbstractJsonContentAssert<?> jsonPath() {
+		return new JsonContentAssert(getJson(), this.jsonMessageConverter, null, this.characterEncoding)
+				.as("JSON body");
 	}
 
 	/**
-	 * Return a new {@linkplain JsonContentAssert assertion} object that provides
-	 * support for {@linkplain org.skyscreamer.jsonassert.JSONCompareMode JSON
-	 * assert} comparisons against expected JSON input which can be loaded from
-	 * the classpath.
+	 * Return a new {@linkplain AbstractJsonContentAssert assertion} object that
+	 * provides support for {@linkplain org.skyscreamer.jsonassert.JSONCompareMode
+	 * JSON assert} comparisons against expected JSON input which can be loaded
+	 * from the classpath.
 	 * <p>This method only supports absolute locations for JSON documents loaded
 	 * from the classpath. Consider using {@link #json(Class)} to load JSON
 	 * documents relative to a given class.
@@ -76,15 +77,15 @@ public class ResponseBodyAssert extends AbstractByteArrayAssert<ResponseBodyAsse
 	 *         .isStrictlyEqualToJson("/com/acme/web/person/person-created.json");
 	 * </code></pre>
 	 */
-	public JsonContentAssert json() {
+	public AbstractJsonContentAssert<?> json() {
 		return json(null);
 	}
 
 	/**
-	 * Return a new {@linkplain JsonContentAssert assertion} object that provides
-	 * support for {@linkplain org.skyscreamer.jsonassert.JSONCompareMode JSON
-	 * assert} comparisons against expected JSON input which can be loaded from
-	 * the classpath.
+	 * Return a new {@linkplain AbstractJsonContentAssert assertion} object that
+	 * provides support for {@linkplain org.skyscreamer.jsonassert.JSONCompareMode
+	 * JSON assert} comparisons against expected JSON input which can be loaded
+	 * from the classpath.
 	 * <p>Locations for JSON documents can be absolute using a leading slash, or
 	 * relative to the given {@code resourceLoadClass}.
 	 * <p>Example: <pre><code class='java'>
@@ -96,8 +97,9 @@ public class ResponseBodyAssert extends AbstractByteArrayAssert<ResponseBodyAsse
 	 * @param resourceLoadClass the class used to load relative JSON documents
 	 * @see ClassPathResource#ClassPathResource(String, Class)
 	 */
-	public JsonContentAssert json(@Nullable Class<?> resourceLoadClass) {
-		return new JsonContentAssert(getJson(), resourceLoadClass, this.characterEncoding);
+	public AbstractJsonContentAssert<?> json(@Nullable Class<?> resourceLoadClass) {
+		return new JsonContentAssert(getJson(), this.jsonMessageConverter, resourceLoadClass, this.characterEncoding)
+				.as("JSON body");
 	}
 
 	/**

@@ -31,7 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.test.json.JsonPathAssert;
+import org.springframework.test.json.AbstractJsonContentAssert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -99,9 +99,9 @@ class AssertableMockMvcTests {
 	@Test
 	void createWithControllersHasNoHttpMessageConverter() {
 		AssertableMockMvc mockMvc = AssertableMockMvc.of(new HelloController());
-		JsonPathAssert jsonPathAssert = assertThat(mockMvc.perform(get("/json"))).hasStatusOk().body().jsonPath();
+		AbstractJsonContentAssert<?> jsonContentAssert = assertThat(mockMvc.perform(get("/json"))).hasStatusOk().body().jsonPath();
 		assertThatIllegalStateException()
-				.isThrownBy(() -> jsonPathAssert.extractingPath("$").convertTo(Message.class))
+				.isThrownBy(() -> jsonContentAssert.extractingPath("$").convertTo(Message.class))
 				.withMessageContaining("No JSON message converter available");
 	}
 
