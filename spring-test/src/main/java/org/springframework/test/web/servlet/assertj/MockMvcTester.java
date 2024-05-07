@@ -38,15 +38,46 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * {@link MockMvc} variant that tests Spring MVC exchanges and provides fluent
- * assertions using {@link org.assertj.core.api.Assertions AssertJ}.
+ * Test Spring MVC applications with {@link MockMvc} for server request handling
+ * using {@link org.assertj.core.api.Assertions AssertJ}.
+ *
+ * <p>A tester instance can be created from a {@link WebApplicationContext}:
+ * <pre><code class='java'>
+ * // Create an instance with default settings
+ * MockMvcTester mvc = MockMvcTester.from(applicationContext);
+ *
+ * // Create an instance with a custom Filter
+ * MockMvcTester mvc = MockMvcTester.from(applicationContext,
+ *         builder -> builder.addFilters(filter).build());
+ * </code></pre>
+ *
+ * <p>A tester can be created standalone by providing the controller(s) to
+ * include in a standalone setup:<pre><code class='java'>
+ * // Create an instance for PersonController
+ * MockMvcTester mvc = MockMvcTester.of(new PersonController());
+ * </code></pre>
+ *
+ * <p>Once a test instance is available, you can perform requests in
+ * a similar fashion as with {@link MockMvc}, and wrapping the result in
+ * {@code assertThat} provides access to assertions. For instance:
+ * <pre><code class='java'>
+ * // perform a GET on /hi and assert the response body is equal to Hello
+ * assertThat(mvc.perform(get("/hi")))
+ *         .hasStatusOk().hasBodyTextEqualTo("Hello");
+ * </code></pre>
  *
  * <p>A main difference with {@link MockMvc} is that an unresolved exception
- * is not thrown directly. Rather an {@link AssertableMvcResult} is available
- * with an {@link AssertableMvcResult#getUnresolvedException() unresolved
- * exception}.
+ * is not thrown directly. Rather an {@link MvcTestResult} is available
+ * with an {@link MvcTestResult#getUnresolvedException() unresolved
+ * exception}. You can assert that a request has failed unexpectedly:
+ * <pre><code class='java'>
+ * // perform a GET on /hi and assert the response body is equal to Hello
+ * assertThat(mvc.perform(get("/boom")))
+ *         .hasUnresolvedException())
+ * 		   .withMessage("Test exception");
+ * </code></pre>
  *
- * <p>{@link AssertableMockMvc} can be configured with a list of
+ * <p>{@link MockMvcTester} can be configured with a list of
  * {@linkplain HttpMessageConverter message converters} to allow the response
  * body to be deserialized, rather than asserting on the raw values.
  *
@@ -54,7 +85,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Brian Clozel
  * @since 6.2
  */
-public final class AssertableMockMvc {
+public final class MockMvcTester {
 
 	private static final MediaType JSON = MediaType.APPLICATION_JSON;
 
@@ -64,23 +95,23 @@ public final class AssertableMockMvc {
 	private final GenericHttpMessageConverter<Object> jsonMessageConverter;
 
 
-	private AssertableMockMvc(MockMvc mockMvc, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
+	private MockMvcTester(MockMvc mockMvc, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
 		Assert.notNull(mockMvc, "mockMVC should not be null");
 		this.mockMvc = mockMvc;
 		this.jsonMessageConverter = jsonMessageConverter;
 	}
 
 	/**
-	 * Create a {@link AssertableMockMvc} instance that delegates to the given
+	 * Create a {@link MockMvcTester} instance that delegates to the given
 	 * {@link MockMvc} instance.
 	 * @param mockMvc the MockMvc instance to delegate calls to
 	 */
-	public static AssertableMockMvc create(MockMvc mockMvc) {
-		return new AssertableMockMvc(mockMvc, null);
+	public static MockMvcTester create(MockMvc mockMvc) {
+		return new MockMvcTester(mockMvc, null);
 	}
 
 	/**
-	 * Create an {@link AssertableMockMvc} instance using the given, fully
+	 * Create an {@link MockMvcTester} instance using the given, fully
 	 * initialized (i.e., <em>refreshed</em>) {@link WebApplicationContext}. The
 	 * given {@code customizations} are applied to the {@link DefaultMockMvcBuilder}
 	 * that ultimately creates the underlying {@link MockMvc} instance.
@@ -92,7 +123,7 @@ public final class AssertableMockMvc {
 	 * instance based on a {@link DefaultMockMvcBuilder}.
 	 * @see MockMvcBuilders#webAppContextSetup(WebApplicationContext)
 	 */
-	public static AssertableMockMvc from(WebApplicationContext applicationContext,
+	public static MockMvcTester from(WebApplicationContext applicationContext,
 			Function<DefaultMockMvcBuilder, MockMvc> customizations) {
 
 		DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(applicationContext);
@@ -101,7 +132,7 @@ public final class AssertableMockMvc {
 	}
 
 	/**
-	 * Shortcut to create an {@link AssertableMockMvc} instance using the given,
+	 * Shortcut to create an {@link MockMvcTester} instance using the given,
 	 * fully initialized (i.e., <em>refreshed</em>) {@link WebApplicationContext}.
 	 * <p>Consider using {@link #from(WebApplicationContext, Function)} if
 	 * further customization of the underlying {@link MockMvc} instance is
@@ -110,12 +141,12 @@ public final class AssertableMockMvc {
 	 * MVC infrastructure and application controllers from
 	 * @see MockMvcBuilders#webAppContextSetup(WebApplicationContext)
 	 */
-	public static AssertableMockMvc from(WebApplicationContext applicationContext) {
+	public static MockMvcTester from(WebApplicationContext applicationContext) {
 		return from(applicationContext, DefaultMockMvcBuilder::build);
 	}
 
 	/**
-	 * Create an {@link AssertableMockMvc} instance by registering one or more
+	 * Create an {@link MockMvcTester} instance by registering one or more
 	 * {@code @Controller} instances and configuring Spring MVC infrastructure
 	 * programmatically.
 	 * <p>This allows full control over the instantiation and initialization of
@@ -129,7 +160,7 @@ public final class AssertableMockMvc {
 	 * Spring MVC infrastructure
 	 * @see MockMvcBuilders#standaloneSetup(Object...)
 	 */
-	public static AssertableMockMvc of(Collection<?> controllers,
+	public static MockMvcTester of(Collection<?> controllers,
 			Function<StandaloneMockMvcBuilder, MockMvc> customizations) {
 
 		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(controllers.toArray());
@@ -137,8 +168,8 @@ public final class AssertableMockMvc {
 	}
 
 	/**
-	 * Shortcut to create an {@link AssertableMockMvc} instance by registering
-	 * one or more {@code @Controller} instances.
+	 * Shortcut to create an {@link MockMvcTester} instance by registering one
+	 * or more {@code @Controller} instances.
 	 * <p>The minimum infrastructure required by the
 	 * {@link org.springframework.web.servlet.DispatcherServlet DispatcherServlet}
 	 * to serve requests with annotated controllers is created. Consider using
@@ -149,12 +180,12 @@ public final class AssertableMockMvc {
 	 * into an instance
 	 * @see MockMvcBuilders#standaloneSetup(Object...)
 	 */
-	public static AssertableMockMvc of(Object... controllers) {
+	public static MockMvcTester of(Object... controllers) {
 		return of(Arrays.asList(controllers), StandaloneMockMvcBuilder::build);
 	}
 
 	/**
-	 * Return a new {@link AssertableMockMvc} instance using the specified
+	 * Return a new {@link MockMvcTester} instance using the specified
 	 * {@linkplain HttpMessageConverter message converters}.
 	 * <p>If none are specified, only basic assertions on the response body can
 	 * be performed. Consider registering a suitable JSON converter for asserting
@@ -162,13 +193,13 @@ public final class AssertableMockMvc {
 	 * @param httpMessageConverters the message converters to use
 	 * @return a new instance using the specified converters
 	 */
-	public AssertableMockMvc withHttpMessageConverters(Iterable<HttpMessageConverter<?>> httpMessageConverters) {
-		return new AssertableMockMvc(this.mockMvc, findJsonMessageConverter(httpMessageConverters));
+	public MockMvcTester withHttpMessageConverters(Iterable<HttpMessageConverter<?>> httpMessageConverters) {
+		return new MockMvcTester(this.mockMvc, findJsonMessageConverter(httpMessageConverters));
 	}
 
 	/**
-	 * Perform a request and return a type that can be used with standard
-	 * {@link org.assertj.core.api.Assertions AssertJ} assertions.
+	 * Perform a request and return a {@link MvcTestResult result} that can be
+	 * used with standard {@link org.assertj.core.api.Assertions AssertJ} assertions.
 	 * <p>Use static methods of {@link MockMvcRequestBuilders} to prepare the
 	 * request, wrapping the invocation in {@code assertThat}. The following
 	 * asserts that a {@linkplain MockMvcRequestBuilders#get(URI) GET} request
@@ -191,16 +222,16 @@ public final class AssertableMockMvc {
 	 * @param requestBuilder used to prepare the request to execute;
 	 * see static factory methods in
 	 * {@link org.springframework.test.web.servlet.request.MockMvcRequestBuilders}
-	 * @return an {@link AssertableMvcResult} to be wrapped in {@code assertThat}
+	 * @return an {@link MvcTestResult} to be wrapped in {@code assertThat}
 	 * @see MockMvc#perform(RequestBuilder)
 	 */
-	public AssertableMvcResult perform(RequestBuilder requestBuilder) {
+	public MvcTestResult perform(RequestBuilder requestBuilder) {
 		Object result = getMvcResultOrFailure(requestBuilder);
 		if (result instanceof MvcResult mvcResult) {
-			return new DefaultAssertableMvcResult(mvcResult, null, this.jsonMessageConverter);
+			return new DefaultMvcTestResult(mvcResult, null, this.jsonMessageConverter);
 		}
 		else {
-			return new DefaultAssertableMvcResult(null, (Exception) result, this.jsonMessageConverter);
+			return new DefaultMvcTestResult(null, (Exception) result, this.jsonMessageConverter);
 		}
 	}
 

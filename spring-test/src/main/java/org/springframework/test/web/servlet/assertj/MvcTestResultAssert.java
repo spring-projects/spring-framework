@@ -30,12 +30,10 @@ import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
 
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.http.MediaTypeAssert;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -43,22 +41,22 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied
- * to {@link MvcResult}.
+ * to {@link MvcTestResult}.
  *
  * @author Stephane Nicoll
  * @author Brian Clozel
  * @since 6.2
  */
-public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcResultAssert, AssertableMvcResult> {
+public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<MvcTestResultAssert, MvcTestResult> {
 
-	MvcResultAssert(AssertableMvcResult mvcResult, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
-		super(jsonMessageConverter, mvcResult, MvcResultAssert.class);
+	MvcTestResultAssert(MvcTestResult actual, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
+		super(jsonMessageConverter, actual, MvcTestResultAssert.class);
 	}
 
 	@Override
 	protected MockHttpServletResponse getResponse() {
-		checkHasNotFailedUnexpectedly();
-		return this.actual.getResponse();
+		getMvcResult();
+		return this.actual.getMvcResult().getResponse();
 	}
 
 	/**
@@ -76,8 +74,7 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	 * object that uses the {@link MockHttpServletRequest} as the object to test.
 	 */
 	public AbstractMockHttpServletRequestAssert<?> request() {
-		checkHasNotFailedUnexpectedly();
-		return new MockHttpRequestAssert(this.actual.getRequest());
+		return new MockHttpRequestAssert(getMvcResult().getRequest());
 	}
 
 	/**
@@ -85,17 +82,7 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	 * response's {@linkplain Cookie cookies} as the object to test.
 	 */
 	public CookieMapAssert cookies() {
-		checkHasNotFailedUnexpectedly();
-		return new CookieMapAssert(this.actual.getResponse().getCookies());
-	}
-
-	/**
-	 * Return a new {@linkplain MediaTypeAssert assertion} object that uses the
-	 * response's {@linkplain MediaType content type} as the object to test.
-	 */
-	public MediaTypeAssert contentType() {
-		checkHasNotFailedUnexpectedly();
-		return new MediaTypeAssert(this.actual.getResponse().getContentType());
+		return new CookieMapAssert(getMvcResult().getResponse().getCookies());
 	}
 
 	/**
@@ -108,8 +95,7 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	 * </code></pre>
 	 */
 	public HandlerResultAssert handler() {
-		checkHasNotFailedUnexpectedly();
-		return new HandlerResultAssert(this.actual.getHandler());
+		return new HandlerResultAssert(getMvcResult().getHandler());
 	}
 
 	/**
@@ -118,7 +104,6 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	 * {@linkplain ModelAndView#getModel() model} as the object to test.
 	 */
 	public ModelAssert model() {
-		checkHasNotFailedUnexpectedly();
 		return new ModelAssert(getModelAndView().getModel());
 	}
 
@@ -129,7 +114,6 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	 * @see #hasViewName(String)
 	 */
 	public AbstractStringAssert<?> viewName() {
-		checkHasNotFailedUnexpectedly();
 		return Assertions.assertThat(getModelAndView().getViewName()).as("View name");
 	}
 
@@ -139,8 +123,7 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	 * to test.
 	 */
 	public MapAssert<String, Object> flash() {
-		checkHasNotFailedUnexpectedly();
-		return new MapAssert<>(this.actual.getFlashMap());
+		return new MapAssert<>(getMvcResult().getFlashMap());
 	}
 
 	/**
@@ -151,14 +134,14 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	 */
 	public ObjectAssert<Object> asyncResult() {
 		request().hasAsyncStarted(true);
-		return Assertions.assertThat(this.actual.getAsyncResult()).as("Async result");
+		return Assertions.assertThat(getMvcResult().getAsyncResult()).as("Async result");
 	}
 
 	/**
 	 * Verify that the request has failed with an unresolved exception.
 	 * @see #unresolvedException()
 	 */
-	public MvcResultAssert hasUnresolvedException() {
+	public MvcTestResultAssert hasUnresolvedException() {
 		Assertions.assertThat(this.actual.getUnresolvedException())
 				.withFailMessage("Expecting request to have failed but it has succeeded").isNotNull();
 		return this;
@@ -167,7 +150,7 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	/**
 	 * Verify that the request has not failed with an unresolved exception.
 	 */
-	public MvcResultAssert doesNotHaveUnresolvedException() {
+	public MvcTestResultAssert doesNotHaveUnresolvedException() {
 		Assertions.assertThat(this.actual.getUnresolvedException())
 				.withFailMessage("Expecting request to have succeeded but it has failed").isNull();
 		return this;
@@ -177,18 +160,18 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	 * Verify that the actual mvc result matches the given {@link ResultMatcher}.
 	 * @param resultMatcher the result matcher to invoke
 	 */
-	public MvcResultAssert matches(ResultMatcher resultMatcher) {
-		checkHasNotFailedUnexpectedly();
-		return super.satisfies(resultMatcher::match);
+	public MvcTestResultAssert matches(ResultMatcher resultMatcher) {
+		MvcResult mvcResult = getMvcResult();
+		return super.satisfies(tmc -> resultMatcher.match(mvcResult));
 	}
 
 	/**
 	 * Apply the given {@link ResultHandler} to the actual mvc result.
 	 * @param resultHandler the result matcher to invoke
 	 */
-	public MvcResultAssert apply(ResultHandler resultHandler) {
-		checkHasNotFailedUnexpectedly();
-		return satisfies(resultHandler::handle);
+	public MvcTestResultAssert apply(ResultHandler resultHandler) {
+		MvcResult mvcResult = getMvcResult();
+		return satisfies(tmc -> resultHandler.handle(mvcResult));
 	}
 
 	/**
@@ -197,7 +180,7 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 	 * {@link #viewName()}
 	 * @param viewName the expected view name
 	 */
-	public MvcResultAssert hasViewName(String viewName) {
+	public MvcTestResultAssert hasViewName(String viewName) {
 		viewName().isEqualTo(viewName);
 		return this.myself;
 	}
@@ -205,17 +188,18 @@ public class MvcResultAssert extends AbstractMockHttpServletResponseAssert<MvcRe
 
 	@SuppressWarnings("NullAway")
 	private ModelAndView getModelAndView() {
-		ModelAndView modelAndView = this.actual.getModelAndView();
+		ModelAndView modelAndView = getMvcResult().getModelAndView();
 		Assertions.assertThat(modelAndView).as("ModelAndView").isNotNull();
 		return modelAndView;
 	}
 
-	protected void checkHasNotFailedUnexpectedly() {
+	protected MvcResult getMvcResult() {
 		Exception unresolvedException = this.actual.getUnresolvedException();
 		if (unresolvedException != null) {
 			throw Failures.instance().failure(this.info,
 					new RequestFailedUnexpectedly(unresolvedException));
 		}
+		return this.actual.getMvcResult();
 	}
 
 	private static final class MockHttpRequestAssert extends AbstractMockHttpServletRequestAssert<MockHttpRequestAssert> {

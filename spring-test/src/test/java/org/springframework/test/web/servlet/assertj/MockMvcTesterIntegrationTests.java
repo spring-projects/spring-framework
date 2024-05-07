@@ -43,7 +43,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.Person;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -69,19 +68,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Integration tests for {@link AssertableMockMvc}.
+ * Integration tests for {@link MockMvcTester}.
  *
  * @author Brian Clozel
  * @author Stephane Nicoll
  */
 @SpringJUnitConfig
 @WebAppConfiguration
-public class AssertableMockMvcIntegrationTests {
+public class MockMvcTesterIntegrationTests {
 
-	private final AssertableMockMvc mockMvc;
+	private final MockMvcTester mockMvc;
 
-	AssertableMockMvcIntegrationTests(WebApplicationContext wac) {
-		this.mockMvc = AssertableMockMvc.from(wac);
+	MockMvcTesterIntegrationTests(WebApplicationContext wac) {
+		this.mockMvc = MockMvcTester.from(wac);
 	}
 
 	@Nested
@@ -126,8 +125,8 @@ public class AssertableMockMvcIntegrationTests {
 			assertThat(performWithCookie(cookie, get("/greet"))).cookies().hasValue("test", "value");
 		}
 
-		private AssertableMvcResult performWithCookie(Cookie cookie, MockHttpServletRequestBuilder request) {
-			AssertableMockMvc mockMvc = AssertableMockMvc.of(List.of(new TestController()), builder -> builder.addInterceptors(
+		private MvcTestResult performWithCookie(Cookie cookie, MockHttpServletRequestBuilder request) {
+			MockMvcTester mockMvc = MockMvcTester.of(List.of(new TestController()), builder -> builder.addInterceptors(
 					new HandlerInterceptor() {
 						@Override
 						public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -137,16 +136,6 @@ public class AssertableMockMvcIntegrationTests {
 					}).build());
 			return mockMvc.perform(request);
 		}
-	}
-
-	@Nested
-	class ContentTypeTests {
-
-		@Test
-		void contentType() {
-			assertThat(perform(get("/greet"))).contentType().isCompatibleWith("text/plain");
-		}
-
 	}
 
 	@Nested
@@ -169,8 +158,8 @@ public class AssertableMockMvcIntegrationTests {
 
 		@Test
 		void shouldAssertHeader() {
-			assertThat(perform(get("/greet"))).headers()
-					.hasValue("Content-Type", "text/plain;charset=ISO-8859-1");
+			assertThat(perform(get("/greet")))
+					.hasHeader("Content-Type", "text/plain;charset=ISO-8859-1");
 		}
 
 		@Test
@@ -250,19 +239,19 @@ public class AssertableMockMvcIntegrationTests {
 
 		@Test
 		void jsonPathContent() {
-			assertThat(perform(get("/message"))).body().jsonPath()
+			assertThat(perform(get("/message"))).bodyJson()
 					.extractingPath("$.message").asString().isEqualTo("hello");
 		}
 
 		@Test
 		void jsonContentCanLoadResourceFromClasspath() {
-			assertThat(perform(get("/message"))).body().json().isLenientlyEqualTo(
-					new ClassPathResource("message.json", AssertableMockMvcIntegrationTests.class));
+			assertThat(perform(get("/message"))).bodyJson().isLenientlyEqualTo(
+					new ClassPathResource("message.json", MockMvcTesterIntegrationTests.class));
 		}
 
 		@Test
 		void jsonContentUsingResourceLoaderClass() {
-			assertThat(perform(get("/message"))).body().json(AssertableMockMvcIntegrationTests.class)
+			assertThat(perform(get("/message"))).bodyJson().withResourceLoadClass(MockMvcTesterIntegrationTests.class)
 					.isLenientlyEqualTo("message.json");
 		}
 
@@ -416,8 +405,8 @@ public class AssertableMockMvcIntegrationTests {
 		}
 
 
-		private void testAssertionFailureWithUnresolvableException(Consumer<AssertableMvcResult> assertions) {
-			AssertableMvcResult result = perform(get("/error/1"));
+		private void testAssertionFailureWithUnresolvableException(Consumer<MvcTestResult> assertions) {
+			MvcTestResult result = perform(get("/error/1"));
 			assertThatExceptionOfType(AssertionError.class)
 					.isThrownBy(() -> assertions.accept(result))
 					.withMessageContainingAll("Request has failed unexpectedly:",
@@ -441,7 +430,7 @@ public class AssertableMockMvcIntegrationTests {
 	@Test
 	void satisfiesAllowsAdditionalAssertions() {
 		assertThat(this.mockMvc.perform(get("/greet"))).satisfies(result -> {
-			assertThat(result).isInstanceOf(MvcResult.class);
+			assertThat(result).isInstanceOf(MvcTestResult.class);
 			assertThat(result).hasStatusOk();
 		});
 	}
@@ -467,7 +456,7 @@ public class AssertableMockMvcIntegrationTests {
 	}
 
 
-	private AssertableMvcResult perform(MockHttpServletRequestBuilder builder) {
+	private MvcTestResult perform(MockHttpServletRequestBuilder builder) {
 		return this.mockMvc.perform(builder);
 	}
 

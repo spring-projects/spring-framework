@@ -31,7 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.test.json.JsonPathAssert;
+import org.springframework.test.json.AbstractJsonContentAssert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,11 +48,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
- * Tests for {@link AssertableMockMvc}.
+ * Tests for {@link MockMvcTester}.
  *
  * @author Stephane Nicoll
  */
-class AssertableMockMvcTests {
+class MockMvcTesterTests {
 
 	private static final MappingJackson2HttpMessageConverter jsonHttpMessageConverter =
 			new MappingJackson2HttpMessageConverter(new ObjectMapper());
@@ -60,56 +60,56 @@ class AssertableMockMvcTests {
 
 	@Test
 	void createShouldRejectNullMockMvc() {
-		assertThatIllegalArgumentException().isThrownBy(() -> AssertableMockMvc.create(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcTester.create(null));
 	}
 
 	@Test
 	void createWithExistingWebApplicationContext() {
 		try (GenericWebApplicationContext wac = create(WebConfiguration.class)) {
-			AssertableMockMvc mockMvc = AssertableMockMvc.from(wac);
-			assertThat(mockMvc.perform(post("/increase"))).body().isEqualTo("counter 41");
-			assertThat(mockMvc.perform(post("/increase"))).body().isEqualTo("counter 42");
+			MockMvcTester mockMvc = MockMvcTester.from(wac);
+			assertThat(mockMvc.perform(post("/increase"))).hasBodyTextEqualTo("counter 41");
+			assertThat(mockMvc.perform(post("/increase"))).hasBodyTextEqualTo("counter 42");
 		}
 	}
 
 	@Test
 	void createWithControllerClassShouldInstantiateControllers() {
-		AssertableMockMvc mockMvc = AssertableMockMvc.of(HelloController.class, CounterController.class);
-		assertThat(mockMvc.perform(get("/hello"))).body().isEqualTo("Hello World");
-		assertThat(mockMvc.perform(post("/increase"))).body().isEqualTo("counter 1");
-		assertThat(mockMvc.perform(post("/increase"))).body().isEqualTo("counter 2");
+		MockMvcTester mockMvc = MockMvcTester.of(HelloController.class, CounterController.class);
+		assertThat(mockMvc.perform(get("/hello"))).hasBodyTextEqualTo("Hello World");
+		assertThat(mockMvc.perform(post("/increase"))).hasBodyTextEqualTo("counter 1");
+		assertThat(mockMvc.perform(post("/increase"))).hasBodyTextEqualTo("counter 2");
 	}
 
 	@Test
 	void createWithControllersShouldUseThemAsIs() {
-		AssertableMockMvc mockMvc = AssertableMockMvc.of(new HelloController(),
+		MockMvcTester mockMvc = MockMvcTester.of(new HelloController(),
 				new CounterController(new AtomicInteger(41)));
-		assertThat(mockMvc.perform(get("/hello"))).body().isEqualTo("Hello World");
-		assertThat(mockMvc.perform(post("/increase"))).body().isEqualTo("counter 42");
-		assertThat(mockMvc.perform(post("/increase"))).body().isEqualTo("counter 43");
+		assertThat(mockMvc.perform(get("/hello"))).hasBodyTextEqualTo("Hello World");
+		assertThat(mockMvc.perform(post("/increase"))).hasBodyTextEqualTo("counter 42");
+		assertThat(mockMvc.perform(post("/increase"))).hasBodyTextEqualTo("counter 43");
 	}
 
 	@Test
 	void createWithControllerAndCustomizations() {
-		AssertableMockMvc mockMvc = AssertableMockMvc.of(List.of(new HelloController()), builder ->
+		MockMvcTester mockMvc = MockMvcTester.of(List.of(new HelloController()), builder ->
 				builder.defaultRequest(get("/hello").accept(MediaType.APPLICATION_JSON)).build());
 		assertThat(mockMvc.perform(get("/hello"))).hasStatus(HttpStatus.NOT_ACCEPTABLE);
 	}
 
 	@Test
 	void createWithControllersHasNoHttpMessageConverter() {
-		AssertableMockMvc mockMvc = AssertableMockMvc.of(new HelloController());
-		JsonPathAssert jsonPathAssert = assertThat(mockMvc.perform(get("/json"))).hasStatusOk().body().jsonPath();
+		MockMvcTester mockMvc = MockMvcTester.of(new HelloController());
+		AbstractJsonContentAssert<?> jsonContentAssert = assertThat(mockMvc.perform(get("/json"))).hasStatusOk().bodyJson();
 		assertThatIllegalStateException()
-				.isThrownBy(() -> jsonPathAssert.extractingPath("$").convertTo(Message.class))
+				.isThrownBy(() -> jsonContentAssert.extractingPath("$").convertTo(Message.class))
 				.withMessageContaining("No JSON message converter available");
 	}
 
 	@Test
 	void createWithControllerCanConfigureHttpMessageConverters() {
-		AssertableMockMvc mockMvc = AssertableMockMvc.of(HelloController.class)
+		MockMvcTester mockMvc = MockMvcTester.of(HelloController.class)
 				.withHttpMessageConverters(List.of(jsonHttpMessageConverter));
-		assertThat(mockMvc.perform(get("/json"))).hasStatusOk().body().jsonPath()
+		assertThat(mockMvc.perform(get("/json"))).hasStatusOk().bodyJson()
 				.extractingPath("$").convertTo(Message.class).satisfies(message -> {
 					assertThat(message.message()).isEqualTo("Hello World");
 					assertThat(message.counter()).isEqualTo(42);
@@ -120,9 +120,9 @@ class AssertableMockMvcTests {
 	@SuppressWarnings("unchecked")
 	void withHttpMessageConverterDetectsJsonConverter() {
 		MappingJackson2HttpMessageConverter converter = spy(jsonHttpMessageConverter);
-		AssertableMockMvc mockMvc = AssertableMockMvc.of(HelloController.class)
+		MockMvcTester mockMvc = MockMvcTester.of(HelloController.class)
 				.withHttpMessageConverters(List.of(mock(), mock(), converter));
-		assertThat(mockMvc.perform(get("/json"))).hasStatusOk().body().jsonPath()
+		assertThat(mockMvc.perform(get("/json"))).hasStatusOk().bodyJson()
 				.extractingPath("$").convertTo(Message.class).satisfies(message -> {
 					assertThat(message.message()).isEqualTo("Hello World");
 					assertThat(message.counter()).isEqualTo(42);
@@ -132,11 +132,11 @@ class AssertableMockMvcTests {
 
 	@Test
 	void performWithUnresolvedExceptionSetsException() {
-		AssertableMockMvc mockMvc = AssertableMockMvc.of(HelloController.class);
-		AssertableMvcResult result = mockMvc.perform(get("/error"));
+		MockMvcTester mockMvc = MockMvcTester.of(HelloController.class);
+		MvcTestResult result = mockMvc.perform(get("/error"));
 		assertThat(result.getUnresolvedException()).isInstanceOf(ServletException.class)
 				.cause().isInstanceOf(IllegalStateException.class).hasMessage("Expected");
-		assertThat(result).hasFieldOrPropertyWithValue("target", null);
+		assertThat(result).hasFieldOrPropertyWithValue("mvcResult", null);
 	}
 
 	private GenericWebApplicationContext create(Class<?>... classes) {

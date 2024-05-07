@@ -55,7 +55,7 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 	 */
 	@Override
 	public JsonContentAssert assertThat() {
-		return new JsonContentAssert(this.json, this.resourceLoadClass, null);
+		return new JsonContentAssert(this.json, null).withResourceLoadClass(this.resourceLoadClass);
 	}
 
 	/**

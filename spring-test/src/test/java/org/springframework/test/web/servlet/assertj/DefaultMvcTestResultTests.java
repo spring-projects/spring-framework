@@ -30,76 +30,47 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Tests for {@link DefaultAssertableMvcResult}.
+ * Tests for {@link DefaultMvcTestResult}.
  *
  * @author Stephane Nicoll
  */
-class DefaultAssertableMvcResultTests {
+class DefaultMvcTestResultTests {
 
 	@Test
 	void createWithMvcResultDelegatesToIt() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MvcResult mvcResult = mock(MvcResult.class);
 		given(mvcResult.getRequest()).willReturn(request);
-		DefaultAssertableMvcResult result = new DefaultAssertableMvcResult(mvcResult, null, null);
+		DefaultMvcTestResult result = new DefaultMvcTestResult(mvcResult, null, null);
 		assertThat(result.getRequest()).isSameAs(request);
 		verify(mvcResult).getRequest();
 	}
 
 	@Test
 	void createWithExceptionDoesNotAllowAccessToRequest() {
-		assertRequestHasFailed(DefaultAssertableMvcResult::getRequest);
+		assertRequestHasFailed(DefaultMvcTestResult::getRequest);
 	}
 
 	@Test
 	void createWithExceptionDoesNotAllowAccessToResponse() {
-		assertRequestHasFailed(DefaultAssertableMvcResult::getResponse);
+		assertRequestHasFailed(DefaultMvcTestResult::getResponse);
 	}
 
-	@Test
-	void createWithExceptionDoesNotAllowAccessToHandler() {
-		assertRequestHasFailed(DefaultAssertableMvcResult::getHandler);
-	}
-
-	@Test
-	void createWithExceptionDoesNotAllowAccessToInterceptors() {
-		assertRequestHasFailed(DefaultAssertableMvcResult::getInterceptors);
-	}
-
-	@Test
-	void createWithExceptionDoesNotAllowAccessToModelAndView() {
-		assertRequestHasFailed(DefaultAssertableMvcResult::getModelAndView);
-	}
 
 	@Test
 	void createWithExceptionDoesNotAllowAccessToResolvedException() {
-		assertRequestHasFailed(DefaultAssertableMvcResult::getResolvedException);
-	}
-
-	@Test
-	void createWithExceptionDoesNotAllowAccessToFlashMap() {
-		assertRequestHasFailed(DefaultAssertableMvcResult::getFlashMap);
-	}
-
-	@Test
-	void createWithExceptionDoesNotAllowAccessToAsyncResult() {
-		assertRequestHasFailed(DefaultAssertableMvcResult::getAsyncResult);
-	}
-
-	@Test
-	void createWithExceptionDoesNotAllowAccessToAsyncResultWithTimeToWait() {
-		assertRequestHasFailed(result -> result.getAsyncResult(1000));
+		assertRequestHasFailed(DefaultMvcTestResult::getResolvedException);
 	}
 
 	@Test
 	void createWithExceptionReturnsException() {
 		IllegalStateException exception = new IllegalStateException("Expected");
-		DefaultAssertableMvcResult result = new DefaultAssertableMvcResult(null, exception, null);
+		DefaultMvcTestResult result = new DefaultMvcTestResult(null, exception, null);
 		assertThat(result.getUnresolvedException()).isSameAs(exception);
 	}
 
-	private void assertRequestHasFailed(Consumer<DefaultAssertableMvcResult> action) {
-		DefaultAssertableMvcResult result = new DefaultAssertableMvcResult(null, new IllegalStateException("Expected"), null);
+	private void assertRequestHasFailed(Consumer<DefaultMvcTestResult> action) {
+		DefaultMvcTestResult result = new DefaultMvcTestResult(null, new IllegalStateException("Expected"), null);
 		assertThatIllegalStateException().isThrownBy(() -> action.accept(result))
 				.withMessageContaining("Request has failed with unresolved exception");
 	}
