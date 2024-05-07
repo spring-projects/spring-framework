@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link RuntimeHintsRegistrar} implementation that registers resource
- * hints for web util resources.
+ * {@link RuntimeHintsRegistrar} implementation that registers resource hints
+ * for resources in the {@code web.util} package.
  *
  * @author Sebastien Deleuze
  * @since 6.0
