@@ -1,10 +1,10 @@
 [[spring-testing-annotation-contextcustomizerfactories]]
 = `@ContextCustomizerFactories`
 
-`@ContextCustomizerFactories` is used to register `ContextCustomizerFactory`
-implementations for a particular test class, its subclasses, and its nested classes. If
-you wish to register a factory globally, you should register it via the automatic
-discovery mechanism described in
+`@ContextCustomizerFactories` is an annotation that can be applied to a test class to
+register `ContextCustomizerFactory` implementations for the particular test class, its
+subclasses, and its nested classes. If you wish to register a factory globally, you
+should register it via the automatic discovery mechanism described in
 xref:testing/testcontext-framework/ctx-management/context-customizers.adoc[`ContextCustomizerFactory` Configuration].
 
 The following example shows how to register two `ContextCustomizerFactory` implementations:

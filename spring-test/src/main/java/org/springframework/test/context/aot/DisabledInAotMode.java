@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * {@code @DisabledInAotMode} signals that an annotated test class is <em>disabled</em>
+ * {@code @DisabledInAotMode} signals that the annotated test class is <em>disabled</em>
  * in Spring AOT (ahead-of-time) mode, which means that the {@code ApplicationContext}
  * for the test class will not be processed for AOT optimizations at build time.
  *

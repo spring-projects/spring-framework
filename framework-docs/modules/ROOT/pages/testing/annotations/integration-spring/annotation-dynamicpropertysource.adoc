@@ -1,12 +1,12 @@
 [[spring-testing-annotation-dynamicpropertysource]]
 = `@DynamicPropertySource`
 
-`@DynamicPropertySource` is a method-level annotation that you can use to register
-_dynamic_ properties to be added to the set of `PropertySources` in the `Environment` for
-an `ApplicationContext` loaded for an integration test. Dynamic properties are useful
-when you do not know the value of the properties upfront – for example, if the properties
-are managed by an external resource such as for a container managed by the
-{testcontainers-site}[Testcontainers] project.
+`@DynamicPropertySource` is an annotation that can be applied to methods in integration
+test classes that need to register _dynamic_ properties to be added to the set of
+`PropertySources` in the `Environment` for an `ApplicationContext` loaded for an
+integration test. Dynamic properties are useful when you do not know the value of the
+properties upfront – for example, if the properties are managed by an external resource
+such as for a container managed by the {testcontainers-site}[Testcontainers] project.
 
 The following example demonstrates how to register a dynamic property:
 

@@ -35,8 +35,8 @@ import java.lang.annotation.Target;
  * will be supplied a new context.
  *
  * <p>{@code @DirtiesContext} may be used as a class-level and method-level
- * annotation within the same class or class hierarchy. In such scenarios, the
- * {@code ApplicationContext} will be marked as <em>dirty</em> before or
+ * annotation within the same test class or test class hierarchy. In such scenarios,
+ * the {@code ApplicationContext} will be marked as <em>dirty</em> before or
  * after any such annotated method as well as before or after the current test
  * class, depending on the configured {@link #methodMode} and {@link #classMode}.
  * When {@code @DirtiesContext} is declared at both the class level and the

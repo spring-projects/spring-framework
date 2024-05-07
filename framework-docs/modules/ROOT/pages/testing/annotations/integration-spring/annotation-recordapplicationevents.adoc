@@ -2,9 +2,9 @@
 = `@RecordApplicationEvents`
 :page-section-summary-toc: 1
 
-`@RecordApplicationEvents` is a class-level annotation that is used to instruct the
-_Spring TestContext Framework_ to record all application events that are published in the
-`ApplicationContext` during the execution of a single test.
+`@RecordApplicationEvents` is an annotation that can be applied to a test class to
+instruct the _Spring TestContext Framework_ to record all application events that are
+published in the `ApplicationContext` during the execution of a single test.
 
 The recorded events can be accessed via the `ApplicationEvents` API within tests.
 

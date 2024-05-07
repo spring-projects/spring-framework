@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Method-level annotation for integration tests that need to add properties with
- * dynamic values to the {@code Environment}'s set of {@code PropertySources}.
+ * {@code @DynamicPropertySource} is an annotation that can be applied to methods
+ * in integration test classes that need to add properties with dynamic values to
+ * the {@code Environment}'s set of {@code PropertySources}.
  *
  * <p>This annotation and its supporting infrastructure were originally designed
  * to allow properties from
