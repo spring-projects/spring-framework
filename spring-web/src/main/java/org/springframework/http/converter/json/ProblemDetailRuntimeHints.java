@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.http.ProblemDetail;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link RuntimeHintsRegistrar} implementation that registers binding reflection entries
+ * {@link RuntimeHintsRegistrar} implementation that registers binding reflection hints
  * for {@link ProblemDetail} serialization support with Jackson.
  *
  * @author Brian Clozel
@@ -33,7 +34,7 @@ import org.springframework.util.ClassUtils;
 class ProblemDetailRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
 		bindingRegistrar.registerReflectionHints(hints.reflection(), ProblemDetail.class);
 		if (ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader)) {

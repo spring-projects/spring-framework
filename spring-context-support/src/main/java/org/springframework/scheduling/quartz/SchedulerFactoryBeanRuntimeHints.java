@@ -22,11 +22,12 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.annotation.ReflectiveRuntimeHintsRegistrar;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that makes sure {@link SchedulerFactoryBean}
- * reflection entries are registered.
+ * reflection hints are registered.
  *
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
@@ -40,7 +41,7 @@ class SchedulerFactoryBeanRuntimeHints implements RuntimeHintsRegistrar {
 
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		if (!ClassUtils.isPresent(SCHEDULER_FACTORY_CLASS_NAME, classLoader)) {
 			return;
 		}
