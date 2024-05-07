@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.aot.hint.TypeReference;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link RuntimeHintsRegistrar} implementation that registers runtime hints for
- * transaction management.
+ * {@link RuntimeHintsRegistrar} implementation that registers runtime hints
+ * for transaction management.
  *
  * @author Sebastien Deleuze
  * @since 6.0
@@ -35,7 +35,8 @@ class TransactionRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		hints.reflection().registerTypes(TypeReference.listOf(Isolation.class, Propagation.class),
+		hints.reflection().registerTypes(
+				TypeReference.listOf(Isolation.class, Propagation.class),
 				TypeHint.builtWith(MemberCategory.DECLARED_FIELDS));
 	}
 

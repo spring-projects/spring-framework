@@ -77,8 +77,7 @@ public @interface RegisterReflectionForBinding {
 
 	/**
 	 * Classes for which reflection hints should be registered.
-	 * <p>At least one class must be specified either via {@link #value} or
-	 * {@code #classes}.
+	 * <p>At least one class must be specified either via {@link #value} or {@code classes}.
 	 * @see #value()
 	 */
 	@AliasFor("value")

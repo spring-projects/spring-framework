@@ -27,7 +27,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link RuntimeHintsRegistrar} implementation that makes sure {@link SchedulerFactoryBean}
- * reflection entries are registered.
+ * reflection hints are registered.
  *
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
