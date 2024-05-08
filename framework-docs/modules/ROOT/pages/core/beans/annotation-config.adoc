@@ -1,33 +1,16 @@
 [[beans-annotation-config]]
 = Annotation-based Container Configuration
 
-.Are annotations better than XML for configuring Spring?
-****
-The introduction of annotation-based configuration raised the question of whether this
-approach is "`better`" than XML. The short answer is "`it depends.`" The long answer is
-that each approach has its pros and cons, and, usually, it is up to the developer to
-decide which strategy suits them better. Due to the way they are defined, annotations
-provide a lot of context in their declaration, leading to shorter and more concise
-configuration. However, XML excels at wiring up components without touching their source
-code or recompiling them. Some developers prefer having the wiring close to the source
-while others argue that annotated classes are no longer POJOs and, furthermore, that the
-configuration becomes decentralized and harder to control.
+Spring provides comprehensive support for annotation-based configuration, operating on
+metadata in the component class itself by using annotations on the relevant class,
+method, or field declaration. As mentioned in
+xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp-examples-aabpp[Example: The `AutowiredAnnotationBeanPostProcessor`],
+Spring uses `BeanPostProcessors` in conjunction with annotations to make the core IOC
+container aware of specific annotations.
 
-No matter the choice, Spring can accommodate both styles and even mix them together.
-It is worth pointing out that through its xref:core/beans/java.adoc[JavaConfig] option, Spring lets
-annotations be used in a non-invasive way, without touching the target components'
-source code and that, in terms of tooling, all configuration styles are supported by
-{spring-site-tools}[Spring Tools] for Eclipse, Visual Studio Code, and Theia.
-****
-
-An alternative to XML setup is provided by annotation-based configuration, which relies
-on bytecode metadata for wiring up components instead of XML declarations. Instead of
-using XML to describe a bean wiring, the developer moves the configuration into the
-component class itself by using annotations on the relevant class, method, or field
-declaration. As mentioned in xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp-examples-aabpp[Example: The `AutowiredAnnotationBeanPostProcessor`], using a
-`BeanPostProcessor` in conjunction with annotations is a common means of extending the
-Spring IoC container. For example, the xref:core/beans/annotation-config/autowired.adoc[`@Autowired`]
-annotation provides the same capabilities as described in xref:core/beans/dependencies/factory-autowire.adoc[Autowiring Collaborators] but
+For example, the xref:core/beans/annotation-config/autowired.adoc[`@Autowired`]
+annotation provides the same capabilities as described in
+xref:core/beans/dependencies/factory-autowire.adoc[Autowiring Collaborators] but
 with more fine-grained control and wider applicability. In addition, Spring provides
 support for JSR-250 annotations, such as `@PostConstruct` and `@PreDestroy`, as well as
 support for JSR-330 (Dependency Injection for Java) annotations contained in the
@@ -36,13 +19,16 @@ can be found in the xref:core/beans/standard-annotations.adoc[relevant section].
 
 [NOTE]
 ====
-Annotation injection is performed before XML injection. Thus, the XML configuration
-overrides the annotations for properties wired through both approaches.
+Annotation injection is performed before external property injection. Thus, external
+configuration (e.g. XML-specified bean properties) effectively overrides the annotations
+for properties when wired through mixed approaches.
 ====
 
-As always, you can register the post-processors as individual bean definitions, but they
-can also be implicitly registered by including the following tag in an XML-based Spring
-configuration (notice the inclusion of the `context` namespace):
+Technically, you can register the post-processors as individual bean definitions, but they
+are implicitly registered in an `AnnotationConfigApplicationContext` already.
+
+In an XML-based Spring setup, you may include the following configuration tag to enable
+mixing and matching with annotation-based configuration:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----

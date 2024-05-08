@@ -2,36 +2,28 @@
 = Container Overview
 
 The `org.springframework.context.ApplicationContext` interface represents the Spring IoC
-container and is responsible for instantiating, configuring, and assembling the
-beans. The container gets its instructions on what objects to
-instantiate, configure, and assemble by reading configuration metadata. The
-configuration metadata is represented in XML, Java annotations, or Java code. It lets
-you express the objects that compose your application and the rich interdependencies
-between those objects.
+container and is responsible for instantiating, configuring, and assembling the beans.
+The container gets its instructions on the components to instantiate, configure, and
+assemble by reading configuration metadata. The configuration metadata can be represented
+as annotated component classes, configuration classes with factory methods, or external
+XML files or Groovy scripts. With either format, you may compose your application and the
+rich interdependencies between those components.
 
-Several implementations of the `ApplicationContext` interface are supplied
-with Spring. In stand-alone applications, it is common to create an
-instance of
-{spring-framework-api}/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
-or {spring-framework-api}/context/support/FileSystemXmlApplicationContext.html[`FileSystemXmlApplicationContext`].
-While XML has been the traditional format for defining configuration metadata, you can
-instruct the container to use Java annotations or code as the metadata format by
-providing a small amount of XML configuration to declaratively enable support for these
-additional metadata formats.
+Several implementations of the `ApplicationContext` interface are part of core Spring.
+In stand-alone applications, it is common to create an instance of
+{spring-framework-api}/context/annotation/AnnotationConfigApplicationContext.html[`AnnotationConfigApplicationContext`]
+or {spring-framework-api}/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`].
 
 In most application scenarios, explicit user code is not required to instantiate one or
-more instances of a Spring IoC container. For example, in a web application scenario, a
-simple eight (or so) lines of boilerplate web descriptor XML in the `web.xml` file
-of the application typically suffices (see
+more instances of a Spring IoC container. For example, in a plain web application scenario,
+a simple boilerplate web descriptor XML in the `web.xml` file of the application suffices (see
 xref:core/beans/context-introduction.adoc#context-create[Convenient ApplicationContext Instantiation for Web Applications]).
-If you use the {spring-site-tools}[Spring Tools for Eclipse] (an Eclipse-powered
-development environment), you can easily create this boilerplate configuration with a
-few mouse clicks or keystrokes.
+In a Spring Boot scenario, the application context is implicitly bootstrapped for you
+based on common setup conventions.
 
 The following diagram shows a high-level view of how Spring works. Your application classes
 are combined with configuration metadata so that, after the `ApplicationContext` is
-created and initialized, you have a fully configured and executable system or
-application.
+created and initialized, you have a fully configured and executable system or application.
 
 .The Spring IoC container
 image::container-magic.png[]
@@ -43,33 +35,25 @@ image::container-magic.png[]
 
 As the preceding diagram shows, the Spring IoC container consumes a form of
 configuration metadata. This configuration metadata represents how you, as an
-application developer, tell the Spring container to instantiate, configure, and assemble
-the objects in your application.
+application developer, tell the Spring container to instantiate, configure,
+and assemble the components in your application.
 
-Configuration metadata is traditionally supplied in a simple and intuitive XML format,
-which is what most of this chapter uses to convey key concepts and features of the
-Spring IoC container.
-
-NOTE: XML-based metadata is not the only allowed form of configuration metadata.
 The Spring IoC container itself is totally decoupled from the format in which this
 configuration metadata is actually written. These days, many developers choose
-xref:core/beans/java.adoc[Java-based configuration] for their Spring applications.
-
-For information about using other forms of metadata with the Spring container, see:
+xref:core/beans/java.adoc[Java-based configuration] for their Spring applications:
 
 * xref:core/beans/annotation-config.adoc[Annotation-based configuration]: define beans using
-  annotation-based configuration metadata.
+  annotation-based configuration metadata on your application's component classes.
 * xref:core/beans/java.adoc[Java-based configuration]: define beans external to your application
-  classes by using Java rather than XML files. To use these features, see the
+  classes by using Java-based configuration classes. To use these features, see the
   {spring-framework-api}/context/annotation/Configuration.html[`@Configuration`],
   {spring-framework-api}/context/annotation/Bean.html[`@Bean`],
   {spring-framework-api}/context/annotation/Import.html[`@Import`],
   and {spring-framework-api}/context/annotation/DependsOn.html[`@DependsOn`] annotations.
 
-Spring configuration consists of at least one and typically more than one bean
-definition that the container must manage. XML-based configuration metadata configures these
-beans as `<bean/>` elements inside a top-level `<beans/>` element. Java
-configuration typically uses `@Bean`-annotated methods within a `@Configuration` class.
+Spring configuration consists of at least one and typically more than one bean definition
+that the container must manage. Java configuration typically uses `@Bean`-annotated
+methods within a `@Configuration` class, each corresponding to one bean definition.
 
 These bean definitions correspond to the actual objects that make up your application.
 Typically, you define service layer objects, persistence layer objects such as
@@ -79,7 +63,14 @@ Typically, one does not configure fine-grained domain objects in the container, 
 it is usually the responsibility of repositories and business logic to create and load
 domain objects.
 
-The following example shows the basic structure of XML-based configuration metadata:
+
+
+[[beans-factory-xml]]
+=== XML as an External Configuration DSL
+
+XML-based configuration metadata configures these beans as `<bean/>` elements inside
+a top-level `<beans/>` element. The following example shows the basic structure of
+XML-based configuration metadata:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -110,14 +101,9 @@ The value of the `id` attribute can be used to refer to collaborating objects. T
 for referring to collaborating objects is not shown in this example. See
 xref:core/beans/dependencies.adoc[Dependencies] for more information.
 
-
-
-[[beans-factory-instantiation]]
-== Instantiating a Container
-
-The location path or paths
-supplied to an `ApplicationContext` constructor are resource strings that let
-the container load configuration metadata from a variety of external resources, such
+For instantiating a container, the location path or paths to the XML resource files
+need to be supplied to a `ClassPathXmlApplicationContext` constructor that let the
+container load configuration metadata from a variety of external resources, such
 as the local file system, the Java `CLASSPATH`, and so on.
 
 [tabs]
@@ -209,9 +195,9 @@ xref:core/beans/dependencies.adoc[Dependencies].
 It can be useful to have bean definitions span multiple XML files. Often, each individual
 XML configuration file represents a logical layer or module in your architecture.
 
-You can use the application context constructor to load bean definitions from all these
+You can use the `ClassPathXmlApplicationContext` constructor to load bean definitions from
 XML fragments. This constructor takes multiple `Resource` locations, as was shown in the
-xref:core/beans/basics.adoc#beans-factory-instantiation[previous section]. Alternatively,
+xref:core/beans/basics.adoc#beans-factory-xml[previous section]. Alternatively,
 use one or more occurrences of the `<import/>` element to load bean definitions from
 another file or files. The following example shows how to do so:
 
@@ -259,7 +245,7 @@ configuration features beyond plain bean definitions are available in a selectio
 of XML namespaces provided by Spring -- for example, the `context` and `util` namespaces.
 
 
-[[groovy-bean-definition-dsl]]
+[[beans-factory-groovy]]
 === The Groovy Bean Definition DSL
 
 As a further example for externalized configuration metadata, bean definitions can also
@@ -417,7 +403,6 @@ code should never use them. Indeed, your application code should have no calls t
 Spring's integration with web frameworks provides dependency injection for various web
 framework components such as controllers and JSF-managed beans, letting you declare
 a dependency on a specific bean through metadata (such as an autowiring annotation).
-
 
 
 
