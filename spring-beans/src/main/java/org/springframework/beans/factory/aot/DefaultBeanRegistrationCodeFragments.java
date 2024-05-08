@@ -79,8 +79,9 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	@Override
 	public ClassName getTarget(RegisteredBean registeredBean) {
 		if (hasInstanceSupplier()) {
-			throw new IllegalStateException("Default code generation is not supported for bean definitions "
-					+ "declaring an instance supplier callback: " + registeredBean.getMergedBeanDefinition());
+			String resourceDescription = registeredBean.getMergedBeanDefinition().getResourceDescription();
+			throw new IllegalStateException("Error processing bean with name '" + registeredBean.getBeanName() + "'" +
+					(resourceDescription != null ? " defined in " + resourceDescription : "") + ": instance supplier is not supported");
 		}
 		Class<?> target = extractDeclaringClass(registeredBean, this.instantiationDescriptor.get());
 		while (target.getName().startsWith("java.") && registeredBean.isInnerBean()) {
