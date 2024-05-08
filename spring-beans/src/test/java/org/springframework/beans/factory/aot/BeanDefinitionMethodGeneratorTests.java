@@ -692,8 +692,8 @@ class BeanDefinitionMethodGeneratorTests {
 				this.methodGeneratorFactory, registeredBean, null,
 				List.of());
 		assertThatIllegalStateException().isThrownBy(() -> generator.generateBeanDefinitionMethod(
-				this.generationContext, this.beanRegistrationsCode)).withMessageStartingWith(
-				"Default code generation is not supported for bean definitions declaring an instance supplier callback");
+				this.generationContext, this.beanRegistrationsCode)).withMessage(
+				"Error processing bean with name 'testBean': instance supplier is not supported");
 	}
 
 	@Test
@@ -729,8 +729,8 @@ class BeanDefinitionMethodGeneratorTests {
 				this.methodGeneratorFactory, registeredBean, null,
 				List.of(aotContribution));
 		assertThatIllegalStateException().isThrownBy(() -> generator.generateBeanDefinitionMethod(
-				this.generationContext, this.beanRegistrationsCode)).withMessageStartingWith(
-						"Default code generation is not supported for bean definitions declaring an instance supplier callback");
+				this.generationContext, this.beanRegistrationsCode)).withMessage(
+						"Error processing bean with name 'testBean': instance supplier is not supported");
 	}
 
 	@Test
