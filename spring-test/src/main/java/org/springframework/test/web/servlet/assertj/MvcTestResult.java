@@ -44,10 +44,12 @@ import org.springframework.test.web.servlet.MvcResult;
 public interface MvcTestResult extends AssertProvider<MvcTestResultAssert> {
 
 	/**
-	 * Return the {@linkplain MvcResult result} of the processing.
+	 * Return the {@linkplain MvcResult result} of the processing. If
+	 * the processing has failed with an unresolved exception, the
+	 * result is not available, see {@link #getUnresolvedException()}.
 	 * @return the {@link MvcResult}
-	 * @throw {@link IllegalStateException} if the request failed unexpectedly
-	 * @see #getUnresolvedException()
+	 * @throws IllegalStateException if the processing has failed with
+	 * an unresolved exception
 	 */
 	MvcResult getMvcResult();
 
