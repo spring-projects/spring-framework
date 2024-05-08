@@ -51,6 +51,7 @@ jobs:
           artifact-properties: |
             /**/framework-docs-*.zip::zip.name=spring-framework,zip.deployed=false
             /**/framework-docs-*-docs.zip::zip.type=docs
+            /**/framework-docs-*-dist.zip::zip.type=dist
             /**/framework-docs-*-schema.zip::zip.type=schema
       - name: Send notification
         uses: ./.github/actions/send-notification
