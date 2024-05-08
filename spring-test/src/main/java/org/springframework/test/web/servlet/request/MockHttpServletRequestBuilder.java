@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.test.web.servlet.request;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -40,6 +42,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.lang.Nullable;
@@ -120,6 +123,8 @@ public class MockHttpServletRequestBuilder
 	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
 	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+
+	private final MultiValueMap<String, String> formFields = new LinkedMultiValueMap<>();
 
 	private final List<Cookie> cookies = new ArrayList<>();
 
@@ -423,6 +428,30 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
+	 * Appends the given value(s) to the given form field and also add to the
+	 * {@link #param(String, String...) request parameters} map.
+	 * @param name the field name
+	 * @param values one or more values
+	 * @since 6.1.7
+	 */
+	public MockHttpServletRequestBuilder formField(String name, String... values) {
+		param(name, values);
+		this.formFields.addAll(name, Arrays.asList(values));
+		return this;
+	}
+
+	/**
+	 * Variant of {@link #formField(String, String...)} with a {@link MultiValueMap}.
+	 * @param formFields the form fields to add
+	 * @since 6.1.7
+	 */
+	public MockHttpServletRequestBuilder formFields(MultiValueMap<String, String> formFields) {
+		params(formFields);
+		this.formFields.addAll(formFields);
+		return this;
+	}
+
+	/**
 	 * Add the given cookies to the request. Cookies are always added.
 	 * @param cookies the cookies to add
 	 */
@@ -629,6 +658,12 @@ public class MockHttpServletRequestBuilder
 				this.queryParams.put(paramName, entry.getValue());
 			}
 		}
+		for (Map.Entry<String, List<String>> entry : parentBuilder.formFields.entrySet()) {
+			String paramName = entry.getKey();
+			if (!this.formFields.containsKey(paramName)) {
+				this.formFields.put(paramName, entry.getValue());
+			}
+		}
 		for (Cookie cookie : parentBuilder.cookies) {
 			if (!containsCookie(cookie)) {
 				this.cookies.add(cookie);
@@ -744,6 +779,24 @@ public class MockHttpServletRequestBuilder
 			}
 		});
 
+		if (!this.formFields.isEmpty()) {
+			if (this.content != null && this.content.length > 0) {
+				throw new IllegalStateException("Could not write form data with an existing body");
+			}
+			Charset charset = (this.characterEncoding != null
+					? Charset.forName(this.characterEncoding) : StandardCharsets.UTF_8);
+			MediaType mediaType = (request.getContentType() != null
+					? MediaType.parseMediaType(request.getContentType())
+					: new MediaType(MediaType.APPLICATION_FORM_URLENCODED, charset));
+			if (!mediaType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)) {
+				throw new IllegalStateException("Invalid content type: '" + mediaType
+						+ "' is not compatible with '" + MediaType.APPLICATION_FORM_URLENCODED + "'");
+			}
+			request.setContent(writeFormData(mediaType, charset));
+			if (request.getContentType() == null) {
+				request.setContentType(mediaType.toString());
+			}
+		}
 		if (this.content != null && this.content.length > 0) {
 			String requestContentType = request.getContentType();
 			if (requestContentType != null) {
@@ -818,6 +871,32 @@ public class MockHttpServletRequestBuilder
 			value = (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
 			request.addParameter(UriUtils.decode(key, StandardCharsets.UTF_8), value);
 		}));
+	}
+
+	private byte[] writeFormData(MediaType mediaType, Charset charset) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		HttpOutputMessage message = new HttpOutputMessage() {
+			@Override
+			public OutputStream getBody() {
+				return out;
+			}
+
+			@Override
+			public HttpHeaders getHeaders() {
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(mediaType);
+				return headers;
+			}
+		};
+		try {
+			FormHttpMessageConverter messageConverter = new FormHttpMessageConverter();
+			messageConverter.setCharset(charset);
+			messageConverter.write(this.formFields, mediaType, message);
+			return out.toByteArray();
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to write form data to request body", ex);
+		}
 	}
 
 	private MultiValueMap<String, String> parseFormData(MediaType mediaType) {

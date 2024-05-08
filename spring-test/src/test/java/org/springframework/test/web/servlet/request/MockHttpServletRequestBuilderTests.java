@@ -29,6 +29,7 @@ import java.util.Map;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
+import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -47,6 +48,8 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.entry;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -286,6 +289,70 @@ class MockHttpServletRequestBuilderTests {
 		assertThat(request.getQueryString()).isEqualTo("foo%5B0%5D=bar&foo%5B1%5D=baz");
 		assertThat(request.getParameter("foo[0]")).isEqualTo("bar");
 		assertThat(request.getParameter("foo[1]")).isEqualTo("baz");
+	}
+
+	@Test
+	void formField() {
+		this.builder = new MockHttpServletRequestBuilder(POST, "/");
+		this.builder.formField("foo", "bar");
+		this.builder.formField("foo", "baz");
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getParameterMap().get("foo")).containsExactly("bar", "baz");
+		assertThat(request).satisfies(hasFormData("foo=bar&foo=baz"));
+	}
+
+	@Test
+	void formFieldMap() {
+		this.builder = new MockHttpServletRequestBuilder(POST, "/");
+		MultiValueMap<String, String> formFields = new LinkedMultiValueMap<>();
+		List<String> values = new ArrayList<>();
+		values.add("bar");
+		values.add("baz");
+		formFields.put("foo", values);
+		this.builder.formFields(formFields);
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getParameterMap().get("foo")).containsExactly("bar", "baz");
+		assertThat(request).satisfies(hasFormData("foo=bar&foo=baz"));
+	}
+
+	@Test
+	void formFieldsAreEncoded() {
+		MockHttpServletRequest request = new MockHttpServletRequestBuilder(POST, "/")
+				.formField("name 1", "value 1").formField("name 2", "value A", "value B")
+				.buildRequest(new MockServletContext());
+		assertThat(request.getParameterMap()).containsOnly(
+				entry("name 1", new String[] { "value 1" }),
+				entry("name 2", new String[] { "value A", "value B" }));
+		assertThat(request).satisfies(hasFormData("name+1=value+1&name+2=value+A&name+2=value+B"));
+	}
+
+	@Test
+	void formFieldWithContent() {
+		this.builder = new MockHttpServletRequestBuilder(POST, "/");
+		this.builder.content("Should not have content");
+		this.builder.formField("foo", "bar");
+		assertThatIllegalStateException().isThrownBy(() -> this.builder.buildRequest(this.servletContext))
+				.withMessage("Could not write form data with an existing body");
+	}
+
+	@Test
+	void formFieldWithIncompatibleMediaType() {
+		this.builder = new MockHttpServletRequestBuilder(POST, "/");
+		this.builder.contentType(MediaType.TEXT_PLAIN);
+		this.builder.formField("foo", "bar");
+		assertThatIllegalStateException().isThrownBy(() -> this.builder.buildRequest(this.servletContext))
+				.withMessage("Invalid content type: 'text/plain' is not compatible with 'application/x-www-form-urlencoded'");
+	}
+
+	private ThrowingConsumer<MockHttpServletRequest> hasFormData(String body) {
+		return request -> {
+			assertThat(request.getContentAsString()).isEqualTo(body);
+			assertThat(request.getContentType()).isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
+		};
 	}
 
 	@Test
