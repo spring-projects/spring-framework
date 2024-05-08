@@ -49,9 +49,10 @@ jobs:
           signing-key: ${{ secrets.GPG_PRIVATE_KEY }}
           signing-passphrase: ${{ secrets.GPG_PASSPHRASE }}
           artifact-properties: |
-            /**/framework-api-*.zip::zip.name=spring-framework,zip.deployed=false
-            /**/framework-api-*-docs.zip::zip.type=docs
-            /**/framework-api-*-schema.zip::zip.type=schema
+            /**/spring-*.zip::zip.name=spring-framework,zip.deployed=false
+            /**/spring-*-docs.zip::zip.type=docs
+            /**/spring-*-dist.zip::zip.type=dist
+            /**/spring-*-schema.zip::zip.type=schema
       - name: Send notification
         uses: ./.github/actions/send-notification
         if: always()
