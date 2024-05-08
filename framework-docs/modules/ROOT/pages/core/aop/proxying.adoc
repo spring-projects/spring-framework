@@ -19,6 +19,10 @@ you can do so. However, you should consider the following issues:
   since the CGLIB proxy instance is created through Objenesis. Only if your JVM does
   not allow for constructor bypassing, you might see double invocations and
   corresponding debug log entries from Spring's AOP support.
+* Your CGLIB proxy usage may face limitations with the JDK 9+ platform module system.
+  As a typical case, you cannot create a CGLIB proxy for a class from the `java.lang`
+  package when deploying on the module path. Such cases require a JVM bootstrap flag
+  `--add-opens=java.base/java.lang=ALL-UNNAMED` which is not available for modules.
 
 To force the use of CGLIB proxies, set the value of the `proxy-target-class` attribute
 of the `<aop:config>` element to true, as follows:

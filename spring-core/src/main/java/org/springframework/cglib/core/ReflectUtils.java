@@ -544,7 +544,15 @@ public class ReflectUtils {
 
 		// No defineClass variant available at all?
 		if (c == null) {
-			throw new CodeGenerationException(t);
+			throw new CodeGenerationException(t) {
+				@Override
+				public String getMessage() {
+					return "No compatible defineClass mechanism detected: " +
+							"JVM should be started with --add-opens=java.base/java.lang=ALL-UNNAMED " +
+							"for ClassLoader.defineClass to be accessible. On the module path, " +
+							"you may not be able to define this CGLIB-generated class at all.";
+				}
+			};
 		}
 
 		// Force static initializers to run.
