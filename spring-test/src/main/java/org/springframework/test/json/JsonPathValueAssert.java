@@ -22,7 +22,7 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 
 /**
- * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied
+ * AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be applied
  * to a JSON value produced by evaluating a {@linkplain JsonPath JSON path}
  * expression.
  *

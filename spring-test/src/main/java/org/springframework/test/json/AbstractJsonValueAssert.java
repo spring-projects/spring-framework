@@ -41,7 +41,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Base AssertJ {@link org.assertj.core.api.Assert assertions} that can be
+ * Base AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be
  * applied to a JSON value.
  *
  * <p>In JSON, values must be one of the following data types:

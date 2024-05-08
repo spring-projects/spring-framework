@@ -44,17 +44,17 @@ import org.springframework.util.Assert;
 import org.springframework.util.function.ThrowingBiFunction;
 
 /**
- * Base AssertJ {@link org.assertj.core.api.Assert assertions} that can be
+ * Base AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be
  * applied to a JSON document.
  *
- * <p>Support evaluating {@linkplain JsonPath JSON path} expressions and
+ * <p>Supports evaluating {@linkplain JsonPath JSON path} expressions and
  * extracting a part of the document for further {@linkplain JsonPathValueAssert
  * assertions} on the value.
  *
- * <p>Also support comparing the JSON document against a target, using
+ * <p>Also supports comparing the JSON document against a target, using
  * {@linkplain JSONCompare JSON Assert}. Resources that are loaded from
  * the classpath can be relative if a {@linkplain #withResourceLoadClass(Class)
- * class} is provided. By default, {@code UTF-8} is used to load resources
+ * class} is provided. By default, {@code UTF-8} is used to load resources,
  * but this can be overridden using {@link #withCharset(Charset)}.
  *
  * @author Stephane Nicoll
@@ -85,7 +85,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	/**
 	 * Create an assert for the given JSON document.
 	 * <p>Path can be converted to a value object using the given
-	 * {@linkplain GenericHttpMessageConverter json message converter}.
+	 * {@linkplain GenericHttpMessageConverter JSON message converter}.
 	 * @param json the JSON document to assert
 	 * @param jsonMessageConverter the converter to use
 	 * @param selfType the implementation type of this assert
@@ -379,12 +379,13 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	}
 
 	/**
-	 * Override the class used to load resources. Resources can be loaded from
-	 * an absolute location or relative to tpe specified class. For instance,
-	 * specifying {@code com.example.MyClass} as the resource class allows you
-	 * to use "my-file.json" to load {@code /com/example/my-file.json}.
-	 * @param resourceLoadClass the class used to load resources or {@code null}
-	 * to only use absolute paths.
+	 * Override the class used to load resources.
+	 * <p>Resources can be loaded from an absolute location or relative to the
+	 * specified class. For instance, specifying {@code com.example.MyClass} as
+	 * the resource class allows you to use "my-file.json" to load
+	 * {@code /com/example/my-file.json}.
+	 * @param resourceLoadClass the class used to load resources, or {@code null}
+	 * to only use absolute paths
 	 */
 	public SELF withResourceLoadClass(@Nullable Class<?> resourceLoadClass) {
 		this.resourceLoadClass = resourceLoadClass;
@@ -393,8 +394,8 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	}
 
 	/**
-	 * Override the {@link Charset} to use to load resources. By default,
-	 * resources are loaded using {@code UTF-8}.
+	 * Override the {@link Charset} to use to load resources.
+	 * <p>By default, resources are loaded using {@code UTF-8}.
 	 * @param charset the charset to use, or {@code null} to use the default
 	 */
 	public SELF withCharset(@Nullable Charset charset) {

@@ -33,8 +33,8 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied to
- * a {@linkplain ModelAndView#getModel() model}.
+ * AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be applied
+ * to a {@linkplain ModelAndView#getModel() model}.
  *
  * @author Stephane Nicoll
  * @since 6.2
@@ -51,7 +51,7 @@ public class ModelAssert extends AbstractMapAssert<ModelAssert, Map<String, Obje
 	 * Return a new {@linkplain AbstractBindingResultAssert assertion} object
 	 * that uses the {@link BindingResult} with the given {@code name} as the
 	 * object to test.
-	 * <p>Example: <pre><code class='java'>
+	 * <p>Example: <pre><code class="java">
 	 * // Check that the "person" attribute in the model has 2 errors:
 	 * assertThat(...).model().extractingBindingResult("person").hasErrorsCount(2);
 	 * </code></pre>

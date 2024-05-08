@@ -300,14 +300,14 @@ public class MockMvcTesterIntegrationTests {
 		void doesNotHaveUnresolvedExceptionWithUnresolvedException() {
 			assertThatExceptionOfType(AssertionError.class)
 					.isThrownBy(() -> assertThat(perform(get("/error/1"))).doesNotHaveUnresolvedException())
-					.withMessage("Expecting request to have succeeded but it has failed");
+					.withMessage("Expected request to succeed, but it failed");
 		}
 
 		@Test
 		void hasUnresolvedExceptionWithoutUnresolvedException() {
 			assertThatExceptionOfType(AssertionError.class)
 					.isThrownBy(() -> assertThat(perform(get("/greet"))).hasUnresolvedException())
-					.withMessage("Expecting request to have failed but it has succeeded");
+					.withMessage("Expected request to fail, but it succeeded");
 		}
 
 		@Test
@@ -321,10 +321,10 @@ public class MockMvcTesterIntegrationTests {
 		void unresolvedExceptionWithSuccessfulRequest() {
 			assertThatExceptionOfType(AssertionError.class)
 					.isThrownBy(() -> assertThat(perform(get("/greet"))).unresolvedException())
-					.withMessage("Expecting request to have failed but it has succeeded");
+					.withMessage("Expected request to fail, but it succeeded");
 		}
 
-		// Check that assertions fail immediately if request has failed with unresolved exception
+		// Check that assertions fail immediately if request failed with unresolved exception
 
 		@Test
 		void assertAndApplyWithUnresolvedException() {
@@ -409,7 +409,7 @@ public class MockMvcTesterIntegrationTests {
 			MvcTestResult result = perform(get("/error/1"));
 			assertThatExceptionOfType(AssertionError.class)
 					.isThrownBy(() -> assertions.accept(result))
-					.withMessageContainingAll("Request has failed unexpectedly:",
+					.withMessageContainingAll("Request failed unexpectedly:",
 							ServletException.class.getName(), IllegalStateException.class.getName(),
 							"Expected");
 		}

@@ -38,11 +38,12 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Test Spring MVC applications with {@link MockMvc} for server request handling
- * using {@link org.assertj.core.api.Assertions AssertJ}.
+ * {@code MockMvcTester} provides support for testing Spring MVC applications
+ * with {@link MockMvc} for server request handling using
+ * {@linkplain org.assertj.core.api.Assertions AssertJ}.
  *
  * <p>A tester instance can be created from a {@link WebApplicationContext}:
- * <pre><code class='java'>
+ * <pre><code class="java">
  * // Create an instance with default settings
  * MockMvcTester mvc = MockMvcTester.from(applicationContext);
  *
@@ -51,30 +52,31 @@ import org.springframework.web.context.WebApplicationContext;
  *         builder -> builder.addFilters(filter).build());
  * </code></pre>
  *
- * <p>A tester can be created standalone by providing the controller(s) to
- * include in a standalone setup:<pre><code class='java'>
+ * <p>A tester can be created in standalone mode by providing the controller(s)
+ * to include:<pre><code class="java">
  * // Create an instance for PersonController
  * MockMvcTester mvc = MockMvcTester.of(new PersonController());
  * </code></pre>
  *
- * <p>Once a test instance is available, you can perform requests in
- * a similar fashion as with {@link MockMvc}, and wrapping the result in
- * {@code assertThat} provides access to assertions. For instance:
- * <pre><code class='java'>
+ * <p>Once a tester instance is available, you can perform requests in a similar
+ * fashion as with {@link MockMvc}, and wrapping the result in
+ * {@code assertThat()} provides access to assertions. For instance:
+ * <pre><code class="java">
  * // perform a GET on /hi and assert the response body is equal to Hello
  * assertThat(mvc.perform(get("/hi")))
  *         .hasStatusOk().hasBodyTextEqualTo("Hello");
  * </code></pre>
  *
- * <p>A main difference with {@link MockMvc} is that an unresolved exception
- * is not thrown directly. Rather an {@link MvcTestResult} is available
- * with an {@link MvcTestResult#getUnresolvedException() unresolved
- * exception}. You can assert that a request has failed unexpectedly:
- * <pre><code class='java'>
- * // perform a GET on /hi and assert the response body is equal to Hello
+ * <p>One main difference between {@link MockMvc} and {@code MockMvcTester} is
+ * that an unresolved exception is not thrown directly when using
+ * {@code MockMvcTester}. Rather an {@link MvcTestResult} is available with an
+ * {@linkplain MvcTestResult#getUnresolvedException() unresolved exception}
+ * which allows you to assert that a request failed unexpectedly:
+ * <pre><code class="java">
+ * // perform a GET on /boom and assert the message for the the unresolved exception
  * assertThat(mvc.perform(get("/boom")))
  *         .hasUnresolvedException())
- * 		   .withMessage("Test exception");
+ *         .withMessage("Test exception");
  * </code></pre>
  *
  * <p>{@link MockMvcTester} can be configured with a list of
@@ -120,7 +122,7 @@ public final class MockMvcTester {
 	 * @param applicationContext the application context to detect the Spring
 	 * MVC infrastructure and application controllers from
 	 * @param customizations a function that creates a {@link MockMvc}
-	 * instance based on a {@link DefaultMockMvcBuilder}.
+	 * instance based on a {@link DefaultMockMvcBuilder}
 	 * @see MockMvcBuilders#webAppContextSetup(WebApplicationContext)
 	 */
 	public static MockMvcTester from(WebApplicationContext applicationContext,
@@ -204,7 +206,7 @@ public final class MockMvcTester {
 	 * request, wrapping the invocation in {@code assertThat}. The following
 	 * asserts that a {@linkplain MockMvcRequestBuilders#get(URI) GET} request
 	 * against "/greet" has an HTTP status code 200 (OK) and a simple body:
-	 * <pre><code class='java'>assertThat(mvc.perform(get("/greet")))
+	 * <pre><code class="java">assertThat(mvc.perform(get("/greet")))
 	 *       .hasStatusOk()
 	 *       .body().asString().isEqualTo("Hello");
 	 * </code></pre>
@@ -215,7 +217,7 @@ public final class MockMvcTester {
 	 * {@code /boom} throws an {@code IllegalStateException}, the following
 	 * asserts that the invocation has indeed failed with the expected error
 	 * message:
-	 * <pre><code class='java'>assertThat(mvc.perform(post("/boom")))
+	 * <pre><code class="java">assertThat(mvc.perform(post("/boom")))
 	 *       .unresolvedException().isInstanceOf(IllegalStateException.class)
 	 *       .hasMessage("Expected");
 	 * </code></pre>

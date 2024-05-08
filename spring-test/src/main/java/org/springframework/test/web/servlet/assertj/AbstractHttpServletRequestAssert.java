@@ -34,7 +34,7 @@ import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.context.request.async.DeferredResult;
 
 /**
- * Base AssertJ {@link org.assertj.core.api.Assert assertions} that can be
+ * Base AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be
  * applied to an {@link HttpServletRequest}.
  *
  * @author Stephane Nicoll

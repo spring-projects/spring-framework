@@ -56,7 +56,7 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	/**
 	 * Return a new {@linkplain AbstractStringAssert assertion} object that uses
 	 * the response body converted to text as the object to test.
-	 * <p>Examples: <pre><code class='java'>
+	 * <p>Examples: <pre><code class="java">
 	 * // Check that the response body is equal to "Hello World":
 	 * assertThat(response).bodyText().isEqualTo("Hello World");
 	 * </code></pre>
@@ -70,7 +70,7 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	 * uses the response body converted to text as the object to test. Compared
 	 * to {@link #bodyText()}, the assertion object provides dedicated JSON
 	 * support.
-	 * <p>Examples: <pre><code class='java'>
+	 * <p>Examples: <pre><code class="java">
 	 * // Check that the response body is strictly equal to the content of
 	 * // "/com/acme/sample/person-created.json":
 	 * assertThat(response).bodyJson()
@@ -82,7 +82,7 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	 *         .isStrictlyEqualToJson("person-created.json");
 	 * </code></pre>
 	 * The returned assert object also supports JSON path expressions.
-	 * <p>Examples: <pre><code class='java'>
+	 * <p>Examples: <pre><code class="java">
 	 * // Check that the JSON document does not have an "error" element
 	 * assertThat(response).bodyJson().doesNotHavePath("$.error");
 	 *
@@ -114,7 +114,7 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	 * Return a new {@linkplain UriAssert assertion} object that uses the
 	 * forwarded URL as the object to test. If a simple equality check is
 	 * required, consider using {@link #hasForwardedUrl(String)} instead.
-	 * <p>Example: <pre><code class='java'>
+	 * <p>Example: <pre><code class="java">
 	 * // Check that the forwarded URL starts with "/orders/":
 	 * assertThat(response).forwardedUrl().matchPattern("/orders/*);
 	 * </code></pre>
@@ -127,7 +127,7 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	 * Return a new {@linkplain UriAssert assertion} object that uses the
 	 * redirected URL as the object to test. If a simple equality check is
 	 * required, consider using {@link #hasRedirectedUrl(String)} instead.
-	 * <p>Example: <pre><code class='java'>
+	 * <p>Example: <pre><code class="java">
 	 * // Check that the redirected URL starts with "/orders/":
 	 * assertThat(response).redirectedUrl().matchPattern("/orders/*);
 	 * </code></pre>

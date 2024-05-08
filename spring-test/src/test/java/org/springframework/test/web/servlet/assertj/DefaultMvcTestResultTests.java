@@ -48,18 +48,17 @@ class DefaultMvcTestResultTests {
 
 	@Test
 	void createWithExceptionDoesNotAllowAccessToRequest() {
-		assertRequestHasFailed(DefaultMvcTestResult::getRequest);
+		assertRequestFailed(DefaultMvcTestResult::getRequest);
 	}
 
 	@Test
 	void createWithExceptionDoesNotAllowAccessToResponse() {
-		assertRequestHasFailed(DefaultMvcTestResult::getResponse);
+		assertRequestFailed(DefaultMvcTestResult::getResponse);
 	}
-
 
 	@Test
 	void createWithExceptionDoesNotAllowAccessToResolvedException() {
-		assertRequestHasFailed(DefaultMvcTestResult::getResolvedException);
+		assertRequestFailed(DefaultMvcTestResult::getResolvedException);
 	}
 
 	@Test
@@ -69,10 +68,11 @@ class DefaultMvcTestResultTests {
 		assertThat(result.getUnresolvedException()).isSameAs(exception);
 	}
 
-	private void assertRequestHasFailed(Consumer<DefaultMvcTestResult> action) {
+	private void assertRequestFailed(Consumer<DefaultMvcTestResult> action) {
 		DefaultMvcTestResult result = new DefaultMvcTestResult(null, new IllegalStateException("Expected"), null);
-		assertThatIllegalStateException().isThrownBy(() -> action.accept(result))
-				.withMessageContaining("Request has failed with unresolved exception");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> action.accept(result))
+				.withMessageContaining("Request failed with unresolved exception");
 	}
 
 }

@@ -36,7 +36,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
- * Base AssertJ {@link org.assertj.core.api.Assert assertions} that can be
+ * Base AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be
  * applied to any object that provides an {@link HttpServletResponse}. This
  * provides direct access to response assertions while also providing access to
  * a different top-level object.
@@ -91,7 +91,7 @@ public abstract class AbstractHttpServletResponseAssert<R extends HttpServletRes
 	 * {@link HttpHeaders} as the object to test. The returned assertion
 	 * object provides all the regular {@linkplain AbstractMapAssert map
 	 * assertions}, with headers mapped by header name.
-	 * Examples: <pre><code class='java'>
+	 * Examples: <pre><code class="java">
 	 * // Check for the presence of the Accept header:
 	 * assertThat(response).headers().containsHeader(HttpHeaders.ACCEPT);
 	 *

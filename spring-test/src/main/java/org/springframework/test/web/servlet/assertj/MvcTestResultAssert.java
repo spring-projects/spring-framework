@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied
+ * AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be applied
  * to {@link MvcTestResult}.
  *
  * @author Stephane Nicoll
@@ -60,7 +60,7 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	}
 
 	/**
-	 * Verify that the request has failed with an unresolved exception, and
+	 * Verify that the request failed with an unresolved exception, and
 	 * return a new {@linkplain AbstractThrowableAssert assertion} object
 	 * that uses the unresolved {@link Exception} as the object to test.
 	 */
@@ -87,11 +87,11 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 
 	/**
 	 * Return a new {@linkplain HandlerResultAssert assertion} object that uses
-	 * the handler as the object to test. For a method invocation on a
-	 * controller, this is relative method handler
-	 * <p>Example: <pre><code class='java'>
+	 * the handler as the object to test.
+	 * <p>For a method invocation on a controller, this is a relative method handler.
+	 * <p>Example: <pre><code class="java">
 	 * // Check that a GET to "/greet" is invoked on a "handleGreet" method name
-	 * assertThat(mvc.perform(get("/greet")).handler().method().hasName("sayGreet");
+	 * assertThat(mvc.perform(get("/greet")).handler().method().hasName("handleGreet");
 	 * </code></pre>
 	 */
 	public HandlerResultAssert handler() {
@@ -127,7 +127,7 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	}
 
 	/**
-	 * Verify that an {@linkplain AbstractHttpServletRequestAssert#hasAsyncStarted(boolean)
+	 * Verify that {@linkplain AbstractHttpServletRequestAssert#hasAsyncStarted(boolean)
 	 * asynchronous processing has started} and return a new
 	 * {@linkplain ObjectAssert assertion} object that uses the asynchronous
 	 * result as the object to test.
@@ -138,46 +138,46 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	}
 
 	/**
-	 * Verify that the request has failed with an unresolved exception.
+	 * Verify that the request failed with an unresolved exception.
 	 * @see #unresolvedException()
 	 */
 	public MvcTestResultAssert hasUnresolvedException() {
 		Assertions.assertThat(this.actual.getUnresolvedException())
-				.withFailMessage("Expecting request to have failed but it has succeeded").isNotNull();
+				.withFailMessage("Expected request to fail, but it succeeded").isNotNull();
 		return this;
 	}
 
 	/**
-	 * Verify that the request has not failed with an unresolved exception.
+	 * Verify that the request did not fail with an unresolved exception.
 	 */
 	public MvcTestResultAssert doesNotHaveUnresolvedException() {
 		Assertions.assertThat(this.actual.getUnresolvedException())
-				.withFailMessage("Expecting request to have succeeded but it has failed").isNull();
+				.withFailMessage("Expected request to succeed, but it failed").isNull();
 		return this;
 	}
 
 	/**
-	 * Verify that the actual mvc result matches the given {@link ResultMatcher}.
+	 * Verify that the actual MVC result matches the given {@link ResultMatcher}.
 	 * @param resultMatcher the result matcher to invoke
 	 */
 	public MvcTestResultAssert matches(ResultMatcher resultMatcher) {
 		MvcResult mvcResult = getMvcResult();
-		return super.satisfies(tmc -> resultMatcher.match(mvcResult));
+		return super.satisfies(mvcTestResult -> resultMatcher.match(mvcResult));
 	}
 
 	/**
-	 * Apply the given {@link ResultHandler} to the actual mvc result.
+	 * Apply the given {@link ResultHandler} to the actual MVC result.
 	 * @param resultHandler the result matcher to invoke
 	 */
 	public MvcTestResultAssert apply(ResultHandler resultHandler) {
 		MvcResult mvcResult = getMvcResult();
-		return satisfies(tmc -> resultHandler.handle(mvcResult));
+		return satisfies(mvcTestResult -> resultHandler.handle(mvcResult));
 	}
 
 	/**
-	 * Verify that a {@link ModelAndView} is available with a view equals to
-	 * the given one. For more advanced assertions, consider using
-	 * {@link #viewName()}
+	 * Verify that a {@link ModelAndView} is available with a view name equal to
+	 * the given one.
+	 * <p>For more advanced assertions, consider using {@link #viewName()}.
 	 * @param viewName the expected view name
 	 */
 	public MvcTestResultAssert hasViewName(String viewName) {
@@ -212,7 +212,7 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	private static final class RequestFailedUnexpectedly extends BasicErrorMessageFactory {
 
 		private RequestFailedUnexpectedly(Exception ex) {
-			super("%nRequest has failed unexpectedly:%n%s", unquotedString(getIndentedStackTraceAsString(ex)));
+			super("%nRequest failed unexpectedly:%n%s", unquotedString(getIndentedStackTraceAsString(ex)));
 		}
 
 		private static String getIndentedStackTraceAsString(Throwable ex) {

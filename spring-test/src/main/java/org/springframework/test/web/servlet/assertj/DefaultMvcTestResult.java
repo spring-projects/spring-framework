@@ -39,20 +39,26 @@ final class DefaultMvcTestResult implements MvcTestResult {
 	@Nullable
 	private final GenericHttpMessageConverter<Object> jsonMessageConverter;
 
-	DefaultMvcTestResult(@Nullable MvcResult mvcResult, @Nullable Exception unresolvedException, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
+
+	DefaultMvcTestResult(@Nullable MvcResult mvcResult, @Nullable Exception unresolvedException,
+			@Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
+
 		this.mvcResult = mvcResult;
 		this.unresolvedException = unresolvedException;
 		this.jsonMessageConverter = jsonMessageConverter;
 	}
 
+
+	@Override
 	public MvcResult getMvcResult() {
 		if (this.mvcResult == null) {
 			throw new IllegalStateException(
-					"Request has failed with unresolved exception " + this.unresolvedException);
+					"Request failed with unresolved exception " + this.unresolvedException);
 		}
 		return this.mvcResult;
 	}
 
+	@Override
 	@Nullable
 	public Exception getUnresolvedException() {
 		return this.unresolvedException;
