@@ -59,7 +59,7 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 	@Nullable
 	public V getFirst(K key) {
 		List<V> values = this.targetMap.get(key);
-		return (values != null && !values.isEmpty() ? values.get(0) : null);
+		return (!CollectionUtils.isEmpty(values) ? values.get(0) : null);
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 	public Map<K, V> toSingleValueMap() {
 		Map<K, V> singleValueMap = CollectionUtils.newLinkedHashMap(this.targetMap.size());
 		this.targetMap.forEach((key, values) -> {
-			if (values != null && !values.isEmpty()) {
+			if (!CollectionUtils.isEmpty(values)) {
 				singleValueMap.put(key, values.get(0));
 			}
 		});

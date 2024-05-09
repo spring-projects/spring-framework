@@ -220,7 +220,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 	@Nullable
 	private String decodeAndNormalizePath(@Nullable String path, HttpServletRequest request) {
-		if (path != null && !path.isEmpty()) {
+		if (StringUtils.hasLength(path)) {
 			path = getUrlPathHelper().decodeRequestString(request, path);
 			if (path.charAt(0) != '/') {
 				String requestUri = getUrlPathHelper().getRequestUri(request);
