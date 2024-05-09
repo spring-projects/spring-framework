@@ -289,7 +289,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
+			// 判断当前bean是否正在被代理 如果正在被代理则不进行封装
 			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
+				// 如果他需要被代理，则需要封装指定的bean
 				return wrapIfNecessary(bean, beanName, cacheKey);
 			}
 		}
@@ -340,7 +342,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		// Create proxy if we have advice.
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {
+			// 对当前代理bean的状态进行缓存
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
+			// 根据获取到的Advice和Advisors为当前bean生成代理对象
 			Object proxy = createProxy(
 					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
 			this.proxyTypes.put(cacheKey, proxy.getClass());
@@ -477,6 +481,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		if (classLoader instanceof SmartClassLoader && classLoader != beanClass.getClassLoader()) {
 			classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
 		}
+		// 真正创建代理对象
 		return proxyFactory.getProxy(classLoader);
 	}
 

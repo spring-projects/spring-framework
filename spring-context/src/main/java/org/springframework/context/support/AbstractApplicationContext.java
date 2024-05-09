@@ -206,10 +206,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** System time in milliseconds when this context started. */
 	private long startupDate;
 
-	/** Flag that indicates whether this context is currently active. */
+	/**
+	 * Flag that indicates whether this context is currently active.
+	 * 判断此上下文当前是否处于活动状态的标志。
+	 */
 	private final AtomicBoolean active = new AtomicBoolean();
 
-	/** Flag that indicates whether this context has been closed already. */
+	/**
+	 * Flag that indicates whether this context has been closed already.
+	 * 判断此上下文当前是否处于关闭状态的标志
+	 */
 	private final AtomicBoolean closed = new AtomicBoolean();
 
 	/** Synchronization monitor for "refresh" and "close". */
@@ -303,6 +309,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return a friendly name for this context.
+	 * 返回此上下文的友好名称
 	 * @return a display name for this context (never {@code null})
 	 */
 	@Override
@@ -1141,6 +1148,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 断言
 	 * Assert that this context's BeanFactory is currently active,
 	 * throwing an {@link IllegalStateException} if it isn't.
 	 * <p>Invoked by all {@link BeanFactory} delegation methods that depend
