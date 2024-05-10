@@ -23,12 +23,18 @@ import io.micrometer.context.ContextRegistry;
 import io.micrometer.context.ContextSnapshot;
 import io.micrometer.context.ContextSnapshot.Scope;
 import io.micrometer.context.ContextSnapshotFactory;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
+import static org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST;
 
 /**
  * Tests for {@link RequestAttributesThreadLocalAccessor}.
@@ -71,6 +77,54 @@ class RequestAttributesThreadLocalAccessorTests {
 
 		assertThat(requestInScope).hasValueSatisfying(value -> assertThat(value).isSameAs(currentRequest));
 		assertThat(requestAfterScope).hasValueSatisfying(value -> assertThat(value).isSameAs(previousRequest));
+	}
+
+	@Test
+	void accessAfterRequestMarkedCompleted() {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+		servletRequest.setAttribute("k1", "v1");
+		servletRequest.setAttribute("k2", "v2");
+
+		ServletRequestAttributes attributes = new ServletRequestAttributes(servletRequest, new MockHttpServletResponse());
+		ContextSnapshot snapshot = getSnapshotFor(attributes);
+		attributes.requestCompleted(); // REQUEST dispatch ends, async handling continues
+
+		try (Scope scope = snapshot.setThreadLocals()) {
+			RequestAttributes current = RequestContextHolder.getRequestAttributes();
+			assertThat(current).isNotNull();
+			assertThat(current.getAttributeNames(SCOPE_REQUEST)).containsExactly("k1", "k2");
+			assertThat(current.getAttribute("k1", SCOPE_REQUEST)).isEqualTo("v1");
+			assertThat(current.getAttribute("k2", SCOPE_REQUEST)).isEqualTo("v2");
+			assertThatIllegalStateException().isThrownBy(() -> current.setAttribute("k3", "v3", SCOPE_REQUEST));
+		}
+	}
+
+	@Test
+	void accessBeforeRequestMarkedCompleted() {
+
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+		ServletRequestAttributes previous = new ServletRequestAttributes(servletRequest, new MockHttpServletResponse());
+
+		ContextSnapshot snapshot = getSnapshotFor(previous);
+
+		RequestContextHolder.setRequestAttributes(previous);
+		try {
+			try (Scope scope = snapshot.setThreadLocals()) {
+				RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+				assertThat(attributes).isNotNull();
+				attributes.setAttribute("k1", "v1", SCOPE_REQUEST);
+			}
+			RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+			assertThat(attributes).isNotNull();
+			attributes.setAttribute("k2", "v2", SCOPE_REQUEST);
+		}
+		finally {
+			RequestContextHolder.resetRequestAttributes();
+		}
+
+		assertThat(previous.getAttributeNames(SCOPE_REQUEST)).containsExactly("k1", "k2");
+		assertThat(previous.getAttribute("k1", SCOPE_REQUEST)).isEqualTo("v1");
+		assertThat(previous.getAttribute("k2", SCOPE_REQUEST)).isEqualTo("v2");
 	}
 
 	private ContextSnapshot getSnapshotFor(RequestAttributes request) {
