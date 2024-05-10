@@ -34,17 +34,17 @@ abstract class AbstractReflectionParameterNameDiscovererKotlinTests(protected va
 	fun getParameterNamesOnInterface() {
 		val method = ReflectionUtils.findMethod(MessageService::class.java, "sendMessage", String::class.java)!!
 		val actualParams = parameterNameDiscoverer.getParameterNames(method)
-		assertThat(actualParams).contains("message")
+		assertThat(actualParams).containsExactly("message")
 	}
 
 	@Test
 	fun getParameterNamesOnClass() {
 		val constructor = ReflectionUtils.accessibleConstructor(MessageServiceImpl::class.java,String::class.java)
 		val actualConstructorParams = parameterNameDiscoverer.getParameterNames(constructor)
-		assertThat(actualConstructorParams).contains("message")
+		assertThat(actualConstructorParams).containsExactly("message")
 		val method = ReflectionUtils.findMethod(MessageServiceImpl::class.java, "sendMessage", String::class.java)!!
 		val actualMethodParams = parameterNameDiscoverer.getParameterNames(method)
-		assertThat(actualMethodParams).contains("message")
+		assertThat(actualMethodParams).containsExactly("message")
 	}
 
 	@Test
@@ -59,7 +59,7 @@ abstract class AbstractReflectionParameterNameDiscovererKotlinTests(protected va
 	fun getParameterNamesOnExtensionMethod() {
 		val method = ReflectionUtils.findMethod(UtilityClass::class.java, "identity", String::class.java)!!
 		val actualParams = parameterNameDiscoverer.getParameterNames(method)!!
-		assertThat(actualParams).contains("\$receiver")
+		assertThat(actualParams).containsExactly("\$receiver")
 	}
 
 	interface MessageService {
