@@ -16,8 +16,6 @@
 
 package org.springframework.web.context.request;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -25,12 +23,9 @@ import io.micrometer.context.ContextRegistry;
 import io.micrometer.context.ContextSnapshot;
 import io.micrometer.context.ContextSnapshot.Scope;
 import io.micrometer.context.ContextSnapshotFactory;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -39,52 +34,55 @@ import static org.mockito.Mockito.mock;
  * Tests for {@link RequestAttributesThreadLocalAccessor}.
  *
  * @author Tadaya Tsuyukubo
+ * @author Rossen Stoyanchev
  */
 class RequestAttributesThreadLocalAccessorTests {
 
-	private final ContextRegistry registry = new ContextRegistry()
-			.registerThreadLocalAccessor(new RequestAttributesThreadLocalAccessor());
+	private final ContextRegistry registry =
+			new ContextRegistry().registerThreadLocalAccessor(new RequestAttributesThreadLocalAccessor());
 
-	@AfterEach
-	void cleanUp() {
-		RequestContextHolder.resetRequestAttributes();
+
+	private static Stream<Arguments> propagation() {
+		RequestAttributes previous = mock(RequestAttributes.class);
+		RequestAttributes current = mock(RequestAttributes.class);
+		return Stream.of(Arguments.of(null, current), Arguments.of(previous, current));
 	}
 
 	@ParameterizedTest
 	@MethodSource
 	@SuppressWarnings({ "try", "unused" })
-	void propagation(@Nullable RequestAttributes previous, RequestAttributes current) throws Exception {
-		RequestContextHolder.setRequestAttributes(current);
-		ContextSnapshot snapshot = ContextSnapshotFactory.builder()
-				.contextRegistry(this.registry)
-				.clearMissing(true)
-				.build()
-				.captureAll();
+	void propagation(RequestAttributes previousRequest, RequestAttributes currentRequest) throws Exception {
 
-		AtomicReference<RequestAttributes> previousHolder = new AtomicReference<>();
-		AtomicReference<RequestAttributes> currentHolder = new AtomicReference<>();
-		CountDownLatch latch = new CountDownLatch(1);
-		new Thread(() -> {
-			RequestContextHolder.setRequestAttributes(previous);
+		ContextSnapshot snapshot = getSnapshotFor(currentRequest);
+
+		AtomicReference<RequestAttributes> requestInScope = new AtomicReference<>();
+		AtomicReference<RequestAttributes> requestAfterScope = new AtomicReference<>();
+
+		Thread thread = new Thread(() -> {
+			RequestContextHolder.setRequestAttributes(previousRequest);
 			try (Scope scope = snapshot.setThreadLocals()) {
-				currentHolder.set(RequestContextHolder.getRequestAttributes());
+				requestInScope.set(RequestContextHolder.getRequestAttributes());
 			}
-			previousHolder.set(RequestContextHolder.getRequestAttributes());
-			latch.countDown();
-		}).start();
+			requestAfterScope.set(RequestContextHolder.getRequestAttributes());
+		});
 
-		latch.await(1, TimeUnit.SECONDS);
-		assertThat(previousHolder).hasValueSatisfying(value -> assertThat(value).isSameAs(previous));
-		assertThat(currentHolder).hasValueSatisfying(value -> assertThat(value).isSameAs(current));
+		thread.start();
+		thread.join(1000);
+
+		assertThat(requestInScope).hasValueSatisfying(value -> assertThat(value).isSameAs(currentRequest));
+		assertThat(requestAfterScope).hasValueSatisfying(value -> assertThat(value).isSameAs(previousRequest));
 	}
 
-	private static Stream<Arguments> propagation() {
-		RequestAttributes previous = mock(RequestAttributes.class);
-		RequestAttributes current = mock(RequestAttributes.class);
-		return Stream.of(
-				Arguments.of(null, current),
-				Arguments.of(previous, current)
-		);
+	private ContextSnapshot getSnapshotFor(RequestAttributes request) {
+		RequestContextHolder.setRequestAttributes(request);
+		try {
+			return ContextSnapshotFactory.builder()
+					.contextRegistry(this.registry).clearMissing(true).build()
+					.captureAll();
+		}
+		finally {
+			RequestContextHolder.resetRequestAttributes();
+		}
 	}
 
 }

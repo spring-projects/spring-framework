@@ -17,20 +17,15 @@
 package org.springframework.context.i18n;
 
 import java.util.Locale;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import io.micrometer.context.ContextRegistry;
 import io.micrometer.context.ContextSnapshot;
 import io.micrometer.context.ContextSnapshotFactory;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,51 +33,55 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link LocaleContextThreadLocalAccessor}.
  *
  * @author Tadaya Tsuyukubo
+ * @author Rossen Stoyanchev
  */
 class LocaleContextThreadLocalAccessorTests {
 
-	private final ContextRegistry registry = new ContextRegistry()
-			.registerThreadLocalAccessor(new LocaleContextThreadLocalAccessor());
+	private final ContextRegistry registry =
+			new ContextRegistry().registerThreadLocalAccessor(new LocaleContextThreadLocalAccessor());
 
-	@AfterEach
-	void cleanUp() {
-		LocaleContextHolder.resetLocaleContext();
+
+	private static Stream<Arguments> propagation() {
+		LocaleContext previousContext = new SimpleLocaleContext(Locale.ENGLISH);
+		LocaleContext currentContext = new SimpleLocaleContext(Locale.ENGLISH);
+		return Stream.of(Arguments.of(null, currentContext), Arguments.of(previousContext, currentContext));
 	}
 
 	@ParameterizedTest
 	@MethodSource
-	@SuppressWarnings("try")
-	void propagation(@Nullable LocaleContext previous, LocaleContext current) throws Exception {
-		LocaleContextHolder.setLocaleContext(current);
-		ContextSnapshot snapshot = ContextSnapshotFactory.builder()
-				.contextRegistry(this.registry)
-				.clearMissing(true)
-				.build()
-				.captureAll();
+	@SuppressWarnings({ "try", "unused" })
+	void propagation(LocaleContext previousContext, LocaleContext currentContext) throws Exception {
 
-		AtomicReference<LocaleContext> previousHolder = new AtomicReference<>();
-		AtomicReference<LocaleContext> currentHolder = new AtomicReference<>();
-		CountDownLatch latch = new CountDownLatch(1);
-		new Thread(() -> {
-			LocaleContextHolder.setLocaleContext(previous);
+		ContextSnapshot snapshot = createContextSnapshotFor(currentContext);
+
+		AtomicReference<LocaleContext> contextInScope = new AtomicReference<>();
+		AtomicReference<LocaleContext> contextAfterScope = new AtomicReference<>();
+
+		Thread thread = new Thread(() -> {
+			LocaleContextHolder.setLocaleContext(previousContext);
 			try (ContextSnapshot.Scope scope = snapshot.setThreadLocals()) {
-				currentHolder.set(LocaleContextHolder.getLocaleContext());
+				contextInScope.set(LocaleContextHolder.getLocaleContext());
 			}
-			previousHolder.set(LocaleContextHolder.getLocaleContext());
-			latch.countDown();
-		}).start();
+			contextAfterScope.set(LocaleContextHolder.getLocaleContext());
+		});
 
-		latch.await(1, TimeUnit.SECONDS);
-		assertThat(previousHolder).hasValueSatisfying(value -> assertThat(value).isSameAs(previous));
-		assertThat(currentHolder).hasValueSatisfying(value -> assertThat(value).isSameAs(current));
+		thread.start();
+		thread.join(1000);
+
+		assertThat(contextAfterScope).hasValueSatisfying(value -> assertThat(value).isSameAs(previousContext));
+		assertThat(contextInScope).hasValueSatisfying(value -> assertThat(value).isSameAs(currentContext));
 	}
 
-	private static Stream<Arguments> propagation() {
-		LocaleContext previous = new SimpleLocaleContext(Locale.ENGLISH);
-		LocaleContext current = new SimpleLocaleContext(Locale.ENGLISH);
-		return Stream.of(
-				Arguments.of(null, current),
-				Arguments.of(previous, current)
-		);
+	private ContextSnapshot createContextSnapshotFor(LocaleContext context) {
+		LocaleContextHolder.setLocaleContext(context);
+		try {
+			return ContextSnapshotFactory.builder()
+					.contextRegistry(this.registry).clearMissing(true).build()
+					.captureAll();
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
+
 }
