@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.aop.aspectj.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -56,8 +55,6 @@ import org.springframework.lang.Nullable;
  */
 public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
 
-	private static final String AJC_MAGIC = "ajc$";
-
 	private static final Class<?>[] ASPECTJ_ANNOTATION_CLASSES = new Class<?>[] {
 			Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class};
 
@@ -68,35 +65,9 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	protected final ParameterNameDiscoverer parameterNameDiscoverer = new AspectJAnnotationParameterNameDiscoverer();
 
 
-	/**
-	 * We consider something to be an AspectJ aspect suitable for use by the Spring AOP system
-	 * if it has the @Aspect annotation, and was not compiled by ajc. The reason for this latter test
-	 * is that aspects written in the code-style (AspectJ language) also have the annotation present
-	 * when compiled by ajc with the -1.5 flag, yet they cannot be consumed by Spring AOP.
-	 */
 	@Override
 	public boolean isAspect(Class<?> clazz) {
-		return (hasAspectAnnotation(clazz) && !compiledByAjc(clazz));
-	}
-
-	private boolean hasAspectAnnotation(Class<?> clazz) {
 		return (AnnotationUtils.findAnnotation(clazz, Aspect.class) != null);
-	}
-
-	/**
-	 * We need to detect this as "code-style" AspectJ aspects should not be
-	 * interpreted by Spring AOP.
-	 */
-	static boolean compiledByAjc(Class<?> clazz) {
-		// The AJTypeSystem goes to great lengths to provide a uniform appearance between code-style and
-		// annotation-style aspects. Therefore there is no 'clean' way to tell them apart. Here we rely on
-		// an implementation detail of the AspectJ compiler.
-		for (Field field : clazz.getDeclaredFields()) {
-			if (field.getName().startsWith(AJC_MAGIC)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	@Override
@@ -114,6 +85,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 					"This is not supported in Spring AOP.");
 		}
 	}
+
 
 	/**
 	 * Find and return the first AspectJ annotation on the given method
