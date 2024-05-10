@@ -142,7 +142,7 @@ public class InstanceSupplierCodeGenerator {
 		if (constructorOrFactoryMethod instanceof Constructor<?> constructor) {
 			return generateCodeForConstructor(registeredBean, constructor);
 		}
-		if (constructorOrFactoryMethod instanceof Method method) {
+		if (constructorOrFactoryMethod instanceof Method method && !KotlinDetector.isSuspendingFunction(method)) {
 			return generateCodeForFactoryMethod(registeredBean, method, instantiationDescriptor.targetClass());
 		}
 		throw new IllegalStateException(

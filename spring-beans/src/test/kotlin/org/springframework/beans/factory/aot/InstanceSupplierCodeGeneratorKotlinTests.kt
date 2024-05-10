@@ -22,10 +22,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.aot.hint.*
 import org.springframework.aot.test.generate.TestGenerationContext
 import org.springframework.beans.factory.config.BeanDefinition
-import org.springframework.beans.factory.support.DefaultListableBeanFactory
-import org.springframework.beans.factory.support.InstanceSupplier
-import org.springframework.beans.factory.support.RegisteredBean
-import org.springframework.beans.factory.support.RootBeanDefinition
+import org.springframework.beans.factory.support.*
+import org.springframework.beans.testfixture.beans.KotlinConfiguration
 import org.springframework.beans.testfixture.beans.KotlinTestBean
 import org.springframework.beans.testfixture.beans.KotlinTestBeanWithOptionalParameter
 import org.springframework.beans.testfixture.beans.factory.aot.DeferredTypeBuilder
@@ -46,6 +44,8 @@ import javax.lang.model.element.Modifier
 class InstanceSupplierCodeGeneratorKotlinTests {
 
     private val generationContext = TestGenerationContext()
+
+	private val beanFactory = DefaultListableBeanFactory()
 
     @Test
     fun generateWhenHasDefaultConstructor() {
@@ -74,6 +74,39 @@ class InstanceSupplierCodeGeneratorKotlinTests {
             .satisfies(hasMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
     }
 
+	@Test
+	fun generateWhenHasFactoryMethodWithNoArg() {
+		val beanDefinition = BeanDefinitionBuilder
+			.rootBeanDefinition(String::class.java)
+			.setFactoryMethodOnBean("stringBean", "config").beanDefinition
+		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+				.genericBeanDefinition(KotlinConfiguration::class.java).beanDefinition
+		)
+		compile(beanFactory, beanDefinition) { instanceSupplier, compiled ->
+			val bean = getBean<String>(beanFactory, beanDefinition, instanceSupplier)
+			Assertions.assertThat(bean).isInstanceOf(String::class.java)
+			Assertions.assertThat(bean).isEqualTo("Hello")
+			Assertions.assertThat(compiled.sourceFile).contains(
+				"getBeanFactory().getBean(KotlinConfiguration.class).stringBean()"
+			)
+		}
+		Assertions.assertThat<TypeHint?>(getReflectionHints().getTypeHint(KotlinConfiguration::class.java))
+			.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT))
+	}
+
+	@Test
+	fun generateWhenHasSuspendingFactoryMethod() {
+		val beanDefinition = BeanDefinitionBuilder
+			.rootBeanDefinition(String::class.java)
+			.setFactoryMethodOnBean("suspendingStringBean", "config").beanDefinition
+		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+				.genericBeanDefinition(KotlinConfiguration::class.java).beanDefinition
+		)
+		Assertions.assertThatIllegalStateException().isThrownBy {
+			compile(beanFactory, beanDefinition) { _, _  -> }
+		}
+	}
+
     private fun getReflectionHints(): ReflectionHints {
         return generationContext.runtimeHints.reflection()
     }
@@ -95,6 +128,12 @@ class InstanceSupplierCodeGeneratorKotlinTests {
             Assertions.assertThat(it.mode).isEqualTo(mode)
         }
     }
+
+	private fun hasMethodWithMode(mode: ExecutableMode): ThrowingConsumer<TypeHint> {
+		return ThrowingConsumer { hint: TypeHint ->
+			Assertions.assertThat(hint.methods()).anySatisfy(hasMode(mode))
+		}
+	}
 
     @Suppress("UNCHECKED_CAST")
     private fun <T> getBean(beanFactory: DefaultListableBeanFactory, beanDefinition: BeanDefinition,

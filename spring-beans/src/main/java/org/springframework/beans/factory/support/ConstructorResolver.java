@@ -63,6 +63,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -622,6 +623,11 @@ class ConstructorResolver {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"Invalid factory method '" + mbd.getFactoryMethodName() + "' on class [" +
 						factoryClass.getName() + "]: needs to have a non-void return type!");
+			}
+			else if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(factoryMethodToUse)) {
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+						"Invalid factory method '" + mbd.getFactoryMethodName() + "' on class [" +
+								factoryClass.getName() + "]: suspending functions are not supported!");
 			}
 			else if (ambiguousFactoryMethods != null) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
