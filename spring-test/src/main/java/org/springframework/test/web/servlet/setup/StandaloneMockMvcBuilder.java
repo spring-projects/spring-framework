@@ -132,7 +132,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private boolean useSuffixPatternMatch = false;
 
-	private boolean useTrailingSlashPatternMatch = true;
+	private boolean useTrailingSlashPatternMatch = false;
 
 	@Nullable
 	private Boolean removeSemicolonContent;
