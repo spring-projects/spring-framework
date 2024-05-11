@@ -428,8 +428,8 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Appends the given value(s) to the given form field and also add to the
-	 * {@link #param(String, String...) request parameters} map.
+	 * Append the given value(s) to the given form field and also add them to the
+	 * {@linkplain #param(String, String...) request parameters} map.
 	 * @param name the field name
 	 * @param values one or more values
 	 * @since 6.1.7
@@ -783,14 +783,14 @@ public class MockHttpServletRequestBuilder
 			if (this.content != null && this.content.length > 0) {
 				throw new IllegalStateException("Could not write form data with an existing body");
 			}
-			Charset charset = (this.characterEncoding != null
-					? Charset.forName(this.characterEncoding) : StandardCharsets.UTF_8);
-			MediaType mediaType = (request.getContentType() != null
-					? MediaType.parseMediaType(request.getContentType())
-					: new MediaType(MediaType.APPLICATION_FORM_URLENCODED, charset));
+			Charset charset = (this.characterEncoding != null ?
+					Charset.forName(this.characterEncoding) : StandardCharsets.UTF_8);
+			MediaType mediaType = (request.getContentType() != null ?
+					MediaType.parseMediaType(request.getContentType()) :
+					new MediaType(MediaType.APPLICATION_FORM_URLENCODED, charset));
 			if (!mediaType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)) {
-				throw new IllegalStateException("Invalid content type: '" + mediaType
-						+ "' is not compatible with '" + MediaType.APPLICATION_FORM_URLENCODED + "'");
+				throw new IllegalStateException("Invalid content type: '" + mediaType +
+						"' is not compatible with '" + MediaType.APPLICATION_FORM_URLENCODED + "'");
 			}
 			request.setContent(writeFormData(mediaType, charset));
 			if (request.getContentType() == null) {
