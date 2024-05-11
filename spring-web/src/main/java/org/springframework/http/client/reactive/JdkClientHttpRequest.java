@@ -37,6 +37,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ClientHttpRequest} for the Java {@link HttpClient}.
@@ -108,8 +109,11 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	protected void applyCookies() {
-		this.builder.header(HttpHeaders.COOKIE, getCookies().values().stream()
-				.flatMap(List::stream).map(HttpCookie::toString).collect(Collectors.joining(";")));
+		MultiValueMap<String, HttpCookie> cookies = getCookies();
+		if (!cookies.isEmpty()) {
+			this.builder.header(HttpHeaders.COOKIE, cookies.values().stream()
+					.flatMap(List::stream).map(HttpCookie::toString).collect(Collectors.joining(";")));
+		}
 	}
 
 	@Override
