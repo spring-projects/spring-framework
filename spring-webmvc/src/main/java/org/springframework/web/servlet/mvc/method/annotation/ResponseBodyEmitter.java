@@ -79,16 +79,6 @@ public class ResponseBodyEmitter {
 	@Nullable
 	private Throwable failure;
 
-	/**
-	 * After an I/O error, we don't call {@link #completeWithError} directly but
-	 * wait for the Servlet container to call us via {@code AsyncListener#onError}
-	 * on a container thread at which point we call completeWithError.
-	 * This flag is used to ignore further calls to complete or completeWithError
-	 * that may come for example from an application try-catch block on the
-	 * thread of the I/O error.
-	 */
-	private boolean ioErrorOnSend;
-
 	private final DefaultCallback timeoutCallback = new DefaultCallback();
 
 	private final ErrorCallback errorCallback = new ErrorCallback();
@@ -198,7 +188,6 @@ public class ResponseBodyEmitter {
 				this.handler.send(object, mediaType);
 			}
 			catch (IOException ex) {
-				this.ioErrorOnSend = true;
 				throw ex;
 			}
 			catch (Throwable ex) {
@@ -234,7 +223,6 @@ public class ResponseBodyEmitter {
 				this.handler.send(items);
 			}
 			catch (IOException ex) {
-				this.ioErrorOnSend = true;
 				throw ex;
 			}
 			catch (Throwable ex) {
@@ -255,10 +243,6 @@ public class ResponseBodyEmitter {
 	 * related events such as an error while {@link #send(Object) sending}.
 	 */
 	public synchronized void complete() {
-		// Ignore complete after IO failure on send
-		if (this.ioErrorOnSend) {
-			return;
-		}
 		this.complete = true;
 		if (this.handler != null) {
 			this.handler.complete();
@@ -277,10 +261,6 @@ public class ResponseBodyEmitter {
 	 * {@link #send(Object) sending}.
 	 */
 	public synchronized void completeWithError(Throwable ex) {
-		// Ignore complete after IO failure on send
-		if (this.ioErrorOnSend) {
-			return;
-		}
 		this.complete = true;
 		this.failure = ex;
 		if (this.handler != null) {
