@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ import org.springframework.web.method.HandlerMethod;
  *
  * <p>A HandlerInterceptor gets called before the appropriate HandlerAdapter
  * triggers the execution of the handler itself. This mechanism can be used
- * for a large field of preprocessing aspects, e.g. for authorization checks,
- * or common handler behavior like locale or theme changes. Its main purpose
- * is to allow for factoring out repetitive handler code.
+ * for a large field of preprocessing aspects, or common handler behavior
+ * like locale or theme changes. Its main purpose is to allow for factoring
+ * out repetitive handler code.
  *
  * <p>In an asynchronous processing scenario, the handler may be executed in a
  * separate thread while the main thread exits without rendering or invoking the
@@ -62,6 +62,12 @@ import org.springframework.web.method.HandlerMethod;
  * is well-suited for request content and view content handling, like multipart
  * forms and GZIP compression. This typically shows when one needs to map the
  * filter to certain content types (e.g. images), or to all requests.
+ *
+ * <p><strong>Note:</strong> Interceptors are not ideally suited as a security
+ * layer due to the potential for a mismatch with annotated controller path matching.
+ * Generally, we recommend using Spring Security, or alternatively a similar
+ * approach integrated with the Servlet filter chain, and applied as early as
+ * possible.
  *
  * @author Juergen Hoeller
  * @since 20.06.2003
