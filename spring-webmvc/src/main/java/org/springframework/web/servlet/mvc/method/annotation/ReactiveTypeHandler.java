@@ -337,6 +337,7 @@ class ReactiveTypeHandler {
 						logger.trace("Send for " + this.emitter + " failed: " + ex);
 					}
 					terminate();
+					this.emitter.completeWithError(ex);
 					return;
 				}
 			}

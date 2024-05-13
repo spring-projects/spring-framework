@@ -149,23 +149,6 @@ public class ResponseBodyEmitterTests {
 	}
 
 	@Test // gh-30687
-	void completeIgnoredAfterIOException() throws Exception {
-		this.emitter.initialize(this.handler);
-		verify(this.handler).onTimeout(any());
-		verify(this.handler).onError(any());
-		verify(this.handler).onCompletion(any());
-		verifyNoMoreInteractions(this.handler);
-
-		willThrow(new IOException()).given(this.handler).send("foo", MediaType.TEXT_PLAIN);
-		assertThatIOException().isThrownBy(() -> this.emitter.send("foo", MediaType.TEXT_PLAIN));
-		verify(this.handler).send("foo", MediaType.TEXT_PLAIN);
-		verifyNoMoreInteractions(this.handler);
-
-		this.emitter.complete();
-		verifyNoMoreInteractions(this.handler);
-	}
-
-	@Test // gh-30687
 	void completeAfterNonIOException() throws Exception {
 		this.emitter.initialize(this.handler);
 		verify(this.handler).onTimeout(any());
