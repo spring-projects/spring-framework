@@ -4920,19 +4920,22 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		// varargs
 		expression = parser.parseExpression("new " + testclass8 + "(#root)");
 		Object[] objectArray = { "a", "b", "c" };
-		assertThat(expression.getValue(objectArray).getClass().getName()).isEqualTo(testclass8);
+		o = expression.getValue(objectArray);
+		assertThat(o).isExactlyInstanceOf(TestClass8.class);
 		assertCanCompile(expression);
 		o = expression.getValue(objectArray);
-		assertThat(o.getClass().getName()).isEqualTo(testclass8);
+		assertThat(o).isExactlyInstanceOf(TestClass8.class);
 		tc8 = (TestClass8) o;
 		assertThat(tc8.args).containsExactly("a", "b", "c");
 
 		// varargs with argument component type that is a subtype of the varargs component type.
 		expression = parser.parseExpression("new " + testclass8 + "(#root)");
-		assertThat(expression.getValue(objectArray).getClass().getName()).isEqualTo(testclass8);
+		String[] stringArray = { "a", "b", "c" };
+		o = expression.getValue(stringArray);
+		assertThat(o).isExactlyInstanceOf(TestClass8.class);
 		assertCanCompile(expression);
-		o = expression.getValue(new String[] { "a", "b", "c" });
-		assertThat(o.getClass().getName()).isEqualTo(testclass8);
+		o = expression.getValue(stringArray);
+		assertThat(o).isExactlyInstanceOf(TestClass8.class);
 		tc8 = (TestClass8) o;
 		assertThat(tc8.args).containsExactly("a", "b", "c");
 
@@ -6939,7 +6942,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				s = a + "::";
 			}
 			else {
-				s = a+"::";
+				s = a + "::";
 				for (Object varg: vargs) {
 					s += varg;
 				}
