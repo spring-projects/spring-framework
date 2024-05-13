@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * {@link RuntimeException} that implements {@link ErrorResponse} to expose
- * an HTTP status, response headers, and a body formatted as an RFC 7807
+ * an HTTP status, response headers, and a body formatted as an RFC 9457
  * {@link ProblemDetail}.
  *
  * <p>The exception can be used as is, or it can be extended as a more specific
