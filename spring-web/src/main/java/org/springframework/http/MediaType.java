@@ -184,7 +184,7 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * Public constant media type for {@code application/problem+json}.
 	 * @since 5.0
-	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
+	 * @see <a href="https://www.iana.org/assignments/media-types/application/problem+json">
 	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
 	 */
 	public static final MediaType APPLICATION_PROBLEM_JSON;
@@ -198,7 +198,7 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * Public constant media type for {@code application/problem+json}.
 	 * @since 5.0
-	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
+	 * @see <a href="https://www.iana.org/assignments/media-types/application/problem+json">
 	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
 	 * @deprecated as of 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON}
 	 * since major browsers like Chrome
@@ -224,7 +224,7 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * Public constant media type for {@code application/problem+xml}.
 	 * @since 5.0
-	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.2">
+	 * @see <a href="https://www.iana.org/assignments/media-types/application/problem+xml">
 	 *     Problem Details for HTTP APIs, 6.2. application/problem+xml</a>
 	 */
 	public static final MediaType APPLICATION_PROBLEM_XML;

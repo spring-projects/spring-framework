@@ -228,11 +228,11 @@ level, xref:web/webmvc/mvc-servlet/exceptionhandlers.adoc[HandlerExceptionResolv
   See xref:web/webmvc/mvc-controller/ann-methods/responseentity.adoc[ResponseEntity].
 
 | `ErrorResponse`
-| To render an RFC 7807 error response with details in the body,
+| To render an RFC 9457 error response with details in the body,
 see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
 
 | `ProblemDetail`
-| To render an RFC 7807 error response with details in the body,
+| To render an RFC 9457 error response with details in the body,
 see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
 
 | `String`

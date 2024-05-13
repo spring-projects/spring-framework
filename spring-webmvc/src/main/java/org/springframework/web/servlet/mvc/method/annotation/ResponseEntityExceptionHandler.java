@@ -58,7 +58,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * A class with an {@code @ExceptionHandler} method that handles all Spring MVC
- * raised exceptions by returning a {@link ResponseEntity} with RFC 7807
+ * raised exceptions by returning a {@link ResponseEntity} with RFC 9457
  * formatted error details in the body.
  *
  * <p>Convenient as a base class of an {@link ControllerAdvice @ControllerAdvice}
