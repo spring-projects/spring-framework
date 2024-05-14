@@ -3,12 +3,12 @@ plugins {
 	id 'io.freefair.aspectj' version '8.0.1' apply false
 	// kotlinVersion is managed in gradle.properties
 	id 'org.jetbrains.kotlin.plugin.serialization' version "${kotlinVersion}" apply false
-	id 'org.jetbrains.dokka' version '1.8.10'
+	id 'org.jetbrains.dokka' version '1.8.20'
 	id 'org.unbroken-dome.xjc' version '2.0.0' apply false
-	id 'com.github.ben-manes.versions' version '0.49.0'
+	id 'com.github.ben-manes.versions' version '0.51.0'
 	id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 	id 'de.undercouch.download' version '5.4.0'
-	id 'me.champeau.jmh' version '0.7.1' apply false
+	id 'me.champeau.jmh' version '0.7.2' apply false
 }
 
 ext {
