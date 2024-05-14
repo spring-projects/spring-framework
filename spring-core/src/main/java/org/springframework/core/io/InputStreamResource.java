@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,22 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link Resource} implementation for a given {@link InputStream}.
+ * {@link Resource} implementation for a given {@link InputStream} or a given
+ * {@link InputStreamSource} (which can be supplied as a lambda expression)
+ * for a lazy {@link InputStream} on demand.
+ *
  * <p>Should only be used if no other specific {@code Resource} implementation
  * is applicable. In particular, prefer {@link ByteArrayResource} or any of the
- * file-based {@code Resource} implementations where possible.
+ * file-based {@code Resource} implementations if possible. If you need to obtain
+ * a custom stream multiple times, use a custom {@link AbstractResource} subclass
+ * with a corresponding {@code getInputStream()} implementation.
  *
  * <p>In contrast to other {@code Resource} implementations, this is a descriptor
  * for an <i>already opened</i> resource - therefore returning {@code true} from
- * {@link #isOpen()}. Do not use an {@code InputStreamResource} if you need to
- * keep the resource descriptor somewhere, or if you need to read from a stream
- * multiple times.
+ * {@link #isOpen()}. Do not use an {@code InputStreamResource} if you need to keep
+ * the resource descriptor somewhere, or if you need to read from a stream multiple
+ * times. This also applies when constructed with an {@code InputStreamSource}
+ * which lazily obtains the stream but only allows for single access as well.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -44,30 +50,62 @@ import org.springframework.util.Assert;
  */
 public class InputStreamResource extends AbstractResource {
 
-	private final InputStream inputStream;
+	private final InputStreamSource inputStreamSource;
 
 	private final String description;
+
+	private final Object equality;
 
 	private boolean read = false;
 
 
 	/**
-	 * Create a new InputStreamResource.
+	 * Create a new {@code InputStreamResource} with a lazy {@code InputStream}
+	 * for single use.
+	 * @param inputStreamSource an on-demand source for a single-use InputStream
+	 * @since 6.1.7
+	 */
+	public InputStreamResource(InputStreamSource inputStreamSource) {
+		this(inputStreamSource, "resource loaded from InputStreamSource");
+	}
+
+	/**
+	 * Create a new {@code InputStreamResource} with a lazy {@code InputStream}
+	 * for single use.
+	 * @param inputStreamSource an on-demand source for a single-use InputStream
+	 * @param description where the InputStream comes from
+	 * @since 6.1.7
+	 */
+	public InputStreamResource(InputStreamSource inputStreamSource, @Nullable String description) {
+		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
+		this.inputStreamSource = inputStreamSource;
+		this.description = (description != null ? description : "");
+		this.equality = inputStreamSource;
+	}
+
+	/**
+	 * Create a new {@code InputStreamResource} for an existing {@code InputStream}.
+	 * <p>Consider retrieving the InputStream on demand if possible, reducing its
+	 * lifetime and reliably opening it and closing it through regular
+	 * {@link InputStreamSource#getInputStream()} usage.
 	 * @param inputStream the InputStream to use
+	 * @see #InputStreamResource(InputStreamSource)
 	 */
 	public InputStreamResource(InputStream inputStream) {
 		this(inputStream, "resource loaded through InputStream");
 	}
 
 	/**
-	 * Create a new InputStreamResource.
+	 * Create a new {@code InputStreamResource} for an existing {@code InputStream}.
 	 * @param inputStream the InputStream to use
 	 * @param description where the InputStream comes from
+	 * @see #InputStreamResource(InputStreamSource, String)
 	 */
 	public InputStreamResource(InputStream inputStream, @Nullable String description) {
 		Assert.notNull(inputStream, "InputStream must not be null");
-		this.inputStream = inputStream;
+		this.inputStreamSource = () -> inputStream;
 		this.description = (description != null ? description : "");
+		this.equality = inputStream;
 	}
 
 
@@ -98,7 +136,7 @@ public class InputStreamResource extends AbstractResource {
 					"do not use InputStreamResource if a stream needs to be read multiple times");
 		}
 		this.read = true;
-		return this.inputStream;
+		return this.inputStreamSource.getInputStream();
 	}
 
 	/**
@@ -117,7 +155,7 @@ public class InputStreamResource extends AbstractResource {
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof InputStreamResource that &&
-				this.inputStream.equals(that.inputStream)));
+				this.equality.equals(that.equality)));
 	}
 
 	/**
@@ -125,7 +163,7 @@ public class InputStreamResource extends AbstractResource {
 	 */
 	@Override
 	public int hashCode() {
-		return this.inputStream.hashCode();
+		return this.equality.hashCode();
 	}
 
 }
