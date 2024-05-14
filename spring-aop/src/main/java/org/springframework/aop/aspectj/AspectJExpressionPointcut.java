@@ -169,25 +169,30 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public ClassFilter getClassFilter() {
-		obtainPointcutExpression();
+		checkExpression();
 		return this;
 	}
 
 	@Override
 	public MethodMatcher getMethodMatcher() {
-		obtainPointcutExpression();
+		checkExpression();
 		return this;
 	}
 
 
 	/**
-	 * Check whether this pointcut is ready to match,
-	 * lazily building the underlying AspectJ pointcut expression.
+	 * Check whether this pointcut is ready to match.
 	 */
-	private PointcutExpression obtainPointcutExpression() {
+	private void checkExpression() {
 		if (getExpression() == null) {
 			throw new IllegalStateException("Must set property 'expression' before attempting to match");
 		}
+	}
+
+	/**
+	 * Lazily build the underlying AspectJ pointcut expression.
+	 */
+	private PointcutExpression obtainPointcutExpression() {
 		if (this.pointcutExpression == null) {
 			this.pointcutClassLoader = determinePointcutClassLoader();
 			this.pointcutExpression = buildPointcutExpression(this.pointcutClassLoader);
@@ -264,10 +269,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public boolean matches(Class<?> targetClass) {
-		PointcutExpression pointcutExpression = obtainPointcutExpression();
 		try {
 			try {
-				return pointcutExpression.couldMatchJoinPointsInType(targetClass);
+				return obtainPointcutExpression().couldMatchJoinPointsInType(targetClass);
 			}
 			catch (ReflectionWorldException ex) {
 				logger.debug("PointcutExpression matching rejected target class - trying fallback expression", ex);
@@ -278,6 +282,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 				}
 			}
 		}
+		catch (IllegalArgumentException | IllegalStateException ex) {
+			throw ex;
+		}
 		catch (Throwable ex) {
 			logger.debug("PointcutExpression matching rejected target class", ex);
 		}
@@ -286,7 +293,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions) {
-		obtainPointcutExpression();
 		ShadowMatch shadowMatch = getTargetShadowMatch(method, targetClass);
 
 		// Special handling for this, target, @this, @target, @annotation
@@ -324,7 +330,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public boolean matches(Method method, Class<?> targetClass, Object... args) {
-		obtainPointcutExpression();
 		ShadowMatch shadowMatch = getTargetShadowMatch(method, targetClass);
 
 		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,
