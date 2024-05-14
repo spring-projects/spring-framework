@@ -308,7 +308,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 			return null;
 		}
 		String typeDescriptor = exitDescriptor;
-		if (typeDescriptor.startsWith("[") || typeDescriptor.startsWith("L")) {
+		// If the SpEL exitDescriptor is not for a primitive (single character),
+		// ASM expects the typeDescriptor to end with a ';'.
+		if (typeDescriptor.length() > 1) {
 			typeDescriptor += ";";
 		}
 		String className = Type.getType(typeDescriptor).getClassName();
