@@ -281,6 +281,13 @@ public interface RestClient {
 		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
 
 		/**
+		 * Set the default headers to be used in HTTP requests.
+		 * @param httpHeaders the HttpHeaders
+		 * @return this builder
+		 */
+		Builder defaultHeaders(HttpHeaders httpHeaders);
+
+		/**
 		 * Provide a consumer to customize every request being built.
 		 * @param defaultRequest the consumer to use for modifying requests
 		 * @return this builder

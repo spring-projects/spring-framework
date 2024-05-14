@@ -863,8 +863,12 @@ class RestClientIntegrationTests {
 		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
 				.setBody("Hello Spring!"));
 
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Hello", "Spring!");
+
 		RestClient headersClient = this.restClient.mutate()
 				.defaultHeaders(headers -> headers.add("foo", "bar"))
+				.defaultHeaders(httpHeaders)
 				.build();
 
 		String result = headersClient.get()
@@ -875,7 +879,10 @@ class RestClientIntegrationTests {
 		assertThat(result).isEqualTo("Hello Spring!");
 
 		expectRequestCount(1);
-		expectRequest(request -> assertThat(request.getHeader("foo")).isEqualTo("bar"));
+		expectRequest(request -> {
+			assertThat(request.getHeader("foo")).isEqualTo("bar");
+			assertThat(request.getHeader("Hello")).isEqualTo("Spring!");
+		});
 	}
 
 	@ParameterizedRestClientTest

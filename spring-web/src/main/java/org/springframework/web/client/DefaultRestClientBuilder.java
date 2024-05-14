@@ -277,6 +277,15 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	}
 
 	@Override
+	public RestClient.Builder defaultHeaders(HttpHeaders httpHeaders) {
+		this.initHeaders();
+		if (this.defaultHeaders != null && httpHeaders != null) {
+			this.defaultHeaders.putAll(httpHeaders);
+		}
+		return this;
+	}
+
+	@Override
 	public RestClient.Builder defaultRequest(Consumer<RestClient.RequestHeadersSpec<?>> defaultRequest) {
 		this.defaultRequest = this.defaultRequest != null ?
 				this.defaultRequest.andThen(defaultRequest) : defaultRequest;
