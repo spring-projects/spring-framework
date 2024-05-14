@@ -211,18 +211,22 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 
 	/**
-	 * Generate code that handles building the argument values for the specified method.
-	 * <p>This method will take into account whether the invoked method is a varargs method,
-	 * and if it is then the argument values will be appropriately packaged into an array.
+	 * Generate code that handles building the argument values for the specified
+	 * {@link Member} (method or constructor).
+	 * <p>This method takes into account whether the method or constructor was
+	 * declared to accept varargs, and if it was then the argument values will be
+	 * appropriately packaged into an array.
 	 * @param mv the method visitor where code should be generated
-	 * @param cf the current codeflow
+	 * @param cf the current {@link CodeFlow}
 	 * @param member the method or constructor for which arguments are being set up
 	 * @param arguments the expression nodes for the expression supplied argument values
 	 * @deprecated As of Spring Framework 6.2, in favor of
 	 * {@link #generateCodeForArguments(MethodVisitor, CodeFlow, Executable, SpelNodeImpl[])}
 	 */
 	@Deprecated(since = "6.2")
-	protected static void generateCodeForArguments(MethodVisitor mv, CodeFlow cf, Member member, SpelNodeImpl[] arguments) {
+	protected static void generateCodeForArguments(
+			MethodVisitor mv, CodeFlow cf, Member member, SpelNodeImpl[] arguments) {
+
 		if (member instanceof Executable executable) {
 			generateCodeForArguments(mv, cf, executable, arguments);
 		}
@@ -233,7 +237,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	/**
 	 * Generate code that handles building the argument values for the specified
 	 * {@link Executable} (method or constructor).
-	 * <p>This method takes into account whether the invoked executable was
+	 * <p>This method takes into account whether the method or constructor was
 	 * declared to accept varargs, and if it was then the argument values will be
 	 * appropriately packaged into an array.
 	 * @param mv the method visitor where code should be generated
@@ -244,52 +248,56 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * values
 	 * @since 6.2
 	 */
-	protected static void generateCodeForArguments(MethodVisitor mv, CodeFlow cf, Executable executable, SpelNodeImpl[] arguments) {
+	protected static void generateCodeForArguments(
+			MethodVisitor mv, CodeFlow cf, Executable executable, SpelNodeImpl[] arguments) {
+
 		Class<?>[] parameterTypes = executable.getParameterTypes();
-		String[] paramDescriptors = CodeFlow.toDescriptors(parameterTypes);
+		String[] parameterDescriptors = CodeFlow.toDescriptors(parameterTypes);
+		int parameterCount = parameterTypes.length;
 
 		if (executable.isVarArgs()) {
 			// The final parameter may or may not need packaging into an array, or nothing may
-			// have been passed to satisfy the varargs and so something needs to be built.
-			int p = 0; // Current supplied argument being processed
-			int childCount = arguments.length;
+			// have been passed to satisfy the varargs which means something needs to be built.
 
-			// Fulfill all the parameter requirements except the last one
-			for (p = 0; p < paramDescriptors.length - 1; p++) {
-				cf.generateCodeForArgument(mv, arguments[p], paramDescriptors[p]);
+			int varargsIndex = parameterCount - 1;
+			int argumentCount = arguments.length;
+			int p = 0;  // Current supplied argument being processed
+
+			// Fulfill all the parameter requirements except the last one (the varargs array).
+			for (p = 0; p < varargsIndex; p++) {
+				cf.generateCodeForArgument(mv, arguments[p], parameterDescriptors[p]);
 			}
 
-			SpelNodeImpl lastChild = (childCount == 0 ? null : arguments[childCount - 1]);
+			SpelNodeImpl lastArgument = (argumentCount != 0 ? arguments[argumentCount - 1] : null);
 			ClassLoader classLoader = executable.getDeclaringClass().getClassLoader();
-			Class<?> lastChildType = (lastChild != null ?
-					loadClassForExitDescriptor(lastChild.getExitDescriptor(), classLoader) : null);
-			Class<?> lastParameterType = parameterTypes[parameterTypes.length - 1];
+			Class<?> lastArgumentType = (lastArgument != null ?
+					loadClassForExitDescriptor(lastArgument.getExitDescriptor(), classLoader) : null);
+			Class<?> lastParameterType = parameterTypes[varargsIndex];
 
 			// Determine if the final passed argument is already suitably packaged in array
-			// form to be passed to the method
-			if (lastChild != null && lastChildType != null && lastParameterType.isAssignableFrom(lastChildType)) {
-				cf.generateCodeForArgument(mv, lastChild, paramDescriptors[p]);
+			// form to be passed to the method.
+			if (lastArgument != null && lastArgumentType != null && lastParameterType.isAssignableFrom(lastArgumentType)) {
+				cf.generateCodeForArgument(mv, lastArgument, parameterDescriptors[p]);
 			}
 			else {
-				String arrayType = paramDescriptors[paramDescriptors.length - 1];
-				arrayType = arrayType.substring(1); // trim the leading '[', may leave other '['
-				// build array big enough to hold remaining arguments
-				CodeFlow.insertNewArrayCode(mv, childCount - p, arrayType);
-				// Package up the remaining arguments into the array
-				int arrayindex = 0;
-				while (p < childCount) {
-					SpelNodeImpl child = arguments[p];
+				String arrayComponentType = parameterDescriptors[varargsIndex];
+				// Trim the leading '[', potentially leaving other '[' characters.
+				arrayComponentType = arrayComponentType.substring(1);
+				// Build array big enough to hold remaining arguments.
+				CodeFlow.insertNewArrayCode(mv, argumentCount - p, arrayComponentType);
+				// Package up the remaining arguments into the array.
+				int arrayIndex = 0;
+				while (p < argumentCount) {
 					mv.visitInsn(DUP);
-					CodeFlow.insertOptimalLoad(mv, arrayindex++);
-					cf.generateCodeForArgument(mv, child, arrayType);
-					CodeFlow.insertArrayStore(mv, arrayType);
-					p++;
+					CodeFlow.insertOptimalLoad(mv, arrayIndex++);
+					cf.generateCodeForArgument(mv, arguments[p++], arrayComponentType);
+					CodeFlow.insertArrayStore(mv, arrayComponentType);
 				}
 			}
 		}
 		else {
-			for (int i = 0; i < paramDescriptors.length;i++) {
-				cf.generateCodeForArgument(mv, arguments[i], paramDescriptors[i]);
+			for (int i = 0; i < parameterCount; i++) {
+				cf.generateCodeForArgument(mv, arguments[i], parameterDescriptors[i]);
 			}
 		}
 	}
@@ -308,8 +316,10 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	}
 
 	/**
-	 * Ask an argument to generate its bytecode and then follow it up
-	 * with any boxing/unboxing/checkcasting to ensure it matches the expected parameter descriptor.
+	 * Generate bytecode that loads the supplied argument onto the stack.
+	 * <p>This method also performs any boxing, unboxing, or check-casting
+	 * necessary to ensure that the type of the argument on the stack matches the
+	 * supplied {@code paramDesc}.
 	 * @deprecated As of Spring Framework 6.2, in favor of
 	 * {@link CodeFlow#generateCodeForArgument(MethodVisitor, SpelNode, String)}
 	 */

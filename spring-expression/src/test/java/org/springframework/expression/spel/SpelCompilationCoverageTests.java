@@ -2642,13 +2642,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertThat(expression.getValue(context)).isEqualTo(20);
 
-
 		expression = parser.parseExpression("#appendChar('abc'.charAt(0),'abc'.charAt(1))");
 		assertThat(expression.getValue(context)).isEqualTo("ab");
 		assertThat(((SpelExpression) expression).getAST().isCompilable()).isTrue();
 		assertCanCompile(expression);
 		assertThat(expression.getValue(context)).isEqualTo("ab");
-
 
 		expression = parser.parseExpression("#append4('a','b','c')");
 		assertThat(expression.getValue(context).toString()).isEqualTo("a::bc");
@@ -3258,7 +3256,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		b = expression.getValue(sec, Boolean.class);
 		assertThat(b).isTrue();
 		assertThat(aa.gotComparedTo).isEqualTo(bb);
-
 
 		List<String> ls = new ArrayList<>();
 		ls.add("foo");
@@ -4682,7 +4679,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(Boolean.class)).isNull();
 	}
 
-
 	/**
 	 * Test variants of using T(...) and static/non-static method/property/field references.
 	 */
@@ -4775,7 +4771,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(StaticsHelper.sh)).isEqualTo("mb");
 		assertCanCompile(expression);
 		assertThat(expression.getValue(StaticsHelper.sh)).isEqualTo("mb");
-
 	}
 
 	@Test
@@ -4863,86 +4858,89 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		context = new StandardEvaluationContext(new Object[] {person.getAge()});
 		context.setVariable("it", person);
 		assertThat(ex.getValue(context, Boolean.class)).isTrue();
-		assertThat(ex.getValue(context, Boolean.class)).isTrue();
 
 		PersonInOtherPackage person2 = new PersonInOtherPackage(1);
 		ex = parser.parseRaw("#it?.age.equals([0])");
 		context = new StandardEvaluationContext(new Object[] {person2.getAge()});
 		context.setVariable("it", person2);
 		assertThat(ex.getValue(context, Boolean.class)).isTrue();
-		assertThat(ex.getValue(context, Boolean.class)).isTrue();
 
 		ex = parser.parseRaw("#it?.age.equals([0])");
 		context = new StandardEvaluationContext(new Object[] {person2.getAge()});
 		context.setVariable("it", person2);
 		assertThat((Boolean) ex.getValue(context)).isTrue();
-		assertThat((Boolean) ex.getValue(context)).isTrue();
 	}
 
 	@Test
 	void constructorReference() {
-		// simple ctor
+		// simple constructor
 		expression = parser.parseExpression("new String('123')");
 		assertThat(expression.getValue()).isEqualTo("123");
 		assertCanCompile(expression);
 		assertThat(expression.getValue()).isEqualTo("123");
 
-		String testclass8 = "org.springframework.expression.spel.SpelCompilationCoverageTests$TestClass8";
-		// multi arg ctor that includes primitives
+		String testclass8 = TestClass8.class.getName();
+		Object result;
+
+		// multi arg constructor that includes primitives
 		expression = parser.parseExpression("new " + testclass8 + "(42,'123',4.0d,true)");
-		assertThat(expression.getValue().getClass().getName()).isEqualTo(testclass8);
+		result = expression.getValue();
+		assertThat(result).isExactlyInstanceOf(TestClass8.class);
 		assertCanCompile(expression);
-		Object o = expression.getValue();
-		assertThat(o.getClass().getName()).isEqualTo(testclass8);
-		TestClass8 tc8 = (TestClass8) o;
+		result = expression.getValue();
+		assertThat(result).isExactlyInstanceOf(TestClass8.class);
+		TestClass8 tc8 = (TestClass8) result;
 		assertThat(tc8.i).isEqualTo(42);
 		assertThat(tc8.s).isEqualTo("123");
 		assertThat(tc8.d).isCloseTo(4.0d, within(0.5d));
 
 		assertThat(tc8.z).isTrue();
 
-		// no-arg ctor
+		// no-arg constructor
 		expression = parser.parseExpression("new " + testclass8 + "()");
-		assertThat(expression.getValue().getClass().getName()).isEqualTo(testclass8);
+		result = expression.getValue();
+		assertThat(result).isExactlyInstanceOf(TestClass8.class);
 		assertCanCompile(expression);
-		o = expression.getValue();
-		assertThat(o.getClass().getName()).isEqualTo(testclass8);
+		result = expression.getValue();
+		assertThat(result).isExactlyInstanceOf(TestClass8.class);
 
-		// pass primitive to reference type ctor
+		// pass primitive to reference type constructor
 		expression = parser.parseExpression("new " + testclass8 + "(42)");
-		assertThat(expression.getValue().getClass().getName()).isEqualTo(testclass8);
+		result = expression.getValue();
+		assertThat(result).isExactlyInstanceOf(TestClass8.class);
 		assertCanCompile(expression);
-		o = expression.getValue();
-		assertThat(o.getClass().getName()).isEqualTo(testclass8);
-		tc8 = (TestClass8) o;
+		result = expression.getValue();
+		assertThat(result).isExactlyInstanceOf(TestClass8.class);
+		tc8 = (TestClass8) result;
 		assertThat(tc8.i).isEqualTo(42);
 
 		// varargs
 		expression = parser.parseExpression("new " + testclass8 + "(#root)");
 		Object[] objectArray = { "a", "b", "c" };
-		o = expression.getValue(objectArray);
-		assertThat(o).isExactlyInstanceOf(TestClass8.class);
+		result = expression.getValue(objectArray);
+		assertThat(result).isExactlyInstanceOf(TestClass8.class);
 		assertCanCompile(expression);
-		o = expression.getValue(objectArray);
-		assertThat(o).isExactlyInstanceOf(TestClass8.class);
-		tc8 = (TestClass8) o;
+		result = expression.getValue(objectArray);
+		assertThat(result).isExactlyInstanceOf(TestClass8.class);
+		tc8 = (TestClass8) result;
 		assertThat(tc8.args).containsExactly("a", "b", "c");
 
 		// varargs with argument component type that is a subtype of the varargs component type.
 		expression = parser.parseExpression("new " + testclass8 + "(#root)");
 		String[] stringArray = { "a", "b", "c" };
-		o = expression.getValue(stringArray);
-		assertThat(o).isExactlyInstanceOf(TestClass8.class);
+		result = expression.getValue(stringArray);
+		assertThat(result).isExactlyInstanceOf(TestClass8.class);
 		assertCanCompile(expression);
-		o = expression.getValue(stringArray);
-		assertThat(o).isExactlyInstanceOf(TestClass8.class);
-		tc8 = (TestClass8) o;
+		result = expression.getValue(stringArray);
+		assertThat(result).isExactlyInstanceOf(TestClass8.class);
+		tc8 = (TestClass8) result;
 		assertThat(tc8.args).containsExactly("a", "b", "c");
 
 		// private class, can't compile it
-		String testclass9 = "org.springframework.expression.spel.SpelCompilationCoverageTests$TestClass9";
+		String testclass9 = TestClass9.class.getName();
 		expression = parser.parseExpression("new " + testclass9 + "(42)");
-		assertThat(expression.getValue().getClass().getName()).isEqualTo(testclass9);
+		result = expression.getValue();
+		assertThat(result).isExactlyInstanceOf(TestClass9.class);
 		assertCannotCompile(expression);
 	}
 

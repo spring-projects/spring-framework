@@ -957,7 +957,7 @@ public class CodeFlow implements Opcodes {
 	 */
 	public static void insertOptimalLoad(MethodVisitor mv, int value) {
 		if (value < 6) {
-			mv.visitInsn(ICONST_0+value);
+			mv.visitInsn(ICONST_0 + value);
 		}
 		else if (value < Byte.MAX_VALUE) {
 			mv.visitIntInsn(BIPUSH, value);
@@ -971,15 +971,16 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
-	 * Produce appropriate bytecode to store a stack item in an array. The
-	 * instruction to use varies depending on whether the type
-	 * is a primitive or reference type.
+	 * Produce appropriate bytecode to store a stack item in an array.
+	 * <p>The instruction to use varies depending on whether the type is a
+	 * primitive or reference type.
 	 * @param mv where to insert the bytecode
-	 * @param arrayElementType the type of the array elements
+	 * @param arrayComponentType the component type of the array
 	 */
-	public static void insertArrayStore(MethodVisitor mv, String arrayElementType) {
-		if (arrayElementType.length() == 1) {
-			switch (arrayElementType.charAt(0)) {
+	public static void insertArrayStore(MethodVisitor mv, String arrayComponentType) {
+		if (arrayComponentType.length() == 1) {
+			char componentType = arrayComponentType.charAt(0);
+			switch (componentType) {
 				case 'B', 'Z' -> mv.visitInsn(BASTORE);
 				case 'I' -> mv.visitInsn(IASTORE);
 				case 'J' -> mv.visitInsn(LASTORE);
@@ -987,7 +988,7 @@ public class CodeFlow implements Opcodes {
 				case 'D' -> mv.visitInsn(DASTORE);
 				case 'C' -> mv.visitInsn(CASTORE);
 				case 'S' -> mv.visitInsn(SASTORE);
-				default -> throw new IllegalArgumentException("Unexpected array type " + arrayElementType.charAt(0));
+				default -> throw new IllegalArgumentException("Unexpected array component type " + componentType);
 			}
 		}
 		else {
