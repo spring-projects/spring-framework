@@ -36,10 +36,10 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 @SpringJUnitConfig
 public class TestBeanIntegrationTests {
 
-	@TestBean
+	@TestBean(name = "field")
 	String field;
 
-	@TestBean
+	@TestBean(name = "nestedField")
 	String nestedField;
 
 	@TestBean(name = "field")
@@ -48,10 +48,10 @@ public class TestBeanIntegrationTests {
 	@TestBean(name = "nestedField")
 	String renamed2;
 
-	@TestBean(methodName = "fieldTestOverride")
+	@TestBean(name = "methodRenamed1", methodName = "fieldTestOverride")
 	String methodRenamed1;
 
-	@TestBean(methodName = "nestedFieldTestOverride")
+	@TestBean(name = "methodRenamed2", methodName = "nestedFieldTestOverride")
 	String methodRenamed2;
 
 	static String fieldTestOverride() {
@@ -69,7 +69,7 @@ public class TestBeanIntegrationTests {
 	}
 
 	@Test
-	void fieldWithBeanNameHasOverride(ApplicationContext ctx) {
+	void renamedFieldHasOverride(ApplicationContext ctx) {
 		assertThat(ctx.getBean("field")).as("applicationContext").isEqualTo("fieldOverride");
 		assertThat(this.renamed1).as("injection point").isEqualTo("fieldOverride");
 	}
@@ -153,7 +153,7 @@ public class TestBeanIntegrationTests {
 		}
 
 		@Test
-		void fieldWithBeanNameHasOverride(ApplicationContext ctx) {
+		void renamedFieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
 			assertThat(TestBeanIntegrationTests.this.renamed2).isEqualTo("nestedFieldOverride");
 		}
@@ -209,7 +209,7 @@ public class TestBeanIntegrationTests {
 	@SpringJUnitConfig
 	static class Failing1 {
 
-		@TestBean
+		@TestBean(name = "noOriginalBean")
 		String noOriginalBean;
 
 		@Test

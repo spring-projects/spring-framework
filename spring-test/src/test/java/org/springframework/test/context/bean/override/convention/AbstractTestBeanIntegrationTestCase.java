@@ -23,10 +23,10 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 class AbstractTestBeanIntegrationTestCase {
 
-		@TestBean
+		@TestBean(name = "someBean")
 		Pojo someBean;
 
-		@TestBean
+		@TestBean(name = "otherBean")
 		Pojo otherBean;
 
 		@TestBean(name = "thirdBean")

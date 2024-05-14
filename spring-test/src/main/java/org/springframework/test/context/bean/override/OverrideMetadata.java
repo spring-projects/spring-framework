@@ -58,11 +58,13 @@ public abstract class OverrideMetadata {
 	}
 
 	/**
-	 * Get the bean name to override.
-	 * <p>Defaults to the name of the {@link #getField() field}.
+	 * Get the bean name to override, or {@code null} to look for a single
+	 * matching bean of type {@link #getBeanType()}.
+	 * <p>Defaults to {@code null}.
 	 */
+	@Nullable
 	protected String getBeanName() {
-		return this.field.getName();
+		return null;
 	}
 
 	/**

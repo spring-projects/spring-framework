@@ -144,14 +144,14 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 				ResolvableType typeToOverride) {
 
 			super(field, typeToOverride, BeanOverrideStrategy.REPLACE_DEFINITION);
-			this.beanName = StringUtils.hasText(overrideAnnotation.name()) ?
-					overrideAnnotation.name() : field.getName();
+			this.beanName = overrideAnnotation.name();
 			this.overrideMethod = overrideMethod;
 		}
 
 		@Override
+		@Nullable
 		protected String getBeanName() {
-			return this.beanName;
+			return StringUtils.hasText(this.beanName) ? this.beanName : super.getBeanName();
 		}
 
 		@Override

@@ -28,10 +28,14 @@ import org.mockito.MockSettings;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
- * Mark a field to trigger a bean override using a Mockito mock. If no explicit
- * {@link #name()} is specified, the annotated field's name is interpreted to
- * be the target of the override. In either case, if no existing bean is defined
- * a new one will be added to the context.
+ * Mark a field to trigger a bean override using a Mockito mock.
+ *
+ * <p>If no explicit {@link #name()} is specified, a target bean definition is
+ * selected according to the class of the annotated field, and there must be
+ * exactly one such candidate definition in the context.
+ * If a {@link #name()} is specified, either the definition exists in the
+ * application context and is replaced, or it doesn't and a new one is added to
+ * the context.
  *
  * <p>Dependencies that are known to the application context but are not beans
  * (such as those
@@ -51,7 +55,8 @@ public @interface MockitoBean {
 
 	/**
 	 * The name of the bean to register or replace.
-	 * <p>If not specified, the name of the annotated field will be used.
+	 * <p>If left unspecified, the bean to override is selected according to
+	 * the annotated field's type.
 	 * @return the name of the mocked bean
 	 */
 	String name() default "";

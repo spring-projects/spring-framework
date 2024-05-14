@@ -38,7 +38,7 @@ class OverrideMetadataTests {
 	@Test
 	void implicitConfigurations() throws Exception {
 		OverrideMetadata metadata = exampleOverride();
-		assertThat(metadata.getBeanName()).as("expectedBeanName").isEqualTo(metadata.getField().getName());
+		assertThat(metadata.getBeanName()).as("expectedBeanName").isNull();
 	}
 
 

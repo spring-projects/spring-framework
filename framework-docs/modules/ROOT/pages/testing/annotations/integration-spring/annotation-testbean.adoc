@@ -5,11 +5,16 @@
 `ApplicationContext` with an instance provided by a conventionally named static factory
 method.
 
-By default, the bean name and the associated factory method name are derived from the
-annotated field's name, but the annotation allows for specific values to be provided.
+By default, the associated factory method name is derived from the annotated field's name,
+but the annotation allows for a specific method name to be provided.
 
 The `@TestBean` annotation uses the `REPLACE_DEFINITION`
 xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy for test bean overriding].
+
+Users are encouraged to make bean overriding as explicit and unambiguous as possible,
+typically by specifying a bean `name` in the annotation.
+If no bean `name` is specified, the annotated field's type is used to search for candidate
+definitions to override. In that case it is required that exactly one definition matches.
 
 The following example shows how to fully configure the `@TestBean` annotation, with
 explicit values equivalent to the defaults:

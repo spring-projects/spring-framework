@@ -35,10 +35,10 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 @SpringJUnitConfig(MockitoBeanIntegrationTests.Config.class)
 public class MockitoSpyBeanIntegrationTests {
 
-	@MockitoSpyBean
+	@MockitoSpyBean(name = "field")
 	ExampleService field;
 
-	@MockitoSpyBean
+	@MockitoSpyBean(name = "nestedField")
 	ExampleService nestedField;
 
 	@MockitoSpyBean(name = "field")
@@ -57,11 +57,10 @@ public class MockitoSpyBeanIntegrationTests {
 
 		assertThat(this.field.greeting()).as("spied greeting")
 				.isEqualTo("Hello Field");
-
 	}
 
 	@Test
-	void fieldWithBeanNameHasOverride(ApplicationContext ctx) {
+	void renamedFieldHasOverride(ApplicationContext ctx) {
 		assertThat(ctx.getBean("field"))
 				.isInstanceOf(ExampleService.class)
 				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy())
@@ -73,7 +72,7 @@ public class MockitoSpyBeanIntegrationTests {
 	}
 
 	@Test
-	void failWhenBeanNotPresentFieldName() {
+	void failWhenBeanNotPresentByType() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
 				.selectors(selectClass(Failure1.class))//
 				.execute();
@@ -83,13 +82,14 @@ public class MockitoSpyBeanIntegrationTests {
 						.getThrowable()).get(THROWABLE)
 						.cause()
 						.isInstanceOf(IllegalStateException.class)
-						.hasMessage("Unable to override bean 'notPresent' by wrapping," +
-										" no existing bean instance by this name of type %s",
-								ExampleService.class.getName()));
+						.hasMessage("Unable to select a bean to override by wrapping, " +
+										"0 bean instances found of type %s " +
+										"(as required by annotated field '%s.notPresent')",
+								ExampleService.class.getName(), Failure1.class.getSimpleName()));
 	}
 
 	@Test
-	void failWhenBeanNotPresentExplicitName() {
+	void failWhenBeanNotPresentByExplicitName() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
 				.selectors(selectClass(Failure2.class))//
 				.execute();
@@ -99,8 +99,8 @@ public class MockitoSpyBeanIntegrationTests {
 						.getThrowable()).get(THROWABLE)
 						.cause()
 						.isInstanceOf(IllegalStateException.class)
-						.hasMessage("Unable to override bean 'notPresentAtAll' by wrapping," +
-								" no existing bean instance by this name of type %s",
+						.hasMessage("Unable to override bean 'notPresentAtAll' by wrapping; " +
+								"there is no existing bean instance with that name of type %s",
 								ExampleService.class.getName()));
 	}
 
@@ -122,7 +122,7 @@ public class MockitoSpyBeanIntegrationTests {
 		}
 
 		@Test
-		void fieldWithBeanNameHasOverride(ApplicationContext ctx) {
+		void renamedFieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField"))
 					.isInstanceOf(ExampleService.class)
 					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy())

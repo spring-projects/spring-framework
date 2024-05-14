@@ -33,10 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringJUnitConfig
 public class MockitoBeanIntegrationTests {
 
-	@MockitoBean
+	@MockitoBean(name = "field")
 	ExampleService field;
 
-	@MockitoBean
+	@MockitoBean(name = "nestedField")
 	ExampleService nestedField;
 
 	@MockitoBean(name = "field")
@@ -63,7 +63,7 @@ public class MockitoBeanIntegrationTests {
 	}
 
 	@Test
-	void fieldWithBeanNameHasOverride(ApplicationContext ctx) {
+	void renamedFieldHasOverride(ApplicationContext ctx) {
 		assertThat(ctx.getBean("field"))
 				.isInstanceOf(ExampleService.class)
 				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock())
@@ -98,7 +98,7 @@ public class MockitoBeanIntegrationTests {
 		}
 
 		@Test
-		void fieldWithBeanNameHasOverride(ApplicationContext ctx) {
+		void renamedFieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField"))
 					.isInstanceOf(ExampleService.class)
 					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock())

@@ -39,10 +39,10 @@ public class TestBeanInheritanceIntegrationTests {
 	@DisplayName("Concrete inherited test with correct @TestBean setup")
 	class ConcreteTestBeanIntegrationTests extends AbstractTestBeanIntegrationTestCase {
 
-		@TestBean(methodName = "commonBeanOverride")
+		@TestBean(name = "pojo", methodName = "commonBeanOverride")
 		Pojo pojo;
 
-		@TestBean(methodName = "nestedBeanOverride")
+		@TestBean(name = "pojo2", methodName = "nestedBeanOverride")
 		Pojo pojo2;
 
 		static Pojo someBeanTestOverride() {

@@ -28,10 +28,13 @@ import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
  * Mark a field to trigger a bean override using a Mockito spy, which will wrap
- * the original instance. If no explicit {@link #name()} is specified, the
- * annotated field's name is interpreted to be the target of the override.
- * In either case, it is required that the target bean is previously registered
- * in the context.
+ * the original instance.
+ *
+ * <p>If no explicit {@link #name()} is specified, a target bean is selected
+ * according to the class of the annotated field, and there must be exactly one
+ * such candidate bean.
+ * If a {@link #name()} is specified, it is required that a target bean of that
+ * name has been previously registered in the application context.
  *
  * <p>Dependencies that are known to the application context but are not beans
  * (such as those
@@ -50,7 +53,8 @@ public @interface MockitoSpyBean {
 
 	/**
 	 * The name of the bean to spy.
-	 * <p>If not specified, the name of the annotated field will be used.
+	 * <p>If left unspecified, the bean to override is selected according to
+	 * the annotated field's type.
 	 * @return the name of the spied bean
 	 */
 	String name() default "";

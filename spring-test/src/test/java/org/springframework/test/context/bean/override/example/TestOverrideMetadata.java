@@ -99,7 +99,7 @@ class TestOverrideMetadata extends OverrideMetadata {
 		if (StringUtils.hasText(this.beanName)) {
 			return this.beanName;
 		}
-		return super.getBeanName();
+		return getField().getName();
 	}
 
 	String getAnnotationMethodName() {

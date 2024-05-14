@@ -58,10 +58,14 @@ by the corresponding `BeanOverrideStrategy`:
 [NOTE]
 ====
 In contrast to Spring's autowiring mechanism (for example, resolution of an `@Autowired`
-field), the bean overriding infrastructure in the TestContext framework does not perform
-any heuristics to locate a bean. Instead, the name of the bean to override must be
-explicitly provided to or computed by the `BeanOverrideProcessor`.
+field), the bean overriding infrastructure in the TestContext framework has limited
+heuristics it can perform to locate a bean. Either the `BeanOverrideProcessor` can compute
+the name of the bean to override, or it can be unambiguously selected given the type of
+the annotated field.
 
-Typically, the user provides the bean name via a custom annotation, or the
-`BeanOverrideProcessor` determines the bean name based on some convention.
+Typically, the user directly provides the bean name in the custom annotation in order to
+make things as explicit as possible. Alternatively, the bean is selected by type by the
+`BeanOverrideFactoryPostProcessor`.
+Some `BeanOverrideProcessor`s could also internally compute a bean name based on a
+convention or another advanced method.
 ====

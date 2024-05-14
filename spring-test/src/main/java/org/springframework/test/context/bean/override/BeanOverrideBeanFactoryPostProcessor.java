@@ -125,6 +125,17 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 		RootBeanDefinition beanDefinition = createBeanDefinition(overrideMetadata);
 		String beanName = overrideMetadata.getBeanName();
+		if (beanName == null) {
+			final String[] candidates = beanFactory.getBeanNamesForType(overrideMetadata.getBeanType());
+			if (candidates.length != 1) {
+				Field f = overrideMetadata.getField();
+				throw new IllegalStateException("Unable to select a bean definition to override, " +
+						candidates.length+ " bean definitions found of type " + overrideMetadata.getBeanType() +
+						" (as required by annotated field '" + f.getDeclaringClass().getSimpleName() +
+						"." + f.getName() + "')");
+			}
+			beanName = candidates[0];
+		}
 
 		BeanDefinition existingBeanDefinition = null;
 		if (beanFactory.containsBeanDefinition(beanName)) {
@@ -160,9 +171,19 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	private void registerWrapBean(ConfigurableListableBeanFactory beanFactory, OverrideMetadata metadata) {
 		Set<String> existingBeanNames = getExistingBeanNames(beanFactory, metadata.getBeanType());
 		String beanName = metadata.getBeanName();
-		if (!existingBeanNames.contains(beanName)) {
-			throw new IllegalStateException("Unable to override bean '" + beanName + "' by wrapping," +
-					" no existing bean instance by this name of type " + metadata.getBeanType());
+		if (beanName == null) {
+			if (existingBeanNames.size() != 1) {
+				Field f = metadata.getField();
+				throw new IllegalStateException("Unable to select a bean to override by wrapping, " +
+						existingBeanNames.size() + " bean instances found of type " + metadata.getBeanType() +
+						" (as required by annotated field '" + f.getDeclaringClass().getSimpleName() +
+						"." + f.getName() + "')");
+			}
+			beanName = existingBeanNames.iterator().next();
+		}
+		else if (!existingBeanNames.contains(beanName)) {
+			throw new IllegalStateException("Unable to override bean '" + beanName + "' by wrapping; " +
+					"there is no existing bean instance with that name of type " + metadata.getBeanType());
 		}
 		this.overrideRegistrar.markWrapEarly(metadata, beanName);
 		this.overrideRegistrar.registerNameForMetadata(metadata, beanName);
