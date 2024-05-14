@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
-import org.springframework.util.ClassUtils;
 
 /**
  * AOT contribution from a {@link BeanRegistrationsAotProcessor} used to
@@ -115,21 +114,8 @@ class BeanRegistrationsAotContribution
 			ReflectionHints hints = runtimeHints.reflection();
 			Class<?> beanClass = beanRegistrationKey.beanClass();
 			hints.registerType(beanClass, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INTROSPECT_DECLARED_METHODS);
-			introspectPublicMethodsOnAllInterfaces(hints, beanClass);
+			hints.registerForInterfaces(beanClass, typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 		});
-	}
-
-	private void introspectPublicMethodsOnAllInterfaces(ReflectionHints hints, Class<?> type) {
-		Class<?> currentClass = type;
-		while (currentClass != null && currentClass != Object.class) {
-			for (Class<?> interfaceType : currentClass.getInterfaces()) {
-				if (!ClassUtils.isJavaLanguageInterface(interfaceType)) {
-					hints.registerType(interfaceType, MemberCategory.INTROSPECT_PUBLIC_METHODS);
-					introspectPublicMethodsOnAllInterfaces(hints, interfaceType);
-				}
-			}
-			currentClass = currentClass.getSuperclass();
-		}
 	}
 
 	/**

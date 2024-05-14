@@ -16,6 +16,7 @@
 
 package org.springframework.aot.hint;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -209,6 +210,18 @@ class ReflectionHintsTests {
 		});
 	}
 
+	@Test
+	void registerOnInterfaces() {
+		this.reflectionHints.registerForInterfaces(ChildType.class,
+				typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+		assertThat(this.reflectionHints.typeHints()).hasSize(2)
+				.noneMatch(typeHint -> typeHint.getType().getCanonicalName().equals(Serializable.class.getCanonicalName()))
+				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(SecondInterface.class.getCanonicalName())
+						&& typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS))
+				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(FirstInterface.class.getCanonicalName())
+						&& typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+	}
+
 	private void assertTestTypeMethodHints(Consumer<ExecutableHint> methodHint) {
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(TestType.class.getCanonicalName());
@@ -239,6 +252,30 @@ class ReflectionHintsTests {
 
 		}
 
+	}
+
+	interface FirstInterface {
+		void first();
+	}
+
+	interface SecondInterface {
+		void second();
+	}
+
+	@SuppressWarnings("serial")
+	static class ParentType implements Serializable, FirstInterface {
+		@Override
+		public void first() {
+
+		}
+	}
+
+	@SuppressWarnings("serial")
+	static class ChildType extends ParentType implements SecondInterface {
+		@Override
+		public void second() {
+
+		}
 	}
 
 }
