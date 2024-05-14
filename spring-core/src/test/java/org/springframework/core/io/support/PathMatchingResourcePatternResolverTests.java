@@ -58,7 +58,8 @@ class PathMatchingResourcePatternResolverTests {
 
 	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT = {"PathMatchingResourcePatternResolverTests.class"};
 
-	private static final String[] CLASSES_IN_REACTOR_UTIL_ANNOTATION = {"NonNull.class", "NonNullApi.class", "Nullable.class"};
+	private static final String[] CLASSES_IN_REACTOR_UTIL_ANNOTATION =
+			{"Incubating.class", "NonNull.class", "NonNullApi.class", "Nullable.class"};
 
 
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
