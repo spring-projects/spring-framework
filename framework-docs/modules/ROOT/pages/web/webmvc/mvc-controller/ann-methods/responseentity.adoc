@@ -32,6 +32,16 @@ Kotlin::
 ----
 ======
 
+The body will usually be provided as a value object to be rendered to a corresponding
+response representation (e.g. JSON) by one of the registered `HttpMessageConverters`.
+
+A `ResponseEntity<Resource>` can be returned for file content, copying the `InputStream`
+content of the provided resource to the response `OutputStream`. Note that the
+`InputStream` should be lazily retrieved by the `Resource` handle in order to reliably
+close it after it has been copied to the response. If you are using `InputStreamResource`
+for such a purpose, make sure to construct it with an on-demand `InputStreamSource`
+(e.g. through a lambda expression that retrieves the actual `InputStream`).
+
 Spring MVC supports using a single value xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[reactive type]
 to produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive
 types for the body. This allows the following types of async responses:

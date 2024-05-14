@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import okhttp3.mockwebserver.Dispatcher;
@@ -189,14 +190,21 @@ class ResourceTests {
 			String content = FileCopyUtils.copyToString(new InputStreamReader(resource1.getInputStream()));
 			assertThat(content).isEqualTo(testString);
 			assertThat(new InputStreamResource(is)).isEqualTo(resource1);
+			assertThat(new InputStreamResource(() -> is)).isNotEqualTo(resource1);
 			assertThatIllegalStateException().isThrownBy(resource1::getInputStream);
 
 			Resource resource2 = new InputStreamResource(new ByteArrayInputStream(testBytes));
 			assertThat(resource2.getContentAsByteArray()).containsExactly(testBytes);
 			assertThatIllegalStateException().isThrownBy(resource2::getContentAsByteArray);
 
-			Resource resource3 = new InputStreamResource(new ByteArrayInputStream(testBytes));
+			AtomicBoolean obtained = new AtomicBoolean();
+			Resource resource3 = new InputStreamResource(() -> {
+				obtained.set(true);
+				return new ByteArrayInputStream(testBytes);
+			});
+			assertThat(obtained).isFalse();
 			assertThat(resource3.getContentAsString(StandardCharsets.US_ASCII)).isEqualTo(testString);
+			assertThat(obtained).isTrue();
 			assertThatIllegalStateException().isThrownBy(() -> resource3.getContentAsString(StandardCharsets.US_ASCII));
 		}
 
@@ -206,12 +214,19 @@ class ResourceTests {
 			Resource resource = new InputStreamResource(is);
 			assertThat(resource.exists()).isTrue();
 			assertThat(resource.isOpen()).isTrue();
+
+			resource = new InputStreamResource(() -> is);
+			assertThat(resource.exists()).isTrue();
+			assertThat(resource.isOpen()).isTrue();
 		}
 
 		@Test
 		void hasDescription() {
 			InputStream is = new ByteArrayInputStream("testString".getBytes());
 			Resource resource = new InputStreamResource(is, "my description");
+			assertThat(resource.getDescription()).contains("my description");
+
+			resource = new InputStreamResource(() -> is, "my description");
 			assertThat(resource.getDescription()).contains("my description");
 		}
 	}
