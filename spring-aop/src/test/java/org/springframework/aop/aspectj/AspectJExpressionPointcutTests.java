@@ -60,7 +60,7 @@ class AspectJExpressionPointcutTests {
 
 
 	@BeforeEach
-	public void setup() throws NoSuchMethodException {
+	void setup() throws NoSuchMethodException {
 		getAge = TestBean.class.getMethod("getAge");
 		setAge = TestBean.class.getMethod("setAge", int.class);
 		setSomeNumber = TestBean.class.getMethod("setSomeNumber", Number.class);
@@ -193,7 +193,7 @@ class AspectJExpressionPointcutTests {
 
 
 	@Test
-	void testMatchWithArgs() throws Exception {
+	void testMatchWithArgs() {
 		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number)) && args(Double)";
 
 		Pointcut pointcut = getPointcut(expression);
