@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
- * The default implementation of Spring's {@link SqlRowSet} interface, wrapping a
+ * The common implementation of Spring's {@link SqlRowSet} interface, wrapping a
  * {@link java.sql.ResultSet}, catching any {@link SQLException SQLExceptions} and
  * translating them to a corresponding Spring {@link InvalidResultSetAccessException}.
  *
