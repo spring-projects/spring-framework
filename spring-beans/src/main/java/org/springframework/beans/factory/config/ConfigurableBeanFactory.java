@@ -26,7 +26,6 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.lang.Nullable;
@@ -152,7 +151,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Set the {@link Executor} (possibly a {@link org.springframework.core.task.TaskExecutor})
 	 * for background bootstrapping.
 	 * @since 6.2
-	 * @see AbstractBeanDefinition#setBackgroundInit
+	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#setBackgroundInit
 	 */
 	void setBootstrapExecutor(@Nullable Executor executor);
 
