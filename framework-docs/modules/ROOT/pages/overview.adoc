@@ -10,7 +10,7 @@ Spring requires Java 17+.
 
 Spring supports a wide range of application scenarios. In a large enterprise, applications
 often exist for a long time and have to run on a JDK and application server whose upgrade
-cycle is beyond developer control. Others may run as a single jar with the server embedded,
+cycle is beyond the developer's control. Others may run as a single jar with the server embedded,
 possibly in a cloud environment. Yet others may be standalone applications (such as batch
 or integration workloads) that do not need a server.
 
