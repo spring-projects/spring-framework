@@ -250,3 +250,115 @@ Kotlin::
 ----
 ======
 
+[[expressions-indexing-custom]]
+== Indexing into Custom Structures
+
+Since Spring Framework 6.2, the Spring Expression Language supports indexing into custom
+structures by allowing developers to implement and register an `IndexAccessor` with the
+`EvaluationContext`. If you would like to support
+xref:core/expressions/evaluation.adoc#expressions-spel-compilation[compilation] of
+expressions that rely on a custom index accessor, that index accessor must implement the
+`CompilableIndexAccessor` SPI.
+
+To support common use cases, Spring provides a built-in `ReflectiveIndexAccessor` which
+is a flexible `IndexAccessor` that uses reflection to read from and optionally write to
+an indexed structure of a target object. The indexed structure can be accessed through a
+`public` read-method (when being read) or a `public` write-method (when being written).
+The relationship between the read-method and write-method is based on a convention that
+is applicable for typical implementations of indexed structures.
+
+NOTE: `ReflectiveIndexAccessor` also implements `CompilableIndexAccessor` in order to
+support xref:core/expressions/evaluation.adoc#expressions-spel-compilation[compilation]
+to bytecode for read access. Note, however, that the configured read-method must be
+invokable via a `public` class or `public` interface for compilation to succeed.
+
+The following code listings define a `Color` enum and `FruitMap` type that behaves like a
+map but does not implement the `java.util.Map` interface. Thus, if you want to index into
+a `FruitMap` within a SpEL expression, you will need to register an `IndexAccessor`.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	package example;
+
+	public enum Color {
+		RED, ORANGE, YELLOW
+	}
+----
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class FruitMap {
+
+		private final Map<Color, String> map = new HashMap<>();
+
+		public FruitMap() {
+			this.map.put(Color.RED, "cherry");
+			this.map.put(Color.ORANGE, "orange");
+			this.map.put(Color.YELLOW, "banana");
+		}
+
+		public String getFruit(Color color) {
+			return this.map.get(color);
+		}
+
+		public void setFruit(Color color, String fruit) {
+			this.map.put(color, fruit);
+		}
+	}
+----
+
+A read-only `IndexAccessor` for `FruitMap` can be created via `new
+ReflectiveIndexAccessor(FruitMap.class, Color.class, "getFruit")`. With that accessor
+registered and a `FruitMap` registered as a variable named `#fruitMap`, the SpEL
+expression `#fruitMap[T(example.Color).RED]` will evaluate to `"cherry"`.
+
+A read-write `IndexAccessor` for `FruitMap` can be created via `new
+ReflectiveIndexAccessor(FruitMap.class, Color.class, "getFruit", "setFruit")`. With that
+accessor registered and a `FruitMap` registered as a variable named `#fruitMap`, the SpEL
+expression `#fruitMap[T(example.Color).RED] = 'strawberry'` can be used to change the
+fruit mapping for the color red from `"cherry"` to `"strawberry"`.
+
+The following example demonstrates how to register a `ReflectiveIndexAccessor` to index
+into a `FruitMap` and then index into the `FruitMap` within a SpEL expression.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// Create a ReflectiveIndexAccessor for FruitMap
+	IndexAccessor fruitMapAccessor = new ReflectiveIndexAccessor(
+			FruitMap.class, Color.class, "getFruit", "setFruit");
+
+	// Register the IndexAccessor for FruitMap
+	context.addIndexAccessor(fruitMapAccessor);
+
+	// Register the fruitMap variable
+	context.setVariable("fruitMap", new FruitMap());
+
+	// evaluates to "cherry"
+	String fruit = parser.parseExpression("#fruitMap[T(example.Color).RED]")
+			.getValue(context, String.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// Create a ReflectiveIndexAccessor for FruitMap
+	val fruitMapAccessor = ReflectiveIndexAccessor(
+			FruitMap::class.java, Color::class.java, "getFruit", "setFruit")
+
+	// Register the IndexAccessor for FruitMap
+	context.addIndexAccessor(fruitMapAccessor)
+
+	// Register the fruitMap variable
+	context.setVariable("fruitMap", FruitMap())
+
+	// evaluates to "cherry"
+	val fruit = parser.parseExpression("#fruitMap[T(example.Color).RED]")
+		.getValue(context, String::class.java)
+----
+======
+

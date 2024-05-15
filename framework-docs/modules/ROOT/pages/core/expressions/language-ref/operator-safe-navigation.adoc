@@ -91,6 +91,7 @@ indexing into the following types of structures.
 * xref:core/expressions/language-ref/properties-arrays.adoc#expressions-indexing-strings[strings]
 * xref:core/expressions/language-ref/properties-arrays.adoc#expressions-indexing-maps[maps]
 * xref:core/expressions/language-ref/properties-arrays.adoc#expressions-indexing-objects[objects]
+* xref:core/expressions/language-ref/properties-arrays.adoc#expressions-indexing-custom[custom]
 
 The following example shows how to use the safe navigation operator for indexing into
 a list (`?.[]`).

@@ -516,7 +516,7 @@ following kinds of expressions cannot be compiled.
 
 * Expressions involving assignment
 * Expressions relying on the conversion service
-* Expressions using custom resolvers or accessors
+* Expressions using custom resolvers
 * Expressions using overloaded operators
 * Expressions using array construction syntax
 * Expressions using selection or projection
