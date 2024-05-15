@@ -38,5 +38,5 @@ runtime:
     failure_level: warn
 ui:
   bundle:
-    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.12/ui-bundle.zip
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.13/ui-bundle.zip
     snapshot: true
