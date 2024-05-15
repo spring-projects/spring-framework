@@ -43,19 +43,35 @@ class MediaTypeAssertTests {
 	}
 
 	@Test
-	void isEqualWhenSameShouldPass() {
+	void isEqualWhenActualIsNullStringShouldFail() {
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(null).isEqualTo("text/html"))
+				.withMessageContaining("Media type");
+	}
+
+	@Test
+	void isEqualWhenSameStringShouldPass() {
 		assertThat(mediaType("application/json")).isEqualTo("application/json");
 	}
 
 	@Test
-	void isEqualWhenDifferentShouldFail() {
+	void isEqualWhenDifferentStringShouldFail() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(mediaType("application/json")).isEqualTo("text/html"))
 				.withMessageContaining("Media type");
 	}
 
 	@Test
-	void isEqualWhenActualIsNullShouldFail() {
+	void isEqualInvalidStringShouldFail() {
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(mediaType("application/json")).isEqualTo("example of a bad value"))
+				.withMessageContaining("[Media type]")
+				.withMessageEndingWith("To be a valid media type but got:\n" +
+						"  \"Invalid mime type \"example of a bad value\": does not contain '/'\"\n");
+	}
+
+	@Test
+	void isEqualWhenActualIsNullTypeShouldFail() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(null).isEqualTo(MediaType.APPLICATION_JSON))
 				.withMessageContaining("Media type");
@@ -70,6 +86,49 @@ class MediaTypeAssertTests {
 	void isEqualWhenDifferentTypeShouldFail() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(mediaType("application/json")).isEqualTo(MediaType.TEXT_HTML))
+				.withMessageContaining("Media type");
+	}
+
+	@Test
+	void isNotEqualWhenActualIsNullStringShouldPass() {
+		assertThat(null).isNotEqualTo("application/json");
+	}
+
+	@Test
+	void isNotEqualWhenDifferentStringShouldPass() {
+		assertThat(mediaType("application/json")).isNotEqualTo("text/html");
+	}
+
+	@Test
+	void isNotEqualWhenSameStringShouldFail() {
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(mediaType("application/json")).isNotEqualTo("application/json"))
+				.withMessageContaining("Media type");
+	}
+
+	@Test
+	void isNotEqualInvalidStringShouldFail() {
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(mediaType("application/json")).isNotEqualTo("example of a bad value"))
+				.withMessageContaining("[Media type]")
+				.withMessageEndingWith("To be a valid media type but got:\n" +
+						"  \"Invalid mime type \"example of a bad value\": does not contain '/'\"\n");
+	}
+
+	@Test
+	void isNotEqualWhenActualIsNullTypeShouldPass() {
+		assertThat(null).isNotEqualTo(MediaType.APPLICATION_JSON);
+	}
+
+	@Test
+	void isNotEqualWhenDifferentTypeShouldPass() {
+		assertThat(mediaType("application/json")).isNotEqualTo(MediaType.TEXT_HTML);
+	}
+
+	@Test
+	void isNotEqualWhenSameTypeShouldFail() {
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertThat(mediaType("application/json")).isNotEqualTo(MediaType.APPLICATION_JSON))
 				.withMessageContaining("Media type");
 	}
 
