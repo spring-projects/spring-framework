@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,10 +110,11 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected void applyCookies() {
 		MultiValueMap<String, HttpCookie> cookies = getCookies();
-		if (!cookies.isEmpty()) {
-			this.builder.header(HttpHeaders.COOKIE, cookies.values().stream()
-					.flatMap(List::stream).map(HttpCookie::toString).collect(Collectors.joining(";")));
+		if (cookies.isEmpty()) {
+			return;
 		}
+		this.builder.header(HttpHeaders.COOKIE, cookies.values().stream()
+				.flatMap(List::stream).map(HttpCookie::toString).collect(Collectors.joining(";")));
 	}
 
 	@Override
