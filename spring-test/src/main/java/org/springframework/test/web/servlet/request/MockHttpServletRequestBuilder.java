@@ -899,7 +899,6 @@ public class MockHttpServletRequestBuilder
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private MultiValueMap<String, String> parseFormData(MediaType mediaType) {
 		HttpInputMessage message = new HttpInputMessage() {
 			@Override
@@ -915,7 +914,7 @@ public class MockHttpServletRequestBuilder
 		};
 
 		try {
-			return (MultiValueMap<String, String>) new FormHttpMessageConverter().read(null, message);
+			return new FormHttpMessageConverter().read(null, message);
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Failed to parse form data in request body", ex);
