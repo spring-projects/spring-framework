@@ -43,7 +43,7 @@ import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
- * {@code Filter} that can be configured to trim a trailing slashes, and either
+ * {@code Filter} that can be configured to trim trailing slashes, and either
  * send a redirect or wrap the request and continue processing.
  *
  * <p>Use the static {@link #trimTrailingSlash(String...)} method to begin to

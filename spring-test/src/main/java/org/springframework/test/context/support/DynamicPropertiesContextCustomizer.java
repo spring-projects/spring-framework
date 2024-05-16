@@ -52,7 +52,7 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 			DynamicPropertiesContextCustomizer.class.getName() + ".dynamicPropertyRegistry";
 
 	private static final String DYNAMIC_PROPERTY_SOURCE_BEAN_INITIALIZER_BEAN_NAME =
-			DynamicPropertiesContextCustomizer.class.getName() + "dynamicPropertySourceBeanInitializer";
+			DynamicPropertiesContextCustomizer.class.getName() + ".dynamicPropertySourceBeanInitializer";
 
 
 	private final Set<Method> methods;
