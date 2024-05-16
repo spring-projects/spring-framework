@@ -156,12 +156,13 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 	@Test
-	void copyDefinitionPrimaryAndScope() {
+	void copyDefinitionPrimaryFallbackAndScope() {
 		AnnotationConfigApplicationContext context = createContext(SingletonBean.class);
 		context.getBeanFactory().registerScope("customScope", new SimpleThreadScope());
 		RootBeanDefinition definition = new RootBeanDefinition(String.class, () -> "ORIGINAL");
 		definition.setScope("customScope");
 		definition.setPrimary(true);
+		definition.setFallback(true);
 		context.registerBeanDefinition("singleton", definition);
 		context.register(SingletonBean.class);
 
@@ -169,6 +170,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		assertThat(context.getBeanDefinition("singleton"))
 				.isNotSameAs(definition)
 				.matches(BeanDefinition::isPrimary, "isPrimary")
+				.matches(BeanDefinition::isFallback, "isFallback")
 				.satisfies(d -> assertThat(d.getScope()).isEqualTo("customScope"))
 				.matches(Predicate.not(BeanDefinition::isSingleton), "!isSingleton")
 				.matches(Predicate.not(BeanDefinition::isPrototype), "!isPrototype");

@@ -101,10 +101,12 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	 * Copy certain details of a {@link BeanDefinition} to the definition created by
 	 * this processor for a given {@link OverrideMetadata}.
 	 * <p>The default implementation copies the {@linkplain BeanDefinition#isPrimary()
-	 * primary flag} and the {@linkplain BeanDefinition#getScope() scope}.
+	 * primary flag}, @{@linkplain BeanDefinition#isFallback() fallback flag}
+	 * and the {@linkplain BeanDefinition#getScope() scope}.
 	 */
 	protected void copyBeanDefinitionDetails(BeanDefinition from, RootBeanDefinition to) {
 		to.setPrimary(from.isPrimary());
+		to.setFallback(from.isFallback());
 		to.setScope(from.getScope());
 	}
 
