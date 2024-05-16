@@ -117,19 +117,35 @@ class FormHttpMessageConverterTests {
 		assertCanWrite(MULTIPART_RELATED);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	void readForm() throws Exception {
+	void readMultiValueForm() throws Exception {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
 		inputMessage.getHeaders().setContentType(
 				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
-		MultiValueMap<String, String> result = this.converter.read(null, inputMessage);
+		MultiValueMap<String, String> result = (MultiValueMap<String, String>) this.converter.read(null, inputMessage);
 
 		assertThat(result).as("Invalid result").hasSize(3);
 		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 		List<String> values = result.get("name 2");
 		assertThat(values).as("Invalid result").containsExactly("value 2+1", "value 2+2");
 		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void readSingleValueForm() throws Exception {
+		String body = "name+1=value+1&name+2=value+2&name+3";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
+		inputMessage.getHeaders().setContentType(
+				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
+		Map<String, String> result = (Map<String, String>) this.converter.read((Class<? extends Map<String, ?>>) Map.class, inputMessage);
+
+		assertThat(result).as("Invalid result").hasSize(3);
+		assertThat(result.get("name 1")).as("Invalid result").isEqualTo("value 1");
+		assertThat(result.get("name 2")).as("Invalid result").isEqualTo("value 2");
+		assertThat(result.get("name 3")).as("Invalid result").isNull();
 	}
 
 	@Test
