@@ -18,4 +18,6 @@
 
 	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
+	<bean id="testBean2" class="org.springframework.beans.testfixture.beans.TestBean"/>
+
 </beans>

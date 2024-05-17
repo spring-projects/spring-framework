@@ -41,6 +41,7 @@ import org.aspectj.weaver.tools.PointcutParameter;
 import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.ShadowMatch;
+import org.aspectj.weaver.tools.UnsupportedPointcutPrimitiveException;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
@@ -113,6 +114,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Nullable
 	private transient PointcutExpression pointcutExpression;
+
+	private transient boolean pointcutParsingFailed = false;
 
 	private transient Map<Method, ShadowMatch> shadowMatchCache = new ConcurrentHashMap<>(32);
 
@@ -269,6 +272,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public boolean matches(Class<?> targetClass) {
+		if (this.pointcutParsingFailed) {
+			return false;
+		}
+
 		try {
 			try {
 				return obtainPointcutExpression().couldMatchJoinPointsInType(targetClass);
@@ -282,8 +289,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 				}
 			}
 		}
-		catch (IllegalArgumentException | IllegalStateException ex) {
-			throw ex;
+		catch (IllegalArgumentException | IllegalStateException | UnsupportedPointcutPrimitiveException ex) {
+			this.pointcutParsingFailed = true;
+			if (logger.isDebugEnabled()) {
+				logger.debug("Pointcut parser rejected expression [" + getExpression() + "]: " + ex);
+			}
 		}
 		catch (Throwable ex) {
 			logger.debug("PointcutExpression matching rejected target class", ex);

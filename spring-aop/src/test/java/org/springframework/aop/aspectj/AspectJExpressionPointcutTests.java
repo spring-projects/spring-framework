@@ -39,13 +39,13 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.subpkg.DeepBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class AspectJExpressionPointcutTests {
 
@@ -244,7 +244,7 @@ public class AspectJExpressionPointcutTests {
 	@Test
 	public void testInvalidExpression() {
 		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number) && args(Double)";
-		assertThatIllegalArgumentException().isThrownBy(() -> getPointcut(expression).getClassFilter().matches(Object.class));
+		assertThat(getPointcut(expression).getClassFilter().matches(Object.class)).isFalse();
 	}
 
 	private TestBean getAdvisedProxy(String pointcutExpression, CallCountingInterceptor interceptor) {
