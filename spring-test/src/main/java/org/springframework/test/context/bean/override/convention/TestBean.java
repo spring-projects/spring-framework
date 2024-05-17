@@ -30,8 +30,9 @@ import org.springframework.test.context.bean.override.BeanOverride;
  *
  * <p>By default, the bean to override is inferred from the type of the
  * annotated field. This requires that exactly one matching definition is
- * present in the application context. To explicitly specify a bean name to
- * replace, set the {@link #value()} or {@link #name()} attribute.
+ * present in the application context. A {@code @Qualifier} annotation can be
+ * used to help disambiguate. Alternatively, you can explicitly specify a bean
+ * name to replace by setting the {@link #value()} or {@link #name()} attribute.
  *
  * <p>The instance is created from a zero-argument static factory method in the
  * test class whose return type is compatible with the annotated field. In the

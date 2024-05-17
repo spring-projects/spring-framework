@@ -23,16 +23,21 @@ import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.mockito.Mockito;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.test.context.bean.override.example.CustomQualifier;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.InstanceOfAssertFactories.THROWABLE;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,6 +51,14 @@ public class MockitoByTypeIntegrationTests {
 
 		@MockitoBean
 		ExampleService anyNameForService;
+
+		@MockitoBean
+		@Qualifier("prefer")
+		StringBuilder ambiguous;
+
+		@MockitoBean
+		@CustomQualifier
+		StringBuilder ambiguousMeta;
 
 		@Test
 		void overrideIsFoundByType(ApplicationContext ctx) {
@@ -62,6 +75,39 @@ public class MockitoByTypeIntegrationTests {
 			verifyNoMoreInteractions(this.anyNameForService);
 		}
 
+		@Test
+		void overrideIsFoundByTypeAndDisambiguatedByQualifier(ApplicationContext ctx) {
+			assertThat(this.ambiguous)
+					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock())
+							.as("isMock").isTrue())
+					.isSameAs(ctx.getBean("ambiguous2"));
+
+			assertThatException().isThrownBy(() -> ctx.getBean(StringBuilder.class))
+					.withMessageEndingWith("but found 2: ambiguous2,ambiguous1");
+
+			assertThat(this.ambiguous.length()).isZero();
+			assertThat(this.ambiguous.substring(0)).isNull();
+			verify(this.ambiguous, times(1)).length();
+			verify(this.ambiguous, times(1)).substring(anyInt());
+			verifyNoMoreInteractions(this.ambiguous);
+		}
+
+		@Test
+		void overrideIsFoundByTypeAndDisambiguatedByMetaQualifier(ApplicationContext ctx) {
+			assertThat(this.ambiguousMeta)
+					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock())
+							.as("isMock").isTrue())
+					.isSameAs(ctx.getBean("ambiguous1"));
+
+			assertThatException().isThrownBy(() -> ctx.getBean(StringBuilder.class))
+					.withMessageEndingWith("but found 2: ambiguous2,ambiguous1");
+
+			assertThat(this.ambiguousMeta.length()).isZero();
+			assertThat(this.ambiguousMeta.substring(0)).isNull();
+			verify(this.ambiguousMeta, times(1)).length();
+			verify(this.ambiguousMeta, times(1)).substring(anyInt());
+			verifyNoMoreInteractions(this.ambiguousMeta);
+		}
 
 		@Test
 		void zeroCandidates() {
@@ -127,6 +173,14 @@ public class MockitoByTypeIntegrationTests {
 		@MockitoSpyBean
 		ExampleService anyNameForService;
 
+		@MockitoSpyBean
+		@Qualifier("prefer")
+		StringBuilder ambiguous;
+
+		@MockitoSpyBean
+		@CustomQualifier
+		StringBuilder ambiguousMeta;
+
 		@Test
 		void overrideIsFoundByType(ApplicationContext ctx) {
 			assertThat(this.anyNameForService)
@@ -138,6 +192,38 @@ public class MockitoByTypeIntegrationTests {
 			assertThat(this.anyNameForService.greeting()).isEqualTo("Production hello");
 			verify(this.anyNameForService, times(1)).greeting();
 			verifyNoMoreInteractions(this.anyNameForService);
+		}
+
+		@Test
+		void overrideIsFoundByTypeAndDisambiguatedByQualifier(ApplicationContext ctx) {
+			assertThat(this.ambiguous)
+					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy())
+							.as("isSpy").isTrue())
+					.isSameAs(ctx.getBean("ambiguous2"));
+
+			assertThatException().isThrownBy(() -> ctx.getBean(StringBuilder.class))
+							.withMessageEndingWith("but found 2: ambiguous1,ambiguous2");
+
+			assertThat(this.ambiguous.toString()).isEqualTo("bean3");
+			assertThat(this.ambiguous.length()).isEqualTo(5);
+			verify(this.ambiguous, times(1)).length();
+			verifyNoMoreInteractions(this.ambiguous); //mockito doesn't verify toString
+		}
+
+		@Test
+		void overrideIsFoundByTypeAndDisambiguatedByMetaQualifier(ApplicationContext ctx) {
+			assertThat(this.ambiguousMeta)
+					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy())
+							.as("isSpy").isTrue())
+					.isSameAs(ctx.getBean("ambiguous1"));
+
+			assertThatException().isThrownBy(() -> ctx.getBean(StringBuilder.class))
+					.withMessageEndingWith("but found 2: ambiguous1,ambiguous2");
+
+			assertThat(this.ambiguousMeta.toString()).isEqualTo("bean2");
+			assertThat(this.ambiguousMeta.length()).isEqualTo(5);
+			verify(this.ambiguousMeta, times(1)).length();
+			verifyNoMoreInteractions(this.ambiguousMeta); //mockito doesn't verify toString
 		}
 
 		@Test
@@ -202,6 +288,20 @@ public class MockitoByTypeIntegrationTests {
 		@Bean("example")
 		ExampleService bean1() {
 			return new RealExampleService("Production hello");
+		}
+
+		@Bean("ambiguous1")
+		@Order(1)
+		@CustomQualifier
+		StringBuilder bean2() {
+			return new StringBuilder("bean2");
+		}
+
+		@Bean("ambiguous2")
+		@Order(2)
+		@Qualifier("prefer")
+		StringBuilder bean3() {
+			return new StringBuilder("bean3");
 		}
 	}
 

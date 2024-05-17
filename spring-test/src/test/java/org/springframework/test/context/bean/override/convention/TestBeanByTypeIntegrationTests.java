@@ -21,9 +21,11 @@ import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.bean.override.example.CustomQualifier;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -39,8 +41,24 @@ public class TestBeanByTypeIntegrationTests {
 	@TestBean
 	ExampleService anyNameForService;
 
+	@TestBean(methodName = "someString")
+	@Qualifier("prefer")
+	StringBuilder anyNameForStringBuilder;
+
+	@TestBean(methodName = "someString2")
+	@CustomQualifier
+	StringBuilder anyNameForStringBuilder2;
+
 	static ExampleService anyNameForServiceTestOverride() {
 		return new RealExampleService("Mocked greeting");
+	}
+
+	static StringBuilder someString() {
+		return new StringBuilder("Prefer TestBean String");
+	}
+
+	static StringBuilder someString2() {
+		return new StringBuilder("CustomQualifier TestBean String");
 	}
 
 	@Test
@@ -50,6 +68,21 @@ public class TestBeanByTypeIntegrationTests {
 				.isSameAs(ctx.getBean(ExampleService.class));
 
 		assertThat(this.anyNameForService.greeting()).isEqualTo("Mocked greeting");
+	}
+
+	@Test
+	void overrideIsFoundByTypeWithQualifierDisambiguation(ApplicationContext ctx) {
+		assertThat(this.anyNameForStringBuilder)
+				.as("direct qualifier")
+				.isSameAs(ctx.getBean("two"))
+				.hasToString("Prefer TestBean String");
+
+		assertThat(this.anyNameForStringBuilder2)
+				.as("meta qualifier")
+				.isSameAs(ctx.getBean("three"))
+				.hasToString("CustomQualifier TestBean String");
+
+		assertThat(ctx.getBean("one")).as("no qualifier needed").hasToString("Prod One");
 	}
 
 	@Test
@@ -91,6 +124,23 @@ public class TestBeanByTypeIntegrationTests {
 		@Bean("example")
 		ExampleService bean1() {
 			return new RealExampleService("Production hello");
+		}
+
+		@Bean("one")
+		StringBuilder beanString1() {
+			return new StringBuilder("Prod One");
+		}
+
+		@Bean("two")
+		@Qualifier("prefer")
+		StringBuilder beanString2() {
+			return new StringBuilder("Prod Two");
+		}
+
+		@Bean("three")
+		@CustomQualifier
+		StringBuilder beanString3() {
+			return new StringBuilder("Prod Three");
 		}
 	}
 

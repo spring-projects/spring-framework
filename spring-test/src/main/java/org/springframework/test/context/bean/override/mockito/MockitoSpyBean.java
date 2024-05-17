@@ -32,7 +32,8 @@ import org.springframework.test.context.bean.override.BeanOverride;
  *
  * <p>If no explicit {@link #name()} is specified, a target bean is selected
  * according to the class of the annotated field, and there must be exactly one
- * such candidate bean.
+ * such candidate bean. A {@code @Qualifier} annotation can be used to help
+ * disambiguate.
  * If a {@link #name()} is specified, it is required that a target bean of that
  * name has been previously registered in the application context.
  *

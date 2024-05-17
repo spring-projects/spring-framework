@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.bean.override;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -75,8 +77,8 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean 'explicit'; " +
-						"there is no bean definition to replace with that name");
+				.withMessage("Unable to override bean 'explicit'; there is no bean definition " +
+						"to replace with that name of type org.springframework.test.context.bean.override.example.ExampleService");
 	}
 
 	@Test
@@ -176,6 +178,26 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 				.matches(Predicate.not(BeanDefinition::isPrototype), "!isPrototype");
 	}
 
+	@Test
+	void createDefinitionShouldSetQualifierElement() {
+		AnnotationConfigApplicationContext context = createContext(QualifiedBean.class);
+		context.registerBeanDefinition("singleton", new RootBeanDefinition(String.class, () -> "ORIGINAL"));
+		context.register(QualifiedBean.class);
+
+		assertThatNoException().isThrownBy(context::refresh);
+
+		assertThat(context.getBeanDefinition("singleton"))
+				.isInstanceOfSatisfying(RootBeanDefinition.class, this::isTheValueField);
+	}
+
+
+	private void isTheValueField(RootBeanDefinition def) {
+		assertThat(def.getQualifiedElement()).isInstanceOfSatisfying(Field.class, field -> {
+					assertThat(field.getDeclaringClass()).isEqualTo(QualifiedBean.class);
+					assertThat(field.getName()).as("annotated field name")
+							.isEqualTo("value");
+				});
+	}
 
 	private AnnotationConfigApplicationContext createContext(Class<?>... classes) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -251,6 +273,18 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 	static class SingletonBean {
 
+		@ExampleBeanOverrideAnnotation(beanName = "singleton",
+				value = "useThis", createIfMissing = false)
+		private String value;
+
+		static String useThis() {
+			return "USED THIS";
+		}
+	}
+
+	static class QualifiedBean {
+
+		@Qualifier("preferThis")
 		@ExampleBeanOverrideAnnotation(beanName = "singleton",
 				value = "useThis", createIfMissing = false)
 		private String value;

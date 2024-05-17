@@ -6,17 +6,18 @@ the test's `ApplicationContext` with a Mockito mock or spy, respectively. In the
 case, the original bean definition is not replaced, but instead an early instance of the
 bean is captured and wrapped by the spy.
 
-Users are encouraged to make bean overriding as explicit and unambiguous as possible,
-typically by specifying a bean `name` in the annotation.
-If no bean `name` is specified, the annotated field's type is used to search for candidate
-definitions to override.
+By default, the annotated field's type is used to search for candidate definitions to
+override, but note that `@Qualifier` annotations are also taken into account for the
+purpose of matching. Users can also make things entirely explicit by specifying a bean
+`name` in the annotation.
+
 Each annotation also defines Mockito-specific attributes to fine-tune the mocking details.
 
 The `@MockitoBean` annotation uses the `REPLACE_OR_CREATE_DEFINITION`
 xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy for test bean overriding].
 
-It requires that at most one candidate definition exists if a bean name is specified,
-or exactly one if no bean name is specified.
+It requires that at most one matching candidate definition exists if a bean name
+is specified, or exactly one if no bean name is specified.
 
 The `@MockitoSpyBean` annotation uses the `WRAP_BEAN`
 xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy],

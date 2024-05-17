@@ -92,7 +92,7 @@ public class TestBeanIntegrationTests {
 						.cause()
 						.isInstanceOf(IllegalStateException.class)
 						.hasMessage("Unable to override bean 'noOriginalBean'; " +
-								"there is no bean definition to replace with that name"));
+								"there is no bean definition to replace with that name of type java.lang.String"));
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class TestBeanIntegrationTests {
 						.cause()
 						.isInstanceOf(IllegalStateException.class)
 						.hasMessage("Unable to override bean 'notPresent'; " +
-								"there is no bean definition to replace with that name"));
+								"there is no bean definition to replace with that name of type java.lang.String"));
 	}
 
 	@Test
@@ -140,6 +140,20 @@ public class TestBeanIntegrationTests {
 								"org.springframework.test.context.bean.override.convention.TestBeanIntegrationTests$Failing4 " +
 								"with return type java.lang.String whose name matches one of the " +
 								"supported candidates [fieldTestOverride]"));
+	}
+
+	@Test
+	void testBeanFailingBeanOfWrongType() {
+		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
+				.selectors(selectClass(Failing5.class))//
+				.execute();
+
+		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
+				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
+						.getThrowable()).get(THROWABLE)
+						.rootCause().isInstanceOf(IllegalStateException.class)
+						.hasMessage("Unable to override bean 'notString'; there is no bean definition to replace with " +
+								"that name of type java.lang.String"));
 	}
 
 	@Nested
@@ -260,6 +274,27 @@ public class TestBeanIntegrationTests {
 		@Test
 		void ignored() {
 			fail("should fail earlier");
+		}
+	}
+
+	@SpringJUnitConfig
+	static class Failing5 {
+
+		@Bean("notString")
+		StringBuilder bean1() {
+			return new StringBuilder("not a String");
+		}
+
+		@TestBean(name = "notString")
+		String field;
+
+		@Test
+		void ignored() {
+			fail("should fail earlier");
+		}
+
+		static String fieldTestOverride() {
+			return "should be ignored";
 		}
 	}
 }

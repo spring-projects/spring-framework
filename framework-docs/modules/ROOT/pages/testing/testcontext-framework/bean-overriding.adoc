@@ -61,11 +61,11 @@ In contrast to Spring's autowiring mechanism (for example, resolution of an `@Au
 field), the bean overriding infrastructure in the TestContext framework has limited
 heuristics it can perform to locate a bean. Either the `BeanOverrideProcessor` can compute
 the name of the bean to override, or it can be unambiguously selected given the type of
-the annotated field.
+the annotated field and its qualifying annotations.
 
-Typically, the user directly provides the bean name in the custom annotation in order to
-make things as explicit as possible. Alternatively, the bean is selected by type by the
-`BeanOverrideFactoryPostProcessor`.
+Typically, the bean is selected by type by the `BeanOverrideFactoryPostProcessor`.
+Alternatively, the user can directly provide the bean name in the custom annotation.
+
 Some `BeanOverrideProcessor`s could also internally compute a bean name based on a
 convention or another advanced method.
 ====
