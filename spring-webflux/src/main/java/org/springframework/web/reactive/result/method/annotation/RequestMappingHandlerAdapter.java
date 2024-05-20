@@ -46,6 +46,8 @@ import org.springframework.web.reactive.DispatchExceptionHandler;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.DisconnectedClientHelper;
@@ -56,6 +58,7 @@ import org.springframework.web.util.DisconnectedClientHelper;
  * handler methods.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class RequestMappingHandlerAdapter
@@ -81,6 +84,8 @@ public class RequestMappingHandlerAdapter
 
 	@Nullable
 	private ArgumentResolverConfigurer argumentResolverConfigurer;
+
+	private RequestedContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder().build();
 
 	@Nullable
 	private Scheduler scheduler;
@@ -146,6 +151,24 @@ public class RequestMappingHandlerAdapter
 	@Nullable
 	public ArgumentResolverConfigurer getArgumentResolverConfigurer() {
 		return this.argumentResolverConfigurer;
+	}
+
+	/**
+	 * Set the {@link RequestedContentTypeResolver} to use to determine requested
+	 * media types. If not set, the default constructor is used.
+	 * @since 6.2.0
+	 */
+	public void setContentTypeResolver(RequestedContentTypeResolver contentTypeResolver) {
+		Assert.notNull(contentTypeResolver, "'contentTypeResolver' must not be null");
+		this.contentTypeResolver = contentTypeResolver;
+	}
+
+	/**
+	 * Return the configured {@link RequestedContentTypeResolver}.
+	 * @since 6.2.0
+	 */
+	public RequestedContentTypeResolver getContentTypeResolver() {
+		return this.contentTypeResolver;
 	}
 
 	/**
@@ -225,7 +248,7 @@ public class RequestMappingHandlerAdapter
 
 		this.methodResolver = new ControllerMethodResolver(
 				this.argumentResolverConfigurer, this.reactiveAdapterRegistry, this.applicationContext,
-				this.messageReaders, this.webBindingInitializer,
+				this.contentTypeResolver, this.messageReaders, this.webBindingInitializer,
 				this.scheduler, this.blockingMethodPredicate);
 
 		this.modelInitializer = new ModelInitializer(this.methodResolver, this.reactiveAdapterRegistry);
@@ -280,7 +303,7 @@ public class RequestMappingHandlerAdapter
 		exchange.getResponse().getHeaders().clearContentHeaders();
 
 		InvocableHandlerMethod invocable =
-				this.methodResolver.getExceptionHandlerMethod(exception, handlerMethod);
+				this.methodResolver.getExceptionHandlerMethod(exception, exchange, handlerMethod);
 
 		if (invocable != null) {
 			ArrayList<Throwable> exceptions = new ArrayList<>();

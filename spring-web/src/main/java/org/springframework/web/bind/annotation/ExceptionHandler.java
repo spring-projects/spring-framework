@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.aot.hint.annotation.Reflective;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * Annotation for handling exceptions in specific handler classes and/or
@@ -101,6 +102,7 @@ import org.springframework.aot.hint.annotation.Reflective;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 3.0
  * @see ControllerAdvice
  * @see org.springframework.web.context.request.WebRequest
@@ -112,9 +114,24 @@ import org.springframework.aot.hint.annotation.Reflective;
 public @interface ExceptionHandler {
 
 	/**
+	 * Exceptions handled by the annotated method.
+	 * <p>This is an alias for {@link #exception}.
+	 */
+	@AliasFor("exception")
+	Class<? extends Throwable>[] value() default {};
+
+	/**
 	 * Exceptions handled by the annotated method. If empty, will default to any
 	 * exceptions listed in the method argument list.
+	 * @since 6.2.0
 	 */
-	Class<? extends Throwable>[] value() default {};
+	@AliasFor("value")
+	Class<? extends Throwable>[] exception() default {};
+
+	/**
+	 * Media Types that can be produced by the annotated method.
+	 * @since 6.2.0
+	 */
+	String[] produces() default {};
 
 }

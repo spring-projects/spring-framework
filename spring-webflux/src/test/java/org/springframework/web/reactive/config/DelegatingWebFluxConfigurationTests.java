@@ -37,6 +37,7 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
 import org.springframework.web.reactive.socket.server.WebSocketService;
@@ -98,11 +99,12 @@ public class DelegatingWebFluxConfigurationTests {
 		ReactiveAdapterRegistry reactiveAdapterRegistry = delegatingConfig.webFluxAdapterRegistry();
 		ServerCodecConfigurer serverCodecConfigurer = delegatingConfig.serverCodecConfigurer();
 		FormattingConversionService formattingConversionService = delegatingConfig.webFluxConversionService();
+		RequestedContentTypeResolver requestedContentTypeResolver = delegatingConfig.webFluxContentTypeResolver();
 		Validator validator = delegatingConfig.webFluxValidator();
 
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer)
 				this.delegatingConfig.requestMappingHandlerAdapter(reactiveAdapterRegistry, serverCodecConfigurer,
-						formattingConversionService, validator).getWebBindingInitializer();
+						formattingConversionService, requestedContentTypeResolver, validator).getWebBindingInitializer();
 
 		verify(webFluxConfigurer).configureHttpMessageCodecs(codecsConfigurer.capture());
 		verify(webFluxConfigurer).getValidator();
