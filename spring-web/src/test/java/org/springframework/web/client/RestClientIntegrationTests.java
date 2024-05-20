@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -54,8 +55,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.xml.Pojo;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Named.named;
 
@@ -569,6 +569,55 @@ class RestClientIntegrationTests {
 		});
 	}
 
+
+	@ParameterizedRestClientTest // gh-31361
+	public void postFormSingleMapInputTest(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setResponseCode(200));
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("key1", "value1");
+		map.put("key2", "value2");
+
+		MultiValueMap<String, Object> formData =  LinkedMultiValueMap.ofSingle(map);
+
+		ResponseEntity<Void> result = this.restClient.post()
+				.uri("/form")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body(formData)
+				.retrieve()
+				.toBodilessEntity();
+
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+	}
+
+	@ParameterizedRestClientTest // gh-31361
+	public void postFormMultiMapInputTest(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setResponseCode(200));
+
+		MultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+
+		multiValueMap.add("key1","value1");
+		multiValueMap.add("key1","value1+1");
+		multiValueMap.add("key2","value2");
+
+
+		MultiValueMap<String, Object> formData =  LinkedMultiValueMap.ofMulti(multiValueMap);
+
+		ResponseEntity<Void> result = this.restClient.post()
+				.uri("/form")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body(formData)
+				.retrieve()
+				.toBodilessEntity();
+
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+	}
 
 	@ParameterizedRestClientTest
 	void statusHandler(ClientHttpRequestFactory requestFactory) {

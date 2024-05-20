@@ -26,6 +26,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Arjen Poutsma
@@ -128,6 +129,26 @@ class LinkedMultiValueMapTests {
 		o2.put("key1", Collections.singletonList("value1"));
 		assertThat(o2).isEqualTo(map);
 		assertThat(map).isEqualTo(o2);
+	}
+
+	@Test
+	public void testMultiValueMapOfMulti() {
+		Map<String, List<Object>> map = new HashMap<>();
+		map.put("key1", List.of("value1", "value2"));
+		map.put("key2", List.of("value3"));
+		MultiValueMap<String, Object> multiValueMap = LinkedMultiValueMap.ofMulti(map);
+		assertEquals(2, multiValueMap.get("key1").size());
+		assertEquals(1, multiValueMap.get("key2").size());
+		assertThat(map.get("key1")).containsExactly("value1","value2");
+	}
+
+	@Test
+	public void testMultiValueMapOfSingle() {
+		Map<String, String> map = Map.of("key1", "value1", "key2", "value2");
+		MultiValueMap<String, String> multiValueMap = LinkedMultiValueMap.ofSingle(map);
+		assertEquals(1, multiValueMap.get("key1").size());
+		assertEquals("value1", multiValueMap.getFirst("key1"));
+		assertEquals("value2", multiValueMap.getFirst("key2"));
 	}
 
 }

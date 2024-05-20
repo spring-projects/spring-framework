@@ -49,6 +49,7 @@ import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
@@ -148,6 +149,17 @@ class FormHttpMessageConverterTests {
 				.as("Invalid content-type").isEqualTo(APPLICATION_FORM_URLENCODED);
 		assertThat(outputMessage.getHeaders().getContentLength())
 				.as("Invalid content-length").isEqualTo(outputMessage.getBodyAsBytes().length);
+	}
+
+	@Test
+	public void writeFormWithSingleValueMap() throws IOException {
+		Map<String, Object> singleValueMap = Map.of("username", "testUser", "password", "testPass");
+		FormHttpMessageConverter converter = new FormHttpMessageConverter();
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(LinkedMultiValueMap.ofSingle(singleValueMap), MediaType.APPLICATION_FORM_URLENCODED, outputMessage);
+
+		assertThat(outputMessage.getBodyAsString(UTF_8))
+				.as("Invalid result").isEqualTo("username=testUser&password=testPass");
 	}
 
 	@Test
@@ -376,7 +388,6 @@ class FormHttpMessageConverterTests {
 		assertThat(parameters).containsOnlyKeys("boundary", "charset");
 		assertThat(parameters).containsEntry("charset", "ISO-8859-1");
 	}
-
 	private void assertCanRead(MediaType mediaType) {
 		assertCanRead(MultiValueMap.class, mediaType);
 	}

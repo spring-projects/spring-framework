@@ -104,4 +104,24 @@ public class LinkedMultiValueMap<K, V> extends MultiValueMapAdapter<K, V>  // ne
 		return new LinkedMultiValueMap<>(this);
 	}
 
+	/**
+	 * Create a new LinkedMultiValueMap from a Map with List values.
+	 * @param map the Map whose mappings are to be placed in this Map
+	 * @return a new LinkedMultiValueMap containing the mappings from the specified Map
+	 */
+	public static <K, V> LinkedMultiValueMap<K, V> ofMulti(Map<K, List<V>> map) {
+		return new LinkedMultiValueMap<>(map);
+	}
+
+	/**
+	 * Create a new LinkedMultiValueMap from a Map with single values.
+	 * Each entry in the Map will be converted to a List containing the single value.
+	 * @param map the Map whose mappings are to be placed in this Map
+	 * @return a new LinkedMultiValueMap containing the mappings from the specified Map
+	 */
+	public static <K, V> LinkedMultiValueMap<K, V> ofSingle(Map<K, V> map) {
+		LinkedMultiValueMap<K, V> multiValueMap = new LinkedMultiValueMap<>();
+		map.forEach((key, value) -> multiValueMap.add(key, value));
+		return multiValueMap;
+	}
 }
