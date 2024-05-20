@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
+import org.springframework.lang.NonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -204,22 +205,26 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		if (handlerType != null) {
 			final Class<?> userType = ClassUtils.getUserClass(handlerType);
-			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
-					(MethodIntrospector.MetadataLookup<T>) method -> getMappingForMethod(method, userType));
+			Map<Method, List<T>> methods = MethodIntrospector.selectMethods(userType,
+					(MethodIntrospector.MetadataLookup<List<T>>) method -> getListMappingsForMethod(method, userType));
 			if (logger.isTraceEnabled()) {
 				logger.trace(formatMappings(userType, methods));
 			}
 			else if (mappingsLogger.isDebugEnabled()) {
 				mappingsLogger.debug(formatMappings(userType, methods));
 			}
-			methods.forEach((method, mapping) -> {
+			methods.forEach((method, mappings) -> {
 				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
-				registerHandlerMethod(handler, invocableMethod, mapping);
+				for(T mapping : mappings) {
+					registerHandlerMethod(handler, invocableMethod, mapping);
+				}
 			});
 		}
 	}
 
-	private String formatMappings(Class<?> userType, Map<Method, T> methods) {
+
+
+	private String formatMappings(Class<?> userType, Map<Method, List<T>> methods) {
 		String packageName = ClassUtils.getPackageName(userType);
 		String formattedType = (StringUtils.hasText(packageName) ?
 				Arrays.stream(packageName.split("\\."))
@@ -435,6 +440,19 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	@Nullable
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
+
+
+	/**
+	 * Provide the list of mappings for a handler method. A method for which no
+	 * mapping can be provided is not a handler method.
+	 * @param method the method to provide a mapping for
+	 * @param handlerType the handler type, possibly a subtype of the method's
+	 * declaring class
+	 * @return the list of mappings, or an empty list if the method is not mapped
+	 */
+	@NonNull
+	protected abstract List<T> getListMappingsForMethod(Method method, Class<?> handlerType);
+
 	/**
 	 * Return the request mapping paths that are not patterns.
 	 * @since 5.3
@@ -555,8 +573,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (existingHandlerMethod != null && !existingHandlerMethod.equals(handlerMethod)) {
 				throw new IllegalStateException(
 						"Ambiguous mapping. Cannot map '" + handlerMethod.getBean() + "' method \n" +
-						handlerMethod + "\nto " + mapping + ": There is already '" +
-						existingHandlerMethod.getBean() + "' bean method\n" + existingHandlerMethod + " mapped.");
+								handlerMethod + "\nto " + mapping + ": There is already '" +
+								existingHandlerMethod.getBean() + "' bean method\n" + existingHandlerMethod + " mapped.");
 			}
 		}
 

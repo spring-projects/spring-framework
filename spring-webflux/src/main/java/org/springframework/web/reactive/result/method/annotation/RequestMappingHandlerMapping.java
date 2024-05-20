@@ -17,17 +17,16 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.lang.NonNull;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotationPredicates;
@@ -185,6 +184,95 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 		return info;
 	}
+
+
+	/**
+	 * Uses type-level and method-level {@link RequestMapping @RequestMapping}
+	 * and {@link HttpExchange @HttpExchange} annotations to create the list
+	 * of {@link RequestMappingInfo}.
+	 * @return the created list of {@code RequestMappingInfo}, or an empty list if the method
+	 * does not have a {@code @RequestMapping} or {@code @HttpExchange} annotation
+	 * @see #getCustomMethodCondition(Method)
+	 * @see #getCustomTypeCondition(Class)
+	 */
+	@Override
+	@NonNull
+	protected List<RequestMappingInfo> getListMappingsForMethod(Method method, Class<?> handlerType) {
+		List<RequestMappingInfo> result = new ArrayList<>();
+		List<RequestMappingInfo> infos = buildListOfRequestMappingInfo(method);
+		if (!infos.isEmpty()) {
+			List<RequestMappingInfo> typeInfos = buildListOfRequestMappingInfo(handlerType);
+			if (!typeInfos.isEmpty()) {
+				List<RequestMappingInfo> requestMappingInfos = new ArrayList<>();
+				for (RequestMappingInfo info : infos) {
+					for (RequestMappingInfo typeInfo : typeInfos) {
+						requestMappingInfos.add(typeInfo.combine(info));
+					}
+				}
+				infos = requestMappingInfos;
+			}
+			for (RequestMappingInfo info : infos) {
+				if (info.getPatternsCondition().isEmptyPathMapping()) {
+					info = info.mutate().paths("", "/").options(this.config).build();
+				}
+
+				result.add(info);
+			}
+
+			for (int idx = 0; idx < result.size(); idx++) {
+				RequestMappingInfo info = result.get(idx);
+
+				for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
+					if (entry.getValue().test(handlerType)) {
+						String prefix = entry.getKey();
+						if (this.embeddedValueResolver != null) {
+							prefix = this.embeddedValueResolver.resolveStringValue(prefix);
+						}
+						info = RequestMappingInfo.paths(prefix).options(this.config).build().combine(info);
+						result.set(idx, info);
+						break;
+					}
+				}
+			}
+		}
+		return Collections.unmodifiableList(result);
+	}
+
+	@NonNull
+	private List<RequestMappingInfo> buildListOfRequestMappingInfo(AnnotatedElement element) {
+		List<RequestMappingInfo> requestMappingInfos = new ArrayList<>();
+		RequestCondition<?> customCondition = (element instanceof Class<?> clazz ?
+				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
+
+		List<AnnotationDescriptor> descriptors = getAnnotationDescriptors(element);
+		List<AnnotationDescriptor> requestMappings = descriptors.stream()
+				.filter(desc -> desc.annotation instanceof RequestMapping).toList();
+		if (!requestMappings.isEmpty()) {
+			if (requestMappings.size() > 1 && logger.isWarnEnabled()) {
+				logger.warn("Multiple @RequestMapping annotations found on %s, but only the first will be used: %s"
+						.formatted(element, requestMappings));
+			}
+
+			for (AnnotationDescriptor requestMapping : requestMappings) {
+				requestMappingInfos.add(createRequestMappingInfo((RequestMapping) requestMapping.annotation, customCondition));
+			}
+		}
+
+		List<AnnotationDescriptor> httpExchanges = descriptors.stream()
+				.filter(desc -> desc.annotation instanceof HttpExchange).toList();
+		if (!httpExchanges.isEmpty()) {
+			Assert.state(requestMappings.isEmpty(),
+					() -> "%s is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed: %s"
+							.formatted(element, Stream.of(requestMappings, httpExchanges).flatMap(List::stream).toList()));
+
+			for (AnnotationDescriptor httpExchange : httpExchanges) {
+				requestMappingInfos.add(createRequestMappingInfo((HttpExchange) httpExchange.annotation, customCondition));
+			}
+		}
+
+		return Collections.unmodifiableList(requestMappingInfos);
+	}
+
 
 	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
