@@ -18,6 +18,8 @@ package org.springframework.test.util;
 
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import org.springframework.test.json.JsonComparator;
+
 /**
  * A helper class for assertions on JSON content.
  *
@@ -26,7 +28,10 @@ import org.skyscreamer.jsonassert.JSONAssert;
  *
  * @author Sebastien Deleuze
  * @since 4.1
+ * @deprecated in favor of using {@link JSONAssert} directly or the
+ * {@link JsonComparator} abstraction
  */
+@Deprecated(since = "6.2")
 public class JsonExpectationsHelper {
 
 	/**

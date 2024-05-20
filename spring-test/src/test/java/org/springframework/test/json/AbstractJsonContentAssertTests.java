@@ -28,6 +28,8 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertProvider;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -37,7 +39,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.skyscreamer.jsonassert.comparator.DefaultComparator;
+import org.skyscreamer.jsonassert.JSONCompareResult;
 import org.skyscreamer.jsonassert.comparator.JSONComparator;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -55,6 +57,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.entry;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link AbstractJsonContentAssert}.
@@ -79,7 +85,7 @@ class AbstractJsonContentAssertTests {
 	private static final MappingJackson2HttpMessageConverter jsonHttpMessageConverter =
 			new MappingJackson2HttpMessageConverter(new ObjectMapper());
 
-	private static final JSONComparator comparator = new DefaultComparator(JSONCompareMode.LENIENT);
+	private static final JsonComparator comparator = JsonAssert.comparator(JsonCompareMode.LENIENT);
 
 	@Test
 	void isNullWhenActualIsNullShouldPass() {
@@ -364,29 +370,29 @@ class AbstractJsonContentAssertTests {
 		void isEqualToWhenExpectedIsNullShouldFail() {
 			CharSequence actual = null;
 			assertThatExceptionOfType(AssertionError.class)
-					.isThrownBy(() -> assertThat(forJson(SOURCE)).isEqualTo(actual, JSONCompareMode.LENIENT));
+					.isThrownBy(() -> assertThat(forJson(SOURCE)).isEqualTo(actual, JsonCompareMode.LENIENT));
 		}
 
 		@Test
 		void isEqualToWhenStringIsMatchingAndLenientShouldPass() {
-			assertThat(forJson(SOURCE)).isEqualTo(LENIENT_SAME, JSONCompareMode.LENIENT);
+			assertThat(forJson(SOURCE)).isEqualTo(LENIENT_SAME, JsonCompareMode.LENIENT);
 		}
 
 		@Test
 		void isEqualToWhenStringIsNotMatchingAndLenientShouldFail() {
 			assertThatExceptionOfType(AssertionError.class)
-					.isThrownBy(() -> assertThat(forJson(SOURCE)).isEqualTo(DIFFERENT, JSONCompareMode.LENIENT));
+					.isThrownBy(() -> assertThat(forJson(SOURCE)).isEqualTo(DIFFERENT, JsonCompareMode.LENIENT));
 		}
 
 		@Test
 		void isEqualToWhenResourcePathIsMatchingAndLenientShouldPass() {
-			assertThat(forJson(SOURCE)).isEqualTo("lenient-same.json", JSONCompareMode.LENIENT);
+			assertThat(forJson(SOURCE)).isEqualTo("lenient-same.json", JsonCompareMode.LENIENT);
 		}
 
 		@Test
 		void isEqualToWhenResourcePathIsNotMatchingAndLenientShouldFail() {
 			assertThatExceptionOfType(AssertionError.class)
-					.isThrownBy(() -> assertThat(forJson(SOURCE)).isEqualTo("different.json", JSONCompareMode.LENIENT));
+					.isThrownBy(() -> assertThat(forJson(SOURCE)).isEqualTo("different.json", JsonCompareMode.LENIENT));
 		}
 
 		Stream<Arguments> source() {
@@ -416,14 +422,14 @@ class AbstractJsonContentAssertTests {
 		@ParameterizedTest
 		@MethodSource("lenientSame")
 		void isEqualToWhenResourceIsMatchingAndLenientSameShouldPass(Resource expected) {
-			assertThat(forJson(SOURCE)).isEqualTo(expected, JSONCompareMode.LENIENT);
+			assertThat(forJson(SOURCE)).isEqualTo(expected, JsonCompareMode.LENIENT);
 		}
 
 		@ParameterizedTest
 		@MethodSource("different")
 		void isEqualToWhenResourceIsNotMatchingAndLenientShouldFail(Resource expected) {
 			assertThatExceptionOfType(AssertionError.class).isThrownBy(
-					() -> assertThat(forJson(SOURCE)).isEqualTo(expected, JSONCompareMode.LENIENT));
+					() -> assertThat(forJson(SOURCE)).isEqualTo(expected, JsonCompareMode.LENIENT));
 		}
 
 		@Test
@@ -568,36 +574,36 @@ class AbstractJsonContentAssertTests {
 		@Test
 		void isNotEqualToWhenStringIsMatchingAndLenientShouldFail() {
 			assertThatExceptionOfType(AssertionError.class)
-					.isThrownBy(() -> assertThat(forJson(SOURCE)).isNotEqualTo(LENIENT_SAME, JSONCompareMode.LENIENT));
+					.isThrownBy(() -> assertThat(forJson(SOURCE)).isNotEqualTo(LENIENT_SAME, JsonCompareMode.LENIENT));
 		}
 
 		@Test
 		void isNotEqualToWhenStringIsNotMatchingAndLenientShouldPass() {
-			assertThat(forJson(SOURCE)).isNotEqualTo(DIFFERENT, JSONCompareMode.LENIENT);
+			assertThat(forJson(SOURCE)).isNotEqualTo(DIFFERENT, JsonCompareMode.LENIENT);
 		}
 
 		@Test
 		void isNotEqualToWhenResourcePathIsMatchingAndLenientShouldFail() {
 			assertThatExceptionOfType(AssertionError.class).isThrownBy(
-					() -> assertThat(forJson(SOURCE)).isNotEqualTo("lenient-same.json", JSONCompareMode.LENIENT));
+					() -> assertThat(forJson(SOURCE)).isNotEqualTo("lenient-same.json", JsonCompareMode.LENIENT));
 		}
 
 		@Test
 		void isNotEqualToWhenResourcePathIsNotMatchingAndLenientShouldPass() {
-			assertThat(forJson(SOURCE)).isNotEqualTo("different.json", JSONCompareMode.LENIENT);
+			assertThat(forJson(SOURCE)).isNotEqualTo("different.json", JsonCompareMode.LENIENT);
 		}
 
 		@ParameterizedTest
 		@MethodSource("lenientSame")
 		void isNotEqualToWhenResourceIsMatchingAndLenientShouldFail(Resource expected) {
 			assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertThat(forJson(SOURCE))
-					.isNotEqualTo(expected, JSONCompareMode.LENIENT));
+					.isNotEqualTo(expected, JsonCompareMode.LENIENT));
 		}
 
 		@ParameterizedTest
 		@MethodSource("different")
 		void isNotEqualToWhenResourceIsNotMatchingAndLenientShouldPass(Resource expected) {
-			assertThat(forJson(SOURCE)).isNotEqualTo(expected, JSONCompareMode.LENIENT);
+			assertThat(forJson(SOURCE)).isNotEqualTo(expected, JsonCompareMode.LENIENT);
 		}
 
 		@Test
@@ -716,6 +722,28 @@ class AbstractJsonContentAssertTests {
 		}
 
 		@Test
+		void isEqualToWithCustomCompareMode() {
+			String differentOrder = """
+				{
+					"spring": [
+						"framework",
+						"boot"
+					]
+				}
+				""";
+			assertThat(forJson(SOURCE)).isEqualTo(differentOrder, JsonAssert.comparator(JSONCompareMode.NON_EXTENSIBLE));
+		}
+
+		@Test
+		void isEqualToWithCustomJsonComparator() throws JSONException {
+			String empty = "{}";
+			JSONComparator comparator = mock(JSONComparator.class);
+			given(comparator.compareJSON(any(JSONObject.class), any(JSONObject.class))).willReturn(new JSONCompareResult());
+			assertThat(forJson(SOURCE)).isEqualTo(empty, JsonAssert.comparator(comparator));
+			verify(comparator).compareJSON(any(JSONObject.class), any(JSONObject.class));
+		}
+
+		@Test
 		void withResourceLoadClassShouldAllowToLoadRelativeContent() {
 			AbstractJsonContentAssert<?> jsonAssert = assertThat(forJson(NULLS)).withResourceLoadClass(String.class);
 			assertThatIllegalStateException()
@@ -730,6 +758,31 @@ class AbstractJsonContentAssertTests {
 		}
 	}
 
+	@Nested
+	class JsonComparatorTests {
+
+		private final JsonComparator comparator = mock(JsonComparator.class);
+
+		@Test
+		void isEqualToInvokesComparator() {
+			given(comparator.compare("{  }", "{}")).willReturn(JsonComparison.match());
+			assertThat(forJson("{}")).isEqualTo("{  }", this.comparator);
+			verify(comparator).compare("{  }", "{}");
+		}
+
+		@Test
+		void isEqualToWithNoMatchProvidesErrorMessage() {
+			given(comparator.compare("{  }", "{}")).willReturn(JsonComparison.mismatch("No additional whitespace expected"));
+			assertThatExceptionOfType(AssertionError.class)
+					.isThrownBy(() -> assertThat(forJson("{}")).isEqualTo("{  }", this.comparator))
+					.withMessageContaining("No additional whitespace expected");
+			verify(comparator).compare("{  }", "{}");
+		}
+
+		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json) {
+			return () -> new TestJsonContentAssert(json, null).withResourceLoadClass(getClass());
+		}
+	}
 
 	private Consumer<AssertionError> hasFailedToMatchPath(String expression) {
 		return error -> assertThat(error.getMessage()).containsSubsequence("Expecting:",

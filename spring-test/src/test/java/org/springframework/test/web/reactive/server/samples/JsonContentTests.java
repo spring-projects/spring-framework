@@ -23,6 +23,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -74,7 +75,7 @@ class JsonContentTests {
 							{"firstName":"John", "lastName":"Smith"}
 						]
 						""",
-						true);
+						JsonCompareMode.STRICT);
 	}
 
 	@Test
@@ -89,7 +90,7 @@ class JsonContentTests {
 							{"firstName":"John"}
 						]
 						""",
-						true)
+						JsonCompareMode.STRICT)
 		);
 	}
 

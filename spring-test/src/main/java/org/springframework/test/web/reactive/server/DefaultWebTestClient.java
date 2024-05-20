@@ -45,9 +45,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.test.json.JsonAssert;
+import org.springframework.test.json.JsonComparator;
+import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.util.ExceptionCollector;
-import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -658,10 +660,22 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
+		@Deprecated(since = "6.2")
 		public BodyContentSpec json(String json, boolean strict) {
+			JsonCompareMode compareMode = (strict ? JsonCompareMode.STRICT : JsonCompareMode.LENIENT);
+			return json(json, compareMode);
+		}
+
+		@Override
+		public BodyContentSpec json(String expectedJson, JsonCompareMode compareMode) {
+			return json(expectedJson, JsonAssert.comparator(compareMode));
+		}
+
+		@Override
+		public BodyContentSpec json(String expectedJson, JsonComparator comparator) {
 			this.result.assertWithDiagnostics(() -> {
 				try {
-					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString(), strict);
+					comparator.assertIsMatch(expectedJson, getBodyAsString());
 				}
 				catch (Exception ex) {
 					throw new AssertionError("JSON parsing error", ex);

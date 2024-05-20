@@ -28,10 +28,6 @@ import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.AssertProvider;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
-import org.skyscreamer.jsonassert.JSONCompare;
-import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.skyscreamer.jsonassert.JSONCompareResult;
-import org.skyscreamer.jsonassert.comparator.JSONComparator;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
@@ -41,7 +37,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.function.ThrowingBiFunction;
 
 /**
  * Base AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be
@@ -51,8 +46,8 @@ import org.springframework.util.function.ThrowingBiFunction;
  * extracting a part of the document for further {@linkplain JsonPathValueAssert
  * assertions} on the value.
  *
- * <p>Also supports comparing the JSON document against a target, using
- * {@linkplain JSONCompare JSON Assert}. Resources that are loaded from
+ * <p>Also supports comparing the JSON document against a target, using a
+ * {@linkplain JsonComparator JSON Comparator}. Resources that are loaded from
  * the classpath can be relative if a {@linkplain #withResourceLoadClass(Class)
  * class} is provided. By default, {@code UTF-8} is used to load resources,
  * but this can be overridden using {@link #withCharset(Charset)}.
@@ -154,9 +149,9 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * the expected JSON
 	 * @param compareMode the compare mode used when checking
 	 */
-	public SELF isEqualTo(@Nullable CharSequence expected, JSONCompareMode compareMode) {
+	public SELF isEqualTo(@Nullable CharSequence expected, JsonCompareMode compareMode) {
 		String expectedJson = this.jsonLoader.getJson(expected);
-		return assertNotFailed(compare(expectedJson, compareMode));
+		return assertIsMatch(compare(expectedJson, compareMode));
 	}
 
 	/**
@@ -171,9 +166,9 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * @param expected a resource containing the expected JSON
 	 * @param compareMode the compare mode used when checking
 	 */
-	public SELF isEqualTo(Resource expected, JSONCompareMode compareMode) {
+	public SELF isEqualTo(Resource expected, JsonCompareMode compareMode) {
 		String expectedJson = this.jsonLoader.getJson(expected);
-		return assertNotFailed(compare(expectedJson, compareMode));
+		return assertIsMatch(compare(expectedJson, compareMode));
 	}
 
 	/**
@@ -184,9 +179,9 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * the expected JSON
 	 * @param comparator the comparator used when checking
 	 */
-	public SELF isEqualTo(@Nullable CharSequence expected, JSONComparator comparator) {
+	public SELF isEqualTo(@Nullable CharSequence expected, JsonComparator comparator) {
 		String expectedJson = this.jsonLoader.getJson(expected);
-		return assertNotFailed(compare(expectedJson, comparator));
+		return assertIsMatch(compare(expectedJson, comparator));
 	}
 
 	/**
@@ -201,13 +196,13 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * @param expected a resource containing the expected JSON
 	 * @param comparator the comparator used when checking
 	 */
-	public SELF isEqualTo(Resource expected, JSONComparator comparator) {
+	public SELF isEqualTo(Resource expected, JsonComparator comparator) {
 		String expectedJson = this.jsonLoader.getJson(expected);
-		return assertNotFailed(compare(expectedJson, comparator));
+		return assertIsMatch(compare(expectedJson, comparator));
 	}
 
 	/**
-	 * Verify that the actual value is {@link JSONCompareMode#LENIENT leniently}
+	 * Verify that the actual value is {@link JsonCompareMode#LENIENT leniently}
 	 * equal to the given JSON. The {@code expected} value can contain the JSON
 	 * itself or, if it ends with {@code .json}, the name of a resource to be
 	 * loaded from the classpath.
@@ -215,11 +210,11 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * the expected JSON
 	 */
 	public SELF isLenientlyEqualTo(@Nullable CharSequence expected) {
-		return isEqualTo(expected, JSONCompareMode.LENIENT);
+		return isEqualTo(expected, JsonCompareMode.LENIENT);
 	}
 
 	/**
-	 * Verify that the actual value is {@link JSONCompareMode#LENIENT leniently}
+	 * Verify that the actual value is {@link JsonCompareMode#LENIENT leniently}
 	 * equal to the given JSON {@link Resource}.
 	 * <p>The resource abstraction allows to provide several input types:
 	 * <ul>
@@ -231,11 +226,11 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * @param expected a resource containing the expected JSON
 	 */
 	public SELF isLenientlyEqualTo(Resource expected) {
-		return isEqualTo(expected, JSONCompareMode.LENIENT);
+		return isEqualTo(expected, JsonCompareMode.LENIENT);
 	}
 
 	/**
-	 * Verify that the actual value is {@link JSONCompareMode#STRICT strictly}
+	 * Verify that the actual value is {@link JsonCompareMode#STRICT strictly}
 	 * equal to the given JSON. The {@code expected} value can contain the JSON
 	 * itself or, if it ends with {@code .json}, the name of a resource to be
 	 * loaded from the classpath.
@@ -243,11 +238,11 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * the expected JSON
 	 */
 	public SELF isStrictlyEqualTo(@Nullable CharSequence expected) {
-		return isEqualTo(expected, JSONCompareMode.STRICT);
+		return isEqualTo(expected, JsonCompareMode.STRICT);
 	}
 
 	/**
-	 * Verify that the actual value is {@link JSONCompareMode#STRICT strictly}
+	 * Verify that the actual value is {@link JsonCompareMode#STRICT strictly}
 	 * equal to the given JSON {@link Resource}.
 	 * <p>The resource abstraction allows to provide several input types:
 	 * <ul>
@@ -259,7 +254,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * @param expected a resource containing the expected JSON
 	 */
 	public SELF isStrictlyEqualTo(Resource expected) {
-		return isEqualTo(expected, JSONCompareMode.STRICT);
+		return isEqualTo(expected, JsonCompareMode.STRICT);
 	}
 
 	/**
@@ -270,9 +265,9 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * the expected JSON
 	 * @param compareMode the compare mode used when checking
 	 */
-	public SELF isNotEqualTo(@Nullable CharSequence expected, JSONCompareMode compareMode) {
+	public SELF isNotEqualTo(@Nullable CharSequence expected, JsonCompareMode compareMode) {
 		String expectedJson = this.jsonLoader.getJson(expected);
-		return assertNotPassed(compare(expectedJson, compareMode));
+		return assertIsMismatch(compare(expectedJson, compareMode));
 	}
 
 	/**
@@ -287,9 +282,9 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * @param expected a resource containing the expected JSON
 	 * @param compareMode the compare mode used when checking
 	 */
-	public SELF isNotEqualTo(Resource expected, JSONCompareMode compareMode) {
+	public SELF isNotEqualTo(Resource expected, JsonCompareMode compareMode) {
 		String expectedJson = this.jsonLoader.getJson(expected);
-		return assertNotPassed(compare(expectedJson, compareMode));
+		return assertIsMismatch(compare(expectedJson, compareMode));
 	}
 
 	/**
@@ -300,9 +295,9 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * the expected JSON
 	 * @param comparator the comparator used when checking
 	 */
-	public SELF isNotEqualTo(@Nullable CharSequence expected, JSONComparator comparator) {
+	public SELF isNotEqualTo(@Nullable CharSequence expected, JsonComparator comparator) {
 		String expectedJson = this.jsonLoader.getJson(expected);
-		return assertNotPassed(compare(expectedJson, comparator));
+		return assertIsMismatch(compare(expectedJson, comparator));
 	}
 
 	/**
@@ -317,13 +312,13 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * @param expected a resource containing the expected JSON
 	 * @param comparator the comparator used when checking
 	 */
-	public SELF isNotEqualTo(Resource expected, JSONComparator comparator) {
+	public SELF isNotEqualTo(Resource expected, JsonComparator comparator) {
 		String expectedJson = this.jsonLoader.getJson(expected);
-		return assertNotPassed(compare(expectedJson, comparator));
+		return assertIsMismatch(compare(expectedJson, comparator));
 	}
 
 	/**
-	 * Verify that the actual value is not {@link JSONCompareMode#LENIENT
+	 * Verify that the actual value is not {@link JsonCompareMode#LENIENT
 	 * leniently} equal to the given JSON. The {@code expected} value can
 	 * contain the JSON itself or, if it ends with {@code .json}, the name of a
 	 * resource to be loaded from the classpath.
@@ -331,11 +326,11 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * the expected JSON
 	 */
 	public SELF isNotLenientlyEqualTo(@Nullable CharSequence expected) {
-		return isNotEqualTo(expected, JSONCompareMode.LENIENT);
+		return isNotEqualTo(expected, JsonCompareMode.LENIENT);
 	}
 
 	/**
-	 * Verify that the actual value is not {@link JSONCompareMode#LENIENT
+	 * Verify that the actual value is not {@link JsonCompareMode#LENIENT
 	 * leniently} equal to the given JSON {@link Resource}.
 	 * <p>The resource abstraction allows to provide several input types:
 	 * <ul>
@@ -347,11 +342,11 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * @param expected a resource containing the expected JSON
 	 */
 	public SELF isNotLenientlyEqualTo(Resource expected) {
-		return isNotEqualTo(expected, JSONCompareMode.LENIENT);
+		return isNotEqualTo(expected, JsonCompareMode.LENIENT);
 	}
 
 	/**
-	 * Verify that the actual value is not {@link JSONCompareMode#STRICT
+	 * Verify that the actual value is not {@link JsonCompareMode#STRICT
 	 * strictly} equal to the given JSON. The {@code expected} value can
 	 * contain the JSON itself or, if it ends with {@code .json}, the name of a
 	 * resource to be loaded from the classpath.
@@ -359,11 +354,11 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * the expected JSON
 	 */
 	public SELF isNotStrictlyEqualTo(@Nullable CharSequence expected) {
-		return isNotEqualTo(expected, JSONCompareMode.STRICT);
+		return isNotEqualTo(expected, JsonCompareMode.STRICT);
 	}
 
 	/**
-	 * Verify that the actual value is not {@link JSONCompareMode#STRICT
+	 * Verify that the actual value is not {@link JsonCompareMode#STRICT
 	 * strictly} equal to the given JSON {@link Resource}.
 	 * <p>The resource abstraction allows to provide several input types:
 	 * <ul>
@@ -375,7 +370,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 * @param expected a resource containing the expected JSON
 	 */
 	public SELF isNotStrictlyEqualTo(Resource expected) {
-		return isNotEqualTo(expected, JSONCompareMode.STRICT);
+		return isNotEqualTo(expected, JsonCompareMode.STRICT);
 	}
 
 	/**
@@ -405,54 +400,25 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	}
 
 
-	private JSONCompareResult compare(@Nullable CharSequence expectedJson, JSONCompareMode compareMode) {
-		return compare(this.actual, expectedJson, (actualJsonString, expectedJsonString) ->
-				JSONCompare.compareJSON(expectedJsonString, actualJsonString, compareMode));
+	private JsonComparison compare(@Nullable CharSequence expectedJson, JsonCompareMode compareMode) {
+		return compare(expectedJson, JsonAssert.comparator(compareMode));
 	}
 
-	private JSONCompareResult compare(@Nullable CharSequence expectedJson, JSONComparator comparator) {
-		return compare(this.actual, expectedJson, (actualJsonString, expectedJsonString) ->
-				JSONCompare.compareJSON(expectedJsonString, actualJsonString, comparator));
+	private JsonComparison compare(@Nullable CharSequence expectedJson, JsonComparator comparator) {
+		return comparator.compare((expectedJson != null) ? expectedJson.toString() : null, this.actual);
 	}
 
-	private JSONCompareResult compare(@Nullable CharSequence actualJson, @Nullable CharSequence expectedJson,
-			ThrowingBiFunction<String, String, JSONCompareResult> comparator) {
-
-		if (actualJson == null) {
-			return compareForNull(expectedJson);
-		}
-		if (expectedJson == null) {
-			return compareForNull(actualJson.toString());
-		}
-		try {
-			return comparator.applyWithException(actualJson.toString(), expectedJson.toString());
-		}
-		catch (Exception ex) {
-			if (ex instanceof RuntimeException runtimeException) {
-				throw runtimeException;
-			}
-			throw new IllegalStateException(ex);
-		}
+	private SELF assertIsMatch(JsonComparison result) {
+		return assertComparison(result, JsonComparison.Result.MATCH);
 	}
 
-	private JSONCompareResult compareForNull(@Nullable CharSequence expectedJson) {
-		JSONCompareResult result = new JSONCompareResult();
-		if (expectedJson != null) {
-			result.fail("Expected null JSON");
-		}
-		return result;
+	private SELF assertIsMismatch(JsonComparison result) {
+		return assertComparison(result, JsonComparison.Result.MISMATCH);
 	}
 
-	private SELF assertNotFailed(JSONCompareResult result) {
-		if (result.failed()) {
-			failWithMessage("JSON comparison failure: %s", result.getMessage());
-		}
-		return this.myself;
-	}
-
-	private SELF assertNotPassed(JSONCompareResult result) {
-		if (result.passed()) {
-			failWithMessage("JSON comparison failure: %s", result.getMessage());
+	private SELF assertComparison(JsonComparison jsonComparison, JsonComparison.Result requiredResult) {
+		if (jsonComparison.getResult() != requiredResult) {
+			failWithMessage("JSON comparison failure: %s", jsonComparison.getMessage());
 		}
 		return this.myself;
 	}
