@@ -18,8 +18,6 @@ package org.springframework.test.web.servlet.assertj;
 
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
@@ -62,14 +60,6 @@ final class DefaultMvcTestResult implements MvcTestResult {
 	@Nullable
 	public Exception getUnresolvedException() {
 		return this.unresolvedException;
-	}
-
-	public MockHttpServletRequest getRequest() {
-		return getMvcResult().getRequest();
-	}
-
-	public MockHttpServletResponse getResponse() {
-		return getMvcResult().getResponse();
 	}
 
 	@Nullable

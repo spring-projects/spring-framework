@@ -55,8 +55,7 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 
 	@Override
 	protected MockHttpServletResponse getResponse() {
-		getMvcResult();
-		return this.actual.getMvcResult().getResponse();
+		return getMvcResult().getResponse();
 	}
 
 	/**

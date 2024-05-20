@@ -19,6 +19,8 @@ package org.springframework.test.web.servlet.assertj;
 import org.assertj.core.api.AssertProvider;
 
 import org.springframework.lang.Nullable;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
@@ -52,6 +54,21 @@ public interface MvcTestResult extends AssertProvider<MvcTestResultAssert> {
 	 * an unresolved exception
 	 */
 	MvcResult getMvcResult();
+
+	/**
+	 * Return the performed {@linkplain  MockHttpServletRequest request}.
+	 */
+	default MockHttpServletRequest getRequest() {
+		return getMvcResult().getRequest();
+	}
+
+	/**
+	 * Return the resulting {@linkplain  MockHttpServletResponse response}.
+	 */
+	default MockHttpServletResponse getResponse() {
+		return getMvcResult().getResponse();
+	}
+
 
 	/**
 	 * Return the exception that was thrown unexpectedly while processing the
