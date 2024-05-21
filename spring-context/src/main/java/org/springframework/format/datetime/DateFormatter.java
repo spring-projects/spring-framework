@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.springframework.format.Formatter;
@@ -35,8 +37,13 @@ import org.springframework.util.StringUtils;
 
 /**
  * A formatter for {@link java.util.Date} types.
+ *
  * <p>Supports the configuration of an explicit date time pattern, timezone,
  * locale, and fallback date time patterns for lenient parsing.
+ *
+ * <p>Common ISO patterns for UTC instants are applied at millisecond precision.
+ * Note that {@link org.springframework.format.datetime.standard.InstantFormatter}
+ * is recommended for flexible UTC parsing into a {@link java.time.Instant} instead.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -51,12 +58,21 @@ public class DateFormatter implements Formatter<Date> {
 
 	private static final Map<ISO, String> ISO_PATTERNS;
 
+	private static final Map<ISO, String> ISO_FALLBACK_PATTERNS;
+
 	static {
+		// We use an EnumMap instead of Map.of(...) since the former provides better performance.
 		Map<ISO, String> formats = new EnumMap<>(ISO.class);
 		formats.put(ISO.DATE, "yyyy-MM-dd");
 		formats.put(ISO.TIME, "HH:mm:ss.SSSXXX");
 		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 		ISO_PATTERNS = Collections.unmodifiableMap(formats);
+
+		// Fallback format for the time part without milliseconds.
+		Map<ISO, String> fallbackFormats = new EnumMap<>(ISO.class);
+		fallbackFormats.put(ISO.TIME, "HH:mm:ssXXX");
+		fallbackFormats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ssXXX");
+		ISO_FALLBACK_PATTERNS = Collections.unmodifiableMap(fallbackFormats);
 	}
 
 
@@ -201,8 +217,16 @@ public class DateFormatter implements Formatter<Date> {
 			return getDateFormat(locale).parse(text);
 		}
 		catch (ParseException ex) {
+			Set<String> fallbackPatterns = new LinkedHashSet<>();
+			String isoPattern = ISO_FALLBACK_PATTERNS.get(this.iso);
+			if (isoPattern != null) {
+				fallbackPatterns.add(isoPattern);
+			}
 			if (!ObjectUtils.isEmpty(this.fallbackPatterns)) {
-				for (String pattern : this.fallbackPatterns) {
+				Collections.addAll(fallbackPatterns, this.fallbackPatterns);
+			}
+			if (!fallbackPatterns.isEmpty()) {
+				for (String pattern : fallbackPatterns) {
 					try {
 						DateFormat dateFormat = configureDateFormat(new SimpleDateFormat(pattern, locale));
 						// Align timezone for parsing format with printing format if ISO is set.
@@ -220,8 +244,8 @@ public class DateFormatter implements Formatter<Date> {
 			}
 			if (this.source != null) {
 				ParseException parseException = new ParseException(
-					String.format("Unable to parse date time value \"%s\" using configuration from %s", text, this.source),
-					ex.getErrorOffset());
+						String.format("Unable to parse date time value \"%s\" using configuration from %s", text, this.source),
+						ex.getErrorOffset());
 				parseException.initCause(ex);
 				throw parseException;
 			}
