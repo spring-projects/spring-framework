@@ -17,15 +17,21 @@
 package org.springframework.beans.factory.aot;
 
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.aot.test.generate.TestGenerationContext;
+import org.springframework.beans.testfixture.beans.GenericBean;
 import org.springframework.beans.testfixture.beans.factory.aot.DeferredTypeBuilder;
 import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedBean;
 import org.springframework.beans.testfixture.beans.factory.generator.deprecation.DeprecatedForRemovalBean;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.javapoet.MethodSpec;
@@ -90,6 +96,40 @@ class CodeWarningsTests {
 	void detectDeprecationOnAnnotatedElementWithDeprecatedForRemoval() {
 		this.codeWarnings.detectDeprecation(DeprecatedForRemovalBean.class);
 		assertThat(this.codeWarnings.getWarnings()).containsOnly("removal");
+	}
+
+	@ParameterizedTest
+	@MethodSource("resolvableTypesWithDeprecated")
+	void detectDeprecationOnResolvableTypeWithDeprecated(ResolvableType resolvableType) {
+		this.codeWarnings.detectDeprecation(resolvableType);
+		assertThat(this.codeWarnings.getWarnings()).containsExactly("deprecation");
+	}
+
+	@SuppressWarnings("deprecation")
+	static Stream<Arguments> resolvableTypesWithDeprecated() {
+		return Stream.of(
+				Arguments.of(ResolvableType.forClass(DeprecatedBean.class)),
+				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class, DeprecatedBean.class)),
+				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class,
+						ResolvableType.forClassWithGenerics(GenericBean.class, DeprecatedBean.class)))
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("resolvableTypesWithDeprecatedForRemoval")
+	void detectDeprecationOnResolvableTypeWithDeprecatedForRemoval(ResolvableType resolvableType) {
+		this.codeWarnings.detectDeprecation(resolvableType);
+		assertThat(this.codeWarnings.getWarnings()).containsExactly("removal");
+	}
+
+	@SuppressWarnings("removal")
+	static Stream<Arguments> resolvableTypesWithDeprecatedForRemoval() {
+		return Stream.of(
+				Arguments.of(ResolvableType.forClass(DeprecatedForRemovalBean.class)),
+				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class, DeprecatedForRemovalBean.class)),
+				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class,
+						ResolvableType.forClassWithGenerics(GenericBean.class, DeprecatedForRemovalBean.class)))
+		);
 	}
 
 	@Test

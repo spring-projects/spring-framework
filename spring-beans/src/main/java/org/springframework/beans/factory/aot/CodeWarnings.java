@@ -22,10 +22,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.AnnotationSpec;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * Helper class to register warnings that the compiler may trigger on
@@ -68,6 +70,26 @@ class CodeWarnings {
 	 */
 	public CodeWarnings detectDeprecation(Stream<AnnotatedElement> elements) {
 		elements.forEach(element -> register(element.getAnnotation(Deprecated.class)));
+		return this;
+	}
+
+	/**
+	 * Detect the presence of {@link Deprecated} on the signature of the
+	 * specified {@link ResolvableType}.
+	 * @param resolvableType a type signature
+	 * @return {@code this} instance
+	 */
+	public CodeWarnings detectDeprecation(ResolvableType resolvableType) {
+		if (ResolvableType.NONE.equals(resolvableType)) {
+			return this;
+		}
+		Class<?> type = ClassUtils.getUserClass(resolvableType.toClass());
+		detectDeprecation(type);
+		if (resolvableType.hasGenerics() && !resolvableType.hasUnresolvableGenerics()) {
+			for (ResolvableType generic : resolvableType.getGenerics()) {
+				detectDeprecation(generic);
+			}
+		}
 		return this;
 	}
 
