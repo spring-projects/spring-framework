@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ final class PersistenceUnitReader {
 	/**
 	 * Validate the given stream and return a valid DOM document for parsing.
 	 */
-	protected Document buildDocument(ErrorHandler handler, InputStream stream)
+	Document buildDocument(ErrorHandler handler, InputStream stream)
 			throws ParserConfigurationException, SAXException, IOException {
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -168,9 +168,7 @@ final class PersistenceUnitReader {
 	/**
 	 * Parse the validated document and add entries to the given unit info list.
 	 */
-	protected List<SpringPersistenceUnitInfo> parseDocument(
-			Resource resource, Document document, List<SpringPersistenceUnitInfo> infos) throws IOException {
-
+	void parseDocument(Resource resource, Document document, List<SpringPersistenceUnitInfo> infos) throws IOException {
 		Element persistence = document.getDocumentElement();
 		String version = persistence.getAttribute(PERSISTENCE_VERSION);
 		URL rootUrl = determinePersistenceUnitRootUrl(resource);
@@ -179,14 +177,12 @@ final class PersistenceUnitReader {
 		for (Element unit : units) {
 			infos.add(parsePersistenceUnitInfo(unit, version, rootUrl));
 		}
-
-		return infos;
 	}
 
 	/**
 	 * Parse the unit info DOM element.
 	 */
-	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo(
+	SpringPersistenceUnitInfo parsePersistenceUnitInfo(
 			Element persistenceUnit, String version, @Nullable URL rootUrl) throws IOException {
 
 		SpringPersistenceUnitInfo unitInfo = new SpringPersistenceUnitInfo();
@@ -253,7 +249,7 @@ final class PersistenceUnitReader {
 	/**
 	 * Parse the {@code property} XML elements.
 	 */
-	protected void parseProperties(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
+	void parseProperties(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		Element propRoot = DomUtils.getChildElementByTagName(persistenceUnit, PROPERTIES);
 		if (propRoot == null) {
 			return;
@@ -269,7 +265,7 @@ final class PersistenceUnitReader {
 	/**
 	 * Parse the {@code class} XML elements.
 	 */
-	protected void parseManagedClasses(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
+	void parseManagedClasses(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		List<Element> classes = DomUtils.getChildElementsByTagName(persistenceUnit, MANAGED_CLASS_NAME);
 		for (Element element : classes) {
 			String value = DomUtils.getTextValue(element).trim();
@@ -282,7 +278,7 @@ final class PersistenceUnitReader {
 	/**
 	 * Parse the {@code mapping-file} XML elements.
 	 */
-	protected void parseMappingFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
+	void parseMappingFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		List<Element> files = DomUtils.getChildElementsByTagName(persistenceUnit, MAPPING_FILE_NAME);
 		for (Element element : files) {
 			String value = DomUtils.getTextValue(element).trim();
@@ -295,7 +291,7 @@ final class PersistenceUnitReader {
 	/**
 	 * Parse the {@code jar-file} XML elements.
 	 */
-	protected void parseJarFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) throws IOException {
+	void parseJarFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) throws IOException {
 		List<Element> jars = DomUtils.getChildElementsByTagName(persistenceUnit, JAR_FILE_URL);
 		for (Element element : jars) {
 			String value = DomUtils.getTextValue(element).trim();
