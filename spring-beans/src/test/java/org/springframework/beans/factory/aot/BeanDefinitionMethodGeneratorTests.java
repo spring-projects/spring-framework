@@ -782,6 +782,19 @@ class BeanDefinitionMethodGeneratorTests {
 			compileAndCheckWarnings(method);
 		}
 
+		@Test
+		void generateBeanDefinitionMethodWithDeprecatedGenericElementInTargetClass() {
+			RootBeanDefinition beanDefinition = new RootBeanDefinition();
+			beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(GenericBean.class, DeprecatedBean.class));
+			RegisteredBean registeredBean = registerBean(beanDefinition);
+			BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+					methodGeneratorFactory, registeredBean, null,
+					Collections.emptyList());
+			MethodReference method = generator.generateBeanDefinitionMethod(
+					generationContext, beanRegistrationsCode);
+			compileAndCheckWarnings(method);
+		}
+
 		private void compileAndCheckWarnings(MethodReference methodReference) {
 			assertThatNoException().isThrownBy(() -> compile(TEST_COMPILER, methodReference,
 					((instanceSupplier, compiled) -> {})));
