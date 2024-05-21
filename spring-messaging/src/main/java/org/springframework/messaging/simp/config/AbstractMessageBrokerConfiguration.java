@@ -28,7 +28,6 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.lang.Nullable;
@@ -197,7 +196,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	protected int initPhase() {
-		return SmartLifecycle.DEFAULT_PHASE;
+		return 0;
 	}
 
 	/**

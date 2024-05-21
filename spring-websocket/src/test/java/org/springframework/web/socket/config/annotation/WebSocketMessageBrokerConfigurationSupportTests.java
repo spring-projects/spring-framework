@@ -212,10 +212,18 @@ class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Test
-	void lifecyclePhase() {
-		ApplicationContext context = createContext(LifecyclePhaseConfig.class);
+	void lifecyclePhaseDefault() {
+		ApplicationContext context = createContext(TestChannelConfig.class, TestConfigurer.class);
+		assertPhase(context, 0);
+	}
 
-		int phase = 99;
+	@Test
+	void lifecyclePhaseExplicitlySet() {
+		ApplicationContext context = createContext(LifecyclePhaseConfig.class);
+		assertPhase(context, 99);
+	}
+
+	private static void assertPhase(ApplicationContext context, int phase) {
 		Consumer<String> executorTester = beanName ->
 				assertThat(context.getBean(beanName, ThreadPoolTaskExecutor.class).getPhase()).isEqualTo(phase);
 

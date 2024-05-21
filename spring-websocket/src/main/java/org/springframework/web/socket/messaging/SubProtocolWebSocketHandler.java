@@ -254,7 +254,8 @@ public class SubProtocolWebSocketHandler
 
 	/**
 	 * Set the phase that this handler should run in.
-	 * <p>By default, this is {@link SmartLifecycle#DEFAULT_PHASE}.
+	 * <p>By default, this is {@link SmartLifecycle#DEFAULT_PHASE}, but with
+	 * {@code @EnableWebSocketMessageBroker} configuration it is set to 0.
 	 * @since 6.1.4
 	 */
 	public void setPhase(int phase) {
