@@ -114,7 +114,7 @@ dependencies {
 		api("org.codehaus.jettison:jettison:1.5.4")
 		api("org.crac:crac:1.4.0")
 		api("org.dom4j:dom4j:2.1.4")
-		api("org.eclipse.jetty:jetty-reactive-httpclient:4.0.3")
+		api("org.eclipse.jetty:jetty-reactive-httpclient:4.0.4")
 		api("org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.4")
 		api("org.eclipse:yasson:2.0.4")
 		api("org.ehcache:ehcache:3.10.8")
