@@ -274,9 +274,7 @@ class DateTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
-		assertThat(value)
-				.startsWith("10/31/09")
-				.endsWith("12:00 PM");
+		assertThat(value).startsWith("10/31/09").endsWith("12:00 PM");
 	}
 
 	@Test
@@ -286,9 +284,7 @@ class DateTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
-		assertThat(value)
-				.startsWith("10/31/09")
-				.endsWith("12:00 PM");
+		assertThat(value).startsWith("10/31/09").endsWith("12:00 PM");
 	}
 
 	@Test
@@ -298,9 +294,7 @@ class DateTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		String value = binder.getBindingResult().getFieldValue("styleLocalDateTime").toString();
-		assertThat(value)
-				.startsWith("Oct 31, 2009")
-				.endsWith("12:00:00 PM");
+		assertThat(value).startsWith("Oct 31, 2009").endsWith("12:00:00 PM");
 	}
 
 	@Test
@@ -310,9 +304,7 @@ class DateTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
-		assertThat(value)
-				.startsWith("10/31/09")
-				.endsWith("12:00 PM");
+		assertThat(value).startsWith("10/31/09").endsWith("12:00 PM");
 	}
 
 	@Test
@@ -325,9 +317,7 @@ class DateTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
-		assertThat(value)
-				.startsWith("Oct 31, 2009")
-				.endsWith("12:00:00 PM");
+		assertThat(value).startsWith("Oct 31, 2009").endsWith("12:00:00 PM");
 	}
 
 	@Test
@@ -540,6 +530,7 @@ class DateTimeFormattingTests {
 		assertThat(binder.getBindingResult().getRawFieldValue("monthDayAnnotatedPattern")).isEqualTo(MonthDay.parse("--01-03"));
 	}
 
+
 	@Nested
 	class FallbackPatternTests {
 
@@ -689,7 +680,6 @@ class DateTimeFormattingTests {
 		private MonthDay monthDayAnnotatedPattern;
 
 		private final List<DateTimeBean> children = new ArrayList<>();
-
 
 		public LocalDate getLocalDate() {
 			return this.localDate;
