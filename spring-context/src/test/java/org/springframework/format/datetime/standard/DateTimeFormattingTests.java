@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -512,7 +512,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	public void testBindYearMonthAnnotatedPattern() {
+	void testBindYearMonthAnnotatedPattern() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("yearMonthAnnotatedPattern", "12/2007");
 		binder.bind(propertyValues);
@@ -531,7 +531,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	public void testBindMonthDayAnnotatedPattern() {
+	void testBindMonthDayAnnotatedPattern() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("monthDayAnnotatedPattern", "1/3");
 		binder.bind(propertyValues);
@@ -631,10 +631,10 @@ class DateTimeFormattingTests {
 		@DateTimeFormat(style = "M-")
 		private LocalDate styleLocalDate;
 
-		@DateTimeFormat(style = "S-", fallbackPatterns = { "yyyy-MM-dd", "yyyyMMdd", "yyyy.MM.dd" })
+		@DateTimeFormat(style = "S-", fallbackPatterns = {"yyyy-MM-dd", "yyyyMMdd", "yyyy.MM.dd"})
 		private LocalDate styleLocalDateWithFallbackPatterns;
 
-		@DateTimeFormat(pattern = "yyyy-MM-dd", fallbackPatterns = { "M/d/yy", "yyyyMMdd", "yyyy.MM.dd" })
+		@DateTimeFormat(pattern = "yyyy-MM-dd", fallbackPatterns = {"M/d/yy", "yyyyMMdd", "yyyy.MM.dd"})
 		private LocalDate patternLocalDateWithFallbackPatterns;
 
 		private LocalTime localTime;
@@ -642,7 +642,7 @@ class DateTimeFormattingTests {
 		@DateTimeFormat(style = "-M")
 		private LocalTime styleLocalTime;
 
-		@DateTimeFormat(style = "-M", fallbackPatterns = { "HH:mm:ss", "HH:mm"})
+		@DateTimeFormat(style = "-M", fallbackPatterns = {"HH:mm:ss", "HH:mm"})
 		private LocalTime styleLocalTimeWithFallbackPatterns;
 
 		private LocalDateTime localDateTime;
@@ -662,7 +662,7 @@ class DateTimeFormattingTests {
 		@DateTimeFormat(iso = ISO.DATE_TIME)
 		private LocalDateTime isoLocalDateTime;
 
-		@DateTimeFormat(iso = ISO.DATE_TIME, fallbackPatterns = { "yyyy-MM-dd HH:mm:ss", "M/d/yy HH:mm"})
+		@DateTimeFormat(iso = ISO.DATE_TIME, fallbackPatterns = {"yyyy-MM-dd HH:mm:ss", "M/d/yy HH:mm"})
 		private LocalDateTime isoLocalDateTimeWithFallbackPatterns;
 
 		private Instant instant;
