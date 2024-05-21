@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Keith Donald
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 class DateFormatterTests {
 
@@ -45,6 +46,7 @@ class DateFormatterTests {
 	void shouldPrintAndParseDefault() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
+
 		Date date = getDate(2009, Calendar.JUNE, 1);
 		assertThat(formatter.print(date, Locale.US)).isEqualTo("Jun 1, 2009");
 		assertThat(formatter.parse("Jun 1, 2009", Locale.US)).isEqualTo(date);
@@ -54,6 +56,7 @@ class DateFormatterTests {
 	void shouldPrintAndParseFromPattern() throws ParseException {
 		DateFormatter formatter = new DateFormatter("yyyy-MM-dd");
 		formatter.setTimeZone(UTC);
+
 		Date date = getDate(2009, Calendar.JUNE, 1);
 		assertThat(formatter.print(date, Locale.US)).isEqualTo("2009-06-01");
 		assertThat(formatter.parse("2009-06-01", Locale.US)).isEqualTo(date);
@@ -64,6 +67,7 @@ class DateFormatterTests {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setStyle(DateFormat.SHORT);
+
 		Date date = getDate(2009, Calendar.JUNE, 1);
 		assertThat(formatter.print(date, Locale.US)).isEqualTo("6/1/09");
 		assertThat(formatter.parse("6/1/09", Locale.US)).isEqualTo(date);
@@ -74,6 +78,7 @@ class DateFormatterTests {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setStyle(DateFormat.MEDIUM);
+
 		Date date = getDate(2009, Calendar.JUNE, 1);
 		assertThat(formatter.print(date, Locale.US)).isEqualTo("Jun 1, 2009");
 		assertThat(formatter.parse("Jun 1, 2009", Locale.US)).isEqualTo(date);
@@ -84,6 +89,7 @@ class DateFormatterTests {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setStyle(DateFormat.LONG);
+
 		Date date = getDate(2009, Calendar.JUNE, 1);
 		assertThat(formatter.print(date, Locale.US)).isEqualTo("June 1, 2009");
 		assertThat(formatter.parse("June 1, 2009", Locale.US)).isEqualTo(date);
@@ -94,16 +100,18 @@ class DateFormatterTests {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setStyle(DateFormat.FULL);
+
 		Date date = getDate(2009, Calendar.JUNE, 1);
 		assertThat(formatter.print(date, Locale.US)).isEqualTo("Monday, June 1, 2009");
 		assertThat(formatter.parse("Monday, June 1, 2009", Locale.US)).isEqualTo(date);
 	}
 
 	@Test
-	void shouldPrintAndParseISODate() throws Exception {
+	void shouldPrintAndParseIsoDate() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setIso(ISO.DATE);
+
 		Date date = getDate(2009, Calendar.JUNE, 1, 14, 23, 5, 3);
 		assertThat(formatter.print(date, Locale.US)).isEqualTo("2009-06-01");
 		assertThat(formatter.parse("2009-6-01", Locale.US))
@@ -111,33 +119,44 @@ class DateFormatterTests {
 	}
 
 	@Test
-	void shouldPrintAndParseISOTime() throws Exception {
+	void shouldPrintAndParseIsoTime() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setIso(ISO.TIME);
+
 		Date date = getDate(2009, Calendar.JANUARY, 1, 14, 23, 5, 3);
 		assertThat(formatter.print(date, Locale.US)).isEqualTo("14:23:05.003Z");
 		assertThat(formatter.parse("14:23:05.003Z", Locale.US))
 				.isEqualTo(getDate(1970, Calendar.JANUARY, 1, 14, 23, 5, 3));
+
+		date = getDate(2009, Calendar.JANUARY, 1, 14, 23, 5, 0);
+		assertThat(formatter.print(date, Locale.US)).isEqualTo("14:23:05.000Z");
+		assertThat(formatter.parse("14:23:05Z", Locale.US))
+				.isEqualTo(getDate(1970, Calendar.JANUARY, 1, 14, 23, 5, 0).toInstant());
 	}
 
 	@Test
-	void shouldPrintAndParseISODateTime() throws Exception {
+	void shouldPrintAndParseIsoDateTime() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setTimeZone(UTC);
 		formatter.setIso(ISO.DATE_TIME);
+
 		Date date = getDate(2009, Calendar.JUNE, 1, 14, 23, 5, 3);
 		assertThat(formatter.print(date, Locale.US)).isEqualTo("2009-06-01T14:23:05.003Z");
 		assertThat(formatter.parse("2009-06-01T14:23:05.003Z", Locale.US)).isEqualTo(date);
+
+		date = getDate(2009, Calendar.JUNE, 1, 14, 23, 5, 0);
+		assertThat(formatter.print(date, Locale.US)).isEqualTo("2009-06-01T14:23:05.000Z");
+		assertThat(formatter.parse("2009-06-01T14:23:05Z", Locale.US)).isEqualTo(date.toInstant());
 	}
 
 	@Test
 	void shouldThrowOnUnsupportedStylePattern() {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setStylePattern("OO");
-		assertThatIllegalStateException().isThrownBy(() ->
-				formatter.parse("2009", Locale.US))
-			.withMessageContaining("Unsupported style pattern 'OO'");
+
+		assertThatIllegalStateException().isThrownBy(() -> formatter.parse("2009", Locale.US))
+				.withMessageContaining("Unsupported style pattern 'OO'");
 	}
 
 	@Test
@@ -148,8 +167,8 @@ class DateFormatterTests {
 		formatter.setStylePattern("L-");
 		formatter.setIso(ISO.DATE_TIME);
 		formatter.setPattern("yyyy");
-		Date date = getDate(2009, Calendar.JUNE, 1, 14, 23, 5, 3);
 
+		Date date = getDate(2009, Calendar.JUNE, 1, 14, 23, 5, 3);
 		assertThat(formatter.print(date, Locale.US)).as("uses pattern").isEqualTo("2009");
 
 		formatter.setPattern("");
