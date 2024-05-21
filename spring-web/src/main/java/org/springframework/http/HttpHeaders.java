@@ -1774,6 +1774,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return this.headers.toSingleValueMap();
 	}
 
+	@Override
+	public Map<String, String> asSingleValueMap() {
+		return this.headers.asSingleValueMap();
+	}
 
 	// Map implementation
 
