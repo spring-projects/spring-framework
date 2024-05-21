@@ -644,10 +644,10 @@ class DateTimeFormattingTests {
 		@DateTimeFormat(style = "M-")
 		private LocalDate styleLocalDate;
 
-		@DateTimeFormat(style = "S-", fallbackPatterns = { "yyyy-MM-dd", "yyyyMMdd", "yyyy.MM.dd" })
+		@DateTimeFormat(style = "S-", fallbackPatterns = {"yyyy-MM-dd", "yyyyMMdd", "yyyy.MM.dd"})
 		private LocalDate styleLocalDateWithFallbackPatterns;
 
-		@DateTimeFormat(pattern = "yyyy-MM-dd", fallbackPatterns = { "M/d/yy", "yyyyMMdd", "yyyy.MM.dd" })
+		@DateTimeFormat(pattern = "yyyy-MM-dd", fallbackPatterns = {"M/d/yy", "yyyyMMdd", "yyyy.MM.dd"})
 		private LocalDate patternLocalDateWithFallbackPatterns;
 
 		private LocalTime localTime;
@@ -655,7 +655,7 @@ class DateTimeFormattingTests {
 		@DateTimeFormat(style = "-M")
 		private LocalTime styleLocalTime;
 
-		@DateTimeFormat(style = "-M", fallbackPatterns = { "HH:mm:ss", "HH:mm"})
+		@DateTimeFormat(style = "-M", fallbackPatterns = {"HH:mm:ss", "HH:mm"})
 		private LocalTime styleLocalTimeWithFallbackPatterns;
 
 		private LocalDateTime localDateTime;
@@ -675,7 +675,7 @@ class DateTimeFormattingTests {
 		@DateTimeFormat(iso = ISO.DATE_TIME)
 		private LocalDateTime isoLocalDateTime;
 
-		@DateTimeFormat(iso = ISO.DATE_TIME, fallbackPatterns = { "yyyy-MM-dd HH:mm:ss", "M/d/yy HH:mm"})
+		@DateTimeFormat(iso = ISO.DATE_TIME, fallbackPatterns = {"yyyy-MM-dd HH:mm:ss", "M/d/yy HH:mm"})
 		private LocalDateTime isoLocalDateTimeWithFallbackPatterns;
 
 		private Instant instant;
