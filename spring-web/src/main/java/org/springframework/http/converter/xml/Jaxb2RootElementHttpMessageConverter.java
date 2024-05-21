@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ import org.springframework.util.ClassUtils;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.0
  * @see MarshallingHttpMessageConverter
  */
@@ -70,6 +71,9 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 
 	private boolean processExternalEntities = false;
 
+	@Nullable
+	private volatile SAXParserFactory sourceParserFactory;
+
 
 	/**
 	 * Indicate whether DTD parsing should be supported.
@@ -77,6 +81,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	 */
 	public void setSupportDtd(boolean supportDtd) {
 		this.supportDtd = supportDtd;
+		this.sourceParserFactory = null;
 	}
 
 	/**
@@ -97,6 +102,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		if (processExternalEntities) {
 			this.supportDtd = true;
 		}
+		this.sourceParserFactory = null;
 	}
 
 	/**
@@ -156,11 +162,16 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		if (source instanceof StreamSource streamSource) {
 			InputSource inputSource = new InputSource(streamSource.getInputStream());
 			try {
-				SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-				saxParserFactory.setNamespaceAware(true);
-				saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-				String featureName = "http://xml.org/sax/features/external-general-entities";
-				saxParserFactory.setFeature(featureName, isProcessExternalEntities());
+				SAXParserFactory saxParserFactory = this.sourceParserFactory;
+				if (saxParserFactory == null) {
+					saxParserFactory = SAXParserFactory.newInstance();
+					saxParserFactory.setNamespaceAware(true);
+					saxParserFactory.setFeature(
+							"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+					saxParserFactory.setFeature(
+							"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+					this.sourceParserFactory = saxParserFactory;
+				}
 				SAXParser saxParser = saxParserFactory.newSAXParser();
 				XMLReader xmlReader = saxParser.getXMLReader();
 				if (!isProcessExternalEntities()) {
