@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -50,13 +51,12 @@ class InstantFormatterTests {
 
 	private final InstantFormatter instantFormatter = new InstantFormatter();
 
+
 	@ParameterizedTest
 	@ArgumentsSource(ISOSerializedInstantProvider.class)
 	void should_parse_an_ISO_formatted_string_representation_of_an_Instant(String input) throws ParseException {
 		Instant expected = DateTimeFormatter.ISO_INSTANT.parse(input, Instant::from);
-
-		Instant actual = instantFormatter.parse(input, null);
-
+		Instant actual = instantFormatter.parse(input, Locale.US);
 		assertThat(actual).isEqualTo(expected);
 	}
 
@@ -64,9 +64,7 @@ class InstantFormatterTests {
 	@ArgumentsSource(RFC1123SerializedInstantProvider.class)
 	void should_parse_an_RFC1123_formatted_string_representation_of_an_Instant(String input) throws ParseException {
 		Instant expected = DateTimeFormatter.RFC_1123_DATE_TIME.parse(input, Instant::from);
-
-		Instant actual = instantFormatter.parse(input, null);
-
+		Instant actual = instantFormatter.parse(input, Locale.US);
 		assertThat(actual).isEqualTo(expected);
 	}
 
@@ -74,19 +72,17 @@ class InstantFormatterTests {
 	@ArgumentsSource(RandomInstantProvider.class)
 	void should_serialize_an_Instant_using_ISO_format_and_ignoring_Locale(Instant input) {
 		String expected = DateTimeFormatter.ISO_INSTANT.format(input);
-
-		String actual = instantFormatter.print(input, null);
-
+		String actual = instantFormatter.print(input, Locale.US);
 		assertThat(actual).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
 	@ArgumentsSource(RandomEpochMillisProvider.class)
 	void should_parse_into_an_Instant_from_epoch_milli(Instant input) throws ParseException {
-		Instant actual = instantFormatter.parse(Long.toString(input.toEpochMilli()), null);
-
+		Instant actual = instantFormatter.parse(Long.toString(input.toEpochMilli()), Locale.US);
 		assertThat(actual).isEqualTo(input);
 	}
+
 
 	private static class RandomInstantProvider implements ArgumentsProvider {
 
@@ -109,6 +105,7 @@ class InstantFormatterTests {
 		}
 	}
 
+
 	private static class ISOSerializedInstantProvider extends RandomInstantProvider {
 
 		@Override
@@ -116,6 +113,7 @@ class InstantFormatterTests {
 			return randomInstantStream(MIN, MAX).map(DateTimeFormatter.ISO_INSTANT::format);
 		}
 	}
+
 
 	private static class RFC1123SerializedInstantProvider extends RandomInstantProvider {
 
@@ -130,6 +128,8 @@ class InstantFormatterTests {
 					.map(DateTimeFormatter.RFC_1123_DATE_TIME.withZone(systemDefault())::format);
 		}
 	}
+
+
 	private static final class RandomEpochMillisProvider implements ArgumentsProvider {
 
 		private static final long DATA_SET_SIZE = 10;
