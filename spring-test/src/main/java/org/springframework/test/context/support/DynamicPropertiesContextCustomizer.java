@@ -45,6 +45,8 @@ import org.springframework.util.ReflectionUtils;
  * @author Sam Brannen
  * @since 5.2.5
  * @see DynamicPropertiesContextCustomizerFactory
+ * @see DefaultDynamicPropertyRegistry
+ * @see DynamicPropertySourceBeanInitializer
  */
 class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 
@@ -59,19 +61,10 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 
 
 	DynamicPropertiesContextCustomizer(Set<Method> methods) {
-		methods.forEach(this::assertValid);
+		methods.forEach(DynamicPropertiesContextCustomizer::assertValid);
 		this.methods = methods;
 	}
 
-
-	private void assertValid(Method method) {
-		Assert.state(Modifier.isStatic(method.getModifiers()),
-				() -> "@DynamicPropertySource method '" + method.getName() + "' must be static");
-		Class<?>[] types = method.getParameterTypes();
-		Assert.state(types.length == 1 && types[0] == DynamicPropertyRegistry.class,
-				() -> "@DynamicPropertySource method '" + method.getName() +
-						"' must accept a single DynamicPropertyRegistry argument");
-	}
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
@@ -113,6 +106,16 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 	@Override
 	public int hashCode() {
 		return this.methods.hashCode();
+	}
+
+
+	private static void assertValid(Method method) {
+		Assert.state(Modifier.isStatic(method.getModifiers()),
+				() -> "@DynamicPropertySource method '" + method.getName() + "' must be static");
+		Class<?>[] types = method.getParameterTypes();
+		Assert.state(types.length == 1 && types[0] == DynamicPropertyRegistry.class,
+				() -> "@DynamicPropertySource method '" + method.getName() +
+						"' must accept a single DynamicPropertyRegistry argument");
 	}
 
 }

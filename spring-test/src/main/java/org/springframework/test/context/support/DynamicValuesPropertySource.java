@@ -41,6 +41,7 @@ class DynamicValuesPropertySource extends MapPropertySource {
 		super(PROPERTY_SOURCE_NAME, Collections.unmodifiableMap(valueSuppliers));
 	}
 
+
 	@Override
 	@Nullable
 	public Object getProperty(String name) {
