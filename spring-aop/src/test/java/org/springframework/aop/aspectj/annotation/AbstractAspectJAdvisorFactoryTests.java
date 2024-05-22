@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import test.aop.DefaultLockable;
 import test.aop.Lockable;
@@ -76,25 +75,24 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 	/**
 	 * To be overridden by concrete test subclasses.
-	 * @return the fixture
 	 */
 	protected abstract AspectJAdvisorFactory getFixture();
 
 
 	@Test
 	void rejectsPerCflowAspect() {
-		assertThatExceptionOfType(AopConfigException.class).isThrownBy(() ->
-				getFixture().getAdvisors(
+		assertThatExceptionOfType(AopConfigException.class)
+				.isThrownBy(() -> getFixture().getAdvisors(
 						new SingletonMetadataAwareAspectInstanceFactory(new PerCflowAspect(), "someBean")))
-			.withMessageContaining("PERCFLOW");
+				.withMessageContaining("PERCFLOW");
 	}
 
 	@Test
 	void rejectsPerCflowBelowAspect() {
-		assertThatExceptionOfType(AopConfigException.class).isThrownBy(() ->
-					getFixture().getAdvisors(
-							new SingletonMetadataAwareAspectInstanceFactory(new PerCflowBelowAspect(), "someBean")))
-			.withMessageContaining("PERCFLOWBELOW");
+		assertThatExceptionOfType(AopConfigException.class)
+				.isThrownBy(() -> getFixture().getAdvisors(
+						new SingletonMetadataAwareAspectInstanceFactory(new PerCflowBelowAspect(), "someBean")))
+				.withMessageContaining("PERCFLOWBELOW");
 	}
 
 	@Test
@@ -385,8 +383,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		assertThat(lockable.locked()).as("Already locked").isTrue();
 		lockable.lock();
 		assertThat(lockable.locked()).as("Real target ignores locking").isTrue();
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				lockable.unlock());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(lockable::unlock);
 	}
 
 	@Test
@@ -413,9 +410,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		lockable.locked();
 	}
 
-	// TODO: Why does this test fail? It hasn't been run before, so it maybe never actually passed...
 	@Test
-	@Disabled
 	void introductionWithArgumentBinding() {
 		TestBean target = new TestBean();
 
@@ -521,6 +516,16 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		aspect.invocations.clear();
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> echo.echo(new FileNotFoundException()));
 		assertThat(aspect.invocations).containsExactly("around - start", "before", "after throwing", "after", "around - end");
+	}
+
+	@Test
+	void parentAspect() {
+		TestBean target = new TestBean("Jane", 42);
+		MetadataAwareAspectInstanceFactory aspectInstanceFactory = new SingletonMetadataAwareAspectInstanceFactory(
+				new IncrementingAspect(), "incrementingAspect");
+		ITestBean proxy = (ITestBean) createProxy(target,
+				getFixture().getAdvisors(aspectInstanceFactory), ITestBean.class);
+		assertThat(proxy.getAge()).isEqualTo(86); // (42 + 1) * 2
 	}
 
 	@Test
@@ -647,7 +652,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	static class NamedPointcutAspectWithFQN {
 
 		@SuppressWarnings("unused")
-		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
+		private final ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 
 		@Pointcut("execution(* getAge())")
 		void getAge() {
@@ -768,6 +773,31 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 
 	@Aspect
+	abstract static class DoublingAspect {
+
+		@Around("execution(* getAge())")
+		public Object doubleAge(ProceedingJoinPoint pjp) throws Throwable {
+			return ((int) pjp.proceed()) * 2;
+		}
+	}
+
+
+	@Aspect
+	static class IncrementingAspect extends DoublingAspect {
+
+		@Override
+		public Object doubleAge(ProceedingJoinPoint pjp) throws Throwable {
+			return ((int) pjp.proceed()) * 2;
+		}
+
+		@Around("execution(* getAge())")
+		public int incrementAge(ProceedingJoinPoint pjp) throws Throwable {
+			return ((int) pjp.proceed()) + 1;
+		}
+	}
+
+
+	@Aspect
 	private static class InvocationTrackingAspect {
 
 		List<String> invocations = new ArrayList<>();
@@ -824,7 +854,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 		@Around("getAge()")
 		int preventExecution(ProceedingJoinPoint pjp) {
-			return 666;
+			return 42;
 		}
 	}
 
@@ -844,7 +874,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 		@Around("getAge()")
 		int preventExecution(ProceedingJoinPoint pjp) {
-			return 666;
+			return 42;
 		}
 	}
 
@@ -1066,7 +1096,7 @@ class PerThisAspect {
 
 	// Just to check that this doesn't cause problems with introduction processing
 	@SuppressWarnings("unused")
-	private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
+	private final ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 
 	@Around("execution(int *.getAge())")
 	int returnCountAsAge() {
