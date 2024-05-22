@@ -26,7 +26,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -75,32 +75,34 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-		DynamicValuesPropertySource propertySource = getOrAdd(context.getEnvironment());
-
-		if (!context.containsBean(DYNAMIC_PROPERTY_REGISTRY_BEAN_NAME)) {
-			ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-			beanFactory.registerSingleton(DYNAMIC_PROPERTY_REGISTRY_BEAN_NAME, propertySource.dynamicPropertyRegistry);
+		ConfigurableEnvironment environment = context.getEnvironment();
+		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
+		if (!(beanFactory instanceof BeanDefinitionRegistry beanDefinitionRegistry)) {
+			throw new IllegalStateException("BeanFactory must be a BeanDefinitionRegistry");
 		}
 
-		if (!context.containsBean(DYNAMIC_PROPERTY_SOURCE_BEAN_INITIALIZER_BEAN_NAME)) {
-			if (!(context.getBeanFactory() instanceof BeanDefinitionRegistry registry)) {
-				throw new IllegalStateException("BeanFactory must be a BeanDefinitionRegistry");
-			}
-			BeanDefinition beanDefinition = new RootBeanDefinition(DynamicPropertySourceBeanInitializer.class);
-			beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			registry.registerBeanDefinition(DYNAMIC_PROPERTY_SOURCE_BEAN_INITIALIZER_BEAN_NAME, beanDefinition);
-		}
+		DefaultDynamicPropertyRegistry dynamicPropertyRegistry =
+				new DefaultDynamicPropertyRegistry(environment, this.methods.isEmpty());
+		beanFactory.registerSingleton(DYNAMIC_PROPERTY_REGISTRY_BEAN_NAME, dynamicPropertyRegistry);
 
-		this.methods.forEach(method -> {
-			ReflectionUtils.makeAccessible(method);
-			ReflectionUtils.invokeMethod(method, null, propertySource.dynamicPropertyRegistry);
-		});
+		BeanDefinition beanDefinition = new RootBeanDefinition(DynamicPropertySourceBeanInitializer.class);
+		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		beanDefinitionRegistry.registerBeanDefinition(
+				DYNAMIC_PROPERTY_SOURCE_BEAN_INITIALIZER_BEAN_NAME, beanDefinition);
+
+		if (!this.methods.isEmpty()) {
+			MutablePropertySources propertySources = environment.getPropertySources();
+			propertySources.addFirst(new DynamicValuesPropertySource(dynamicPropertyRegistry.valueSuppliers));
+			this.methods.forEach(method -> {
+				ReflectionUtils.makeAccessible(method);
+				ReflectionUtils.invokeMethod(method, null, dynamicPropertyRegistry);
+			});
+		}
 	}
 
 	Set<Method> getMethods() {
 		return this.methods;
 	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {
@@ -111,19 +113,6 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 	@Override
 	public int hashCode() {
 		return this.methods.hashCode();
-	}
-
-
-	private static DynamicValuesPropertySource getOrAdd(ConfigurableEnvironment environment) {
-		PropertySource<?> propertySource = environment.getPropertySources()
-				.get(DynamicValuesPropertySource.PROPERTY_SOURCE_NAME);
-		if (propertySource == null) {
-			environment.getPropertySources().addFirst(new DynamicValuesPropertySource());
-			return getOrAdd(environment);
-		}
-		Assert.state(propertySource instanceof DynamicValuesPropertySource,
-				"Incorrect DynamicValuesPropertySource type registered");
-		return (DynamicValuesPropertySource) propertySource;
 	}
 
 }

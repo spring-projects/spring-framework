@@ -17,14 +17,11 @@
 package org.springframework.test.context.support;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.lang.Nullable;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.util.Assert;
 import org.springframework.util.function.SupplierUtils;
 
 /**
@@ -39,20 +36,9 @@ class DynamicValuesPropertySource extends MapPropertySource {
 
 	static final String PROPERTY_SOURCE_NAME = "Dynamic Test Properties";
 
-	final DynamicPropertyRegistry dynamicPropertyRegistry;
-
-
-	DynamicValuesPropertySource() {
-		this(Collections.synchronizedMap(new LinkedHashMap<>()));
-	}
 
 	DynamicValuesPropertySource(Map<String, Supplier<Object>> valueSuppliers) {
 		super(PROPERTY_SOURCE_NAME, Collections.unmodifiableMap(valueSuppliers));
-		this.dynamicPropertyRegistry = (name, valueSupplier) -> {
-			Assert.hasText(name, "'name' must not be null or blank");
-			Assert.notNull(valueSupplier, "'valueSupplier' must not be null");
-			valueSuppliers.put(name, valueSupplier);
-		};
 	}
 
 	@Override
