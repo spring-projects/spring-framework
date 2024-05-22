@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Advisor;
@@ -84,15 +83,15 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	@Test
 	void rejectsPerCflowAspect() {
 		assertThatExceptionOfType(AopConfigException.class)
-			.isThrownBy(() -> getAdvisorFactory().getAdvisors(aspectInstanceFactory(new PerCflowAspect(), "someBean")))
-			.withMessageContaining("PERCFLOW");
+				.isThrownBy(() -> getAdvisorFactory().getAdvisors(aspectInstanceFactory(new PerCflowAspect(), "someBean")))
+				.withMessageContaining("PERCFLOW");
 	}
 
 	@Test
 	void rejectsPerCflowBelowAspect() {
 		assertThatExceptionOfType(AopConfigException.class)
-			.isThrownBy(() -> getAdvisorFactory().getAdvisors(aspectInstanceFactory(new PerCflowBelowAspect(), "someBean")))
-			.withMessageContaining("PERCFLOWBELOW");
+				.isThrownBy(() -> getAdvisorFactory().getAdvisors(aspectInstanceFactory(new PerCflowBelowAspect(), "someBean")))
+				.withMessageContaining("PERCFLOWBELOW");
 	}
 
 	@Test
@@ -363,7 +362,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		assertThat(lockable.locked()).as("Already locked").isTrue();
 		lockable.lock();
 		assertThat(lockable.locked()).as("Real target ignores locking").isTrue();
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> lockable.unlock());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(lockable::unlock);
 	}
 
 	@Test
@@ -389,9 +388,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		assertThat(lockable.locked()).isTrue();
 	}
 
-	// TODO: Why does this test fail? It hasn't been run before, so it maybe never actually passed...
 	@Test
-	@Disabled
 	void introductionWithArgumentBinding() {
 		TestBean target = new TestBean();
 
@@ -648,7 +645,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	static class NamedPointcutAspectWithFQN {
 
 		@SuppressWarnings("unused")
-		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
+		private final ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 
 		@Around("org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.CommonPointcuts.getAge()()")
 		int changeReturnValue(ProceedingJoinPoint pjp) {
@@ -765,7 +762,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 
 	@Aspect
-	class DoublingAspect {
+	static class DoublingAspect {
 
 		@Around("execution(* getAge())")
 		public Object doubleAge(ProceedingJoinPoint pjp) throws Throwable {
@@ -773,15 +770,20 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		}
 	}
 
+
 	@Aspect
-	class IncrementingAspect extends DoublingAspect {
+	static class IncrementingAspect extends DoublingAspect {
+
+		@Override
+		public Object doubleAge(ProceedingJoinPoint pjp) throws Throwable {
+			return ((int) pjp.proceed()) * 2;
+		}
 
 		@Around("execution(* getAge())")
 		public int incrementAge(ProceedingJoinPoint pjp) throws Throwable {
 			return ((int) pjp.proceed()) + 1;
 		}
 	}
-
 
 
 	@Aspect
@@ -1083,7 +1085,7 @@ class PerThisAspect {
 
 	// Just to check that this doesn't cause problems with introduction processing
 	@SuppressWarnings("unused")
-	private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
+	private final ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 
 	@Around("execution(int *.getAge())")
 	int returnCountAsAge() {
