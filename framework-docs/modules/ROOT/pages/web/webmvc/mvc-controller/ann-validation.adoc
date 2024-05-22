@@ -3,28 +3,40 @@
 
 [.small]#xref:web/webflux/controller/ann-validation.adoc[See equivalent in the Reactive stack]#
 
-Spring MVC has built-in xref:core/validation/validator.adoc[Validation] support for
-`@RequestMapping` methods, including the option to use
-xref:core/validation/beanvalidation.adoc[Java Bean Validation].
-The validation support works on two levels.
+Spring MVC has built-in xref:core/validation/validator.adoc[validation] for
+`@RequestMapping` methods, including xref:core/validation/beanvalidation.adoc[Java Bean Validation].
+Validation may be applied at one of two levels:
 
-First, resolvers for
-xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[@ModelAttribute],
+1. xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[@ModelAttribute],
 xref:web/webmvc/mvc-controller/ann-methods/requestbody.adoc[@RequestBody], and
-xref:web/webmvc/mvc-controller/ann-methods/multipart-forms.adoc[@RequestPart] method
-parameters perform validation if the parameter has Jakarta's `@Valid` or Spring's
-`@Validated` annotation, and raise `MethodArgumentNotValidException` if necessary.
-Alternatively, you can handle the errors in the controller method by adding an
-`Errors` or `BindingResult` method parameter immediately after the validated one.
+xref:web/webmvc/mvc-controller/ann-methods/multipart-forms.adoc[@RequestPart] argument
+resolvers validate a method argument individually if the method parameter is annotated
+with Jakarta `@Valid` or Spring's `@Validated`, _AND_ there is no `Errors` or
+`BindingResult` parameter immediately after, _AND_ method validation is not needed (to be
+discussed next). The exception raised in this case is `MethodArgumentNotValidException`.
 
-Second, if {bean-validation-site}[Java Bean Validation] is present _AND_ any method
-parameter has `@Constraint` annotations, then method validation is applied instead,
-raising `HandlerMethodValidationException` if necessary. For this case you can still add
-an `Errors` or `BindingResult` method parameter to handle validation errors within the
-controller method, but if other method arguments have validation errors then
-`HandlerMethodValidationException` is raised instead. Method validation can apply
-to the return value if the method is annotated with `@Valid` or with `@Constraint`
-annotations.
+2. When `@Constraint` annotations such as `@Min`, `@NotBlank` and others are declared
+directly on method parameters, or on the method (for the return value), then method
+validation must be applied, and that supersedes validation at the method argument level
+because method validation covers both method parameter constraints and nested constraints
+via `@Valid`. The exception raised in this case is `HandlerMethodValidationException`.
+
+Applications must handle both `MethodArgumentNotValidException` and
+`HandlerMethodValidationException` as either may be raised depending on the controller
+method signature. The two exceptions, however are designed to be very similar, and can be
+handled with almost identical code. The main difference is that the former is for a single
+object while the latter is for a list of method parameters.
+
+NOTE: `@Valid` is not a constraint annotation, but rather for nested constraints within
+an Object. Therefore, by itself `@Valid` does not lead to method validation. `@NotNull`
+on the other hand is a constraint, and adding it to an `@Valid` parameter leads to method
+validation. For nullability specifically, you may also use the `required` flag of
+`@RequestBody` or `@ModelAttribute`.
+
+Method validation may be used in combination with `Errors` or `BindingResult` method
+parameters. However, the controller method is called only if all validation errors are on
+method parameters with an `Errors` immediately after. If there are validation errors on
+any other method parameter then `HandlerMethodValidationException` is raised.
 
 You can configure a `Validator` globally through the
 xref:web/webmvc/mvc-config/validation.adoc[WebMvc config], or locally through an
