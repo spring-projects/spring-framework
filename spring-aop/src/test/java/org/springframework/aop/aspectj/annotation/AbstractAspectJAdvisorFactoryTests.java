@@ -83,15 +83,15 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	@Test
 	void rejectsPerCflowAspect() {
 		assertThatExceptionOfType(AopConfigException.class)
-			.isThrownBy(() -> getAdvisorFactory().getAdvisors(aspectInstanceFactory(new PerCflowAspect(), "someBean")))
-			.withMessageContaining("PERCFLOW");
+				.isThrownBy(() -> getAdvisorFactory().getAdvisors(aspectInstanceFactory(new PerCflowAspect(), "someBean")))
+				.withMessageContaining("PERCFLOW");
 	}
 
 	@Test
 	void rejectsPerCflowBelowAspect() {
 		assertThatExceptionOfType(AopConfigException.class)
-			.isThrownBy(() -> getAdvisorFactory().getAdvisors(aspectInstanceFactory(new PerCflowBelowAspect(), "someBean")))
-			.withMessageContaining("PERCFLOWBELOW");
+				.isThrownBy(() -> getAdvisorFactory().getAdvisors(aspectInstanceFactory(new PerCflowBelowAspect(), "someBean")))
+				.withMessageContaining("PERCFLOWBELOW");
 	}
 
 	@Test
@@ -770,15 +770,20 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		}
 	}
 
+
 	@Aspect
 	static class IncrementingAspect extends DoublingAspect {
+
+		@Override
+		public Object doubleAge(ProceedingJoinPoint pjp) throws Throwable {
+			return ((int) pjp.proceed()) * 2;
+		}
 
 		@Around("execution(* getAge())")
 		public int incrementAge(ProceedingJoinPoint pjp) throws Throwable {
 			return ((int) pjp.proceed()) + 1;
 		}
 	}
-
 
 
 	@Aspect
