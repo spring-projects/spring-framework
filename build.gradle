@@ -90,8 +90,6 @@ configure([rootProject] + javaProjects) { project ->
 	ext.javadocLinks = [
 			"https://docs.oracle.com/en/java/javase/17/docs/api/",
 			"https://jakarta.ee/specifications/platform/9/apidocs/",
-			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ and weblogic.* packages
-			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/", // org.jboss.resource.*
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
 			"https://eclipse.dev/aspectj/doc/released/aspectj5rt-api",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
