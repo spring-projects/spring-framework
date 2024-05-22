@@ -456,7 +456,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	private ShadowMatch getShadowMatch(Method targetMethod, Method originalMethod) {
-		String expression = resolveExpression();
 		ShadowMatch shadowMatch = ShadowMatchUtils.getShadowMatch(this, targetMethod);
 		if (shadowMatch == null) {
 			PointcutExpression fallbackExpression = null;
