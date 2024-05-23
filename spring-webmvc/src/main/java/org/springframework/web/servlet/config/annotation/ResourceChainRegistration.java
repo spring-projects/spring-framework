@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
+import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 
 /**
  * Assists with the registration of resource resolvers and transformers.
@@ -92,8 +93,7 @@ public class ResourceChainRegistration {
 		else if (resolver instanceof PathResourceResolver) {
 			this.hasPathResolver = true;
 		}
-		else if (resolver instanceof org.springframework.web.servlet.resource.WebJarsResourceResolver ||
-				resolver instanceof LiteWebJarsResourceResolver) {
+		else if (resolver instanceof WebJarsResourceResolver || resolver instanceof LiteWebJarsResourceResolver) {
 			this.hasWebjarsResolver = true;
 		}
 		return this;
@@ -121,7 +121,7 @@ public class ResourceChainRegistration {
 				result.add(new LiteWebJarsResourceResolver());
 			}
 			else if (isWebJarAssetLocatorPresent && !this.hasWebjarsResolver) {
-				result.add(new org.springframework.web.servlet.resource.WebJarsResourceResolver());
+				result.add(new WebJarsResourceResolver());
 			}
 			result.add(new PathResourceResolver());
 			return result;
