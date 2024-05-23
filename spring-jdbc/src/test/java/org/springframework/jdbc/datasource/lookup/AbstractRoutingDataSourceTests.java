@@ -135,7 +135,7 @@ class AbstractRoutingDataSourceTests {
 		routingDataSource.setDefaultTargetDataSource(ds);
 		routingDataSource.setLenientFallback(false);
 		routingDataSource.afterPropertiesSet();
-		lookupKey.set(null);
+		lookupKey.remove();
 		assertThat(routingDataSource.determineTargetDataSource()).isSameAs(ds);
 	}
 

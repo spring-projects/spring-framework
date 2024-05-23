@@ -221,8 +221,8 @@ NOTE: `ThreadLocal` instances come with serious issues (potentially resulting in
 incorrectly using them in multi-threaded and multi-classloader environments. You
 should always consider wrapping a `ThreadLocal` in some other class and never directly use
 the `ThreadLocal` itself (except in the wrapper class). Also, you should
-always remember to correctly set and unset (where the latter simply involves a call to
-`ThreadLocal.set(null)`) the resource local to the thread. Unsetting should be done in
+always remember to correctly set and unset (where the latter involves a call to
+`ThreadLocal.remove()`) the resource local to the thread. Unsetting should be done in
 any case, since not unsetting it might result in problematic behavior. Spring's
 `ThreadLocal` support does this for you and should always be considered in favor of using
 `ThreadLocal` instances without other proper handling code.
