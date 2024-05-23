@@ -73,6 +73,7 @@ class FormHttpMessageConverterTests {
 	@Test
 	void canRead() {
 		assertCanRead(MultiValueMap.class, null);
+		assertCanRead(Map.class, null);
 		assertCanRead(APPLICATION_FORM_URLENCODED);
 
 		assertCannotRead(String.class, null);
@@ -118,12 +119,12 @@ class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	void readForm() throws Exception {
+	void readFormMultiValue() throws Exception {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
 		inputMessage.getHeaders().setContentType(
 				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
-		MultiValueMap<String, String> result = this.converter.read(null, inputMessage);
+		MultiValueMap<String, String> result = (MultiValueMap<String, String>) this.converter.read(null, inputMessage);
 
 		assertThat(result).as("Invalid result").hasSize(3);
 		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
@@ -133,7 +134,25 @@ class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	void writeForm() throws IOException {
+	@SuppressWarnings("rawtypes")
+	void readFormSingleValue() throws Exception {
+		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
+		inputMessage.getHeaders().setContentType(
+				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
+		Object result = ((HttpMessageConverter) this.converter).read(Map.class, inputMessage);
+
+		assertThat(result).isInstanceOf(Map.class);
+		assertThat(result).isNotInstanceOf(MultiValueMap.class);
+		Map<String, String> map = (Map<String, String>) result;
+		assertThat(map).as("Invalid result").hasSize(3);
+		assertThat(map.get("name 1")).as("Invalid result").isEqualTo("value 1");
+		assertThat(map.get("name 2")).as("Invalid result").isEqualTo("value 2+1");
+		assertThat(map.get("name 3")).as("Invalid result").isNull();
+	}
+
+	@Test
+	void writeFormMultiValue() throws IOException {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
@@ -151,7 +170,24 @@ class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	void writeMultipart() throws Exception {
+	void writeFormSingleValue() throws IOException {
+		Map<String, String> body = new LinkedHashMap<>();
+		body.put("name 1", "value 1");
+		body.put("name 2", "value 2");
+		body.put("name 3", null);
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(body, APPLICATION_FORM_URLENCODED, outputMessage);
+
+		assertThat(outputMessage.getBodyAsString(UTF_8))
+				.as("Invalid result").isEqualTo("name+1=value+1&name+2=value+2&name+3");
+		assertThat(outputMessage.getHeaders().getContentType())
+				.as("Invalid content-type").isEqualTo(APPLICATION_FORM_URLENCODED);
+		assertThat(outputMessage.getHeaders().getContentLength())
+				.as("Invalid content-length").isEqualTo(outputMessage.getBodyAsBytes().length);
+	}
+
+	@Test
+	void writeMultipartMultiValue() throws Exception {
 
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("name 1", "value 1");
@@ -224,6 +260,78 @@ class FormHttpMessageConverterTests {
 		assertThat(item.getSize()).isEqualTo(logo.getFile().length());
 
 		item = items.get(5);
+		assertThat(item.getFieldName()).isEqualTo("json");
+		assertThat(item.getContentType()).isEqualTo("application/json");
+	}
+
+	@Test
+	void writeMultipartSingleValue() throws Exception {
+
+		Map<String, Object> parts = new LinkedHashMap<>();
+		parts.put("name 1", "value 1");
+		parts.put("name 2", "value 2");
+		parts.put("name 3", null);
+
+		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
+		parts.put("logo", logo);
+
+		// SPR-12108
+		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
+			@Override
+			public String getFilename() {
+				return "Hall\u00F6le.jpg";
+			}
+		};
+		parts.put("utf8", utf8);
+
+		MyBean myBean = new MyBean();
+		myBean.setString("foo");
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.setContentType(APPLICATION_JSON);
+		HttpEntity<MyBean> entity = new HttpEntity<>(myBean, entityHeaders);
+		parts.put("json", entity);
+
+		Map<String, String> parameters = new LinkedHashMap<>(2);
+		parameters.put("charset", UTF_8.name());
+		parameters.put("foo", "bar");
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
+
+		final MediaType contentType = outputMessage.getHeaders().getContentType();
+		assertThat(contentType.getParameters()).containsKeys("charset", "boundary", "foo"); // gh-21568, gh-25839
+
+		// see if Commons FileUpload can read what we wrote
+		FileUpload fileUpload = new FileUpload();
+		fileUpload.setFileItemFactory(new DiskFileItemFactory());
+		RequestContext requestContext = new MockHttpOutputMessageRequestContext(outputMessage);
+		List<FileItem> items = fileUpload.parseRequest(requestContext);
+		assertThat(items).hasSize(5);
+		FileItem item = items.get(0);
+		assertThat(item.isFormField()).isTrue();
+		assertThat(item.getFieldName()).isEqualTo("name 1");
+		assertThat(item.getString()).isEqualTo("value 1");
+
+		item = items.get(1);
+		assertThat(item.isFormField()).isTrue();
+		assertThat(item.getFieldName()).isEqualTo("name 2");
+		assertThat(item.getString()).isEqualTo("value 2");
+
+		item = items.get(2);
+		assertThat(item.isFormField()).isFalse();
+		assertThat(item.getFieldName()).isEqualTo("logo");
+		assertThat(item.getName()).isEqualTo("logo.jpg");
+		assertThat(item.getContentType()).isEqualTo("image/jpeg");
+		assertThat(item.getSize()).isEqualTo(logo.getFile().length());
+
+		item = items.get(3);
+		assertThat(item.isFormField()).isFalse();
+		assertThat(item.getFieldName()).isEqualTo("utf8");
+		assertThat(item.getName()).isEqualTo("Hall\u00F6le.jpg");
+		assertThat(item.getContentType()).isEqualTo("image/jpeg");
+		assertThat(item.getSize()).isEqualTo(logo.getFile().length());
+
+		item = items.get(4);
 		assertThat(item.getFieldName()).isEqualTo("json");
 		assertThat(item.getContentType()).isEqualTo("application/json");
 	}
@@ -401,8 +509,8 @@ class FormHttpMessageConverterTests {
 	}
 
 	private void assertCanWrite(MediaType mediaType) {
-		Class<?> clazz = MultiValueMap.class;
-		assertThat(this.converter.canWrite(clazz, mediaType)).as(clazz.getSimpleName() + " : " + mediaType).isTrue();
+		assertThat(this.converter.canWrite(MultiValueMap.class, mediaType)).as("MultiValueMap : " + mediaType).isTrue();
+		assertThat(this.converter.canWrite(Map.class, mediaType)).as("Map : " + mediaType).isTrue();
 	}
 
 	private void assertCannotWrite(MediaType mediaType) {
