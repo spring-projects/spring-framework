@@ -258,6 +258,18 @@ class ControllerMethodResolverTests {
 		assertThat(producibleMediaTypes).isNotEmpty().contains(MediaType.APPLICATION_JSON);
 	}
 
+	@Test
+	void exceptionHandlerWithInvalidAcceptHeader() {
+		Method method = ResolvableMethod.on(ExceptionHandlerController.class).mockCall(ExceptionHandlerController::handle).method();
+		this.handlerMethod = new HandlerMethod(new ExceptionHandlerController(), method);
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("/test").header("Accept", "v=12").build();
+		MockServerWebExchange serverWebExchange = MockServerWebExchange.builder(httpRequest).build();
+		InvocableHandlerMethod invocable = this.methodResolver.getExceptionHandlerMethod(
+				new ResponseStatusException(HttpStatus.BAD_REQUEST, "reason"), serverWebExchange, this.handlerMethod);
+
+		assertThat(invocable).as("No match").isNotNull();
+	}
+
 
 	private static HandlerMethodArgumentResolver next(
 			List<? extends HandlerMethodArgumentResolver> resolvers, AtomicInteger index) {

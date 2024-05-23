@@ -60,6 +60,7 @@ import org.springframework.web.reactive.result.method.HandlerMethodArgumentResol
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -416,7 +417,15 @@ class ControllerMethodResolver {
 	public InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, ServerWebExchange exchange, @Nullable HandlerMethod handlerMethod) {
 
 		Class<?> handlerType = (handlerMethod != null ? handlerMethod.getBeanType() : null);
-		List<MediaType> requestedMediaTypes = this.contentTypeResolver.resolveMediaTypes(exchange);
+		List<MediaType> requestedMediaTypes = List.of(MediaType.ALL);
+		try {
+			requestedMediaTypes = this.contentTypeResolver.resolveMediaTypes(exchange);
+		}
+		catch (NotAcceptableStatusException exc) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not parse Accept header for requested media types", exc);
+			}
+		}
 
 		// Controller-local first
 		if (handlerType != null) {
