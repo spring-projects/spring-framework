@@ -213,8 +213,16 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			return null;
 		}
 
-		return new InstantiationModelAwarePointcutAdvisorImpl(expressionPointcut, candidateAdviceMethod,
-				this, aspectInstanceFactory, declarationOrderInAspect, aspectName);
+		try {
+			return new InstantiationModelAwarePointcutAdvisorImpl(expressionPointcut, candidateAdviceMethod,
+					this, aspectInstanceFactory, declarationOrderInAspect, aspectName);
+		}
+		catch (IllegalArgumentException | IllegalStateException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring incompatible advice method: " + candidateAdviceMethod, ex);
+			}
+			return null;
+		}
 	}
 
 	@Nullable
