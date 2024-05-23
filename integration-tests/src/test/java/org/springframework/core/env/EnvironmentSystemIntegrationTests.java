@@ -561,8 +561,7 @@ public class EnvironmentSystemIntegrationTests {
 		{
 			ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
 			ctx.getEnvironment().setRequiredProperties("foo", "bar");
-			assertThatExceptionOfType(MissingRequiredPropertiesException.class).isThrownBy(
-					ctx::refresh);
+			assertThatExceptionOfType(MissingRequiredPropertiesException.class).isThrownBy(ctx::refresh);
 		}
 
 		{

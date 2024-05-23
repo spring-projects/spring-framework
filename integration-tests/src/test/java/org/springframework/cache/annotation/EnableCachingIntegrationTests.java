@@ -63,7 +63,7 @@ class EnableCachingIntegrationTests {
 		// attempt was made to look up the AJ aspect. It's due to classpath issues
 		// in .integration-tests that it's not found.
 		assertThatException().isThrownBy(ctx::refresh)
-			.withMessageContaining("AspectJCachingConfiguration");
+				.withMessageContaining("AspectJCachingConfiguration");
 	}
 
 
