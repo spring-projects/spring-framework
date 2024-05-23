@@ -24,7 +24,6 @@ import org.springframework.lang.Nullable;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
- * @author Yanming Zhou
  * @since 3.1
  * @see PropertySource
  * @see PropertySources

@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Chris Beams
- * @author Yanming Zhou
  * @since 3.1
  */
 class PropertySourcesPropertyResolverTests {
@@ -307,31 +306,7 @@ class PropertySourcesPropertyResolverTests {
 		ps.addFirst(new MockPropertySource()
 				.withProperty("p1", "v1")
 				.withProperty("p2", "v2")
-				.withProperty("p3", new CharSequence() {
-
-					static final String underlying = "${p1}:${p2}";
-
-					@Override
-					public int length() {
-						return underlying.length();
-					}
-
-					@Override
-					public char charAt(int index) {
-						return underlying.charAt(index);
-					}
-
-					@Override
-					public CharSequence subSequence(int start, int end) {
-						return underlying.subSequence(start, end);
-					}
-
-					@Override
-					public String toString() {
-						return underlying;
-					}
-				})
-		);
+				.withProperty("p3", new StringBuilder("${p1}:${p2}")));
 		ConfigurablePropertyResolver pr = new PropertySourcesPropertyResolver(ps);
 		assertThat(pr.getProperty("p1")).isEqualTo("v1");
 		assertThat(pr.getProperty("p2")).isEqualTo("v2");
