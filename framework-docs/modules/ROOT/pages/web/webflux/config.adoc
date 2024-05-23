@@ -331,7 +331,7 @@ Kotlin::
 	class WebConfig : WebFluxConfigurer {
 
 		override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
-			// ...
+			configurer.defaultCodecs().maxInMemorySize(512 * 1024)
 		}
 	}
 ----
