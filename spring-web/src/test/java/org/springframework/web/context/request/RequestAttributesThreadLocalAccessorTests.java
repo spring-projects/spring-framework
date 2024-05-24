@@ -58,7 +58,6 @@ class RequestAttributesThreadLocalAccessorTests {
 	@MethodSource
 	@SuppressWarnings({ "try", "unused" })
 	void propagation(RequestAttributes previousRequest, RequestAttributes currentRequest) throws Exception {
-
 		ContextSnapshot snapshot = getSnapshotFor(currentRequest);
 
 		AtomicReference<RequestAttributes> requestInScope = new AtomicReference<>();
@@ -80,6 +79,7 @@ class RequestAttributesThreadLocalAccessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("try")
 	void accessAfterRequestMarkedCompleted() {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		servletRequest.setAttribute("k1", "v1");
@@ -100,8 +100,8 @@ class RequestAttributesThreadLocalAccessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("try")
 	void accessBeforeRequestMarkedCompleted() {
-
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		ServletRequestAttributes previous = new ServletRequestAttributes(servletRequest, new MockHttpServletResponse());
 

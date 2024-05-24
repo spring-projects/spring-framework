@@ -41,8 +41,7 @@ class AspectProxyFactoryTests {
 	@Test
 	void testWithNonAspect() {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				proxyFactory.addAspect(TestBean.class));
+		assertThatIllegalArgumentException().isThrownBy(() -> proxyFactory.addAspect(TestBean.class));
 	}
 
 	@Test
@@ -78,8 +77,7 @@ class AspectProxyFactoryTests {
 	@Test
 	void testWithInstanceWithNonAspect() {
 		AspectJProxyFactory pf = new AspectJProxyFactory();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				pf.addAspect(new TestBean()));
+		assertThatIllegalArgumentException().isThrownBy(() -> pf.addAspect(new TestBean()));
 	}
 
 	@Test
@@ -119,6 +117,7 @@ class AspectProxyFactoryTests {
 	}
 
 	@Test  // SPR-13328
+	@SuppressWarnings("unchecked")
 	public void testProxiedVarargsWithEnumArray() {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnVarargs.class);
@@ -127,6 +126,7 @@ class AspectProxyFactoryTests {
 	}
 
 	@Test  // SPR-13328
+	@SuppressWarnings("unchecked")
 	public void testUnproxiedVarargsWithEnumArray() {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnSetter.class);
