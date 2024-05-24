@@ -74,8 +74,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final String SCHEME_PATTERN = "([^:/?#\\\\]+):";
 
-	private static final String HTTP_PATTERN = "(?i)(http|https):";
-
 	private static final String USERINFO_PATTERN = "([^/?#\\\\]*)";
 
 	private static final String HOST_IPV4_PATTERN = "[^/?#:\\\\]*";
