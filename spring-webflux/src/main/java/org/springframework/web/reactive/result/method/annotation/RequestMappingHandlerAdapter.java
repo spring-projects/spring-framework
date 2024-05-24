@@ -156,7 +156,7 @@ public class RequestMappingHandlerAdapter
 	/**
 	 * Set the {@link RequestedContentTypeResolver} to use to determine requested
 	 * media types. If not set, the default constructor is used.
-	 * @since 6.2.0
+	 * @since 6.2
 	 */
 	public void setContentTypeResolver(RequestedContentTypeResolver contentTypeResolver) {
 		Assert.notNull(contentTypeResolver, "'contentTypeResolver' must not be null");
@@ -165,7 +165,7 @@ public class RequestMappingHandlerAdapter
 
 	/**
 	 * Return the configured {@link RequestedContentTypeResolver}.
-	 * @since 6.2.0
+	 * @since 6.2
 	 */
 	public RequestedContentTypeResolver getContentTypeResolver() {
 		return this.contentTypeResolver;

@@ -123,14 +123,14 @@ public @interface ExceptionHandler {
 	/**
 	 * Exceptions handled by the annotated method. If empty, will default to any
 	 * exceptions listed in the method argument list.
-	 * @since 6.2.0
+	 * @since 6.2
 	 */
 	@AliasFor("value")
 	Class<? extends Throwable>[] exception() default {};
 
 	/**
 	 * Media Types that can be produced by the annotated method.
-	 * @since 6.2.0
+	 * @since 6.2
 	 */
 	String[] produces() default {};
 

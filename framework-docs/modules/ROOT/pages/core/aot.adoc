@@ -561,7 +561,7 @@ If you forgot to contribute a hint, the test will fail and provide some details 
 [source,txt,indent=0,subs="verbatim,quotes"]
 ----
 org.springframework.docs.core.aot.hints.testing.SampleReflection performReflection
-INFO: Spring version:6.0.0-SNAPSHOT
+INFO: Spring version: 6.2.0
 
 Missing <"ReflectionHints"> for invocation <java.lang.Class#forName>
 with arguments ["org.springframework.core.SpringVersion",

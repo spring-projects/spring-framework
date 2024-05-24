@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  *     <li>the method in charge of handling the exception
  * </ul>
  * @author Brian Clozel
- * @since 6.2.0
+ * @since 6.2
  */
 public class ExceptionHandlerMappingInfo {
 
@@ -40,6 +40,7 @@ public class ExceptionHandlerMappingInfo {
 
 	private final Method handlerMethod;
 
+
 	ExceptionHandlerMappingInfo(Set<Class<? extends Throwable>> exceptionTypes, Set<MediaType> producibleMediaTypes, Method handlerMethod) {
 		Assert.notNull(exceptionTypes, "exceptionTypes should not be null");
 		Assert.notNull(producibleMediaTypes, "producibleMediaTypes should not be null");
@@ -48,6 +49,7 @@ public class ExceptionHandlerMappingInfo {
 		this.producibleTypes = producibleMediaTypes;
 		this.handlerMethod = handlerMethod;
 	}
+
 
 	/**
 	 * Return the method responsible for handling the exception.

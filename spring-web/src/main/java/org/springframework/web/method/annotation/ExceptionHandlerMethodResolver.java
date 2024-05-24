@@ -186,7 +186,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @param exception the exception
 	 * @param mediaType the media type requested by the HTTP client
 	 * @return a Method to handle the exception, or {@code null} if none found
-	 * @since 6.2.0
+	 * @since 6.2
 	 */
 	@Nullable
 	public ExceptionHandlerMappingInfo resolveExceptionMapping(Throwable exception, MediaType mediaType) {
