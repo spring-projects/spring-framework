@@ -87,12 +87,12 @@ rootProject.ext {
 gradle.taskGraph.afterTask { Task task, TaskState state ->
 	if (!resolvedMainToolchain && task instanceof JavaCompile && task.javaCompiler.isPresent()) {
 		def metadata = task.javaCompiler.get().metadata
-		task.project.buildScan.value('Main toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
+		task.project.develocity.buildScan.value('Main toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
 		resolvedMainToolchain = true
 	}
 	if (testToolchainConfigured() && !resolvedTestToolchain && task instanceof Test && task.javaLauncher.isPresent()) {
 		def metadata = task.javaLauncher.get().metadata
-		task.project.buildScan.value('Test toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
+		task.project.develocity.buildScan.value('Test toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
 		resolvedTestToolchain = true
 	}
 }
