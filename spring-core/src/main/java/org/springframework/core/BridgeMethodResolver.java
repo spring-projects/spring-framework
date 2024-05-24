@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,11 +57,11 @@ public final class BridgeMethodResolver {
 
 
 	/**
-	 * Find the original method for the supplied {@link Method bridge Method}.
+	 * Find the local original method for the supplied {@link Method bridge Method}.
 	 * <p>It is safe to call this method passing in a non-bridge {@link Method} instance.
 	 * In such a case, the supplied {@link Method} instance is returned directly to the caller.
 	 * Callers are <strong>not</strong> required to check for bridging before calling this method.
-	 * @param bridgeMethod the method to introspect
+	 * @param bridgeMethod the method to introspect against its declaring class
 	 * @return the original method (either the bridged method or the passed-in method
 	 * if no more specific one could be found)
 	 */
@@ -73,8 +73,7 @@ public final class BridgeMethodResolver {
 		if (bridgedMethod == null) {
 			// Gather all methods with matching name and parameter size.
 			List<Method> candidateMethods = new ArrayList<>();
-			MethodFilter filter = candidateMethod ->
-					isBridgedCandidateFor(candidateMethod, bridgeMethod);
+			MethodFilter filter = (candidateMethod -> isBridgedCandidateFor(candidateMethod, bridgeMethod));
 			ReflectionUtils.doWithMethods(bridgeMethod.getDeclaringClass(), candidateMethods::add, filter);
 			if (!candidateMethods.isEmpty()) {
 				bridgedMethod = candidateMethods.size() == 1 ?
@@ -95,10 +94,10 @@ public final class BridgeMethodResolver {
 	 * Returns {@code true} if the supplied '{@code candidateMethod}' can be
 	 * considered a valid candidate for the {@link Method} that is {@link Method#isBridge() bridged}
 	 * by the supplied {@link Method bridge Method}. This method performs inexpensive
-	 * checks and can be used quickly to filter for a set of possible matches.
+	 * checks and can be used to quickly filter for a set of possible matches.
 	 */
 	private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
-		return (!candidateMethod.isBridge() && !candidateMethod.equals(bridgeMethod) &&
+		return (!candidateMethod.isBridge() &&
 				candidateMethod.getName().equals(bridgeMethod.getName()) &&
 				candidateMethod.getParameterCount() == bridgeMethod.getParameterCount());
 	}
@@ -121,8 +120,8 @@ public final class BridgeMethodResolver {
 				return candidateMethod;
 			}
 			else if (previousMethod != null) {
-				sameSig = sameSig &&
-						Arrays.equals(candidateMethod.getGenericParameterTypes(), previousMethod.getGenericParameterTypes());
+				sameSig = sameSig && Arrays.equals(
+						candidateMethod.getGenericParameterTypes(), previousMethod.getGenericParameterTypes());
 			}
 			previousMethod = candidateMethod;
 		}
@@ -163,7 +162,8 @@ public final class BridgeMethodResolver {
 				}
 			}
 			// A non-array type: compare the type itself.
-			if (!ClassUtils.resolvePrimitiveIfNecessary(candidateParameter).equals(ClassUtils.resolvePrimitiveIfNecessary(genericParameter.toClass()))) {
+			if (!ClassUtils.resolvePrimitiveIfNecessary(candidateParameter).equals(
+					ClassUtils.resolvePrimitiveIfNecessary(genericParameter.toClass()))) {
 				return false;
 			}
 		}
@@ -226,8 +226,8 @@ public final class BridgeMethodResolver {
 	/**
 	 * Compare the signatures of the bridge method and the method which it bridges. If
 	 * the parameter and return types are the same, it is a 'visibility' bridge method
-	 * introduced in Java 6 to fix https://bugs.openjdk.org/browse/JDK-6342411.
-	 * See also https://stas-blogspot.blogspot.com/2010/03/java-bridge-methods-explained.html
+	 * introduced in Java 6 to fix <a href="https://bugs.openjdk.org/browse/JDK-6342411">
+	 * JDK-6342411</a>.
 	 * @return whether signatures match as described
 	 */
 	public static boolean isVisibilityBridgeMethodPair(Method bridgeMethod, Method bridgedMethod) {
