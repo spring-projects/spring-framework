@@ -79,9 +79,9 @@ public final class BridgeMethodResolver {
 	 * method has been generated at the same class hierarchy level (a known difference
 	 * between the Eclipse compiler and regular javac).
 	 * @param bridgeMethod the method to introspect against the given target class
-	 * @param targetClass the target class to find methods on
-	 * @return the original method (either the bridged method or the passed-in method
-	 * if no more specific one could be found)
+	 * @param targetClass the target class to find the most specific method on
+	 * @return the most specific method corresponding to the given bridge method
+	 * (can be the original method if no more specific one could be found)
 	 * @since 6.1.3
 	 * @see #findBridgedMethod
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod

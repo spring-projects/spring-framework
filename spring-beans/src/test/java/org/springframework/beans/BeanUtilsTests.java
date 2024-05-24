@@ -344,7 +344,7 @@ class BeanUtilsTests {
 	}
 
 	@Test  // gh-32888
-	public void copyPropertiesWithGenericCglibCLass() {
+	public void copyPropertiesWithGenericCglibClass() {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(User.class);
 		enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> proxy.invokeSuper(obj, args));
@@ -934,6 +934,7 @@ class BeanUtilsTests {
 	private static class Order {
 
 		private String id;
+
 		private List<String> lineItems;
 
 		Order() {
@@ -999,10 +1000,8 @@ class BeanUtilsTests {
 
 	private static class GenericBaseModel<T> {
 
-		public GenericBaseModel() {
-		}
-
 		private T id;
+
 		private String name;
 
 		public T getId() {
