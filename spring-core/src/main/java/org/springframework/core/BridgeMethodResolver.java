@@ -101,8 +101,12 @@ public final class BridgeMethodResolver {
 
 	private static Method resolveBridgeMethod(Method bridgeMethod, Class<?> targetClass) {
 		boolean localBridge = (targetClass == bridgeMethod.getDeclaringClass());
+		Class<?> userClass = targetClass;
 		if (!bridgeMethod.isBridge() && localBridge) {
-			return bridgeMethod;
+			userClass = ClassUtils.getUserClass(targetClass);
+			if (userClass == targetClass) {
+				return bridgeMethod;
+			}
 		}
 
 		Object cacheKey = (localBridge ? bridgeMethod : new MethodClassKey(bridgeMethod, targetClass));
@@ -111,7 +115,7 @@ public final class BridgeMethodResolver {
 			// Gather all methods with matching name and parameter size.
 			List<Method> candidateMethods = new ArrayList<>();
 			MethodFilter filter = (candidateMethod -> isBridgedCandidateFor(candidateMethod, bridgeMethod));
-			ReflectionUtils.doWithMethods(targetClass, candidateMethods::add, filter);
+			ReflectionUtils.doWithMethods(userClass, candidateMethods::add, filter);
 			if (!candidateMethods.isEmpty()) {
 				bridgedMethod = (candidateMethods.size() == 1 ? candidateMethods.get(0) :
 						searchCandidates(candidateMethods, bridgeMethod));
