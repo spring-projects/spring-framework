@@ -66,6 +66,6 @@ the annotated field and its qualifying annotations.
 Typically, the bean is selected by type by the `BeanOverrideFactoryPostProcessor`.
 Alternatively, the user can directly provide the bean name in the custom annotation.
 
-Some `BeanOverrideProcessor`s could also internally compute a bean name based on a
-convention or another advanced method.
+Some `BeanOverrideProcessor` implementations could also internally compute a bean name
+based on a convention or another advanced method.
 ====
