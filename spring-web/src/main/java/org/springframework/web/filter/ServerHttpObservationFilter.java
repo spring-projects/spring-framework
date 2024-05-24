@@ -132,7 +132,7 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 	 * @param scope the newly opened observation scope
 	 * @param request the HTTP client request
 	 * @param response the filter's response
-	 * @since 6.2.
+	 * @since 6.2
 	 */
 	protected void onScopeOpened(Observation.Scope scope, HttpServletRequest request, HttpServletResponse response) {
 	}
