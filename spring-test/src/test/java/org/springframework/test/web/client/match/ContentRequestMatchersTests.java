@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.test.json.JsonCompareMode;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -234,12 +235,34 @@ public class ContentRequestMatchersTests {
 
 		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}")
 				.match(this.request);
+		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}", JsonCompareMode.LENIENT)
+				.match(this.request);
+	}
+
+	@Test
+	@Deprecated
+	public void testJsonLenientMatchWithDeprecatedBooleanFlag() throws Exception {
+		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is allowed\" \n}";
+		this.request.getBody().write(content.getBytes());
+
 		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}", false)
 				.match(this.request);
 	}
 
 	@Test
 	public void testJsonStrictMatch() throws Exception {
+		String content = "{\n \"foo\": \"bar\", \"foo array\":[\"first\",\"second\"] \n}";
+		this.request.getBody().write(content.getBytes());
+
+		MockRestRequestMatchers
+				.content()
+				.json("{\n \"foo array\":[\"first\",\"second\"] , \"foo\": \"bar\" \n}", JsonCompareMode.STRICT)
+				.match(this.request);
+	}
+
+	@Test
+	@Deprecated
+	public void testJsonStrictMatchWithDeprecatedBooleanFlag() throws Exception {
 		String content = "{\n \"foo\": \"bar\", \"foo array\":[\"first\",\"second\"] \n}";
 		this.request.getBody().write(content.getBytes());
 
@@ -262,12 +285,38 @@ public class ContentRequestMatchersTests {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				MockRestRequestMatchers
 						.content()
+						.json("{\n \"foo\" : \"bar\"  \n}", JsonCompareMode.LENIENT)
+						.match(this.request));
+	}
+
+	@Test
+	@Deprecated
+	public void testJsonLenientNoMatchWithDeprecatedBooleanFlag() throws Exception {
+		String content = "{\n \"bar\" : \"foo\"  \n}";
+		this.request.getBody().write(content.getBytes());
+
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				MockRestRequestMatchers
+						.content()
 						.json("{\n \"foo\" : \"bar\"  \n}", false)
 						.match(this.request));
 	}
 
 	@Test
 	public void testJsonStrictNoMatch() throws Exception {
+		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is NOT allowed\" \n}";
+		this.request.getBody().write(content.getBytes());
+
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				MockRestRequestMatchers
+						.content()
+						.json("{\n \"foo array\":[\"second\",\"first\"] \n}", JsonCompareMode.STRICT)
+						.match(this.request));
+	}
+
+	@Test
+	@Deprecated
+	public void testJsonStrictNoMatchWithDeprecatedBooleanFlag() throws Exception {
 		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is NOT allowed\" \n}";
 		this.request.getBody().write(content.getBytes());
 
