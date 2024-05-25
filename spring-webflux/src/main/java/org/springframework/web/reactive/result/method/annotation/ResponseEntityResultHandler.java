@@ -141,7 +141,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			returnValueMono = Mono.from(adapter.toPublisher(result.getReturnValue()));
 			boolean isContinuation = (KotlinDetector.isSuspendingFunction(actualParameter.getMethod()) &&
 					!COROUTINES_FLOW_CLASS_NAME.equals(actualParameter.getParameterType().getName()));
-			bodyParameter = (isContinuation ? actualParameter.nested() : actualParameter.nested().nested());
+			bodyParameter = (actualParameter.nested().nested());
 		}
 		else {
 			returnValueMono = Mono.justOrEmpty(result.getReturnValue());
