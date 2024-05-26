@@ -150,6 +150,31 @@ class WebHttpHandlerBuilderTests {
 	}
 
 	@Test
+	void httpHandlerDecoratorNotNull() {
+		BiFunction<ServerHttpRequest, String, ServerHttpRequest> mutator =
+				(req, value) -> req.mutate().headers(headers -> headers.add("My-Header", value)).build();
+
+		boolean httpHandlerNotNull = WebHttpHandlerBuilder
+				.webHandler(exchange -> Mono.empty())
+				.httpHandlerDecorator(handler -> (req, res) -> handler.handle(mutator.apply(req, "1"), res))
+				.hasHttpHandlerDecorator();
+
+		assertThat(httpHandlerNotNull).isTrue();
+	}
+
+	@Test
+	void httpHandlerDecoratorNull() {
+		BiFunction<ServerHttpRequest, String, ServerHttpRequest> mutator =
+				(req, value) -> req.mutate().headers(headers -> headers.add("My-Header", value)).build();
+
+		boolean httpHandlerNotNull = WebHttpHandlerBuilder
+				.webHandler(exchange -> Mono.empty())
+				.hasHttpHandlerDecorator();
+
+		assertThat(httpHandlerNotNull).isFalse();
+	}
+
+	@Test
 	void httpHandlerDecoratorFactoryBeans() {
 		HttpHandler handler = WebHttpHandlerBuilder.applicationContext(
 				new AnnotationConfigApplicationContext(HttpHandlerDecoratorFactoryBeansConfig.class)).build();
