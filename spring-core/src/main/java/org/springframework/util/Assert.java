@@ -101,6 +101,12 @@ public abstract class Assert {
 		}
 	}
 
+	public static <T extends RuntimeException> void state(boolean expression, T exception) {
+		if (!expression) {
+			throw exception;
+		}
+	}
+
 	/**
 	 * Assert a boolean expression, throwing an {@code IllegalArgumentException}
 	 * if the expression evaluates to {@code false}.
@@ -132,6 +138,12 @@ public abstract class Assert {
 	public static void isTrue(boolean expression, Supplier<String> messageSupplier) {
 		if (!expression) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+		}
+	}
+
+	public static <T extends RuntimeException> void isTrue(boolean expression, T exception) {
+		if (!expression) {
+			throw exception;
 		}
 	}
 
@@ -167,6 +179,12 @@ public abstract class Assert {
 		}
 	}
 
+	public static <T extends RuntimeException> void isNull(@Nullable Object object, T exception) {
+		if (object != null) {
+			throw exception;
+		}
+	}
+
 	/**
 	 * Assert that an object is not {@code null}.
 	 * <pre class="code">Assert.notNull(clazz, "The class must not be null");</pre>
@@ -197,6 +215,12 @@ public abstract class Assert {
 	public static void notNull(@Nullable Object object, Supplier<String> messageSupplier) {
 		if (object == null) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+		}
+	}
+
+	public static <T extends RuntimeException> void notNull(@Nullable Object object, T exception) {
+		if (object != null) {
+			throw exception;
 		}
 	}
 
@@ -235,6 +259,12 @@ public abstract class Assert {
 		}
 	}
 
+	public static <T extends RuntimeException> void hasLength(@Nullable String text, T exception) {
+		if (!StringUtils.hasText(text)) {
+			throw exception;
+		}
+	}
+
 	/**
 	 * Assert that the given String contains valid text content; that is, it must not
 	 * be {@code null} and must contain at least one non-whitespace character.
@@ -267,6 +297,12 @@ public abstract class Assert {
 	public static void hasText(@Nullable String text, Supplier<String> messageSupplier) {
 		if (!StringUtils.hasText(text)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+		}
+	}
+
+	public static <T extends RuntimeException> void hasText(@Nullable String text, T exception) {
+		if (!StringUtils.hasText(text)) {
+			throw exception;
 		}
 	}
 
@@ -304,6 +340,13 @@ public abstract class Assert {
 		}
 	}
 
+	public static <T extends RuntimeException> void doesNotContain(@Nullable String textToSearch, String substring, T exception) {
+		if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
+				textToSearch.contains(substring)) {
+			throw exception;
+		}
+	}
+
 	/**
 	 * Assert that an array contains elements; that is, it must not be
 	 * {@code null} and must contain at least one element.
@@ -335,6 +378,12 @@ public abstract class Assert {
 	public static void notEmpty(@Nullable Object[] array, Supplier<String> messageSupplier) {
 		if (ObjectUtils.isEmpty(array)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+		}
+	}
+
+	public static <T extends RuntimeException> void notEmpty(@Nullable Object[] array, T exception) {
+		if (ObjectUtils.isEmpty(array)) {
+			throw exception;
 		}
 	}
 
@@ -378,6 +427,16 @@ public abstract class Assert {
 		}
 	}
 
+	public static <T extends RuntimeException> void noNullElements(@Nullable Object[] array, T exception) {
+		if (array != null) {
+			for (Object element : array) {
+				if (element == null) {
+					throw exception;
+				}
+			}
+		}
+	}
+
 	/**
 	 * Assert that a collection contains elements; that is, it must not be
 	 * {@code null} and must contain at least one element.
@@ -409,6 +468,12 @@ public abstract class Assert {
 	public static void notEmpty(@Nullable Collection<?> collection, Supplier<String> messageSupplier) {
 		if (CollectionUtils.isEmpty(collection)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+		}
+	}
+
+	public static <T extends RuntimeException> void notEmpty(@Nullable Collection<T> collection, T exception) {
+		if (CollectionUtils.isEmpty(collection)) {
+			throw exception;
 		}
 	}
 
@@ -453,6 +518,16 @@ public abstract class Assert {
 		}
 	}
 
+	public static <T extends RuntimeException> void noNullElements(@Nullable Collection<T> collection, T exception) {
+		if (collection != null) {
+			for (Object element : collection) {
+				if (element == null) {
+					throw exception;
+				}
+			}
+		}
+	}
+
 	/**
 	 * Assert that a Map contains entries; that is, it must not be {@code null}
 	 * and must contain at least one entry.
@@ -482,6 +557,12 @@ public abstract class Assert {
 	public static void notEmpty(@Nullable Map<?, ?> map, Supplier<String> messageSupplier) {
 		if (CollectionUtils.isEmpty(map)) {
 			throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+		}
+	}
+
+	public static <T extends RuntimeException> void notEmpty(@Nullable Map<?, ?> map, T exception) {
+		if (CollectionUtils.isEmpty(map)) {
+			throw exception;
 		}
 	}
 
@@ -534,6 +615,13 @@ public abstract class Assert {
 		isInstanceOf(type, obj, "");
 	}
 
+	public static <T extends RuntimeException> void isInstanceOf(Class<?> type, @Nullable Object obj, T exception) {
+		notNull(obj, exception);
+		if (!type.isInstance(obj)) {
+			throw exception;
+		}
+	}
+
 	/**
 	 * Assert that {@code superType.isAssignableFrom(subType)} is {@code true}.
 	 * <pre class="code">Assert.isAssignable(Number.class, myClass, "Number expected");</pre>
@@ -581,6 +669,13 @@ public abstract class Assert {
 	 */
 	public static void isAssignable(Class<?> superType, Class<?> subType) {
 		isAssignable(superType, subType, "");
+	}
+
+	public static <T extends RuntimeException> void isAssignable(Class<?> superType, @Nullable Class<?> subType, T exception) {
+		notNull(superType, exception);
+		if (subType == null || !superType.isAssignableFrom(subType)) {
+			throw exception;
+		}
 	}
 
 
