@@ -94,4 +94,51 @@ class EscapedErrorsTests {
 		assertThat(ageError2.getCode()).as("Age error 2 code not escaped").isEqualTo("AGE_NOT_32 <tag>");
 	}
 
+	@Test
+	void testRejectMethods() {
+		TestBean tb = new TestBean();
+		Errors errors = new EscapedErrors(new BindException(tb, "tb"));
+
+		errors.reject("ERROR_CODE");
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getGlobalError().getCode()).isEqualTo("ERROR_CODE");
+
+		errors = new EscapedErrors(new BindException(tb, "tb")); // Reset errors
+		errors.reject("ERROR_CODE", "Default error message");
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getGlobalError().getCode()).isEqualTo("ERROR_CODE");
+		assertThat(errors.getGlobalError().getDefaultMessage()).isEqualTo("Default error message");
+
+		errors = new EscapedErrors(new BindException(tb, "tb")); // Reset errors
+		errors.reject("ERROR_CODE", new Object[]{"arg1"}, "Default error message");
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getGlobalError().getCode()).isEqualTo("ERROR_CODE");
+		assertThat(errors.getGlobalError().getDefaultMessage()).isEqualTo("Default error message");
+		assertThat(errors.getGlobalError().getArguments()).contains("arg1");
+	}
+
+	@Test
+	void testRejectValueMethods() {
+		TestBean tb = new TestBean();
+		Errors errors = new EscapedErrors(new BindException(tb, "tb"));
+
+		errors.rejectValue("name", "ERROR_CODE");
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("ERROR_CODE");
+
+		errors = new EscapedErrors(new BindException(tb, "tb")); // Reset errors
+		errors.rejectValue("name", "ERROR_CODE", "Default error message");
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("ERROR_CODE");
+		assertThat(errors.getFieldError("name").getDefaultMessage()).isEqualTo("Default error message");
+
+		errors = new EscapedErrors(new BindException(tb, "tb")); // Reset errors
+		errors.rejectValue("name", "ERROR_CODE", new Object[]{"arg1"}, "Default error message");
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("ERROR_CODE");
+		assertThat(errors.getFieldError("name").getDefaultMessage()).isEqualTo("Default error message");
+		assertThat(errors.getFieldError("name").getArguments()).contains("arg1");
+	}
+
+
 }

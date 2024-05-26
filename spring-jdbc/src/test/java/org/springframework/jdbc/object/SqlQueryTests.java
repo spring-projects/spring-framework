@@ -440,7 +440,7 @@ class SqlQueryTests {
 
 		given(connection.prepareStatement(SELECT_ID_FORENAME_WHERE,
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)
-			).willReturn(preparedStatement);
+		).willReturn(preparedStatement);
 
 		class CustomerQuery extends MappingSqlQuery<Customer> {
 
@@ -525,7 +525,7 @@ class SqlQueryTests {
 		given(resultSet.getString("forename")).willReturn("rod");
 		given(connection.prepareStatement(SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED,
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)
-			).willReturn(preparedStatement);
+		).willReturn(preparedStatement);
 
 		class CustomerQuery extends MappingSqlQuery<Customer> {
 
@@ -578,7 +578,7 @@ class SqlQueryTests {
 
 		given(connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID_IN_LIST_1,
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)
-			).willReturn(preparedStatement);
+		).willReturn(preparedStatement);
 
 		class CustomerQuery extends MappingSqlQuery<Customer> {
 
@@ -631,7 +631,7 @@ class SqlQueryTests {
 
 		given(connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID_REUSED_1,
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)).willReturn(preparedStatement)
-;
+		;
 
 		class CustomerQuery extends MappingSqlQuery<Customer> {
 
@@ -678,8 +678,8 @@ class SqlQueryTests {
 	void testNamedParameterUsingInvalidQuestionMarkPlaceHolders()
 			throws SQLException {
 		given(
-		connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID_REUSED_1,
-				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)).willReturn(preparedStatement);
+				connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID_REUSED_1,
+						ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)).willReturn(preparedStatement);
 
 		class CustomerQuery extends MappingSqlQuery<Customer> {
 
@@ -716,7 +716,7 @@ class SqlQueryTests {
 		given(resultSet.getInt("id")).willReturn(1, 2);
 		given(connection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID,
 				ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE)
-			).willReturn(preparedStatement);
+		).willReturn(preparedStatement);
 
 		class CustomerUpdateQuery extends UpdatableSqlQuery<Customer> {
 
@@ -765,4 +765,30 @@ class SqlQueryTests {
 		}
 	}
 
+	@Test
+	void testExecuteSingleIntParameter() throws SQLException {
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt(1)).willReturn(1);
+
+		SqlQuery<Integer> query = new MappingSqlQueryWithParameters<>() {
+			@Override
+			protected Integer mapRow(ResultSet rs, int rownum, @Nullable Object[] params, @Nullable Map<?, ?> context)
+					throws SQLException {
+				assertThat(params).containsExactly(1);
+				assertThat(context).isNull();
+				return rs.getInt(1);
+			}
+		};
+		query.setDataSource(dataSource);
+		query.setSql(SELECT_ID);
+		query.declareParameter(new SqlParameter(Types.INTEGER)); // Declare the parameter
+		query.compile();
+		List<Integer> list = query.execute(1);
+
+		assertThat(list).containsExactly(1);
+		verify(connection).prepareStatement(SELECT_ID);
+		verify(preparedStatement).setObject(1, 1, Types.INTEGER); // Verify setObject instead of setInt
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+	}
 }
