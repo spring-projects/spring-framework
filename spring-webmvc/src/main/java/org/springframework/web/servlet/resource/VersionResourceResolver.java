@@ -34,6 +34,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ETag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
@@ -332,7 +333,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		public HttpHeaders getResponseHeaders() {
 			HttpHeaders headers = (this.original instanceof HttpResource httpResource ?
 					httpResource.getResponseHeaders() : new HttpHeaders());
-			headers.setETag("W/\"" + this.version + "\"");
+			headers.setETag(new ETag(this.version, true));
 			return headers;
 		}
 	}

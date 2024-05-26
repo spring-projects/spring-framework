@@ -223,7 +223,7 @@ class ResponseEntityTests {
 		responseEntity = ResponseEntity.ok().eTag("W/\"foo\"").build();
 		assertThat(responseEntity.getHeaders().getETag()).isEqualTo("W/\"foo\"");
 
-		responseEntity = ResponseEntity.ok().eTag(null).build();
+		responseEntity = ResponseEntity.ok().eTag((String) null).build();
 		assertThat(responseEntity.getHeaders().getETag()).isNull();
 	}
 

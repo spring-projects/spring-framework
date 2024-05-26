@@ -407,6 +407,15 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		B eTag(@Nullable String etag);
 
 		/**
+		 * Set the entity tag of the body, as specified by the {@code ETag} header.
+		 * @since TODO
+		 * @param etag the new entity tag
+		 * @return this builder
+		 * @see HttpHeaders#setETag(ETag)
+		 */
+		B eTag(@Nullable ETag etag);
+
+		/**
 		 * Set the time the resource was last changed, as specified by the
 		 * {@code Last-Modified} header.
 		 * @param lastModified the last modified date
@@ -569,14 +578,12 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public BodyBuilder eTag(@Nullable String etag) {
-			if (etag != null) {
-				if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
-					etag = "\"" + etag;
-				}
-				if (!etag.endsWith("\"")) {
-					etag = etag + "\"";
-				}
-			}
+			this.headers.setETag(etag);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder eTag(@Nullable ETag etag) {
 			this.headers.setETag(etag);
 			return this;
 		}

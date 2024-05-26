@@ -31,6 +31,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
+import org.springframework.http.ETag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
@@ -127,13 +128,13 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public ServerResponse.BodyBuilder eTag(String etag) {
+		this.headers.setETag(etag);
+		return this;
+	}
+
+	@Override
+	public ServerResponse.BodyBuilder eTag(ETag etag) {
 		Assert.notNull(etag, "etag must not be null");
-		if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
-			etag = "\"" + etag;
-		}
-		if (!etag.endsWith("\"")) {
-			etag = etag + "\"";
-		}
 		this.headers.setETag(etag);
 		return this;
 	}

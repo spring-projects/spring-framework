@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
+import org.springframework.http.ETag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -368,10 +369,10 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		if (!StringUtils.hasLength(etag)) {
 			return etag;
 		}
-		if ((etag.startsWith("\"") || etag.startsWith("W/\"")) && etag.endsWith("\"")) {
+		if ((etag.startsWith(ETag.PREFIX) || etag.startsWith(ETag.PREFIX_WEAK)) && etag.endsWith(ETag.SUFFIX)) {
 			return etag;
 		}
-		return "\"" + etag + "\"";
+		return ETag.PREFIX + etag + ETag.SUFFIX;
 	}
 
 	private boolean eTagStrongMatch(@Nullable String first, @Nullable String second) {

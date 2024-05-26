@@ -26,6 +26,7 @@ import jakarta.servlet.http.Cookie;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
+import org.springframework.http.ETag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
@@ -154,6 +155,15 @@ public interface EntityResponse<T> extends ServerResponse {
 		 * @see HttpHeaders#setETag(String)
 		 */
 		Builder<T> eTag(String etag);
+
+		/**
+		 * Set the entity tag of the body, as specified by the {@code ETag} header.
+		 * @since TODO
+		 * @param etag the new entity tag
+		 * @return this builder
+		 * @see HttpHeaders#setETag(ETag)
+		 */
+		Builder<T> eTag(ETag etag);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the

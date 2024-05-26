@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.CacheControl;
+import org.springframework.http.ETag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -299,6 +300,15 @@ public interface ServerResponse {
 		 * @see HttpHeaders#setETag(String)
 		 */
 		B eTag(String eTag);
+
+		/**
+		 * Set the entity tag of the body, as specified by the {@code ETag} header.
+		 * @since TODO
+		 * @param eTag the new entity tag
+		 * @return this builder
+		 * @see HttpHeaders#setETag(ETag)
+		 */
+		B eTag(ETag eTag);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the

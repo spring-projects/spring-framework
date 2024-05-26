@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.codec.Hints;
 import org.springframework.http.CacheControl;
+import org.springframework.http.ETag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -148,12 +149,12 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	@Override
 	public EntityResponse.Builder<T> eTag(String etag) {
-		if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
-			etag = "\"" + etag;
-		}
-		if (!etag.endsWith("\"")) {
-			etag = etag + "\"";
-		}
+		this.headers.setETag(etag);
+		return this;
+	}
+
+	@Override
+	public EntityResponse.Builder<T> eTag(ETag etag) {
 		this.headers.setETag(etag);
 		return this;
 	}

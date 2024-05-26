@@ -1072,11 +1072,16 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Set the (new) entity tag of the body, as specified by the {@code ETag} header.
 	 */
 	public void setETag(@Nullable String etag) {
+		setETag((etag != null) ? ETag.parse(etag) : null);
+	}
+
+	/**
+	 * Set the (new) entity tag of the body, as specified by the {@code ETag} header.
+	 * @since TODO
+	 */
+	public void setETag(@Nullable ETag etag) {
 		if (etag != null) {
-			Assert.isTrue(etag.startsWith("\"") || etag.startsWith("W/"),
-					"Invalid ETag: does not start with W/ or \"");
-			Assert.isTrue(etag.endsWith("\""), "Invalid ETag: does not end with \"");
-			set(ETAG, etag);
+			set(ETAG, etag.toHeaderValue());
 		}
 		else {
 			remove(ETAG);

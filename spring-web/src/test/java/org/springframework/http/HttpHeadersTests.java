@@ -190,6 +190,14 @@ class HttpHeadersTests {
 	}
 
 	@Test
+	void eTagW() {
+		String eTag = "W\"v2.6\"";
+		headers.setETag(eTag);
+		assertThat(headers.getETag()).as("Invalid ETag header").isEqualTo(eTag);
+		assertThat(headers.getFirst("ETag")).as("Invalid ETag header").isEqualTo("W\"v2.6\"");
+	}
+
+	@Test
 	void host() {
 		InetSocketAddress host = InetSocketAddress.createUnresolved("localhost", 8080);
 		headers.setHost(host);
@@ -216,6 +224,12 @@ class HttpHeadersTests {
 	@Test
 	void illegalETag() {
 		String eTag = "v2.6";
+		assertThatIllegalArgumentException().isThrownBy(() -> headers.setETag(eTag));
+	}
+
+	@Test
+	void illegalETagWithoutQuoteAfterWSlash() {
+		String eTag = "W/v2.6\"";
 		assertThatIllegalArgumentException().isThrownBy(() -> headers.setETag(eTag));
 	}
 
