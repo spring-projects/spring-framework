@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.undertow.util.HeaderMap;
 import org.apache.tomcat.util.http.MimeHeaders;
-import org.assertj.core.api.StringAssert;
 import org.eclipse.jetty.http.HttpFields;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -90,7 +89,7 @@ class HeadersAdaptersTests {
 		headers.add("TestHeader", "first");
 		headers.add("TestHeader", "second");
 		assertThat(headers.getFirst("TestHeader")).isEqualTo("first");
-		assertThat(headers.get("TestHeader"), StringAssert.class).element(0).isEqualTo("first");
+		assertThat(headers.get("TestHeader")).first().isEqualTo("first");
 	}
 
 	@ParameterizedHeadersTest
