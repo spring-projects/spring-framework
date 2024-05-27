@@ -92,6 +92,14 @@ class AbstractJsonContentAssertTests {
 		assertThat(forJson(null)).isNull();
 	}
 
+	@Test
+	void satisfiesAllowFurtherAssertions() {
+		assertThat(forJson(SIMPSONS)).satisfies(content -> {
+			assertThat(content).extractingPath("$.familyMembers[0].name").isEqualTo("Homer");
+			assertThat(content).extractingPath("$.familyMembers[1].name").isEqualTo("Marge");
+		});
+	}
+
 	@Nested
 	class HasPathTests {
 
@@ -831,7 +839,7 @@ class AbstractJsonContentAssertTests {
 	private static class TestJsonContentAssert extends AbstractJsonContentAssert<TestJsonContentAssert> {
 
 		public TestJsonContentAssert(@Nullable String json, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
-			super(json, jsonMessageConverter, TestJsonContentAssert.class);
+			super((json != null ? new JsonContent(json, jsonMessageConverter) : null), TestJsonContentAssert.class);
 		}
 	}
 

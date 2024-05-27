@@ -18,6 +18,7 @@ package org.springframework.test.json;
 
 import org.assertj.core.api.AssertProvider;
 
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -34,20 +35,29 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 	private final String json;
 
 	@Nullable
-	private final Class<?> resourceLoadClass;
+	private final GenericHttpMessageConverter<Object> jsonMessageConverter;
+
+
+	/**
+	 * Create a new {@code JsonContent} instance with the message converter to
+	 * use to deserialize content.
+	 * @param json the actual JSON content
+	 * @param jsonMessageConverter the message converter to use
+	 */
+	public JsonContent(String json, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
+		Assert.notNull(json, "JSON must not be null");
+		this.json = json;
+		this.jsonMessageConverter = jsonMessageConverter;
+	}
 
 
 	/**
 	 * Create a new {@code JsonContent} instance.
 	 * @param json the actual JSON content
-	 * @param resourceLoadClass the source class used to load resources
 	 */
-	JsonContent(String json, @Nullable Class<?> resourceLoadClass) {
-		Assert.notNull(json, "JSON must not be null");
-		this.json = json;
-		this.resourceLoadClass = resourceLoadClass;
+	public JsonContent(String json) {
+		this(json, null);
 	}
-
 
 	/**
 	 * Use AssertJ's {@link org.assertj.core.api.Assertions#assertThat assertThat}
@@ -55,15 +65,22 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 	 */
 	@Override
 	public JsonContentAssert assertThat() {
-		return new JsonContentAssert(this.json, null).withResourceLoadClass(this.resourceLoadClass);
+		return new JsonContentAssert(this);
 	}
 
 	/**
 	 * Return the actual JSON content string.
-	 * @return the JSON content
 	 */
 	public String getJson() {
 		return this.json;
+	}
+
+	/**
+	 * Return the message converter to use to deserialize content.
+	 */
+	@Nullable
+	GenericHttpMessageConverter<Object> getJsonMessageConverter() {
+		return this.jsonMessageConverter;
 	}
 
 	@Override

@@ -16,7 +16,6 @@
 
 package org.springframework.test.json;
 
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 
 /**
@@ -29,13 +28,10 @@ public class JsonContentAssert extends AbstractJsonContentAssert<JsonContentAsse
 
 	/**
 	 * Create an assert for the given JSON document.
-	 * <p>Path can be converted to a value object using the given
-	 * {@linkplain GenericHttpMessageConverter JSON message converter}.
 	 * @param json the JSON document to assert
-	 * @param jsonMessageConverter the converter to use
 	 */
-	public JsonContentAssert(@Nullable String json, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
-		super(json, jsonMessageConverter, JsonContentAssert.class);
+	public JsonContentAssert(@Nullable JsonContent json) {
+		super(json, JsonContentAssert.class);
 	}
 
 }

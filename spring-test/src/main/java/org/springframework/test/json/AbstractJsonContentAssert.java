@@ -24,8 +24,9 @@ import java.util.function.Consumer;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
-import org.assertj.core.api.AbstractStringAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.AssertProvider;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
 
@@ -61,7 +62,7 @@ import org.springframework.util.Assert;
  * @param <SELF> the type of assertions
  */
 public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContentAssert<SELF>>
-		extends AbstractStringAssert<SELF> {
+		extends AbstractObjectAssert<SELF, JsonContent> {
 
 	private static final Failures failures = Failures.instance();
 
@@ -79,16 +80,12 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 
 	/**
 	 * Create an assert for the given JSON document.
-	 * <p>Path can be converted to a value object using the given
-	 * {@linkplain GenericHttpMessageConverter JSON message converter}.
-	 * @param json the JSON document to assert
-	 * @param jsonMessageConverter the converter to use
+	 * @param actual the JSON document to assert
 	 * @param selfType the implementation type of this assert
 	 */
-	protected AbstractJsonContentAssert(@Nullable String json,
-			@Nullable GenericHttpMessageConverter<Object> jsonMessageConverter, Class<?> selfType) {
-		super(json, selfType);
-		this.jsonMessageConverter = jsonMessageConverter;
+	protected AbstractJsonContentAssert(@Nullable JsonContent actual, Class<?> selfType) {
+		super(actual, selfType);
+		this.jsonMessageConverter = (actual != null ? actual.getJsonMessageConverter() : null);
 		this.jsonLoader = new JsonLoader(null, null);
 		as("JSON content");
 	}
@@ -140,6 +137,19 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	}
 
 	// JsonAssert support
+
+	/**
+	 * Verify that the actual value is {@linkplain JsonCompareMode#STRICT strictly}
+	 * equal to the given JSON. The {@code expected} value can contain the JSON
+	 * itself or, if it ends with {@code .json}, the name of a resource to be
+	 * loaded from the classpath.
+	 * @param expected the expected JSON or the name of a resource containing
+	 * the expected JSON
+	 * @see #isEqualTo(CharSequence, JsonCompareMode)
+	 */
+	public SELF isEqualTo(@Nullable CharSequence expected) {
+		return isEqualTo(expected, JsonCompareMode.STRICT);
+	}
 
 	/**
 	 * Verify that the actual value is equal to the given JSON. The
@@ -255,6 +265,19 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 */
 	public SELF isStrictlyEqualTo(Resource expected) {
 		return isEqualTo(expected, JsonCompareMode.STRICT);
+	}
+
+	/**
+	 * Verify that the actual value is {@linkplain JsonCompareMode#STRICT strictly}
+	 * not equal to the given JSON. The {@code expected} value can contain the
+	 * JSON itself or, if it ends with {@code .json}, the name of a resource to
+	 * be loaded from the classpath.
+	 * @param expected the expected JSON or the name of a resource containing
+	 * the expected JSON
+	 * @see #isNotEqualTo(CharSequence, JsonCompareMode)
+	 */
+	public SELF isNotEqualTo(@Nullable CharSequence expected) {
+		return isNotEqualTo(expected, JsonCompareMode.STRICT);
 	}
 
 	/**
@@ -399,13 +422,24 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 		return this.myself;
 	}
 
+	@Nullable
+	private String toJsonString() {
+		return (this.actual != null ? this.actual.getJson() : null);
+	}
+
+	@SuppressWarnings("NullAway")
+	private String toNonNullJsonString() {
+		String jsonString = toJsonString();
+		Assertions.assertThat(jsonString).as("JSON content").isNotNull();
+		return jsonString;
+	}
 
 	private JsonComparison compare(@Nullable CharSequence expectedJson, JsonCompareMode compareMode) {
 		return compare(expectedJson, JsonAssert.comparator(compareMode));
 	}
 
 	private JsonComparison compare(@Nullable CharSequence expectedJson, JsonComparator comparator) {
-		return comparator.compare((expectedJson != null) ? expectedJson.toString() : null, this.actual);
+		return comparator.compare((expectedJson != null) ? expectedJson.toString() : null, toJsonString());
 	}
 
 	private SELF assertIsMatch(JsonComparison result) {
@@ -435,16 +469,15 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 
 		private final String path;
 
-		private final JsonPath jsonPath;
-
 		private final String json;
+
+		private final JsonPath jsonPath;
 
 		JsonPathValue(String path) {
 			Assert.hasText(path, "'path' must not be null or empty");
-			isNotNull();
 			this.path = path;
+			this.json = toNonNullJsonString();
 			this.jsonPath = JsonPath.compile(this.path);
-			this.json = AbstractJsonContentAssert.this.actual;
 		}
 
 		@Nullable
