@@ -720,7 +720,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
 		}
 
-		@Test  // gh-32694
+		@Test  // gh-32694, gh-32908
 		void indexIntoArrayUsingIntegerWrapper() {
 			context.setVariable("array", new int[] {1, 2, 3, 4});
 			context.setVariable("index", 2);
@@ -733,7 +733,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
 		}
 
-		@Test  // gh-32694
+		@Test  // gh-32694, gh-32908
 		void indexIntoListUsingIntegerWrapper() {
 			context.setVariable("list", List.of(1, 2, 3, 4));
 			context.setVariable("index", 2);
