@@ -390,7 +390,7 @@ public class Indexer extends SpelNodeImpl {
 				mv.visitLdcInsn(mapKeyName);
 			}
 			else {
-				generateIndexCode(mv, cf, index);
+				generateIndexCode(mv, cf, index, Object.class);
 			}
 			mv.visitMethodInsn(
 					INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
@@ -436,12 +436,6 @@ public class Indexer extends SpelNodeImpl {
 			}
 			mv.visitLabel(skipIfNull);
 		}
-	}
-
-	private void generateIndexCode(MethodVisitor mv, CodeFlow cf, SpelNodeImpl index) {
-		cf.enterCompilationScope();
-		index.generateCode(mv, cf);
-		cf.exitCompilationScope();
 	}
 
 	private void generateIndexCode(MethodVisitor mv, CodeFlow cf, SpelNodeImpl indexNode, Class<?> indexType) {

@@ -746,6 +746,53 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
 		}
 
+		@Test  // gh-32903
+		void indexIntoMapUsingPrimitiveLiteral() {
+			Map<Object, String> map = Map.of(
+					false, "0",   // BooleanLiteral
+					1, "ABC",     // IntLiteral
+					2L, "XYZ",    // LongLiteral
+					9.99F, "~10", // FloatLiteral
+					3.14159, "PI" // RealLiteral
+				);
+			context.setVariable("map", map);
+
+			// BooleanLiteral
+			expression = parser.parseExpression("#map[false]");
+			assertThat(expression.getValue(context)).isEqualTo("0");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("0");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// IntLiteral
+			expression = parser.parseExpression("#map[1]");
+			assertThat(expression.getValue(context)).isEqualTo("ABC");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("ABC");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// LongLiteral
+			expression = parser.parseExpression("#map[2L]");
+			assertThat(expression.getValue(context)).isEqualTo("XYZ");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("XYZ");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// FloatLiteral
+			expression = parser.parseExpression("#map[9.99F]");
+			assertThat(expression.getValue(context)).isEqualTo("~10");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("~10");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// RealLiteral
+			expression = parser.parseExpression("#map[3.14159]");
+			assertThat(expression.getValue(context)).isEqualTo("PI");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("PI");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
 		private String stringify(Object object) {
 			Stream<? extends Object> stream;
 			if (object instanceof Collection<?> collection) {
