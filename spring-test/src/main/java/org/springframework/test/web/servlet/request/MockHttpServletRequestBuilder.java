@@ -88,7 +88,7 @@ public class MockHttpServletRequestBuilder
 
 	private final HttpMethod method;
 
-	private final URI url;
+	private final URI uri;
 
 	private String contextPath = "";
 
@@ -146,18 +146,18 @@ public class MockHttpServletRequestBuilder
 	 * the {@code MockHttpServletRequest} can be plugged in via
 	 * {@link #with(RequestPostProcessor)}.
 	 * @param httpMethod the HTTP method (GET, POST, etc.)
-	 * @param url a URL template; the resulting URL will be encoded
-	 * @param vars zero or more URI variables
+	 * @param uriTemplate a URI template; the resulting URI will be encoded
+	 * @param uriVariables zero or more URI variables
 	 */
-	MockHttpServletRequestBuilder(HttpMethod httpMethod, String url, Object... vars) {
-		this(httpMethod, initUri(url, vars));
+	MockHttpServletRequestBuilder(HttpMethod httpMethod, String uriTemplate, Object... uriVariables) {
+		this(httpMethod, initUri(uriTemplate, uriVariables));
 	}
 
-	private static URI initUri(String url, Object[] vars) {
-		Assert.notNull(url, "'url' must not be null");
-		Assert.isTrue(url.isEmpty() || url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"),
-				() -> "'url' should start with a path or be a complete HTTP URL: " + url);
-		String uriString = (url.isEmpty() ? "/" : url);
+	private static URI initUri(String uri, Object[] vars) {
+		Assert.notNull(uri, "'uri' must not be null");
+		Assert.isTrue(uri.isEmpty() || uri.startsWith("/") || uri.startsWith("http://") || uri.startsWith("https://"),
+				() -> "'uri' should start with a path or be a complete HTTP URI: " + uri);
+		String uriString = (uri.isEmpty() ? "/" : uri);
 		return UriComponentsBuilder.fromUriString(uriString).buildAndExpand(vars).encode().toUri();
 	}
 
@@ -165,14 +165,14 @@ public class MockHttpServletRequestBuilder
 	 * Alternative to {@link #MockHttpServletRequestBuilder(HttpMethod, String, Object...)}
 	 * with a pre-built URI.
 	 * @param httpMethod the HTTP method (GET, POST, etc.)
-	 * @param url the URL
+	 * @param uri the URI
 	 * @since 4.0.3
 	 */
-	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI url) {
+	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI uri) {
 		Assert.notNull(httpMethod, "'httpMethod' is required");
-		Assert.notNull(url, "'url' is required");
+		Assert.notNull(uri, "'uri' is required");
 		this.method = httpMethod;
-		this.url = url;
+		this.uri = uri;
 	}
 
 
@@ -363,7 +363,7 @@ public class MockHttpServletRequestBuilder
 	 * also use add Servlet request parameters by specifying the query or form
 	 * data through one of the following:
 	 * <ul>
-	 * <li>Supply a URL with a query to {@link MockMvcRequestBuilders}.
+	 * <li>Supply a URI with a query to {@link MockMvcRequestBuilders}.
 	 * <li>Add query params via {@link #queryParam} or {@link #queryParams}.
 	 * <li>Provide {@link #content} with {@link #contentType}
 	 * {@code application/x-www-form-urlencoded}.
@@ -708,17 +708,17 @@ public class MockHttpServletRequestBuilder
 		request.setAsyncSupported(true);
 		request.setMethod(this.method.name());
 
-		String requestUri = this.url.getRawPath();
+		String requestUri = this.uri.getRawPath();
 		request.setRequestURI(requestUri);
 
-		if (this.url.getScheme() != null) {
-			request.setScheme(this.url.getScheme());
+		if (this.uri.getScheme() != null) {
+			request.setScheme(this.uri.getScheme());
 		}
-		if (this.url.getHost() != null) {
-			request.setServerName(this.url.getHost());
+		if (this.uri.getHost() != null) {
+			request.setServerName(this.uri.getHost());
 		}
-		if (this.url.getPort() != -1) {
-			request.setServerPort(this.url.getPort());
+		if (this.uri.getPort() != -1) {
+			request.setServerPort(this.uri.getPort());
 		}
 
 		updatePathRequestProperties(request, requestUri);
@@ -753,7 +753,7 @@ public class MockHttpServletRequestBuilder
 			request.addHeader(HttpHeaders.CONTENT_LENGTH, this.content.length);
 		}
 
-		String query = this.url.getRawQuery();
+		String query = this.uri.getRawQuery();
 		if (!this.queryParams.isEmpty()) {
 			String str = UriComponentsBuilder.newInstance().queryParams(this.queryParams).build().encode().getQuery();
 			query = StringUtils.hasLength(query) ? (query + "&" + str) : str;
@@ -761,7 +761,7 @@ public class MockHttpServletRequestBuilder
 		if (query != null) {
 			request.setQueryString(query);
 		}
-		addRequestParams(request, UriComponentsBuilder.fromUri(this.url).build().getQueryParams());
+		addRequestParams(request, UriComponentsBuilder.fromUri(this.uri).build().getQueryParams());
 
 		this.parameters.forEach((name, values) -> {
 			for (String value : values) {

@@ -109,7 +109,7 @@ class MockHttpServletRequestBuilderTests {
 	@Test // gh-24556
 	void requestUriWithoutScheme() {
 		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcRequestBuilders.get("localhost:8080/path"))
-				.withMessage("'url' should start with a path or be a complete HTTP URL: localhost:8080/path");
+				.withMessage("'uri' should start with a path or be a complete HTTP URI: localhost:8080/path");
 	}
 
 	@Test
