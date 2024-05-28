@@ -47,7 +47,7 @@ import org.springframework.util.MultiValueMap;
  * @author Arjen Poutsma
  * @since 3.2
  */
-public class MockMultipartHttpServletRequestBuilder extends MockHttpServletRequestBuilder {
+public class MockMultipartHttpServletRequestBuilder extends AbstractMockHttpServletRequestBuilder<MockMultipartHttpServletRequestBuilder> {
 
 	private final List<MockMultipartFile> files = new ArrayList<>();
 
@@ -73,7 +73,8 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 * @since 5.3.22
 	 */
 	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod, String uriTemplate, Object... uriVariables) {
-		super(httpMethod, uriTemplate, uriVariables);
+		super(httpMethod);
+		super.uri(uriTemplate, uriVariables);
 		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
@@ -92,7 +93,8 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 * @since 5.3.21
 	 */
 	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod, URI uri) {
-		super(httpMethod, uri);
+		super(httpMethod);
+		super.uri(uri);
 		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
@@ -134,7 +136,7 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 		if (parent == null) {
 			return this;
 		}
-		if (parent instanceof MockHttpServletRequestBuilder) {
+		if (parent instanceof AbstractMockHttpServletRequestBuilder) {
 			super.merge(parent);
 			if (parent instanceof MockMultipartHttpServletRequestBuilder parentBuilder) {
 				this.files.addAll(parentBuilder.files);
