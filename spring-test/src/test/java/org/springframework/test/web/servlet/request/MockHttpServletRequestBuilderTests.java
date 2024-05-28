@@ -33,6 +33,7 @@ import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
@@ -650,7 +651,7 @@ class MockHttpServletRequestBuilderTests {
 	void arbitraryMethod() {
 		String httpMethod = "REPort";
 		URI url = UriComponentsBuilder.fromPath("/foo/{bar}").buildAndExpand(42).toUri();
-		this.builder = new MockHttpServletRequestBuilder(httpMethod, url);
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.valueOf(httpMethod), url);
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertThat(request.getMethod()).isEqualTo(httpMethod);

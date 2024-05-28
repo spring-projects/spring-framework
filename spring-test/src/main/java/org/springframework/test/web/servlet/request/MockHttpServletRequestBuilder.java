@@ -86,7 +86,7 @@ import org.springframework.web.util.UrlPathHelper;
 public class MockHttpServletRequestBuilder
 		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
 
-	private final String method;
+	private final HttpMethod method;
 
 	private final URI url;
 
@@ -150,7 +150,7 @@ public class MockHttpServletRequestBuilder
 	 * @param vars zero or more URI variables
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, String url, Object... vars) {
-		this(httpMethod.name(), initUri(url, vars));
+		this(httpMethod, initUri(url, vars));
 	}
 
 	private static URI initUri(String url, Object[] vars) {
@@ -169,16 +169,6 @@ public class MockHttpServletRequestBuilder
 	 * @since 4.0.3
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI url) {
-		this(httpMethod.name(), url);
-	}
-
-	/**
-	 * Alternative constructor for custom HTTP methods.
-	 * @param httpMethod the HTTP method (GET, POST, etc)
-	 * @param url the URL
-	 * @since 4.3
-	 */
-	MockHttpServletRequestBuilder(String httpMethod, URI url) {
 		Assert.notNull(httpMethod, "'httpMethod' is required");
 		Assert.notNull(url, "'url' is required");
 		this.method = httpMethod;
@@ -716,7 +706,7 @@ public class MockHttpServletRequestBuilder
 		MockHttpServletRequest request = createServletRequest(servletContext);
 
 		request.setAsyncSupported(true);
-		request.setMethod(this.method);
+		request.setMethod(this.method.name());
 
 		String requestUri = this.url.getRawPath();
 		request.setRequestURI(requestUri);
