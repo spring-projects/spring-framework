@@ -53,6 +53,9 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	private final BeanDefinitionRegistry registry;
 
+	/**
+	 * 资源加载器
+	 */
 	@Nullable
 	private ResourceLoader resourceLoader;
 

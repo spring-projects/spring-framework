@@ -5,10 +5,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.model.User;
 
 public class Main {
-	/**
-	 * dsad
-	 * @param args -
-	 */
+
 	public static void main(String[] args) {
 		// 1 启动 SpringIOC 容器
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("bean.xml");
@@ -16,9 +13,7 @@ public class Main {
 		User person = (User) applicationContext.getBean("user");
 		//2 使用 bean
 		System.out.println(person);
-
 		System.out.println("Hello world!");
 	}
-
 
 }
