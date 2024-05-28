@@ -54,10 +54,11 @@ import org.springframework.util.ReflectionUtils;
  *
  * <ul>
  * <li>Arrays: the n<sup>th</sup> element</li>
- * <li>Collections (lists and sets): the n<sup>th</sup> element</li>
+ * <li>Collections (lists, sets, etc.): the n<sup>th</sup> element</li>
  * <li>Strings: the n<sup>th</sup> character as a {@link String}</li>
  * <li>Maps: the value for the specified key</li>
  * <li>Objects: the property with the specified name</li>
+ * <li>Custom Structures: via registered {@link IndexAccessor} implementations</li>
  * </ul>
  *
  * <h3>Null-safe Indexing</h3>
@@ -72,6 +73,9 @@ import org.springframework.util.ReflectionUtils;
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 3.0
+ * @see org.springframework.expression.IndexAccessor
+ * @see org.springframework.expression.spel.CompilableIndexAccessor
+ * @see org.springframework.expression.spel.support.ReflectiveIndexAccessor
  */
 public class Indexer extends SpelNodeImpl {
 
@@ -385,7 +389,7 @@ public class Indexer extends SpelNodeImpl {
 			mv.visitTypeInsn(CHECKCAST, "java/util/Map");
 			// Special case when the key is an unquoted string literal that will be parsed as
 			// a property/field reference
-			if ((index instanceof PropertyOrFieldReference reference)) {
+			if (index instanceof PropertyOrFieldReference reference) {
 				String mapKeyName = reference.getName();
 				mv.visitLdcInsn(mapKeyName);
 			}
@@ -849,6 +853,7 @@ public class Indexer extends SpelNodeImpl {
 				exitTypeDescriptor = CodeFlow.toDescriptor(Object.class);
 				return new TypedValue(o, this.collectionEntryDescriptor.elementTypeDescriptor(o));
 			}
+
 			int pos = 0;
 			for (Object o : this.collection) {
 				if (pos == this.index) {
@@ -856,23 +861,23 @@ public class Indexer extends SpelNodeImpl {
 				}
 				pos++;
 			}
-			throw new IllegalStateException("Failed to find indexed element " + this.index + ": " + this.collection);
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,
+					this.collection.size(), this.index);
 		}
 
 		@Override
 		public void setValue(@Nullable Object newValue) {
-			growCollectionIfNecessary();
-			if (this.collection instanceof List list) {
-				if (this.collectionEntryDescriptor.getElementTypeDescriptor() != null) {
-					newValue = this.typeConverter.convertValue(newValue, TypeDescriptor.forObject(newValue),
-							this.collectionEntryDescriptor.getElementTypeDescriptor());
-				}
-				list.set(this.index, newValue);
-			}
-			else {
+			if (!(this.collection instanceof List list)) {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
 						this.collectionEntryDescriptor.toString());
 			}
+
+			growCollectionIfNecessary();
+			if (this.collectionEntryDescriptor.getElementTypeDescriptor() != null) {
+				newValue = this.typeConverter.convertValue(newValue, TypeDescriptor.forObject(newValue),
+						this.collectionEntryDescriptor.getElementTypeDescriptor());
+			}
+			list.set(this.index, newValue);
 		}
 
 		private void growCollectionIfNecessary() {
@@ -906,7 +911,7 @@ public class Indexer extends SpelNodeImpl {
 
 		@Override
 		public boolean isWritable() {
-			return true;
+			return (this.collection instanceof List);
 		}
 
 		@Nullable
