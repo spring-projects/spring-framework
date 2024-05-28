@@ -285,9 +285,7 @@ public class Indexer extends SpelNodeImpl {
 				mv.visitLdcInsn(mapKeyName);
 			}
 			else {
-				cf.enterCompilationScope();
-				index.generateCode(mv, cf);
-				cf.exitCompilationScope();
+				generateIndexCode(mv, cf, index, Object.class);
 			}
 			mv.visitMethodInsn(
 					INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
