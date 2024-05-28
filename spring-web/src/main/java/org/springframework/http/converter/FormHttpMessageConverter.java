@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
@@ -51,13 +50,24 @@ import org.springframework.util.StringUtils;
  * Implementation of {@link HttpMessageConverter} to read and write 'normal' HTML
  * forms and also to write (but not read) multipart data (e.g. file uploads).
  *
- * <p>In other words, this converter can read and write the
- * {@code "application/x-www-form-urlencoded"} media type as
- * {@code Map<String, String>} or as
- * {@link MultiValueMap MultiValueMap&lt;String, String&gt;}, and it can also
- * write (but not read) the {@code "multipart/form-data"} and
- * {@code "multipart/mixed"} media types as {@code Map<String, Object>} or as
- * {@link MultiValueMap MultiValueMap&lt;String, Object&gt;}.
+ * <p>
+ * The following table shows an overview of the supported media and class types.
+ * <table border="1">
+ * <tr><th>Media type</th><th>Read</th><th>Write</th></tr>
+ * <tr>
+ * <td>{@code "application/x-www-form-urlencoded"}</td>
+ * <td>{@link MultiValueMap MultiValueMap&lt;String, String&gt;}</td>
+ * <td>{@link Map Map&lt;String, String&gt;}<br>
+ * {@link MultiValueMap MultiValueMap&lt;String, String&gt;}</td>
+ * </tr>
+ * <tr>
+ * <td>{@code "multipart/form-data"}<br>
+ * {@code "multipart/mixed"}</td>
+ * <td>Unsupported</td>
+ * <td>{@link Map Map&lt;String, Object&gt;}<br>
+ * {@link MultiValueMap MultiValueMap&lt;String, Object&gt;}</td>
+ * </tr>
+ * </table>
  *
  * <h3>Multipart Data</h3>
  *
@@ -158,8 +168,8 @@ import org.springframework.util.StringUtils;
  * {@code org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity}.
  *
  * <p>As of 6.2, the {@code FormHttpMessageConverter} is parameterized over
- * {@code Map<String, ?>}, whereas before it was {@code MultiValueMap<String, ?>},
- * in order to support single-value maps.
+ * {@code Map<String, ?>} in order to support writing single-value maps.
+ * Before 6.2, this class was parameterized over {@code MultiValueMap<String, ?>}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -312,7 +322,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<Map<String
 
 	@Override
 	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
-		if (!Map.class.isAssignableFrom(clazz)) {
+		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
 			return false;
 		}
 		if (mediaType == null) {
@@ -354,32 +364,21 @@ public class FormHttpMessageConverter implements HttpMessageConverter<Map<String
 		Charset charset = (contentType != null && contentType.getCharset() != null ?
 				contentType.getCharset() : this.charset);
 		String body = StreamUtils.copyToString(inputMessage.getBody(), charset);
+
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
-
-		if (clazz == null || MultiValueMap.class.isAssignableFrom(clazz)) {
-			MultiValueMap<String, String> result = new LinkedMultiValueMap<>(pairs.length);
-			readToMap(pairs, charset, result::add);
-			return result;
-		}
-		else {
-			Map<String, String> result = CollectionUtils.newLinkedHashMap(pairs.length);
-			readToMap(pairs, charset, result::putIfAbsent);
-			return result;
-		}
-	}
-
-	private static void readToMap(String[] pairs, Charset charset, BiConsumer<String, String> addFunction) {
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(pairs.length);
 		for (String pair : pairs) {
 			int idx = pair.indexOf('=');
 			if (idx == -1) {
-				addFunction.accept(URLDecoder.decode(pair, charset), null);
+				result.add(URLDecoder.decode(pair, charset), null);
 			}
 			else {
 				String name = URLDecoder.decode(pair.substring(0, idx), charset);
 				String value = URLDecoder.decode(pair.substring(idx + 1), charset);
-				addFunction.accept(name, value);
+				result.add(name, value);
 			}
 		}
+		return result;
 	}
 
 	@Override
