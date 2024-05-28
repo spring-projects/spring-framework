@@ -1030,7 +1030,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		finally {
-			this.preInstantiationThread.set(null);
+			this.preInstantiationThread.remove();
 		}
 		if (!futures.isEmpty()) {
 			try {
@@ -1100,7 +1100,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			throw ex;
 		}
 		finally {
-			this.preInstantiationThread.set(null);
+			this.preInstantiationThread.remove();
 		}
 	}
 
