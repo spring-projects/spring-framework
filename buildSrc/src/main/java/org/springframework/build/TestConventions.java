@@ -62,8 +62,11 @@ class TestConventions {
 		if (project.hasProperty("testGroups")) {
 			test.systemProperty("testGroups", project.getProperties().get("testGroups"));
 		}
-		test.jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED",
-				"--add-opens=java.base/java.util=ALL-UNNAMED");
+		test.jvmArgs(
+				"--add-opens=java.base/java.lang=ALL-UNNAMED",
+				"--add-opens=java.base/java.util=ALL-UNNAMED",
+				"-Xshare:off"
+		);
 	}
 
 	private void configureTestRetryPlugin(Project project, Test test) {
