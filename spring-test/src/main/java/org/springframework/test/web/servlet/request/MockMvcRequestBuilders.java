@@ -176,7 +176,7 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
-	 * @param method the HTTP method (GET, POST, etc)
+	 * @param method the HTTP method (GET, POST, etc.)
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param uriVariables zero or more URI variables
 	 */
@@ -186,7 +186,7 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
-	 * @param httpMethod the HTTP method (GET, POST, etc)
+	 * @param httpMethod the HTTP method (GET, POST, etc.)
 	 * @param uri the URL
 	 * @since 4.0.3
 	 */

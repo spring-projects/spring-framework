@@ -145,7 +145,7 @@ public class MockHttpServletRequestBuilder
 	 * <p>Although this class cannot be extended, additional ways to initialize
 	 * the {@code MockHttpServletRequest} can be plugged in via
 	 * {@link #with(RequestPostProcessor)}.
-	 * @param httpMethod the HTTP method (GET, POST, etc)
+	 * @param httpMethod the HTTP method (GET, POST, etc.)
 	 * @param url a URL template; the resulting URL will be encoded
 	 * @param vars zero or more URI variables
 	 */
@@ -164,7 +164,7 @@ public class MockHttpServletRequestBuilder
 	/**
 	 * Alternative to {@link #MockHttpServletRequestBuilder(HttpMethod, String, Object...)}
 	 * with a pre-built URI.
-	 * @param httpMethod the HTTP method (GET, POST, etc)
+	 * @param httpMethod the HTTP method (GET, POST, etc.)
 	 * @param url the URL
 	 * @since 4.0.3
 	 */
@@ -797,7 +797,7 @@ public class MockHttpServletRequestBuilder
 					}
 				}
 				catch (Exception ex) {
-					// Must be invalid, ignore..
+					// Must be invalid, ignore
 				}
 			}
 		}
@@ -894,7 +894,8 @@ public class MockHttpServletRequestBuilder
 		HttpInputMessage message = new HttpInputMessage() {
 			@Override
 			public InputStream getBody() {
-				return (content != null ? new ByteArrayInputStream(content) : InputStream.nullInputStream());
+				byte[] bodyContent = MockHttpServletRequestBuilder.this.content;
+				return (bodyContent != null ? new ByteArrayInputStream(bodyContent) : InputStream.nullInputStream());
 			}
 			@Override
 			public HttpHeaders getHeaders() {
