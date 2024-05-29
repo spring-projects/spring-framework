@@ -47,6 +47,7 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
+@SuppressWarnings("NullAway")
 public class JettyWebSocketHandlerAdapter implements Session.Listener {
 	private final WebSocketHandler delegateHandler;
 
