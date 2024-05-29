@@ -24,6 +24,7 @@ import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -38,14 +39,15 @@ import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator
  * @author Rossen Stoyanchev
  * @since 4.0
  */
+@SuppressWarnings("NullAway")
 public class JettyWebSocketHandlerAdapter implements Session.Listener {
 	private static final Log logger = LogFactory.getLog(JettyWebSocketHandlerAdapter.class);
 
 	private final WebSocketHandler webSocketHandler;
 	private final JettyWebSocketSession wsSession;
-	@SuppressWarnings("NotNullFieldNotInitialized")
-	private Session nativeSession;
 
+	@Nullable
+	private Session nativeSession;
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler webSocketHandler, JettyWebSocketSession wsSession) {
 		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
@@ -53,7 +55,6 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 		this.webSocketHandler = webSocketHandler;
 		this.wsSession = wsSession;
 	}
-
 
 	@Override
 	public void onWebSocketOpen(Session session) {
@@ -140,5 +141,4 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 			this.nativeSession.disconnect();
 		}
 	}
-
 }

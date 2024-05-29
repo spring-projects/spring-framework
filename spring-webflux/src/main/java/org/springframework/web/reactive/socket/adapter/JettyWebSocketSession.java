@@ -49,6 +49,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
+@SuppressWarnings("NullAway")
 public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	private final Flux<WebSocketMessage> flux;
@@ -57,7 +58,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	private long requested = 0;
 	private boolean awaitingMessage = false;
 
-	@SuppressWarnings("NotNullFieldNotInitialized")
+	@Nullable
 	private FluxSink<WebSocketMessage> sink;
 
 	@Nullable
