@@ -503,7 +503,7 @@ public class MockMvcTesterIntegrationTests {
 
 	@Controller
 	@SessionAttributes("locale")
-	private static class SessionController {
+	static class SessionController {
 
 		@ModelAttribute
 		void populate(Model model) {
@@ -517,7 +517,7 @@ public class MockMvcTesterIntegrationTests {
 	}
 
 	@Controller
-	private static class ErrorController {
+	static class ErrorController {
 
 		@GetMapping("/error/1")
 		public String one() {
