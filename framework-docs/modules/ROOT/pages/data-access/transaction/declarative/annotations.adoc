@@ -74,10 +74,11 @@ Kotlin::
 ----
 ======
 
-Used at the class level as above, the annotation indicates a default for all methods of
-the declaring class (as well as its subclasses). Alternatively, each method can be
-annotated individually. See xref:data-access/transaction/declarative/annotations.adoc#transaction-declarative-annotations-method-visibility[method visibility] for
-further details on which methods Spring considers transactional. Note that a class-level
+Used at the class level as above, the annotation indicates a default for all methods
+of the declaring class (as well as its subclasses). Alternatively, each method can be
+annotated individually. See
+xref:data-access/transaction/declarative/annotations.adoc#transaction-declarative-annotations-method-visibility[method visibility]
+for further details on which methods Spring considers transactional. Note that a class-level
 annotation does not apply to ancestor classes up the class hierarchy; in such a scenario,
 inherited methods need to be locally redeclared in order to participate in a
 subclass-level annotation.
@@ -436,7 +437,8 @@ properties of the `@Transactional` annotation:
 | Optional array of exception name patterns that must not cause rollback.
 |===
 
-TIP: See xref:data-access/transaction/declarative/rolling-back.adoc#transaction-declarative-rollback-rules[Rollback rules]
+TIP: See
+xref:data-access/transaction/declarative/rolling-back.adoc#transaction-declarative-rollback-rules[Rollback rules]
 for further details on rollback rule semantics, patterns, and warnings
 regarding possible unintentional matches for pattern-based rollback rules.
 

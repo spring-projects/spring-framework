@@ -1265,9 +1265,13 @@ public abstract class RouterFunctions {
 								return this.routerFunction.route(nestedRequest)
 										.doOnNext(match -> {
 											if (nestedRequest != serverRequest) {
-												serverRequest.attributes().clear();
-												serverRequest.attributes()
-														.putAll(nestedRequest.attributes());
+												// new attributes map from nestedRequest.attributes() can be composed of the old attributes,
+												// which means that clearing the old attributes will remove those values from new attributes as well
+												// so let's make a copy
+												Map<String, Object> newAttributes = new LinkedHashMap<>(nestedRequest.attributes());
+												Map<String, Object> oldAttributes = serverRequest.attributes();
+												oldAttributes.clear();
+												oldAttributes.putAll(newAttributes);
 											}
 										});
 							}

@@ -18,13 +18,17 @@ package org.springframework.test.json;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link JsonContent}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class JsonContentTests {
 
@@ -34,27 +38,33 @@ class JsonContentTests {
 	void createWhenJsonIsNullShouldThrowException() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(
-						() -> new JsonContent(null, null))
+						() -> new JsonContent(null))
 				.withMessageContaining("JSON must not be null");
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void assertThatShouldReturnJsonContentAssert() {
-		JsonContent content = new JsonContent(JSON, getClass());
+		JsonContent content = new JsonContent(JSON);
 		assertThat(content.assertThat()).isInstanceOf(JsonContentAssert.class);
 	}
 
 	@Test
 	void getJsonShouldReturnJson() {
-		JsonContent content = new JsonContent(JSON, getClass());
+		JsonContent content = new JsonContent(JSON);
 		assertThat(content.getJson()).isEqualTo(JSON);
 	}
 
 	@Test
 	void toStringShouldReturnString() {
-		JsonContent content = new JsonContent(JSON, getClass());
+		JsonContent content = new JsonContent(JSON);
 		assertThat(content.toString()).isEqualTo("JsonContent " + JSON);
+	}
+
+	@Test
+	void getJsonMessageConverterShouldReturnConverter() {
+		MappingJackson2HttpMessageConverter converter = mock(MappingJackson2HttpMessageConverter.class);
+		JsonContent content = new JsonContent(JSON, converter);
+		assertThat(content.getJsonMessageConverter()).isSameAs(converter);
 	}
 
 }

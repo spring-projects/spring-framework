@@ -18,54 +18,34 @@ package org.springframework.test.context.bean.override;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.TypeVariable;
-
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.core.ResolvableType;
 
 /**
- * Strategy interface for Bean Override processing.
+ * Strategy interface for Bean Override processing, providing
+ * {@link OverrideMetadata} that drives how the target bean is overridden.
  *
- * <p>Processors are generally linked to one or more specific concrete annotations
- * (meta-annotated with {@link BeanOverride @BeanOverride}) and specify different
- * steps in the process of parsing these annotations, ultimately creating
- * {@link OverrideMetadata} which will be used to instantiate the overrides.
+ * <p>At least one composed annotation that is meta-annotated with
+ * {@link BeanOverride @BeanOverride} must be a companion of this processor and
+ * may provide additional user settings that drive how the concrete
+ * {@link OverrideMetadata} is configured.
  *
  * <p>Implementations are required to have a no-argument constructor and be
  * stateless.
  *
  * @author Simon Baslé
+ * @author Stephane Nicoll
  * @since 6.2
  */
 @FunctionalInterface
 public interface BeanOverrideProcessor {
 
 	/**
-	 * Determine the {@link ResolvableType} for which an {@link OverrideMetadata}
-	 * instance will be created &mdash; for example, by using the supplied annotation
-	 * to determine the type.
-	 * <p>The default implementation deduces the field's corresponding
-	 * {@link ResolvableType}, additionally tracking the source class if the
-	 * field's type is a {@link TypeVariable}.
-	 */
-	default ResolvableType getOrDeduceType(Field field, Annotation annotation, Class<?> source) {
-		return (field.getGenericType() instanceof TypeVariable ?
-				ResolvableType.forField(field, source) : ResolvableType.forField(field));
-	}
-
-	/**
-	 * Create an {@link OverrideMetadata} instance for the given annotated field
-	 * and target {@link #getOrDeduceType(Field, Annotation, Class) type}.
-	 * <p>Specific implementations of metadata can have state to be used during
-	 * override {@linkplain OverrideMetadata#createOverride(String, BeanDefinition,
-	 * Object) instance creation} &mdash; for example, from further parsing of the
-	 * annotation or the annotated field.
+	 * Create an {@link OverrideMetadata} instance for the given annotated field.
+	 * @param overrideAnnotation the composed annotation that defines the
+	 * {@link BeanOverride @BeanOverride} that triggers this processor
+	 * @param testClass the test class being processed
 	 * @param field the annotated field
-	 * @param overrideAnnotation the field annotation
-	 * @param typeToOverride the target type
-	 * @return a new {@link OverrideMetadata} instance
-	 * @see #getOrDeduceType(Field, Annotation, Class)
+	 * @return the {@link OverrideMetadata} instance that should handle the
+	 * given field
 	 */
-	OverrideMetadata createMetadata(Field field, Annotation overrideAnnotation, ResolvableType typeToOverride);
-
+	OverrideMetadata createMetadata(Annotation overrideAnnotation, Class<?> testClass, Field field);
 }

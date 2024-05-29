@@ -48,6 +48,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerResponse;
@@ -63,6 +64,7 @@ import org.springframework.web.util.pattern.PatternParseException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
 
 /**
@@ -111,6 +113,29 @@ class HandlerMappingIntrospectorTests {
 		List<HandlerMapping> actual = initIntrospector(context).getHandlerMappings();
 
 		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	void useParsedPatternsOnly() {
+		GenericWebApplicationContext context = new GenericWebApplicationContext();
+		context.registerBean("A", SimpleUrlHandlerMapping.class);
+		context.registerBean("B", SimpleUrlHandlerMapping.class);
+		context.registerBean("C", SimpleUrlHandlerMapping.class);
+		context.refresh();
+
+		assertThat(initIntrospector(context).allHandlerMappingsUsePathPatternParser()).isTrue();
+
+		context = new GenericWebApplicationContext();
+		context.registerBean("A", SimpleUrlHandlerMapping.class);
+		context.registerBean("B", SimpleUrlHandlerMapping.class);
+		context.registerBean("C", SimpleUrlHandlerMapping.class, () -> {
+			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+			mapping.setPatternParser(null);
+			return mapping;
+		});
+		context.refresh();
+
+		assertThat(initIntrospector(context).allHandlerMappingsUsePathPatternParser()).isFalse();
 	}
 
 	@ParameterizedTest
@@ -202,6 +227,41 @@ class HandlerMappingIntrospectorTests {
 		assertThat(corsConfig).isNotNull();
 		assertThat(corsConfig.getAllowedOrigins()).isEqualTo(Collections.singletonList("http://localhost:9000"));
 		assertThat(corsConfig.getAllowedMethods()).isEqualTo(Collections.singletonList("POST"));
+	}
+
+	@Test
+	void handlePreFlight() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.register(TestConfig.class);
+		context.refresh();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/path");
+		request.addHeader("Origin", "http://localhost:9000");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		initIntrospector(context).handlePreFlight(request, response);
+
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("http://localhost:9000");
+		assertThat(response.getHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS)).containsExactly("POST");
+	}
+
+	@Test
+	void handlePreFlightWithNoHandlerFoundException() {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.register(TestConfig.class);
+		context.refresh();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/unknownPath");
+		request.addHeader("Origin", "http://localhost:9000");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		assertThatThrownBy(() -> initIntrospector(context).handlePreFlight(request, response))
+				.isInstanceOf(NoHandlerFoundException.class);
+
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isNull();
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS)).isNull();
 	}
 
 	@ParameterizedTest

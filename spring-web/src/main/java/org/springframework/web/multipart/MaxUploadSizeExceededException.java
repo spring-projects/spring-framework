@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,8 @@ import org.springframework.web.ErrorResponse;
 @SuppressWarnings("serial")
 public class MaxUploadSizeExceededException extends MultipartException implements ErrorResponse {
 
-	private static final ProblemDetail body =
+	private final ProblemDetail body =
 			ProblemDetail.forStatusAndDetail(HttpStatus.PAYLOAD_TOO_LARGE, "Maximum upload size exceeded");
-
 
 	private final long maxUploadSize;
 
@@ -76,7 +75,7 @@ public class MaxUploadSizeExceededException extends MultipartException implement
 
 	@Override
 	public ProblemDetail getBody() {
-		return body;
+		return this.body;
 	}
 
 }

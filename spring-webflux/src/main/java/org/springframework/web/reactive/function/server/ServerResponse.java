@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -419,6 +419,20 @@ public interface ServerResponse {
 		 * @since 5.2
 		 */
 		Mono<ServerResponse> bodyValue(Object body);
+
+		/**
+		 * Set the body of the response to the given {@code Object} and return it.
+		 * This is a shortcut for using a {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromValue value inserter}.
+		 * @param body the body of the response
+		 * @param bodyType the type of the body, used to capture the generic type
+		 * @param <T> the type of the body
+		 * @return the built response
+		 * @throws IllegalArgumentException if {@code body} is a
+		 * {@link Publisher} or producer known to {@link ReactiveAdapterRegistry}
+		 * @since 6.2
+		 */
+		<T> Mono<ServerResponse> bodyValue(T body, ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Set the body from the given {@code Publisher}. Shortcut for

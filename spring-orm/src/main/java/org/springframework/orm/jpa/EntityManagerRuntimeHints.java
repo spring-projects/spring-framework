@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static final String NATIVE_QUERY_IMPL_CLASS_NAME = "org.hibernate.query.sql.internal.NativeQueryImpl";
 
+
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		if (ClassUtils.isPresent(HIBERNATE_SESSION_FACTORY_CLASS_NAME, classLoader)) {
@@ -71,4 +72,5 @@ class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
 		catch (ClassNotFoundException ignored) {
 		}
 	}
+
 }

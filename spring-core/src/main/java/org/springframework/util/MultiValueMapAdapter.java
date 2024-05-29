@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 	@Nullable
 	public V getFirst(K key) {
 		List<V> values = this.targetMap.get(key);
-		return (values != null && !values.isEmpty() ? values.get(0) : null);
+		return (!CollectionUtils.isEmpty(values) ? values.get(0) : null);
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 	public Map<K, V> toSingleValueMap() {
 		Map<K, V> singleValueMap = CollectionUtils.newLinkedHashMap(this.targetMap.size());
 		this.targetMap.forEach((key, values) -> {
-			if (values != null && !values.isEmpty()) {
+			if (!CollectionUtils.isEmpty(values)) {
 				singleValueMap.put(key, values.get(0));
 			}
 		});

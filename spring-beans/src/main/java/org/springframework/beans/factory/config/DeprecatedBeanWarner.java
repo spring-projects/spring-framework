@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class DeprecatedBeanWarner implements BeanFactoryPostProcessor {
 		builder.append(beanName);
 		builder.append('\'');
 		String resourceDescription = beanDefinition.getResourceDescription();
-		if (StringUtils.hasLength(resourceDescription)) {
+		if (StringUtils.hasText(resourceDescription)) {
 			builder.append(" in ");
 			builder.append(resourceDescription);
 		}

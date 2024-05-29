@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -38,11 +39,28 @@ class AbstractHttpServletResponseAssertTests {
 	class HeadersTests {
 
 		@Test
+		void containsHeader() {
+			MockHttpServletResponse response = createResponse(Map.of("n1", "v1", "n2", "v2", "n3", "v3"));
+			assertThat(response).containsHeader("n1");
+		}
+
+		@Test
+		void doesNotContainHeader() {
+			MockHttpServletResponse response = createResponse(Map.of("n1", "v1", "n2", "v2", "n3", "v3"));
+			assertThat(response).doesNotContainHeader("n4");
+		}
+
+		@Test
+		void hasHeader() {
+			MockHttpServletResponse response = createResponse(Map.of("n1", "v1", "n2", "v2", "n3", "v3"));
+			assertThat(response).hasHeader("n1", "v1");
+		}
+
+		@Test
 		void headersAreMatching() {
 			MockHttpServletResponse response = createResponse(Map.of("n1", "v1", "n2", "v2", "n3", "v3"));
 			assertThat(response).headers().containsHeaders("n1", "n2", "n3");
 		}
-
 
 		private MockHttpServletResponse createResponse(Map<String, String> headers) {
 			MockHttpServletResponse response = new MockHttpServletResponse();
@@ -51,6 +69,45 @@ class AbstractHttpServletResponseAssertTests {
 		}
 	}
 
+	@Nested
+	class ContentTypeTests {
+
+		@Test
+		void contentType() {
+			MockHttpServletResponse response = createResponse("text/plain");
+			assertThat(response).hasContentType(MediaType.TEXT_PLAIN);
+		}
+
+		@Test
+		void contentTypeAndRepresentation() {
+			MockHttpServletResponse response = createResponse("text/plain");
+			assertThat(response).hasContentType("text/plain");
+		}
+
+		@Test
+		void contentTypeCompatibleWith() {
+			MockHttpServletResponse response = createResponse("application/json;charset=UTF-8");
+			assertThat(response).hasContentTypeCompatibleWith(MediaType.APPLICATION_JSON);
+		}
+
+		@Test
+		void contentTypeCompatibleWithAndStringRepresentation() {
+			MockHttpServletResponse response = createResponse("text/plain");
+			assertThat(response).hasContentTypeCompatibleWith("text/*");
+		}
+
+		@Test
+		void contentTypeCanBeAsserted() {
+			MockHttpServletResponse response = createResponse("text/plain");
+			assertThat(response).contentType().isInstanceOf(MediaType.class).isCompatibleWith("text/*").isNotNull();
+		}
+
+		private MockHttpServletResponse createResponse(String contentType) {
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			response.setContentType(contentType);
+			return response;
+		}
+	}
 
 	@Nested
 	class StatusTests {

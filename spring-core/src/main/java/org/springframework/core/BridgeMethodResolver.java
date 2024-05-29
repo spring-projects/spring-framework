@@ -79,9 +79,9 @@ public final class BridgeMethodResolver {
 	 * method has been generated at the same class hierarchy level (a known difference
 	 * between the Eclipse compiler and regular javac).
 	 * @param bridgeMethod the method to introspect against the given target class
-	 * @param targetClass the target class to find methods on
-	 * @return the original method (either the bridged method or the passed-in method
-	 * if no more specific one could be found)
+	 * @param targetClass the target class to find the most specific method on
+	 * @return the most specific method corresponding to the given bridge method
+	 * (can be the original method if no more specific one could be found)
 	 * @since 6.1.3
 	 * @see #findBridgedMethod
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
@@ -101,8 +101,12 @@ public final class BridgeMethodResolver {
 
 	private static Method resolveBridgeMethod(Method bridgeMethod, Class<?> targetClass) {
 		boolean localBridge = (targetClass == bridgeMethod.getDeclaringClass());
+		Class<?> userClass = targetClass;
 		if (!bridgeMethod.isBridge() && localBridge) {
-			return bridgeMethod;
+			userClass = ClassUtils.getUserClass(targetClass);
+			if (userClass == targetClass) {
+				return bridgeMethod;
+			}
 		}
 
 		Object cacheKey = (localBridge ? bridgeMethod : new MethodClassKey(bridgeMethod, targetClass));
@@ -111,7 +115,7 @@ public final class BridgeMethodResolver {
 			// Gather all methods with matching name and parameter size.
 			List<Method> candidateMethods = new ArrayList<>();
 			MethodFilter filter = (candidateMethod -> isBridgedCandidateFor(candidateMethod, bridgeMethod));
-			ReflectionUtils.doWithMethods(targetClass, candidateMethods::add, filter);
+			ReflectionUtils.doWithMethods(userClass, candidateMethods::add, filter);
 			if (!candidateMethods.isEmpty()) {
 				bridgedMethod = (candidateMethods.size() == 1 ? candidateMethods.get(0) :
 						searchCandidates(candidateMethods, bridgeMethod));

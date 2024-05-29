@@ -22,27 +22,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark an annotation as eligible for Bean Override parsing.
+ * Mark a composed annotation as eligible for Bean Override processing.
  *
- * <p>This meta-annotation specifies a {@link BeanOverrideProcessor} class which
- * must be capable of handling the composed annotation that is meta-annotated
- * with {@code @BeanOverride}.
+ * <p>Specifying this annotation triggers the configured {@link BeanOverrideProcessor}
+ * which must be capable of handling the composed annotation and its attributes.
  *
- * <p>The composed annotation that is meta-annotated with {@code @BeanOverride}
- * must have a {@code RetentionPolicy} of {@link RetentionPolicy#RUNTIME RUNTIME}
- * and a {@code Target} of {@link ElementType#FIELD FIELD}.
+ * <p>Since the composed annotation should only be applied to fields, it is
+ * expected that it has a {@link Target} of {@link ElementType#FIELD FIELD}.
  *
  * @author Simon Baslé
  * @since 6.2
- * @see BeanOverrideBeanPostProcessor
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface BeanOverride {
 
 	/**
-	 * A {@link BeanOverrideProcessor} implementation class by which the composed
-	 * annotation should be processed.
+	 * The {@link BeanOverrideProcessor} implementation to use.
 	 */
 	Class<? extends BeanOverrideProcessor> value();
 

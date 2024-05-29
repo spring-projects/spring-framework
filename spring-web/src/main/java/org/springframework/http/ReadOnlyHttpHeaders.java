@@ -123,6 +123,11 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
+	public Map<String, String> asSingleValueMap() {
+		return Collections.unmodifiableMap(this.headers.asSingleValueMap());
+	}
+
+	@Override
 	public Set<String> keySet() {
 		return Collections.unmodifiableSet(this.headers.keySet());
 	}

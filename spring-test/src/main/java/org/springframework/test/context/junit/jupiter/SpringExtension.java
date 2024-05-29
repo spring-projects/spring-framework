@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
@@ -118,9 +117,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 			List.of(BeforeAll.class, AfterAll.class, BeforeEach.class, AfterEach.class, Testable.class);
 
 	private static final MethodFilter autowiredTestOrLifecycleMethodFilter =
-			ReflectionUtils.USER_DECLARED_METHODS
-					.and(method -> !Modifier.isPrivate(method.getModifiers()))
-					.and(SpringExtension::isAutowiredTestOrLifecycleMethod);
+			ReflectionUtils.USER_DECLARED_METHODS.and(SpringExtension::isAutowiredTestOrLifecycleMethod);
 
 
 	/**

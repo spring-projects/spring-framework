@@ -219,7 +219,7 @@ class WebClientIntegrationTests {
 		else if (nativeRequest.get() instanceof Request nativeReq) {
 			assertThat(nativeReq.getAttributes()).containsEntry("foo", "bar");
 		}
-		else if (nativeRequest.get() instanceof org.apache.hc.core5.http.HttpRequest nativeReq) {
+		else if (nativeRequest.get() instanceof org.apache.hc.core5.http.HttpRequest) {
 			// Attributes are not in the request, but in separate HttpClientContext
 		}
 	}

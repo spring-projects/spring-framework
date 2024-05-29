@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import java.util.function.Function;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -129,54 +131,94 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * {@link HttpStatus} enum range.
 	 * </ul>
 	 * @throws UnknownHttpStatusCodeException in case of an unresolvable status code
-	 * @see #handleError(ClientHttpResponse, HttpStatusCode)
+	 * @see #handleError(ClientHttpResponse, HttpStatusCode, URI, HttpMethod)
 	 */
 	@Override
 	public void handleError(ClientHttpResponse response) throws IOException {
 		HttpStatusCode statusCode = response.getStatusCode();
-		handleError(response, statusCode);
+		handleError(response, statusCode, null, null);
+	}
+
+	/**
+	 * Handle the error in the given response with the given resolved status code
+	 * and extra information providing access to the request URL and HTTP method.
+	 * <p>The default implementation throws:
+	 * <ul>
+	 * <li>{@link HttpClientErrorException} if the status code is in the 4xx
+	 * series, or one of its sub-classes such as
+	 * {@link HttpClientErrorException.BadRequest} and others.
+	 * <li>{@link HttpServerErrorException} if the status code is in the 5xx
+	 * series, or one of its sub-classes such as
+	 * {@link HttpServerErrorException.InternalServerError} and others.
+	 * <li>{@link UnknownHttpStatusCodeException} for error status codes not in the
+	 * {@link HttpStatus} enum range.
+	 * </ul>
+	 * @throws UnknownHttpStatusCodeException in case of an unresolvable status code
+	 * @since 6.2
+	 * @see #handleError(ClientHttpResponse, HttpStatusCode, URI, HttpMethod)
+	 */
+	@Override
+	public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
+		HttpStatusCode statusCode = response.getStatusCode();
+		handleError(response, statusCode, url, method);
 	}
 
 	/**
 	 * Return error message with details from the response body. For example:
 	 * <pre>
-	 * 404 Not Found: [{'id': 123, 'message': 'my message'}]
+	 * 404 Not Found on GET request for "https://example.com": [{'id': 123, 'message': 'my message'}]
 	 * </pre>
 	 */
-	private String getErrorMessage(
-			int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset) {
+	private String getErrorMessage(int rawStatusCode, String statusText, @Nullable byte[] responseBody, @Nullable Charset charset,
+			@Nullable URI url, @Nullable HttpMethod method) {
 
-		String preface = rawStatusCode + " " + statusText + ": ";
-
-		if (ObjectUtils.isEmpty(responseBody)) {
-			return preface + "[no body]";
+		StringBuilder msg = new StringBuilder(rawStatusCode + " " + statusText);
+		if (method != null) {
+			msg.append(" on ").append(method).append(" request");
 		}
-
-		charset = (charset != null ? charset : StandardCharsets.UTF_8);
-
-		String bodyText = new String(responseBody, charset);
-		bodyText = LogFormatUtils.formatValue(bodyText, -1, true);
-
-		return preface + bodyText;
+		if (url != null) {
+			msg.append(" for \"");
+			String urlString = url.toString();
+			int idx = urlString.indexOf('?');
+			if (idx != -1) {
+				msg.append(urlString, 0, idx);
+			}
+			else {
+				msg.append(urlString);
+			}
+			msg.append("\"");
+		}
+		msg.append(": ");
+		if (ObjectUtils.isEmpty(responseBody)) {
+			msg.append("[no body]");
+		}
+		else {
+			charset = (charset != null ? charset : StandardCharsets.UTF_8);
+			String bodyText = new String(responseBody, charset);
+			bodyText = LogFormatUtils.formatValue(bodyText, -1, true);
+			msg.append(bodyText);
+		}
+		return msg.toString();
 	}
 
 	/**
 	 * Handle the error based on the resolved status code.
-	 *
 	 * <p>The default implementation delegates to
 	 * {@link HttpClientErrorException#create} for errors in the 4xx range, to
 	 * {@link HttpServerErrorException#create} for errors in the 5xx range,
 	 * or otherwise raises {@link UnknownHttpStatusCodeException}.
-	 * @since 5.0
+	 * @since 6.2
 	 * @see HttpClientErrorException#create
 	 * @see HttpServerErrorException#create
 	 */
-	protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode) throws IOException {
+	protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode,
+			@Nullable URI url, @Nullable HttpMethod method) throws IOException {
+
 		String statusText = response.getStatusText();
 		HttpHeaders headers = response.getHeaders();
 		byte[] body = getResponseBody(response);
 		Charset charset = getCharset(response);
-		String message = getErrorMessage(statusCode.value(), statusText, body, charset);
+		String message = getErrorMessage(statusCode.value(), statusText, body, charset, url, method);
 
 		RestClientResponseException ex;
 		if (statusCode.is4xxClientError()) {

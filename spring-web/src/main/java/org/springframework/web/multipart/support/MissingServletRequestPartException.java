@@ -75,7 +75,7 @@ public class MissingServletRequestPartException extends ServletException impleme
 	}
 
 	/**
-	 * Return the body for the response, formatted as an RFC 7807
+	 * Return the body for the response, formatted as an RFC 9457
 	 * {@link ProblemDetail} whose {@link ProblemDetail#getStatus() status}
 	 * should match the response status.
 	 */

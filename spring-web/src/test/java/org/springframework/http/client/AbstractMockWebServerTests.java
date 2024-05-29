@@ -106,6 +106,10 @@ public abstract class AbstractMockWebServerTests {
 					assertThat(request.getMethod()).isEqualTo(expectedMethod);
 					return new MockResponse();
 				}
+				else if(request.getPath().startsWith("/header/")) {
+					String headerName = request.getPath().replace("/header/","");
+					return new MockResponse().setBody(headerName + ":" + request.getHeader(headerName)).setResponseCode(200);
+				}
 				return new MockResponse().setResponseCode(404);
 			}
 			catch (Throwable exc) {

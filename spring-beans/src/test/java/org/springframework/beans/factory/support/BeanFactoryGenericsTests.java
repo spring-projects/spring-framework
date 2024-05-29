@@ -29,9 +29,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -63,27 +66,25 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericSetProperty() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
-		rbd.getPropertyValues().add("integerSet", Set.of("4", "5"));
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.getPropertyValues().add("integerSet", Set.of("4", "5"));
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 	}
 
 	@Test
 	void genericListProperty() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		List<String> input = List.of("http://localhost:8080", "http://localhost:9090");
-		rbd.getPropertyValues().add("resourceList", input);
+		bd.getPropertyValues().add("resourceList", input);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getResourceList())
 				.containsExactly(new UrlResource("http://localhost:8080"), new UrlResource("http://localhost:9090"));
 	}
@@ -94,11 +95,11 @@ class BeanFactoryGenericsTests {
 		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
 		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericIntegerBean.class);
-		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
-		bf.registerBeanDefinition("genericBean", rbd);
-		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("genericBean");
+		RootBeanDefinition bd = new RootBeanDefinition(GenericIntegerBean.class);
+		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		bf.registerBeanDefinition("genericBean", bd);
 
+		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("genericBean");
 		assertThat(gb.getResourceList())
 				.containsExactly(new UrlResource("http://localhost:8080"), new UrlResource("http://localhost:9090"));
 	}
@@ -106,43 +107,42 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericListPropertyWithInvalidElementType() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericIntegerBean.class);
 
-		rbd.getPropertyValues().add("testBeanList", List.of(1));
+		RootBeanDefinition bd = new RootBeanDefinition(GenericIntegerBean.class);
+		bd.getPropertyValues().add("testBeanList", List.of(1));
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() -> bf.getBean("genericBean"))
-			.withMessageContaining("genericBean")
-			.withMessageContaining("testBeanList[0]")
-			.withMessageContaining(TestBean.class.getName())
-			.withMessageContaining("Integer");
+				.withMessageContaining("genericBean")
+				.withMessageContaining("testBeanList[0]")
+				.withMessageContaining(TestBean.class.getName())
+				.withMessageContaining("Integer");
 	}
 
 	@Test
 	void genericListPropertyWithOptionalAutowiring() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
-		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		bf.registerBeanDefinition("genericBean", bd);
 
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 		assertThat(gb.getResourceList()).isNull();
 	}
 
 	@Test
 	void genericMapProperty() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		Map<String, String> input = Map.of(
 				"4", "5",
 				"6", "7");
-		rbd.getPropertyValues().add("shortMap", input);
+		bd.getPropertyValues().add("shortMap", input);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
 	}
@@ -152,22 +152,21 @@ class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("listOfArrays");
 
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("listOfArrays");
 		assertThat(gb.getListOfArrays()).containsExactly(new String[] {"value1", "value2"});
 	}
 
 	@Test
 	void genericSetConstructor() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		Set<String> input = Set.of("4", "5");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 	}
 
@@ -177,11 +176,11 @@ class BeanFactoryGenericsTests {
 		bf.registerSingleton("integer1", 4);
 		bf.registerSingleton("integer2", 5);
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("genericBean", bd);
 
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 	}
 
@@ -189,27 +188,26 @@ class BeanFactoryGenericsTests {
 	void genericSetConstructorWithOptionalAutowiring() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("genericBean", bd);
 
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 		assertThat(gb.getIntegerSet()).isNull();
 	}
 
 	@Test
 	void genericSetListConstructor() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		Set<String> input1 = Set.of("4", "5");
 		List<String> input2 = List.of("http://localhost:8080", "http://localhost:9090");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input1);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input1);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 		assertThat(gb.getResourceList())
 				.containsExactly(new UrlResource("http://localhost:8080"), new UrlResource("http://localhost:9090"));
@@ -223,11 +221,11 @@ class BeanFactoryGenericsTests {
 		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
 		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("genericBean", bd);
 
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 		assertThat(gb.getResourceList())
 				.containsExactly(new UrlResource("http://localhost:8080"), new UrlResource("http://localhost:9090"));
@@ -239,11 +237,11 @@ class BeanFactoryGenericsTests {
 		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
 		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-		bf.registerBeanDefinition("genericBean", rbd);
-		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("genericBean", bd);
 
+		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 		assertThat(gb.getIntegerSet()).isNull();
 		assertThat(gb.getResourceList()).isNull();
 	}
@@ -251,18 +249,17 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericSetMapConstructor() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		Set<String> input1 = Set.of("4", "5");
 		Map<String, String> input2 = Map.of(
 				"4", "5",
 				"6", "7");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input1);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input1);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
@@ -271,17 +268,16 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericMapResourceConstructor() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		Map<String, String> input = Map.of(
 				"4", "5",
 				"6", "7");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue("http://localhost:8080");
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue("http://localhost:8080");
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
 		assertThat(gb.getResourceList()).containsExactly(new UrlResource("http://localhost:8080"));
@@ -290,20 +286,19 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericMapMapConstructor() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		Map<String, String> input1 = Map.of(
 				"1", "0",
 				"2", "3");
 		Map<String, String> input2 = Map.of(
 				"4", "5",
 				"6", "7");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input1);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input1);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getShortMap()).isNotSameAs(gb.getPlainMap());
 		assertThat(gb.getPlainMap()).hasSize(2);
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
@@ -316,17 +311,16 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericMapMapConstructorWithSameRefAndConversion() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		Map<String, String> input = Map.of(
 				"1", "0",
 				"2", "3");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getShortMap()).isNotSameAs(gb.getPlainMap());
 		assertThat(gb.getPlainMap()).hasSize(2);
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
@@ -339,17 +333,16 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericMapMapConstructorWithSameRefAndNoConversion() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		Map<Short, Integer> input = new HashMap<>();
 		input.put((short) 1, 0);
 		input.put((short) 2, 3);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getShortMap()).isSameAs(gb.getPlainMap());
 		assertThat(gb.getShortMap()).hasSize(2);
 		assertThat(gb.getShortMap().get(Short.valueOf("1"))).isEqualTo(0);
@@ -359,16 +352,15 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericMapWithKeyTypeConstructor() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		Map<String, String> input = Map.of(
 				"4", "5",
 				"6", "7");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getLongMap().get(4L)).isEqualTo("5");
 		assertThat(gb.getLongMap().get(6L)).isEqualTo("7");
 	}
@@ -376,18 +368,18 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericMapWithCollectionValueConstructor() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.addPropertyEditorRegistrar(registry -> registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false)));
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
+		bf.addPropertyEditorRegistrar(registry ->
+				registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false)));
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
 		Map<String, Collection<?>> input = Map.of(
 				"1", Set.of(1),
 				"2", List.of(Boolean.TRUE));
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getCollectionMap().get(1)).isInstanceOf(Set.class);
 		assertThat(gb.getCollectionMap().get(2)).isInstanceOf(List.class);
 	}
@@ -395,32 +387,30 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericSetFactoryMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setFactoryMethodName("createInstance");
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setFactoryMethodName("createInstance");
 		Set<String> input = Set.of("4", "5");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 	}
 
 	@Test
 	void genericSetListFactoryMethod() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setFactoryMethodName("createInstance");
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setFactoryMethodName("createInstance");
 		Set<String> input1 = Set.of("4", "5");
 		List<String> input2 = List.of("http://localhost:8080", "http://localhost:9090");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input1);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input1);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 		assertThat(gb.getResourceList())
 				.containsExactly(new UrlResource("http://localhost:8080"), new UrlResource("http://localhost:9090"));
@@ -429,19 +419,18 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericSetMapFactoryMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setFactoryMethodName("createInstance");
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setFactoryMethodName("createInstance");
 		Set<String> input1 = Set.of("4", "5");
 		Map<String, String> input2 = Map.of(
 				"4", "5",
 				"6", "7");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input1);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input1);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getIntegerSet()).containsExactlyInAnyOrder(4, 5);
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
@@ -450,18 +439,17 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericMapResourceFactoryMethod() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setFactoryMethodName("createInstance");
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setFactoryMethodName("createInstance");
 		Map<String, String> input = Map.of(
 				"4", "5",
 				"6", "7");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue("http://localhost:8080");
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue("http://localhost:8080");
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
 		assertThat(gb.getResourceList()).containsExactly(new UrlResource("http://localhost:8080"));
@@ -470,21 +458,20 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericMapMapFactoryMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setFactoryMethodName("createInstance");
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setFactoryMethodName("createInstance");
 		Map<String, String> input1 = Map.of(
 				"1", "0",
 				"2", "3");
 		Map<String, String> input2 = Map.of(
 				"4", "5",
 				"6", "7");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input1);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input1);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input2);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
 		assertThat(gb.getPlainMap().get("2")).isEqualTo("3");
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
@@ -494,17 +481,16 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericMapWithKeyTypeFactoryMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setFactoryMethodName("createInstance");
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setFactoryMethodName("createInstance");
 		Map<String, String> input = Map.of(
 				"4", "5",
 				"6", "7");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getLongMap().get(Long.valueOf("4"))).isEqualTo("5");
 		assertThat(gb.getLongMap().get(Long.valueOf("6"))).isEqualTo("7");
 	}
@@ -512,19 +498,19 @@ class BeanFactoryGenericsTests {
 	@Test
 	void genericMapWithCollectionValueFactoryMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.addPropertyEditorRegistrar(registry -> registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false)));
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
-		rbd.setFactoryMethodName("createInstance");
+		bf.addPropertyEditorRegistrar(registry ->
+				registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false)));
 
+		RootBeanDefinition bd = new RootBeanDefinition(GenericBean.class);
+		bd.setFactoryMethodName("createInstance");
 		Map<String, Collection<?>> input = Map.of(
 				"1", Set.of(1),
 				"2", List.of(Boolean.TRUE));
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(input);
+		bf.registerBeanDefinition("genericBean", bd);
 
-		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
-
 		assertThat(gb.getCollectionMap().get(1)).isInstanceOf(Set.class);
 		assertThat(gb.getCollectionMap().get(2)).isInstanceOf(List.class);
 	}
@@ -534,6 +520,7 @@ class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
+
 		NamedUrlList list = bf.getBean("list", NamedUrlList.class);
 		assertThat(list).containsExactly(new URL("http://localhost:8080"));
 	}
@@ -543,6 +530,7 @@ class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
+
 		NamedUrlSet set = bf.getBean("set", NamedUrlSet.class);
 		assertThat(set).containsExactly(new URL("http://localhost:8080"));
 	}
@@ -552,6 +540,7 @@ class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
+
 		NamedUrlMap map = bf.getBean("map", NamedUrlMap.class);
 		assertThat(map).containsExactly(entry(10, new URL("http://localhost:8080")));
 	}
@@ -561,6 +550,7 @@ class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
+
 		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("integerBean");
 		assertThat(gb.getGenericProperty()).isEqualTo(10);
 		assertThat(gb.getGenericListProperty()).containsExactly(20, 30);
@@ -571,6 +561,7 @@ class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
+
 		GenericSetOfIntegerBean gb = (GenericSetOfIntegerBean) bf.getBean("setOfIntegerBean");
 		assertThat(gb.getGenericProperty()).singleElement().isEqualTo(10);
 		assertThat(gb.getGenericListProperty()).satisfiesExactly(
@@ -583,6 +574,7 @@ class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
+
 		UrlSet urlSet = bf.getBean("setBean", UrlSet.class);
 		assertThat(urlSet).containsExactly(new URL("https://www.springframework.org"));
 	}
@@ -599,27 +591,27 @@ class BeanFactoryGenericsTests {
 	 */
 	@Test
 	void parameterizedStaticFactoryMethod() {
-		RootBeanDefinition rbd = new RootBeanDefinition(getClass());
-		rbd.setFactoryMethodName("createMockitoMock");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
+		RootBeanDefinition bd = new RootBeanDefinition(getClass());
+		bd.setFactoryMethodName("createMockitoMock");
+		bd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
 
-		assertRunnableMockFactory(rbd);
+		assertRunnableMockFactory(bd);
 	}
 
 	@Test
 	void parameterizedStaticFactoryMethodWithWrappedClassName() {
-		RootBeanDefinition rbd = new RootBeanDefinition();
-		rbd.setBeanClassName(getClass().getName());
-		rbd.setFactoryMethodName("createMockitoMock");
+		RootBeanDefinition bd = new RootBeanDefinition();
+		bd.setBeanClassName(getClass().getName());
+		bd.setFactoryMethodName("createMockitoMock");
 		// TypedStringValue is used as an equivalent to an XML-defined argument String
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(new TypedStringValue(Runnable.class.getName()));
+		bd.getConstructorArgumentValues().addGenericArgumentValue(new TypedStringValue(Runnable.class.getName()));
 
-		assertRunnableMockFactory(rbd);
+		assertRunnableMockFactory(bd);
 	}
 
-	private void assertRunnableMockFactory(RootBeanDefinition rbd) {
+	private void assertRunnableMockFactory(RootBeanDefinition bd) {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("mock", rbd);
+		bf.registerBeanDefinition("mock", bd);
 
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
 		assertThat(bf.getType("mock")).isEqualTo(Runnable.class);
@@ -642,14 +634,14 @@ class BeanFactoryGenericsTests {
 	void parameterizedInstanceFactoryMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
-		bf.registerBeanDefinition("mocksControl", rbd);
+		RootBeanDefinition bd1 = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", bd1);
 
-		rbd = new RootBeanDefinition();
-		rbd.setFactoryBeanName("mocksControl");
-		rbd.setFactoryMethodName("createMock");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
-		bf.registerBeanDefinition("mock", rbd);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setFactoryBeanName("mocksControl");
+		bd2.setFactoryMethodName("createMock");
+		bd2.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
+		bf.registerBeanDefinition("mock", bd2);
 
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
@@ -663,14 +655,14 @@ class BeanFactoryGenericsTests {
 	void parameterizedInstanceFactoryMethodWithNonResolvedClassName() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
-		bf.registerBeanDefinition("mocksControl", rbd);
+		RootBeanDefinition bd1 = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", bd1);
 
-		rbd = new RootBeanDefinition();
-		rbd.setFactoryBeanName("mocksControl");
-		rbd.setFactoryMethodName("createMock");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class.getName());
-		bf.registerBeanDefinition("mock", rbd);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setFactoryBeanName("mocksControl");
+		bd2.setFactoryMethodName("createMock");
+		bd2.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class.getName());
+		bf.registerBeanDefinition("mock", bd2);
 
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
@@ -684,14 +676,14 @@ class BeanFactoryGenericsTests {
 	void parameterizedInstanceFactoryMethodWithInvalidClassName() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
-		bf.registerBeanDefinition("mocksControl", rbd);
+		RootBeanDefinition bd1 = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", bd1);
 
-		rbd = new RootBeanDefinition();
-		rbd.setFactoryBeanName("mocksControl");
-		rbd.setFactoryMethodName("createMock");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue("x");
-		bf.registerBeanDefinition("mock", rbd);
+		RootBeanDefinition rbd2 = new RootBeanDefinition();
+		rbd2.setFactoryBeanName("mocksControl");
+		rbd2.setFactoryMethodName("createMock");
+		rbd2.getConstructorArgumentValues().addGenericArgumentValue("x");
+		bf.registerBeanDefinition("mock", rbd2);
 
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isFalse();
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isFalse();
@@ -705,14 +697,14 @@ class BeanFactoryGenericsTests {
 	void parameterizedInstanceFactoryMethodWithIndexedArgument() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
-		bf.registerBeanDefinition("mocksControl", rbd);
+		RootBeanDefinition bd1 = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", bd1);
 
-		rbd = new RootBeanDefinition();
-		rbd.setFactoryBeanName("mocksControl");
-		rbd.setFactoryMethodName("createMock");
-		rbd.getConstructorArgumentValues().addIndexedArgumentValue(0, Runnable.class);
-		bf.registerBeanDefinition("mock", rbd);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setFactoryBeanName("mocksControl");
+		bd2.setFactoryMethodName("createMock");
+		bd2.getConstructorArgumentValues().addIndexedArgumentValue(0, Runnable.class);
+		bf.registerBeanDefinition("mock", bd2);
 
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
@@ -727,14 +719,14 @@ class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setTempClassLoader(new OverridingClassLoader(getClass().getClassLoader()));
 
-		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
-		bf.registerBeanDefinition("mocksControl", rbd);
+		RootBeanDefinition bd1 = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", bd1);
 
-		rbd = new RootBeanDefinition();
-		rbd.setFactoryBeanName("mocksControl");
-		rbd.setFactoryMethodName("createMock");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
-		bf.registerBeanDefinition("mock", rbd);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setFactoryBeanName("mocksControl");
+		bd2.setFactoryMethodName("createMock");
+		bd2.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
+		bf.registerBeanDefinition("mock", bd2);
 
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
@@ -766,25 +758,31 @@ class BeanFactoryGenericsTests {
 		assertThat(floatStoreNames).isEmpty();
 	}
 
-	@Test
-	void genericMatchingWithFullTypeDifferentiation() {
+	@ParameterizedTest
+	@ValueSource(classes = {NumberStoreFactory.class, NumberStoreFactoryBeans.class})
+	void genericMatchingWithFullTypeDifferentiation(Class<?> factoryClass) {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
 
-		RootBeanDefinition bd1 = new RootBeanDefinition(NumberStoreFactory.class);
+		RootBeanDefinition bd1 = new RootBeanDefinition(factoryClass);
 		bd1.setFactoryMethodName("newDoubleStore");
 		bf.registerBeanDefinition("store1", bd1);
-		RootBeanDefinition bd2 = new RootBeanDefinition(NumberStoreFactory.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(factoryClass);
 		bd2.setFactoryMethodName("newFloatStore");
 		bf.registerBeanDefinition("store2", bd2);
-		bf.registerBeanDefinition("numberBean",
-				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+		RootBeanDefinition bd3 = new RootBeanDefinition(NumberBean.class);
+		bd3.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd3.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("numberBean", bd3);
 
-		NumberBean nb = bf.getBean(NumberBean.class);
 		NumberStore<?> store1 = bf.getBean("store1", NumberStore.class);
-		assertThat(nb.getDoubleStore()).isSameAs(store1);
 		NumberStore<?> store2 = bf.getBean("store2", NumberStore.class);
+		NumberBean nb = bf.getBean(NumberBean.class);
+		assertThat(nb.getDoubleStore()).isSameAs(store1);
+		assertThat(nb.getFloatStore()).isSameAs(store2);
+		nb = bf.getBean(NumberBean.class);
+		assertThat(nb.getDoubleStore()).isSameAs(store1);
 		assertThat(nb.getFloatStore()).isSameAs(store2);
 
 		String[] numberStoreNames = bf.getBeanNamesForType(ResolvableType.forClass(NumberStore.class));
@@ -832,22 +830,60 @@ class BeanFactoryGenericsTests {
 		assertThat(floatStoreProvider.orderedStream()).singleElement().isEqualTo(store2);
 	}
 
-	@Test
-	void genericMatchingWithUnresolvedOrderedStream() {
+	@ParameterizedTest
+	@ValueSource(classes = {NumberStoreFactory.class, NumberStoreFactoryBeans.class})
+	void genericMatchingWithUnresolvedOrderedStream(Class<?> factoryClass) {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
 
-		RootBeanDefinition bd1 = new RootBeanDefinition(NumberStoreFactory.class);
+		RootBeanDefinition bd1 = new RootBeanDefinition(factoryClass);
 		bd1.setFactoryMethodName("newDoubleStore");
 		bf.registerBeanDefinition("store1", bd1);
-		RootBeanDefinition bd2 = new RootBeanDefinition(NumberStoreFactory.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(factoryClass);
 		bd2.setFactoryMethodName("newFloatStore");
 		bf.registerBeanDefinition("store2", bd2);
 
 		ObjectProvider<NumberStore<?>> numberStoreProvider = bf.getBeanProvider(ResolvableType.forClass(NumberStore.class));
 		assertThat(numberStoreProvider.orderedStream()).containsExactly(
 				bf.getBean("store2", NumberStore.class), bf.getBean("store1", NumberStore.class));
+	}
+
+	@Test  // gh-32489
+	void genericMatchingAgainstFactoryBeanClass() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		RootBeanDefinition bd = new RootBeanDefinition(MyFactoryBean.class);
+		bd.setTargetType(ResolvableType.forClassWithGenerics(MyFactoryBean.class, String.class));
+		bf.registerBeanDefinition("myFactoryBean", bd);
+		bf.registerBeanDefinition("myFactoryBeanHolder",
+				new RootBeanDefinition(MyFactoryBeanHolder.class, AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+
+		assertThat(bf.getBean(MyFactoryBeanHolder.class).factoryBeans).containsOnly(bf.getBean(MyFactoryBean.class));
+		assertThat(bf.getBeanProvider(MyGenericInterfaceForFactoryBeans.class)).containsOnly(bf.getBean(MyFactoryBean.class));
+		assertThat(bf.getBeanProvider(bd.getResolvableType())).containsOnly(bf.getBean(MyFactoryBean.class));
+	}
+
+	@Test  // gh-32489
+	void genericMatchingAgainstLazyFactoryBeanClass() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		RootBeanDefinition bd = new RootBeanDefinition(MyFactoryBean.class);
+		// Replicate org.springframework.data.repository.config.RepositoryConfigurationDelegate#registerRepositoriesIn
+		// behavior of setting targetType, required to hit other branch in
+		// org.springframework.beans.factory.support.GenericTypeAwareAutowireCandidateResolver.checkGenericTypeMatch
+		bd.setTargetType(ResolvableType.forClassWithGenerics(MyFactoryBean.class, String.class));
+		bd.setLazyInit(true);
+		bf.registerBeanDefinition("myFactoryBean", bd);
+		bf.registerBeanDefinition("myFactoryBeanHolder",
+				new RootBeanDefinition(MyFactoryBeanHolder.class, AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+
+		assertThat(bf.getBeanProvider(bd.getResolvableType())).containsOnly(bf.getBean(MyFactoryBean.class));
+		assertThat(bf.getBeanProvider(MyGenericInterfaceForFactoryBeans.class)).containsOnly(bf.getBean(MyFactoryBean.class));
+		assertThat(bf.getBean(MyFactoryBeanHolder.class).factoryBeans).containsOnly(bf.getBean(MyFactoryBean.class));
+		assertThat(bf.getBeanProvider(bd.getResolvableType())).containsOnly(bf.getBean(MyFactoryBean.class));
 	}
 
 
@@ -963,6 +999,66 @@ class BeanFactoryGenericsTests {
 		@Order(0)
 		public static NumberStore<Float> newFloatStore() {
 			return new FloatStore();
+		}
+	}
+
+
+	public static class NumberStoreFactoryBeans {
+
+		@Order(1)
+		public static FactoryBean<NumberStore<Double>> newDoubleStore() {
+			return new FactoryBean<>() {
+				@Override
+				public NumberStore<Double> getObject() {
+					return new DoubleStore();
+				}
+				@Override
+				public Class<?> getObjectType() {
+					return DoubleStore.class;
+				}
+			};
+		}
+
+		@Order(0)
+		public static FactoryBean<NumberStore<Float>> newFloatStore() {
+			return new FactoryBean<>() {
+				@Override
+				public NumberStore<Float> getObject() {
+					return new FloatStore();
+				}
+				@Override
+				public Class<?> getObjectType() {
+					return FloatStore.class;
+				}
+			};
+		}
+	}
+
+
+	public interface MyGenericInterfaceForFactoryBeans<T> {
+	}
+
+
+	public static class MyFactoryBean<T extends CharSequence> implements FactoryBean<T>, MyGenericInterfaceForFactoryBeans<T> {
+
+		@Override
+		public T getObject() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return String.class;
+		}
+	}
+
+
+	public static class MyFactoryBeanHolder {
+
+		List<MyGenericInterfaceForFactoryBeans<?>> factoryBeans;  // Requested type is not a FactoryBean type
+
+		public MyFactoryBeanHolder(List<MyGenericInterfaceForFactoryBeans<?>> factoryBeans) {
+			this.factoryBeans = factoryBeans;
 		}
 	}
 

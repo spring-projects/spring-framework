@@ -124,6 +124,7 @@ class ServletServerHttpRequestTests {
 		assertThat(headers).as("No HttpHeaders returned").isNotNull();
 		assertThat(headers.containsKey(headerName)).as("Invalid headers returned").isTrue();
 		List<String> headerValues = headers.get(headerName);
+		assertThat(headerValues).as("No header values returned").isNotNull();
 		assertThat(headerValues.size()).as("Invalid header values returned").isEqualTo(2);
 		assertThat(headerValues.contains(headerValue1)).as("Invalid header values returned").isTrue();
 		assertThat(headerValues.contains(headerValue2)).as("Invalid header values returned").isTrue();
@@ -150,7 +151,7 @@ class ServletServerHttpRequestTests {
 		assertThat(headers.getContentType()).isNull();
 	}
 
-	@Test // gh-27957
+	@Test  // gh-27957
 	void getHeadersWithWildcardContentType() {
 		mockRequest.setContentType("*/*");
 		mockRequest.removeHeader("Content-Type");
@@ -166,7 +167,7 @@ class ServletServerHttpRequestTests {
 		assertThat(result).as("Invalid content returned").isEqualTo(content);
 	}
 
-	@Test // gh-13318
+	@Test  // gh-13318
 	void getFormBody() throws IOException {
 		mockRequest.setContentType("application/x-www-form-urlencoded; charset=UTF-8");
 		mockRequest.setMethod("POST");
@@ -189,7 +190,7 @@ class ServletServerHttpRequestTests {
 		assertThat(result).as("Invalid content returned").isEqualTo(content);
 	}
 
-	@Test // gh-31327
+	@Test  // gh-31327
 	void getFormBodyWhenQueryParamsAlsoPresent() throws IOException {
 		mockRequest.setContentType("application/x-www-form-urlencoded; charset=UTF-8");
 		mockRequest.setMethod("POST");
@@ -201,6 +202,19 @@ class ServletServerHttpRequestTests {
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
 		byte[] content = "foo=bar".getBytes(StandardCharsets.UTF_8);
 		assertThat(result).as("Invalid content returned").isEqualTo(content);
+	}
+
+	@Test  // gh-32471
+	void getFormBodyWhenNotEncodedCharactersPresent() throws IOException {
+		mockRequest.setContentType("application/x-www-form-urlencoded; charset=UTF-8");
+		mockRequest.setMethod("POST");
+		mockRequest.addParameter("name", "Test");
+		mockRequest.addParameter("lastName", "Test@er");
+		mockRequest.addHeader("Content-Length", 26);
+
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertThat(result).isEqualTo("name=Test&lastName=Test%40er".getBytes(StandardCharsets.UTF_8));
+		assertThat(request.getHeaders().getContentLength()).isEqualTo(result.length);
 	}
 
 }

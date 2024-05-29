@@ -21,9 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.composer.ComposerException;
 import org.yaml.snakeyaml.parser.ParserException;
@@ -34,6 +32,7 @@ import org.springframework.core.io.ByteArrayResource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.InstanceOfAssertFactories.set;
 
 /**
  * Tests for {@link YamlProcessor}.
@@ -142,13 +141,11 @@ class YamlProcessorTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void standardTypesSupportedByDefault() {
 		setYaml("value: !!set\n  ? first\n  ? second");
 		this.processor.process((properties, map) -> {
 			assertThat(properties).containsExactly(entry("value[0]", "first"), entry("value[1]", "second"));
-			assertThat(map.get("value")).asInstanceOf(InstanceOfAssertFactories.type(Set.class))
-					.satisfies(set -> assertThat(set).containsExactly("first", "second"));
+			assertThat(map.get("value")).asInstanceOf(set(String.class)).containsExactly("first", "second");
 		});
 	}
 

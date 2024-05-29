@@ -155,6 +155,17 @@ class HttpHeadersTests {
 	}
 
 	@Test
+	void setContentLengthWithNegativeValue() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				headers.setContentLength(-1));
+	}
+
+	@Test
+	void getContentLengthReturnsMinusOneForAbsentHeader() {
+		assertThat(headers.getContentLength()).isEqualTo(-1);
+	}
+
+	@Test
 	void contentType() {
 		MediaType contentType = new MediaType("text", "html", StandardCharsets.UTF_8);
 		headers.setContentType(contentType);

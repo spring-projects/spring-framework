@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,7 @@ public class FormContentFilter extends OncePerRequestFilter {
 	}
 
 	@Nullable
+	@SuppressWarnings("unchecked")
 	private MultiValueMap<String, String> parseIfNecessary(HttpServletRequest request) throws IOException {
 		if (!shouldParse(request)) {
 			return null;
@@ -106,7 +107,7 @@ public class FormContentFilter extends OncePerRequestFilter {
 				return request.getInputStream();
 			}
 		};
-		return this.formConverter.read(null, inputMessage);
+		return (MultiValueMap<String, String>) this.formConverter.read(null, inputMessage);
 	}
 
 	private boolean shouldParse(HttpServletRequest request) {

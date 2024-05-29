@@ -672,13 +672,13 @@ Kotlin::
 	val result = client.get().uri("/persons/1")
 			.exchange()
 			.expectStatus().isOk()
-			.expectBody(Person.class)
-			.returnResult();
+			.expectBody<Person>()
+			.returnResult()
 
 	// For a response without a body
 	val result = client.get().uri("/path")
 			.exchange()
-			.expectBody().isEmpty();
+			.expectBody().isEmpty()
 ----
 ======
 

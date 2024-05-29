@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,18 +178,13 @@ public abstract class StreamUtils {
 		long bytesToCopy = end - start + 1;
 		byte[] buffer = new byte[(int) Math.min(StreamUtils.BUFFER_SIZE, bytesToCopy)];
 		while (bytesToCopy > 0) {
-			int bytesRead = in.read(buffer);
+			int bytesRead = (bytesToCopy < buffer.length ? in.read(buffer, 0, (int) bytesToCopy) :
+					in.read(buffer));
 			if (bytesRead == -1) {
 				break;
 			}
-			else if (bytesRead <= bytesToCopy) {
-				out.write(buffer, 0, bytesRead);
-				bytesToCopy -= bytesRead;
-			}
-			else {
-				out.write(buffer, 0, (int) bytesToCopy);
-				bytesToCopy = 0;
-			}
+			out.write(buffer, 0, bytesRead);
+			bytesToCopy -= bytesRead;
 		}
 		return (end - start + 1 - bytesToCopy);
 	}
@@ -204,7 +199,9 @@ public abstract class StreamUtils {
 	 */
 	@Contract("null -> fail")
 	public static int drain(@Nullable InputStream in) throws IOException {
-		Assert.notNull(in, "No InputStream specified");
+		if (in == null) {
+			return 0;
+		}
 		return (int) in.transferTo(OutputStream.nullOutputStream());
 	}
 

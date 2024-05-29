@@ -692,8 +692,37 @@ public interface WebClient {
 		 * @throws IllegalArgumentException if {@code body} is a
 		 * {@link Publisher} or producer known to {@link ReactiveAdapterRegistry}
 		 * @since 5.2
+		 * @see #bodyValue(Object, ParameterizedTypeReference)
 		 */
 		RequestHeadersSpec<?> bodyValue(Object body);
+
+		/**
+		 * Shortcut for {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromValue value inserter}.
+		 * For example:
+		 * <p><pre class="code">
+		 * List&lt;Person&gt; list = ... ;
+		 *
+		 * Mono&lt;Void&gt; result = client.post()
+		 *     .uri("/persons/{id}", id)
+		 *     .contentType(MediaType.APPLICATION_JSON)
+		 *     .bodyValue(list, new ParameterizedTypeReference&lt;List&lt;Person&gt;&gt;() {};)
+		 *     .retrieve()
+		 *     .bodyToMono(Void.class);
+		 * </pre>
+		 * <p>For multipart requests consider providing
+		 * {@link org.springframework.util.MultiValueMap MultiValueMap} prepared
+		 * with {@link org.springframework.http.client.MultipartBodyBuilder
+		 * MultipartBodyBuilder}.
+		 * @param body the value to write to the request body
+		 * @param bodyType the type of the body, used to capture the generic type
+		 * @param <T> the type of the body
+		 * @return this builder
+		 * @throws IllegalArgumentException if {@code body} is a
+		 * {@link Publisher} or producer known to {@link ReactiveAdapterRegistry}
+		 * @since 6.2
+		 */
+		<T> RequestHeadersSpec<?> bodyValue(T body, ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Shortcut for {@link #body(BodyInserter)} with a

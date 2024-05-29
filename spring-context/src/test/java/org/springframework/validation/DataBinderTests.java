@@ -36,7 +36,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.assertj.core.api.IntegerAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanWrapper;
@@ -2042,7 +2041,7 @@ class DataBinderTests {
 
 		binder.bind(pvs);
 		assertThat(tb.getIntegerList()).hasSize(257);
-		assertThat(tb.getIntegerList(), IntegerAssert.class).element(256).isEqualTo(1);
+		assertThat(tb.getIntegerList()).element(256).isEqualTo(1);
 		assertThat(binder.getBindingResult().getFieldValue("integerList[256]")).isEqualTo(1);
 	}
 

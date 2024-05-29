@@ -42,7 +42,10 @@ import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.mock.http.client.MockClientHttpRequest;
-import org.springframework.test.util.JsonExpectationsHelper;
+import org.springframework.test.json.JsonAssert;
+import org.springframework.test.json.JsonComparator;
+import org.springframework.test.json.JsonCompareMode;
+import org.springframework.test.json.JsonComparison;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.util.LinkedMultiValueMap;
@@ -71,8 +74,6 @@ public class ContentRequestMatchers {
 
 	private final XmlExpectationsHelper xmlHelper;
 
-	private final JsonExpectationsHelper jsonHelper;
-
 
 	/**
 	 * Class constructor, not for direct instantiation.
@@ -80,7 +81,6 @@ public class ContentRequestMatchers {
 	 */
 	protected ContentRequestMatchers() {
 		this.xmlHelper = new XmlExpectationsHelper();
-		this.jsonHelper = new JsonExpectationsHelper();
 	}
 
 
@@ -174,12 +174,13 @@ public class ContentRequestMatchers {
 		return formData(multiValueMap, false);
 	}
 
+	@SuppressWarnings("unchecked")
 	private RequestMatcher formData(MultiValueMap<String, String> expectedMap, boolean containsExactly) {
 		return request -> {
 			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 			MockHttpInputMessage message = new MockHttpInputMessage(mockRequest.getBodyAsBytes());
 			message.getHeaders().putAll(mockRequest.getHeaders());
-			MultiValueMap<String, String> actualMap = new FormHttpMessageConverter().read(null, message);
+			MultiValueMap<String, String> actualMap = (MultiValueMap<String, String>) new FormHttpMessageConverter().read(null, message);
 			if (containsExactly) {
 				assertEquals("Form data", expectedMap, actualMap);
 			}
@@ -330,7 +331,7 @@ public class ContentRequestMatchers {
 	 * @since 5.0.5
 	 */
 	public RequestMatcher json(String expectedJsonContent) {
-		return json(expectedJsonContent, false);
+		return json(expectedJsonContent, JsonCompareMode.LENIENT);
 	}
 
 	/**
@@ -347,12 +348,43 @@ public class ContentRequestMatchers {
 	 * @param expectedJsonContent the expected JSON content
 	 * @param strict enables strict checking
 	 * @since 5.0.5
+	 * @deprecated in favor of {@link #json(String, JsonCompareMode)}
 	 */
+	@Deprecated(since = "6.2")
 	public RequestMatcher json(String expectedJsonContent, boolean strict) {
+		JsonCompareMode compareMode = (strict ? JsonCompareMode.STRICT : JsonCompareMode.LENIENT);
+		return json(expectedJsonContent, compareMode);
+	}
+
+	/**
+	 * Parse the request body and the given string as JSON and assert the two
+	 * using the given {@linkplain JsonCompareMode mode}. If the comparison failed,
+	 * throws an {@link AssertionError} with the message of the {@link JsonComparison}.
+	 * <p>Use of this matcher requires the <a
+	 * href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
+	 * @param expectedJsonContent the expected JSON content
+	 * @param compareMode the compare mode
+	 * @since 6.2
+	 */
+	public RequestMatcher json(String expectedJsonContent, JsonCompareMode compareMode) {
+		return json(expectedJsonContent, JsonAssert.comparator(compareMode));
+	}
+
+	/**
+	 * Parse the request body and the given string as JSON and assert the two
+	 * using the given {@link JsonComparator}. If the comparison failed, throws an
+	 * {@link AssertionError} with the message of the {@link JsonComparison}.
+	 * <p>Use this matcher if you require a custom JSONAssert configuration or
+	 * if you desire to use another assertion library.
+	 * @param expectedJsonContent the expected JSON content
+	 * @param comparator the comparator to use
+	 * @since 6.2
+	 */
+	public RequestMatcher json(String expectedJsonContent, JsonComparator comparator) {
 		return request -> {
 			try {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				this.jsonHelper.assertJsonEqual(expectedJsonContent, mockRequest.getBodyAsString(), strict);
+				comparator.assertIsMatch(expectedJsonContent, mockRequest.getBodyAsString());
 			}
 			catch (Exception ex) {
 				throw new AssertionError("Failed to parse expected or actual JSON request content", ex);

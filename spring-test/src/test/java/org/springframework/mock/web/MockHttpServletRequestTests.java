@@ -93,6 +93,17 @@ class MockHttpServletRequestTests {
 		secondRequest.getInputStream().close();
 	}
 
+	@Test // gh-32820
+	void readEmptyReaderWorksAcrossRequests() throws IOException {
+		MockHttpServletRequest firstRequest = new MockHttpServletRequest();
+		firstRequest.getReader().read(new char[256]);
+		firstRequest.getReader().close();
+
+		MockHttpServletRequest secondRequest = new MockHttpServletRequest();
+		secondRequest.getReader().read(new char[256]);
+		secondRequest.getReader().close();
+	}
+
 	@Test
 	void setContentAndGetReader() throws IOException {
 		byte[] bytes = "body".getBytes(Charset.defaultCharset());

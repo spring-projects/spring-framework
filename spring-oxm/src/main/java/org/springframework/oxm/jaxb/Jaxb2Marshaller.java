@@ -37,6 +37,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.XMLConstants;
 import javax.xml.datatype.Duration;
@@ -192,7 +194,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	@Nullable
 	private ClassLoader beanClassLoader;
 
-	private final Object jaxbContextMonitor = new Object();
+	private final Lock jaxbContextLock = new ReentrantLock();
 
 	@Nullable
 	private volatile JAXBContext jaxbContext;
@@ -203,6 +205,12 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	private boolean supportDtd = false;
 
 	private boolean processExternalEntities = false;
+
+	@Nullable
+	private volatile SAXParserFactory schemaParserFactory;
+
+	@Nullable
+	private volatile SAXParserFactory sourceParserFactory;
 
 
 	/**
@@ -426,6 +434,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 */
 	public void setSupportDtd(boolean supportDtd) {
 		this.supportDtd = supportDtd;
+		this.sourceParserFactory = null;
 	}
 
 	/**
@@ -450,6 +459,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		if (processExternalEntities) {
 			this.supportDtd = true;
 		}
+		this.sourceParserFactory = null;
 	}
 
 	/**
@@ -497,7 +507,9 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		if (context != null) {
 			return context;
 		}
-		synchronized (this.jaxbContextMonitor) {
+
+		this.jaxbContextLock.lock();
+		try {
 			context = this.jaxbContext;
 			if (context == null) {
 				try {
@@ -520,6 +532,9 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				}
 			}
 			return context;
+		}
+		finally {
+			this.jaxbContextLock.unlock();
 		}
 	}
 
@@ -587,17 +602,24 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		Assert.notEmpty(resources, "No resources given");
 		Assert.hasLength(schemaLanguage, "No schema language provided");
 		Source[] schemaSources = new Source[resources.length];
-		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-		saxParserFactory.setNamespaceAware(true);
-		saxParserFactory.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+
+		SAXParserFactory saxParserFactory = this.schemaParserFactory;
+		if (saxParserFactory == null) {
+			saxParserFactory = SAXParserFactory.newInstance();
+			saxParserFactory.setNamespaceAware(true);
+			saxParserFactory.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+			this.schemaParserFactory = saxParserFactory;
+		}
 		SAXParser saxParser = saxParserFactory.newSAXParser();
 		XMLReader xmlReader = saxParser.getXMLReader();
+
 		for (int i = 0; i < resources.length; i++) {
 			Resource resource = resources[i];
 			Assert.isTrue(resource != null && resource.exists(), () -> "Resource does not exist: " + resource);
 			InputSource inputSource = SaxResourceUtils.createInputSource(resource);
 			schemaSources[i] = new SAXSource(xmlReader, inputSource);
 		}
+
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(schemaLanguage);
 		if (this.schemaResourceResolver != null) {
 			schemaFactory.setResourceResolver(this.schemaResourceResolver);
@@ -886,11 +908,16 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 		try {
 			if (xmlReader == null) {
-				SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-				saxParserFactory.setNamespaceAware(true);
-				saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-				String name = "http://xml.org/sax/features/external-general-entities";
-				saxParserFactory.setFeature(name, isProcessExternalEntities());
+				SAXParserFactory saxParserFactory = this.sourceParserFactory;
+				if (saxParserFactory == null) {
+					saxParserFactory = SAXParserFactory.newInstance();
+					saxParserFactory.setNamespaceAware(true);
+					saxParserFactory.setFeature(
+							"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+					saxParserFactory.setFeature(
+							"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+					this.sourceParserFactory = saxParserFactory;
+				}
 				SAXParser saxParser = saxParserFactory.newSAXParser();
 				xmlReader = saxParser.getXMLReader();
 			}

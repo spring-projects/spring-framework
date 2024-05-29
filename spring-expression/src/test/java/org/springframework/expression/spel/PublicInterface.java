@@ -23,4 +23,6 @@ public interface PublicInterface {
 
 	String getText();
 
+	String getFruit(int index);
+
 }

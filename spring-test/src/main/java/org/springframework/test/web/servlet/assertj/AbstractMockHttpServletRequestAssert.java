@@ -19,8 +19,8 @@ package org.springframework.test.web.servlet.assertj;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
- * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied to
- * {@link MockHttpServletRequest}.
+ * AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be applied
+ * to {@link MockHttpServletRequest}.
  *
  * @author Stephane Nicoll
  * @since 6.2

@@ -36,7 +36,7 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <pre class="code">
  * &#064;Configuration
- * &#064;RegisterReflectionForBinding({ Foo.class, Bar.class })
+ * &#064;RegisterReflectionForBinding({Foo.class, Bar.class})
  * public class MyConfig {
  *     // ...
  * }</pre>
@@ -77,8 +77,7 @@ public @interface RegisterReflectionForBinding {
 
 	/**
 	 * Classes for which reflection hints should be registered.
-	 * <p>At least one class must be specified either via {@link #value} or
-	 * {@link #classes}.
+	 * <p>At least one class must be specified either via {@link #value} or {@code classes}.
 	 * @see #value()
 	 */
 	@AliasFor("value")

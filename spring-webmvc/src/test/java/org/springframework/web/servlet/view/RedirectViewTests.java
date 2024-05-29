@@ -146,7 +146,7 @@ class RedirectViewTests {
 		assertThat(response.getHeader("Location")).isEqualTo("https://url.somewhere.com/path?id=1");
 
 		assertThat(flashMap.getTargetRequestPath()).isEqualTo("/path");
-		assertThat(flashMap.getTargetRequestParams().toSingleValueMap()).isEqualTo(model);
+		assertThat(flashMap.getTargetRequestParams().asSingleValueMap()).isEqualTo(model);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.MultiValueMap;
  * @author Arjen Poutsma
  * @since 3.2
  */
-public class MockMultipartHttpServletRequestBuilder extends MockHttpServletRequestBuilder {
+public class MockMultipartHttpServletRequestBuilder extends AbstractMockHttpServletRequestBuilder<MockMultipartHttpServletRequestBuilder> {
 
 	private final List<MockMultipartFile> files = new ArrayList<>();
 
@@ -60,11 +60,11 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 * <p>For other ways to initialize a {@code MockMultipartHttpServletRequest},
 	 * see {@link #with(RequestPostProcessor)} and the
 	 * {@link RequestPostProcessor} extension point.
-	 * @param urlTemplate a URL template; the resulting URL will be encoded
+	 * @param uriTemplate a URI template; the resulting URI will be encoded
 	 * @param uriVariables zero or more URI variables
 	 */
-	MockMultipartHttpServletRequestBuilder(String urlTemplate, Object... uriVariables) {
-		this(HttpMethod.POST, urlTemplate, uriVariables);
+	MockMultipartHttpServletRequestBuilder(String uriTemplate, Object... uriVariables) {
+		this(HttpMethod.POST, uriTemplate, uriVariables);
 	}
 
 	/**
@@ -72,8 +72,9 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 * that also accepts an {@link HttpMethod}.
 	 * @since 5.3.22
 	 */
-	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod, String urlTemplate, Object... uriVariables) {
-		super(httpMethod, urlTemplate, uriVariables);
+	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod, String uriTemplate, Object... uriVariables) {
+		super(httpMethod);
+		super.uri(uriTemplate, uriVariables);
 		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
@@ -92,7 +93,8 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 * @since 5.3.21
 	 */
 	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod, URI uri) {
-		super(httpMethod, uri);
+		super(httpMethod);
+		super.uri(uri);
 		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
@@ -134,7 +136,7 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 		if (parent == null) {
 			return this;
 		}
-		if (parent instanceof MockHttpServletRequestBuilder) {
+		if (parent instanceof AbstractMockHttpServletRequestBuilder) {
 			super.merge(parent);
 			if (parent instanceof MockMultipartHttpServletRequestBuilder parentBuilder) {
 				this.files.addAll(parentBuilder.files);

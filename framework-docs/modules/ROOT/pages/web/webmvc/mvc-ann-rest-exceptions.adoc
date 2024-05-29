@@ -5,14 +5,14 @@
 
 A common requirement for REST services is to include details in the body of error
 responses. The Spring Framework supports the "Problem Details for HTTP APIs"
-specification, {rfc-site}/rfc7807[RFC 7807].
+specification, {rfc-site}/rfc9457[RFC 9457].
 
 The following are the main abstractions for this support:
 
-- `ProblemDetail` -- representation for an RFC 7807 problem detail; a simple container
+- `ProblemDetail` -- representation for an RFC 9457 problem detail; a simple container
 for both standard fields defined in the spec, and for non-standard ones.
 - `ErrorResponse` -- contract to expose HTTP error response details including HTTP
-status, response headers, and a body in the format of RFC 7807; this allows exceptions to
+status, response headers, and a body in the format of RFC 9457; this allows exceptions to
 encapsulate and expose the details of how they map to an HTTP response. All Spring MVC
 exceptions implement this.
 - `ErrorResponseException` -- basic `ErrorResponse` implementation that others
@@ -28,7 +28,7 @@ and any `ErrorResponseException`, and renders an error response with a body.
 [.small]#xref:web/webflux/ann-rest-exceptions.adoc#webflux-ann-rest-exceptions-render[See equivalent in the Reactive stack]#
 
 You can return `ProblemDetail` or `ErrorResponse` from any `@ExceptionHandler` or from
-any `@RequestMapping` method to render an RFC 7807 response. This is processed as follows:
+any `@RequestMapping` method to render an RFC 9457 response. This is processed as follows:
 
 - The `status` property of `ProblemDetail` determines the HTTP status.
 - The `instance` property of `ProblemDetail` is set from the current URL path, if not
@@ -37,7 +37,7 @@ already set.
 "application/problem+json" over "application/json" when rendering a `ProblemDetail`,
 and also falls back on it if no compatible media type is found.
 
-To enable RFC 7807 responses for Spring WebFlux exceptions and for any
+To enable RFC 9457 responses for Spring WebFlux exceptions and for any
 `ErrorResponseException`, extend `ResponseEntityExceptionHandler` and declare it as an
 xref:web/webmvc/mvc-controller/ann-advice.adoc[@ControllerAdvice] in Spring configuration. The handler
 has an `@ExceptionHandler` method that handles any `ErrorResponse` exception, which
@@ -54,7 +54,7 @@ any RFC 7807 response and take some action.
 == Non-Standard Fields
 [.small]#xref:web/webflux/ann-rest-exceptions.adoc#webflux-ann-rest-exceptions-non-standard[See equivalent in the Reactive stack]#
 
-You can extend an RFC 7807 response with non-standard fields in one of two ways.
+You can extend an RFC 9457 response with non-standard fields in one of two ways.
 
 One, insert into the "properties" `Map` of `ProblemDetail`. When using the Jackson
 library, the Spring Framework registers `ProblemDetailJacksonMixin` that ensures this

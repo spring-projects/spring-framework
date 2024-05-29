@@ -4,8 +4,19 @@
 [.small]#xref:web/webmvc/mvc-controller/ann-methods/return-types.adoc[See equivalent in the Servlet stack]#
 
 The following table shows the supported controller method return values. Note that reactive
-types from libraries such as Reactor, RxJava, xref:web-reactive.adoc#webflux-reactive-libraries[or other] are
+types from libraries such as Reactor, RxJava, xref:web/webflux-reactive-libraries.adoc[or other] are
 generally supported for all return values.
+
+For return types like `Flux`, when multiple values are expected, elements are streamed as they come
+and are not buffered. This is the default behavior, as keeping a potentially large amount of elements in memory
+is not efficient. If the media type implies an infinite stream (for example,
+`application/json+stream`), values are written and flushed individually. Otherwise,
+values are written individually and the flushing happens separately.
+
+NOTE: If an error happens while an element is encoded to JSON, the response might have been written to and committed already
+and it is impossible at that point to render a proper error response.
+In some cases, applications can choose to trade memory efficiency for better handling such errors by buffering elements and encoding them all at once.
+Controllers can then return a `Flux<List<B>>`; Reactor provides a dedicated operator for that, `Flux#collectList()`.
 
 [cols="1,2", options="header"]
 |===
@@ -24,11 +35,11 @@ generally supported for all return values.
 | For returning a response with headers and no body.
 
 | `ErrorResponse`
-| To render an RFC 7807 error response with details in the body,
+| To render an RFC 9457 error response with details in the body,
   see xref:web/webflux/ann-rest-exceptions.adoc[Error Responses]
 
 | `ProblemDetail`
-| To render an RFC 7807 error response with details in the body,
+| To render an RFC 9457 error response with details in the body,
   see xref:web/webflux/ann-rest-exceptions.adoc[Error Responses]
 
 | `String`

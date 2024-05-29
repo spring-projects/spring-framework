@@ -27,8 +27,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
 
 /**
- * Representation of a complete RFC 7807 error response including status,
- * headers, and an RFC 7807 formatted {@link ProblemDetail} body. Allows any
+ * Representation of a complete RFC 9457 error response including status,
+ * headers, and an RFC 9457 formatted {@link ProblemDetail} body. Allows any
  * exception to expose HTTP error response information.
  *
  * <p>{@link ErrorResponseException} is a default implementation of this
@@ -58,9 +58,14 @@ public interface ErrorResponse {
 	}
 
 	/**
-	 * Return the body for the response, formatted as an RFC 7807
+	 * Return the body for the response, formatted as an RFC 9457
 	 * {@link ProblemDetail} whose {@link ProblemDetail#getStatus() status}
 	 * should match the response status.
+	 * <p><strong>Note:</strong> The returned {@code ProblemDetail} may be
+	 * updated before the response is rendered, e.g. via
+	 * {@link #updateAndGetBody(MessageSource, Locale)}. Therefore, implementing
+	 * methods should use an instance field, and should not re-create the
+	 * {@code ProblemDetail} on every call, nor use a static variable.
 	 */
 	ProblemDetail getBody();
 

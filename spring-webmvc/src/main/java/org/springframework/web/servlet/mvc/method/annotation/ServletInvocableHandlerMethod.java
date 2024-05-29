@@ -215,7 +215,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		private final MethodParameter returnType;
 
-		@SuppressWarnings("NullAway")
 		public ConcurrentResultHandlerMethod(@Nullable Object result, ConcurrentResultMethodParameter returnType) {
 			super((Callable<Object>) () -> {
 				if (result instanceof Exception exception) {

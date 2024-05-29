@@ -1,0 +1,17 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- tag::snippet[] -->
+	<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
+		<property name="cacheNames">
+			<set>
+				<value>default</value>
+				<value>books</value>
+			</set>
+		</property>
+	</bean>
+	<!-- end::snippet[] -->
+
+</beans>

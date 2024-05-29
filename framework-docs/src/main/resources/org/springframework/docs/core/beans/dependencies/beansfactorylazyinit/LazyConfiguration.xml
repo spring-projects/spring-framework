@@ -1,0 +1,6 @@
+<!-- tag::snippet[] -->
+<beans default-lazy-init="true">
+
+	<!-- No bean will be pre-instantiated... -->
+</beans>
+<!-- end::snippet[] -->

@@ -24,7 +24,7 @@ To create the archive, two additional JVM flags must be specified:
 * `-Dspring.context.exit=onRefresh`: starts and then immediately exits your Spring
   application as described above
 
-To create a CDS archive, your JDK must have a base image. If you add the flags above to
+To create a CDS archive, your JDK/JRE must have a base image. If you add the flags above to
 your startup script, you may get a warning that looks like this:
 
 [source,shell,indent=0,subs="verbatim"]
@@ -32,7 +32,8 @@ your startup script, you may get a warning that looks like this:
   -XX:ArchiveClassesAtExit is unsupported when base CDS archive is not loaded. Run with -Xlog:cds for more info.
 ----
 
-The base CDS archive can be created by issuing the following command:
+The base CDS archive is usually provided out-of-the-box, but can also be created if needed by issuing the following
+command:
 
 [source,shell,indent=0,subs="verbatim"]
 ----
@@ -43,6 +44,9 @@ The base CDS archive can be created by issuing the following command:
 
 Once the archive is available, add `-XX:SharedArchiveFile=application.jsa` to your startup
 script to use it, assuming an `application.jsa` file in the working directory.
+
+To check if the CDS cache is effective, you can use (for testing purposes only, not in production) `-Xshare:on` which
+prints an error message and exits if CDS can't be enabled.
 
 To figure out how effective the cache is, you can enable class loading logs by adding
 an extra attribute: `-Xlog:class+load:file=cds.log`. This creates a `cds.log` with every
@@ -58,8 +62,11 @@ a "shared objects file" source, as shown in the following example:
     [0.065s][info][class,load] org.springframework.context.MessageSource source: shared objects file (top)
 ----
 
-TIP: If you have a large number of classes that are not loaded from the cache, make sure that
-the JDK and classpath used by the commands that create the archive and start the application
-are identical. Note also that to effectively cache classes, the classpath should be specified
-as a list of JARs containing those classes, and avoid the usage of directories and `*`
-wildcard characters.
+If CDS can't be enabled or if you have a large number of classes that are not loaded from the cache, make sure that
+the following conditions are fulfilled when creating and using the archive:
+
+ - The very same JVM must used.
+ - The classpath must be specified as a list of JARs, and avoid the usage of directories and `*` wildcard characters.
+ - The timestamps of the JARs must be preserved.
+ - When using the archive, the classpath must be the same than the one used to create the archive, in the same order.
+Additional JARs or directories can be specified *at the end* (but won't be cached).

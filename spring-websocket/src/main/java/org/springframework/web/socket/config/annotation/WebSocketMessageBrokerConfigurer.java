@@ -117,11 +117,9 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * handling beans of type {@link SmartLifecycle} should run in.
 	 * <p>The default implementation returns {@code null} which allows other
 	 * configurers to decide. As soon as any configurer returns a value, that
-	 * value is used. If no configurer returns a value, then by default
-	 * {@link SmartLifecycle#DEFAULT_PHASE} is used.
+	 * value is used. If no configurer returns a value, then 0 is used.
 	 * <p>It is recommended to use a phase value such as 0 in order to ensure that
-	 * components start before the web server in Spring Boot application. In 6.2.0,
-	 * the default used will change to 0.
+	 * components start before the web server in Spring Boot application.
 	 * @since 6.1.4
 	 * @see SmartLifecycle
 	 */

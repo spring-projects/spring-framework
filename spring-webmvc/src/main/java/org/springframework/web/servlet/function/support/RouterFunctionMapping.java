@@ -125,7 +125,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		if (this.routerFunction == null) {
 			initRouterFunctions();
 		}

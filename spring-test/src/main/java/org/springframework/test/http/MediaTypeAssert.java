@@ -49,10 +49,21 @@ public class MediaTypeAssert extends AbstractObjectAssert<MediaTypeAssert, Media
 	/**
 	 * Verify that the actual media type is equal to the given string
 	 * representation.
-	 * @param expected the expected media type
+	 * @param mediaType the expected media type, as a String to be parsed
+	 * into a MediaType
+*/
+	public MediaTypeAssert isEqualTo(String mediaType) {
+		return isEqualTo(parseMediaType(mediaType));
+	}
+
+	/**
+	 * Verify that the actual media type is not equal to the given string
+	 * representation.
+	 * @param mediaType the given media type, as a String to be parsed
+	 * into a MediaType
 	 */
-	public MediaTypeAssert isEqualTo(String expected) {
-		return isEqualTo(parseMediaType(expected));
+	public MediaTypeAssert isNotEqualTo(String mediaType) {
+		return isNotEqualTo(parseMediaType(mediaType));
 	}
 
 	/**
@@ -84,7 +95,8 @@ public class MediaTypeAssert extends AbstractObjectAssert<MediaTypeAssert, Media
 	 * // Check that actual is compatible with "text/plain"
 	 * assertThat(mediaType).isCompatibleWith("text/plain");
 	 * </code></pre>
-	 * @param mediaType the media type with which to compare
+	 * @param mediaType the media type with which to compare, as a String
+	 * to be parsed into a MediaType
 	 */
 	public MediaTypeAssert isCompatibleWith(String mediaType) {
 		return isCompatibleWith(parseMediaType(mediaType));

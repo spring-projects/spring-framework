@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import a.ClassHavingNestedClass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -86,8 +87,11 @@ class ClassUtilsTests {
 	void forNameWithNestedType() throws ClassNotFoundException {
 		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests$NestedClass", classLoader)).isEqualTo(NestedClass.class);
 		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests.NestedClass", classLoader)).isEqualTo(NestedClass.class);
-		assertThat(ClassUtils.forName("a.ClassHavingNestedClass$NestedClass", classLoader)).isEqualTo(a.ClassHavingNestedClass.NestedClass.class);
-		assertThat(ClassUtils.forName("a.ClassHavingNestedClass.NestedClass", classLoader)).isEqualTo(a.ClassHavingNestedClass.NestedClass.class);
+
+		// Precondition: package name must have length == 1.
+		assertThat(ClassHavingNestedClass.class.getPackageName().length()).isEqualTo(1);
+		assertThat(ClassUtils.forName("a.ClassHavingNestedClass$NestedClass", classLoader)).isEqualTo(ClassHavingNestedClass.NestedClass.class);
+		assertThat(ClassUtils.forName("a.ClassHavingNestedClass.NestedClass", classLoader)).isEqualTo(ClassHavingNestedClass.NestedClass.class);
 	}
 
 	@Test

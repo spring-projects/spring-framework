@@ -62,12 +62,12 @@ class HttpHeadersAssertTests {
 	}
 
 	@Test
-	void doesNotContainsHeader() {
-		assertThat(Map.of("first", "1")).doesNotContainsHeader("second");
+	void doesNotContainHeader() {
+		assertThat(Map.of("first", "1")).doesNotContainHeader("second");
 	}
 
 	@Test
-	void doesNotContainsHeaderWithNamePresent() {
+	void doesNotContainHeaderWithNamePresent() {
 		Map<String, String> map = Map.of("first", "1");
 		Assertions.assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).doesNotContainKey("first"))
@@ -75,13 +75,13 @@ class HttpHeadersAssertTests {
 	}
 
 	@Test
-	void doesNotContainsHeaders() {
+	void doesNotContainHeaders() {
 		assertThat(Map.of("first", "1", "third", "3"))
 				.doesNotContainsHeaders("second", "fourth");
 	}
 
 	@Test
-	void doesNotContainsHeadersWithSeveralNamesPresent() {
+	void doesNotContainHeadersWithSeveralNamesPresent() {
 		Map<String, String> map = Map.of("first", "1", "second", "2", "third", "3");
 		Assertions.assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).doesNotContainsHeaders("first", "another-wrong-name", "second"))

@@ -26,8 +26,8 @@ import org.assertj.core.api.AbstractMapAssert;
 import org.assertj.core.api.Assertions;
 
 /**
- * AssertJ {@link org.assertj.core.api.Assert assertions} that can be applied to
- * {@link Cookie cookies}.
+ * AssertJ {@linkplain org.assertj.core.api.Assert assertions} that can be applied
+ * to {@link Cookie cookies}.
  *
  * @author Brian Clozel
  * @author Stephane Nicoll

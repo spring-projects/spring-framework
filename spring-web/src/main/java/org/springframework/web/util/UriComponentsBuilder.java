@@ -72,19 +72,17 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
-	private static final String SCHEME_PATTERN = "([^:/?#]+):";
+	private static final String SCHEME_PATTERN = "([^:/?#\\\\]+):";
 
-	private static final String HTTP_PATTERN = "(?i)(http|https):";
+	private static final String USERINFO_PATTERN = "([^/?#\\\\]*)";
 
-	private static final String USERINFO_PATTERN = "([^/?#]*)";
-
-	private static final String HOST_IPV4_PATTERN = "[^/?#:]*";
+	private static final String HOST_IPV4_PATTERN = "[^/?#:\\\\]*";
 
 	private static final String HOST_IPV6_PATTERN = "\\[[\\p{XDigit}:.]*[%\\p{Alnum}]*]";
 
 	private static final String HOST_PATTERN = "(" + HOST_IPV6_PATTERN + "|" + HOST_IPV4_PATTERN + ")";
 
-	private static final String PORT_PATTERN = "(\\{[^}]+\\}?|[^/?#]*)";
+	private static final String PORT_PATTERN = "(\\{[^}]+\\}?|[^/?#\\\\]*)";
 
 	private static final String PATH_PATTERN = "([^?#]*)";
 
@@ -97,11 +95,9 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			"^(" + SCHEME_PATTERN + ")?" + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN +
 					")?" + ")?" + PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
 
-	private static final Pattern HTTP_URL_PATTERN = Pattern.compile(
-			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
-					PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
-
 	private static final Object[] EMPTY_VALUES = new Object[0];
+
+	private static final UrlParser.UrlRecord EMPTY_URL_RECORD = new UrlParser.UrlRecord();
 
 
 	@Nullable
@@ -214,52 +210,45 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * </pre>
 	 * @param uri the URI string to initialize with
 	 * @return the new {@code UriComponentsBuilder}
+	 * @throws InvalidUrlException if {@code uri} cannot be parsed
 	 */
-	public static UriComponentsBuilder fromUriString(String uri) {
+	public static UriComponentsBuilder fromUriString(String uri) throws InvalidUrlException {
 		Assert.notNull(uri, "URI must not be null");
-		Matcher matcher = URI_PATTERN.matcher(uri);
-		if (matcher.matches()) {
-			UriComponentsBuilder builder = new UriComponentsBuilder();
-			String scheme = matcher.group(2);
-			String userInfo = matcher.group(5);
-			String host = matcher.group(6);
-			String port = matcher.group(8);
-			String path = matcher.group(9);
-			String query = matcher.group(11);
-			String fragment = matcher.group(13);
-			boolean opaque = false;
-			if (StringUtils.hasLength(scheme)) {
-				String rest = uri.substring(scheme.length());
-				if (!rest.startsWith(":/")) {
-					opaque = true;
-				}
+
+		UriComponentsBuilder builder = new UriComponentsBuilder();
+		if (!uri.isEmpty()) {
+			UrlParser.UrlRecord urlRecord = UrlParser.parse(uri, EMPTY_URL_RECORD, null, null);
+			if (!urlRecord.scheme().isEmpty()) {
+				builder.scheme(urlRecord.scheme());
 			}
-			builder.scheme(scheme);
-			if (opaque) {
-				String ssp = uri.substring(scheme.length() + 1);
-				if (StringUtils.hasLength(fragment)) {
-					ssp = ssp.substring(0, ssp.length() - (fragment.length() + 1));
+			if (urlRecord.includesCredentials()) {
+				StringBuilder userInfo = new StringBuilder(urlRecord.username());
+				if (!urlRecord.password().isEmpty()) {
+					userInfo.append(':');
+					userInfo.append(urlRecord.password());
 				}
-				builder.schemeSpecificPart(ssp);
+				builder.userInfo(userInfo.toString());
+			}
+			if (urlRecord.host() != null && !(urlRecord.host() instanceof UrlParser.EmptyHost)) {
+				builder.host(urlRecord.host().toString());
+			}
+			if (urlRecord.port() != null) {
+				builder.port(urlRecord.port().toString());
+			}
+			if (urlRecord.path().isOpaque()) {
+				builder.schemeSpecificPart(urlRecord.path().toString());
 			}
 			else {
-				checkSchemeAndHost(uri, scheme, host);
-				builder.userInfo(userInfo);
-				builder.host(host);
-				if (StringUtils.hasLength(port)) {
-					builder.port(port);
+				builder.path(urlRecord.path().toString());
+				if (StringUtils.hasLength(urlRecord.query())) {
+					builder.query(urlRecord.query());
 				}
-				builder.path(path);
-				builder.query(query);
 			}
-			if (StringUtils.hasText(fragment)) {
-				builder.fragment(fragment);
+			if (StringUtils.hasLength(urlRecord.fragment())) {
+				builder.fragment(urlRecord.fragment());
 			}
-			return builder;
 		}
-		else {
-			throw new IllegalArgumentException("[" + uri + "] is not a valid URI");
-		}
+		return builder;
 	}
 
 	/**
@@ -275,33 +264,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * </pre>
 	 * @param httpUrl the source URI
 	 * @return the URI components of the URI
+	 * @deprecated as of 6.2, in favor of {@link #fromUriString(String)}
 	 */
-	public static UriComponentsBuilder fromHttpUrl(String httpUrl) {
-		Assert.notNull(httpUrl, "HTTP URL must not be null");
-		Matcher matcher = HTTP_URL_PATTERN.matcher(httpUrl);
-		if (matcher.matches()) {
-			UriComponentsBuilder builder = new UriComponentsBuilder();
-			String scheme = matcher.group(1);
-			builder.scheme(scheme != null ? scheme.toLowerCase() : null);
-			builder.userInfo(matcher.group(4));
-			String host = matcher.group(5);
-			checkSchemeAndHost(httpUrl, scheme, host);
-			builder.host(host);
-			String port = matcher.group(7);
-			if (StringUtils.hasLength(port)) {
-				builder.port(port);
-			}
-			builder.path(matcher.group(8));
-			builder.query(matcher.group(10));
-			String fragment = matcher.group(12);
-			if (StringUtils.hasText(fragment)) {
-				builder.fragment(fragment);
-			}
-			return builder;
-		}
-		else {
-			throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
-		}
+	@Deprecated(since = "6.2")
+	public static UriComponentsBuilder fromHttpUrl(String httpUrl) throws InvalidUrlException {
+		return fromUriString(httpUrl);
 	}
 
 	private static void checkSchemeAndHost(String uri, @Nullable String scheme, @Nullable String host) {

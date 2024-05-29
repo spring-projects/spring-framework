@@ -40,29 +40,7 @@ the user header on the CONNECT `Message`. Spring notes and saves the authenticat
 user and associate it with subsequent STOMP messages on the same session. The following
 example shows how to register a custom authentication interceptor:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebSocketMessageBroker
-	public class MyConfig implements WebSocketMessageBrokerConfigurer {
-
-		@Override
-		public void configureClientInboundChannel(ChannelRegistration registration) {
-			registration.interceptors(new ChannelInterceptor() {
-				@Override
-				public Message<?> preSend(Message<?> message, MessageChannel channel) {
-					StompHeaderAccessor accessor =
-							MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-					if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-						Authentication user = ... ; // access authentication header(s)
-						accessor.setUser(user);
-					}
-					return message;
-				}
-			});
-		}
-	}
-----
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]
 
 Also, note that, when you use Spring Security's authorization for messages, at present,
 you need to ensure that the authentication `ChannelInterceptor` config is ordered

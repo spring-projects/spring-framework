@@ -128,8 +128,9 @@ public abstract class CoroutinesUtils {
 								Object arg = args[index];
 								if (!(parameter.isOptional() && arg == null)) {
 									KType type = parameter.getType();
-									if (!(type.isMarkedNullable() && arg == null) && type.getClassifier() instanceof KClass<?> kClass
-											&& KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
+									if (!(type.isMarkedNullable() && arg == null) &&
+											type.getClassifier() instanceof KClass<?> kClass &&
+											KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
 										KFunction<?> constructor = KClasses.getPrimaryConstructor(kClass);
 										if (!KCallablesJvm.isAccessible(constructor)) {
 											KCallablesJvm.setAccessible(constructor, true);

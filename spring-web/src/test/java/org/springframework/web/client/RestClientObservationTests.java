@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
@@ -40,6 +41,7 @@ import org.springframework.http.client.observation.ClientRequestObservationConte
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.client.observation.DefaultClientRequestObservationConvention;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -64,8 +66,6 @@ class RestClientObservationTests {
 
 	private final ClientHttpResponse response = mock();
 
-	private final ResponseErrorHandler errorHandler = mock();
-
 	private final HttpMessageConverter<String> converter = mock();
 
 	private RestClient client;
@@ -77,14 +77,13 @@ class RestClientObservationTests {
 		this.client = RestClient.builder()
 				.messageConverters(converters -> converters.add(0, this.converter))
 				.requestFactory(this.requestFactory)
-				.defaultStatusHandler(this.errorHandler)
 				.observationRegistry(this.observationRegistry)
 				.build();
 		this.observationRegistry.observationConfig().observationHandler(new ContextAssertionObservationHandler());
 	}
 
 	@Test
-	void executeVarArgsAddsUriTemplateAsKeyValue() throws Exception {
+	void shouldContributeTemplateWhenUriVariables() throws Exception {
 		mockSentRequest(GET, "https://example.com/hotels/42/bookings/21");
 		mockResponseStatus(HttpStatus.OK);
 
@@ -95,7 +94,7 @@ class RestClientObservationTests {
 	}
 
 	@Test
-	void executeArgsMapAddsUriTemplateAsKeyValue() throws Exception {
+	void shouldContributeTemplateWhenMap() throws Exception {
 		mockSentRequest(GET, "https://example.com/hotels/42/bookings/21");
 		mockResponseStatus(HttpStatus.OK);
 
@@ -107,9 +106,8 @@ class RestClientObservationTests {
 		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "/hotels/{hotel}/bookings/{booking}");
 	}
 
-
 	@Test
-	void executeAddsSuccessAsOutcome() throws Exception {
+	void shouldContributeSuccessOutcome() throws Exception {
 		mockSentRequest(GET, "https://example.org");
 		mockResponseStatus(HttpStatus.OK);
 		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
@@ -120,7 +118,11 @@ class RestClientObservationTests {
 	}
 
 	@Test
-	void executeAddsServerErrorAsOutcome() throws Exception {
+	void shouldContributeServerErrorOutcome() throws Exception {
+		ResponseErrorHandler errorHandler = mock();
+		given(errorHandler.hasError(response)).willReturn(true);
+		this.client = this.client.mutate().defaultStatusHandler(errorHandler).build();
+
 		String url = "https://example.org";
 		mockSentRequest(GET, url);
 		mockResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -134,7 +136,7 @@ class RestClientObservationTests {
 	}
 
 	@Test
-	void executeAddsExceptionAsKeyValue() throws Exception {
+	void shouldContributeDecodingError() throws Exception {
 		mockSentRequest(POST, "https://example.org/resource");
 		mockResponseStatus(HttpStatus.OK);
 
@@ -150,7 +152,7 @@ class RestClientObservationTests {
 	}
 
 	@Test
-	void executeWithIoExceptionAddsUnknownOutcome() throws Exception {
+	void shouldContributeIOError() throws Exception {
 		String url = "https://example.org/resource";
 		mockSentRequest(GET, url);
 		given(request.execute()).willThrow(new IOException("Socket failure"));
@@ -161,7 +163,7 @@ class RestClientObservationTests {
 	}
 
 	@Test
-	void executeWithCustomConventionUsesCustomObservationName() throws Exception {
+	void shouldUseCustomConvention() throws Exception {
 		ClientRequestObservationConvention observationConvention =
 				new DefaultClientRequestObservationConvention("custom.requests");
 		RestClient restClient = this.client.mutate().observationConvention(observationConvention).build();
@@ -172,6 +174,69 @@ class RestClientObservationTests {
 
 		TestObservationRegistryAssert.assertThat(this.observationRegistry)
 				.hasObservationWithNameEqualTo("custom.requests");
+	}
+
+	@Test
+	void shouldAddClientDecodingErrorAsException() throws Exception {
+		String url = "https://example.org";
+		mockSentRequest(GET, url);
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody("INVALID", MediaType.APPLICATION_JSON);
+
+		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+				client.get().uri(url).retrieve().body(User.class));
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "RestClientException");
+	}
+
+	@Test
+	void shouldAddUnknownContentTypeErrorAsException() throws Exception {
+		String url = "https://example.org";
+		mockSentRequest(GET, url);
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody("Not Found", MediaType.TEXT_HTML);
+
+		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+				client.get().uri(url).retrieve().body(User.class));
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "UnknownContentTypeException");
+	}
+
+	@Test
+	void shouldAddRestClientExceptionAsError() throws Exception {
+		String url = "https://example.org";
+		mockSentRequest(GET, url);
+		mockResponseStatus(HttpStatus.NOT_FOUND);
+		mockResponseBody("Not Found", MediaType.TEXT_HTML);
+
+		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+				client.get().uri(url).retrieve().toEntity(String.class));
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "NotFound");
+	}
+
+	@Test
+	void registerObservationWhenReadingBody() throws Exception {
+		mockSentRequest(GET, "https://example.org");
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+
+		client.get().uri("https://example.org").exchange((request, response) -> response.bodyTo(String.class));
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
+	}
+
+	@Test
+	void registerObservationWhenReadingStream() throws Exception {
+		mockSentRequest(GET, "https://example.org");
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+
+		client.get().uri("https://example.org").exchange((request, response) -> {
+			String result = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
+			response.close();
+			return result;
+		}, false);
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
 	}
 
 
@@ -188,7 +253,6 @@ class RestClientObservationTests {
 
 	private void mockResponseStatus(HttpStatus responseStatus) throws Exception {
 		given(request.execute()).willReturn(response);
-		given(errorHandler.hasError(response)).willReturn(responseStatus.isError());
 		given(response.getStatusCode()).willReturn(responseStatus);
 		given(response.getStatusText()).willReturn(responseStatus.getReasonPhrase());
 	}
@@ -218,6 +282,10 @@ class RestClientObservationTests {
 		public void onStart(ClientRequestObservationContext context) {
 			assertThat(context.getCarrier()).isNotNull();
 		}
+	}
+
+	record User(String name) {
+
 	}
 
 }

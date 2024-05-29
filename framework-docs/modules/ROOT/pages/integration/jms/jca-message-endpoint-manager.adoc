@@ -7,62 +7,13 @@ automatically determine the `ActivationSpec` class name from the provider's
 `ResourceAdapter` class name. Therefore, it is typically possible to provide
 Spring's generic `JmsActivationSpecConfig`, as the following example shows:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean class="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager">
-		<property name="resourceAdapter" ref="resourceAdapter"/>
-		<property name="activationSpecConfig">
-			<bean class="org.springframework.jms.listener.endpoint.JmsActivationSpecConfig">
-				<property name="destinationName" value="myQueue"/>
-			</bean>
-		</property>
-		<property name="messageListener" ref="myMessageListener"/>
-	</bean>
-----
+include-code::./JmsConfiguration[tag=snippet,indent=0]
 
 Alternatively, you can set up a `JmsMessageEndpointManager` with a given
 `ActivationSpec` object. The `ActivationSpec` object may also come from a JNDI lookup
 (using `<jee:jndi-lookup>`). The following example shows how to do so:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean class="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager">
-		<property name="resourceAdapter" ref="resourceAdapter"/>
-		<property name="activationSpec">
-			<bean class="org.apache.activemq.ra.ActiveMQActivationSpec">
-				<property name="destination" value="myQueue"/>
-				<property name="destinationType" value="jakarta.jms.Queue"/>
-			</bean>
-		</property>
-		<property name="messageListener" ref="myMessageListener"/>
-	</bean>
-----
-
-Using Spring's `ResourceAdapterFactoryBean`, you can configure the target `ResourceAdapter`
-locally, as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="resourceAdapter" class="org.springframework.jca.support.ResourceAdapterFactoryBean">
-		<property name="resourceAdapter">
-			<bean class="org.apache.activemq.ra.ActiveMQResourceAdapter">
-				<property name="serverUrl" value="tcp://localhost:61616"/>
-			</bean>
-		</property>
-		<property name="workManager">
-			<bean class="org.springframework.jca.work.SimpleTaskWorkManager"/>
-		</property>
-	</bean>
-----
-
-The specified `WorkManager` can also point to an environment-specific thread pool --
-typically through a `SimpleTaskWorkManager` instance's `asyncTaskExecutor` property.
-Consider defining a shared thread pool for all your `ResourceAdapter` instances
-if you happen to use multiple adapters.
-
-In some environments, you can instead obtain the entire `ResourceAdapter` object from JNDI
-(by using `<jee:jndi-lookup>`). The Spring-based message listeners can then interact with
-the server-hosted `ResourceAdapter`, which also use the server's built-in `WorkManager`.
+include-code::./AlternativeJmsConfiguration[tag=snippet,indent=0]
 
 See the javadoc for {spring-framework-api}/jms/listener/endpoint/JmsMessageEndpointManager.html[`JmsMessageEndpointManager`],
 {spring-framework-api}/jms/listener/endpoint/JmsActivationSpecConfig.html[`JmsActivationSpecConfig`],

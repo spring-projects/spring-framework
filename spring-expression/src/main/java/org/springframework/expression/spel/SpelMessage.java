@@ -212,7 +212,7 @@ public enum SpelMessage {
 			"No bean resolver registered in the context to resolve access to bean ''{0}''"),
 
 	EXCEPTION_DURING_BEAN_RESOLUTION(Kind.ERROR, 1058,
-			"A problem occurred when trying to resolve bean ''{0}'':''{1}''"),
+			"A problem occurred when trying to resolve bean ''{0}'': ''{1}''"),
 
 	INVALID_BEAN_REFERENCE(Kind.ERROR, 1059,
 			"@ or & can only be followed by an identifier or a quoted name"),
@@ -291,7 +291,16 @@ public enum SpelMessage {
 
 	/** @since 6.0.13 */
 	NEGATIVE_REPEATED_TEXT_COUNT(Kind.ERROR, 1081,
-			"Repeat count ''{0}'' must not be negative");
+			"Repeat count ''{0}'' must not be negative"),
+
+	/** @since 6.2 */
+	EXCEPTION_DURING_INDEX_READ(Kind.ERROR, 1082,
+			"A problem occurred while attempting to read index ''{0}'' in ''{1}''"),
+
+	/** @since 6.2 */
+	EXCEPTION_DURING_INDEX_WRITE(Kind.ERROR, 1083,
+			"A problem occurred while attempting to write index ''{0}'' in ''{1}''");
+
 
 
 	private final Kind kind;

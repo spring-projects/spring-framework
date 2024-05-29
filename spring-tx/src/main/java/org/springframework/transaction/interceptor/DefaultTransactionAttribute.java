@@ -51,7 +51,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 
 	/**
-	 * Create a new DefaultTransactionAttribute, with default settings.
+	 * Create a new {@code DefaultTransactionAttribute} with default settings.
 	 * Can be modified through bean property setters.
 	 * @see #setPropagationBehavior
 	 * @see #setIsolationLevel
@@ -75,7 +75,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 	/**
-	 * Create a new DefaultTransactionAttribute with the given
+	 * Create a new {@code DefaultTransactionAttribute} with the given
 	 * propagation behavior. Can be modified through bean property setters.
 	 * @param propagationBehavior one of the propagation constants in the
 	 * TransactionDefinition interface
@@ -206,7 +206,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 				}
 				catch (RuntimeException ex) {
 					throw new IllegalArgumentException(
-							"Invalid timeoutString value \"" + timeoutString + "\" - cannot parse into int");
+							"Invalid timeoutString value \"" + timeoutString + "\"; " + ex);
 				}
 			}
 		}

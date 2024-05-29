@@ -55,33 +55,34 @@ The preceding `AppConfig` class is equivalent to the following Spring `<beans/>`
 	</beans>
 ----
 
-.Full @Configuration vs "`lite`" @Bean mode?
+.@Configuration classes with or without local calls between @Bean methods?
 ****
-When `@Bean` methods are declared within classes that are not annotated with
-`@Configuration`, they are referred to as being processed in a "`lite`" mode. Bean methods
-declared on a bean that is not annotated with `@Configuration` are considered to be "`lite`",
-with a different primary purpose of the containing class and a `@Bean` method
-being a sort of bonus there. For example, service components may expose management views
-to the container through an additional `@Bean` method on each applicable component class.
-In such scenarios, `@Bean` methods are a general-purpose factory method mechanism.
-
-Unlike full `@Configuration`, lite `@Bean` methods cannot declare inter-bean dependencies.
-Instead, they operate on their containing component's internal state and, optionally, on
-arguments that they may declare. Such a `@Bean` method should therefore not invoke other
-`@Bean` methods. Each such method is literally only a factory method for a particular
-bean reference, without any special runtime semantics. The positive side-effect here is
-that no CGLIB subclassing has to be applied at runtime, so there are no limitations in
-terms of class design (that is, the containing class may be `final` and so forth).
-
 In common scenarios, `@Bean` methods are to be declared within `@Configuration` classes,
-ensuring that "`full`" mode is always used and that cross-method references therefore
-get redirected to the container's lifecycle management. This prevents the same
-`@Bean` method from accidentally being invoked through a regular Java call, which helps
-to reduce subtle bugs that can be hard to track down when operating in "`lite`" mode.
+ensuring that full configuration class processing applies and that cross-method
+references therefore get redirected to the container's lifecycle management.
+This prevents the same `@Bean` method from accidentally being invoked through a regular
+Java method call, which helps to reduce subtle bugs that can be hard to track down.
+
+When `@Bean` methods are declared within classes that are not annotated with
+`@Configuration` - or when `@Configuration(proxyBeanMethods=false)` is declared -,
+they are referred to as being processed in a "lite" mode. In such scenarios,
+`@Bean` methods are effectively a general-purpose factory method mechanism without
+special runtime processing (that is, without generating a CGLIB subclass for it).
+A custom Java call to such a method will not get intercepted by the container and
+therefore behaves just like a regular method call, creating a new instance every time
+rather than reusing an existing singleton (or scoped) instance for the given bean.
+
+As a consequence, `@Bean` methods on classes without runtime proxying are not meant to
+declare inter-bean dependencies at all. Instead, they are expected to operate on their
+containing component's fields and, optionally, on arguments that a factory method may
+declare in order to receive autowired collaborators. Such a `@Bean` method therefore
+never needs to invoke other `@Bean` methods; every such call can be expressed through
+a factory method argument instead. The positive side-effect here is that no CGLIB
+subclassing has to be applied at runtime, reducing the overhead and the footprint.
 ****
 
 The `@Bean` and `@Configuration` annotations are discussed in depth in the following sections.
-First, however, we cover the various ways of creating a spring container by using
+First, however, we cover the various ways of creating a Spring container by using
 Java-based configuration.
 
 

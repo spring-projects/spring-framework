@@ -186,6 +186,15 @@ implementation type, consider declaring the most specific return type on your fa
 method (at least as specific as required by the injection points referring to your bean).
 ====
 
+[NOTE]
+====
+As of 4.3, `@Autowired` also considers self references for injection (that is, references
+back to the bean that is currently injected). Note that self injection is a fallback.
+In practice, you should use self references as a last resort only (for example, for
+calling other methods on the same instance through the bean's transactional proxy).
+Consider factoring out the affected methods to a separate delegate bean in such a scenario.
+====
+
 You can also instruct Spring to provide all beans of a particular type from the
 `ApplicationContext` by adding the `@Autowired` annotation to a field or method that
 expects an array of that type, as the following example shows:
@@ -267,6 +276,12 @@ potentially for individual bean definitions (in case of multiple definitions tha
 use the same bean class). `@Order` values may influence priorities at injection points,
 but be aware that they do not influence singleton startup order, which is an
 orthogonal concern determined by dependency relationships and `@DependsOn` declarations.
+
+Note that `@Order` annotations on configuration classes just influence the evaluation
+order within the overall set of configuration classes on startup. Such configuration-level
+order values do not affect the contained `@Bean` methods at all. For bean-level ordering,
+each `@Bean` method needs to have its own `@Order` annotation which applies within a
+set of multiple matches for the specific bean type (as returned by the factory method).
 
 Note that the standard `jakarta.annotation.Priority` annotation is not available at the
 `@Bean` level, since it cannot be declared on methods. Its semantics can be modeled

@@ -64,7 +64,7 @@ class TestConventions {
 		}
 		test.jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED",
 				"--add-opens=java.base/java.util=ALL-UNNAMED",
-				"-Djava.locale.providers=COMPAT");
+				"-Djava.locale.providers=COMPAT", "-Xshare:off");
 	}
 
 	private void configureTestRetryPlugin(Project project, Test test) {

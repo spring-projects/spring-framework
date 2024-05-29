@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @see DynamicPropertyRegistryIntegrationTests
  */
 @SpringJUnitConfig
 @TestPropertySource(properties = "test.container.ip: test")

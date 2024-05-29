@@ -42,6 +42,8 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.testfixture.beans.DerivedTestBean;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.lang.Nullable;
@@ -322,12 +324,13 @@ class BeanUtilsTests {
 		Order original = new Order("test", List.of("foo", "bar"));
 
 		// Create a Proxy that loses the generic type information for the getLineItems() method.
-		OrderSummary proxy = proxyOrder(original);
+		OrderSummary proxy = (OrderSummary) Proxy.newProxyInstance(getClass().getClassLoader(),
+				new Class<?>[] {OrderSummary.class}, new OrderInvocationHandler(original));
 		assertThat(OrderSummary.class.getDeclaredMethod("getLineItems").toGenericString())
-			.contains("java.util.List<java.lang.String>");
+				.contains("java.util.List<java.lang.String>");
 		assertThat(proxy.getClass().getDeclaredMethod("getLineItems").toGenericString())
-			.contains("java.util.List")
-			.doesNotContain("<java.lang.String>");
+				.contains("java.util.List")
+				.doesNotContain("<java.lang.String>");
 
 		// Ensure that our custom Proxy works as expected.
 		assertThat(proxy.getId()).isEqualTo("test");
@@ -338,6 +341,23 @@ class BeanUtilsTests {
 		BeanUtils.copyProperties(proxy, target);
 		assertThat(target.getId()).isEqualTo("test");
 		assertThat(target.getLineItems()).containsExactly("foo", "bar");
+	}
+
+	@Test  // gh-32888
+	public void copyPropertiesWithGenericCglibClass() {
+		Enhancer enhancer = new Enhancer();
+		enhancer.setSuperclass(User.class);
+		enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> proxy.invokeSuper(obj, args));
+		User user = (User) enhancer.create();
+		user.setId(1);
+		user.setName("proxy");
+		user.setAddress("addr");
+
+		User target = new User();
+		BeanUtils.copyProperties(user, target);
+		assertThat(target.getId()).isEqualTo(user.getId());
+		assertThat(target.getName()).isEqualTo(user.getName());
+		assertThat(target.getAddress()).isEqualTo(user.getAddress());
 	}
 
 	@Test
@@ -520,6 +540,7 @@ class BeanUtilsTests {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	private static class IntegerHolder {
 
@@ -533,6 +554,7 @@ class BeanUtilsTests {
 			this.number = number;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class WildcardListHolder1 {
@@ -548,6 +570,7 @@ class BeanUtilsTests {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	private static class WildcardListHolder2 {
 
@@ -561,6 +584,7 @@ class BeanUtilsTests {
 			this.list = list;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class NumberUpperBoundedWildcardListHolder {
@@ -576,6 +600,7 @@ class BeanUtilsTests {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	private static class NumberListHolder {
 
@@ -589,6 +614,7 @@ class BeanUtilsTests {
 			this.list = list;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class IntegerListHolder1 {
@@ -604,6 +630,7 @@ class BeanUtilsTests {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	private static class IntegerListHolder2 {
 
@@ -617,6 +644,7 @@ class BeanUtilsTests {
 			this.list = list;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class LongListHolder {
@@ -798,6 +826,7 @@ class BeanUtilsTests {
 		}
 	}
 
+
 	private static class BeanWithNullableTypes {
 
 		private Integer counter;
@@ -828,6 +857,7 @@ class BeanUtilsTests {
 		}
 	}
 
+
 	private static class BeanWithPrimitiveTypes {
 
 		private boolean flag;
@@ -839,7 +869,6 @@ class BeanUtilsTests {
 		private double doubleCount;
 		private char character;
 		private String text;
-
 
 		@SuppressWarnings("unused")
 		public BeanWithPrimitiveTypes(boolean flag, byte byteCount, short shortCount, int intCount, long longCount,
@@ -891,8 +920,8 @@ class BeanUtilsTests {
 		public String getText() {
 			return text;
 		}
-
 	}
+
 
 	private static class PrivateBeanWithPrivateConstructor {
 
@@ -900,12 +929,13 @@ class BeanUtilsTests {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	private static class Order {
 
 		private String id;
-		private List<String> lineItems;
 
+		private List<String> lineItems;
 
 		Order() {
 		}
@@ -937,6 +967,7 @@ class BeanUtilsTests {
 		}
 	}
 
+
 	private interface OrderSummary {
 
 		String getId();
@@ -945,16 +976,9 @@ class BeanUtilsTests {
 	}
 
 
-	private OrderSummary proxyOrder(Order order) {
-		return (OrderSummary) Proxy.newProxyInstance(getClass().getClassLoader(),
-			new Class<?>[] { OrderSummary.class }, new OrderInvocationHandler(order));
-	}
-
-
 	private static class OrderInvocationHandler implements InvocationHandler {
 
 		private final Order order;
-
 
 		OrderInvocationHandler(Order order) {
 			this.order = order;
@@ -970,6 +994,48 @@ class BeanUtilsTests {
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
 			}
+		}
+	}
+
+
+	private static class GenericBaseModel<T> {
+
+		private T id;
+
+		private String name;
+
+		public T getId() {
+			return id;
+		}
+
+		public void setId(T id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
+
+
+	private static class User extends GenericBaseModel<Integer> {
+
+		private String address;
+
+		public User() {
+			super();
+		}
+
+		public String getAddress() {
+			return address;
+		}
+
+		public void setAddress(String address) {
+			this.address = address;
 		}
 	}
 

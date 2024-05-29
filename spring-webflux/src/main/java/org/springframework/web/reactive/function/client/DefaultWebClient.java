@@ -368,6 +368,12 @@ final class DefaultWebClient implements WebClient {
 		}
 
 		@Override
+		public <T> RequestHeadersSpec<?> bodyValue(T body, ParameterizedTypeReference<T> bodyType) {
+			this.inserter = BodyInserters.fromValue(body, bodyType);
+			return this;
+		}
+
+		@Override
 		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(
 				P publisher, ParameterizedTypeReference<T> elementTypeRef) {
 			this.inserter = BodyInserters.fromPublisher(publisher, elementTypeRef);

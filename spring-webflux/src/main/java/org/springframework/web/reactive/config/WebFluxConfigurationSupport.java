@@ -283,12 +283,14 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			@Qualifier("webFluxAdapterRegistry") ReactiveAdapterRegistry reactiveAdapterRegistry,
 			ServerCodecConfigurer serverCodecConfigurer,
 			@Qualifier("webFluxConversionService") FormattingConversionService conversionService,
+			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver,
 			@Qualifier("webFluxValidator") Validator validator) {
 
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
 		adapter.setMessageReaders(serverCodecConfigurer.getReaders());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer(conversionService, validator));
 		adapter.setReactiveAdapterRegistry(reactiveAdapterRegistry);
+		adapter.setContentTypeResolver(contentTypeResolver);
 
 		BlockingExecutionConfigurer executorConfigurer = getBlockingExecutionConfigurer();
 		if (executorConfigurer.getExecutor() != null) {

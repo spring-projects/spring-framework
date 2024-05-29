@@ -16,15 +16,19 @@
 
 package org.springframework.web.filter;
 
+import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.observation.ServerRequestObservationContext;
+import org.springframework.util.Assert;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -41,13 +45,13 @@ class ServerHttpObservationFilterTests {
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
-	private final ServerHttpObservationFilter filter = new ServerHttpObservationFilter(this.observationRegistry);
-
 	private final MockFilterChain mockFilterChain = new MockFilterChain();
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.GET.name(), "/resource/test");
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
+
+	private ServerHttpObservationFilter filter = new ServerHttpObservationFilter(this.observationRegistry);
 
 
 	@Test
@@ -65,7 +69,7 @@ class ServerHttpObservationFilterTests {
 
 	@Test
 	void filterShouldAcceptNoOpObservationContext() throws Exception {
-		ServerHttpObservationFilter filter = new ServerHttpObservationFilter(ObservationRegistry.NOOP);
+		this.filter = new ServerHttpObservationFilter(ObservationRegistry.NOOP);
 		filter.doFilter(this.request, this.response, this.mockFilterChain);
 
 		ServerRequestObservationContext context = (ServerRequestObservationContext) this.request
@@ -109,9 +113,32 @@ class ServerHttpObservationFilterTests {
 				.hasLowCardinalityKeyValue("status", "500");
 	}
 
+	@Test
+	void customFilterShouldCallScopeOpened() throws Exception {
+		this.filter = new CustomObservationFilter(this.observationRegistry);
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+
+		assertThat(this.response.getHeader("X-Trace-Id")).isEqualTo("badc0ff33");
+	}
+
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
 		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
 				.hasObservationWithNameEqualTo("http.server.requests").that();
+	}
+
+	static class CustomObservationFilter extends ServerHttpObservationFilter {
+
+		public CustomObservationFilter(ObservationRegistry observationRegistry) {
+			super(observationRegistry);
+		}
+
+		@Override
+		protected void onScopeOpened(Observation.Scope scope, HttpServletRequest request, HttpServletResponse response) {
+			Assert.notNull(scope, "scope must not be null");
+			Assert.notNull(request, "request must not be null");
+			Assert.notNull(response, "response must not be null");
+			response.setHeader("X-Trace-Id", "badc0ff33");
+		}
 	}
 
 }

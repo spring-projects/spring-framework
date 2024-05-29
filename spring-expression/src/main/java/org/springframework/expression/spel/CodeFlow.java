@@ -30,6 +30,7 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -242,6 +243,74 @@ public class CodeFlow implements Opcodes {
 
 	public String getClassName() {
 		return this.className;
+	}
+
+	/**
+	 * Generate bytecode that loads the supplied argument onto the stack.
+	 * <p>Delegates to {@link #generateCodeForArgument(MethodVisitor, SpelNode, String)}
+	 * with the {@linkplain #toDescriptor(Class) descriptor} for
+	 * the supplied {@code requiredType}.
+	 * <p>This method also performs any boxing, unboxing, or check-casting
+	 * necessary to ensure that the type of the argument on the stack matches the
+	 * supplied {@code requiredType}.
+	 * <p>Use this method when a node in the AST will be used as an argument for
+	 * a constructor or method invocation. For example, if you wish to invoke a
+	 * method with an {@code indexNode} that must be of type {@code int} for the
+	 * actual method invocation within bytecode, you would call
+	 * {@code codeFlow.generateCodeForArgument(methodVisitor, indexNode, int.class)}.
+	 * @param methodVisitor the ASM {@link MethodVisitor} into which code should
+	 * be generated
+	 * @param argument a {@link SpelNode} that represents an argument to a method
+	 * or constructor
+	 * @param requiredType the required type for the argument when invoking the
+	 * corresponding constructor or method
+	 * @since 6.2
+	 * @see #generateCodeForArgument(MethodVisitor, SpelNode, String)
+	 */
+	public void generateCodeForArgument(MethodVisitor methodVisitor, SpelNode argument, Class<?> requiredType) {
+		generateCodeForArgument(methodVisitor, argument, toDescriptor(requiredType));
+	}
+
+	/**
+	 * Generate bytecode that loads the supplied argument onto the stack.
+	 * <p>This method also performs any boxing, unboxing, or check-casting
+	 * necessary to ensure that the type of the argument on the stack matches the
+	 * supplied {@code requiredTypeDesc}.
+	 * <p>Use this method when a node in the AST will be used as an argument for
+	 * a constructor or method invocation. For example, if you wish to invoke a
+	 * method with an {@code indexNode} that must be of type {@code int} for the
+	 * actual method invocation within bytecode, you would call
+	 * {@code codeFlow.generateCodeForArgument(methodVisitor, indexNode, "I")}.
+	 * @param methodVisitor the ASM {@link MethodVisitor} into which code should
+	 * be generated
+	 * @param argument a {@link SpelNode} that represents an argument to a method
+	 * or constructor
+	 * @param requiredTypeDesc a descriptor for the required type for the argument
+	 * when invoking the corresponding constructor or method
+	 * @since 6.2
+	 * @see #generateCodeForArgument(MethodVisitor, SpelNode, Class)
+	 * @see #toDescriptor(Class)
+	 */
+	public void generateCodeForArgument(MethodVisitor methodVisitor, SpelNode argument, String requiredTypeDesc) {
+		enterCompilationScope();
+		argument.generateCode(methodVisitor, this);
+		String lastDesc = lastDescriptor();
+		Assert.state(lastDesc != null, "No last descriptor");
+		boolean primitiveOnStack = isPrimitive(lastDesc);
+		// Check if we need to box it.
+		if (primitiveOnStack && requiredTypeDesc.charAt(0) == 'L') {
+			insertBoxIfNecessary(methodVisitor, lastDesc.charAt(0));
+		}
+		// Check if we need to unbox it.
+		else if (requiredTypeDesc.length() == 1 && !primitiveOnStack) {
+			insertUnboxInsns(methodVisitor, requiredTypeDesc.charAt(0), lastDesc);
+		}
+		// Check if we need to check-cast
+		else if (!requiredTypeDesc.equals(lastDesc)) {
+			// This would be unnecessary in the case of subtyping (e.g. method takes Number but Integer passed in)
+			insertCheckCast(methodVisitor, requiredTypeDesc);
+		}
+		exitCompilationScope();
 	}
 
 
@@ -888,7 +957,7 @@ public class CodeFlow implements Opcodes {
 	 */
 	public static void insertOptimalLoad(MethodVisitor mv, int value) {
 		if (value < 6) {
-			mv.visitInsn(ICONST_0+value);
+			mv.visitInsn(ICONST_0 + value);
 		}
 		else if (value < Byte.MAX_VALUE) {
 			mv.visitIntInsn(BIPUSH, value);
@@ -902,15 +971,16 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
-	 * Produce appropriate bytecode to store a stack item in an array. The
-	 * instruction to use varies depending on whether the type
-	 * is a primitive or reference type.
+	 * Produce appropriate bytecode to store a stack item in an array.
+	 * <p>The instruction to use varies depending on whether the type is a
+	 * primitive or reference type.
 	 * @param mv where to insert the bytecode
-	 * @param arrayElementType the type of the array elements
+	 * @param arrayComponentType the component type of the array
 	 */
-	public static void insertArrayStore(MethodVisitor mv, String arrayElementType) {
-		if (arrayElementType.length() == 1) {
-			switch (arrayElementType.charAt(0)) {
+	public static void insertArrayStore(MethodVisitor mv, String arrayComponentType) {
+		if (arrayComponentType.length() == 1) {
+			char componentType = arrayComponentType.charAt(0);
+			switch (componentType) {
 				case 'B', 'Z' -> mv.visitInsn(BASTORE);
 				case 'I' -> mv.visitInsn(IASTORE);
 				case 'J' -> mv.visitInsn(LASTORE);
@@ -918,7 +988,7 @@ public class CodeFlow implements Opcodes {
 				case 'D' -> mv.visitInsn(DASTORE);
 				case 'C' -> mv.visitInsn(CASTORE);
 				case 'S' -> mv.visitInsn(SASTORE);
-				default -> throw new IllegalArgumentException("Unexpected array type " + arrayElementType.charAt(0));
+				default -> throw new IllegalArgumentException("Unexpected array component type " + componentType);
 			}
 		}
 		else {

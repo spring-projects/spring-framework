@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- tag::snippet[] -->
+	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="registerDefaultFormatters" value="false" />
+		<property name="formatters">
+			<set>
+				<bean class="org.springframework.format.number.NumberFormatAnnotationFormatterFactory" />
+			</set>
+		</property>
+		<property name="formatterRegistrars">
+			<set>
+				<bean class="org.springframework.format.datetime.standard.DateTimeFormatterRegistrar">
+					<property name="dateFormatter">
+						<bean class="org.springframework.format.datetime.standard.DateTimeFormatterFactoryBean">
+							<property name="pattern" value="yyyyMMdd"/>
+						</bean>
+					</property>
+				</bean>
+			</set>
+		</property>
+	</bean>
+	<!-- end::snippet[] -->
+</beans>

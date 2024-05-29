@@ -100,9 +100,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
-	private static final BufferedReader EMPTY_BUFFERED_READER =
-			new BufferedReader(new StringReader(""));
-
 	/**
 	 * Date formats as specified in the HTTP RFC.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
@@ -383,6 +380,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	// ---------------------------------------------------------------------
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		checkActive();
 		return this.attributes.get(name);
@@ -637,6 +635,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
+	@Nullable
 	public String[] getParameterValues(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.parameters.get(name);
@@ -736,7 +735,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			this.reader = new BufferedReader(sourceReader);
 		}
 		else {
-			this.reader = EMPTY_BUFFERED_READER;
+			this.reader = new BufferedReader(new StringReader(""));
 		}
 		return this.reader;
 	}

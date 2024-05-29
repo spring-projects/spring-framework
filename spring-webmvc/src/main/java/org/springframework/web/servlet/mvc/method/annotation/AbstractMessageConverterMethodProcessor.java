@@ -276,7 +276,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			List<MediaType> compatibleMediaTypes = new ArrayList<>();
 			determineCompatibleMediaTypes(acceptableTypes, producibleTypes, compatibleMediaTypes);
 
-			// For ProblemDetail, fall back on RFC 7807 format
+			// For ProblemDetail, fall back on RFC 9457 format
 			if (compatibleMediaTypes.isEmpty() && ProblemDetail.class.isAssignableFrom(valueType)) {
 				determineCompatibleMediaTypes(this.problemMediaTypes, producibleTypes, compatibleMediaTypes);
 			}

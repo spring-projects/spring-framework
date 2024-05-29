@@ -1,0 +1,16 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:p="http://www.springframework.org/schema/p"
+	   xsi:schemaLocation="
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- tag::snippet[] -->
+	<bean id="cacheManager"
+		  class="org.springframework.cache.jcache.JCacheCacheManager"
+		  p:cache-manager-ref="jCacheManager"/>
+
+	<!-- JSR-107 cache manager setup  -->
+	<bean id="jCacheManager" .../>
+	<!-- end::snippet[] -->
+
+</beans>

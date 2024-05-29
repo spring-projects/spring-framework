@@ -34,23 +34,14 @@ import org.springframework.lang.Nullable;
  * <p>Property accessors are considered to be ordered, and each will be called in
  * turn. The only rule that affects the call order is that any property accessor
  * which specifies explicit support for the target class via
- * {@link #getSpecificTargetClasses()} will be called first, before the general
+ * {@link #getSpecificTargetClasses()} will be called first, before the generic
  * property accessors.
  *
  * @author Andy Clement
  * @since 3.0
+ * @see IndexAccessor
  */
-public interface PropertyAccessor {
-
-	/**
-	 * Return an array of classes for which this property accessor should be called.
-	 * <p>Returning {@code null} indicates this is a general property accessor that
-	 * can be called in an attempt to access a property on any type.
-	 * @return an array of classes that this property accessor is suitable for
-	 * (or {@code null} if a general property accessor)
-	 */
-	@Nullable
-	Class<?>[] getSpecificTargetClasses();
+public interface PropertyAccessor extends TargetedAccessor {
 
 	/**
 	 * Called to determine if this property accessor is able to read a specified

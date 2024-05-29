@@ -71,7 +71,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Test fixture with {@link ExceptionHandlerExceptionResolver}.
+ * Tests for {@link ExceptionHandlerExceptionResolver}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -419,6 +419,41 @@ class ExceptionHandlerExceptionResolverTests {
 		assertThat(mav.isEmpty()).isTrue();
 	}
 
+	@Test
+	void resolveExceptionJsonMediaType() throws UnsupportedEncodingException, NoSuchMethodException {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new MediaTypeController(), "handle");
+		this.resolver.afterPropertiesSet();
+		this.request.addHeader("Accept", "application/json");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertExceptionHandledAsBody(mav, "jsonBody");
+	}
+
+	@Test
+	void resolveExceptionHtmlMediaType() throws NoSuchMethodException {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new MediaTypeController(), "handle");
+		this.resolver.afterPropertiesSet();
+		this.request.addHeader("Accept", "text/html");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).isNotNull();
+		assertThat(mav.getViewName()).isEqualTo("htmlView");
+	}
+
+	@Test
+	void resolveExceptionDefaultMediaType() throws NoSuchMethodException {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new MediaTypeController(), "handle");
+		this.resolver.afterPropertiesSet();
+		this.request.addHeader("Accept", "*/*");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).isNotNull();
+		assertThat(mav.getViewName()).isEqualTo("htmlView");
+	}
+
 
 	private void assertMethodProcessorCount(int resolverCount, int handlerCount) {
 		assertThat(this.resolver.getArgumentResolvers().getResolvers()).hasSize(resolverCount);
@@ -647,6 +682,23 @@ class ExceptionHandlerExceptionResolverTests {
 		public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
 				Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
 			return null;
+		}
+	}
+
+	@Controller
+	static class MediaTypeController {
+
+		public void handle() {}
+
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "application/json")
+		@ResponseBody
+		public String handleExceptionJson() {
+			return "jsonBody";
+		}
+
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = {"text/html", "*/*"})
+		public String handleExceptionHtml() {
+			return "htmlView";
 		}
 	}
 

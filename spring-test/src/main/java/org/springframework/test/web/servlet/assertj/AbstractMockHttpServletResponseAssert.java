@@ -18,9 +18,17 @@ package org.springframework.test.web.servlet.assertj;
 
 import java.nio.charset.Charset;
 
+import org.assertj.core.api.AbstractByteArrayAssert;
+import org.assertj.core.api.AbstractStringAssert;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.ByteArrayAssert;
+
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.json.AbstractJsonContentAssert;
+import org.springframework.test.json.JsonContent;
+import org.springframework.test.json.JsonContentAssert;
 import org.springframework.test.web.UriAssert;
 
 /**
@@ -45,29 +53,69 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 		this.jsonMessageConverter = jsonMessageConverter;
 	}
 
+
 	/**
-	 * Return a new {@linkplain ResponseBodyAssert assertion} object that uses
-	 * the response body as the object to test. The returned assertion object
-	 * provides access to the raw byte array, a String value decoded using the
-	 * response's character encoding, and dedicated JSON testing support.
-	 * <p>Examples: <pre><code class='java'>
+	 * Return a new {@linkplain AbstractStringAssert assertion} object that uses
+	 * the response body converted to text as the object to test.
+	 * <p>Examples: <pre><code class="java">
 	 * // Check that the response body is equal to "Hello World":
-	 * assertThat(response).body().isEqualTo("Hello World");
-	 *
-	 * // Check that the response body is strictly equal to the content of "test.json":
-	 * assertThat(response).body().json().isStrictlyEqualToJson("test.json");
+	 * assertThat(response).bodyText().isEqualTo("Hello World");
 	 * </code></pre>
 	 */
-	public ResponseBodyAssert body() {
-		return new ResponseBodyAssert(getResponse().getContentAsByteArray(),
-				Charset.forName(getResponse().getCharacterEncoding()), this.jsonMessageConverter);
+	public AbstractStringAssert<?> bodyText() {
+		return Assertions.assertThat(readBody());
+	}
+
+	/**
+	 * Return a new {@linkplain AbstractJsonContentAssert assertion} object that
+	 * uses the response body converted to text as the object to test. Compared
+	 * to {@link #bodyText()}, the assertion object provides dedicated JSON
+	 * support.
+	 * <p>Examples: <pre><code class="java">
+	 * // Check that the response body is strictly equal to the content of
+	 * // "/com/acme/sample/person-created.json":
+	 * assertThat(response).bodyJson()
+	 *         .isStrictlyEqualToJson("/com/acme/sample/person-created.json");
+	 *
+	 * // Check that the response is strictly equal to the content of the
+	 * // specified file located in the same package as the PersonController:
+	 * assertThat(response).bodyJson().withResourceLoadClass(PersonController.class)
+	 *         .isStrictlyEqualToJson("person-created.json");
+	 * </code></pre>
+	 * The returned assert object also supports JSON path expressions.
+	 * <p>Examples: <pre><code class="java">
+	 * // Check that the JSON document does not have an "error" element
+	 * assertThat(response).bodyJson().doesNotHavePath("$.error");
+	 *
+	 * // Check that the JSON document as a top level "message" element
+	 * assertThat(response).bodyJson()
+	 *         .extractingPath("$.message").asString().isEqualTo("hello");
+	 * </code></pre>
+	 */
+	public AbstractJsonContentAssert<?> bodyJson() {
+		return new JsonContentAssert(new JsonContent(readBody(), this.jsonMessageConverter));
+	}
+
+	private String readBody() {
+		return new String(getResponse().getContentAsByteArray(),
+				Charset.forName(getResponse().getCharacterEncoding()));
+	}
+
+	/**
+	 * Return a new {@linkplain AbstractByteArrayAssert assertion} object that
+	 * uses the response body as the object to test.
+	 * @see #bodyText()
+	 * @see #bodyJson()
+	 */
+	public AbstractByteArrayAssert<?> body() {
+		return new ByteArrayAssert(getResponse().getContentAsByteArray());
 	}
 
 	/**
 	 * Return a new {@linkplain UriAssert assertion} object that uses the
 	 * forwarded URL as the object to test. If a simple equality check is
 	 * required, consider using {@link #hasForwardedUrl(String)} instead.
-	 * <p>Example: <pre><code class='java'>
+	 * <p>Example: <pre><code class="java">
 	 * // Check that the forwarded URL starts with "/orders/":
 	 * assertThat(response).forwardedUrl().matchPattern("/orders/*);
 	 * </code></pre>
@@ -80,13 +128,21 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	 * Return a new {@linkplain UriAssert assertion} object that uses the
 	 * redirected URL as the object to test. If a simple equality check is
 	 * required, consider using {@link #hasRedirectedUrl(String)} instead.
-	 * <p>Example: <pre><code class='java'>
+	 * <p>Example: <pre><code class="java">
 	 * // Check that the redirected URL starts with "/orders/":
 	 * assertThat(response).redirectedUrl().matchPattern("/orders/*);
 	 * </code></pre>
 	 */
 	public UriAssert redirectedUrl() {
 		return new UriAssert(getResponse().getRedirectedUrl(), "Redirected URL");
+	}
+
+	/**
+	 * Verify that the response body is equal to the given value.
+	 */
+	public SELF hasBodyTextEqualTo(String bodyText) {
+		bodyText().isEqualTo(bodyText);
+		return this.myself;
 	}
 
 	/**

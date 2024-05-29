@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@ package org.springframework.test.context.support;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
@@ -35,59 +36,66 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * {@link ContextCustomizer} to support
- * {@link DynamicPropertySource @DynamicPropertySource} methods.
+ * {@link ContextCustomizer} which supports
+ * {@link DynamicPropertySource @DynamicPropertySource} methods and registers a
+ * {@link DynamicPropertyRegistry} as a singleton bean in the container for use
+ * in {@code @Configuration} classes and {@code @Bean} methods.
  *
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 5.2.5
  * @see DynamicPropertiesContextCustomizerFactory
+ * @see DefaultDynamicPropertyRegistry
+ * @see DynamicPropertySourceBeanInitializer
  */
 class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 
-	private static final String PROPERTY_SOURCE_NAME = "Dynamic Test Properties";
+	private static final String DYNAMIC_PROPERTY_REGISTRY_BEAN_NAME =
+			DynamicPropertiesContextCustomizer.class.getName() + ".dynamicPropertyRegistry";
+
+	private static final String DYNAMIC_PROPERTY_SOURCE_BEAN_INITIALIZER_BEAN_NAME =
+			DynamicPropertiesContextCustomizer.class.getName() + ".dynamicPropertySourceBeanInitializer";
+
 
 	private final Set<Method> methods;
 
 
 	DynamicPropertiesContextCustomizer(Set<Method> methods) {
-		methods.forEach(this::assertValid);
+		methods.forEach(DynamicPropertiesContextCustomizer::assertValid);
 		this.methods = methods;
 	}
 
 
-	private void assertValid(Method method) {
-		Assert.state(Modifier.isStatic(method.getModifiers()),
-				() -> "@DynamicPropertySource method '" + method.getName() + "' must be static");
-		Class<?>[] types = method.getParameterTypes();
-		Assert.state(types.length == 1 && types[0] == DynamicPropertyRegistry.class,
-				() -> "@DynamicPropertySource method '" + method.getName() + "' must accept a single DynamicPropertyRegistry argument");
-	}
-
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-		MutablePropertySources sources = context.getEnvironment().getPropertySources();
-		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, buildDynamicPropertiesMap()));
-	}
+		ConfigurableEnvironment environment = context.getEnvironment();
+		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
+		if (!(beanFactory instanceof BeanDefinitionRegistry beanDefinitionRegistry)) {
+			throw new IllegalStateException("BeanFactory must be a BeanDefinitionRegistry");
+		}
 
-	private Map<String, Supplier<Object>> buildDynamicPropertiesMap() {
-		Map<String, Supplier<Object>> map = new LinkedHashMap<>();
-		DynamicPropertyRegistry dynamicPropertyRegistry = (name, valueSupplier) -> {
-			Assert.hasText(name, "'name' must not be null or blank");
-			Assert.notNull(valueSupplier, "'valueSupplier' must not be null");
-			map.put(name, valueSupplier);
-		};
-		this.methods.forEach(method -> {
-			ReflectionUtils.makeAccessible(method);
-			ReflectionUtils.invokeMethod(method, null, dynamicPropertyRegistry);
-		});
-		return Collections.unmodifiableMap(map);
+		DefaultDynamicPropertyRegistry dynamicPropertyRegistry =
+				new DefaultDynamicPropertyRegistry(environment, this.methods.isEmpty());
+		beanFactory.registerSingleton(DYNAMIC_PROPERTY_REGISTRY_BEAN_NAME, dynamicPropertyRegistry);
+
+		BeanDefinition beanDefinition = new RootBeanDefinition(DynamicPropertySourceBeanInitializer.class);
+		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		beanDefinitionRegistry.registerBeanDefinition(
+				DYNAMIC_PROPERTY_SOURCE_BEAN_INITIALIZER_BEAN_NAME, beanDefinition);
+
+		if (!this.methods.isEmpty()) {
+			MutablePropertySources propertySources = environment.getPropertySources();
+			propertySources.addFirst(new DynamicValuesPropertySource(dynamicPropertyRegistry.valueSuppliers));
+			this.methods.forEach(method -> {
+				ReflectionUtils.makeAccessible(method);
+				ReflectionUtils.invokeMethod(method, null, dynamicPropertyRegistry);
+			});
+		}
 	}
 
 	Set<Method> getMethods() {
 		return this.methods;
 	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {
@@ -98,6 +106,16 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 	@Override
 	public int hashCode() {
 		return this.methods.hashCode();
+	}
+
+
+	private static void assertValid(Method method) {
+		Assert.state(Modifier.isStatic(method.getModifiers()),
+				() -> "@DynamicPropertySource method '" + method.getName() + "' must be static");
+		Class<?>[] types = method.getParameterTypes();
+		Assert.state(types.length == 1 && types[0] == DynamicPropertyRegistry.class,
+				() -> "@DynamicPropertySource method '" + method.getName() +
+						"' must accept a single DynamicPropertyRegistry argument");
 	}
 
 }

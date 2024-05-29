@@ -1,0 +1,18 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jms="http://www.springframework.org/schema/jms"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   https://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms.xsd">
+
+	<!-- tag::snippet[] -->
+	<jms:annotation-driven/>
+
+	<bean id="jmsListenerContainerFactory" class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+		<property name="connectionFactory" ref="connectionFactory"/>
+		<property name="destinationResolver" ref="destinationResolver"/>
+		<property name="sessionTransacted" value="true"/>
+		<property name="concurrency" value="3-10"/>
+	</bean>
+	<!-- end::snippet[] -->
+
+</beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,13 @@ class WebClientExtensionsTests {
 		val body = mockk<CompletableFuture<List<Foo>>>()
 		requestBodySpec.body<List<Foo>>(body)
 		verify { requestBodySpec.body(ofType<Any>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `RequestBodySpec#bodyValueWithType with reified type parameters`() {
+		val body = mockk<List<Foo>>()
+		requestBodySpec.bodyValueWithType<List<Foo>>(body)
+		verify { requestBodySpec.bodyValue(body, object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test

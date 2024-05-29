@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -133,7 +132,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private boolean useSuffixPatternMatch = false;
 
-	private boolean useTrailingSlashPatternMatch = true;
+	private boolean useTrailingSlashPatternMatch = false;
 
 	@Nullable
 	private Boolean removeSemicolonContent;
@@ -593,25 +592,6 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		@Override
 		public String resolveStringValue(String strVal) throws BeansException {
 			return this.helper.replacePlaceholders(strVal, this.resolver);
-		}
-	}
-
-
-	/**
-	 * A {@link ViewResolver} that always returns same View.
-	 */
-	private static class StaticViewResolver implements ViewResolver {
-
-		private final View view;
-
-		public StaticViewResolver(View view) {
-			this.view = view;
-		}
-
-		@Override
-		@Nullable
-		public View resolveViewName(String viewName, Locale locale) {
-			return this.view;
 		}
 	}
 

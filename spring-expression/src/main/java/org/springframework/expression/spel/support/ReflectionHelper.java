@@ -448,24 +448,29 @@ public abstract class ReflectionHelper {
 	}
 
 	/**
-	 * Package up the arguments so that they correctly match what is expected in requiredParameterTypes.
-	 * <p>For example, if requiredParameterTypes is {@code (int, String[])} because the second parameter
-	 * was declared {@code String...}, then if arguments is {@code [1,"a","b"]} then it must be
-	 * repackaged as {@code [1,new String[]{"a","b"}]} in order to match the expected types.
+	 * Package up the supplied {@code args} so that they correctly match what is
+	 * expected in {@code requiredParameterTypes}.
+	 * <p>For example, if {@code requiredParameterTypes} is {@code (int, String[])}
+	 * because the second parameter was declared as {@code String...}, then if
+	 * {@code args} is {@code [1, "a", "b"]} it must be repackaged as
+	 * {@code [1, new String[] {"a", "b"}]} in order to match the expected types.
 	 * @param requiredParameterTypes the types of the parameters for the invocation
-	 * @param args the arguments to be setup ready for the invocation
-	 * @return a repackaged array of arguments where any varargs setup has been done
+	 * @param args the arguments to be set up for the invocation
+	 * @return a repackaged array of arguments where any varargs setup has performed
 	 */
 	public static Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args) {
-		// Check if array already built for final argument
+		Assert.notEmpty(requiredParameterTypes, "Required parameter types array must not be empty");
+
 		int parameterCount = requiredParameterTypes.length;
+		Class<?> lastRequiredParameterType = requiredParameterTypes[parameterCount - 1];
+		Assert.isTrue(lastRequiredParameterType.isArray(),
+				"The last required parameter type must be an array to support varargs invocation");
+
 		int argumentCount = args.length;
+		Object lastArgument = (argumentCount > 0 ? args[argumentCount - 1] : null);
 
 		// Check if repackaging is needed...
-		if (parameterCount != args.length ||
-				requiredParameterTypes[parameterCount - 1] !=
-						(args[argumentCount - 1] != null ? args[argumentCount - 1].getClass() : null)) {
-
+		if (parameterCount != argumentCount || !lastRequiredParameterType.isInstance(lastArgument)) {
 			// Create an array for the leading arguments plus the varargs array argument.
 			Object[] newArgs = new Object[parameterCount];
 			// Copy all leading arguments to the new array, omitting the varargs array argument.
@@ -477,7 +482,7 @@ public abstract class ReflectionHelper {
 			if (argumentCount >= parameterCount) {
 				varargsArraySize = argumentCount - (parameterCount - 1);
 			}
-			Class<?> componentType = requiredParameterTypes[parameterCount - 1].componentType();
+			Class<?> componentType = lastRequiredParameterType.componentType();
 			Object varargsArray = Array.newInstance(componentType, varargsArraySize);
 			for (int i = 0; i < varargsArraySize; i++) {
 				Array.set(varargsArray, i, args[parameterCount - 1 + i]);
@@ -486,6 +491,7 @@ public abstract class ReflectionHelper {
 			newArgs[newArgs.length - 1] = varargsArray;
 			return newArgs;
 		}
+
 		return args;
 	}
 

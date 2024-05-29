@@ -58,7 +58,7 @@ final class CompositeMap<K, V> implements Map<K, V> {
 		Assert.notNull(first, "First must not be null");
 		Assert.notNull(second, "Second must not be null");
 		this.first = first;
-		this.second = second;
+		this.second = new FilteredMap<>(second, key -> !this.first.containsKey(key));
 		this.putFunction = putFunction;
 		this.putAllFunction = putAllFunction;
 	}

@@ -339,7 +339,7 @@ Kotlin::
 
 More sophisticated stored procedure support is xref:data-access/jdbc/object.adoc#jdbc-StoredProcedure[covered later].
 
-[[jdbc-JdbcTemplate-idioms]]
+[[jdbc-jdbctemplate-idioms]]
 === `JdbcTemplate` Best Practices
 
 Instances of the `JdbcTemplate` class are thread-safe, once configured. This is
@@ -352,40 +352,9 @@ A common practice when using the `JdbcTemplate` class (and the associated
 xref:data-access/jdbc/core.adoc#jdbc-NamedParameterJdbcTemplate[`NamedParameterJdbcTemplate`] class) is to
 configure a `DataSource` in your Spring configuration file and then dependency-inject
 that shared `DataSource` bean into your DAO classes. The `JdbcTemplate` is created in
-the setter for the `DataSource`. This leads to DAOs that resemble the following:
+the setter for the `DataSource` or in the constructor. This leads to DAOs that resemble the following:
 
---
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	public class JdbcCorporateEventDao implements CorporateEventDao {
-
-		private JdbcTemplate jdbcTemplate;
-
-		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
-		}
-
-		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	class JdbcCorporateEventDao(dataSource: DataSource) : CorporateEventDao {
-
-		private val jdbcTemplate = JdbcTemplate(dataSource)
-
-		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
-	}
-----
-======
---
+include-code::./JdbcCorporateEventDao[tag=snippet,indent=0]
 
 The following example shows the corresponding configuration:
 
@@ -605,7 +574,7 @@ functionality that is present only in the `JdbcTemplate` class, you can use the
 `getJdbcOperations()` method to access the wrapped `JdbcTemplate` through the
 `JdbcOperations` interface.
 
-See also xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate-idioms[`JdbcTemplate` Best Practices]
+See also xref:data-access/jdbc/core.adoc#jdbc-jdbctemplate-idioms[`JdbcTemplate` Best Practices]
 for guidelines on using the `NamedParameterJdbcTemplate` class in the context of an application.
 
 

@@ -26,8 +26,8 @@ import java.util.function.Supplier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.BeanResolver;
-import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.OperatorOverloader;
 import org.springframework.expression.PropertyAccessor;
@@ -108,6 +108,8 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 
 	private final List<PropertyAccessor> propertyAccessors;
 
+	private final List<IndexAccessor> indexAccessors;
+
 	private final List<MethodResolver> methodResolvers;
 
 	private final TypeConverter typeConverter;
@@ -119,10 +121,11 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	private final Map<String, Object> variables = new HashMap<>();
 
 
-	private SimpleEvaluationContext(List<PropertyAccessor> accessors, List<MethodResolver> resolvers,
-			@Nullable TypeConverter converter, @Nullable TypedValue rootObject) {
+	private SimpleEvaluationContext(List<PropertyAccessor> propertyAccessors, List<IndexAccessor> indexAccessors,
+			List<MethodResolver> resolvers, @Nullable TypeConverter converter, @Nullable TypedValue rootObject) {
 
-		this.propertyAccessors = accessors;
+		this.propertyAccessors = propertyAccessors;
+		this.indexAccessors = indexAccessors;
 		this.methodResolvers = resolvers;
 		this.typeConverter = (converter != null ? converter : new StandardTypeConverter());
 		this.rootObject = (rootObject != null ? rootObject : TypedValue.NULL);
@@ -147,12 +150,13 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	}
 
 	/**
-	 * Return an empty list, always, since this context does not support the
-	 * use of type references.
+	 * Return the specified {@link IndexAccessor} delegates, if any.
+	 * @since 6.2
+	 * @see Builder#withIndexAccessors(IndexAccessor...)
 	 */
 	@Override
-	public List<ConstructorResolver> getConstructorResolvers() {
-		return Collections.emptyList();
+	public List<IndexAccessor> getIndexAccessors() {
+		return this.indexAccessors;
 	}
 
 	/**
@@ -299,7 +303,9 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 	 */
 	public static final class Builder {
 
-		private final List<PropertyAccessor> accessors;
+		private final List<PropertyAccessor> propertyAccessors;
+
+		private List<IndexAccessor> indexAccessors = Collections.emptyList();
 
 		private List<MethodResolver> resolvers = Collections.emptyList();
 
@@ -309,8 +315,20 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 		@Nullable
 		private TypedValue rootObject;
 
+
 		private Builder(PropertyAccessor... accessors) {
-			this.accessors = Arrays.asList(accessors);
+			this.propertyAccessors = Arrays.asList(accessors);
+		}
+
+
+		/**
+		 * Register the specified {@link IndexAccessor} delegates.
+		 * @param indexAccessors the index accessors to use
+		 * @since 6.2
+		 */
+		public Builder withIndexAccessors(IndexAccessor... indexAccessors) {
+			this.indexAccessors = Arrays.asList(indexAccessors);
+			return this;
 		}
 
 		/**
@@ -391,7 +409,8 @@ public final class SimpleEvaluationContext implements EvaluationContext {
 		}
 
 		public SimpleEvaluationContext build() {
-			return new SimpleEvaluationContext(this.accessors, this.resolvers, this.typeConverter, this.rootObject);
+			return new SimpleEvaluationContext(this.propertyAccessors, this.indexAccessors,
+					this.resolvers, this.typeConverter, this.rootObject);
 		}
 	}
 

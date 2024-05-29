@@ -37,6 +37,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy;
 import org.springframework.cglib.core.CodeGenerationException;
+import org.springframework.cglib.core.GeneratorStrategy;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
@@ -46,6 +47,7 @@ import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
+import org.springframework.cglib.transform.impl.UndeclaredThrowableStrategy;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.SmartClassLoader;
@@ -54,7 +56,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * CGLIB-based {@link AopProxy} implementation for the Spring AOP framework.
@@ -94,13 +95,19 @@ class CglibAopProxy implements AopProxy, Serializable {
 	private static final int INVOKE_HASHCODE = 6;
 
 
+	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
+
+	private static final boolean coroutinesReactorPresent = ClassUtils.isPresent(
+			"kotlinx.coroutines.reactor.MonoKt", CglibAopProxy.class.getClassLoader());
+
+	private static final GeneratorStrategy undeclaredThrowableStrategy =
+			new UndeclaredThrowableStrategy(UndeclaredThrowableException.class);
+
 	/** Logger available to subclasses; static to optimize serialization. */
 	protected static final Log logger = LogFactory.getLog(CglibAopProxy.class);
 
 	/** Keeps track of the Classes that we have validated for final methods. */
 	private static final Map<Class<?>, Boolean> validatedClasses = new WeakHashMap<>();
-
-	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
 
 	/** The configuration used to configure this proxy. */
@@ -199,7 +206,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setAttemptLoad(true);
-			enhancer.setStrategy(new ClassLoaderAwareGeneratorStrategy(classLoader));
+			enhancer.setStrategy(new ClassLoaderAwareGeneratorStrategy(classLoader, undeclaredThrowableStrategy));
 
 			Callback[] callbacks = getCallbacks(rootClass);
 			Class<?>[] types = new Class<?>[callbacks.length];
@@ -421,7 +428,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			throw new AopInvocationException(
 					"Null return value from advice does not match primitive return type for: " + method);
 		}
-		if (KotlinDetector.isSuspendingFunction(method)) {
+		if (coroutinesReactorPresent && KotlinDetector.isSuspendingFunction(method)) {
 			return COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()) ?
 					CoroutinesUtils.asFlow(returnValue) :
 					CoroutinesUtils.awaitSingleOrNull(returnValue, arguments[arguments.length - 1]);
@@ -761,27 +768,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		@Override
 		@Nullable
 		public Object proceed() throws Throwable {
-			try {
 				return super.proceed();
-			}
-			catch (RuntimeException ex) {
-				throw ex;
-			}
-			catch (Exception ex) {
-				if (ReflectionUtils.declaresException(getMethod(), ex.getClass()) ||
-						KotlinDetector.isKotlinType(getMethod().getDeclaringClass())) {
-					// Propagate original exception if declared on the target method
-					// (with callers expecting it). Always propagate it for Kotlin code
-					// since checked exceptions do not have to be explicitly declared there.
-					throw ex;
-				}
-				else {
-					// Checked exception thrown in the interceptor but not declared on the
-					// target method signature -> apply an UndeclaredThrowableException,
-					// aligned with standard JDK dynamic proxy behavior.
-					throw new UndeclaredThrowableException(ex);
-				}
-			}
 		}
 	}
 

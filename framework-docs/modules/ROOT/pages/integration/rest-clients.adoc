@@ -71,8 +71,34 @@ This can be done with `method(HttpMethod)` or with the convenience methods `get(
 Next, the request URI can be specified with the `uri` methods.
 This step is optional and can be skipped if the `RestClient` is configured with a default URI.
 The URL is typically specified as a `String`, with optional URI template variables.
-String URLs are encoded by default, but this can be changed by building a client with a custom `uriBuilderFactory`.
+The following example configures a GET request to `https://example.com/orders/42`:
 
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+int id = 42;
+restClient.get()
+  .uri("https://example.com/orders/{id}", id)
+  ....
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+val id = 42
+restClient.get()
+  .uri("https://example.com/orders/{id}", id)
+  ...
+----
+======
+
+A function can also be used for more controls, such as specifying xref:web/webmvc/mvc-uri-building.adoc[request parameters].
+
+String URLs are encoded by default, but this can be changed by building a client with a custom `uriBuilderFactory`.
 The URL can also be provided with a function or as a `java.net.URI`, both of which are not encoded.
 For more details on working with and encoding URIs, see xref:web/webmvc/mvc-uri-building.adoc[URI Links].
 
@@ -467,6 +493,9 @@ Various implementations are available:
 If no request factory is specified when the `RestClient` was built, it will use the Apache or Jetty `HttpClient` if they are available on the classpath.
 Otherwise, if the `java.net.http` module is loaded, it will use Java's `HttpClient`.
 Finally, it will resort to the simple default.
+
+TIP: Note that the `SimpleClientHttpRequestFactory` may raise an exception when accessing the status of a response that represents an error (e.g. 401).
+If this is an issue, use any of the alternative request factories.
 
 [[rest-webclient]]
 == `WebClient`

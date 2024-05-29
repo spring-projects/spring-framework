@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,11 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AbstractAspectJAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
+import org.springframework.aop.aspectj.ShadowMatchUtils;
 import org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
@@ -44,7 +47,8 @@ import org.springframework.util.ClassUtils;
  * @since 2.0
  */
 @SuppressWarnings("serial")
-public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator {
+public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator
+		implements SmartInitializingSingleton, DisposableBean {
 
 	private static final Comparator<Advisor> DEFAULT_PRECEDENCE_COMPARATOR = new AspectJPrecedenceComparator();
 
@@ -106,6 +110,16 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			}
 		}
 		return super.shouldSkip(beanClass, beanName);
+	}
+
+	@Override
+	public void afterSingletonsInstantiated() {
+		ShadowMatchUtils.clearCache();
+	}
+
+	@Override
+	public void destroy() {
+		ShadowMatchUtils.clearCache();
 	}
 
 

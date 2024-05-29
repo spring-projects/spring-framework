@@ -36,6 +36,7 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -271,7 +272,7 @@ public class MultipartControllerTests {
 		public String processMultipartFileList(@RequestParam(required = false) List<MultipartFile> file,
 				@RequestPart(required = false) Map<String, String> json) throws IOException {
 
-			if (file != null && !file.isEmpty()) {
+			if (!CollectionUtils.isEmpty(file)) {
 				byte[] content = file.get(0).getBytes();
 				assertThat(file.get(1).getBytes()).isEqualTo(content);
 			}

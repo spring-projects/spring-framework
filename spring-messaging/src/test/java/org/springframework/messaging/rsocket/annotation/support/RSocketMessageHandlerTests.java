@@ -16,10 +16,12 @@
 
 package org.springframework.messaging.rsocket.annotation.support;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import io.netty.buffer.UnpooledByteBufAllocator;
 import io.rsocket.frame.FrameType;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -33,6 +35,8 @@ import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.io.buffer.NettyDataBuffer;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.CompositeMessageCondition;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
@@ -250,6 +254,10 @@ class RSocketMessageHandlerTests {
 	}
 
 	private static void testHandleNoMatch(FrameType frameType) {
+		testHandleNoMatch(frameType, "");
+	}
+
+	private static void testHandleNoMatch(FrameType frameType, Object payload) {
 		RSocketMessageHandler handler = new RSocketMessageHandler();
 		handler.setDecoders(Collections.singletonList(StringDecoder.allMimeTypes()));
 		handler.setEncoders(Collections.singletonList(CharSequenceEncoder.allMimeTypes()));
@@ -260,9 +268,40 @@ class RSocketMessageHandlerTests {
 
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
 		headers.setHeader(RSocketFrameTypeMessageCondition.FRAME_TYPE_HEADER, frameType);
-		Message<Object> message = MessageBuilder.createMessage("", headers.getMessageHeaders());
+		Message<Object> message = MessageBuilder.createMessage(payload, headers.getMessageHeaders());
 
 		handler.handleNoMatch(route, message);
+	}
+
+	@Test
+	void handleNoMatchWithNettyBufferPayload() {
+
+		testHandleNoMatchBuffer(FrameType.SETUP, true);
+		testHandleNoMatchBuffer(FrameType.METADATA_PUSH, false);
+		testHandleNoMatchBuffer(FrameType.REQUEST_FNF, false);
+
+		assertThatThrownBy(() -> testHandleNoMatchBuffer(FrameType.REQUEST_RESPONSE, false))
+				.hasMessage("No handler for destination 'path'");
+	}
+
+	private static void testHandleNoMatchBuffer(FrameType frameType, boolean expectReleased) {
+		NettyDataBufferFactory factory = new NettyDataBufferFactory(UnpooledByteBufAllocator.DEFAULT);
+		NettyDataBuffer buf = factory.allocateBuffer(5);
+		buf.write("hello", StandardCharsets.UTF_8);
+
+		assertThat(buf.getNativeBuffer().refCnt()).as(frameType + " refCnt").isOne();
+
+		try {
+			testHandleNoMatch(frameType, buf);
+		}
+		finally {
+			if (expectReleased) {
+				assertThat(buf.getNativeBuffer().refCnt()).as(frameType + " is released").isZero();
+			}
+			else {
+				assertThat(buf.getNativeBuffer().refCnt()).as("is not released").isOne();
+			}
+		}
 	}
 
 

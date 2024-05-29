@@ -165,8 +165,8 @@ for further details.
 [[integration-testing-annotations-testconstructor]]
 == `@TestConstructor`
 
-`@TestConstructor` is a type-level annotation that is used to configure how the parameters
-of a test class constructor are autowired from components in the test's
+`@TestConstructor` is an annotation that can be applied to a test class to configure how
+the parameters of a test class constructor are autowired from components in the test's
 `ApplicationContext`.
 
 If `@TestConstructor` is not present or meta-present on a test class, the default _test
@@ -199,9 +199,9 @@ Spring Boot Test.
 [[integration-testing-annotations-nestedtestconfiguration]]
 == `@NestedTestConfiguration`
 
-`@NestedTestConfiguration` is a type-level annotation that is used to configure how
-Spring test configuration annotations are processed within enclosing class hierarchies
-for inner test classes.
+`@NestedTestConfiguration` is an annotation that can be applied to a test class to
+configure how Spring test configuration annotations are processed within enclosing class
+hierarchies for inner test classes.
 
 If `@NestedTestConfiguration` is not present or meta-present on a test class, in its
 supertype hierarchy, or in its enclosing class hierarchy, the default _enclosing

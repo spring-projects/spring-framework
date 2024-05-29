@@ -28,7 +28,6 @@ import java.util.Set;
 import kotlin.coroutines.Continuation;
 import kotlin.coroutines.CoroutineContext;
 import kotlinx.coroutines.Job;
-import org.reactivestreams.Publisher;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AopInvocationException;
@@ -65,6 +64,10 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.aop.framework.AopProxyUtils
  */
 public abstract class AopUtils {
+
+	private static final boolean coroutinesReactorPresent = ClassUtils.isPresent(
+			"kotlinx.coroutines.reactor.MonoKt", AopUtils.class.getClassLoader());
+
 
 	/**
 	 * Check whether the given object is a JDK dynamic proxy or a CGLIB proxy.
@@ -351,8 +354,8 @@ public abstract class AopUtils {
 		// Use reflection to invoke the method.
 		try {
 			ReflectionUtils.makeAccessible(method);
-			return KotlinDetector.isSuspendingFunction(method) ?
-					KotlinDelegate.invokeSuspendingFunction(method, target, args) : method.invoke(target, args);
+			return (coroutinesReactorPresent && KotlinDetector.isSuspendingFunction(method) ?
+					KotlinDelegate.invokeSuspendingFunction(method, target, args) : method.invoke(target, args));
 		}
 		catch (InvocationTargetException ex) {
 			// Invoked method threw a checked exception.
@@ -374,7 +377,7 @@ public abstract class AopUtils {
 	 */
 	private static class KotlinDelegate {
 
-		public static Publisher<?> invokeSuspendingFunction(Method method, @Nullable Object target, Object... args) {
+		public static Object invokeSuspendingFunction(Method method, @Nullable Object target, Object... args) {
 			Continuation<?> continuation = (Continuation<?>) args[args.length -1];
 			Assert.state(continuation != null, "No Continuation available");
 			CoroutineContext context = continuation.getContext().minusKey(Job.Key);

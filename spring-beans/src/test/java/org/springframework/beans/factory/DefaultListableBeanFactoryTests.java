@@ -1957,6 +1957,42 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	void getBeanByTypeInstanceWithConstructorIgnoresInstanceSupplier() {
+		RootBeanDefinition bd1 = createConstructorDependencyBeanDefinition(99);
+		bd1.setInstanceSupplier(() -> new ConstructorDependency(new TestBean("test")));
+		lbf.registerBeanDefinition("bd1", bd1);
+
+		ConstructorDependency defaultInstance = lbf.getBean(ConstructorDependency.class);
+		assertThat(defaultInstance.beanName).isEqualTo("bd1");
+		assertThat(defaultInstance.spouseAge).isEqualTo(0);
+
+		ConstructorDependency argsInstance = lbf.getBean(ConstructorDependency.class, 42);
+		assertThat(argsInstance.beanName).isEqualTo("bd1");
+		assertThat(argsInstance.spouseAge).isEqualTo(42);
+	}
+
+	@Test
+	void getBeanByTypeInstanceWithFactoryMethodIgnoresInstanceSupplier() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bd1.setFactoryBeanName("config");
+		bd1.setFactoryMethodName("create");
+		bd1.setInstanceSupplier(() -> new TestBean("test"));
+		lbf.registerBeanDefinition("config", new RootBeanDefinition(BeanWithFactoryMethod.class));
+		lbf.registerBeanDefinition("bd1", bd1);
+
+		TestBean defaultInstance = lbf.getBean(TestBean.class);
+		assertThat(defaultInstance.getBeanName()).isEqualTo("bd1");
+		assertThat(defaultInstance.getName()).isEqualTo("test");
+		assertThat(defaultInstance.getAge()).isEqualTo(0);
+
+		TestBean argsInstance = lbf.getBean(TestBean.class, "another", 42);
+		assertThat(argsInstance.getBeanName()).isEqualTo("bd1");
+		assertThat(argsInstance.getName()).isEqualTo("another");
+		assertThat(argsInstance.getAge()).isEqualTo(42);
+	}
+
+	@Test
 	@SuppressWarnings("rawtypes")
 	void beanProviderSerialization() throws Exception {
 		lbf.setSerializationId("test");
@@ -3190,6 +3226,10 @@ class DefaultListableBeanFactoryTests {
 			TestBean tb = new TestBean();
 			tb.setName(this.name);
 			return tb;
+		}
+
+		public TestBean create(String name, int age) {
+			return new TestBean(name, age);
 		}
 
 		public TestBean createWithArgs(String arg) {

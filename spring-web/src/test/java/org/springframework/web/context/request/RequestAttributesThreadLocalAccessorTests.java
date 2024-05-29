@@ -16,8 +16,6 @@
 
 package org.springframework.web.context.request;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -25,66 +23,120 @@ import io.micrometer.context.ContextRegistry;
 import io.micrometer.context.ContextSnapshot;
 import io.micrometer.context.ContextSnapshot.Scope;
 import io.micrometer.context.ContextSnapshotFactory;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import org.springframework.lang.Nullable;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
+import static org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST;
 
 /**
  * Tests for {@link RequestAttributesThreadLocalAccessor}.
  *
  * @author Tadaya Tsuyukubo
+ * @author Rossen Stoyanchev
  */
 class RequestAttributesThreadLocalAccessorTests {
 
-	private final ContextRegistry registry = new ContextRegistry()
-			.registerThreadLocalAccessor(new RequestAttributesThreadLocalAccessor());
+	private final ContextRegistry registry =
+			new ContextRegistry().registerThreadLocalAccessor(new RequestAttributesThreadLocalAccessor());
 
-	@AfterEach
-	void cleanUp() {
-		RequestContextHolder.resetRequestAttributes();
+
+	private static Stream<Arguments> propagation() {
+		RequestAttributes previous = mock(RequestAttributes.class);
+		RequestAttributes current = mock(RequestAttributes.class);
+		return Stream.of(Arguments.of(null, current), Arguments.of(previous, current));
 	}
 
 	@ParameterizedTest
 	@MethodSource
 	@SuppressWarnings({ "try", "unused" })
-	void propagation(@Nullable RequestAttributes previous, RequestAttributes current) throws Exception {
-		RequestContextHolder.setRequestAttributes(current);
-		ContextSnapshot snapshot = ContextSnapshotFactory.builder()
-				.contextRegistry(this.registry)
-				.clearMissing(true)
-				.build()
-				.captureAll();
+	void propagation(RequestAttributes previousRequest, RequestAttributes currentRequest) throws Exception {
+		ContextSnapshot snapshot = getSnapshotFor(currentRequest);
 
-		AtomicReference<RequestAttributes> previousHolder = new AtomicReference<>();
-		AtomicReference<RequestAttributes> currentHolder = new AtomicReference<>();
-		CountDownLatch latch = new CountDownLatch(1);
-		new Thread(() -> {
-			RequestContextHolder.setRequestAttributes(previous);
+		AtomicReference<RequestAttributes> requestInScope = new AtomicReference<>();
+		AtomicReference<RequestAttributes> requestAfterScope = new AtomicReference<>();
+
+		Thread thread = new Thread(() -> {
+			RequestContextHolder.setRequestAttributes(previousRequest);
 			try (Scope scope = snapshot.setThreadLocals()) {
-				currentHolder.set(RequestContextHolder.getRequestAttributes());
+				requestInScope.set(RequestContextHolder.getRequestAttributes());
 			}
-			previousHolder.set(RequestContextHolder.getRequestAttributes());
-			latch.countDown();
-		}).start();
+			requestAfterScope.set(RequestContextHolder.getRequestAttributes());
+		});
 
-		latch.await(1, TimeUnit.SECONDS);
-		assertThat(previousHolder).hasValueSatisfying(value -> assertThat(value).isSameAs(previous));
-		assertThat(currentHolder).hasValueSatisfying(value -> assertThat(value).isSameAs(current));
+		thread.start();
+		thread.join(1000);
+
+		assertThat(requestInScope).hasValueSatisfying(value -> assertThat(value).isSameAs(currentRequest));
+		assertThat(requestAfterScope).hasValueSatisfying(value -> assertThat(value).isSameAs(previousRequest));
 	}
 
-	private static Stream<Arguments> propagation() {
-		RequestAttributes previous = mock(RequestAttributes.class);
-		RequestAttributes current = mock(RequestAttributes.class);
-		return Stream.of(
-				Arguments.of(null, current),
-				Arguments.of(previous, current)
-		);
+	@Test
+	@SuppressWarnings("try")
+	void accessAfterRequestMarkedCompleted() {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+		servletRequest.setAttribute("k1", "v1");
+		servletRequest.setAttribute("k2", "v2");
+
+		ServletRequestAttributes attributes = new ServletRequestAttributes(servletRequest, new MockHttpServletResponse());
+		ContextSnapshot snapshot = getSnapshotFor(attributes);
+		attributes.requestCompleted(); // REQUEST dispatch ends, async handling continues
+
+		try (Scope scope = snapshot.setThreadLocals()) {
+			RequestAttributes current = RequestContextHolder.getRequestAttributes();
+			assertThat(current).isNotNull();
+			assertThat(current.getAttributeNames(SCOPE_REQUEST)).containsExactly("k1", "k2");
+			assertThat(current.getAttribute("k1", SCOPE_REQUEST)).isEqualTo("v1");
+			assertThat(current.getAttribute("k2", SCOPE_REQUEST)).isEqualTo("v2");
+			assertThatIllegalStateException().isThrownBy(() -> current.setAttribute("k3", "v3", SCOPE_REQUEST));
+		}
+	}
+
+	@Test
+	@SuppressWarnings("try")
+	void accessBeforeRequestMarkedCompleted() {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+		ServletRequestAttributes previous = new ServletRequestAttributes(servletRequest, new MockHttpServletResponse());
+
+		ContextSnapshot snapshot = getSnapshotFor(previous);
+
+		RequestContextHolder.setRequestAttributes(previous);
+		try {
+			try (Scope scope = snapshot.setThreadLocals()) {
+				RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+				assertThat(attributes).isNotNull();
+				attributes.setAttribute("k1", "v1", SCOPE_REQUEST);
+			}
+			RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+			assertThat(attributes).isNotNull();
+			attributes.setAttribute("k2", "v2", SCOPE_REQUEST);
+		}
+		finally {
+			RequestContextHolder.resetRequestAttributes();
+		}
+
+		assertThat(previous.getAttributeNames(SCOPE_REQUEST)).containsExactly("k1", "k2");
+		assertThat(previous.getAttribute("k1", SCOPE_REQUEST)).isEqualTo("v1");
+		assertThat(previous.getAttribute("k2", SCOPE_REQUEST)).isEqualTo("v2");
+	}
+
+	private ContextSnapshot getSnapshotFor(RequestAttributes request) {
+		RequestContextHolder.setRequestAttributes(request);
+		try {
+			return ContextSnapshotFactory.builder()
+					.contextRegistry(this.registry).clearMissing(true).build()
+					.captureAll();
+		}
+		finally {
+			RequestContextHolder.resetRequestAttributes();
+		}
 	}
 
 }

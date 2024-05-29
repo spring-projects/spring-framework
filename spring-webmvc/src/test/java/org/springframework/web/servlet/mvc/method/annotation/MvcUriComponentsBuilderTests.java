@@ -42,6 +42,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
@@ -332,6 +333,14 @@ public class MvcUriComponentsBuilderTests {
 		UriComponents uriComponents = fromMethodName(ControllerWithMethods.class,
 				"methodWithConfigurableMapping", "1").build();
 		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/something/custom/1/foo");
+	}
+
+	@Test
+	void fromMethodNameWithAnnotationsOnInterface() {
+		initWebApplicationContext(WebConfig.class);
+		UriComponents uriComponents = fromMethodName(HelloController.class, "get", "test").build();
+
+		assertThat(uriComponents.toString()).isEqualTo("http://localhost/hello/test");
 	}
 
 	@Test
@@ -852,6 +861,23 @@ public class MvcUriComponentsBuilderTests {
 		@GetMapping("/bookings/{booking}")
 		public Savepoint getBooking(@PathVariable Long booking) {
 			return null;
+		}
+	}
+
+
+	interface HelloInterface {
+
+		@GetMapping("/hello/{name}")
+		ResponseEntity<String> get(@PathVariable String name);
+	}
+
+
+	@Controller
+	static class HelloController implements HelloInterface {
+
+		@Override
+		public ResponseEntity<String> get(String name) {
+			return ResponseEntity.ok("Hello " + name);
 		}
 	}
 

@@ -21,26 +21,50 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.math.BigDecimal;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+import example.Color;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.ReflectiveIndexAccessor;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Person;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.doThrow;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.expression.spel.SpelMessage.EXCEPTION_DURING_INDEX_READ;
+import static org.springframework.expression.spel.SpelMessage.EXCEPTION_DURING_INDEX_WRITE;
 import static org.springframework.expression.spel.SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE;
 import static org.springframework.expression.spel.SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE;
 
@@ -438,6 +462,58 @@ class IndexingTests {
 			assertThat(expression.getValue(context)).isEqualTo("Jane");
 		}
 
+		@Test
+		void nullSafeIndexWithCustomIndexAccessor() {
+			context.addIndexAccessor(new BirdsIndexAccessor());
+			context.setVariable("color", Color.RED);
+
+			expression = parser.parseExpression("birds?.[#color]");
+			assertThat(expression.getValue(context)).isNull();
+			rootContext.birds = new Birds();
+			assertThat(expression.getValue(context)).isEqualTo("cardinal");
+		}
+
+		static class Birds {
+
+			public String get(Color color) {
+				return switch (color) {
+					case RED -> "cardinal";
+					case BLUE -> "blue jay";
+					default -> throw new RuntimeException("unknown bird color: " + color);
+				};
+			}
+		}
+
+		static class BirdsIndexAccessor implements IndexAccessor {
+
+			@Override
+			public Class<?>[] getSpecificTargetClasses() {
+				return new Class<?>[] { Birds.class };
+			}
+
+			@Override
+			public boolean canRead(EvaluationContext context, Object target, Object index) {
+				return (target instanceof Birds && index instanceof Color);
+			}
+
+			@Override
+			public TypedValue read(EvaluationContext context, Object target, Object index) {
+				Birds birds = (Birds) target;
+				Color color = (Color) index;
+				return new TypedValue(birds.get(color));
+			}
+
+			@Override
+			public boolean canWrite(EvaluationContext context, Object target, Object index) {
+				return false;
+			}
+
+			@Override
+			public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
+				throw new UnsupportedOperationException();
+			}
+		}
+
 		static class RootContextWithIndexedProperties {
 			public int[] array;
 			public List<Integer> list;
@@ -445,8 +521,332 @@ class IndexingTests {
 			public String string;
 			public Map<String, Integer> map;
 			public Person person;
+			public Birds birds;
 		}
 
+	}
+
+	@Nested
+	class IndexAccessorTests {  // gh-26478
+
+		private final StandardEvaluationContext context = new StandardEvaluationContext();
+		private final SpelExpressionParser parser = new SpelExpressionParser();
+
+		@Test
+		void addingAndRemovingIndexAccessors() {
+			ObjectMapper objectMapper = new ObjectMapper();
+			IndexAccessor accessor1 = new JacksonArrayNodeIndexAccessor(objectMapper);
+			IndexAccessor accessor2 = new JacksonArrayNodeIndexAccessor(objectMapper);
+
+			List<IndexAccessor> indexAccessors = context.getIndexAccessors();
+			assertThat(indexAccessors).isEmpty();
+
+			context.addIndexAccessor(accessor1);
+			assertThat(indexAccessors).containsExactly(accessor1);
+
+			context.addIndexAccessor(accessor2);
+			assertThat(indexAccessors).containsExactly(accessor1, accessor2);
+
+			List<IndexAccessor> copy = new ArrayList<>(indexAccessors);
+			assertThat(context.removeIndexAccessor(accessor1)).isTrue();
+			assertThat(context.removeIndexAccessor(accessor1)).isFalse();
+			assertThat(indexAccessors).containsExactly(accessor2);
+
+			context.setIndexAccessors(copy);
+			assertThat(context.getIndexAccessors()).containsExactly(accessor1, accessor2);
+		}
+
+		@Test
+		void noSuitableIndexAccessorResultsInException() {
+			assertThat(context.getIndexAccessors()).isEmpty();
+
+			Expression expr = parser.parseExpression("[0]");
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.getValue(context, this))
+					.withMessageEndingWith("Indexing into type '%s' is not supported", getClass().getName())
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(INDEXING_NOT_SUPPORTED_FOR_TYPE);
+		}
+
+		@Test
+		void canReadThrowsException() throws Exception {
+			RuntimeException exception = new RuntimeException("Boom!");
+
+			IndexAccessor mock = mock();
+			given(mock.getSpecificTargetClasses()).willReturn(null);
+			given(mock.canRead(any(), eq(this), any())).willThrow(exception);
+			context.addIndexAccessor(mock);
+
+			Expression expr = parser.parseExpression("[0]");
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.getValue(context, this))
+					.withMessageEndingWith("A problem occurred while attempting to read index '%d' in '%s'",
+							0, getClass().getName())
+					.withCause(exception)
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_READ);
+
+			verify(mock, times(1)).getSpecificTargetClasses();
+			verify(mock, times(1)).canRead(any(), any(), any());
+			verifyNoMoreInteractions(mock);
+		}
+
+		@Test
+		void readThrowsException() throws Exception {
+			RuntimeException exception = new RuntimeException("Boom!");
+
+			IndexAccessor mock = mock();
+			given(mock.getSpecificTargetClasses()).willReturn(null);
+			given(mock.canRead(any(), eq(this), any())).willReturn(true);
+			given(mock.read(any(), eq(this), any())).willThrow(exception);
+			context.addIndexAccessor(mock);
+
+			Expression expr = parser.parseExpression("[0]");
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.getValue(context, this))
+					.withMessageEndingWith("A problem occurred while attempting to read index '%d' in '%s'",
+							0, getClass().getName())
+					.withCause(exception)
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_READ);
+
+			verify(mock, times(2)).getSpecificTargetClasses();
+			verify(mock, times(2)).canRead(any(), any(), any());
+			verify(mock, times(1)).read(any(), any(), any());
+			verifyNoMoreInteractions(mock);
+		}
+
+		@Test
+		void canWriteThrowsException() throws Exception {
+			RuntimeException exception = new RuntimeException("Boom!");
+
+			IndexAccessor mock = mock();
+			given(mock.getSpecificTargetClasses()).willReturn(null);
+			given(mock.canWrite(eq(context), eq(this), eq(0))).willThrow(exception);
+			context.addIndexAccessor(mock);
+
+			Expression expr = parser.parseExpression("[0]");
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.setValue(context, this, 999))
+					.withMessageEndingWith("A problem occurred while attempting to write index '%d' in '%s'",
+							0, getClass().getName())
+					.withCause(exception)
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_WRITE);
+
+			verify(mock, times(1)).getSpecificTargetClasses();
+			verify(mock, times(1)).canWrite(any(), any(), any());
+			verifyNoMoreInteractions(mock);
+		}
+
+		@Test
+		void writeThrowsException() throws Exception {
+			RuntimeException exception = new RuntimeException("Boom!");
+
+			IndexAccessor mock = mock();
+			given(mock.getSpecificTargetClasses()).willReturn(null);
+			given(mock.canWrite(eq(context), eq(this), eq(0))).willReturn(true);
+			doThrow(exception).when(mock).write(any(), any(), any(), any());
+			context.addIndexAccessor(mock);
+
+			Expression expr = parser.parseExpression("[0]");
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.setValue(context, this, 999))
+					.withMessageEndingWith("A problem occurred while attempting to write index '%d' in '%s'",
+							0, getClass().getName())
+					.withCause(exception)
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(EXCEPTION_DURING_INDEX_WRITE);
+
+			verify(mock, times(2)).getSpecificTargetClasses();
+			verify(mock, times(2)).canWrite(any(), any(), any());
+			verify(mock, times(1)).write(any(), any(), any(), any());
+			verifyNoMoreInteractions(mock);
+		}
+
+		@Test
+		void readAndWriteIndex() {
+			ObjectMapper objectMapper = new ObjectMapper();
+			context.addIndexAccessor(new JacksonArrayNodeIndexAccessor(objectMapper));
+
+			TextNode node0 = new TextNode("node0");
+			TextNode node1 = new TextNode("node1");
+			ArrayNode arrayNode = objectMapper.createArrayNode();
+			arrayNode.addAll(List.of(node0, node1));
+
+			Expression expr = parser.parseExpression("[0]");
+			assertThat(expr.getValue(context, arrayNode)).isSameAs(node0);
+
+			TextNode nodeX = new TextNode("nodeX");
+			expr.setValue(context, arrayNode, nodeX);
+			// We use isEqualTo() instead of isSameAs(), since ObjectMapper.convertValue()
+			// converts the supplied TextNode to an equivalent JsonNode.
+			assertThat(expr.getValue(context, arrayNode)).isEqualTo(nodeX);
+
+			NullNode nullNode = NullNode.getInstance();
+			expr.setValue(context, arrayNode, nullNode);
+			assertThat(expr.getValue(context, arrayNode)).isSameAs(nullNode);
+
+			expr = parser.parseExpression("[1]");
+			assertThat(expr.getValue(context, arrayNode)).isSameAs(node1);
+
+			expr = parser.parseExpression("[-1]");
+			// Jackson's ArrayNode returns null for a non-existent index instead
+			// of throwing an ArrayIndexOutOfBoundsException or similar.
+			assertThat(expr.getValue(context, arrayNode)).isNull();
+		}
+
+		@Test
+		void readAndWriteIndexWithSimpleEvaluationContext() {
+			ObjectMapper objectMapper = new ObjectMapper();
+			SimpleEvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding()
+					.withIndexAccessors(new JacksonArrayNodeIndexAccessor(objectMapper))
+					.build();
+
+			TextNode node0 = new TextNode("node0");
+			TextNode node1 = new TextNode("node1");
+			ArrayNode arrayNode = objectMapper.createArrayNode();
+			arrayNode.addAll(List.of(node0, node1));
+
+			Expression expr = parser.parseExpression("[0]");
+			assertThat(expr.getValue(context, arrayNode)).isSameAs(node0);
+
+			TextNode nodeX = new TextNode("nodeX");
+			expr.setValue(context, arrayNode, nodeX);
+			// We use isEqualTo() instead of isSameAs(), since ObjectMapper.convertValue()
+			// converts the supplied TextNode to an equivalent JsonNode.
+			assertThat(expr.getValue(context, arrayNode)).isEqualTo(nodeX);
+
+			expr = parser.parseExpression("[1]");
+			assertThat(expr.getValue(context, arrayNode)).isSameAs(node1);
+		}
+
+		@Test  // gh-32706
+		void readIndexWithStringIndexType() {
+			BirdNameToColorMappings birdNameMappings = new BirdNameToColorMappings();
+
+			// Without a registered BirdNameToColorMappingsIndexAccessor, we should
+			// be able to index into an object via a property name.
+			Expression propertyExpression = parser.parseExpression("['property']");
+			assertThat(propertyExpression.getValue(context, birdNameMappings)).isEqualTo("enigma");
+
+			context.addIndexAccessor(new BirdNameToColorMappingsIndexAccessor());
+
+			Expression expression = parser.parseExpression("['cardinal']");
+			assertThat(expression.getValue(context, birdNameMappings)).isEqualTo(Color.RED);
+
+			// With a registered BirdNameToColorMappingsIndexAccessor, an attempt
+			// to index into an object via a property name should fail.
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> propertyExpression.getValue(context, birdNameMappings))
+					.withMessageEndingWith("A problem occurred while attempting to read index '%s' in '%s'",
+							"property", BirdNameToColorMappings.class.getName())
+					.havingCause().withMessage("unknown bird: property");
+		}
+
+		@Test  // gh-32736
+		void readIndexWithCollectionTargetType() {
+			context.addIndexAccessor(new ColorCollectionIndexAccessor());
+
+			Expression expression = parser.parseExpression("[0]");
+
+			// List.of() relies on built-in list support.
+			assertThat(expression.getValue(context, List.of(Color.RED))).isEqualTo(Color.RED);
+
+			ColorCollection colorCollection = new ColorCollection();
+
+			// Preconditions for this use case.
+			assertThat(colorCollection).isInstanceOf(Collection.class);
+			assertThat(colorCollection).isNotInstanceOf(List.class);
+
+			// ColorCollection relies on custom ColorCollectionIndexAccessor.
+			assertThat(expression.getValue(context, colorCollection)).isEqualTo(Color.RED);
+		}
+
+		static class BirdNameToColorMappings {
+
+			public final String property = "enigma";
+
+			public Color get(String name) {
+				return switch (name) {
+					case "cardinal" -> Color.RED;
+					case "blue jay" -> Color.BLUE;
+					default -> throw new NoSuchElementException("unknown bird: " + name);
+				};
+			}
+		}
+
+		static class BirdNameToColorMappingsIndexAccessor extends ReflectiveIndexAccessor {
+
+			BirdNameToColorMappingsIndexAccessor() {
+				super(BirdNameToColorMappings.class, String.class, "get");
+			}
+		}
+
+		static class ColorCollection extends AbstractCollection<Color> {
+
+			public Color get(int index) {
+				return switch (index) {
+					case 0 -> Color.RED;
+					case 1 -> Color.BLUE;
+					default -> throw new NoSuchElementException("No color at index " + index);
+				};
+			}
+
+			@Override
+			public Iterator<Color> iterator() {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public int size() {
+				throw new UnsupportedOperationException();
+			}
+		}
+
+		static class ColorCollectionIndexAccessor extends ReflectiveIndexAccessor {
+
+			ColorCollectionIndexAccessor() {
+				super(ColorCollection.class, int.class, "get");
+			}
+		}
+
+		/**
+		 * {@link IndexAccessor} that knows how to read and write indexes in a
+		 * Jackson {@link ArrayNode}.
+		 */
+		private static class JacksonArrayNodeIndexAccessor implements IndexAccessor {
+
+			private final ObjectMapper objectMapper;
+
+			JacksonArrayNodeIndexAccessor(ObjectMapper objectMapper) {
+				this.objectMapper = objectMapper;
+			}
+
+			@Override
+			public Class<?>[] getSpecificTargetClasses() {
+				return new Class<?>[] { ArrayNode.class };
+			}
+
+			@Override
+			public boolean canRead(EvaluationContext context, Object target, Object index) {
+				return (target instanceof ArrayNode && index instanceof Integer);
+			}
+
+			@Override
+			public TypedValue read(EvaluationContext context, Object target, Object index) {
+				ArrayNode arrayNode = (ArrayNode) target;
+				Integer intIndex = (Integer) index;
+				return new TypedValue(arrayNode.get(intIndex));
+			}
+
+			@Override
+			public boolean canWrite(EvaluationContext context, Object target, Object index) {
+				return canRead(context, target, index);
+			}
+
+			@Override
+			public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
+				ArrayNode arrayNode = (ArrayNode) target;
+				Integer intIndex = (Integer) index;
+				arrayNode.set(intIndex, this.objectMapper.convertValue(newValue, JsonNode.class));
+			}
+		}
 	}
 
 

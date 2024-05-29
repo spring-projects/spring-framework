@@ -1,0 +1,51 @@
+[[spring-testing-annotation-beanoverriding-mockitobean]]
+= `@MockitoBean` and `@MockitoSpyBean`
+
+`@MockitoBean` and `@MockitoSpyBean` are used on test class fields to override beans in
+the test's `ApplicationContext` with a Mockito mock or spy, respectively. In the latter
+case, the original bean definition is not replaced, but instead an early instance of the
+bean is captured and wrapped by the spy.
+
+By default, the annotated field's type is used to search for candidate definitions to
+override, but note that `@Qualifier` annotations are also taken into account for the
+purpose of matching. Users can also make things entirely explicit by specifying a bean
+`name` in the annotation.
+
+Each annotation also defines Mockito-specific attributes to fine-tune the mocking details.
+
+The `@MockitoBean` annotation uses the `REPLACE_OR_CREATE_DEFINITION`
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy for test bean overriding].
+
+It requires that at most one matching candidate definition exists if a bean name
+is specified, or exactly one if no bean name is specified.
+
+The `@MockitoSpyBean` annotation uses the `WRAP_BEAN`
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy],
+and the original instance is wrapped in a Mockito spy.
+
+It requires that exactly one candidate definition exists.
+
+The following example shows how to configure the bean name via `@MockitoBean` and
+`@MockitoSpyBean`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class OverrideBeanTests {
+
+		@MockitoBean(name = "service1")  // <1>
+		private CustomService mockService;
+
+		@MockitoSpyBean(name = "service2") // <2>
+		private CustomService spyService; // <3>
+
+		// test case body...
+	}
+----
+<1> Mark `mockService` as a Mockito mock override of bean `service1` in this test class.
+<2> Mark `spyService` as a Mockito spy override of bean `service2` in this test class.
+<3> The fields will be injected with the Mockito mock and spy, respectively.
+======

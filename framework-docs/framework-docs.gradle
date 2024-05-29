@@ -10,27 +10,10 @@ apply from: "${rootDir}/gradle/ide.gradle"
 apply from: "${rootDir}/gradle/publications.gradle"
 
 antora {
-	version = '3.2.0-alpha.2'
-	playbook = 'cached-antora-playbook.yml'
-	playbookProvider {
-		repository = 'spring-projects/spring-framework'
-		branch = 'docs-build'
-		path = 'lib/antora/templates/per-branch-antora-playbook.yml'
-		checkLocalBranch = true
-	}
-	options = ['--clean', '--stacktrace']
+	options = [clean: true, fetch: !project.gradle.startParameter.offline, stacktrace: true]
 	environment = [
-			'ALGOLIA_API_KEY': '82c7ead946afbac3cf98c32446154691',
-			'ALGOLIA_APP_ID': '244V8V9FGG',
-			'ALGOLIA_INDEX_NAME': 'framework-docs'
-	]
-	dependencies = [
-			'@antora/atlas-extension': '1.0.0-alpha.1',
-			'@antora/collector-extension': '1.0.0-alpha.3',
-			'@asciidoctor/tabs': '1.0.0-beta.3',
-			'@opendevise/antora-release-line-extension': '1.0.0',
-			'@springio/antora-extensions': '1.8.2',
-			'@springio/asciidoctor-extensions': '1.0.0-alpha.10'
+			'BUILD_REFNAME': 'HEAD',
+			'BUILD_VERSION': project.version,
 	]
 }
 
@@ -65,6 +48,8 @@ dependencies {
 	api(project(":spring-web"))
 	api(project(":spring-webmvc"))
 	api(project(":spring-context-support"))
+	api(project(":spring-aspects"))
+	api(project(":spring-websocket"))
 
 	api("org.jetbrains.kotlin:kotlin-stdlib")
 	api("jakarta.jms:jakarta.jms-api")
@@ -74,6 +59,12 @@ dependencies {
 	api("com.fasterxml.jackson.core:jackson-databind")
 	api("com.fasterxml.jackson.module:jackson-module-parameter-names")
 	api("jakarta.validation:jakarta.validation-api")
+	api("org.aspectj:aspectjweaver")
+	api("io.projectreactor.netty:reactor-netty-http")
+	api("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
+	api("javax.cache:cache-api")
+	api("jakarta.resource:jakarta.resource-api")
+	api("org.apache.activemq:activemq-ra:6.1.2")
 
 	implementation(project(":spring-core-test"))
 	implementation("org.assertj:assertj-core")

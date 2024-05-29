@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,10 @@ import java.util.Map;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * The default implementation of Spring's {@link SqlRowSet} interface, wrapping a
+ * The common implementation of Spring's {@link SqlRowSet} interface, wrapping a
  * {@link java.sql.ResultSet}, catching any {@link SQLException SQLExceptions} and
  * translating them to a corresponding Spring {@link InvalidResultSetAccessException}.
  *
@@ -99,13 +100,22 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			ResultSetMetaData rsmd = resultSet.getMetaData();
 			if (rsmd != null) {
 				int columnCount = rsmd.getColumnCount();
-				this.columnLabelMap = CollectionUtils.newHashMap(columnCount);
+				this.columnLabelMap = CollectionUtils.newHashMap(columnCount * 2);
 				for (int i = 1; i <= columnCount; i++) {
 					String key = rsmd.getColumnLabel(i);
 					// Make sure to preserve first matching column for any given name,
 					// as defined in ResultSet's type-level javadoc (lines 81 to 83).
 					if (!this.columnLabelMap.containsKey(key)) {
 						this.columnLabelMap.put(key, i);
+					}
+					// Also support column names prefixed with table name
+					// as in {table_name}.{column.name}.
+					String table = rsmd.getTableName(i);
+					if (StringUtils.hasLength(table)) {
+						key = table + "." + rsmd.getColumnName(i);
+						if (!this.columnLabelMap.containsKey(key)) {
+							this.columnLabelMap.put(key, i);
+						}
 					}
 				}
 			}

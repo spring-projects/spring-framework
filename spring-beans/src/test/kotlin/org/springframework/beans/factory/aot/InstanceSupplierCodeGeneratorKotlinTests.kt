@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.aot.hint.*
 import org.springframework.aot.test.generate.TestGenerationContext
 import org.springframework.beans.factory.config.BeanDefinition
-import org.springframework.beans.factory.support.DefaultListableBeanFactory
-import org.springframework.beans.factory.support.InstanceSupplier
-import org.springframework.beans.factory.support.RegisteredBean
-import org.springframework.beans.factory.support.RootBeanDefinition
+import org.springframework.beans.factory.support.*
+import org.springframework.beans.testfixture.beans.KotlinConfiguration
 import org.springframework.beans.testfixture.beans.KotlinTestBean
 import org.springframework.beans.testfixture.beans.KotlinTestBeanWithOptionalParameter
 import org.springframework.beans.testfixture.beans.factory.aot.DeferredTypeBuilder
@@ -46,6 +44,8 @@ import javax.lang.model.element.Modifier
 class InstanceSupplierCodeGeneratorKotlinTests {
 
     private val generationContext = TestGenerationContext()
+
+	private val beanFactory = DefaultListableBeanFactory()
 
     @Test
     fun generateWhenHasDefaultConstructor() {
@@ -74,6 +74,39 @@ class InstanceSupplierCodeGeneratorKotlinTests {
             .satisfies(hasMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
     }
 
+	@Test
+	fun generateWhenHasFactoryMethodWithNoArg() {
+		val beanDefinition = BeanDefinitionBuilder
+			.rootBeanDefinition(String::class.java)
+			.setFactoryMethodOnBean("stringBean", "config").beanDefinition
+		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+				.genericBeanDefinition(KotlinConfiguration::class.java).beanDefinition
+		)
+		compile(beanFactory, beanDefinition) { instanceSupplier, compiled ->
+			val bean = getBean<String>(beanFactory, beanDefinition, instanceSupplier)
+			Assertions.assertThat(bean).isInstanceOf(String::class.java)
+			Assertions.assertThat(bean).isEqualTo("Hello")
+			Assertions.assertThat(compiled.sourceFile).contains(
+				"getBeanFactory().getBean(KotlinConfiguration.class).stringBean()"
+			)
+		}
+		Assertions.assertThat<TypeHint?>(getReflectionHints().getTypeHint(KotlinConfiguration::class.java))
+			.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT))
+	}
+
+	@Test
+	fun generateWhenHasSuspendingFactoryMethod() {
+		val beanDefinition = BeanDefinitionBuilder
+			.rootBeanDefinition(String::class.java)
+			.setFactoryMethodOnBean("suspendingStringBean", "config").beanDefinition
+		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+				.genericBeanDefinition(KotlinConfiguration::class.java).beanDefinition
+		)
+		Assertions.assertThatIllegalStateException().isThrownBy {
+			compile(beanFactory, beanDefinition) { _, _  -> }
+		}
+	}
+
     private fun getReflectionHints(): ReflectionHints {
         return generationContext.runtimeHints.reflection()
     }
@@ -96,6 +129,12 @@ class InstanceSupplierCodeGeneratorKotlinTests {
         }
     }
 
+	private fun hasMethodWithMode(mode: ExecutableMode): ThrowingConsumer<TypeHint> {
+		return ThrowingConsumer { hint: TypeHint ->
+			Assertions.assertThat(hint.methods()).anySatisfy(hasMode(mode))
+		}
+	}
+
     @Suppress("UNCHECKED_CAST")
     private fun <T> getBean(beanFactory: DefaultListableBeanFactory, beanDefinition: BeanDefinition,
                             instanceSupplier: InstanceSupplier<*>): T {
@@ -116,9 +155,9 @@ class InstanceSupplierCodeGeneratorKotlinTests {
             generationContext, generateClass.name,
             generateClass.methods, false
         )
-        val constructorOrFactoryMethod = registeredBean.resolveConstructorOrFactoryMethod()
-        Assertions.assertThat(constructorOrFactoryMethod).isNotNull()
-        val generatedCode = generator.generateCode(registeredBean, constructorOrFactoryMethod)
+        val instantiationDescriptor = registeredBean.resolveInstantiationDescriptor()
+        Assertions.assertThat(instantiationDescriptor).isNotNull()
+        val generatedCode = generator.generateCode(registeredBean, instantiationDescriptor)
         typeBuilder.set { type: TypeSpec.Builder ->
             type.addModifiers(Modifier.PUBLIC)
             type.addSuperinterface(

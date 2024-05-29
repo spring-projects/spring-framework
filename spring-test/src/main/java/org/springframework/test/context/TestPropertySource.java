@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.support.PropertySourceFactory;
 
 /**
- * {@code @TestPropertySource} is a class-level annotation that is used to
- * configure the {@link #locations} of properties files and inlined
+ * {@code @TestPropertySource} is an annotation that can be applied to a test
+ * class to configure the {@link #locations} of properties files and inlined
  * {@link #properties} to be added to the {@code Environment}'s set of
  * {@code PropertySources} for an
  * {@link org.springframework.context.ApplicationContext ApplicationContext}

@@ -16,6 +16,7 @@
 
 package org.springframework.expression;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -46,25 +47,44 @@ public interface EvaluationContext {
 
 	/**
 	 * Return the default root context object against which unqualified
-	 * properties/methods/etc should be resolved. This can be overridden
-	 * when evaluating an expression.
+	 * properties, methods, etc. should be resolved.
+	 * <p>This can be overridden when evaluating an expression.
 	 */
 	TypedValue getRootObject();
 
 	/**
 	 * Return a list of accessors that will be asked in turn to read/write a property.
+	 * <p>The default implementation returns an empty list.
 	 */
-	List<PropertyAccessor> getPropertyAccessors();
+	default List<PropertyAccessor> getPropertyAccessors() {
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Return a list of index accessors that will be asked in turn to access or
+	 * set an indexed value.
+	 * <p>The default implementation returns an empty list.
+	 * @since 6.2
+	 */
+	default List<IndexAccessor> getIndexAccessors() {
+		return Collections.emptyList();
+	}
 
 	/**
 	 * Return a list of resolvers that will be asked in turn to locate a constructor.
+	 * <p>The default implementation returns an empty list.
 	 */
-	List<ConstructorResolver> getConstructorResolvers();
+	default List<ConstructorResolver> getConstructorResolvers() {
+		return Collections.emptyList();
+	}
 
 	/**
 	 * Return a list of resolvers that will be asked in turn to locate a method.
+	 * <p>The default implementation returns an empty list.
 	 */
-	List<MethodResolver> getMethodResolvers();
+	default List<MethodResolver> getMethodResolvers() {
+		return Collections.emptyList();
+	}
 
 	/**
 	 * Return a bean resolver that can look up beans by name.

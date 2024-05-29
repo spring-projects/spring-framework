@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,6 @@ public final class WebHttpHandlerBuilder {
 	public WebHttpHandlerBuilder filter(WebFilter... filters) {
 		if (!ObjectUtils.isEmpty(filters)) {
 			this.filters.addAll(Arrays.asList(filters));
-			updateFilters();
 		}
 		return this;
 	}
@@ -254,27 +253,7 @@ public final class WebHttpHandlerBuilder {
 	 */
 	public WebHttpHandlerBuilder filters(Consumer<List<WebFilter>> consumer) {
 		consumer.accept(this.filters);
-		updateFilters();
 		return this;
-	}
-
-	private void updateFilters() {
-		if (this.filters.isEmpty()) {
-			return;
-		}
-
-		List<WebFilter> filtersToUse = this.filters.stream()
-				.peek(filter -> {
-					if (filter instanceof ForwardedHeaderTransformer forwardedHeaderTransformerFilter
-							&& this.forwardedHeaderTransformer == null) {
-						this.forwardedHeaderTransformer = forwardedHeaderTransformerFilter;
-					}
-				})
-				.filter(filter -> !(filter instanceof ForwardedHeaderTransformer))
-				.toList();
-
-		this.filters.clear();
-		this.filters.addAll(filtersToUse);
 	}
 
 	/**

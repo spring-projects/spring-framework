@@ -40,6 +40,9 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
+import org.springframework.test.json.JsonComparator;
+import org.springframework.test.json.JsonCompareMode;
+import org.springframework.test.json.JsonComparison;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -997,10 +1000,10 @@ public interface WebTestClient {
 		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
 		 * to be on the classpath.
 		 * @param expectedJson the expected JSON content
-		 * @see #json(String, boolean)
+		 * @see #json(String, JsonCompareMode)
 		 */
 		default BodyContentSpec json(String expectedJson) {
-			return json(expectedJson, false);
+			return json(expectedJson, JsonCompareMode.LENIENT);
 		}
 
 		/**
@@ -1019,8 +1022,36 @@ public interface WebTestClient {
 		 * @param strict enables strict checking if {@code true}
 		 * @since 5.3.16
 		 * @see #json(String)
+		 * @deprecated in favor of {@link #json(String, JsonCompareMode)}
 		 */
+		@Deprecated(since = "6.2")
 		BodyContentSpec json(String expectedJson, boolean strict);
+
+		/**
+		 * Parse the expected and actual response content as JSON and perform a
+		 * comparison using the given {@linkplain JsonCompareMode mode}. If the
+		 * comparison failed, throws an {@link AssertionError} with the message
+		 * of the {@link JsonComparison}.
+		 * <p>Use of this method requires the
+		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
+		 * to be on the classpath.
+		 * @param expectedJson the expected JSON content
+		 * @param compareMode the compare mode
+		 * @since 6.2
+		 * @see #json(String)
+		 */
+		BodyContentSpec json(String expectedJson, JsonCompareMode compareMode);
+
+		/**
+		 * Parse the expected and actual response content as JSON and perform a
+		 * comparison using the given {@link JsonComparator}. If the comparison
+		 * failed, throws an {@link AssertionError} with the message  of the
+		 * {@link JsonComparison}.
+		 * @param expectedJson the expected JSON content
+		 * @param comparator the comparator to use
+		 * @since 6.2
+		 */
+		BodyContentSpec json(String expectedJson, JsonComparator comparator);
 
 		/**
 		 * Parse expected and actual response content as XML and assert that

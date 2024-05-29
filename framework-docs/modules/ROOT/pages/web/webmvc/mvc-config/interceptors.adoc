@@ -5,14 +5,10 @@ You can register interceptors to apply to incoming requests, as the following ex
 
 include-code::./WebConfiguration[tag=snippet,indent=0]
 
-NOTE: Interceptors are not ideally suited as a security layer due to the potential
-for a mismatch with annotated controller path matching, which can also match trailing
-slashes and path extensions transparently, along with other path matching options. Many
-of these options have been deprecated but the potential for a mismatch remains.
-Generally, we recommend using Spring Security which includes a dedicated
-https://docs.spring.io/spring-security/reference/servlet/integrations/mvc.html#mvc-requestmatcher[MvcRequestMatcher]
-to align with Spring MVC path matching and also has a security firewall that blocks many
-unwanted characters in URL paths.
+WARNING: Interceptors are not ideally suited as a security layer due to the potential for
+a mismatch with annotated controller path matching. Generally, we recommend using Spring
+Security, or alternatively a similar approach integrated with the Servlet filter chain,
+and applied as early as possible.
 
 NOTE: The XML config declares interceptors as `MappedInterceptor` beans, and those are in
 turn detected by any `HandlerMapping` bean, including those from other frameworks.

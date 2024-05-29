@@ -50,7 +50,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 /**
  * A class with an {@code @ExceptionHandler} method that handles all Spring
  * WebFlux raised exceptions by returning a {@link ResponseEntity} with
- * RFC 7807 formatted error details in the body.
+ * RFC 9457 formatted error details in the body.
  *
  * <p>Convenient as a base class of an {@link ControllerAdvice @ControllerAdvice}
  * for global exception handling in an application. Subclasses can override
