@@ -109,6 +109,7 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getNativeRequest() {
 		return this.delegate.getNativeRequest();
 	}
