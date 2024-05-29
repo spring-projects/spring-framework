@@ -18,6 +18,7 @@ package org.springframework.web.reactive.socket.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jetty.client.Request;
@@ -79,7 +80,7 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 			headers.keySet().forEach(header -> upgradeRequest.setHeader(header, headers.getValuesAsList(header)));
 		}
 
-		AtomicReference<HandshakeInfo> handshakeInfo = new AtomicReference<>();
+		final AtomicReference<HandshakeInfo> handshakeInfo = new AtomicReference<>();
 		JettyUpgradeListener jettyUpgradeListener = new JettyUpgradeListener() {
 			@Override
 			public void onHandshakeResponse(Request request, Response response) {
@@ -92,10 +93,10 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 
 		Sinks.Empty<Void> completion = Sinks.empty();
 		JettyWebSocketHandlerAdapter handlerAdapter = new JettyWebSocketHandlerAdapter(handler, session ->
-				new JettyWebSocketSession(session, handshakeInfo.get(), DefaultDataBufferFactory.sharedInstance, completion));
+				new JettyWebSocketSession(session, Objects.requireNonNull(handshakeInfo.get()), DefaultDataBufferFactory.sharedInstance, completion));
 		try {
 			this.client.connect(handlerAdapter, url, upgradeRequest, jettyUpgradeListener)
-					.exceptionally((throwable) -> {
+					.exceptionally(throwable -> {
 						// Only fail the completion if we have an error
 						// as the JettyWebSocketSession will never be opened.
 						completion.tryEmitError(throwable);
