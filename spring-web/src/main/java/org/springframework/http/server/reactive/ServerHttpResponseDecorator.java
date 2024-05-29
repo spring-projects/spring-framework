@@ -124,6 +124,7 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	}
 
 	@Override
+	@Nullable
 	public <T> T getNativeResponse() {
 		return getDelegate().getNativeResponse();
 	}

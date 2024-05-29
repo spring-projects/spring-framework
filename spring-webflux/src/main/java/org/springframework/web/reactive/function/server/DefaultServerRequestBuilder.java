@@ -297,11 +297,6 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		public Flux<DataBuffer> getBody() {
 			return this.body;
 		}
-
-		@Override
-		public <T> T getNativeRequest() {
-			return null;
-		}
 	}
 
 
