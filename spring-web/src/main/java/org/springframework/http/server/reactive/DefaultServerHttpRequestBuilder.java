@@ -20,7 +20,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import reactor.core.publisher.Flux;
@@ -68,29 +67,14 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 
 	public DefaultServerHttpRequestBuilder(ServerHttpRequest original) {
-		this(original.getURI(),
-				new HttpHeaders(original.getHeaders()),
-				original.getMethod(),
-				original.getPath().contextPath().value(),
-		        original.getRemoteAddress(),
-		        original.getBody(),
-				Objects.requireNonNull(original, "ServerHttpRequest is required"));
-	}
+		Assert.notNull(original, "ServerHttpRequest is required");
 
-	public DefaultServerHttpRequestBuilder(
-			URI uri,
-			HttpHeaders httpHeaders,
-			HttpMethod method,
-			String contextPath,
-			@Nullable InetSocketAddress remoteAddress,
-			Flux<DataBuffer> body,
-			ServerHttpRequest original) {
-		this.uri = uri;
-		this.headers = httpHeaders;
-		this.httpMethod = method;
-		this.contextPath = contextPath;
-		this.remoteAddress = remoteAddress;
-		this.body = body;
+		this.uri = original.getURI();
+		this.headers = new HttpHeaders(original.getHeaders());
+		this.httpMethod = original.getMethod();
+		this.contextPath = original.getPath().contextPath().value();
+		this.remoteAddress = original.getRemoteAddress();
+		this.body = original.getBody();
 		this.originalRequest = original;
 	}
 
