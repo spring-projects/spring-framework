@@ -74,12 +74,30 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	private final HttpHeaders headers;
 
-	@Nullable
-	private LinkedMultiValueMap<String, ResponseCookie> cookies;
+	private final LinkedMultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
+
+	private @Nullable HttpStatusCode status;
 
 	public JettyCoreServerHttpResponse(Response response) {
 		this.response = response;
 		this.headers = new HttpHeaders(new JettyHeadersAdapter(response.getHeaders()));
+
+	    // remove all existing cookies from the response and add them to the cookie map, to be added back later
+		for (ListIterator<HttpField> i = this.response.getHeaders().listIterator(); i.hasNext(); ) {
+			HttpField f = i.next();
+			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField) {
+				HttpCookie httpCookie = setCookieHttpField.getHttpCookie();
+				ResponseCookie responseCookie = ResponseCookie.from(httpCookie.getName(), httpCookie.getValue())
+						.httpOnly(httpCookie.isHttpOnly())
+						.domain(httpCookie.getDomain())
+						.maxAge(httpCookie.getMaxAge())
+						.sameSite(httpCookie.getSameSite().name())
+						.secure(httpCookie.isSecure())
+						.build();
+				this.addCookie(responseCookie);
+				i.remove();
+			}
+		}
 	}
 
 	@Override
@@ -146,6 +164,8 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	@Nullable
 	private Mono<Void> ensureCommitted() {
 		if (this.committed.compareAndSet(false, true)) {
+			if (this.status != null)
+				this.response.setStatus(this.status.value());
 			if (!this.commitActions.isEmpty()) {
 				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
 						.concatWith(Mono.fromRunnable(this::writeCookies))
@@ -163,7 +183,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		if (this.cookies != null) {
 			this.cookies.values().stream()
 					.flatMap(List::stream)
-					.forEach(cookie -> Response.addCookie(this.response, new HttpResponseCookie(cookie)));
+					.forEach(cookie -> Response.addCookie(this.response, new ResponseHttpCookie(cookie)));
 		}
 	}
 
@@ -206,36 +226,27 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 
 	@Override
 	public boolean setStatusCode(@Nullable HttpStatusCode status) {
-		if (isCommitted() || status == null) {
+		if (isCommitted()) {
 			return false;
 		}
-		this.response.setStatus(status.value());
+		this.status = status;
 		return true;
 	}
 
 	@Override
+	@Nullable
 	public HttpStatusCode getStatusCode() {
-		int status = this.response.getStatus();
-		return HttpStatusCode.valueOf(status == 0 ? 200 : status);
-	}
-
-	@Override
-	public boolean setRawStatusCode(@Nullable Integer value) {
-		if (isCommitted() || value == null) {
-			return false;
-		}
-		this.response.setStatus(value);
-		return true;
+		return status;
 	}
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
-		return initializeCookies();
+		return this.cookies;
 	}
 
 	@Override
 	public void addCookie(ResponseCookie cookie) {
-		initializeCookies().add(cookie.getName(), cookie);
+		this.cookies.add(cookie.getName(), cookie);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -244,33 +255,10 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		return (T) this.response;
 	}
 
-	private LinkedMultiValueMap<String, ResponseCookie> initializeCookies() {
-		if (this.cookies == null) {
-			this.cookies = new LinkedMultiValueMap<>();
-			// remove all existing cookies from the response and add them to the cookie map, to be added back later
-			for (ListIterator<HttpField> i = this.response.getHeaders().listIterator(); i.hasNext(); ) {
-				HttpField f = i.next();
-				if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField) {
-					HttpCookie httpCookie = setCookieHttpField.getHttpCookie();
-					ResponseCookie responseCookie = ResponseCookie.from(httpCookie.getName(), httpCookie.getValue())
-							.httpOnly(httpCookie.isHttpOnly())
-							.domain(httpCookie.getDomain())
-							.maxAge(httpCookie.getMaxAge())
-							.sameSite(httpCookie.getSameSite().name())
-							.secure(httpCookie.isSecure())
-							.build();
-					this.cookies.add(responseCookie.getName(), responseCookie);
-					i.remove();
-				}
-			}
-		}
-		return this.cookies;
-	}
-
-	private static class HttpResponseCookie implements org.eclipse.jetty.http.HttpCookie {
+	private static class ResponseHttpCookie implements org.eclipse.jetty.http.HttpCookie {
 		private final ResponseCookie responseCookie;
 
-		public HttpResponseCookie(ResponseCookie responseCookie) {
+		public ResponseHttpCookie(ResponseCookie responseCookie) {
 			this.responseCookie = responseCookie;
 		}
 
