@@ -26,6 +26,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpField;
@@ -43,6 +46,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -51,6 +55,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Adapt an Eclipse Jetty {@link Response} to a {@link org.springframework.http.server.ServerHttpResponse}.
@@ -59,73 +65,72 @@ import org.springframework.lang.Nullable;
  * @author Lachlan Roberts
  * @since 6.2
  */
-class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements ZeroCopyHttpOutputMessage {
+class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOutputMessage {
+	private final AtomicBoolean committed = new AtomicBoolean(false);
+
+	private final List<Supplier<? extends Mono<Void>>> commitActions = new CopyOnWriteArrayList<>();
 
 	private final Response response;
 
+	private final HttpHeaders headers;
+
+	@Nullable
+	private LinkedMultiValueMap<String, ResponseCookie> cookies;
+
 	public JettyCoreServerHttpResponse(Response response) {
-		this(null, response);
-	}
-
-	public JettyCoreServerHttpResponse(@Nullable DefaultDataBufferFactory dataBufferFactory, Response response) {
-		super(dataBufferFactory == null ? DefaultDataBufferFactory.sharedInstance : dataBufferFactory,
-				new HttpHeaders(new JettyHeadersAdapter(response.getHeaders())));
 		this.response = response;
-
-		// remove all existing cookies from the response and add them to the cookie map, to be added back later
-		for (ListIterator<HttpField> i = this.response.getHeaders().listIterator(); i.hasNext(); ) {
-			HttpField f = i.next();
-			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField) {
-				HttpCookie httpCookie = setCookieHttpField.getHttpCookie();
-				ResponseCookie responseCookie = ResponseCookie.from(httpCookie.getName(), httpCookie.getValue())
-						.httpOnly(httpCookie.isHttpOnly())
-						.domain(httpCookie.getDomain())
-						.maxAge(httpCookie.getMaxAge())
-						.sameSite(httpCookie.getSameSite().name())
-						.secure(httpCookie.isSecure())
-						.build();
-				this.addCookie(responseCookie);
-				i.remove();
-			}
-		}
+		this.headers = new HttpHeaders(new JettyHeadersAdapter(response.getHeaders()));
 	}
 
 	@Override
-	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
+	public HttpHeaders getHeaders() {
+		return this.headers;
+	}
+
+	@Override
+	public DataBufferFactory bufferFactory() {
+		return DefaultDataBufferFactory.sharedInstance;
+	}
+
+	@Override
+	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
+		this.commitActions.add(action);
+	}
+
+	@Override
+	public boolean isCommitted() {
+		return this.committed.get();
+	}
+
+	@Override
+	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return Flux.from(body)
 				.flatMap(this::sendDataBuffer, 1)
 				.then();
 	}
 
 	@Override
-	protected Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> body) {
+	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		return Flux.from(body)
 				.flatMap(this::writeWith, 1)
 				.then();
 	}
 
 	@Override
-	protected void applyStatusCode() {
-		HttpStatusCode status = getStatusCode();
-		this.response.setStatus(status == null ? 0 : status.value());
-	}
-
-	@Override
-	protected void applyHeaders() {
-
-	}
-
-	@Override
-	protected void applyCookies() {
-		this.getCookies().values().stream()
-				.flatMap(List::stream)
-				.forEach(cookie -> Response.addCookie(this.response, new ResponseHttpCookie(cookie)));
+	public Mono<Void> setComplete() {
+		Mono<Void> mono = ensureCommitted();
+		return (mono == null) ? Mono.empty() : mono;
 	}
 
 	@Override
 	public Mono<Void> writeWith(Path file, long position, long count) {
+		Mono<Void> mono = ensureCommitted();
+		if (mono != null) {
+			return mono.then(Mono.defer(() -> writeWith(file, position, count)));
+		}
+
 		Callback.Completable callback = new Callback.Completable();
-		Mono<Void> mono = Mono.fromFuture(callback);
+		mono = Mono.fromFuture(callback);
 		try {
 			// The method can block, but it is not expected to do so for any significant time.
 			@SuppressWarnings("BlockingMethodInNonBlockingContext")
@@ -135,10 +140,39 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 		catch (Throwable th) {
 			callback.failed(th);
 		}
-		return doCommit(() -> mono);
+		return mono;
+	}
+
+	@Nullable
+	private Mono<Void> ensureCommitted() {
+		if (this.committed.compareAndSet(false, true)) {
+			if (!this.commitActions.isEmpty()) {
+				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
+						.concatWith(Mono.fromRunnable(this::writeCookies))
+						.then()
+						.doOnError(t -> getHeaders().clearContentHeaders());
+			}
+
+			writeCookies();
+		}
+
+		return null;
+	}
+
+	private void writeCookies() {
+		if (this.cookies != null) {
+			this.cookies.values().stream()
+					.flatMap(List::stream)
+					.forEach(cookie -> Response.addCookie(this.response, new HttpResponseCookie(cookie)));
+		}
 	}
 
 	private Mono<Void> sendDataBuffer(DataBuffer dataBuffer) {
+		Mono<Void> mono = ensureCommitted();
+		if (mono != null) {
+			return mono.then(Mono.defer(() -> sendDataBuffer(dataBuffer)));
+		}
+
 		@SuppressWarnings("resource")
 		DataBuffer.ByteBufferIterator byteBufferIterator = dataBuffer.readableByteBuffers();
 		Callback.Completable callback = new Callback.Completable();
@@ -167,7 +201,41 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 			}
 		}.iterate();
 
-		return doCommit(() -> Mono.fromFuture(callback));
+		return Mono.fromFuture(callback);
+	}
+
+	@Override
+	public boolean setStatusCode(@Nullable HttpStatusCode status) {
+		if (isCommitted() || status == null) {
+			return false;
+		}
+		this.response.setStatus(status.value());
+		return true;
+	}
+
+	@Override
+	public HttpStatusCode getStatusCode() {
+		int status = this.response.getStatus();
+		return HttpStatusCode.valueOf(status == 0 ? 200 : status);
+	}
+
+	@Override
+	public boolean setRawStatusCode(@Nullable Integer value) {
+		if (isCommitted() || value == null) {
+			return false;
+		}
+		this.response.setStatus(value);
+		return true;
+	}
+
+	@Override
+	public MultiValueMap<String, ResponseCookie> getCookies() {
+		return initializeCookies();
+	}
+
+	@Override
+	public void addCookie(ResponseCookie cookie) {
+		initializeCookies().add(cookie.getName(), cookie);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -176,10 +244,33 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 		return (T) this.response;
 	}
 
-	private static class ResponseHttpCookie implements org.eclipse.jetty.http.HttpCookie {
+	private LinkedMultiValueMap<String, ResponseCookie> initializeCookies() {
+		if (this.cookies == null) {
+			this.cookies = new LinkedMultiValueMap<>();
+			// remove all existing cookies from the response and add them to the cookie map, to be added back later
+			for (ListIterator<HttpField> i = this.response.getHeaders().listIterator(); i.hasNext(); ) {
+				HttpField f = i.next();
+				if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField) {
+					HttpCookie httpCookie = setCookieHttpField.getHttpCookie();
+					ResponseCookie responseCookie = ResponseCookie.from(httpCookie.getName(), httpCookie.getValue())
+							.httpOnly(httpCookie.isHttpOnly())
+							.domain(httpCookie.getDomain())
+							.maxAge(httpCookie.getMaxAge())
+							.sameSite(httpCookie.getSameSite().name())
+							.secure(httpCookie.isSecure())
+							.build();
+					this.cookies.add(responseCookie.getName(), responseCookie);
+					i.remove();
+				}
+			}
+		}
+		return this.cookies;
+	}
+
+	private static class HttpResponseCookie implements org.eclipse.jetty.http.HttpCookie {
 		private final ResponseCookie responseCookie;
 
-		public ResponseHttpCookie(ResponseCookie responseCookie) {
+		public HttpResponseCookie(ResponseCookie responseCookie) {
 			this.responseCookie = responseCookie;
 		}
 
