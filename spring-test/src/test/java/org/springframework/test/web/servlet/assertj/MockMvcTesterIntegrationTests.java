@@ -40,8 +40,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.ui.Model;
@@ -72,8 +71,7 @@ import static org.mockito.Mockito.verify;
  * @author Brian Clozel
  * @author Stephane Nicoll
  */
-@SpringJUnitConfig
-@WebAppConfiguration
+@SpringJUnitWebConfig
 public class MockMvcTesterIntegrationTests {
 
 	private final MockMvcTester mvc;
@@ -148,7 +146,6 @@ public class MockMvcTesterIntegrationTests {
 		void statusSeries() {
 			assertThat(mvc.get().uri("/greet")).hasStatus2xxSuccessful();
 		}
-
 	}
 
 	@Nested
@@ -169,7 +166,6 @@ public class MockMvcTesterIntegrationTests {
 			return headers -> assertThat(headers).containsEntry(
 					"Content-Type", List.of("text/plain;charset=%s".formatted(charset)));
 		}
-
 	}
 
 	@Nested
@@ -205,7 +201,6 @@ public class MockMvcTesterIntegrationTests {
 		void hasAttributeErrorsCount() {
 			assertThat(mvc.post().uri("/persons")).model().extractingBindingResult("person").hasErrorsCount(1);
 		}
-
 	}
 
 	@Nested
@@ -252,7 +247,6 @@ public class MockMvcTesterIntegrationTests {
 			assertThat(mvc.get().uri("/message")).bodyJson().withResourceLoadClass(MockMvcTesterIntegrationTests.class)
 					.isLenientlyEqualTo("message.json");
 		}
-
 	}
 
 	@Nested
@@ -278,7 +272,6 @@ public class MockMvcTesterIntegrationTests {
 			assertThat(mvc.get().uri("/callable")).handler()
 					.isInvokedOn(AsyncController.class, AsyncController::getCallable);
 		}
-
 	}
 
 	@Nested
@@ -411,7 +404,6 @@ public class MockMvcTesterIntegrationTests {
 							ServletException.class.getName(), IllegalStateException.class.getName(),
 							"Expected");
 		}
-
 	}
 
 	@Test
@@ -446,8 +438,7 @@ public class MockMvcTesterIntegrationTests {
 		ResultMatcher matcher = result -> assertThat(result.getResponse().getStatus())
 				.isEqualTo(HttpStatus.NOT_FOUND.value());
 		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertThat(mvc.get().uri("/greet"))
-						.matches(matcher))
+				.isThrownBy(() -> assertThat(mvc.get().uri("/greet")).matches(matcher))
 				.withMessageContaining("expected: 404").withMessageContaining(" but was: 200");
 	}
 
