@@ -26,9 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpField;
@@ -42,11 +39,11 @@ import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.IteratingCallback;
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -55,8 +52,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 /**
  * Adapt an Eclipse Jetty {@link Response} to a {@link org.springframework.http.server.ServerHttpResponse}.
@@ -65,24 +60,20 @@ import org.springframework.util.MultiValueMap;
  * @author Lachlan Roberts
  * @since 6.2
  */
-class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOutputMessage {
-	private final AtomicBoolean committed = new AtomicBoolean(false);
-
-	private final List<Supplier<? extends Mono<Void>>> commitActions = new CopyOnWriteArrayList<>();
+class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements ZeroCopyHttpOutputMessage {
 
 	private final Response response;
 
-	private final HttpHeaders headers;
-
-	private final LinkedMultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
-
-	private @Nullable HttpStatusCode status;
-
 	public JettyCoreServerHttpResponse(Response response) {
-		this.response = response;
-		this.headers = new HttpHeaders(new JettyHeadersAdapter(response.getHeaders()));
+		this(null, response);
+	}
 
-	    // remove all existing cookies from the response and add them to the cookie map, to be added back later
+	public JettyCoreServerHttpResponse(@Nullable DefaultDataBufferFactory dataBufferFactory, Response response) {
+		super(dataBufferFactory == null ? DefaultDataBufferFactory.sharedInstance : dataBufferFactory,
+				new HttpHeaders(new JettyHeadersAdapter(response.getHeaders())));
+		this.response = response;
+
+		// remove all existing cookies from the response and add them to the cookie map, to be added back later
 		for (ListIterator<HttpField> i = this.response.getHeaders().listIterator(); i.hasNext(); ) {
 			HttpField f = i.next();
 			if (f instanceof HttpCookieUtils.SetCookieHttpField setCookieHttpField) {
@@ -101,54 +92,39 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		return this.headers;
-	}
-
-	@Override
-	public DataBufferFactory bufferFactory() {
-		return DefaultDataBufferFactory.sharedInstance;
-	}
-
-	@Override
-	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-		this.commitActions.add(action);
-	}
-
-	@Override
-	public boolean isCommitted() {
-		return this.committed.get();
-	}
-
-	@Override
-	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
 		return Flux.from(body)
 				.flatMap(this::sendDataBuffer, 1)
 				.then();
 	}
 
 	@Override
-	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		return Flux.from(body)
-				.flatMap(this::writeWith, 1)
-				.then();
+	protected Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> body) {
+		return Flux.from(body).flatMap(this::writeWithInternal, 1).then();
 	}
 
 	@Override
-	public Mono<Void> setComplete() {
-		Mono<Void> mono = ensureCommitted();
-		return (mono == null) ? Mono.empty() : mono;
+	protected void applyStatusCode() {
+		HttpStatusCode status = getStatusCode();
+		this.response.setStatus(status == null ? 0 : status.value());
+	}
+
+	@Override
+	protected void applyHeaders() {
+
+	}
+
+	@Override
+	protected void applyCookies() {
+		this.getCookies().values().stream()
+				.flatMap(List::stream)
+				.forEach(cookie -> Response.addCookie(this.response, new ResponseHttpCookie(cookie)));
 	}
 
 	@Override
 	public Mono<Void> writeWith(Path file, long position, long count) {
-		Mono<Void> mono = ensureCommitted();
-		if (mono != null) {
-			return mono.then(Mono.defer(() -> writeWith(file, position, count)));
-		}
-
 		Callback.Completable callback = new Callback.Completable();
-		mono = Mono.fromFuture(callback);
+		Mono<Void> mono = Mono.fromFuture(callback);
 		try {
 			// The method can block, but it is not expected to do so for any significant time.
 			@SuppressWarnings("BlockingMethodInNonBlockingContext")
@@ -158,42 +134,10 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 		catch (Throwable th) {
 			callback.failed(th);
 		}
-		return mono;
-	}
-
-	@Nullable
-	private Mono<Void> ensureCommitted() {
-		if (this.committed.compareAndSet(false, true)) {
-			if (this.status != null) {
-				this.response.setStatus(this.status.value());
-			}
-			if (!this.commitActions.isEmpty()) {
-				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
-						.concatWith(Mono.fromRunnable(this::writeCookies))
-						.then()
-						.doOnError(t -> getHeaders().clearContentHeaders());
-			}
-
-			writeCookies();
-		}
-
-		return null;
-	}
-
-	private void writeCookies() {
-		if (this.cookies != null) {
-			this.cookies.values().stream()
-					.flatMap(List::stream)
-					.forEach(cookie -> Response.addCookie(this.response, new ResponseHttpCookie(cookie)));
-		}
+		return doCommit(() -> mono);
 	}
 
 	private Mono<Void> sendDataBuffer(DataBuffer dataBuffer) {
-		Mono<Void> mono = ensureCommitted();
-		if (mono != null) {
-			return mono.then(Mono.defer(() -> sendDataBuffer(dataBuffer)));
-		}
-
 		@SuppressWarnings("resource")
 		DataBuffer.ByteBufferIterator byteBufferIterator = dataBuffer.readableByteBuffers();
 		Callback.Completable callback = new Callback.Completable();
@@ -222,32 +166,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 			}
 		}.iterate();
 
-		return Mono.fromFuture(callback);
-	}
-
-	@Override
-	public boolean setStatusCode(@Nullable HttpStatusCode status) {
-		if (isCommitted()) {
-			return false;
-		}
-		this.status = status;
-		return true;
-	}
-
-	@Override
-	@Nullable
-	public HttpStatusCode getStatusCode() {
-		return this.status;
-	}
-
-	@Override
-	public MultiValueMap<String, ResponseCookie> getCookies() {
-		return this.cookies;
-	}
-
-	@Override
-	public void addCookie(ResponseCookie cookie) {
-		this.cookies.add(cookie.getName(), cookie);
+		return doCommit(() -> Mono.fromFuture(callback));
 	}
 
 	@SuppressWarnings("unchecked")
