@@ -164,8 +164,9 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	@Nullable
 	private Mono<Void> ensureCommitted() {
 		if (this.committed.compareAndSet(false, true)) {
-			if (this.status != null)
+			if (this.status != null) {
 				this.response.setStatus(this.status.value());
+			}
 			if (!this.commitActions.isEmpty()) {
 				return Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
 						.concatWith(Mono.fromRunnable(this::writeCookies))
@@ -236,7 +237,7 @@ class JettyCoreServerHttpResponse implements ServerHttpResponse, ZeroCopyHttpOut
 	@Override
 	@Nullable
 	public HttpStatusCode getStatusCode() {
-		return status;
+		return this.status;
 	}
 
 	@Override
