@@ -24,6 +24,8 @@ import org.assertj.core.api.Condition;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Events;
 
+import org.springframework.core.NestedExceptionUtils;
+
 import static java.util.stream.Collectors.toList;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
@@ -42,6 +44,11 @@ public class EngineTestKitUtils {
 				.testEvents();
 	}
 
+	/**
+	 * Create a new {@link Condition} that matches if and only if a
+	 * {@link Throwable}'s root {@linkplain Throwable#getCause() cause} matches
+	 * all supplied conditions.
+	 */
 	@SafeVarargs
 	@SuppressWarnings("varargs")
 	public static Condition<Throwable> rootCause(Condition<Throwable>... conditions) {
@@ -53,16 +60,8 @@ public class EngineTestKitUtils {
 	}
 
 	private static Condition<Throwable> rootCause(Condition<Throwable> condition) {
-		return new Condition<>(throwable -> condition.matches(getRootCause(throwable)),
+		return new Condition<>(throwable -> condition.matches(NestedExceptionUtils.getRootCause(throwable)),
 				"throwable root cause matches %s", condition);
-	}
-
-	private static Throwable getRootCause(Throwable throwable) {
-		Throwable cause = throwable.getCause();
-		if (cause == null) {
-			return throwable;
-		}
-		return getRootCause(cause);
 	}
 
 }
