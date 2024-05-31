@@ -39,7 +39,6 @@ import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.IteratingCallback;
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
