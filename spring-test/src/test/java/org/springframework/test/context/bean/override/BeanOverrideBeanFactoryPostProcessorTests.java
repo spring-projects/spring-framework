@@ -77,7 +77,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean 'explicit'; there is no bean definition " +
+				.withMessage("Unable to override bean 'explicit': there is no bean definition " +
 						"to replace with that name of type org.springframework.test.context.bean.override.example.ExampleService");
 	}
 

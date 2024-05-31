@@ -30,6 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * {@link TestBean @TestBean} integration tests for success scenarios.
  *
+ * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  * @see FailingTestBeanIntegrationTests
  */
@@ -82,8 +84,8 @@ public class TestBeanIntegrationTests {
 
 
 	@Nested
-	@DisplayName("With @TestBean on enclosing class")
-	class TestBeanNested {
+	@DisplayName("With @TestBean in enclosing class")
+	public class TestBeanNestedTests {
 
 		@Test
 		void fieldHasOverride(ApplicationContext ctx) {
@@ -105,8 +107,8 @@ public class TestBeanIntegrationTests {
 	}
 
 	@Nested
-	@DisplayName("With factory method on enclosing class")
-	class TestBeanNested2 {
+	@DisplayName("With factory method in enclosing class")
+	public class TestBeanNested2Tests {
 
 		@TestBean(methodName = "nestedFieldTestOverride", name = "nestedField")
 		String nestedField2;

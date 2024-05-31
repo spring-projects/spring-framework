@@ -21,28 +21,28 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 @SpringJUnitConfig
-class AbstractTestBeanIntegrationTestCase {
+abstract class AbstractTestBeanIntegrationTestCase {
 
-		@TestBean(name = "someBean")
-		Pojo someBean;
+	@TestBean(name = "someBean")
+	Pojo someBean;
 
-		@TestBean(name = "otherBean")
-		Pojo otherBean;
+	@TestBean(name = "otherBean")
+	Pojo otherBean;
 
-		@TestBean(name = "thirdBean")
-		Pojo anotherBean;
+	@TestBean(name = "thirdBean")
+	Pojo anotherBean;
 
-		static Pojo otherBeanTestOverride() {
-			return new FakePojo("otherBean in superclass");
-		}
+	static Pojo otherBeanTestOverride() {
+		return new FakePojo("otherBean in superclass");
+	}
 
-		static Pojo thirdBeanTestOverride() {
-			return new FakePojo("third in superclass");
-		}
+	static Pojo thirdBeanTestOverride() {
+		return new FakePojo("third in superclass");
+	}
 
-		static Pojo commonBeanOverride() {
-			return new FakePojo("in superclass");
-		}
+	static Pojo commonBeanOverride() {
+		return new FakePojo("in superclass");
+	}
 
 	interface Pojo {
 
@@ -60,6 +60,7 @@ class AbstractTestBeanIntegrationTestCase {
 			this.value = value;
 		}
 
+		@Override
 		public String getValue() {
 			return this.value;
 		}
@@ -94,4 +95,5 @@ class AbstractTestBeanIntegrationTestCase {
 			return new ProdPojo();
 		}
 	}
+
 }

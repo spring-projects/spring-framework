@@ -19,9 +19,6 @@ package org.springframework.test.context.bean.override.mockito;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.testkit.engine.EngineExecutionResults;
-import org.junit.platform.testkit.engine.EngineTestKit;
 import org.mockito.Mockito;
 
 import org.springframework.context.ApplicationContext;
@@ -29,9 +26,14 @@ import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.THROWABLE;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
+/**
+ * {@link MockitoSpyBean @MockitoSpyBean} integration tests for success scenarios.
+ *
+ * @author Simon Baslé
+ * @since 6.2
+ * @see FailingMockitoSpyBeanIntegrationTests
+ */
 @SpringJUnitConfig(MockitoBeanIntegrationTests.Config.class)
 public class MockitoSpyBeanIntegrationTests {
 
@@ -47,73 +49,36 @@ public class MockitoSpyBeanIntegrationTests {
 	@MockitoSpyBean(name = "nestedField")
 	ExampleService renamed2;
 
+
 	@Test
 	void fieldHasOverride(ApplicationContext ctx) {
 		assertThat(ctx.getBean("field"))
 				.isInstanceOf(ExampleService.class)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy())
-						.as("isSpy").isTrue())
+				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
 				.isSameAs(this.field);
 
-		assertThat(this.field.greeting()).as("spied greeting")
-				.isEqualTo("Hello Field");
+		assertThat(this.field.greeting()).as("spied greeting").isEqualTo("Hello Field");
 	}
 
 	@Test
 	void renamedFieldHasOverride(ApplicationContext ctx) {
 		assertThat(ctx.getBean("field"))
 				.isInstanceOf(ExampleService.class)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy())
-						.as("isSpy").isTrue())
+				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
 				.isSameAs(this.renamed1);
 
-		assertThat(this.field.greeting()).as("spied greeting")
-				.isEqualTo("Hello Field");
-	}
-
-	@Test
-	void failWhenBeanNotPresentByType() {
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(Failure1.class))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.cause()
-						.isInstanceOf(IllegalStateException.class)
-						.hasMessage("Unable to select a bean to override by wrapping, " +
-										"0 bean instances found of type %s " +
-										"(as required by annotated field '%s.notPresent')",
-								ExampleService.class.getName(), Failure1.class.getSimpleName()));
-	}
-
-	@Test
-	void failWhenBeanNotPresentByExplicitName() {
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(Failure2.class))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.cause()
-						.isInstanceOf(IllegalStateException.class)
-						.hasMessage("Unable to override bean 'notPresentAtAll' by wrapping; " +
-								"there is no existing bean instance with that name of type %s",
-								ExampleService.class.getName()));
+		assertThat(this.renamed1.greeting()).as("spied greeting").isEqualTo("Hello Field");
 	}
 
 	@Nested
-	@DisplayName("With @MockitoSpyBean on enclosing class")
-	class MockitoBeanNested {
+	@DisplayName("With @MockitoSpyBean in enclosing class")
+	public class MockitoSpyBeanNestedTests {
 
 		@Test
 		void fieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField"))
 					.isInstanceOf(ExampleService.class)
-					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy())
-							.as("isSpy").isTrue())
+					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
 					.isSameAs(MockitoSpyBeanIntegrationTests.this.nestedField);
 
 			assertThat(MockitoSpyBeanIntegrationTests.this.nestedField.greeting())
@@ -125,10 +90,8 @@ public class MockitoSpyBeanIntegrationTests {
 		void renamedFieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField"))
 					.isInstanceOf(ExampleService.class)
-					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy())
-							.as("isSpy").isTrue())
+					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
 					.isSameAs(MockitoSpyBeanIntegrationTests.this.renamed2);
-
 
 			assertThat(MockitoSpyBeanIntegrationTests.this.renamed2.greeting())
 					.as("spied greeting")
@@ -136,25 +99,4 @@ public class MockitoSpyBeanIntegrationTests {
 		}
 	}
 
-
-	@SpringJUnitConfig
-	static class Failure1 {
-
-		@MockitoSpyBean
-		ExampleService notPresent;
-
-		@Test
-		void ignored() { }
-
-	}
-
-	@SpringJUnitConfig
-	static class Failure2 {
-
-		@MockitoSpyBean(name = "notPresentAtAll")
-		ExampleService field;
-
-		@Test
-		void ignored() { }
-	}
 }

@@ -17,155 +17,116 @@
 package org.springframework.test.context.bean.override.convention;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.testkit.engine.EngineExecutionResults;
-import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.aot.DisabledInAotMode;
+import org.springframework.test.context.junit.EngineTestKitUtils;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.InstanceOfAssertFactories.THROWABLE;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.cause;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
+import static org.springframework.test.context.junit.EngineTestKitUtils.rootCause;
 
 /**
  * {@link TestBean @TestBean} integration tests for failure scenarios.
  *
+ * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  * @see TestBeanIntegrationTests
  */
-public class FailingTestBeanIntegrationTests {
+class FailingTestBeanIntegrationTests {
 
 	@Test
 	void testBeanFailingNoFieldNameBean() {
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(NoOriginalBeanTestCase.class))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.cause()
-						.isInstanceOf(IllegalStateException.class)
-						.hasMessage("Unable to override bean 'noOriginalBean'; " +
-								"there is no bean definition to replace with that name of type java.lang.String"));
+		Class<?> testClass = NoOriginalBeanTestCase.class;
+		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
+			finishedWithFailure(
+				cause(
+					instanceOf(IllegalStateException.class),
+					message("""
+						Unable to override bean 'noOriginalBean': there is no bean definition \
+						to replace with that name of type java.lang.String"""))));
 	}
 
 	@Test
 	void testBeanFailingNoExplicitNameBean() {
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(BeanDefinitionToOverrideNotPresentTestCase.class))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.cause()
-						.isInstanceOf(IllegalStateException.class)
-						.hasMessage("Unable to override bean 'notPresent'; " +
-								"there is no bean definition to replace with that name of type java.lang.String"));
+		Class<?> testClass = BeanDefinitionToOverrideNotPresentTestCase.class;
+		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
+			finishedWithFailure(
+				cause(
+					instanceOf(IllegalStateException.class),
+					message("""
+						Unable to override bean 'notPresent': there is no bean definition \
+						to replace with that name of type java.lang.String"""))));
 	}
 
 	@Test
 	void testBeanFailingNoImplicitMethod() {
 		Class<?> testClass = ExplicitTestOverrideMethodNotPresentTestCase.class;
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(testClass))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.rootCause().isInstanceOf(IllegalStateException.class)
-						.hasMessage("Failed to find a static test bean factory method in %s " +
-								"with return type java.lang.String whose name matches one of the " +
-								"supported candidates [notPresent]", testClass.getName()));
+		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
+			finishedWithFailure(
+				rootCause(
+					instanceOf(IllegalStateException.class),
+					message("""
+						Failed to find a static test bean factory method in %s with return type \
+						java.lang.String whose name matches one of the supported candidates \
+						[notPresent]""".formatted(testClass.getName())))));
 	}
 
 	@Test
 	void testBeanFailingNoExplicitMethod() {
 		Class<?> testClass = ImplicitTestOverrideMethodNotPresentTestCase.class;
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(testClass))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.rootCause().isInstanceOf(IllegalStateException.class)
-						.hasMessage("Failed to find a static test bean factory method in %s " +
-								"with return type java.lang.String whose name matches one of the " +
-								"supported candidates [fieldTestOverride]", testClass.getName()));
+		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
+			finishedWithFailure(
+				rootCause(
+					instanceOf(IllegalStateException.class),
+					message("""
+						Failed to find a static test bean factory method in %s with return type \
+						java.lang.String whose name matches one of the supported candidates \
+						[fieldTestOverride]""".formatted(testClass.getName())))));
 	}
 
 	@Test
 	void testBeanFailingBeanOfWrongType() {
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(BeanTypeMismatchTestCase.class))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.rootCause().isInstanceOf(IllegalStateException.class)
-						.hasMessage("Unable to override bean 'notString'; there is no bean definition to replace with " +
-								"that name of type java.lang.String"));
+		Class<?> testClass = BeanTypeMismatchTestCase.class;
+		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
+			finishedWithFailure(
+				rootCause(
+					instanceOf(IllegalStateException.class),
+					message("""
+						Unable to override bean 'notString': there is no bean definition to replace \
+						with that name of type java.lang.String"""))));
 	}
 
-	@Configuration
-	static class Config {
-
-		@Bean("field")
-		String bean1() {
-			return "prod";
-		}
-
-		@Bean("nestedField")
-		String bean2() {
-			return "nestedProd";
-		}
-
-		@Bean("methodRenamed1")
-		String bean3() {
-			return "Prod";
-		}
-
-		@Bean("methodRenamed2")
-		String bean4() {
-			return "NestedProd";
-		}
-	}
 
 	@SpringJUnitConfig
-	@DisabledInAotMode
 	static class NoOriginalBeanTestCase {
 
 		@TestBean(name = "noOriginalBean")
 		String noOriginalBean;
 
 		@Test
-		void ignored() {
+		void test() {
 			fail("should fail earlier");
 		}
 
 		static String noOriginalBeanTestOverride() {
 			return "should be ignored";
 		}
-
 	}
 
 	@SpringJUnitConfig
-	@DisabledInAotMode
 	static class BeanDefinitionToOverrideNotPresentTestCase {
 
 		@TestBean(name = "notPresent")
 		String field;
 
 		@Test
-		void ignored() {
+		void test() {
 			fail("should fail earlier");
 		}
 
@@ -175,40 +136,37 @@ public class FailingTestBeanIntegrationTests {
 	}
 
 	@SpringJUnitConfig
-	@DisabledInAotMode
 	static class ExplicitTestOverrideMethodNotPresentTestCase {
 
 		@TestBean(methodName = "notPresent")
 		String field;
 
 		@Test
-		void ignored() {
+		void test() {
 			fail("should fail earlier");
 		}
 	}
 
 	@SpringJUnitConfig
-	@DisabledInAotMode
 	static class ImplicitTestOverrideMethodNotPresentTestCase {
 
-		@TestBean //expects fieldTestOverride method
+		@TestBean // expects fieldTestOverride method
 		String field;
 
 		@Test
-		void ignored() {
+		void test() {
 			fail("should fail earlier");
 		}
 	}
 
 	@SpringJUnitConfig
-	@DisabledInAotMode
 	static class BeanTypeMismatchTestCase {
 
 		@TestBean(name = "notString")
 		String field;
 
 		@Test
-		void ignored() {
+		void test() {
 			fail("should fail earlier");
 		}
 

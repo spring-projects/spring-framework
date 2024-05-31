@@ -19,30 +19,33 @@ package org.springframework.test.context.bean.override.convention;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.testkit.engine.EngineExecutionResults;
-import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.context.ApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.THROWABLE;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
+/**
+ * {@link TestBean @TestBean} inheritance integration tests for success scenarios.
+ *
+ * @author Simon Baslé
+ * @author Sam Brannen
+ * @since 6.2
+ * @see FailingTestBeanInheritanceIntegrationTests
+ */
 public class TestBeanInheritanceIntegrationTests {
 
-	static AbstractTestBeanIntegrationTestCase.Pojo nestedBeanOverride() {
+	static AbstractTestBeanIntegrationTestCase.Pojo enclosingClassBeanOverride() {
 		return new AbstractTestBeanIntegrationTestCase.FakePojo("in enclosing test class");
 	}
 
 	@Nested
 	@DisplayName("Concrete inherited test with correct @TestBean setup")
-	class ConcreteTestBeanIntegrationTests extends AbstractTestBeanIntegrationTestCase {
+	public class ConcreteTestBeanIntegrationTests extends AbstractTestBeanIntegrationTestCase {
 
 		@TestBean(name = "pojo", methodName = "commonBeanOverride")
 		Pojo pojo;
 
-		@TestBean(name = "pojo2", methodName = "nestedBeanOverride")
+		@TestBean(name = "pojo2", methodName = "enclosingClassBeanOverride")
 		Pojo pojo2;
 
 		static Pojo someBeanTestOverride() {
@@ -74,60 +77,4 @@ public class TestBeanInheritanceIntegrationTests {
 		}
 	}
 
-
-	@Test
-	void failsIfFieldInSupertypeButNoMethod() {
-		Class<?> clazz = Failing1.class;
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(clazz))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.rootCause().isInstanceOf(IllegalStateException.class)
-						.hasMessage("""
-			Failed to find a static test bean factory method in %s with return type %s \
-			whose name matches one of the supported candidates [someBeanTestOverride]""",
-			clazz.getName(), AbstractTestBeanIntegrationTestCase.Pojo.class.getName()));
-	}
-
-	@Test
-	void failsIfMethod1InSupertypeAndMethod2InType() {
-		Class<?> clazz = Failing2.class;
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(clazz))
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.rootCause().isInstanceOf(IllegalStateException.class)
-						.hasMessage("""
-			Found 2 competing static test bean factory methods in %s with return type %s \
-			whose name matches one of the supported candidates \
-			[thirdBeanTestOverride, anotherBeanTestOverride]""",
-			clazz.getName(), AbstractTestBeanIntegrationTestCase.Pojo.class.getName()));
-	}
-
-	static class Failing1 extends AbstractTestBeanIntegrationTestCase {
-
-		@Test
-		void ignored() {
-		}
-	}
-
-	static class Failing2 extends AbstractTestBeanIntegrationTestCase {
-
-		static Pojo someBeanTestOverride() {
-			return new FakePojo("ignored");
-		}
-
-		static Pojo anotherBeanTestOverride() {
-			return new FakePojo("sub2");
-		}
-
-		@Test
-		void ignored2() { }
-	}
 }
