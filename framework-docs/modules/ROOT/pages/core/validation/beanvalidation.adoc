@@ -341,7 +341,7 @@ xref:web/webflux/ann-rest-exceptions.adoc[Error Responses] sections.
 === Method Validation Exceptions
 
 By default, `jakarta.validation.ConstraintViolationException` is raised with the set of
-``ConstraintViolation``s returned by `jakarata.validation.Validator`. As an alternative,
+``ConstraintViolation``s returned by `jakarta.validation.Validator`. As an alternative,
 you can have `MethodValidationException` raised instead with ``ConstraintViolation``s
 adapted to `MessageSourceResolvable` errors. To enable set the following flag:
 
