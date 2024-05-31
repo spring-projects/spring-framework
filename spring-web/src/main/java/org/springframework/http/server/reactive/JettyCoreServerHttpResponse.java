@@ -88,13 +88,13 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
 		return Flux.from(body)
-				.flatMap(this::sendDataBuffer, 1)
+				.concatMap(this::sendDataBuffer)
 				.then();
 	}
 
 	@Override
 	protected Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		return Flux.from(body).flatMap(this::writeWithInternal, 1).then();
+		return Flux.from(body).concatMap(this::writeWithInternal).then();
 	}
 
 	@Override
