@@ -223,9 +223,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
-	public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object... args)
-			throws BeansException {
-
+	public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object... args)			throws BeansException {
 		return doGetBean(name, requiredType, args, false);
 	}
 
@@ -242,9 +240,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @throws BeansException if the bean could not be created
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> T doGetBean(
-			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
-			throws BeansException {
+	protected <T> T doGetBean(String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly) throws BeansException {
 		// 获取规范beanName
 		String beanName = transformedBeanName(name);
 		Object beanInstance;
@@ -1836,11 +1832,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Get the object for the given bean instance, either the bean
 	 * instance itself or its created object in case of a FactoryBean.
 	 * 检测当前bean是否是 FactoryBean 类型的bean 如果是 调用该bean的FactoryBean的getObject()方法 返回bean实例
+	 * <p>
+	 * ① 判断当前bean是否是 FactoryBean 类型的bean
+	 * ② 非FactoryBean类型bean不处理
+	 * ③ bean类型转换
+	 * ④ 将从FactoryBean中解析bean的工作委托给getObjectFromFactoryBean
 	 *
-	 * @param beanInstance the shared bean instance
-	 * @param name         the name that may include factory dereference prefix
-	 * @param beanName     the canonical bean name
-	 * @param beanDefinition          the merged bean definition
+	 * @param beanInstance   the shared bean instance
+	 * @param name           the name that may include factory dereference prefix
+	 * @param beanName       the canonical bean name
+	 * @param beanDefinition the merged bean definition
 	 * @return the object to expose for the bean
 	 */
 	protected Object getObjectForBeanInstance(Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition beanDefinition) {
@@ -1868,20 +1869,25 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (!(beanInstance instanceof FactoryBean)) {
 			return beanInstance;
 		}
-
+		// 加载FactoryBean
 		Object object = null;
 		if (beanDefinition != null) {
 			beanDefinition.isFactoryBean = true;
 		} else {
+			// 尝试获取缓存的FactoryBean
 			object = getCachedObjectForFactoryBean(beanName);
 		}
 		if (object == null) {
 			// Return bean instance from factory.
+			// 当前beanInstance一定是 FactoryBean
 			FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
 			// Caches object obtained from FactoryBean if it is a singleton.
+			// beanDefinition为空 && 当前beanName在beanDefinitionMap中是否存在
 			if (beanDefinition == null && containsBeanDefinition(beanName)) {
+				// 将存储XML配置文件的GenericBeanDefinition转换为RootBeanDefinition, 如果BeanName是子bean同时合并父类相关属性
 				beanDefinition = getMergedLocalBeanDefinition(beanName);
 			}
+			// 是否为用户定义的FactoryBean 非程序定义的FactoryBean
 			boolean synthetic = (beanDefinition != null && beanDefinition.isSynthetic());
 			object = getObjectFromFactoryBean(factory, beanName, !synthetic);
 		}

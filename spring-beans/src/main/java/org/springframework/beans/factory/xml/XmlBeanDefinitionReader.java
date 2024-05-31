@@ -325,8 +325,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
 
 		if (!currentResources.add(encodedResource)) {
-			throw new BeanDefinitionStoreException(
-					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
+			throw new BeanDefinitionStoreException("Detected cyclic loading of " + encodedResource + " - check your import definitions!");
 		}
 		// 从encodedResource中获取已封装的Resource对象并获取其中的 inputStream
 		try (InputStream inputStream = encodedResource.getResource().getInputStream()) {
@@ -337,8 +336,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			// 核心逻辑
 			return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
 		} catch (IOException ex) {
-			throw new BeanDefinitionStoreException(
-					"IOException parsing XML document from " + encodedResource.getResource(), ex);
+			throw new BeanDefinitionStoreException("IOException parsing XML document from " + encodedResource.getResource(), ex);
 		} finally {
 			currentResources.remove(encodedResource);
 			if (currentResources.isEmpty()) {
@@ -438,6 +436,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * <p>Override this method if you would like full control over the validation
 	 * mode, even when something other than {@link #VALIDATION_AUTO} was set.
 	 * 验证XML
+	 *
 	 * @see #detectValidationMode
 	 */
 	protected int getValidationModeForResource(Resource resource) {
