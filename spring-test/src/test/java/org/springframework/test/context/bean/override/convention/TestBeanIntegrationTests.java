@@ -85,7 +85,7 @@ public class TestBeanIntegrationTests {
 
 	@Nested
 	@DisplayName("With @TestBean in enclosing class")
-	public class TestBeanNestedTests {
+	public class TestBeanFieldInEnclosingClassTests {
 
 		@Test
 		void fieldHasOverride(ApplicationContext ctx) {
@@ -108,7 +108,7 @@ public class TestBeanIntegrationTests {
 
 	@Nested
 	@DisplayName("With factory method in enclosing class")
-	public class TestBeanNested2Tests {
+	public class TestBeanFactoryMethodInEnclosingClassTests {
 
 		@TestBean(methodName = "nestedFieldTestOverride", name = "nestedField")
 		String nestedField2;
