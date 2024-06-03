@@ -86,12 +86,21 @@ class BeanRegistrationsAotContribution
 		method.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_PARAMETER_NAME);
 		CodeBlock.Builder code = CodeBlock.builder();
 		this.registrations.forEach(registration -> {
-			MethodReference beanDefinitionMethod = registration.methodGenerator
-					.generateBeanDefinitionMethod(generationContext, beanRegistrationsCode);
-			CodeBlock methodInvocation = beanDefinitionMethod.toInvokeCodeBlock(
-					ArgumentCodeGenerator.none(), beanRegistrationsCode.getClassName());
-			code.addStatement("$L.registerBeanDefinition($S, $L)",
-				BEAN_FACTORY_PARAMETER_NAME, registration.beanName(), methodInvocation);
+			try {
+				MethodReference beanDefinitionMethod = registration.methodGenerator
+						.generateBeanDefinitionMethod(generationContext, beanRegistrationsCode);
+				CodeBlock methodInvocation = beanDefinitionMethod.toInvokeCodeBlock(
+						ArgumentCodeGenerator.none(), beanRegistrationsCode.getClassName());
+				code.addStatement("$L.registerBeanDefinition($S, $L)",
+					BEAN_FACTORY_PARAMETER_NAME, registration.beanName(), methodInvocation);
+			}
+			catch (AotException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				throw new AotBeanProcessingException(registration.registeredBean,
+						"failed to generate code for bean definition", ex);
+			}
 		});
 		method.addCode(code.build());
 	}

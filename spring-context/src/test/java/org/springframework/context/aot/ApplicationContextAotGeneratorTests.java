@@ -40,6 +40,7 @@ import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.aot.AotProcessingException;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
@@ -94,6 +95,7 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link ApplicationContextAotGenerator}.
@@ -587,6 +589,22 @@ class ApplicationContextAotGeneratorTests {
 
 	}
 
+	@Nested
+	class ExceptionHanding {
+
+		@Test
+		void failureProcessingBeanFactoryAotContribution() {
+			GenericApplicationContext applicationContext = new GenericApplicationContext();
+			applicationContext.registerBeanDefinition("test",
+					new RootBeanDefinition(FailingBeanFactoryInitializationAotContribution.class));
+			assertThatExceptionOfType(AotProcessingException.class)
+					.isThrownBy(() -> processAheadOfTime(applicationContext))
+					.withMessageStartingWith("Error executing '")
+					.withMessageContaining(FailingBeanFactoryInitializationAotContribution.class.getName())
+					.withMessageContaining("Test exception");
+		}
+	}
+
 	private static void registerBeanPostProcessor(GenericApplicationContext applicationContext,
 			String beanName, Class<?> beanPostProcessorClass) {
 
@@ -674,6 +692,14 @@ class ApplicationContextAotGeneratorTests {
 			return null;
 		}
 
+	}
+
+	static class FailingBeanFactoryInitializationAotContribution implements BeanFactoryInitializationAotProcessor {
+
+		@Override
+		public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+			throw new IllegalStateException("Test exception");
+		}
 	}
 
 }

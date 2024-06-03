@@ -102,7 +102,7 @@ class InstanceSupplierCodeGeneratorKotlinTests {
 		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
 				.genericBeanDefinition(KotlinConfiguration::class.java).beanDefinition
 		)
-		Assertions.assertThatIllegalStateException().isThrownBy {
+		Assertions.assertThatExceptionOfType(AotBeanProcessingException::class.java).isThrownBy {
 			compile(beanFactory, beanDefinition) { _, _  -> }
 		}
 	}
