@@ -1052,16 +1052,16 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 		try {
-			Method method = annotation.annotationType().getDeclaredMethod(attributeName);
-			return invokeAnnotationMethod(method, annotation);
-		}
-		catch (NoSuchMethodException ex) {
-			return null;
+			for (Method method : annotation.annotationType().getDeclaredMethods()) {
+				if (method.getName().equals(attributeName) && method.getParameterCount() == 0) {
+					return invokeAnnotationMethod(method, annotation);
+				}
+			}
 		}
 		catch (Throwable ex) {
 			handleValueRetrievalFailure(annotation, ex);
-			return null;
 		}
+		return null;
 	}
 
 	/**
