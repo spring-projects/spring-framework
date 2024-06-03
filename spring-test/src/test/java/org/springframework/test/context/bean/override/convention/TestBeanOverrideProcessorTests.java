@@ -129,7 +129,7 @@ class TestBeanOverrideProcessorTests {
 				.withMessage("""
 						Failed to find a static test bean factory method in %s with return type %s \
 						whose name matches one of the supported candidates %s""",
-						clazz.getName(), returnType.getName(), List.of("someFieldTestOverride", "fieldTestOverride"));
+						clazz.getName(), returnType.getName(), List.of("fieldTestOverride", "someFieldTestOverride"));
 	}
 
 	@Test

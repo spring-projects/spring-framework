@@ -58,7 +58,7 @@ class FailingTestBeanInheritanceIntegrationTests {
 					message("""
 						Found 2 competing static test bean factory methods in %s with return type %s \
 						whose name matches one of the supported candidates \
-						[thirdBeanTestOverride, anotherBeanTestOverride]"""
+						[anotherBeanTestOverride, thirdBeanTestOverride]"""
 							.formatted(testClass.getName(), AbstractTestBeanIntegrationTestCase.Pojo.class.getName())))));
 	}
 
