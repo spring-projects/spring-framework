@@ -299,7 +299,7 @@ Java::
 	public class AppConfig {
 
 		@Bean
-		public MethodValidationPostProcessor validationPostProcessor() {
+		public static MethodValidationPostProcessor validationPostProcessor() {
 			return new MethodValidationPostProcessor();
 		}
 	}
@@ -357,7 +357,7 @@ Java::
 	public class AppConfig {
 
 		@Bean
-		public MethodValidationPostProcessor validationPostProcessor() {
+		public static MethodValidationPostProcessor validationPostProcessor() {
 			MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
 			processor.setAdaptConstraintViolations(true);
 			return processor;
