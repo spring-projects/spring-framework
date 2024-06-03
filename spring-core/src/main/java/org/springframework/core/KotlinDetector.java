@@ -84,6 +84,10 @@ public abstract class KotlinDetector {
 	/**
 	 * Determine whether the given {@code Class} is a Kotlin type
 	 * (with Kotlin metadata present on it).
+	 *
+	 * <p>As of Kotlin 2.0, this method can't be used to detect Kotlin
+	 * lambdas unless they are annotated with <code>@JvmSerializableLambda</code>
+	 * as invokedynamic has become the default method for lambda generation.
 	 */
 	public static boolean isKotlinType(Class<?> clazz) {
 		return (kotlinMetadata != null && clazz.getDeclaredAnnotation(kotlinMetadata) != null);
