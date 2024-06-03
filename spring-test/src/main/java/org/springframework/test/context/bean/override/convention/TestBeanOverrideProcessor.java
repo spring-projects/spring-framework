@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextAnnotationUtils;
@@ -88,24 +89,23 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 				supportedNames.contains(method.getName()) &&
 				methodReturnType.isAssignableFrom(method.getReturnType()));
 
-		List<Method> methods = findMethods(clazz, methodFilter);
+		Set<Method> methods = findMethods(clazz, methodFilter);
 		if (methods.isEmpty() && TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
 			methods = findMethods(clazz.getEnclosingClass(), methodFilter);
 		}
 
-		Assert.state(!methods.isEmpty(), () -> """
+		int methodCount = methods.size();
+		Assert.state(methodCount > 0, () -> """
 				Failed to find a static test bean factory method in %s with return type %s \
 				whose name matches one of the supported candidates %s""".formatted(
 						clazz.getName(), methodReturnType.getName(), supportedNames));
 
-		long nameCount = methods.stream().map(Method::getName).distinct().count();
-		int methodCount = methods.size();
-		Assert.state(nameCount == 1, () -> """
+		Assert.state(methodCount == 1, () -> """
 				Found %d competing static test bean factory methods in %s with return type %s \
 				whose name matches one of the supported candidates %s""".formatted(
 					methodCount, clazz.getName(), methodReturnType.getName(), supportedNames));
 
-		return methods.get(0);
+		return methods.iterator().next();
 	}
 
 	@Override
@@ -138,10 +138,8 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 	}
 
 
-	private static List<Method> findMethods(Class<?> clazz, MethodFilter methodFilter) {
-		List<Method> methods = new ArrayList<>();
-		ReflectionUtils.doWithMethods(clazz, methods::add, methodFilter);
-		return methods;
+	private static Set<Method> findMethods(Class<?> clazz, MethodFilter methodFilter) {
+		return MethodIntrospector.selectMethods(clazz, methodFilter);
 	}
 
 
