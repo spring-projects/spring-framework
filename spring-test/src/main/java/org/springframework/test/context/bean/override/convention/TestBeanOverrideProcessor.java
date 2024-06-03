@@ -22,7 +22,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +36,7 @@ import org.springframework.test.context.bean.override.BeanOverrideStrategy;
 import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
 
 /**
@@ -84,18 +84,13 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 	static Method findTestBeanFactoryMethod(Class<?> clazz, Class<?> methodReturnType, List<String> methodNames) {
 		Assert.notEmpty(methodNames, "At least one candidate method name is required");
 		Set<String> supportedNames = new LinkedHashSet<>(methodNames);
-		List<Method> methods = Arrays.stream(ReflectionUtils.getAllDeclaredMethods(clazz))
-				.filter(method -> Modifier.isStatic(method.getModifiers()) &&
-						supportedNames.contains(method.getName()) &&
-						methodReturnType.isAssignableFrom(method.getReturnType()))
-				.toList();
+		MethodFilter methodFilter = method -> (Modifier.isStatic(method.getModifiers()) &&
+				supportedNames.contains(method.getName()) &&
+				methodReturnType.isAssignableFrom(method.getReturnType()));
 
+		List<Method> methods = findMethods(clazz, methodFilter);
 		if (methods.isEmpty() && TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
-			methods = Arrays.stream(ReflectionUtils.getAllDeclaredMethods(clazz.getEnclosingClass()))
-					.filter(method -> Modifier.isStatic(method.getModifiers()) &&
-							supportedNames.contains(method.getName()) &&
-							methodReturnType.isAssignableFrom(method.getReturnType()))
-					.toList();
+			methods = findMethods(clazz.getEnclosingClass(), methodFilter);
 		}
 
 		Assert.state(!methods.isEmpty(), () -> """
@@ -140,6 +135,13 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 		}
 
 		return new TestBeanOverrideMetadata(field, overrideMethod, testBeanAnnotation, ResolvableType.forField(field, testClass));
+	}
+
+
+	private static List<Method> findMethods(Class<?> clazz, MethodFilter methodFilter) {
+		List<Method> methods = new ArrayList<>();
+		ReflectionUtils.doWithMethods(clazz, methods::add, methodFilter);
+		return methods;
 	}
 
 
