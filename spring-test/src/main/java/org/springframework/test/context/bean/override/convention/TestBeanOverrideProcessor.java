@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,7 +41,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link BeanOverrideProcessor} implementation for {@link TestBean @TestBean}
- * support. It creates metadata for annotated fields in a given class and
+ * support, which creates metadata for annotated fields in a given class and
  * ensures that a corresponding static factory method exists, according to the
  * {@linkplain TestBean documented conventions}.
  *
@@ -49,6 +50,15 @@ import org.springframework.util.StringUtils;
  * @since 6.2
  */
 class TestBeanOverrideProcessor implements BeanOverrideProcessor {
+
+	/**
+	 * Find a test bean factory {@link Method} in the given {@link Class} or one
+	 * of its parent classes.
+	 * <p>Delegates to {@link #findTestBeanFactoryMethod(Class, Class, List)}.
+	 */
+	static Method findTestBeanFactoryMethod(Class<?> clazz, Class<?> methodReturnType, String... methodNames) {
+		return findTestBeanFactoryMethod(clazz, methodReturnType, List.of(methodNames));
+	}
 
 	/**
 	 * Find a test bean factory {@link Method} in the given {@link Class} or one
@@ -61,7 +71,7 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 	 * </ul>
 	 * <p>If the test class inherits from another class, the class hierarchy is
 	 * searched for factory methods. Matching factory methods are prioritized
-	 * from closest to furthest from the test class in the class hierarchy,
+	 * from closest to farthest from the test class in the class hierarchy,
 	 * provided they have the same name. However, if multiple methods are found
 	 * that match distinct candidate names, an exception is thrown.
 	 * @param clazz the class in which to search for the factory method
@@ -71,9 +81,9 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 	 * @throws IllegalStateException if a matching factory method cannot
 	 * be found or multiple methods match
 	 */
-	static Method findTestBeanFactoryMethod(Class<?> clazz, Class<?> methodReturnType, String... methodNames) {
-		Assert.isTrue(methodNames.length > 0, "At least one candidate method name is required");
-		Set<String> supportedNames = new LinkedHashSet<>(Arrays.asList(methodNames));
+	static Method findTestBeanFactoryMethod(Class<?> clazz, Class<?> methodReturnType, List<String> methodNames) {
+		Assert.notEmpty(methodNames, "At least one candidate method name is required");
+		Set<String> supportedNames = new LinkedHashSet<>(methodNames);
 		List<Method> methods = Arrays.stream(ReflectionUtils.getAllDeclaredMethods(clazz))
 				.filter(method -> Modifier.isStatic(method.getModifiers()) &&
 						supportedNames.contains(method.getName()) &&
@@ -110,27 +120,26 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 					TestBeanOverrideProcessor.class.getSimpleName(), field.getDeclaringClass().getName(),
 					field.getName()));
 		}
-		// If the user specified a method explicitly, search for that.
-		// Otherwise, search candidate factory methods using the convention suffix
-		// and the explicit bean name (if any) or field name.
-		Method explicitOverrideMethod;
-		if (!testBeanAnnotation.methodName().isBlank()) {
-			explicitOverrideMethod = findTestBeanFactoryMethod(testClass, field.getType(), testBeanAnnotation.methodName());
+		Method overrideMethod;
+		String methodName = testBeanAnnotation.methodName();
+		if (!methodName.isBlank()) {
+			// If the user specified an explicit method name, search for that.
+			overrideMethod = findTestBeanFactoryMethod(testClass, field.getType(), methodName);
 		}
 		else {
+			// Otherwise, search for candidate factory methods using the convention
+			// suffix and the field name or explicit bean name (if any).
+			List<String> candidateMethodNames = new ArrayList<>();
+			candidateMethodNames.add(field.getName() + TestBean.CONVENTION_SUFFIX);
+
 			String beanName = testBeanAnnotation.name();
-			if (!StringUtils.hasText(beanName)) {
-				explicitOverrideMethod = findTestBeanFactoryMethod(testClass, field.getType(),
-					field.getName() + TestBean.CONVENTION_SUFFIX);
+			if (StringUtils.hasText(beanName)) {
+				candidateMethodNames.add(beanName + TestBean.CONVENTION_SUFFIX);
 			}
-			else {
-				explicitOverrideMethod = findTestBeanFactoryMethod(testClass, field.getType(),
-					beanName + TestBean.CONVENTION_SUFFIX,
-						field.getName() + TestBean.CONVENTION_SUFFIX);
-			}
+			overrideMethod = findTestBeanFactoryMethod(testClass, field.getType(), candidateMethodNames);
 		}
 
-		return new TestBeanOverrideMetadata(field, explicitOverrideMethod, testBeanAnnotation, ResolvableType.forField(field, testClass));
+		return new TestBeanOverrideMetadata(field, overrideMethod, testBeanAnnotation, ResolvableType.forField(field, testClass));
 	}
 
 
