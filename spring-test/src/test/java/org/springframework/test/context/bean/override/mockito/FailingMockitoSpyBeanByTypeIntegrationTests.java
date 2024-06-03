@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
@@ -48,7 +50,7 @@ class FailingMockitoSpyBeanByTypeIntegrationTests {
 				cause(
 					instanceOf(IllegalStateException.class),
 					message("""
-						Unable to select a bean to override by wrapping: 0 bean instances found of \
+						Unable to select a bean to override by wrapping: found 0 bean instances of \
 						type %s (as required by annotated field '%s.example')"""
 							.formatted(ExampleService.class.getName(), testClass.getSimpleName())))));
 	}
@@ -61,9 +63,9 @@ class FailingMockitoSpyBeanByTypeIntegrationTests {
 				cause(
 					instanceOf(IllegalStateException.class),
 					message("""
-						Unable to select a bean to override by wrapping: 2 bean instances found of \
-						type %s (as required by annotated field '%s.example')"""
-							.formatted(ExampleService.class.getName(), testClass.getSimpleName())))));
+						Unable to select a bean to override by wrapping: found 2 bean instances of \
+						type %s (as required by annotated field '%s.example'): %s"""
+							.formatted(ExampleService.class.getName(), testClass.getSimpleName(), List.of("bean1", "bean2"))))));
 	}
 
 

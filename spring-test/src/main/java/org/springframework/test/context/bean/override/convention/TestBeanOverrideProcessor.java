@@ -111,9 +111,8 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 	@Override
 	public TestBeanOverrideMetadata createMetadata(Annotation overrideAnnotation, Class<?> testClass, Field field) {
 		if (!(overrideAnnotation instanceof TestBean testBeanAnnotation)) {
-			throw new IllegalStateException(String.format("Invalid annotation passed to %s: expected @TestBean on field %s.%s",
-					TestBeanOverrideProcessor.class.getSimpleName(), field.getDeclaringClass().getName(),
-					field.getName()));
+			throw new IllegalStateException("Invalid annotation passed to %s: expected @TestBean on field %s.%s"
+					.formatted(getClass().getSimpleName(), field.getDeclaringClass().getName(), field.getName()));
 		}
 		Method overrideMethod;
 		String methodName = testBeanAnnotation.methodName();
@@ -172,7 +171,7 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 				return this.overrideMethod.invoke(null);
 			}
 			catch (IllegalAccessException | InvocationTargetException ex) {
-				throw new IllegalArgumentException("Could not invoke bean overriding method " + this.overrideMethod.getName() +
+				throw new IllegalStateException("Failed to invoke bean overriding method " + this.overrideMethod.getName() +
 						"; a static method with no formal parameters is expected", ex);
 			}
 		}

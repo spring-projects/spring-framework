@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.bean.override.convention;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
@@ -49,8 +51,8 @@ class FailingTestBeanByTypeIntegrationTests {
 				cause(
 					instanceOf(IllegalStateException.class),
 					message("""
-						Unable to select a bean definition to override: 0 bean definitions \
-						found of type %s (as required by annotated field '%s.example')"""
+						Unable to select a bean definition to override: found 0 bean definitions \
+						of type %s (as required by annotated field '%s.example')"""
 							.formatted(ExampleService.class.getName(), testClass.getSimpleName())))));
 	}
 
@@ -62,9 +64,9 @@ class FailingTestBeanByTypeIntegrationTests {
 				cause(
 					instanceOf(IllegalStateException.class),
 					message("""
-						Unable to select a bean definition to override: 2 bean definitions \
-						found of type %s (as required by annotated field '%s.example')"""
-							.formatted(ExampleService.class.getName(), testClass.getSimpleName())))));
+						Unable to select a bean definition to override: found 2 bean definitions \
+						of type %s (as required by annotated field '%s.example'): %s"""
+							.formatted(ExampleService.class.getName(), testClass.getSimpleName(), List.of("bean1", "bean2"))))));
 	}
 
 
