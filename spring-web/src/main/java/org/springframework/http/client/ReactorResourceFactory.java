@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import reactor.netty.resources.LoopResources;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.Lifecycle;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -35,20 +37,21 @@ import org.springframework.util.Assert;
  * event loop threads, and {@link ConnectionProvider} for the connection pool,
  * within the lifecycle of a Spring {@code ApplicationContext}.
  *
- * <p>This factory implements {@link InitializingBean}, {@link DisposableBean}
- * and {@link Lifecycle} and is expected typically to be declared as a
- * Spring-managed bean.
+ * <p>This factory implements {@link SmartLifecycle} and is expected typically
+ * to be declared as a Spring-managed bean.
  *
- * <p>Notice that after a {@link Lifecycle} stop/restart, new instances of
+ * <p>Notice that after a {@link SmartLifecycle} stop/restart, new instances of
  * the configured {@link LoopResources} and {@link ConnectionProvider} are
  * created, so any references to those should be updated.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 6.1
  */
-public class ReactorResourceFactory implements InitializingBean, DisposableBean, Lifecycle {
+public class ReactorResourceFactory
+		implements ApplicationContextAware, InitializingBean, DisposableBean, SmartLifecycle {
 
 	private boolean useGlobalResources = true;
 
@@ -72,6 +75,9 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean,
 	private Duration shutdownQuietPeriod = Duration.ofSeconds(LoopResources.DEFAULT_SHUTDOWN_QUIET_PERIOD);
 
 	private Duration shutdownTimeout = Duration.ofSeconds(LoopResources.DEFAULT_SHUTDOWN_TIMEOUT);
+
+	@Nullable
+	private ApplicationContext applicationContext;
 
 	private volatile boolean running;
 
@@ -202,15 +208,30 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean,
 		this.shutdownTimeout = shutdownTimeout;
 	}
 
+	/**
+	 * Setting an {@link ApplicationContext} is optional: If set, Reactor resources
+	 * will be initialized in the {@link #start() lifecycle start} phase and closed
+	 * in the {@link #stop() lifecycle stop} phase. If not set, it will happen in
+	 * {@link #afterPropertiesSet()} and {@link #destroy()}, respectively.
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() {
-		start();
+		if (this.applicationContext == null) {
+			start();
+		}
 	}
 
 	@Override
 	public void destroy() {
-		stop();
+		if (this.applicationContext == null) {
+			stop();
+		}
 	}
 
 	@Override

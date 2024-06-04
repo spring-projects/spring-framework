@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.client.reactive;
+package org.springframework.http.client;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,7 +24,7 @@ import reactor.netty.http.HttpResources;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 
-import org.springframework.http.client.ReactorResourceFactory;
+import org.springframework.context.support.GenericApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  */
 class ReactorResourceFactoryTests {
 
@@ -49,37 +50,34 @@ class ReactorResourceFactoryTests {
 
 	@Test
 	void globalResources() {
-
 		this.resourceFactory.setUseGlobalResources(true);
-		this.resourceFactory.afterPropertiesSet();
+		this.resourceFactory.start();
 
 		HttpResources globalResources = HttpResources.get();
 		assertThat(this.resourceFactory.getConnectionProvider()).isSameAs(globalResources);
 		assertThat(this.resourceFactory.getLoopResources()).isSameAs(globalResources);
 		assertThat(globalResources.isDisposed()).isFalse();
 
-		this.resourceFactory.destroy();
+		this.resourceFactory.stop();
 
 		assertThat(globalResources.isDisposed()).isTrue();
 	}
 
 	@Test
 	void globalResourcesWithConsumer() {
-
 		AtomicBoolean invoked = new AtomicBoolean();
 
 		this.resourceFactory.addGlobalResourcesConsumer(httpResources -> invoked.set(true));
-		this.resourceFactory.afterPropertiesSet();
+		this.resourceFactory.start();
 
 		assertThat(invoked.get()).isTrue();
-		this.resourceFactory.destroy();
+		this.resourceFactory.stop();
 	}
 
 	@Test
 	void localResources() {
-
 		this.resourceFactory.setUseGlobalResources(false);
-		this.resourceFactory.afterPropertiesSet();
+		this.resourceFactory.start();
 
 		ConnectionProvider connectionProvider = this.resourceFactory.getConnectionProvider();
 		LoopResources loopResources = this.resourceFactory.getLoopResources();
@@ -91,7 +89,7 @@ class ReactorResourceFactoryTests {
 		// assertFalse(connectionProvider.isDisposed());
 		assertThat(loopResources.isDisposed()).isFalse();
 
-		this.resourceFactory.destroy();
+		this.resourceFactory.stop();
 
 		assertThat(connectionProvider.isDisposed()).isTrue();
 		assertThat(loopResources.isDisposed()).isTrue();
@@ -99,11 +97,10 @@ class ReactorResourceFactoryTests {
 
 	@Test
 	void localResourcesViaSupplier() {
-
 		this.resourceFactory.setUseGlobalResources(false);
 		this.resourceFactory.setConnectionProviderSupplier(() -> this.connectionProvider);
 		this.resourceFactory.setLoopResourcesSupplier(() -> this.loopResources);
-		this.resourceFactory.afterPropertiesSet();
+		this.resourceFactory.start();
 
 		ConnectionProvider connectionProvider = this.resourceFactory.getConnectionProvider();
 		LoopResources loopResources = this.resourceFactory.getLoopResources();
@@ -113,9 +110,9 @@ class ReactorResourceFactoryTests {
 
 		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
 
-		this.resourceFactory.destroy();
+		this.resourceFactory.stop();
 
-		// Managed (destroy disposes)..
+		// Managed (stop disposes)..
 		verify(this.connectionProvider).disposeLater();
 		verify(this.loopResources).disposeLater(eq(Duration.ofSeconds(LoopResources.DEFAULT_SHUTDOWN_QUIET_PERIOD)), eq(Duration.ofSeconds(LoopResources.DEFAULT_SHUTDOWN_TIMEOUT)));
 		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
@@ -130,8 +127,8 @@ class ReactorResourceFactoryTests {
 		this.resourceFactory.setLoopResourcesSupplier(() -> this.loopResources);
 		this.resourceFactory.setShutdownQuietPeriod(quietPeriod);
 		this.resourceFactory.setShutdownTimeout(shutdownTimeout);
-		this.resourceFactory.afterPropertiesSet();
-		this.resourceFactory.destroy();
+		this.resourceFactory.start();
+		this.resourceFactory.stop();
 
 		verify(this.connectionProvider).disposeLater();
 		verify(this.loopResources).disposeLater(eq(quietPeriod), eq(shutdownTimeout));
@@ -140,11 +137,10 @@ class ReactorResourceFactoryTests {
 
 	@Test
 	void externalResources() {
-
 		this.resourceFactory.setUseGlobalResources(false);
 		this.resourceFactory.setConnectionProvider(this.connectionProvider);
 		this.resourceFactory.setLoopResources(this.loopResources);
-		this.resourceFactory.afterPropertiesSet();
+		this.resourceFactory.start();
 
 		ConnectionProvider connectionProvider = this.resourceFactory.getConnectionProvider();
 		LoopResources loopResources = this.resourceFactory.getLoopResources();
@@ -154,17 +150,16 @@ class ReactorResourceFactoryTests {
 
 		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
 
-		this.resourceFactory.destroy();
+		this.resourceFactory.stop();
 
-		// Not managed (destroy has no impact)
+		// Not managed (stop has no impact)
 		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
 	}
 
 	@Test
 	void restartWithGlobalResources() {
-
 		this.resourceFactory.setUseGlobalResources(true);
-		this.resourceFactory.afterPropertiesSet();
+		this.resourceFactory.start();
 		this.resourceFactory.stop();
 		this.resourceFactory.start();
 
@@ -173,16 +168,15 @@ class ReactorResourceFactoryTests {
 		assertThat(this.resourceFactory.getLoopResources()).isSameAs(globalResources);
 		assertThat(globalResources.isDisposed()).isFalse();
 
-		this.resourceFactory.destroy();
+		this.resourceFactory.stop();
 
 		assertThat(globalResources.isDisposed()).isTrue();
 	}
 
 	@Test
 	void restartWithLocalResources() {
-
 		this.resourceFactory.setUseGlobalResources(false);
-		this.resourceFactory.afterPropertiesSet();
+		this.resourceFactory.start();
 		this.resourceFactory.stop();
 		this.resourceFactory.start();
 
@@ -196,7 +190,7 @@ class ReactorResourceFactoryTests {
 		// assertFalse(connectionProvider.isDisposed());
 		assertThat(loopResources.isDisposed()).isFalse();
 
-		this.resourceFactory.destroy();
+		this.resourceFactory.stop();
 
 		assertThat(connectionProvider.isDisposed()).isTrue();
 		assertThat(loopResources.isDisposed()).isTrue();
@@ -204,11 +198,10 @@ class ReactorResourceFactoryTests {
 
 	@Test
 	void restartWithExternalResources() {
-
 		this.resourceFactory.setUseGlobalResources(false);
 		this.resourceFactory.setConnectionProvider(this.connectionProvider);
 		this.resourceFactory.setLoopResources(this.loopResources);
-		this.resourceFactory.afterPropertiesSet();
+		this.resourceFactory.start();
 		this.resourceFactory.stop();
 		this.resourceFactory.start();
 
@@ -220,10 +213,52 @@ class ReactorResourceFactoryTests {
 
 		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
 
-		this.resourceFactory.destroy();
+		this.resourceFactory.stop();
 
-		// Not managed (destroy has no impact)...
+		// Not managed (stop has no impact)...
 		verifyNoMoreInteractions(this.connectionProvider, this.loopResources);
+	}
+
+	@Test
+	void restartWithinApplicationContext() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBean(ReactorResourceFactory.class);
+		context.refresh();
+
+		ReactorResourceFactory resourceFactory = context.getBean(ReactorResourceFactory.class);
+		assertThat(resourceFactory.isRunning()).isTrue();
+
+		HttpResources globalResources = HttpResources.get();
+		assertThat(resourceFactory.getConnectionProvider()).isSameAs(globalResources);
+		assertThat(resourceFactory.getLoopResources()).isSameAs(globalResources);
+		assertThat(globalResources.isDisposed()).isFalse();
+
+		context.stop();
+		assertThat(globalResources.isDisposed()).isTrue();
+
+		context.start();
+		globalResources = HttpResources.get();
+		assertThat(resourceFactory.getConnectionProvider()).isSameAs(globalResources);
+		assertThat(resourceFactory.getLoopResources()).isSameAs(globalResources);
+		assertThat(globalResources.isDisposed()).isFalse();
+		assertThat(globalResources.isDisposed()).isFalse();
+
+		context.close();
+		assertThat(globalResources.isDisposed()).isTrue();
+	}
+
+	@Test
+	void doNotStartBeforeApplicationContextFinish() {
+		GenericApplicationContext context = new GenericApplicationContext() {
+			@Override
+			protected void finishRefresh() {
+			}
+		};
+		context.registerBean(ReactorResourceFactory.class);
+		context.refresh();
+
+		ReactorResourceFactory resourceFactory = context.getBeanFactory().getBean(ReactorResourceFactory.class);
+		assertThat(resourceFactory.isRunning()).isFalse();
 	}
 
 }
