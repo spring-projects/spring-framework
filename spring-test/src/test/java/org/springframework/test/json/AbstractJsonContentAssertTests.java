@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertProvider;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
@@ -42,7 +43,6 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.JSONCompareResult;
 import org.skyscreamer.jsonassert.comparator.JSONComparator;
 
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -286,8 +286,8 @@ class AbstractJsonContentAssertTests {
 		void convertArrayToParameterizedType() {
 			assertThat(forJson(SIMPSONS, jsonHttpMessageConverter))
 					.extractingPath("$.familyMembers")
-					.convertTo(new ParameterizedTypeReference<List<Member>>() {})
-					.satisfies(family -> assertThat(family).hasSize(5).element(0).isEqualTo(new Member("Homer")));
+					.convertTo(InstanceOfAssertFactories.list(Member.class))
+					.hasSize(5).element(0).isEqualTo(new Member("Homer"));
 		}
 
 		@Test

@@ -20,16 +20,18 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractBooleanAssert;
 import org.assertj.core.api.AbstractMapAssert;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.AbstractStringAssert;
+import org.assertj.core.api.AssertFactory;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.ObjectArrayAssert;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
 
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
@@ -152,16 +154,23 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 	}
 
 	/**
-	 * Verify that the actual value can be converted to an instance of the
-	 * given {@code target}, and produce a new {@linkplain AbstractObjectAssert
-	 * assertion} object narrowed to that type.
-	 * @param target the {@linkplain ParameterizedTypeReference parameterized
-	 * type} to convert the actual value to
+	 * Verify that the actual value can be converted to an instance of the type
+	 * defined by the given {@link AssertFactory} and return a new Assert narrowed
+	 * to that type.
+	 * <p>{@link InstanceOfAssertFactories} provides static factories for all the
+	 * types supported by {@link Assertions#assertThat}. Additional factories can
+	 * be created by implementing {@link AssertFactory}.
+	 * <p>Example: <pre><code class="java">
+	 * // Check that the json value is an array of 3 users
+	 * assertThat(jsonValue).convertTo(InstanceOfAssertFactories.list(User.class))
+	 *         hasSize(3); // ListAssert of User
+	 * </code></pre>
+	 * @param assertFactory the {@link AssertFactory} to use to produce a narrowed
+	 * Assert for the type that it defines.
 	 */
-	public <T> AbstractObjectAssert<?, T> convertTo(ParameterizedTypeReference<T> target) {
+	public <ASSERT extends AbstractAssert<?, ?>> ASSERT convertTo(AssertFactory<?, ASSERT> assertFactory) {
 		isNotNull();
-		T value = convertToTargetType(target.getType());
-		return Assertions.assertThat(value);
+		return assertFactory.createAssert(this::convertToTargetType);
 	}
 
 	/**
