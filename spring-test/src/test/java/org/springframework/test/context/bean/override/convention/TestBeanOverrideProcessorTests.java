@@ -26,6 +26,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.test.context.bean.override.convention.TestBeanOverrideProcessor.TestBeanOverrideMetadata;
 import org.springframework.test.context.bean.override.example.ExampleService;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -49,6 +50,16 @@ class TestBeanOverrideProcessorTests {
 		Method method = findTestBeanFactoryMethod(clazz, returnType, "example1", "example2", "example3");
 
 		assertThat(method.getName()).isEqualTo("example2");
+	}
+
+	@Test
+	void findTestBeanFactoryMethodFindsLocalMethodWhenSubclassMethodHidesSuperclassMethod() {
+		Class<?> clazz = SubTestCase.class;
+		Class<?> returnType = String.class;
+
+		Method method = findTestBeanFactoryMethod(clazz, returnType, "factory");
+
+		assertThat(method).isEqualTo(ReflectionUtils.findMethod(clazz, "factory"));
 	}
 
 	@Test
@@ -170,6 +181,24 @@ class TestBeanOverrideProcessorTests {
 		public ExampleService b;
 
 		static ExampleService explicit2() {
+			return null;
+		}
+	}
+
+	static class BaseTestCase {
+
+		@TestBean(methodName = "factory")
+		public String field;
+
+		static String factory() {
+			return null;
+		}
+	}
+
+	static class SubTestCase extends BaseTestCase {
+
+		// Hides factory() in superclass.
+		static String factory() {
 			return null;
 		}
 	}

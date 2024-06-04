@@ -61,6 +61,11 @@ public class TestBeanInheritanceIntegrationTests {
 			return new FakePojo("someBeanOverride");
 		}
 
+		// Hides otherBeanTestOverride() defined in AbstractTestBeanIntegrationTestCase.
+		static Pojo otherBeanTestOverride() {
+			return new FakePojo("otherBean in subclass");
+		}
+
 		@Test
 		void fieldInSubtypeWithFactoryMethodInSupertype() {
 			assertThat(ctx.getBean("pojo")).as("applicationContext").hasToString("in superclass");
@@ -75,8 +80,8 @@ public class TestBeanInheritanceIntegrationTests {
 
 		@Test
 		void fieldInSupertypeWithPrioritizedFactoryMethodInSubtype() {
-			assertThat(ctx.getBean("someBean")).as("applicationContext").hasToString("someBeanOverride");
-			assertThat(this.someBean.getValue()).as("injection point").isEqualTo("someBeanOverride");
+			assertThat(ctx.getBean("otherBean")).as("applicationContext").hasToString("otherBean in subclass");
+			assertThat(super.otherBean.getValue()).as("injection point").isEqualTo("otherBean in subclass");
 		}
 
 		@Test

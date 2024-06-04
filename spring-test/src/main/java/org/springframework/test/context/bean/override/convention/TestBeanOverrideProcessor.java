@@ -92,16 +92,16 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 		Set<Method> methods = findMethods(clazz, methodFilter);
 
-		int methodCount = methods.size();
-		Assert.state(methodCount > 0, () -> """
+		Assert.state(!methods.isEmpty(), () -> """
 				Failed to find a static test bean factory method in %s with return type %s \
 				whose name matches one of the supported candidates %s""".formatted(
 						clazz.getName(), methodReturnType.getName(), supportedNames));
 
-		Assert.state(methodCount == 1, () -> """
+		long uniqueMethodNameCount = methods.stream().map(Method::getName).distinct().count();
+		Assert.state(uniqueMethodNameCount == 1, () -> """
 				Found %d competing static test bean factory methods in %s with return type %s \
 				whose name matches one of the supported candidates %s""".formatted(
-					methodCount, clazz.getName(), methodReturnType.getName(), supportedNames));
+						uniqueMethodNameCount, clazz.getName(), methodReturnType.getName(), supportedNames));
 
 		return methods.iterator().next();
 	}
