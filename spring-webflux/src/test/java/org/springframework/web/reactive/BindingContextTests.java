@@ -17,16 +17,20 @@
 package org.springframework.web.reactive;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import jakarta.validation.Valid;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.ResolvableType;
+import org.springframework.http.MediaType;
 import org.springframework.validation.Errors;
 import org.springframework.validation.SmartValidator;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
@@ -62,6 +66,27 @@ class BindingContextTests {
 		binder.addValidators(wrappedBeanValidator);
 
 		assertThat(binder.getValidatorsToApply()).containsExactly(springValidator);
+	}
+
+	@Test
+	void uriVariablesAddedConditionally() {
+
+		MockServerHttpRequest request = MockServerHttpRequest.post("/path")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body("name=John&age=25");
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("age", "26"));
+
+		TestBean testBean = new TestBean();
+
+		BindingContext bindingContext = new BindingContext(null);
+		WebExchangeDataBinder binder = bindingContext.createDataBinder(exchange, testBean, "testBean", null);
+
+		binder.bind(exchange).block();
+
+		assertThat(testBean.getName()).isEqualTo("John");
+		assertThat(testBean.getAge()).isEqualTo(25);
 	}
 
 
