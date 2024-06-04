@@ -1752,17 +1752,15 @@ public class ResolvableType implements Serializable {
 		 * @since 6.2
 		 */
 		public boolean isAssignableTo(ResolvableType type, @Nullable Map<Type, Type> matchedBefore) {
-			if (this.kind == Kind.UPPER) {
-				for (ResolvableType bound : this.bounds) {
-					if (type.isAssignableFrom(bound, false, matchedBefore, false)) {
-						return true;
-					}
+			if (!this.kind == Kind.UPPER) {
+				return (type.resolve() == Object.class);		
+			}
+			for (ResolvableType bound : this.bounds) {
+				if (type.isAssignableFrom(bound, false, matchedBefore, false)) {
+					return true;
 				}
-				return false;
 			}
-			else {
-				return (type.resolve() == Object.class);
-			}
+			return false;
 		}
 
 		/**
