@@ -139,6 +139,8 @@ public class ResolvableType implements Serializable {
 	@Nullable
 	private volatile Boolean unresolvableGenerics;
 
+	private final int HASH_CONSTANT = 31;
+
 
 	/**
 	 * Private constructor used to create a new {@code ResolvableType} for cache key purposes,
@@ -1038,13 +1040,13 @@ public class ResolvableType implements Serializable {
 	private int calculateHashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(this.type);
 		if (this.componentType != null) {
-			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.componentType);
+			hashCode = HASH_CONSTANT * hashCode + ObjectUtils.nullSafeHashCode(this.componentType);
 		}
 		if (this.typeProvider != null) {
-			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.typeProvider.getType());
+			hashCode = HASH_CONSTANT * hashCode + ObjectUtils.nullSafeHashCode(this.typeProvider.getType());
 		}
 		if (this.variableResolver != null) {
-			hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.variableResolver.getSource());
+			hashCode = HASH_CONSTANT * hashCode + ObjectUtils.nullSafeHashCode(this.variableResolver.getSource());
 		}
 		return hashCode;
 	}
@@ -1676,7 +1678,7 @@ public class ResolvableType implements Serializable {
 
 		@Override
 		public int hashCode() {
-			return (this.rawType.hashCode() * 31 + Arrays.hashCode(this.typeArguments));
+			return (this.rawType.hashCode() * HASH_CONSTANT + Arrays.hashCode(this.typeArguments));
 		}
 
 		@Override
