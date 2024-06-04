@@ -297,21 +297,31 @@ public class ResolvableType implements Serializable {
 		return isAssignableFrom(other, false, null, true);
 	}
 
-	private boolean isAssignableFrom(ResolvableType other, boolean strict,
-			@Nullable Map<Type, Type> matchedBefore, boolean upUntilUnresolvable) {
-
-		Assert.notNull(other, "ResolvableType must not be null");
-
+	private boolean typeIsNotResolvable(ResolvableType other){
 		// If we cannot resolve types, we are not assignable
-		if (this == NONE || other == NONE) {
-			return false;
-		}
+		return (this == NONE || other == NONE)
+	}
 
+	private boolean hasBeenMatchedBefore(@Nullable Map<Type, Type> matchedBefore, ResolvableType other){
 		if (matchedBefore != null) {
 			if (matchedBefore.get(this.type) == other.type) {
 				return true;
 			}
 		}
+	}
+
+	private boolean isAssignableFrom(ResolvableType other, boolean strict,
+			@Nullable Map<Type, Type> matchedBefore, boolean upUntilUnresolvable) {
+
+		Assert.notNull(other, "ResolvableType must not be null");
+
+		if  (this.typeIsNotResolvable(other)){
+			return false;
+		}
+		if (this.hasBeenMatchedBefore(matchedBefore, other)){
+			return true;
+		}
+
 		else {
 			// As of 6.1: shortcut assignability check for top-level Class references
 			if (this.type instanceof Class<?> clazz && other.type instanceof Class<?> otherClazz) {
