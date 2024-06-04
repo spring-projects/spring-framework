@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,24 +81,29 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	protected void addBindValues(MutablePropertyValues mpvs, ServletRequest request) {
 		Map<String, String> uriVars = getUriVars(request);
 		if (uriVars != null) {
-			uriVars.forEach((name, value) -> {
-				if (mpvs.contains(name)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("URI variable '" + name + "' overridden by request bind value.");
-					}
-				}
-				else {
-					mpvs.addPropertyValue(name, value);
-				}
-			});
+			uriVars.forEach((name, value) -> addValueIfNotPresent(mpvs, "URI variable", name, value));
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Nullable
 	private static Map<String, String> getUriVars(ServletRequest request) {
-		String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		return (Map<String, String>) request.getAttribute(attr);
+		return (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+	}
+
+	private static void addValueIfNotPresent(
+			MutablePropertyValues mpvs, String label, String name, @Nullable Object value) {
+
+		if (value != null) {
+			if (mpvs.contains(name)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(label + " '" + name + "' overridden by request bind value.");
+				}
+			}
+			else {
+				mpvs.addPropertyValue(name, value);
+			}
+		}
 	}
 
 

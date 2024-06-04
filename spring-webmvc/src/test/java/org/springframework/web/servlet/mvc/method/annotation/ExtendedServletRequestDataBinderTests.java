@@ -45,10 +45,10 @@ class ExtendedServletRequestDataBinderTests {
 
 	@Test
 	void createBinder() {
-		Map<String, String> uriTemplateVars = new HashMap<>();
-		uriTemplateVars.put("name", "nameValue");
-		uriTemplateVars.put("age", "25");
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+
+		this.request.setAttribute(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+				Map.of("name", "nameValue", "age", "25"));
 
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(target, "");

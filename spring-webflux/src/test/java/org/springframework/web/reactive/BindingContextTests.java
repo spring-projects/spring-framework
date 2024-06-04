@@ -16,10 +16,11 @@
 
 package org.springframework.web.reactive;
 
+import java.lang.reflect.Method;
+
 import jakarta.validation.Valid;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.validation.Errors;
 import org.springframework.validation.SmartValidator;
@@ -27,7 +28,6 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
-import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,44 +40,37 @@ import static org.mockito.BDDMockito.when;
 class BindingContextTests {
 
 	@Test
-	void jakartaValidatorExcludedWhenMethodValidationApplicable() {
+	void jakartaValidatorExcludedWhenMethodValidationApplicable() throws Exception {
 		BindingContext bindingContext = new BindingContext(null);
 		bindingContext.setMethodValidationApplicable(true);
 
-		MethodParameter parameter = ResolvableMethod.on(BindingContextTests.class)
-				.named("handle").build().annotPresent(Valid.class).arg();
+		Method method = getClass().getDeclaredMethod("handleValidObject", Foo.class);
+		ResolvableType targetType = ResolvableType.forMethodParameter(method, 0);
 
-		WebDataBinder dataBinder = bindingContext.createDataBinder(
-				MockServerWebExchange.from(MockServerHttpRequest.get("")), new Foo(), "foo",
-				ResolvableType.forMethodParameter(parameter));
+		WebDataBinder binder = bindingContext.createDataBinder(
+				MockServerWebExchange.from(MockServerHttpRequest.get("")), new Foo(), "foo", targetType);
 
 		Validator springValidator = mock(Validator.class);
 		when(springValidator.supports(Foo.class)).thenReturn(true);
-		dataBinder.addValidators(springValidator);
+		binder.addValidators(springValidator);
 
 		LocalValidatorFactoryBean beanValidator = new LocalValidatorFactoryBean();
 		beanValidator.afterPropertiesSet();
-		dataBinder.addValidators(beanValidator);
+		binder.addValidators(beanValidator);
 
 		WrappedBeanValidator wrappedBeanValidator = new WrappedBeanValidator(beanValidator);
-		dataBinder.addValidators(wrappedBeanValidator);
+		binder.addValidators(wrappedBeanValidator);
 
-		assertThat(dataBinder.getValidatorsToApply()).containsExactly(springValidator);
+		assertThat(binder.getValidatorsToApply()).containsExactly(springValidator);
 	}
 
 
 	@SuppressWarnings("unused")
-	private void handle(@Valid Foo foo) {
+	private void handleValidObject(@Valid Foo foo) {
 	}
 
 
-	private static class WrappedBeanValidator implements SmartValidator {
-
-		private final jakarta.validation.Validator validator;
-
-		private WrappedBeanValidator(jakarta.validation.Validator validator) {
-			this.validator = validator;
-		}
+	private record WrappedBeanValidator(jakarta.validation.Validator validator) implements SmartValidator {
 
 		@Override
 		public boolean supports(Class<?> clazz) {
@@ -100,6 +93,6 @@ class BindingContextTests {
 	}
 
 
-	private static class Foo {}
+	private static final class Foo {}
 
 }
