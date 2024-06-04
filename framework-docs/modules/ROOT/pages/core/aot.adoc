@@ -326,6 +326,19 @@ However, this is not a best practice and flagging the preferred constructor with
 
 In case you are working on a code base that you cannot modify, you can set the {spring-framework-api}/beans/factory/support/AbstractBeanDefinition.html#PREFERRED_CONSTRUCTORS_ATTRIBUTE[`preferredConstructors` attribute] on the related bean definition to indicate which constructor should be used.
 
+[[aot.bestpractices.comlext-data-structure]]
+=== Avoid Complex Data Structure for Constructor Parameters and Properties
+
+When crafting a `RootBeanDefinition` programmatically, you are not constrained in terms of types that you can use.
+For instance, you may have a custom `record` with several properties that your bean takes as a constructor argument.
+
+While this works fine with the regular runtime, AOT does not know how to generate the code of your custom data structure.
+A good rule of thumb is to keep in mind that bean definitions are an abstraction on top of several models.
+Rather than using such structure, decomposing to simple types or referring to a bean that is built as such is recommended.
+
+As a last resort, you can implement your own `org.springframework.aot.generate.ValueCodeGenerator$Delegate`.
+To use it, register its fully qualified name in `META-INF/spring/aot.factories` using the `Delegate` as the key.
+
 [[aot.bestpractices.custom-arguments]]
 === Avoid Creating Bean with Custom Arguments
 
