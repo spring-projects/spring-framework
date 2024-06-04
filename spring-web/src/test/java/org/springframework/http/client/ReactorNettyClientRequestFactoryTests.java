@@ -28,8 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @since 6.1
  */
-class ReactorNettyClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+class ReactorNettyClientRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {

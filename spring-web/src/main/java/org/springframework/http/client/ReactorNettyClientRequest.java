@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ final class ReactorNettyClientRequest extends AbstractStreamingClientHttpRequest
 				return result;
 			}
 		}
-		catch (RuntimeException ex) { // Exceptions.ReactiveException is package private
+		catch (RuntimeException ex) {  // Exceptions.ReactiveException is package private
 			Throwable cause = ex.getCause();
 
 			if (cause instanceof UncheckedIOException uioEx) {
@@ -111,7 +111,7 @@ final class ReactorNettyClientRequest extends AbstractStreamingClientHttpRequest
 				throw ioEx;
 			}
 			else {
-				throw ex;
+				throw new IOException(ex.getMessage(), cause);
 			}
 		}
 	}
