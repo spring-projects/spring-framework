@@ -36,9 +36,10 @@ import org.springframework.test.context.bean.override.BeanOverride;
  *
  * <p>The instance is created from a zero-argument static factory method in the
  * test class whose return type is compatible with the annotated field. In the
- * case of a nested test class, the enclosing class is also considered. Similarly,
- * if the test class extends from a base class or implements any interfaces, the
- * entire type hierarchy is considered. The method is deduced as follows.
+ * case of a nested test class, the enclosing class hierarchy is also considered.
+ * Similarly, if the test class extends from a base class or implements any
+ * interfaces, the entire type hierarchy is considered. The method is deduced as
+ * follows.
  * <ul>
  * <li>If the {@link #methodName()} is specified, look for a static method with
  * that name.</li>

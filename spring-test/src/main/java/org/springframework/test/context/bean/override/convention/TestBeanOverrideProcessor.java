@@ -72,8 +72,8 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 	 * <p>This method traverses up the type hierarchy of the given class in search
 	 * of the factory method, beginning with the class itself and then searching
 	 * implemented interfaces and superclasses. If a factory method is not found
-	 * in the type hierarchy, this method will also search on the enclosing class
-	 * if the class is a nested class.
+	 * in the type hierarchy, this method will also search the enclosing class
+	 * hierarchy if the class is a nested class.
 	 * <p>If multiple factory methods are found that match the search criteria,
 	 * an exception is thrown.
 	 * @param clazz the class in which to search for the factory method
@@ -91,9 +91,6 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 				methodReturnType.isAssignableFrom(method.getReturnType()));
 
 		Set<Method> methods = findMethods(clazz, methodFilter);
-		if (methods.isEmpty() && TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
-			methods = findMethods(clazz.getEnclosingClass(), methodFilter);
-		}
 
 		int methodCount = methods.size();
 		Assert.state(methodCount > 0, () -> """
@@ -139,7 +136,11 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 
 	private static Set<Method> findMethods(Class<?> clazz, MethodFilter methodFilter) {
-		return MethodIntrospector.selectMethods(clazz, methodFilter);
+		Set<Method> methods = MethodIntrospector.selectMethods(clazz, methodFilter);
+		if (methods.isEmpty() && TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
+			methods = findMethods(clazz.getEnclosingClass(), methodFilter);
+		}
+		return methods;
 	}
 
 

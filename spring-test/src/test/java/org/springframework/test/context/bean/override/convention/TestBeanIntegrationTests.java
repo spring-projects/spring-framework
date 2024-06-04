@@ -104,6 +104,29 @@ public class TestBeanIntegrationTests {
 			assertThat(ctx.getBean("methodRenamed2")).as("applicationContext").isEqualTo("nestedFieldOverride");
 			assertThat(TestBeanIntegrationTests.this.methodRenamed2).isEqualTo("nestedFieldOverride");
 		}
+
+		@Nested
+		@DisplayName("With @TestBean in the enclosing class of the enclosing class")
+		public class TestBeanFieldInEnclosingClassLevel2Tests {
+
+			@Test
+			void fieldHasOverride(ApplicationContext ctx) {
+				assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
+				assertThat(TestBeanIntegrationTests.this.nestedField).isEqualTo("nestedFieldOverride");
+			}
+
+			@Test
+			void renamedFieldHasOverride(ApplicationContext ctx) {
+				assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
+				assertThat(TestBeanIntegrationTests.this.renamed2).isEqualTo("nestedFieldOverride");
+			}
+
+			@Test
+			void fieldWithMethodNameHasOverride(ApplicationContext ctx) {
+				assertThat(ctx.getBean("methodRenamed2")).as("applicationContext").isEqualTo("nestedFieldOverride");
+				assertThat(TestBeanIntegrationTests.this.methodRenamed2).isEqualTo("nestedFieldOverride");
+			}
+		}
 	}
 
 	@Nested
@@ -117,6 +140,20 @@ public class TestBeanIntegrationTests {
 		void fieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
 			assertThat(this.nestedField2).isEqualTo("nestedFieldOverride");
+		}
+
+		@Nested
+		@DisplayName("With factory method in the enclosing class of the enclosing class")
+		public class TestBeanFactoryMethodInEnclosingClassLevel2Tests {
+
+			@TestBean(methodName = "nestedFieldTestOverride", name = "nestedField")
+			String nestedField2;
+
+			@Test
+			void fieldHasOverride(ApplicationContext ctx) {
+				assertThat(ctx.getBean("nestedField")).as("applicationContext").isEqualTo("nestedFieldOverride");
+				assertThat(this.nestedField2).isEqualTo("nestedFieldOverride");
+			}
 		}
 	}
 
