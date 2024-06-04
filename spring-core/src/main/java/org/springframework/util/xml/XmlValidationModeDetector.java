@@ -16,14 +16,10 @@
 
 package org.springframework.util.xml;
 
-import java.io.BufferedReader;
-import java.io.CharConversionException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.io.*;
 
 /**
  * Detects whether an XML stream is using DTD- or XSD-based validation.
@@ -37,22 +33,26 @@ public class XmlValidationModeDetector {
 
 	/**
 	 * Indicates that the validation should be disabled.
+	 * 指示应禁用验证
 	 */
 	public static final int VALIDATION_NONE = 0;
 
 	/**
 	 * Indicates that the validation mode should be auto-guessed, since we cannot find
 	 * a clear indication (probably choked on some special characters, or the like).
+	 * 表示验证模式应该是自动猜测的，因为我们找不到明确的指示（可能被一些特殊字符等卡住了）
 	 */
 	public static final int VALIDATION_AUTO = 1;
 
 	/**
 	 * Indicates that DTD validation should be used (we found a "DOCTYPE" declaration).
+	 * 指示应该使用DTD验证（我们发现了一个“DOCTYPE”声明）
 	 */
 	public static final int VALIDATION_DTD = 2;
 
 	/**
 	 * Indicates that XSD validation should be used (found no "DOCTYPE" declaration).
+	 * 指示应使用XSD验证（未发现“DOCTYPE”声明）
 	 */
 	public static final int VALIDATION_XSD = 3;
 
@@ -60,22 +60,26 @@ public class XmlValidationModeDetector {
 	/**
 	 * The token in an XML document that declares the DTD to use for validation
 	 * and thus that DTD validation is being used.
+	 * XML文档中的令牌，它声明要用于验证的DTD，从而声明正在使用DTD验证
 	 */
 	private static final String DOCTYPE = "DOCTYPE";
 
 	/**
 	 * The token that indicates the start of an XML comment.
+	 * 指示XML注释开始的标记
 	 */
 	private static final String START_COMMENT = "<!--";
 
 	/**
 	 * The token that indicates the end of an XML comment.
+	 * 指示XML注释结束的标记
 	 */
 	private static final String END_COMMENT = "-->";
 
 
 	/**
 	 * Indicates whether the current parse position is inside an XML comment.
+	 * 指示当前分析位置是否在XML注释内
 	 */
 	private boolean inComment;
 
@@ -83,6 +87,9 @@ public class XmlValidationModeDetector {
 	/**
 	 * Detect the validation mode for the XML document in the supplied {@link InputStream}.
 	 * <p>Note that the supplied {@link InputStream} is closed by this method before returning.
+	 * 在提供的｛@link InputStream｝中检测XML文档的验证模式
+	 * 请注意，提供的｛@link InputStream｝在返回之前已被此方法关闭。
+	 *
 	 * @param inputStream the InputStream to parse
 	 * @throws IOException in case of I/O failure
 	 * @see #VALIDATION_DTD
@@ -110,8 +117,7 @@ public class XmlValidationModeDetector {
 				}
 			}
 			return (isDtdValidated ? VALIDATION_DTD : VALIDATION_XSD);
-		}
-		catch (CharConversionException ex) {
+		} catch (CharConversionException ex) {
 			// Choked on some character encoding...
 			// Leave the decision up to the caller.
 			return VALIDATION_AUTO;
@@ -178,6 +184,7 @@ public class XmlValidationModeDetector {
 
 	/**
 	 * Try to consume the {@link #START_COMMENT} token.
+	 *
 	 * @see #commentToken(String, String, boolean)
 	 */
 	private int startComment(String line) {
@@ -186,6 +193,7 @@ public class XmlValidationModeDetector {
 
 	/**
 	 * Try to consume the {@link #END_COMMENT} token.
+	 *
 	 * @see #commentToken(String, String, boolean)
 	 */
 	private int endComment(String line) {
@@ -200,7 +208,7 @@ public class XmlValidationModeDetector {
 	 */
 	private int commentToken(String line, String token, boolean inCommentIfPresent) {
 		int index = line.indexOf(token);
-		if (index > - 1) {
+		if (index > -1) {
 			this.inComment = inCommentIfPresent;
 		}
 		return (index == -1 ? index : index + token.length());

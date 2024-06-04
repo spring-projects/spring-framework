@@ -8,10 +8,10 @@
 
 	<!--    <bean id="a" class="com.qf.spring.pojo.A" abstract="false" depends-on="b">-->
 	<bean id="instanceA" class="org.springframework.circular.dependency.model.InstanceA">
-		<!--        <property name="b" ref="b"></property>-->
+		        <property name="instanceB" ref="instanceB"></property>
 	</bean>
 
 	<bean id="instanceB" class="org.springframework.circular.dependency.model.InstanceB">
-<!--		<property name="a" ref="a"></property>-->
+		<property name="instanceA" ref="instanceA"></property>
 	</bean>
 </beans>

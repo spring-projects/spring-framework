@@ -96,38 +96,45 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Map from serialized id to factory instance.
+	 * 从序列化的id映射到工厂实例
 	 */
 	private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories = new ConcurrentHashMap<>(8);
 
 	/**
 	 * Optional id for this factory, for serialization purposes.
+	 * 此工厂的可选id，用于序列化
 	 */
 	@Nullable
 	private String serializationId;
 
 	/**
 	 * Whether to allow re-registration of a different definition with the same name.
+	 * 是否允许使用相同名称重新注册不同的定义
 	 */
 	private boolean allowBeanDefinitionOverriding = true;
 
 	/**
 	 * Whether to allow eager class loading even for lazy-init beans.
+	 * 是否允许即使对于懒惰的init bean也进行急切的类加载
 	 */
 	private boolean allowEagerClassLoading = true;
 
 	/**
 	 * Optional OrderComparator for dependency Lists and arrays.
+	 * 依赖项列表和数组的可选OrderComparator。
 	 */
 	@Nullable
 	private Comparator<Object> dependencyComparator;
 
 	/**
 	 * Resolver to use for checking if a bean definition is an autowire candidate.
+	 * 用于检查bean定义是否为autowire候选者的解析程序
 	 */
 	private AutowireCandidateResolver autowireCandidateResolver = SimpleAutowireCandidateResolver.INSTANCE;
 
 	/**
 	 * Map from dependency type to corresponding autowired value.
+	 * 从依赖关系类型映射到相应的自动连接值
 	 */
 	private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<>(16);
 
@@ -141,43 +148,51 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Map from bean name to merged BeanDefinitionHolder.
+	 * 从bean名称映射到合并的BeanDefinitionHolder
 	 */
 	private final Map<String, BeanDefinitionHolder> mergedBeanDefinitionHolders = new ConcurrentHashMap<>(256);
 
 	/**
 	 * Map of singleton and non-singleton bean names, keyed by dependency type.
+	 * 单例和非单例bean名称的映射，按依赖类型键控
 	 */
 	private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<>(64);
 
 	/**
 	 * Map of singleton-only bean names, keyed by dependency type.
+	 * 单例bean名称的映射，按依赖类型键
 	 */
 	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<>(64);
 
 	/**
 	 * List of bean definition names, in registration order.
+	 * bean定义名称列表，按注册顺序排列
 	 */
 	private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
 
 	/**
 	 * List of names of manually registered singletons, in registration order.
+	 * 按登记顺序手动登记的单例名单
 	 */
 	private volatile Set<String> manualSingletonNames = new LinkedHashSet<>(16);
 
 	/**
 	 * Cached array of bean definition names in case of frozen configuration.
+	 * 在冻结配置的情况下缓存的bean定义名称数组
 	 */
 	@Nullable
 	private volatile String[] frozenBeanDefinitionNames;
 
 	/**
 	 * Whether bean definition metadata may be cached for all beans.
+	 * 是否可以为所有bean缓存bean定义元数据
 	 */
 	private volatile boolean configurationFrozen;
 
 
 	/**
 	 * Create a new DefaultListableBeanFactory.
+	 * 创建新的DefaultListableBeanFactory
 	 */
 	public DefaultListableBeanFactory() {
 		super();
@@ -185,6 +200,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Create a new DefaultListableBeanFactory with the given parent.
+	 * 使用给定的父级创建一个新的DefaultListableBeanFactory。
 	 *
 	 * @param parentBeanFactory the parent BeanFactory
 	 */
@@ -196,6 +212,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Specify an id for serialization purposes, allowing this BeanFactory to be
 	 * deserialized from this id back into the BeanFactory object, if needed.
+	 * 指定一个用于序列化的id，如果需要，允许将此BeanFactory从该id反序列化回BeanFactory对象。
 	 */
 	public void setSerializationId(@Nullable String serializationId) {
 		if (serializationId != null) {
@@ -209,6 +226,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Return an id for serialization purposes, if specified, allowing this BeanFactory
 	 * to be deserialized from this id back into the BeanFactory object, if needed.
+	 * 如果指定了id，则返回一个用于序列化的id，以便在需要时将此BeanFactory从该id反序列化回BeanFactory对象
 	 *
 	 * @since 4.1.2
 	 */

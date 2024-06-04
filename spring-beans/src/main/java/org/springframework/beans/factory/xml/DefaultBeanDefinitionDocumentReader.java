@@ -76,9 +76,15 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * Xml读取器上下文
+	 */
 	@Nullable
 	private XmlReaderContext readerContext;
 
+	/**
+	 * Bean定义解析程序委托
+	 */
 	@Nullable
 	private BeanDefinitionParserDelegate delegate;
 
@@ -92,12 +98,13 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	@Override
 	public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
 		this.readerContext = readerContext;
-		//
+		//  注册Bean定义
 		doRegisterBeanDefinitions(doc.getDocumentElement());
 	}
 
 	/**
 	 * Return the descriptor for the XML resource that this parser works on.
+	 * 返回此解析器工作的XML资源的描述符
 	 */
 	protected final XmlReaderContext getReaderContext() {
 		Assert.state(this.readerContext != null, "No XmlReaderContext available");
@@ -147,7 +154,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 		// 解析前处理
 		preProcessXml(root);
-		// 
+		// 解析Bean定义
 		parseBeanDefinitions(root, this.delegate);
 		// 解析后处理
 		postProcessXml(root);

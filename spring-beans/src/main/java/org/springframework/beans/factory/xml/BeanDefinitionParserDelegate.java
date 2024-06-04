@@ -440,7 +440,7 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Validate that the specified bean name and aliases have not been used already
-	 * within the current level of beans element nesting.
+	 * within the current level of beans element nesting. 验证指定的bean名称和别名是否尚未在当前级别的bean元素嵌套中使用
 	 */
 	protected void checkNameUniqueness(String beanName, List<String> aliases, Element beanElement) {
 		String foundName = null;

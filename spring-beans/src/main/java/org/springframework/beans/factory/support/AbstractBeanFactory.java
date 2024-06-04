@@ -76,73 +76,86 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Parent bean factory, for bean inheritance support.
+	 * 父bean工厂，用于bean继承支持。
 	 */
 	@Nullable
 	private BeanFactory parentBeanFactory;
 
 	/**
 	 * ClassLoader to resolve bean class names with, if necessary.
+	 * ClassLoader来解析bean类名，如果需要的话。
 	 */
 	@Nullable
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/**
 	 * ClassLoader to temporarily resolve bean class names with, if necessary.
+	 * ClassLoader，以便在必要时使用临时解析bean类名
 	 */
 	@Nullable
 	private ClassLoader tempClassLoader;
 
 	/**
 	 * Whether to cache bean metadata or rather reobtain it for every access.
+	 * 是缓存bean元数据，还是每次访问都重新获取它
 	 */
 	private boolean cacheBeanMetadata = true;
 
 	/**
 	 * Resolution strategy for expressions in bean definition values.
+	 * bean定义值中表达式的解析策略。
 	 */
 	@Nullable
 	private BeanExpressionResolver beanExpressionResolver;
 
 	/**
 	 * Spring ConversionService to use instead of PropertyEditors.
+	 * 要使用的Spring ConversionService，而不是PropertyEditors。
 	 */
 	@Nullable
 	private ConversionService conversionService;
 
 	/**
 	 * Custom PropertyEditorRegistrars to apply to the beans of this factory.
+	 * 要应用到此工厂的bean的自定义PropertyEditorRegistors
 	 */
 	private final Set<PropertyEditorRegistrar> propertyEditorRegistrars = new LinkedHashSet<>(4);
 
 	/**
 	 * Custom PropertyEditors to apply to the beans of this factory.
+	 * 要应用于此工厂的bean的自定义PropertyEditors
 	 */
 	private final Map<Class<?>, Class<? extends PropertyEditor>> customEditors = new HashMap<>(4);
 
 	/**
 	 * A custom TypeConverter to use, overriding the default PropertyEditor mechanism.
+	 * 要使用的自定义TypeConverter，覆盖默认的PropertyEditor机制
 	 */
 	@Nullable
 	private TypeConverter typeConverter;
 
 	/**
 	 * String resolvers to apply e.g. to annotation attribute values.
+	 * 字符串解析器应用于例如注释属性值
 	 */
 	private final List<StringValueResolver> embeddedValueResolvers = new CopyOnWriteArrayList<>();
 
 	/**
 	 * BeanPostProcessors to apply.
+	 * 要应用的BeanPostProcessors
 	 */
 	private final List<BeanPostProcessor> beanPostProcessors = new BeanPostProcessorCacheAwareList();
 
 	/**
 	 * Cache of pre-filtered post-processors.
+	 * 预过滤后处理器的缓存
 	 */
 	@Nullable
 	private BeanPostProcessorCache beanPostProcessorCache;
 
 	/**
 	 * Map from scope identifier String to corresponding Scope.
+	 * 从作用域标识符String映射到相应的作用域。
 	 */
 	private final Map<String, Scope> scopes = new LinkedHashMap<>(8);
 
@@ -154,6 +167,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Security context used when running with a SecurityManager.
+	 * 使用SecurityManager运行时使用的安全上下文
 	 */
 	@Nullable
 	private SecurityContextProvider securityContextProvider;
@@ -172,19 +186,21 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Names of beans that are currently in creation.
+	 * 当前正在创建的bean的名称
 	 */
-	private final ThreadLocal<Object> prototypesCurrentlyInCreation =
-			new NamedThreadLocal<>("Prototype beans currently in creation");
+	private final ThreadLocal<Object> prototypesCurrentlyInCreation = new NamedThreadLocal<>("Prototype beans currently in creation");
 
 
 	/**
 	 * Create a new AbstractBeanFactory.
+	 * 创建新的AbstractBeanFactory
 	 */
 	public AbstractBeanFactory() {
 	}
 
 	/**
 	 * Create a new AbstractBeanFactory with the given parent.
+	 * 使用给定的父级创建一个新的AbstractBeanFactory。
 	 *
 	 * @param parentBeanFactory parent bean factory, or {@code null} if none
 	 * @see #getBean
@@ -224,7 +240,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
-	public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object... args)			throws BeansException {
+	public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object... args) throws BeansException {
 		return doGetBean(name, requiredType, args, false);
 	}
 
@@ -1521,7 +1537,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Resolve the bean class for the specified bean definition,
 	 * resolving a bean class name into a Class reference (if necessary)
 	 * and storing the resolved Class in the bean definition for further use.
-	 *
+	 * 为指定的bean定义解析bean类，将bean类名解析为class引用（如果需要），并将解析的class存储在bean定义中以供进一步使用
 	 * @param mbd          the merged bean definition to determine the class for
 	 * @param beanName     the name of the bean (for error handling purposes)
 	 * @param typesToMatch the types to match in case of internal type matching purposes

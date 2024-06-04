@@ -44,11 +44,20 @@ import org.springframework.util.ObjectUtils;
  */
 public class EncodedResource implements InputStreamSource {
 
+	/**
+	 * 资源
+	 */
 	private final Resource resource;
 
+	/**
+	 * 编码
+	 */
 	@Nullable
 	private final String encoding;
 
+	/**
+	 * 字符集
+	 */
 	@Nullable
 	private final Charset charset;
 

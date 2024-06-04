@@ -12,7 +12,7 @@ public class MainClass {
 		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(MainConfig.class);
 		InstanceA instanceA1 = (InstanceA)annotationConfigApplicationContext.getBean("instanceA");
 		System.out.println(instanceA1);
-		ApplicationContext context 	= new ClassPathXmlApplicationContext("circular/dependncy/bean.xml");
+//		ApplicationContext context 	= new ClassPathXmlApplicationContext("circular/dependncy/bean.xml");
 //		InstanceA instanceA = context.getBean("instanceA", InstanceA.class);
 //		System.out.println(instanceA);
 	}

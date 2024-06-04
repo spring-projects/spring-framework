@@ -32,6 +32,7 @@ public abstract class NativeDetector {
 
 	/**
 	 * Returns {@code true} if invoked in the context of image building or during image runtime, else {@code false}.
+	 * 如果在图像构建上下文中或在图像运行时调用，则返回｛@code true｝，否则返回｛@code false｝
 	 */
 	public static boolean inNativeImage() {
 		return imageCode;
