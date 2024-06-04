@@ -152,7 +152,7 @@ class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder>
 				.verifyComplete());
 	}
 
-	@Test // gh-29038
+	@Test  // gh-29038
 	void encodeNonStreamWithErrorAsFirstSignal() {
 		String message = "I'm a teapot";
 		Flux<Object> input = Flux.error(new IllegalStateException(message));
@@ -264,8 +264,7 @@ class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder>
 
 		String ls = System.lineSeparator();  // output below is different between Unix and Windows
 		testEncode(Mono.just(jacksonValue), type, halMediaType, Collections.emptyMap(), step -> step
-				.consumeNextWith(expectString("{" + ls + "  \"withView1\" : \"with\"" + ls + "}")
-						)
+				.consumeNextWith(expectString("{" + ls + "  \"withView1\" : \"with\"" + ls + "}"))
 				.verifyComplete()
 		);
 	}

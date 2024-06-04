@@ -16,7 +16,6 @@
 
 package org.springframework.test.http;
 
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -63,11 +62,12 @@ class MediaTypeAssertTests {
 
 	@Test
 	void isEqualInvalidStringShouldFail() {
+		String ls = System.lineSeparator();  // output below is different between Unix and Windows
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(mediaType("application/json")).isEqualTo("example of a bad value"))
 				.withMessageContaining("[Media type]")
-				.withMessageEndingWith("To be a valid media type but got:\n" +
-						"  \"Invalid mime type \"example of a bad value\": does not contain '/'\"\n");
+				.withMessageEndingWith("To be a valid media type but got:" + ls +
+						"  \"Invalid mime type \"example of a bad value\": does not contain '/'\"" + ls);
 	}
 
 	@Test
@@ -108,11 +108,12 @@ class MediaTypeAssertTests {
 
 	@Test
 	void isNotEqualInvalidStringShouldFail() {
+		String ls = System.lineSeparator();  // output below is different between Unix and Windows
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(mediaType("application/json")).isNotEqualTo("example of a bad value"))
 				.withMessageContaining("[Media type]")
-				.withMessageEndingWith("To be a valid media type but got:\n" +
-						"  \"Invalid mime type \"example of a bad value\": does not contain '/'\"\n");
+				.withMessageEndingWith("To be a valid media type but got:" + ls +
+						"  \"Invalid mime type \"example of a bad value\": does not contain '/'\"" + ls);
 	}
 
 	@Test
