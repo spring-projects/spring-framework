@@ -200,6 +200,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 					registerForReflection(reflection,
 							AnnotationUtils.findAnnotation(field.getType(), embeddableInstantiatorClass), "value");
 				});
+				ReflectionUtils.doWithMethods(managedClass, method -> registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(method, embeddableInstantiatorClass), "value"));
 			}
 
 			Class<? extends Annotation> valueGenerationTypeClass = loadClass("org.hibernate.annotations.ValueGenerationType", classLoader);
