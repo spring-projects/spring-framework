@@ -33,6 +33,7 @@ import org.springframework.util.StreamUtils;
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 6.1
  */
 final class ReactorNettyClientResponse implements ClientHttpResponse {
@@ -79,8 +80,13 @@ final class ReactorNettyClientResponse implements ClientHttpResponse {
 			return body;
 		}
 
-		body = this.connection.inbound().receive()
-				.aggregate().asInputStream().block(this.readTimeout);
+		try {
+			body = this.connection.inbound().receive().aggregate().asInputStream().block(this.readTimeout);
+		}
+		catch (RuntimeException ex) {
+			throw ReactorNettyClientRequest.convertException(ex);
+		}
+
 		if (body == null) {
 			throw new IOException("Could not receive body");
 		}
