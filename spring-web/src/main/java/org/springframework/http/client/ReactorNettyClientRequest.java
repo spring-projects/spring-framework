@@ -131,15 +131,16 @@ final class ReactorNettyClientRequest extends AbstractStreamingClientHttpRequest
 		// Exceptions.ReactiveException is package private
 		Throwable cause = ex.getCause();
 
-		if (cause instanceof UncheckedIOException uioEx) {
-			return uioEx.getCause();
-		}
-		else if (cause instanceof IOException ioEx) {
+		if (cause instanceof IOException ioEx) {
 			return ioEx;
 		}
-		else {
-			return new IOException(ex.getMessage(), cause);
+		if (cause instanceof UncheckedIOException uioEx) {
+			IOException ioEx = uioEx.getCause();
+			if (ioEx != null) {
+				return ioEx;
+			}
 		}
+		return new IOException(ex.getMessage(), cause);
 	}
 
 
