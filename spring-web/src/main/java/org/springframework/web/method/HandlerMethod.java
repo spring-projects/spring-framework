@@ -417,7 +417,7 @@ public class HandlerMethod extends AnnotatedMethod {
 						return true;
 					}
 					merged = MergedAnnotations.from(getContainerElementAnnotations(param));
-					if (merged.stream().anyMatch(CONSTRAINT_PREDICATE)) {
+					if (merged.stream().anyMatch(CONSTRAINT_PREDICATE.or(VALID_PREDICATE))) {
 						return true;
 					}
 				}
