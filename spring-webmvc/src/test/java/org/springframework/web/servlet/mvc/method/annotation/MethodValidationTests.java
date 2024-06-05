@@ -126,9 +126,8 @@ class MethodValidationTests {
 		HandlerMethod hm = handlerMethod(new ValidController(), c -> c.handle(mockPerson));
 		this.request.addParameter("name", "name=Faustino1234");
 
-		MethodArgumentNotValidException ex = catchThrowableOfType(
-				() -> this.handlerAdapter.handle(this.request, this.response, hm),
-				MethodArgumentNotValidException.class);
+		MethodArgumentNotValidException ex = catchThrowableOfType(MethodArgumentNotValidException.class,
+				() -> this.handlerAdapter.handle(this.request, this.response, hm));
 
 		assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
 		assertThat(this.jakartaValidator.getMethodValidationCount()).as("Method validation unexpected").isEqualTo(0);
@@ -167,9 +166,8 @@ class MethodValidationTests {
 		this.request.addParameter("name", "name=Faustino1234");
 		this.request.addHeader("myHeader", "123");
 
-		HandlerMethodValidationException ex = catchThrowableOfType(
-				() -> this.handlerAdapter.handle(this.request, this.response, hm),
-				HandlerMethodValidationException.class);
+		HandlerMethodValidationException ex = catchThrowableOfType(HandlerMethodValidationException.class,
+				() -> this.handlerAdapter.handle(this.request, this.response, hm));
 
 		assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
 		assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
@@ -223,9 +221,8 @@ class MethodValidationTests {
 		this.request.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		this.request.setContent("[{\"name\":\"Faustino1234\"},{\"name\":\"Cayetana6789\"}]".getBytes(UTF_8));
 
-		HandlerMethodValidationException ex = catchThrowableOfType(
-				() -> this.handlerAdapter.handle(this.request, this.response, hm),
-				HandlerMethodValidationException.class);
+		HandlerMethodValidationException ex = catchThrowableOfType(HandlerMethodValidationException.class,
+				() -> this.handlerAdapter.handle(this.request, this.response, hm));
 
 		assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
 		assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
