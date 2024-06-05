@@ -41,7 +41,7 @@ public class EngineTestKitUtils {
 		return EngineTestKit.engine("junit-jupiter")
 				.selectors(selectClass(testClass))
 				.execute()
-				.testEvents();
+				.allEvents();
 	}
 
 	/**
