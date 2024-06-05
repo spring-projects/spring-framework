@@ -262,9 +262,11 @@ class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder>
 		ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
 		this.encoder.registerObjectMappersForType(JacksonViewBean.class, map -> map.put(halMediaType, mapper));
 
-		String ls = System.lineSeparator();  // output below is different between Unix and Windows
 		testEncode(Mono.just(jacksonValue), type, halMediaType, Collections.emptyMap(), step -> step
-				.consumeNextWith(expectString("{" + ls + "  \"withView1\" : \"with\"" + ls + "}"))
+				.consumeNextWith(expectString("""
+					{
+					\s "withView1" : "with"
+					}"""))
 				.verifyComplete()
 		);
 	}

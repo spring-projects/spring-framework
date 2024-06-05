@@ -62,12 +62,10 @@ class MediaTypeAssertTests {
 
 	@Test
 	void isEqualInvalidStringShouldFail() {
-		String ls = System.lineSeparator();  // output below is different between Unix and Windows
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(mediaType("application/json")).isEqualTo("example of a bad value"))
-				.withMessageContaining("[Media type]")
-				.withMessageEndingWith("To be a valid media type but got:" + ls +
-						"  \"Invalid mime type \"example of a bad value\": does not contain '/'\"" + ls);
+				.withMessageContainingAll("[Media type]", "To be a valid media type but got:",
+						"\"Invalid mime type \"example of a bad value\": does not contain '/'\"");
 	}
 
 	@Test
@@ -108,12 +106,10 @@ class MediaTypeAssertTests {
 
 	@Test
 	void isNotEqualInvalidStringShouldFail() {
-		String ls = System.lineSeparator();  // output below is different between Unix and Windows
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(mediaType("application/json")).isNotEqualTo("example of a bad value"))
-				.withMessageContaining("[Media type]")
-				.withMessageEndingWith("To be a valid media type but got:" + ls +
-						"  \"Invalid mime type \"example of a bad value\": does not contain '/'\"" + ls);
+				.withMessageContainingAll("[Media type]", "To be a valid media type but got:",
+						"\"Invalid mime type \"example of a bad value\": does not contain '/'\"");
 	}
 
 	@Test
@@ -169,7 +165,7 @@ class MediaTypeAssertTests {
 	void isCompatibleWithStringAndEmptyExpected() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(mediaType("application/json")).isCompatibleWith(""))
-				.withMessageContainingAll("Expecting:", "", "To be a valid media type but got:",
+				.withMessageContainingAll("Expecting:", "To be a valid media type but got:",
 						"'mimeType' must not be empty");
 	}
 
