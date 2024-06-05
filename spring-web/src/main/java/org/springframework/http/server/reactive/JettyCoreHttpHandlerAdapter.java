@@ -21,8 +21,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.JettyDataBufferFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -37,14 +36,14 @@ public class JettyCoreHttpHandlerAdapter extends Handler.Abstract.NonBlocking {
 
 	private final HttpHandler httpHandler;
 
-	private DataBufferFactory dataBufferFactory = DefaultDataBufferFactory.sharedInstance;
+	private JettyDataBufferFactory dataBufferFactory = new JettyDataBufferFactory();
 
 
 	public JettyCoreHttpHandlerAdapter(HttpHandler httpHandler) {
 		this.httpHandler = httpHandler;
 	}
 
-	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
+	public void setDataBufferFactory(JettyDataBufferFactory dataBufferFactory) {
 		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 		this.dataBufferFactory = dataBufferFactory;
 	}

@@ -28,7 +28,7 @@ import org.reactivestreams.FlowAdapters;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.JettyDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -47,12 +47,12 @@ import org.springframework.util.MultiValueMap;
  */
 class JettyCoreServerHttpRequest extends AbstractServerHttpRequest {
 
-	private final DataBufferFactory dataBufferFactory;
+	private final JettyDataBufferFactory dataBufferFactory;
 
 	private final Request request;
 
 
-	public JettyCoreServerHttpRequest(Request request, DataBufferFactory dataBufferFactory) {
+	public JettyCoreServerHttpRequest(Request request, JettyDataBufferFactory dataBufferFactory) {
 		super(HttpMethod.valueOf(request.getMethod()),
 				request.getHttpURI().toURI(),
 				request.getContext().getContextPath(),
@@ -111,7 +111,8 @@ class JettyCoreServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private DataBuffer chunkToDataBuffer(Content.Chunk chunk) {
-		return new JettyRetainedDataBuffer(this.dataBufferFactory, chunk);
+		chunk.retain();
+		return this.dataBufferFactory.wrap(chunk);
 	}
 
 	@SuppressWarnings("unchecked")
