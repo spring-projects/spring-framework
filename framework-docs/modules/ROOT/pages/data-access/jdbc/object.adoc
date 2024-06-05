@@ -112,7 +112,7 @@ Java::
 		this.actorMappingQuery = new ActorMappingQuery(dataSource);
 	}
 
-	public Customer getCustomer(Long id) {
+	public Actor getActor(Long id) {
 		return actorMappingQuery.findObject(id);
 	}
 ----
@@ -123,11 +123,11 @@ Kotlin::
 ----
 	private val actorMappingQuery = ActorMappingQuery(dataSource)
 
-	fun getCustomer(id: Long) = actorMappingQuery.findObject(id)
+	fun getActor(id: Long) = actorMappingQuery.findObject(id)
 ----
 ======
 
-The method in the preceding example retrieves the customer with the `id` that is passed in as the
+The method in the preceding example retrieves the actor with the `id` that is passed in as the
 only parameter. Since we want only one object to be returned, we call the `findObject` convenience
 method with the `id` as the parameter. If we had instead a query that returned a
 list of objects and took additional parameters, we would use one of the `execute`
