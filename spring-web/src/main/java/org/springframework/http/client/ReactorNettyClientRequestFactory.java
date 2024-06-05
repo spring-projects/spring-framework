@@ -50,19 +50,21 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 	private static final Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
 
 
-	private HttpClient httpClient;
-
 	@Nullable
 	private final ReactorResourceFactory resourceFactory;
 
 	@Nullable
 	private final Function<HttpClient, HttpClient> mapper;
 
-	private Duration exchangeTimeout = Duration.ofSeconds(5);
+	@Nullable
+	private Integer connectTimeout;
 
 	private Duration readTimeout = Duration.ofSeconds(10);
 
-	private volatile boolean running = true;
+	private Duration exchangeTimeout = Duration.ofSeconds(5);
+
+	@Nullable
+	private volatile HttpClient httpClient;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -107,25 +109,11 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 	 * @param mapper a mapper for further initialization of the created client
 	 */
 	public ReactorNettyClientRequestFactory(ReactorResourceFactory resourceFactory, Function<HttpClient, HttpClient> mapper) {
-		this.httpClient = createHttpClient(resourceFactory, mapper);
 		this.resourceFactory = resourceFactory;
 		this.mapper = mapper;
-	}
-
-
-	private static HttpClient createHttpClient(ReactorResourceFactory resourceFactory, Function<HttpClient, HttpClient> mapper) {
-		ConnectionProvider provider = resourceFactory.getConnectionProvider();
-		Assert.notNull(provider, "No ConnectionProvider: is ReactorResourceFactory not initialized yet?");
-		return defaultInitializer.andThen(mapper).andThen(applyLoopResources(resourceFactory))
-				.apply(HttpClient.create(provider));
-	}
-
-	private static Function<HttpClient, HttpClient> applyLoopResources(ReactorResourceFactory factory) {
-		return httpClient -> {
-			LoopResources resources = factory.getLoopResources();
-			Assert.notNull(resources, "No LoopResources: is ReactorResourceFactory not initialized yet?");
-			return httpClient.runOn(resources);
-		};
+		if (resourceFactory.isRunning()) {
+			this.httpClient = createHttpClient(resourceFactory, mapper);
+		}
 	}
 
 
@@ -138,7 +126,11 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 	 */
 	public void setConnectTimeout(int connectTimeout) {
 		Assert.isTrue(connectTimeout >= 0, "Timeout must be a non-negative value");
-		this.httpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeout);
+		this.connectTimeout = connectTimeout;
+		HttpClient httpClient = this.httpClient;
+		if (httpClient != null) {
+			this.httpClient = httpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.connectTimeout);
+		}
 	}
 
 	/**
@@ -150,8 +142,7 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 	 */
 	public void setConnectTimeout(Duration connectTimeout) {
 		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
-		Assert.isTrue(!connectTimeout.isNegative(), "Timeout must be a non-negative value");
-		this.httpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int)connectTimeout.toMillis());
+		setConnectTimeout((int) connectTimeout.toMillis());
 	}
 
 	/**
@@ -192,52 +183,55 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 		this.exchangeTimeout = exchangeTimeout;
 	}
 
+	private HttpClient createHttpClient(ReactorResourceFactory factory, Function<HttpClient, HttpClient> mapper) {
+		HttpClient httpClient = defaultInitializer.andThen(mapper)
+				.apply(HttpClient.create(factory.getConnectionProvider()));
+		httpClient = httpClient.runOn(factory.getLoopResources());
+		if (this.connectTimeout != null) {
+			httpClient = httpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.connectTimeout);
+		}
+		return httpClient;
+	}
+
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		return new ReactorNettyClientRequest(this.httpClient, uri, httpMethod, this.exchangeTimeout, this.readTimeout);
+		HttpClient httpClient = this.httpClient;
+		if (httpClient == null) {
+			Assert.state(this.resourceFactory != null && this.mapper != null, "Illegal configuration");
+			httpClient = createHttpClient(this.resourceFactory, this.mapper);
+		}
+		return new ReactorNettyClientRequest(httpClient, uri, httpMethod, this.exchangeTimeout, this.readTimeout);
 	}
+
 
 	@Override
 	public void start() {
-		synchronized (this.lifecycleMonitor) {
-			if (!isRunning()) {
-				if (this.resourceFactory != null && this.mapper != null) {
+		if (this.resourceFactory != null && this.mapper != null) {
+			synchronized (this.lifecycleMonitor) {
+				if (this.httpClient == null) {
 					this.httpClient = createHttpClient(this.resourceFactory, this.mapper);
 				}
-				else {
-					logger.warn("Restarting a ReactorNettyClientRequestFactory bean is only supported with externally managed Reactor Netty resources");
-				}
-				this.running = true;
 			}
+		}
+		else {
+			logger.warn("Restarting a ReactorNettyClientRequestFactory bean is only supported " +
+					"with externally managed Reactor Netty resources");
 		}
 	}
 
 	@Override
 	public void stop() {
-		synchronized (this.lifecycleMonitor) {
-			if (isRunning()) {
-				this.running = false;
+		if (this.resourceFactory != null && this.mapper != null) {
+			synchronized (this.lifecycleMonitor) {
+				this.httpClient = null;
 			}
 		}
 	}
 
 	@Override
-	public final void stop(Runnable callback) {
-		synchronized (this.lifecycleMonitor) {
-			stop();
-			callback.run();
-		}
-	}
-
-	@Override
 	public boolean isRunning() {
-		return this.running;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return false;
+		return (this.httpClient != null);
 	}
 
 	@Override
