@@ -237,7 +237,7 @@ public class ReactorResourceFactory
 	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
-			if (!isRunning()) {
+			if (!this.running) {
 				if (this.useGlobalResources) {
 					Assert.isTrue(this.loopResources == null && this.connectionProvider == null,
 							"'useGlobalResources' is mutually exclusive with explicitly configured resources");
@@ -267,7 +267,7 @@ public class ReactorResourceFactory
 	@Override
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
-			if (isRunning()) {
+			if (this.running) {
 				if (this.useGlobalResources) {
 					HttpResources.disposeLoopsAndConnectionsLater(this.shutdownQuietPeriod, this.shutdownTimeout).block();
 					this.connectionProvider = null;
@@ -304,6 +304,12 @@ public class ReactorResourceFactory
 	@Override
 	public boolean isRunning() {
 		return this.running;
+	}
+
+	@Override
+	public int getPhase() {
+		// Same as plain Lifecycle
+		return 0;
 	}
 
 }

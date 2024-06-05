@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
+ * @since 6.1
  */
 class ReactorClientHttpConnectorTests {
 
@@ -37,7 +38,20 @@ class ReactorClientHttpConnectorTests {
 		connector.start();
 		assertThat(connector.isRunning()).isTrue();
 		connector.stop();
-		assertThat(connector.isRunning()).isFalse();
+		assertThat(connector.isRunning()).isTrue();
+		connector.start();
+		assertThat(connector.isRunning()).isTrue();
+	}
+
+	@Test
+	void restartWithHttpClient() {
+		HttpClient httpClient = HttpClient.create();
+		ReactorClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);
+		assertThat(connector.isRunning()).isTrue();
+		connector.start();
+		assertThat(connector.isRunning()).isTrue();
+		connector.stop();
+		assertThat(connector.isRunning()).isTrue();
 		connector.start();
 		assertThat(connector.isRunning()).isTrue();
 	}
@@ -58,10 +72,12 @@ class ReactorClientHttpConnectorTests {
 	}
 
 	@Test
-	void restartWithHttpClient() {
-		HttpClient httpClient = HttpClient.create();
-		ReactorClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);
-		assertThat(connector.isRunning()).isTrue();
+	void lateStartWithExternalResourceFactory() {
+		ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
+		Function<HttpClient, HttpClient> mapper = Function.identity();
+		ReactorClientHttpConnector connector = new ReactorClientHttpConnector(resourceFactory, mapper);
+		assertThat(connector.isRunning()).isFalse();
+		resourceFactory.start();
 		connector.start();
 		assertThat(connector.isRunning()).isTrue();
 		connector.stop();
