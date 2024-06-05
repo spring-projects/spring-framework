@@ -18,6 +18,7 @@ package org.springframework.web.reactive;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import reactor.core.publisher.Mono;
@@ -26,6 +27,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
@@ -213,6 +215,14 @@ public class BindingContext {
 				Map<String, String> vars = exchange.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 				if (!CollectionUtils.isEmpty(vars)) {
 					vars.forEach((key, value) -> addValueIfNotPresent(map, "URI variable", key, value));
+				}
+				HttpHeaders headers = exchange.getRequest().getHeaders();
+				for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+					List<String> values = entry.getValue();
+					if (!CollectionUtils.isEmpty(values)) {
+						String name = entry.getKey().replace("-", "");
+						addValueIfNotPresent(map, "Header", name, (values.size() == 1 ? values.get(0) : values));
+					}
 				}
 			});
 		}

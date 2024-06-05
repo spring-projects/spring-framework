@@ -3,8 +3,8 @@
 
 [.small]#xref:web/webflux/controller/ann-methods/modelattrib-method-args.adoc[See equivalent in the Reactive stack]#
 
-The `@ModelAttribute` method parameter annotation binds request parameters onto a model
-object. For example:
+The `@ModelAttribute` method parameter annotation binds request parameters, URI path variables,
+and request headers onto a model object. For example:
 
 [tabs]
 ======
@@ -31,7 +31,11 @@ fun processSubmit(@ModelAttribute pet: Pet): String { // <1>
 <1> Bind to an instance of `Pet`.
 ======
 
-The `Pet` instance may be:
+Request parameters are a Servlet API concept that includes form data from the request body,
+and query parameters. URI variables and headers are also included, but only if they don't
+override request parameters with the same name. Dashes are stripped from header names.
+
+The `Pet` instance above may be:
 
 * Accessed from the model where it could have been added by a
   xref:web/webmvc/mvc-controller/ann-modelattrib-methods.adoc[@ModelAttribute method].

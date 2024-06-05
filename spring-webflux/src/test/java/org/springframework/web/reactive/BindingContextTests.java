@@ -69,24 +69,50 @@ class BindingContextTests {
 	}
 
 	@Test
-	void uriVariablesAddedConditionally() {
+	void bindUriVariablesAndHeaders() {
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("/path")
+				.header("Some-Int-Array", "1")
+				.header("Some-Int-Array", "2")
+				.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		exchange.getAttributes().put(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+				Map.of("name", "John", "age", "25"));
+
+		TestBean target = new TestBean();
+
+		BindingContext bindingContext = new BindingContext(null);
+		WebExchangeDataBinder binder = bindingContext.createDataBinder(exchange, target, "testBean", null);
+
+		binder.bind(exchange).block();
+
+		assertThat(target.getName()).isEqualTo("John");
+		assertThat(target.getAge()).isEqualTo(25);
+		assertThat(target.getSomeIntArray()).containsExactly(1, 2);
+	}
+
+	@Test
+	void bindUriVarsAndHeadersAddedConditionally() {
 
 		MockServerHttpRequest request = MockServerHttpRequest.post("/path")
+				.header("name", "Johnny")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.body("name=John&age=25");
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("age", "26"));
 
-		TestBean testBean = new TestBean();
+		TestBean target = new TestBean();
 
 		BindingContext bindingContext = new BindingContext(null);
-		WebExchangeDataBinder binder = bindingContext.createDataBinder(exchange, testBean, "testBean", null);
+		WebExchangeDataBinder binder = bindingContext.createDataBinder(exchange, target, "testBean", null);
 
 		binder.bind(exchange).block();
 
-		assertThat(testBean.getName()).isEqualTo("John");
-		assertThat(testBean.getAge()).isEqualTo(25);
+		assertThat(target.getName()).isEqualTo("John");
+		assertThat(target.getAge()).isEqualTo(25);
 	}
 
 

@@ -16,10 +16,14 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
@@ -83,6 +87,17 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 		if (uriVars != null) {
 			uriVars.forEach((name, value) -> addValueIfNotPresent(mpvs, "URI variable", name, value));
 		}
+		if (request instanceof HttpServletRequest httpRequest) {
+			Enumeration<String> names = httpRequest.getHeaderNames();
+			while (names.hasMoreElements()) {
+				String name = names.nextElement();
+				Object value = getHeaderValue(httpRequest, name);
+				if (value != null) {
+					name = name.replace("-", "");
+					addValueIfNotPresent(mpvs, "Header", name, value);
+				}
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -91,19 +106,35 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 		return (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 	}
 
-	private static void addValueIfNotPresent(
-			MutablePropertyValues mpvs, String label, String name, @Nullable Object value) {
-
-		if (value != null) {
-			if (mpvs.contains(name)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(label + " '" + name + "' overridden by request bind value.");
-				}
-			}
-			else {
-				mpvs.addPropertyValue(name, value);
+	private static void addValueIfNotPresent(MutablePropertyValues mpvs, String label, String name, Object value) {
+		if (mpvs.contains(name)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(label + " '" + name + "' overridden by request bind value.");
 			}
 		}
+		else {
+			mpvs.addPropertyValue(name, value);
+		}
+	}
+
+	@Nullable
+	private static Object getHeaderValue(HttpServletRequest request, String name) {
+		Enumeration<String> valuesEnum = request.getHeaders(name);
+		if (!valuesEnum.hasMoreElements()) {
+			return null;
+		}
+
+		String value = valuesEnum.nextElement();
+		if (!valuesEnum.hasMoreElements()) {
+			return value;
+		}
+
+		List<Object> values = new ArrayList<>();
+		values.add(value);
+		while (valuesEnum.hasMoreElements()) {
+			values.add(valuesEnum.nextElement());
+		}
+		return values;
 	}
 
 
