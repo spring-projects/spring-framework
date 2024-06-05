@@ -53,7 +53,7 @@ public class JettyDataBufferTests {
 
 		assertThatIllegalStateException().isThrownBy(dataBuffer::release);
 
-		then(mockChunk).should(times(2)).retain();
+		then(mockChunk).should(times(3)).retain();
 		then(mockChunk).should(times(3)).release();
 	}
 }

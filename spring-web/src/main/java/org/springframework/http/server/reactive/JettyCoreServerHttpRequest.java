@@ -107,12 +107,8 @@ class JettyCoreServerHttpRequest extends AbstractServerHttpRequest {
 	public Flux<DataBuffer> getBody() {
 		// We access the request body as a Flow.Publisher, which is wrapped as an org.reactivestreams.Publisher and
 		// then wrapped as a Flux.
-		return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(this.request))).map(this::chunkToDataBuffer);
-	}
-
-	private DataBuffer chunkToDataBuffer(Content.Chunk chunk) {
-		chunk.retain();
-		return this.dataBufferFactory.wrap(chunk);
+		return Flux.from(FlowAdapters.toPublisher(Content.Source.asPublisher(this.request)))
+				.map(this.dataBufferFactory::wrap);
 	}
 
 	@SuppressWarnings("unchecked")
