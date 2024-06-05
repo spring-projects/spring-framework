@@ -30,6 +30,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
@@ -70,7 +71,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		Assert.notNull(original, "ServerHttpRequest is required");
 
 		this.uri = original.getURI();
-		this.headers = new HttpHeaders(original.getHeaders());
+		// original headers can be immutable, so create a copy
+		this.headers = new HttpHeaders(new LinkedMultiValueMap<>(original.getHeaders()));
 		this.httpMethod = original.getMethod();
 		this.contextPath = original.getPath().contextPath().value();
 		this.remoteAddress = original.getRemoteAddress();
