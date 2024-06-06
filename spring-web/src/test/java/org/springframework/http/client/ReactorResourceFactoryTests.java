@@ -261,4 +261,22 @@ class ReactorResourceFactoryTests {
 		assertThat(resourceFactory.isRunning()).isFalse();
 	}
 
+	@Test
+	void lazilyStartOnConnectionProviderAccess() {
+		assertThat(this.resourceFactory.isRunning()).isFalse();
+		this.resourceFactory.getConnectionProvider();
+		assertThat(this.resourceFactory.isRunning()).isTrue();
+		this.resourceFactory.stop();
+		assertThat(this.resourceFactory.isRunning()).isFalse();
+	}
+
+	@Test
+	void lazilyStartOnLoopResourcesAccess() {
+		assertThat(this.resourceFactory.isRunning()).isFalse();
+		this.resourceFactory.getLoopResources();
+		assertThat(this.resourceFactory.isRunning()).isTrue();
+		this.resourceFactory.stop();
+		assertThat(this.resourceFactory.isRunning()).isFalse();
+	}
+
 }
