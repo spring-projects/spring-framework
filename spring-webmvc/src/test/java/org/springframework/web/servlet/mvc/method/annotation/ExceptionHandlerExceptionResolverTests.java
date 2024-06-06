@@ -60,6 +60,8 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.function.HandlerFunction;
+import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -81,6 +83,8 @@ import static org.mockito.Mockito.mock;
  */
 @SuppressWarnings("unused")
 class ExceptionHandlerExceptionResolverTests {
+
+	//TODO
 
 	private static int DEFAULT_RESOLVER_COUNT;
 
@@ -251,6 +255,19 @@ class ExceptionHandlerExceptionResolverTests {
 		IllegalAccessException ex = new IllegalAccessException();
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertExceptionHandledAsBody(mav, "AnotherTestExceptionResolver: IllegalAccessException");
+	}
+
+	@Test
+	void resolveExceptionGlobalHandlerForHandlerFunction() throws Exception {
+		loadConfiguration(MyConfig.class);
+
+		IllegalAccessException ex = new IllegalAccessException();
+		HandlerFunction<ServerResponse> handlerFunction = req -> {
+			throw new IllegalAccessException();
+		};
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerFunction, ex);
 
 		assertExceptionHandledAsBody(mav, "AnotherTestExceptionResolver: IllegalAccessException");
 	}
