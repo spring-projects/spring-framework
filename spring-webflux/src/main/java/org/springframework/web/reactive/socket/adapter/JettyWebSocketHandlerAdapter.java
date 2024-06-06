@@ -19,15 +19,12 @@ package org.springframework.web.reactive.socket.adapter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.CloseableDataBuffer;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -47,14 +44,15 @@ import org.springframework.web.reactive.socket.WebSocketMessage.Type;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-@SuppressWarnings("NullAway")
 public class JettyWebSocketHandlerAdapter implements Session.Listener {
+
 	private final WebSocketHandler delegateHandler;
 
 	private final Function<Session, JettyWebSocketSession> sessionFactory;
 
 	@Nullable
 	private JettyWebSocketSession delegateSession;
+
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler handler,
 			Function<Session, JettyWebSocketSession> sessionFactory) {
@@ -67,32 +65,16 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 	@Override
 	public void onWebSocketOpen(Session session) {
-		this.delegateSession = Objects.requireNonNull(this.sessionFactory.apply(session));
-		this.delegateHandler.handle(this.delegateSession)
-				.subscribe(new Subscriber<>() {
-					@Override
-					public void onSubscribe(Subscription s) {
-						s.request(Long.MAX_VALUE);
-					}
-
-					@Override
-					public void onNext(Void unused) {
-					}
-
-					@Override
-					public void onError(Throwable t) {
-						delegateSession.onHandlerError(t);
-					}
-
-					@Override
-					public void onComplete() {
-						delegateSession.onHandleComplete();
-					}
-				});
+		JettyWebSocketSession delegateSession = this.sessionFactory.apply(session);
+		this.delegateSession = delegateSession;
+		this.delegateHandler.handle(delegateSession)
+				.checkpoint(session.getUpgradeRequest().getRequestURI() + " [JettyWebSocketHandlerAdapter]")
+				.subscribe(unused -> {}, delegateSession::onHandlerError, delegateSession::onHandleComplete);
 	}
 
 	@Override
 	public void onWebSocketText(String message) {
+		Assert.state(this.delegateSession != null, "No delegate session available");
 		byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
 		DataBuffer buffer = this.delegateSession.bufferFactory().wrap(bytes);
 		WebSocketMessage webSocketMessage = new WebSocketMessage(Type.TEXT, buffer);
@@ -101,14 +83,16 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 	@Override
 	public void onWebSocketBinary(ByteBuffer byteBuffer, Callback callback) {
+		Assert.state(this.delegateSession != null, "No delegate session available");
 		DataBuffer buffer = this.delegateSession.bufferFactory().wrap(byteBuffer);
-		buffer = new JettyDataBuffer(buffer, callback);
+		buffer = new JettyCallbackDataBuffer(buffer, callback);
 		WebSocketMessage webSocketMessage = new WebSocketMessage(Type.BINARY, buffer);
 		this.delegateSession.handleMessage(webSocketMessage);
 	}
 
 	@Override
 	public void onWebSocketPong(ByteBuffer payload) {
+		Assert.state(this.delegateSession != null, "No delegate session available");
 		DataBuffer buffer = this.delegateSession.bufferFactory().wrap(BufferUtil.copy(payload));
 		WebSocketMessage webSocketMessage = new WebSocketMessage(Type.PONG, buffer);
 		this.delegateSession.handleMessage(webSocketMessage);
@@ -116,22 +100,25 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
+		Assert.state(this.delegateSession != null, "No delegate session available");
 		this.delegateSession.handleClose(CloseStatus.create(statusCode, reason));
 	}
 
 	@Override
 	public void onWebSocketError(Throwable cause) {
+		Assert.state(this.delegateSession != null, "No delegate session available");
 		this.delegateSession.handleError(cause);
 	}
 
 
-	private static final class JettyDataBuffer implements CloseableDataBuffer {
+	private static final class JettyCallbackDataBuffer implements CloseableDataBuffer {
 
 		private final DataBuffer delegate;
 
 		private final Callback callback;
 
-		public JettyDataBuffer(DataBuffer delegate, Callback callback) {
+
+		public JettyCallbackDataBuffer(DataBuffer delegate, Callback callback) {
 			Assert.notNull(delegate, "'delegate` must not be null");
 			Assert.notNull(callback, "Callback must not be null");
 			this.delegate = delegate;
@@ -266,13 +253,13 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 		@Deprecated
 		public DataBuffer slice(int index, int length) {
 			DataBuffer delegateSlice = this.delegate.slice(index, length);
-			return new JettyDataBuffer(delegateSlice, this.callback);
+			return new JettyCallbackDataBuffer(delegateSlice, this.callback);
 		}
 
 		@Override
 		public DataBuffer split(int index) {
 			DataBuffer delegateSplit = this.delegate.split(index);
-			return new JettyDataBuffer(delegateSplit, this.callback);
+			return new JettyCallbackDataBuffer(delegateSplit, this.callback);
 		}
 
 		@Override

@@ -53,9 +53,13 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	private final Flux<WebSocketMessage> flux;
+
 	private final Sinks.One<CloseStatus> closeStatusSink = Sinks.one();
+
 	private final Lock lock = new ReentrantLock();
+
 	private long requested = 0;
+
 	private boolean awaitingMessage = false;
 
 	@Nullable

@@ -305,6 +305,22 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 		return this.delegate.toString(index, length, charset);
 	}
 
+	@Override
+	public int hashCode() {
+		return this.delegate.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		return this == o || (o instanceof JettyDataBuffer other &&
+				this.delegate.equals(other.delegate));
+	}
+
+	@Override
+	public String toString() {
+		return String.format("JettyDataBuffer (r: %d, w: %d, c: %d)",
+				readPosition(), writePosition(), capacity());
+	}
 
 	private static final class JettyByteBufferIterator implements ByteBufferIterator {
 

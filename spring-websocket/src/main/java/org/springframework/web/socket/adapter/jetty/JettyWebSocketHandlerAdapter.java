@@ -39,15 +39,17 @@ import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("NullAway")
 public class JettyWebSocketHandlerAdapter implements Session.Listener {
+
 	private static final Log logger = LogFactory.getLog(JettyWebSocketHandlerAdapter.class);
 
 	private final WebSocketHandler webSocketHandler;
+
 	private final JettyWebSocketSession wsSession;
 
 	@Nullable
 	private Session nativeSession;
+
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler webSocketHandler, JettyWebSocketSession wsSession) {
 		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
@@ -71,6 +73,7 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 	@Override
 	public void onWebSocketText(String payload) {
+		Assert.state(this.nativeSession != null, "No native session available");
 		TextMessage message = new TextMessage(payload);
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
@@ -83,6 +86,7 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 	@Override
 	public void onWebSocketBinary(ByteBuffer payload, Callback callback) {
+		Assert.state(this.nativeSession != null, "No native session available");
 		BinaryMessage message = new BinaryMessage(BufferUtil.copy(payload), true);
 		callback.succeed();
 		try {
@@ -96,6 +100,7 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 	@Override
 	public void onWebSocketPong(ByteBuffer payload) {
+		Assert.state(this.nativeSession != null, "No native session available");
 		PongMessage message = new PongMessage(BufferUtil.copy(payload));
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
@@ -132,13 +137,14 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 	}
 
 	private void tryCloseWithError(Throwable t) {
-
-		if (this.nativeSession.isOpen()) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
-		}
-		else {
-			// Session might be O-SHUT waiting for response close frame, so abort to close the connection.
-			this.nativeSession.disconnect();
+		if (this.nativeSession != null) {
+			if (this.nativeSession.isOpen()) {
+				ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+			}
+			else {
+				// Session might be O-SHUT waiting for response close frame, so abort to close the connection.
+				this.nativeSession.disconnect();
+			}
 		}
 	}
 }
