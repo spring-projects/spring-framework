@@ -287,32 +287,7 @@ As the preceding example shows, a `ConstraintValidator` implementation can have 
 You can integrate the method validation feature of Bean Validation into a
 Spring context through a `MethodValidationPostProcessor` bean definition:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
-
-	@Configuration
-	public class AppConfig {
-
-		@Bean
-		public static MethodValidationPostProcessor validationPostProcessor() {
-			return new MethodValidationPostProcessor();
-		}
-	}
-
-----
-
-XML::
-+
-[source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
-----
-======
+include-code::./ApplicationConfiguration[tag=snippet,indent=0]
 
 To be eligible for Spring-driven method validation, target classes need to be annotated
 with Spring's `@Validated` annotation, which can optionally also declare the validation
@@ -345,36 +320,7 @@ By default, `jakarta.validation.ConstraintViolationException` is raised with the
 you can have `MethodValidationException` raised instead with ``ConstraintViolation``s
 adapted to `MessageSourceResolvable` errors. To enable set the following flag:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
-
-	@Configuration
-	public class AppConfig {
-
-		@Bean
-		public static MethodValidationPostProcessor validationPostProcessor() {
-			MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
-			processor.setAdaptConstraintViolations(true);
-			return processor;
-		}
-	}
-
-----
-
-XML::
-+
-[source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor">
-		<property name="adaptConstraintViolations" value="true"/>
-	</bean>
-----
-======
+include-code::./ApplicationConfiguration[tag=snippet,indent=0]
 
 `MethodValidationException` contains a list of ``ParameterValidationResult``s which
 group errors by method parameter, and each exposes a `MethodParameter`, the argument
