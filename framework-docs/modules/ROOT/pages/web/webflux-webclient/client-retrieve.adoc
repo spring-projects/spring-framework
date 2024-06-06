@@ -97,8 +97,8 @@ Java::
 	Mono<Person> result = client.get()
 			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
 			.retrieve()
-			.onStatus(HttpStatus::is4xxClientError, response -> ...)
-			.onStatus(HttpStatus::is5xxServerError, response -> ...)
+			.onStatus(HttpStatusCode::is4xxClientError, response -> ...)
+			.onStatus(HttpStatusCode::is5xxServerError, response -> ...)
 			.bodyToMono(Person.class);
 ----
 
@@ -109,8 +109,8 @@ Kotlin::
 	val result = client.get()
 			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
 			.retrieve()
-			.onStatus(HttpStatus::is4xxClientError) { ... }
-			.onStatus(HttpStatus::is5xxServerError) { ... }
+			.onStatus(HttpStatusCode::is4xxClientError) { ... }
+			.onStatus(HttpStatusCode::is5xxServerError) { ... }
 			.awaitBody<Person>()
 ----
 ======
