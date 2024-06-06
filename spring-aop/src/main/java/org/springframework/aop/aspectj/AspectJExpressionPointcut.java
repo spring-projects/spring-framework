@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -85,6 +86,8 @@ import org.springframework.util.StringUtils;
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
 
+	private static final String AJC_MAGIC = "ajc$";
+
 	private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = Set.of(
 			PointcutPrimitive.EXECUTION,
 			PointcutPrimitive.ARGS,
@@ -101,6 +104,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Nullable
 	private Class<?> pointcutDeclarationScope;
+
+	private boolean aspectCompiledByAjc;
 
 	private String[] pointcutParameterNames = new String[0];
 
@@ -133,7 +138,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 * @param paramTypes the parameter types for the pointcut
 	 */
 	public AspectJExpressionPointcut(Class<?> declarationScope, String[] paramNames, Class<?>[] paramTypes) {
-		this.pointcutDeclarationScope = declarationScope;
+		setPointcutDeclarationScope(declarationScope);
 		if (paramNames.length != paramTypes.length) {
 			throw new IllegalStateException(
 					"Number of pointcut parameter names must match number of pointcut parameter types");
@@ -148,6 +153,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 */
 	public void setPointcutDeclarationScope(Class<?> pointcutDeclarationScope) {
 		this.pointcutDeclarationScope = pointcutDeclarationScope;
+		this.aspectCompiledByAjc = compiledByAjc(pointcutDeclarationScope);
 	}
 
 	/**
@@ -273,6 +279,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	@Override
 	public boolean matches(Class<?> targetClass) {
 		if (this.pointcutParsingFailed) {
+			// Pointcut parsing failed before below -> avoid trying again.
+			return false;
+		}
+		if (this.aspectCompiledByAjc && compiledByAjc(targetClass)) {
+			// ajc-compiled aspect class for ajc-compiled target class -> already weaved.
 			return false;
 		}
 
@@ -526,6 +537,15 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			}
 		}
 		return shadowMatch;
+	}
+
+	private static boolean compiledByAjc(Class<?> clazz) {
+		for (Field field : clazz.getDeclaredFields()) {
+			if (field.getName().startsWith(AJC_MAGIC)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 
