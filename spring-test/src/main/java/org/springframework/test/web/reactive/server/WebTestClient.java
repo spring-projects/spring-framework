@@ -1060,7 +1060,7 @@ public interface WebTestClient {
 		 * <p>Use of this method requires the
 		 * <a href="https://github.com/xmlunit/xmlunit">XMLUnit</a> library on
 		 * the classpath.
-		 * @param expectedXml the expected JSON content.
+		 * @param expectedXml the expected XML content.
 		 * @since 5.1
 		 * @see org.springframework.test.util.XmlExpectationsHelper#assertXmlEqual(String, String)
 		 */
