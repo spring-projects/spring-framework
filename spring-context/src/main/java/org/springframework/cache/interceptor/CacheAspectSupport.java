@@ -630,7 +630,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		if (result instanceof CompletableFuture<?> future) {
 			return future.whenComplete((value, ex) -> {
 				if (ex == null) {
-					performCacheEvicts(applicable, result);
+					performCacheEvicts(applicable, value);
 				}
 			});
 		}
@@ -1112,7 +1112,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			ReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);
 			if (adapter != null) {
 				return adapter.fromPublisher(Mono.from(adapter.toPublisher(result))
-						.doOnSuccess(value -> performCacheEvicts(contexts, result)));
+						.doOnSuccess(value -> performCacheEvicts(contexts, value)));
 			}
 			return NOT_HANDLED;
 		}
