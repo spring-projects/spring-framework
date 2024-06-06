@@ -219,6 +219,14 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 				ReflectionUtils.doWithMethods(managedClass, method -> registerForReflection(reflection,
 						AnnotationUtils.findAnnotation(method, idGeneratorTypeClass), "value"));
 			}
+
+			Class<? extends Annotation> attributeBinderTypeClass = loadClass("org.hibernate.annotations.AttributeBinderType", classLoader);
+			if (attributeBinderTypeClass != null) {
+				ReflectionUtils.doWithFields(managedClass, field -> registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(field, attributeBinderTypeClass), "binder"));
+				ReflectionUtils.doWithMethods(managedClass, method -> registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(method, attributeBinderTypeClass), "binder"));
+			}
 		}
 
 		@Nullable
