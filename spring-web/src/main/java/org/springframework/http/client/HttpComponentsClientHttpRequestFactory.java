@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	private long connectTimeout = -1;
 
 	private long connectionRequestTimeout = -1;
+
 
 	/**
 	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
@@ -202,6 +203,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		this.httpContextFactory = httpContextFactory;
 	}
 
+
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpClient client = getHttpClient();
@@ -309,8 +311,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
-	 * Template method that allows for manipulating the {@link ClassicHttpRequest} before it is
-	 * returned as part of a {@link HttpComponentsClientHttpRequest}.
+	 * Template method that allows for manipulating the {@link ClassicHttpRequest}
+	 * before it is returned as part of a {@link HttpComponentsClientHttpRequest}.
 	 * <p>The default implementation is empty.
 	 * @param request the request to process
 	 */
@@ -331,8 +333,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	/**
-	 * Shutdown hook that closes the underlying
-	 * {@link HttpClientConnectionManager ClientConnectionManager}'s
+	 * Shutdown hook that closes the underlying {@link HttpClientConnectionManager}'s
 	 * connection pool, if any.
 	 */
 	@Override
