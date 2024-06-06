@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,9 @@ class ReactiveCachingTests {
 			LateCacheHitDeterminationConfig.class,
 			LateCacheHitDeterminationWithValueWrapperConfig.class})
 	void cacheHitDetermination(Class<?> configClass) {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
+
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
 		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
 
 		Object key = new Object();
@@ -117,7 +119,9 @@ class ReactiveCachingTests {
 			LateCacheHitDeterminationConfig.class,
 			LateCacheHitDeterminationWithValueWrapperConfig.class})
 	void fluxCacheDoesntDependOnFirstRequest(Class<?> configClass) {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
+
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
 		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
 
 		Object key = new Object();
@@ -134,6 +138,7 @@ class ReactiveCachingTests {
 
 		ctx.close();
 	}
+
 
 	@CacheConfig(cacheNames = "first")
 	static class ReactiveCacheableService {
