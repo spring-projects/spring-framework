@@ -35,6 +35,7 @@ import reactor.core.publisher.Sinks;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -49,7 +50,6 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-@SuppressWarnings("NullAway")
 public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	private final Flux<WebSocketMessage> flux;
@@ -102,6 +102,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	void handleMessage(WebSocketMessage message) {
+		Assert.state(this.sink != null, "No sink available");
 		this.sink.next(message);
 
 		boolean demand = false;
@@ -131,7 +132,9 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	void handleClose(CloseStatus closeStatus) {
 		this.closeStatusSink.tryEmitValue(closeStatus);
-		this.sink.complete();
+		if (this.sink != null) {
+			this.sink.complete();
+		}
 	}
 
 	void onHandlerError(Throwable error) {
