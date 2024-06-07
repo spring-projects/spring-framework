@@ -55,6 +55,11 @@ class ServerHttpObservationFilterTests {
 
 
 	@Test
+	void filterShouldNotProcessAsyncDispatch() {
+		assertThat(this.filter.shouldNotFilterAsyncDispatch()).isTrue();
+	}
+
+	@Test
 	void filterShouldFillObservationContext() throws Exception {
 		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
 
@@ -64,7 +69,7 @@ class ServerHttpObservationFilterTests {
 		assertThat(context.getCarrier()).isEqualTo(this.request);
 		assertThat(context.getResponse()).isEqualTo(this.response);
 		assertThat(context.getPathPattern()).isNull();
-		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS").hasBeenStopped();
 	}
 
 	@Test
@@ -119,6 +124,16 @@ class ServerHttpObservationFilterTests {
 		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
 
 		assertThat(this.response.getHeader("X-Trace-Id")).isEqualTo("badc0ff33");
+	}
+
+	@Test
+	void shouldCloseObservationAfterAsyncCompletion() throws Exception {
+		this.request.setAsyncSupported(true);
+		this.request.startAsync();
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+		this.request.getAsyncContext().complete();
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS").hasBeenStopped();
 	}
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {

@@ -21,9 +21,12 @@ import java.util.Optional;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -95,11 +98,6 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected boolean shouldNotFilterAsyncDispatch() {
-		return false;
-	}
-
-	@Override
 	@SuppressWarnings("try")
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
@@ -115,8 +113,12 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 			throw ex;
 		}
 		finally {
-			// Only stop Observation if async processing is done or has never been started.
-			if (!request.isAsyncStarted()) {
+			// If async is started, register a listener for completion notification.
+			if (request.isAsyncStarted()) {
+				request.getAsyncContext().addListener(new ObservationAsyncListener(observation));
+			}
+			// Stop Observation right now if async processing has not been started.
+			else {
 				Throwable error = fetchException(request);
 				if (error != null) {
 					observation.error(error);
@@ -152,13 +154,43 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 	}
 
 	@Nullable
-	private Throwable unwrapServletException(Throwable ex) {
+	static Throwable unwrapServletException(Throwable ex) {
 		return (ex instanceof ServletException) ? ex.getCause() : ex;
 	}
 
 	@Nullable
-	private Throwable fetchException(HttpServletRequest request) {
+	static Throwable fetchException(ServletRequest request) {
 		return (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+	}
+
+	private static class ObservationAsyncListener implements AsyncListener {
+
+		private final Observation currentObservation;
+
+		public ObservationAsyncListener(Observation currentObservation) {
+			this.currentObservation = currentObservation;
+		}
+
+		@Override
+		public void onStartAsync(AsyncEvent event) {
+		}
+
+		@Override
+		public void onTimeout(AsyncEvent event) {
+			this.currentObservation.stop();
+		}
+
+		@Override
+		public void onComplete(AsyncEvent event) {
+			this.currentObservation.stop();
+		}
+
+		@Override
+		public void onError(AsyncEvent event) {
+			this.currentObservation.error(unwrapServletException(event.getThrowable()));
+			this.currentObservation.stop();
+		}
+
 	}
 
 }
