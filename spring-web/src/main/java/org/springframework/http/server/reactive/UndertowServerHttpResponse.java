@@ -122,6 +122,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				}
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
+				// TODO: add "Partitioned" attribute when Undertow supports it
 				cookie.setSameSiteMode(httpCookie.getSameSite());
 				this.exchange.setResponseCookie(cookie);
 			}

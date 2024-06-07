@@ -274,12 +274,13 @@ class MockHttpServletResponseTests {
 		cookie.setMaxAge(0);
 		cookie.setSecure(true);
 		cookie.setHttpOnly(true);
+		cookie.setAttribute("Partitioned", "");
 
 		response.addCookie(cookie);
 
 		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(("foo=bar; Path=/path; Domain=example.com; " +
 				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
-				"Secure; HttpOnly"));
+				"Secure; HttpOnly; Partitioned"));
 	}
 
 	@Test

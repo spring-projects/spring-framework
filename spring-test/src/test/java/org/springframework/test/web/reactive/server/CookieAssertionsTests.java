@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class CookieAssertionTests {
+public class CookieAssertionsTests {
 
 	private final ResponseCookie cookie = ResponseCookie.from("foo", "bar")
 			.maxAge(Duration.ofMinutes(30))
@@ -45,6 +45,7 @@ public class CookieAssertionTests {
 			.path("/foo")
 			.secure(true)
 			.httpOnly(true)
+			.partitioned(true)
 			.sameSite("Lax")
 			.build();
 
@@ -115,6 +116,12 @@ public class CookieAssertionTests {
 	void httpOnly() {
 		assertions.httpOnly("foo", true);
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertions.httpOnly("foo", false));
+	}
+
+	@Test
+	void partitioned() {
+		assertions.partitioned("foo", true);
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertions.partitioned("foo", false));
 	}
 
 	@Test

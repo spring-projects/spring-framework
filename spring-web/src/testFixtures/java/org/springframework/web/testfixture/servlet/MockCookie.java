@@ -99,6 +99,24 @@ public class MockCookie extends Cookie {
 	}
 
 	/**
+	 * Set the "Partitioned" attribute for this cookie.
+	 * @since 6.2
+	 * @see <a href="https://datatracker.ietf.org/doc/html/draft-cutler-httpbis-partitioned-cookies#section-2.1">The Partitioned attribute spec</a>
+	 */
+	public void setPartitioned(boolean partitioned) {
+		setAttribute("Partitioned", "");
+	}
+
+	/**
+	 * Return whether the "Partitioned" attribute is set for this cookie.
+	 * @since 6.2
+	 * @see <a href="https://datatracker.ietf.org/doc/html/draft-cutler-httpbis-partitioned-cookies#section-2.1">The Partitioned attribute spec</a>
+	 */
+	public boolean isPartitioned() {
+		return getAttribute("Partitioned") != null;
+	}
+
+	/**
 	 * Factory method that parses the value of the supplied "Set-Cookie" header.
 	 * @param setCookieHeader the "Set-Cookie" value; never {@code null} or empty
 	 * @return the created cookie
@@ -145,6 +163,9 @@ public class MockCookie extends Cookie {
 			}
 			else if (StringUtils.startsWithIgnoreCase(attribute, "Comment")) {
 				cookie.setComment(extractAttributeValue(attribute, setCookieHeader));
+			}
+			else {
+				cookie.setAttribute(attribute, extractAttributeValue(attribute, setCookieHeader));
 			}
 		}
 		return cookie;
