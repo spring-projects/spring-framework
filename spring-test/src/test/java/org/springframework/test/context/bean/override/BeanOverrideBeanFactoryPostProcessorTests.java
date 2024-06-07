@@ -37,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.SimpleThreadScope;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.bean.override.example.ExampleBeanOverrideAnnotation;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.FailingExampleService;
@@ -47,6 +48,7 @@ import org.springframework.util.Assert;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link BeanOverrideBeanFactoryPostProcessor} combined with a
@@ -199,9 +201,9 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 				});
 	}
 
-	private AnnotationConfigApplicationContext createContext(Class<?>... classes) {
+	private AnnotationConfigApplicationContext createContext(Class<?> testClass) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		BeanOverrideContextCustomizer.registerInfrastructure(context, Set.of(classes));
+		new BeanOverrideContextCustomizer(Set.of(testClass)).customizeContext(context, mock(MergedContextConfiguration.class));
 		return context;
 	}
 

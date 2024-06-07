@@ -69,6 +69,14 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 		this.serializable = serializable;
 	}
 
+	private static Set<Class<?>> asClassSet(@Nullable Class<?>[] classes) {
+		Set<Class<?>> classSet = new LinkedHashSet<>();
+		if (classes != null) {
+			classSet.addAll(Arrays.asList(classes));
+		}
+		return Collections.unmodifiableSet(classSet);
+	}
+
 
 	/**
 	 * Return the extra interfaces.
@@ -99,12 +107,21 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 		return createMock(beanName);
 	}
 
-	private Set<Class<?>> asClassSet(@Nullable Class<?>[] classes) {
-		Set<Class<?>> classSet = new LinkedHashSet<>();
-		if (classes != null) {
-			classSet.addAll(Arrays.asList(classes));
+	@SuppressWarnings("unchecked")
+	<T> T createMock(String name) {
+		MockSettings settings = MockReset.withSettings(getReset());
+		if (StringUtils.hasLength(name)) {
+			settings.name(name);
 		}
-		return Collections.unmodifiableSet(classSet);
+		if (!this.extraInterfaces.isEmpty()) {
+			settings.extraInterfaces(ClassUtils.toClassArray(this.extraInterfaces));
+		}
+		settings.defaultAnswer(this.answer);
+		if (this.serializable) {
+			settings.serializable();
+		}
+		Class<?> targetType = getBeanType().resolve();
+		return (T) mock(targetType, settings);
 	}
 
 	@Override
@@ -138,23 +155,6 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 				.append("answer", getAnswer())
 				.append("serializable", isSerializable())
 				.toString();
-	}
-
-	@SuppressWarnings("unchecked")
-	<T> T createMock(String name) {
-		MockSettings settings = MockReset.withSettings(getReset());
-		if (StringUtils.hasLength(name)) {
-			settings.name(name);
-		}
-		if (!this.extraInterfaces.isEmpty()) {
-			settings.extraInterfaces(ClassUtils.toClassArray(this.extraInterfaces));
-		}
-		settings.defaultAnswer(this.answer);
-		if (this.serializable) {
-			settings.serializable();
-		}
-		Class<?> targetType = getBeanType().resolve();
-		return (T) mock(targetType, settings);
 	}
 
 }

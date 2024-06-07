@@ -55,7 +55,16 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 		this.detectedClasses = detectedClasses;
 	}
 
-	static void registerInfrastructure(BeanDefinitionRegistry registry, Set<Class<?>> detectedClasses) {
+	@Override
+	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
+		if (!(context instanceof BeanDefinitionRegistry registry)) {
+			throw new IllegalStateException("Cannot process bean overrides with an ApplicationContext " +
+					"that doesn't implement BeanDefinitionRegistry: " + context.getClass());
+		}
+		registerInfrastructure(registry, this.detectedClasses);
+	}
+
+	private void registerInfrastructure(BeanDefinitionRegistry registry, Set<Class<?>> detectedClasses) {
 		addInfrastructureBeanDefinition(registry, BeanOverrideRegistrar.class, REGISTRAR_BEAN_NAME,
 				constructorArgs -> constructorArgs.addIndexedArgumentValue(0, detectedClasses));
 		RuntimeBeanReference registrarReference = new RuntimeBeanReference(REGISTRAR_BEAN_NAME);
@@ -67,7 +76,7 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 				constructorArgs -> constructorArgs.addIndexedArgumentValue(0, registrarReference));
 	}
 
-	private static void addInfrastructureBeanDefinition(BeanDefinitionRegistry registry,
+	private void addInfrastructureBeanDefinition(BeanDefinitionRegistry registry,
 			Class<?> clazz, String beanName, Consumer<ConstructorArgumentValues> constructorArgumentsConsumer) {
 
 		if (!registry.containsBeanDefinition(beanName)) {
@@ -80,24 +89,15 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 	}
 
 	@Override
-	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-		if (!(context instanceof BeanDefinitionRegistry registry)) {
-			throw new IllegalStateException("Cannot process bean overrides with an ApplicationContext " +
-					"that doesn't implement BeanDefinitionRegistry: " + context.getClass());
-		}
-		registerInfrastructure(registry, this.detectedClasses);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(Object other) {
+		if (other == this) {
 			return true;
 		}
-		if (obj == null || obj.getClass() != getClass()) {
+		if (other == null || other.getClass() != getClass()) {
 			return false;
 		}
-		BeanOverrideContextCustomizer other = (BeanOverrideContextCustomizer) obj;
-		return this.detectedClasses.equals(other.detectedClasses);
+		BeanOverrideContextCustomizer that = (BeanOverrideContextCustomizer) other;
+		return this.detectedClasses.equals(that.detectedClasses);
 	}
 
 	@Override

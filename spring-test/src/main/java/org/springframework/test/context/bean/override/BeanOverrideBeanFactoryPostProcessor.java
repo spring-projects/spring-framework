@@ -78,18 +78,17 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 
 	@Override
-	public int getOrder() {
-		return Ordered.LOWEST_PRECEDENCE - 10;
-	}
-
-
-	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (!(beanFactory instanceof BeanDefinitionRegistry registry)) {
 			throw new IllegalStateException("Cannot process bean override with a BeanFactory " +
 					"that doesn't implement BeanDefinitionRegistry: " + beanFactory.getClass());
 		}
 		postProcessWithRegistry(beanFactory, registry);
+	}
+
+	@Override
+	public int getOrder() {
+		return Ordered.LOWEST_PRECEDENCE - 10;
 	}
 
 	private void postProcessWithRegistry(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry) {
@@ -240,7 +239,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	}
 
 
-	static final class WrapEarlyBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
+	static class WrapEarlyBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
 			PriorityOrdered {
 
 		private final Map<String, Object> earlyReferences = new ConcurrentHashMap<>(16);
@@ -248,7 +247,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		private final BeanOverrideRegistrar overrideRegistrar;
 
 
-		private WrapEarlyBeanPostProcessor(BeanOverrideRegistrar registrar) {
+		WrapEarlyBeanPostProcessor(BeanOverrideRegistrar registrar) {
 			this.overrideRegistrar = registrar;
 		}
 
