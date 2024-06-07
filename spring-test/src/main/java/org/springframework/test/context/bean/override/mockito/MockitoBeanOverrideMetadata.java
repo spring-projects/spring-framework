@@ -54,16 +54,16 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 	private final boolean serializable;
 
 
-	MockitoBeanOverrideMetadata(MockitoBean annotation, Field field, ResolvableType typeToMock) {
-		this(annotation.name(), annotation.reset(), field, typeToMock,
-				annotation.extraInterfaces(), annotation.answers(), annotation.serializable());
+	MockitoBeanOverrideMetadata(Field field, ResolvableType typeToMock, MockitoBean annotation) {
+		this(field, typeToMock, (StringUtils.hasText(annotation.name()) ? annotation.name() : null),
+				annotation.reset(), annotation.extraInterfaces(), annotation.answers(), annotation.serializable());
 	}
 
-	MockitoBeanOverrideMetadata(String name, MockReset reset, Field field, ResolvableType typeToMock,
+	MockitoBeanOverrideMetadata(Field field, ResolvableType typeToMock, @Nullable String beanName, MockReset reset,
 			Class<?>[] extraInterfaces, @Nullable Answers answer, boolean serializable) {
 
-		super(name, reset, false, field, typeToMock, BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION);
-		Assert.notNull(typeToMock, "TypeToMock must not be null");
+		super(field, typeToMock, beanName, BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION, reset, false);
+		Assert.notNull(typeToMock, "'typeToMock' must not be null");
 		this.extraInterfaces = asClassSet(extraInterfaces);
 		this.answer = (answer != null) ? answer : Answers.RETURNS_DEFAULTS;
 		this.serializable = serializable;
@@ -108,18 +108,18 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (obj == this) {
+	public boolean equals(@Nullable Object other) {
+		if (other == this) {
 			return true;
 		}
-		if (obj == null || obj.getClass() != getClass()) {
+		if (other == null || other.getClass() != getClass()) {
 			return false;
 		}
-		MockitoBeanOverrideMetadata other = (MockitoBeanOverrideMetadata) obj;
-		boolean result = super.equals(obj);
-		result = result && ObjectUtils.nullSafeEquals(this.extraInterfaces, other.extraInterfaces);
-		result = result && ObjectUtils.nullSafeEquals(this.answer, other.answer);
-		result = result && this.serializable == other.serializable;
+		MockitoBeanOverrideMetadata that = (MockitoBeanOverrideMetadata) other;
+		boolean result = super.equals(that);
+		result = result && ObjectUtils.nullSafeEquals(this.extraInterfaces, that.extraInterfaces);
+		result = result && ObjectUtils.nullSafeEquals(this.answer, that.answer);
+		result = result && this.serializable == that.serializable;
 		return result;
 	}
 
@@ -131,12 +131,12 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)
+				.append("beanType", getBeanType())
 				.append("beanName", getBeanName())
-				.append("fieldType", getBeanType())
+				.append("reset", getReset())
 				.append("extraInterfaces", getExtraInterfaces())
 				.append("answer", getAnswer())
 				.append("serializable", isSerializable())
-				.append("reset", getReset())
 				.toString();
 	}
 

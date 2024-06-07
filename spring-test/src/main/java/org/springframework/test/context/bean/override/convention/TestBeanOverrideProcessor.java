@@ -124,7 +124,8 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 			overrideMethod = findTestBeanFactoryMethod(testClass, field.getType(), candidateMethodNames);
 		}
 
-		return new TestBeanOverrideMetadata(field, overrideMethod, testBeanAnnotation, ResolvableType.forField(field, testClass));
+		String beanName = (StringUtils.hasText(testBeanAnnotation.name()) ? testBeanAnnotation.name() : null);
+		return new TestBeanOverrideMetadata(field, ResolvableType.forField(field, testClass), beanName, overrideMethod);
 	}
 
 

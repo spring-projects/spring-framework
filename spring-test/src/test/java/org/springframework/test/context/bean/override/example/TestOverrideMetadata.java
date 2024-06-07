@@ -37,9 +37,6 @@ class TestOverrideMetadata extends OverrideMetadata {
 	@Nullable
 	private final Method method;
 
-	@Nullable
-	private final String beanName;
-
 	private final String methodName;
 
 	@Nullable
@@ -79,25 +76,24 @@ class TestOverrideMetadata extends OverrideMetadata {
 	}
 
 	public TestOverrideMetadata(Field field, ExampleBeanOverrideAnnotation overrideAnnotation, ResolvableType typeToOverride) {
-		super(field, typeToOverride, overrideAnnotation.createIfMissing() ?
+		super(field, typeToOverride, overrideAnnotation.beanName(), overrideAnnotation.createIfMissing() ?
 				BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION: BeanOverrideStrategy.REPLACE_DEFINITION);
 		this.method = findMethod(field, overrideAnnotation.value());
 		this.methodName = overrideAnnotation.value();
-		this.beanName = overrideAnnotation.beanName();
 	}
 
 	//Used to trigger duplicate detection in parser test
 	TestOverrideMetadata(String duplicateTrigger) {
-		super(null, null, null);
+		super(null, null, duplicateTrigger, null);
 		this.method = null;
 		this.methodName = duplicateTrigger;
-		this.beanName = duplicateTrigger;
 	}
 
 	@Override
-	protected String getBeanName() {
-		if (StringUtils.hasText(this.beanName)) {
-			return this.beanName;
+	public String getBeanName() {
+		String name = super.getBeanName();
+		if (StringUtils.hasText(name)) {
+			return name;
 		}
 		return getField().getName();
 	}
@@ -124,8 +120,8 @@ class TestOverrideMetadata extends OverrideMetadata {
 	public boolean equals(Object obj) {
 		if (this.method == null) {
 			return obj instanceof TestOverrideMetadata tem &&
-					tem.beanName != null &&
-					tem.beanName.startsWith(ExampleBeanOverrideAnnotation.DUPLICATE_TRIGGER);
+					tem.getBeanName() != null &&
+					tem.getBeanName().startsWith(ExampleBeanOverrideAnnotation.DUPLICATE_TRIGGER);
 		}
 		return super.equals(obj);
 	}
@@ -141,7 +137,7 @@ class TestOverrideMetadata extends OverrideMetadata {
 	@Override
 	public String toString() {
 		if (this.method == null) {
-			return "{" + this.beanName + "}";
+			return "{" + this.getBeanName() + "}";
 		}
 		return this.methodName;
 	}

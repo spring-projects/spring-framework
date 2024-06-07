@@ -48,13 +48,15 @@ import static org.mockito.Mockito.mock;
  */
 class MockitoSpyBeanOverrideMetadata extends MockitoOverrideMetadata {
 
-	MockitoSpyBeanOverrideMetadata(MockitoSpyBean spyAnnotation, Field field, ResolvableType typeToSpy) {
-		this(spyAnnotation.name(), spyAnnotation.reset(), spyAnnotation.proxyTargetAware(),
-				field, typeToSpy);
+	MockitoSpyBeanOverrideMetadata(Field field, ResolvableType typeToSpy, MockitoSpyBean spyAnnotation) {
+		this(field, typeToSpy, (StringUtils.hasText(spyAnnotation.name()) ? spyAnnotation.name() : null),
+				spyAnnotation.reset(), spyAnnotation.proxyTargetAware());
 	}
 
-	MockitoSpyBeanOverrideMetadata(String name, MockReset reset, boolean proxyTargetAware, Field field, ResolvableType typeToSpy) {
-		super(name, reset, proxyTargetAware, field, typeToSpy, BeanOverrideStrategy.WRAP_BEAN);
+	MockitoSpyBeanOverrideMetadata(Field field, ResolvableType typeToSpy, @Nullable String beanName,
+			MockReset reset, boolean proxyTargetAware) {
+
+		super(field, typeToSpy, beanName, BeanOverrideStrategy.WRAP_BEAN, reset, proxyTargetAware);
 		Assert.notNull(typeToSpy, "typeToSpy must not be null");
 	}
 
@@ -98,16 +100,16 @@ class MockitoSpyBeanOverrideMetadata extends MockitoOverrideMetadata {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (obj == this) {
+	public boolean equals(@Nullable Object other) {
+		if (other == this) {
 			return true;
 		}
 		// For SpyBean we want the class to be exactly the same.
-		if (obj == null || obj.getClass() != getClass()) {
+		if (other == null || other.getClass() != getClass()) {
 			return false;
 		}
-		MockitoSpyBeanOverrideMetadata that = (MockitoSpyBeanOverrideMetadata) obj;
-		return (super.equals(obj) && ObjectUtils.nullSafeEquals(getBeanType(), that.getBeanType()));
+		MockitoSpyBeanOverrideMetadata that = (MockitoSpyBeanOverrideMetadata) other;
+		return (super.equals(that) && ObjectUtils.nullSafeEquals(getBeanType(), that.getBeanType()));
 	}
 
 	@Override

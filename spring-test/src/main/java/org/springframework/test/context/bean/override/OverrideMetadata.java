@@ -38,6 +38,7 @@ import org.springframework.lang.Nullable;
  * annotation or the annotated field.
  *
  * @author Simon Baslé
+ * @author Stephane Nicoll
  * @since 6.2
  */
 public abstract class OverrideMetadata {
@@ -46,25 +47,26 @@ public abstract class OverrideMetadata {
 
 	private final ResolvableType beanType;
 
+	@Nullable
+	private final String beanName;
+
 	private final BeanOverrideStrategy strategy;
 
 
-	protected OverrideMetadata(Field field, ResolvableType beanType,
+	protected OverrideMetadata(Field field, ResolvableType beanType, @Nullable String beanName,
 			BeanOverrideStrategy strategy) {
-
 		this.field = field;
 		this.beanType = beanType;
+		this.beanName = beanName;
 		this.strategy = strategy;
 	}
 
+
 	/**
-	 * Get the bean name to override, or {@code null} to look for a single
-	 * matching bean of type {@link #getBeanType()}.
-	 * <p>Defaults to {@code null}.
+	 * Get the annotated {@link Field}.
 	 */
-	@Nullable
-	protected String getBeanName() {
-		return null;
+	public final Field getField() {
+		return this.field;
 	}
 
 	/**
@@ -75,10 +77,12 @@ public abstract class OverrideMetadata {
 	}
 
 	/**
-	 * Get the annotated {@link Field}.
+	 * Get the bean name to override, or {@code null} to look for a single
+	 * matching bean of type {@link #getBeanType()}.
 	 */
-	public final Field getField() {
-		return this.field;
+	@Nullable
+	public String getBeanName() {
+		return this.beanName;
 	}
 
 	/**
@@ -123,22 +127,24 @@ public abstract class OverrideMetadata {
 			return false;
 		}
 		OverrideMetadata that = (OverrideMetadata) obj;
-		return Objects.equals(this.strategy, that.strategy) &&
-				Objects.equals(this.field, that.field) &&
-				Objects.equals(this.beanType, that.beanType);
+		return Objects.equals(this.beanType, that.beanType) &&
+				Objects.equals(this.beanName, that.beanName) &&
+				Objects.equals(this.strategy, that.strategy) &&
+				Objects.equals(this.field, that.field);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.strategy, this.field, this.beanType);
+		return Objects.hash(this.beanType, this.beanName, this.strategy, this.field);
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)
-				.append("strategy", this.strategy)
 				.append("field", this.field)
 				.append("beanType", this.beanType)
+				.append("beanName", this.beanName)
+				.append("strategy", this.strategy)
 				.toString();
 	}
 

@@ -27,7 +27,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
 import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link OverrideMetadata} implementation for {@link TestBean}.
@@ -40,21 +39,14 @@ final class TestBeanOverrideMetadata extends OverrideMetadata {
 
 	private final Method overrideMethod;
 
-	private final String beanName;
 
-	TestBeanOverrideMetadata(Field field, Method overrideMethod, TestBean overrideAnnotation,
-			ResolvableType typeToOverride) {
+	TestBeanOverrideMetadata(Field field, ResolvableType beanType, @Nullable String beanName,
+			Method overrideMethod) {
 
-		super(field, typeToOverride, BeanOverrideStrategy.REPLACE_DEFINITION);
-		this.beanName = overrideAnnotation.name();
+		super(field, beanType, beanName, BeanOverrideStrategy.REPLACE_DEFINITION);
 		this.overrideMethod = overrideMethod;
 	}
 
-	@Override
-	@Nullable
-	protected String getBeanName() {
-		return StringUtils.hasText(this.beanName) ? this.beanName : super.getBeanName();
-	}
 
 	@Override
 	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
@@ -71,23 +63,22 @@ final class TestBeanOverrideMetadata extends OverrideMetadata {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object o) {
-		if (this == o) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (o == null || getClass() != o.getClass()) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		if (!super.equals(o)) {
+		if (!super.equals(other)) {
 			return false;
 		}
-		TestBeanOverrideMetadata that = (TestBeanOverrideMetadata) o;
-		return Objects.equals(this.overrideMethod, that.overrideMethod)
-				&& Objects.equals(this.beanName, that.beanName);
+		TestBeanOverrideMetadata that = (TestBeanOverrideMetadata) other;
+		return Objects.equals(this.overrideMethod, that.overrideMethod);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), this.overrideMethod, this.beanName);
+		return Objects.hash(super.hashCode(), this.overrideMethod);
 	}
 }

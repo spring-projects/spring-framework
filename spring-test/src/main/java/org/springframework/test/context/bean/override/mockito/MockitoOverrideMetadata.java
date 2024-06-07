@@ -26,7 +26,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
 import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Base {@link OverrideMetadata} implementation for Mockito.
@@ -36,28 +35,19 @@ import org.springframework.util.StringUtils;
  */
 abstract class MockitoOverrideMetadata extends OverrideMetadata {
 
-	protected final String name;
-
 	private final MockReset reset;
 
 	private final boolean proxyTargetAware;
 
 
-	MockitoOverrideMetadata(String name, @Nullable MockReset reset, boolean proxyTargetAware, Field field,
-			ResolvableType typeToOverride, BeanOverrideStrategy strategy) {
+	protected MockitoOverrideMetadata(Field field, ResolvableType beanType, @Nullable String beanName,
+			BeanOverrideStrategy strategy, @Nullable MockReset reset, boolean proxyTargetAware) {
 
-		super(field, typeToOverride, strategy);
-		this.name = name;
+		super(field, beanType, beanName, strategy);
 		this.reset = (reset != null) ? reset : MockReset.AFTER;
 		this.proxyTargetAware = proxyTargetAware;
 	}
 
-
-	@Override
-	@Nullable
-	protected String getBeanName() {
-		return StringUtils.hasText(this.name) ? this.name : super.getBeanName();
-	}
 
 	/**
 	 * Return the mock reset mode.
@@ -101,7 +91,6 @@ abstract class MockitoOverrideMetadata extends OverrideMetadata {
 		}
 		MockitoOverrideMetadata other = (MockitoOverrideMetadata) obj;
 		boolean result = super.equals(obj);
-		result = result && ObjectUtils.nullSafeEquals(this.name, other.name);
 		result = result && ObjectUtils.nullSafeEquals(this.reset, other.reset);
 		result = result && ObjectUtils.nullSafeEquals(this.proxyTargetAware, other.proxyTargetAware);
 		return result;
@@ -109,7 +98,7 @@ abstract class MockitoOverrideMetadata extends OverrideMetadata {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), this.name, this.reset, this.proxyTargetAware);
+		return Objects.hash(super.hashCode(), this.reset, this.proxyTargetAware);
 	}
 
 }
