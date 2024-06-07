@@ -63,6 +63,8 @@ class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> {
 		assertThat(this.encoder.canEncode(forClass(TypePojo.class), MediaType.APPLICATION_XML)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(getClass()), MediaType.APPLICATION_XML)).isFalse();
 
+		assertThat(this.encoder.canEncode(forClass(JAXBElement.class), MediaType.APPLICATION_XML)).isTrue();
+
 		// SPR-15464
 		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isFalse();
 	}
