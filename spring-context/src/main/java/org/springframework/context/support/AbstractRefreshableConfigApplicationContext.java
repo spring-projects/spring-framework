@@ -72,12 +72,15 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	/**
 	 * Set the config locations for this application context.
 	 * <p>If not set, the implementation may use a default as appropriate.
+	 * 设置此应用程序上下文的配置位置
+	 * 如果未设置，则实现可以酌情使用默认值
 	 */
 	public void setConfigLocations(@Nullable String... locations) {
 		if (locations != null) {
 			Assert.noNullElements(locations, "Config locations must not be null");
 			this.configLocations = new String[locations.length];
 			for (int i = 0; i < locations.length; i++) {
+				// 解析给定路径
 				this.configLocations[i] = resolvePath(locations[i]).trim();
 			}
 		}
@@ -117,6 +120,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	/**
 	 * Resolve the given path, replacing placeholders with corresponding
 	 * environment property values if necessary. Applied to config locations.
+	 * 解析给定的路径，如有必要，将占位符替换为相应的环境属性值。应用于配置位置
 	 * @param path the original file path
 	 * @return the resolved file path
 	 * @see org.springframework.core.env.Environment#resolveRequiredPlaceholders(String)
