@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,12 @@ public class MockCookie extends Cookie {
 	 * @see <a href="https://datatracker.ietf.org/doc/html/draft-cutler-httpbis-partitioned-cookies#section-2.1">The Partitioned attribute spec</a>
 	 */
 	public void setPartitioned(boolean partitioned) {
-		setAttribute("Partitioned", "");
+		if (partitioned) {
+			setAttribute("Partitioned", "");
+		}
+		else {
+			setAttribute("Partitioned", null);
+		}
 	}
 
 	/**
@@ -197,6 +202,7 @@ public class MockCookie extends Cookie {
 				.append("Comment", getComment())
 				.append("Secure", getSecure())
 				.append("HttpOnly", isHttpOnly())
+				.append("Partitioned", isPartitioned())
 				.append(SAME_SITE, getSameSite())
 				.append("Max-Age", getMaxAge())
 				.append(EXPIRES, getAttribute(EXPIRES))

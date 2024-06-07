@@ -46,6 +46,7 @@ class MockCookieTests {
 		assertThat(cookie.getMaxAge()).isEqualTo(-1);
 		assertThat(cookie.getPath()).isNull();
 		assertThat(cookie.isHttpOnly()).isFalse();
+		assertThat(cookie.isPartitioned()).isFalse();
 		assertThat(cookie.getSecure()).isFalse();
 		assertThat(cookie.getSameSite()).isNull();
 	}
@@ -207,9 +208,11 @@ class MockCookieTests {
 	@Test
 	void setPartitioned() {
 		MockCookie cookie = new MockCookie("SESSION", "123");
-		cookie.setAttribute("Partitioned", "");
-
+		assertThat(cookie.isPartitioned()).isFalse();
+		cookie.setPartitioned(true);
 		assertThat(cookie.isPartitioned()).isTrue();
+		cookie.setPartitioned(false);
+		assertThat(cookie.isPartitioned()).isFalse();
 	}
 
 }
