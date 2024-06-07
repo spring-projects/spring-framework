@@ -96,8 +96,10 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Set the default read timeout to use.
-	 * <p>By default, this is null, so no read timeout will be set.</p>
+	 * Set the underlying {@code HttpClient}'s read timeout as a {@code Duration}.
+	 * <p>Default is the system's default timeout.
+	 * @since 6.2
+	 * @see java.net.http.HttpRequest.Builder#timeout
 	 */
 	public void setReadTimeout(Duration readTimeout) {
 		Assert.notNull(readTimeout, "readTimeout is required");
