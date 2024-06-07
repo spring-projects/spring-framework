@@ -98,7 +98,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	public static final String ON_REFRESH_VALUE = "onRefresh";
 
 
-	private static final boolean checkpointOnRefresh =
+	private static boolean checkpointOnRefresh =
 			ON_REFRESH_VALUE.equalsIgnoreCase(SpringProperties.getProperty(CHECKPOINT_PROPERTY_NAME));
 
 	private static final boolean exitOnRefresh =
@@ -194,6 +194,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	@Override
 	public void onRefresh() {
 		if (checkpointOnRefresh) {
+			checkpointOnRefresh = false;
 			new CracDelegate().checkpointRestore();
 		}
 		if (exitOnRefresh) {
