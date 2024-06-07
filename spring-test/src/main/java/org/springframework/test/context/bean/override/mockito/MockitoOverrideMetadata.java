@@ -31,6 +31,7 @@ import org.springframework.util.ObjectUtils;
  * Base {@link OverrideMetadata} implementation for Mockito.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.2
  */
 abstract class MockitoOverrideMetadata extends OverrideMetadata {
@@ -98,7 +99,7 @@ abstract class MockitoOverrideMetadata extends OverrideMetadata {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), this.reset, this.proxyTargetAware);
+		return Objects.hash(this.reset, this.proxyTargetAware) + super.hashCode();
 	}
 
 }

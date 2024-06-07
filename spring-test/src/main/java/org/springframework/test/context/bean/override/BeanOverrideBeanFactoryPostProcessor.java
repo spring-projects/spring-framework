@@ -41,38 +41,41 @@ import org.springframework.core.ResolvableType;
 import org.springframework.util.StringUtils;
 
 /**
- * A {@link BeanFactoryPostProcessor} implementation that processes test classes
- * and adapts the {@link BeanFactory} for any {@link BeanOverride} it may define.
+ * A {@link BeanFactoryPostProcessor} implementation that processes identified
+ * use of {@link BeanOverride} and adapts the {@link BeanFactory} accordingly.
  *
- * <p>A set of classes from which to parse {@link OverrideMetadata} must be
- * provided to this processor. Each test class is expected to use any
- * annotation meta-annotated with {@link BeanOverride @BeanOverride} to mark
- * beans to override. The {@link BeanOverrideParsingUtils#hasBeanOverride(Class)}
- * method can be used to check if a class matches the above criteria.
+ * <p>For each override, the bean factory is prepared according to the chosen
+ * {@link BeanOverrideStrategy overriding strategy}. The override value is created,
+ * if necessary, and the necessary infrastructure is updated to allow the value
+ * to be injected in the corresponding {@linkplain OverrideMetadata#getField() field}
+ * of the test class.
  *
- * <p>The provided classes are fully parsed at creation to build a metadata set.
- * This processor implements several {@link BeanOverrideStrategy overriding
- * strategies} and chooses the correct one according to each override metadata's
- * {@link OverrideMetadata#getStrategy()} method. Additionally, it provides
- * support for injecting the overridden bean instances into their corresponding
- * annotated {@link Field fields}.
+ * <p>This processor does not work against a particular test class, it only prepares
+ * the bean factory for the identified, unique, set of bean overrides.
  *
  * @author Simon Baslé
+ * @author Stephane Nicoll
  * @since 6.2
  */
 class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
+
+	private final Set<OverrideMetadata> metadata;
 
 	private final BeanOverrideRegistrar overrideRegistrar;
 
 
 	/**
 	 * Create a new {@code BeanOverrideBeanFactoryPostProcessor} instance with
-	 * the given {@link BeanOverrideRegistrar}, which contains a set of parsed
-	 * {@link OverrideMetadata}.
+	 * the set of {@link OverrideMetadata} to process, using the given
+	 * {@link BeanOverrideRegistrar}.
+	 * @param metadata the {@link OverrideMetadata} instances to process
 	 * @param overrideRegistrar the {@link BeanOverrideRegistrar} used to track
 	 * metadata
 	 */
-	public BeanOverrideBeanFactoryPostProcessor(BeanOverrideRegistrar overrideRegistrar) {
+	public BeanOverrideBeanFactoryPostProcessor(Set<OverrideMetadata> metadata,
+			BeanOverrideRegistrar overrideRegistrar) {
+
+		this.metadata = metadata;
 		this.overrideRegistrar = overrideRegistrar;
 	}
 
@@ -92,7 +95,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	}
 
 	private void postProcessWithRegistry(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry) {
-		for (OverrideMetadata metadata : this.overrideRegistrar.getOverrideMetadata()) {
+		for (OverrideMetadata metadata : this.metadata) {
 			registerBeanOverride(beanFactory, registry, metadata);
 		}
 	}

@@ -69,25 +69,22 @@ class FailingTestBeanIntegrationTests {
 		Class<?> testClass = ExplicitTestOverrideMethodNotPresentTestCase.class;
 		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
 			finishedWithFailure(
-				rootCause(
 					instanceOf(IllegalStateException.class),
 					message("""
 						Failed to find a static test bean factory method in %s with return type \
 						java.lang.String whose name matches one of the supported candidates \
-						[notPresent]""".formatted(testClass.getName())))));
+						[notPresent]""".formatted(testClass.getName()))));
 	}
 
 	@Test
 	void testBeanFailingNoExplicitMethod() {
 		Class<?> testClass = ImplicitTestOverrideMethodNotPresentTestCase.class;
 		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
-			finishedWithFailure(
-				rootCause(
-					instanceOf(IllegalStateException.class),
+			finishedWithFailure(instanceOf(IllegalStateException.class),
 					message("""
 						Failed to find a static test bean factory method in %s with return type \
 						java.lang.String whose name matches one of the supported candidates \
-						[fieldTestOverride]""".formatted(testClass.getName())))));
+						[fieldTestOverride]""".formatted(testClass.getName()))));
 	}
 
 	@Test

@@ -43,6 +43,7 @@ import static org.mockito.Mockito.mock;
  * {@link OverrideMetadata} implementation for Mockito {@code mock} support.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.2
  */
 class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
@@ -142,7 +143,7 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), this.extraInterfaces, this.answer, this.serializable);
+		return Objects.hash(this.extraInterfaces, this.answer, this.serializable) + super.hashCode();
 	}
 
 	@Override

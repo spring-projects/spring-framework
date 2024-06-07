@@ -23,7 +23,6 @@ import org.springframework.test.context.junit.EngineTestKitUtils;
 import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
-import static org.springframework.test.context.junit.EngineTestKitUtils.rootCause;
 
 /**
  * {@link TestBean @TestBean} inheritance integration tests for failure scenarios.
@@ -40,12 +39,11 @@ class FailingTestBeanInheritanceIntegrationTests {
 		Class<?> testClass = FieldInSupertypeButNoMethodTestCase.class;
 		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
 			finishedWithFailure(
-				rootCause(
 					instanceOf(IllegalStateException.class),
 					message("""
 						Failed to find a static test bean factory method in %s with return type %s \
 						whose name matches one of the supported candidates [someBeanTestOverride]"""
-							.formatted(testClass.getName(), AbstractTestBeanIntegrationTestCase.Pojo.class.getName())))));
+							.formatted(testClass.getName(), AbstractTestBeanIntegrationTestCase.Pojo.class.getName()))));
 	}
 
 	@Test
@@ -53,13 +51,12 @@ class FailingTestBeanInheritanceIntegrationTests {
 		Class<?> testClass = Method1InSupertypeAndMethod2InTypeTestCase.class;
 		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
 			finishedWithFailure(
-				rootCause(
 					instanceOf(IllegalStateException.class),
 					message("""
 						Found 2 competing static test bean factory methods in %s with return type %s \
 						whose name matches one of the supported candidates \
 						[anotherBeanTestOverride, thirdBeanTestOverride]"""
-							.formatted(testClass.getName(), AbstractTestBeanIntegrationTestCase.Pojo.class.getName())))));
+							.formatted(testClass.getName(), AbstractTestBeanIntegrationTestCase.Pojo.class.getName()))));
 	}
 
 
