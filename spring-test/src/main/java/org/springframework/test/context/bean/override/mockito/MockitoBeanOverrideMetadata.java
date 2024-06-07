@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
+import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -39,12 +40,12 @@ import org.springframework.util.StringUtils;
 import static org.mockito.Mockito.mock;
 
 /**
- * A complete definition that can be used to create a Mockito mock.
+ * {@link OverrideMetadata} implementation for Mockito {@code mock} support.
  *
  * @author Phillip Webb
  * @since 6.2
  */
-class MockitoBeanMetadata extends MockitoMetadata {
+class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 
 	private final Set<Class<?>> extraInterfaces;
 
@@ -53,12 +54,12 @@ class MockitoBeanMetadata extends MockitoMetadata {
 	private final boolean serializable;
 
 
-	MockitoBeanMetadata(MockitoBean annotation, Field field, ResolvableType typeToMock) {
+	MockitoBeanOverrideMetadata(MockitoBean annotation, Field field, ResolvableType typeToMock) {
 		this(annotation.name(), annotation.reset(), field, typeToMock,
 				annotation.extraInterfaces(), annotation.answers(), annotation.serializable());
 	}
 
-	MockitoBeanMetadata(String name, MockReset reset, Field field, ResolvableType typeToMock,
+	MockitoBeanOverrideMetadata(String name, MockReset reset, Field field, ResolvableType typeToMock,
 			Class<?>[] extraInterfaces, @Nullable Answers answer, boolean serializable) {
 
 		super(name, reset, false, field, typeToMock, BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION);
@@ -68,18 +69,6 @@ class MockitoBeanMetadata extends MockitoMetadata {
 		this.serializable = serializable;
 	}
 
-	@Override
-	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition, @Nullable Object existingBeanInstance) {
-		return createMock(beanName);
-	}
-
-	private Set<Class<?>> asClassSet(@Nullable Class<?>[] classes) {
-		Set<Class<?>> classSet = new LinkedHashSet<>();
-		if (classes != null) {
-			classSet.addAll(Arrays.asList(classes));
-		}
-		return Collections.unmodifiableSet(classSet);
-	}
 
 	/**
 	 * Return the extra interfaces.
@@ -106,6 +95,19 @@ class MockitoBeanMetadata extends MockitoMetadata {
 	}
 
 	@Override
+	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition, @Nullable Object existingBeanInstance) {
+		return createMock(beanName);
+	}
+
+	private Set<Class<?>> asClassSet(@Nullable Class<?>[] classes) {
+		Set<Class<?>> classSet = new LinkedHashSet<>();
+		if (classes != null) {
+			classSet.addAll(Arrays.asList(classes));
+		}
+		return Collections.unmodifiableSet(classSet);
+	}
+
+	@Override
 	public boolean equals(@Nullable Object obj) {
 		if (obj == this) {
 			return true;
@@ -113,7 +115,7 @@ class MockitoBeanMetadata extends MockitoMetadata {
 		if (obj == null || obj.getClass() != getClass()) {
 			return false;
 		}
-		MockitoBeanMetadata other = (MockitoBeanMetadata) obj;
+		MockitoBeanOverrideMetadata other = (MockitoBeanOverrideMetadata) obj;
 		boolean result = super.equals(obj);
 		result = result && ObjectUtils.nullSafeEquals(this.extraInterfaces, other.extraInterfaces);
 		result = result && ObjectUtils.nullSafeEquals(this.answer, other.answer);

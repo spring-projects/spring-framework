@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Base class for Mockito override metadata.
+ * Base {@link OverrideMetadata} implementation for Mockito.
  *
  * @author Phillip Webb
  * @since 6.2
  */
-abstract class MockitoMetadata extends OverrideMetadata {
+abstract class MockitoOverrideMetadata extends OverrideMetadata {
 
 	protected final String name;
 
@@ -43,7 +43,7 @@ abstract class MockitoMetadata extends OverrideMetadata {
 	private final boolean proxyTargetAware;
 
 
-	MockitoMetadata(String name, @Nullable MockReset reset, boolean proxyTargetAware, Field field,
+	MockitoOverrideMetadata(String name, @Nullable MockReset reset, boolean proxyTargetAware, Field field,
 			ResolvableType typeToOverride, BeanOverrideStrategy strategy) {
 
 		super(field, typeToOverride, strategy);
@@ -57,22 +57,6 @@ abstract class MockitoMetadata extends OverrideMetadata {
 	@Nullable
 	protected String getBeanName() {
 		return StringUtils.hasText(this.name) ? this.name : super.getBeanName();
-	}
-
-	@Override
-	protected void track(Object mock, SingletonBeanRegistry trackingBeanRegistry) {
-		MockitoBeans tracker = null;
-		try {
-			tracker = (MockitoBeans) trackingBeanRegistry.getSingleton(MockitoBeans.class.getName());
-		}
-		catch (NoSuchBeanDefinitionException ignored) {
-
-		}
-		if (tracker == null) {
-			tracker= new MockitoBeans();
-			trackingBeanRegistry.registerSingleton(MockitoBeans.class.getName(), tracker);
-		}
-		tracker.add(mock);
 	}
 
 	/**
@@ -92,6 +76,22 @@ abstract class MockitoMetadata extends OverrideMetadata {
 	}
 
 	@Override
+	protected void track(Object mock, SingletonBeanRegistry trackingBeanRegistry) {
+		MockitoBeans tracker = null;
+		try {
+			tracker = (MockitoBeans) trackingBeanRegistry.getSingleton(MockitoBeans.class.getName());
+		}
+		catch (NoSuchBeanDefinitionException ignored) {
+
+		}
+		if (tracker == null) {
+			tracker= new MockitoBeans();
+			trackingBeanRegistry.registerSingleton(MockitoBeans.class.getName(), tracker);
+		}
+		tracker.add(mock);
+	}
+
+	@Override
 	public boolean equals(@Nullable Object obj) {
 		if (obj == this) {
 			return true;
@@ -99,7 +99,7 @@ abstract class MockitoMetadata extends OverrideMetadata {
 		if (obj == null || !getClass().isAssignableFrom(obj.getClass())) {
 			return false;
 		}
-		MockitoMetadata other = (MockitoMetadata) obj;
+		MockitoOverrideMetadata other = (MockitoOverrideMetadata) obj;
 		boolean result = super.equals(obj);
 		result = result && ObjectUtils.nullSafeEquals(this.name, other.name);
 		result = result && ObjectUtils.nullSafeEquals(this.reset, other.reset);

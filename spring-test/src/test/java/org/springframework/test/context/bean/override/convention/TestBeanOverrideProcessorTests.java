@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.NonNull;
-import org.springframework.test.context.bean.override.convention.TestBeanOverrideProcessor.TestBeanOverrideMetadata;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.util.ReflectionUtils;
 

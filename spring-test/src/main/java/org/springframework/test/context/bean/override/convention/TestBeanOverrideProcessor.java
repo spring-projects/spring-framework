@@ -18,25 +18,18 @@ package org.springframework.test.context.bean.override.convention;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.bean.override.BeanOverrideProcessor;
-import org.springframework.test.context.bean.override.BeanOverrideStrategy;
-import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
 
@@ -141,63 +134,6 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 			methods = findMethods(clazz.getEnclosingClass(), methodFilter);
 		}
 		return methods;
-	}
-
-
-	static final class TestBeanOverrideMetadata extends OverrideMetadata {
-
-		private final Method overrideMethod;
-
-		private final String beanName;
-
-		public TestBeanOverrideMetadata(Field field, Method overrideMethod, TestBean overrideAnnotation,
-				ResolvableType typeToOverride) {
-
-			super(field, typeToOverride, BeanOverrideStrategy.REPLACE_DEFINITION);
-			this.beanName = overrideAnnotation.name();
-			this.overrideMethod = overrideMethod;
-		}
-
-		@Override
-		@Nullable
-		protected String getBeanName() {
-			return StringUtils.hasText(this.beanName) ? this.beanName : super.getBeanName();
-		}
-
-		@Override
-		protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
-				@Nullable Object existingBeanInstance) {
-
-			try {
-				ReflectionUtils.makeAccessible(this.overrideMethod);
-				return this.overrideMethod.invoke(null);
-			}
-			catch (IllegalAccessException | InvocationTargetException ex) {
-				throw new IllegalStateException("Failed to invoke bean overriding method " + this.overrideMethod.getName() +
-						"; a static method with no formal parameters is expected", ex);
-			}
-		}
-
-		@Override
-		public boolean equals(@Nullable Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			if (!super.equals(o)) {
-				return false;
-			}
-			TestBeanOverrideMetadata that = (TestBeanOverrideMetadata) o;
-			return Objects.equals(this.overrideMethod, that.overrideMethod)
-					&& Objects.equals(this.beanName, that.beanName);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(super.hashCode(), this.overrideMethod, this.beanName);
-		}
 	}
 
 }

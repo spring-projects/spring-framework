@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,20 +40,20 @@ import org.springframework.util.StringUtils;
 import static org.mockito.Mockito.mock;
 
 /**
- * {@link OverrideMetadata} for Mockito {@code spy} support.
+ * {@link OverrideMetadata} implementation for Mockito {@code spy} support.
  *
  * @author Phillip Webb
  * @author Simon Baslé
  * @since 6.2
  */
-class MockitoSpyBeanMetadata extends MockitoMetadata {
+class MockitoSpyBeanOverrideMetadata extends MockitoOverrideMetadata {
 
-	MockitoSpyBeanMetadata(MockitoSpyBean spyAnnotation, Field field, ResolvableType typeToSpy) {
+	MockitoSpyBeanOverrideMetadata(MockitoSpyBean spyAnnotation, Field field, ResolvableType typeToSpy) {
 		this(spyAnnotation.name(), spyAnnotation.reset(), spyAnnotation.proxyTargetAware(),
 				field, typeToSpy);
 	}
 
-	MockitoSpyBeanMetadata(String name, MockReset reset, boolean proxyTargetAware, Field field, ResolvableType typeToSpy) {
+	MockitoSpyBeanOverrideMetadata(String name, MockReset reset, boolean proxyTargetAware, Field field, ResolvableType typeToSpy) {
 		super(name, reset, proxyTargetAware, field, typeToSpy, BeanOverrideStrategy.WRAP_BEAN);
 		Assert.notNull(typeToSpy, "typeToSpy must not be null");
 	}
@@ -66,33 +66,6 @@ class MockitoSpyBeanMetadata extends MockitoMetadata {
 		Assert.notNull(existingBeanInstance,
 				() -> "MockitoSpyBean requires an existing bean instance for bean " + beanName);
 		return createSpy(beanName, existingBeanInstance);
-	}
-
-	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		// For SpyBean we want the class to be exactly the same.
-		if (obj == null || obj.getClass() != getClass()) {
-			return false;
-		}
-		MockitoSpyBeanMetadata that = (MockitoSpyBeanMetadata) obj;
-		return (super.equals(obj) && ObjectUtils.nullSafeEquals(getBeanType(), that.getBeanType()));
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(super.hashCode(), getBeanType());
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringCreator(this)
-				.append("beanName", getBeanName())
-				.append("beanType", getBeanType())
-				.append("reset", getReset())
-				.toString();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -124,6 +97,34 @@ class MockitoSpyBeanMetadata extends MockitoMetadata {
 		return (T) mock(toSpy, settings);
 	}
 
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		// For SpyBean we want the class to be exactly the same.
+		if (obj == null || obj.getClass() != getClass()) {
+			return false;
+		}
+		MockitoSpyBeanOverrideMetadata that = (MockitoSpyBeanOverrideMetadata) obj;
+		return (super.equals(obj) && ObjectUtils.nullSafeEquals(getBeanType(), that.getBeanType()));
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), getBeanType());
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringCreator(this)
+				.append("beanName", getBeanName())
+				.append("beanType", getBeanType())
+				.append("reset", getReset())
+				.toString();
+	}
+
+
 	/**
 	 * A {@link VerificationStartedListener} that bypasses any proxy created by
 	 * Spring AOP when the verification of a spy starts.
@@ -134,7 +135,6 @@ class MockitoSpyBeanMetadata extends MockitoMetadata {
 		public void onVerificationStarted(VerificationStartedEvent event) {
 			event.setMock(AopTestUtils.getUltimateTargetObject(event.getMock()));
 		}
-
 	}
 
 }

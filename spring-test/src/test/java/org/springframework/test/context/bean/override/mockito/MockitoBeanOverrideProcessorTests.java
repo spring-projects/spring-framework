@@ -40,7 +40,7 @@ public class MockitoBeanOverrideProcessorTests {
 
 		OverrideMetadata object = processor.createMetadata(annotation, clazz, field);
 
-		assertThat(object).isExactlyInstanceOf(MockitoBeanMetadata.class);
+		assertThat(object).isExactlyInstanceOf(MockitoBeanOverrideMetadata.class);
 	}
 
 	@Test
@@ -52,7 +52,7 @@ public class MockitoBeanOverrideProcessorTests {
 
 		OverrideMetadata object = processor.createMetadata(annotation, clazz, field);
 
-		assertThat(object).isExactlyInstanceOf(MockitoSpyBeanMetadata.class);
+		assertThat(object).isExactlyInstanceOf(MockitoSpyBeanOverrideMetadata.class);
 	}
 
 	@Test
