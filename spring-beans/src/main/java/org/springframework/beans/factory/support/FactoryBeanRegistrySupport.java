@@ -98,7 +98,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName, boolean shouldPostProcess) {
 		// 工厂是否单例  beanName是否包含在单例缓存池中
 		if (factory.isSingleton() && containsSingleton(beanName)) {
-			// 加锁
+			// 使用singletonObjects加锁
 			synchronized (getSingletonMutex()) {
 				// 从缓存中获取
 				Object object = this.factoryBeanObjectCache.get(beanName);
@@ -106,6 +106,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 					object = doGetObjectFromFactoryBean(factory, beanName);
 					// Only post-process and store if not put there already during getObject() call above
 					// (e.g. because of circular reference processing triggered by custom getBean calls)
+					// 如果在上面的getObject()调用期间还没有放在那里，则只进行后期处理和存储（例如，由于自定义getBean调用触发的循环引用处理）
 					Object alreadyThere = this.factoryBeanObjectCache.get(beanName);
 					if (alreadyThere != null) {
 						object = alreadyThere;
@@ -117,6 +118,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 							}
 							beforeSingletonCreation(beanName);
 							try {
+								// 调用FactoryBean后置处理器
 								object = postProcessObjectFromFactoryBean(object, beanName);
 							} catch (Throwable ex) {
 								throw new BeanCreationException(beanName,
@@ -136,6 +138,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			Object object = doGetObjectFromFactoryBean(factory, beanName);
 			if (shouldPostProcess) {
 				try {
+					// 调用FactoryBean后置处理器
 					object = postProcessObjectFromFactoryBean(object, beanName);
 				} catch (Throwable ex) {
 					throw new BeanCreationException(beanName, "Post-processing of FactoryBean's object failed", ex);
@@ -147,7 +150,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 
 	/**
 	 * Obtain an object to expose from the given FactoryBean.
-	 *
+	 * 从给定的FactoryBean中获取要公开的对象。
 	 * @param factory  the FactoryBean instance
 	 * @param beanName the name of the bean
 	 * @return the object obtained from the FactoryBean
@@ -157,6 +160,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	private Object doGetObjectFromFactoryBean(FactoryBean<?> factory, String beanName) throws BeanCreationException {
 		Object object;
 		try {
+			// 权限校验
 			if (System.getSecurityManager() != null) {
 				AccessControlContext acc = getAccessControlContext();
 				try {
@@ -190,7 +194,8 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * The resulting object will get exposed for bean references.
 	 * <p>The default implementation simply returns the given object as-is.
 	 * Subclasses may override this, for example, to apply post-processors.
-	 *
+	 * 对从FactoryBean获得的给定对象进行后处理。生成的对象将被公开用于bean引用
+	 * 默认实现只是按原样返回给定的对象。例如，子类可以重写它以应用后处理程序。
 	 * @param object   the object obtained from the FactoryBean.
 	 * @param beanName the name of the bean
 	 * @return the object to expose

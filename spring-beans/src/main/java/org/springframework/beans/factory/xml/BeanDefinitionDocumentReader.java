@@ -16,9 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.w3c.dom.Document;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.w3c.dom.Document;
 
 /**
  * SPI for parsing an XML document that contains Spring bean definitions.
@@ -31,20 +30,21 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @since 18.12.2003
  * @see XmlBeanDefinitionReader#setDocumentReaderClass
+ * @since 18.12.2003
  */
 public interface BeanDefinitionDocumentReader {
 
 	/**
 	 * Read bean definitions from the given DOM document and
 	 * register them with the registry in the given reader context.
-	 * @param doc the DOM document
+	 * 加载并注册beanDefinition
+	 *
+	 * @param doc           the DOM document
 	 * @param readerContext the current context of the reader
-	 * (includes the target registry and the resource being parsed)
+	 *                      (includes the target registry and the resource being parsed)
 	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 */
-	void registerBeanDefinitions(Document doc, XmlReaderContext readerContext)
-			throws BeanDefinitionStoreException;
+	void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) throws BeanDefinitionStoreException;
 
 }

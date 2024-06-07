@@ -132,7 +132,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// the new (child) delegate with a reference to the parent for fallback purposes,
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
-		// 获取解析实例
+		// 任何嵌套的bean元素都将导致此方法中的递归。为了正确地传播和保存bean默认属性，请跟踪当前（父）委托，该委托可能为null。
+		// 创建一个新的（子）委托，并引用父代以进行回退，然后最终将此.delegate重置回其原始（父）引用。这种行为模拟了一堆委托，而实际上不需要一个。
+		// 获取bean定义解析器实例
 		BeanDefinitionParserDelegate parent = this.delegate;
 		this.delegate = createDelegate(getReaderContext(), root, parent);
 
@@ -172,7 +174,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	/**
 	 * Parse the elements at the root level in the document:
 	 * "import", "alias", "bean".
-	 *
+	 * 在文档的根级别分析元素：“import”、“alias”、“bean”@param root文档的DOM根元素
 	 * @param root the DOM root element of the document
 	 */
 	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
@@ -310,6 +312,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	/**
 	 * Process the given bean element, parsing the bean definition
 	 * and registering it with the registry.
+	 * 处理给定的bean元素，解析bean定义并将其注册到注册表中
 	 */
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
 		// 解析文件
@@ -325,6 +328,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				getReaderContext().error("Failed to register bean definition with name '" + bdHolder.getBeanName() + "'", ele, ex);
 			}
 			// Send registration event.
+			// 注册 beanDefinition到容器
 			getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 		}
 	}

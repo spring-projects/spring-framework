@@ -211,6 +211,14 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 	}
 
+	/**
+	 * 检查缓存中或者实例工厂中是否有对应的实例
+	 * 因为在创建单例bean时会存在依赖注入的情况, 在创建依赖时为了避免循环依赖, Spring创建bean的原则是不等bean创建完成, 就将创建bean的ObjectFactory提前暴露到容器中,
+	 * 当下个bean创建时需要依赖上一个bean ObjectFactory#getObject()获取bean时直接使用
+	 *
+	 * @param beanName _
+	 * @return _
+	 */
 	@Override
 	@Nullable
 	public Object getSingleton(String beanName) {
@@ -254,11 +262,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 						singletonObject = this.earlySingletonObjects.get(beanName);
 						if (singletonObject == null) {
 							// 从三级缓存中尝试获取
+							// 当某些方法需要提前初始化时, 会调用addSingletonFactory方法将ObjectFactory初始化策略存储在this.singletonFactories中
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
-								// 获取三级缓存中的对象
+								// 获取singletonFactory中实例
 								singletonObject = singletonFactory.getObject();
-								// 添加对象到二级缓存
+								// earlySingletonObjects 和 singletonFactories 互斥
+								// 添加实例到二级缓存
 								this.earlySingletonObjects.put(beanName, singletonObject);
 								// 从三级缓存中移除
 								this.singletonFactories.remove(beanName);
@@ -283,16 +293,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(beanName, "Bean name must not be null");
-		// 加锁
+		// 使用singletonObjects加锁
 		synchronized (this.singletonObjects) {
-			// 获取单例对象
+			// 获取单例对象  检查bean是否已加载, 因为singleton模式就是复用已创建bean
 			Object singletonObject = this.singletonObjects.get(beanName);
+			// 如果单例对象为空 进行singletonBean初始化
 			if (singletonObject == null) {
 				// 判断当前上下文是否处于销毁阶段
 				if (this.singletonsCurrentlyInDestruction) {
-					throw new BeanCreationNotAllowedException(beanName,
-							"Singleton bean creation not allowed while singletons of this factory are in destruction " +
-									"(Do not request a bean from a BeanFactory in a destroy method implementation!)");
+					throw new BeanCreationNotAllowedException(beanName, "Singleton bean creation not allowed while singletons of this factory are in destruction " +
+							"(Do not request a bean from a BeanFactory in a destroy method implementation!)");
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
@@ -328,6 +338,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					if (recordSuppressedExceptions) {
 						this.suppressedExceptions = null;
 					}
+					// 标记当前bean创建完成  创建中列表移除当前bean
 					afterSingletonCreation(beanName);
 				}
 				// 添加到一级缓存
@@ -569,7 +580,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Determine whether a dependent bean has been registered for the given name.
-	 *
+	 * 确定是否已为给定名称注册了依赖bean
 	 * @param beanName the name of the bean to check
 	 */
 	protected boolean hasDependentBean(String beanName) {
@@ -578,7 +589,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Return the names of all beans which depend on the specified bean, if any.
-	 *
+	 * 返回依赖于指定bean的所有bean的名称（如果有的话）
 	 * @param beanName the name of the bean
 	 * @return the array of dependent bean names, or an empty array if none
 	 */
@@ -734,6 +745,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * any sort of extended singleton creation phase. In particular, subclasses
 	 * should <i>not</i> have their own mutexes involved in singleton creation,
 	 * to avoid the potential for deadlocks in lazy-init situations.
+	 * 将单例互斥对象暴露给子类和外部协作者
+	 * 如果子类执行任何类型的扩展单例创建阶段，那么它们应该在给定的对象上同步。
+	 * 特别是，子类应该＜i＞而不是＜i＞在单例创建中有自己的互斥体，以避免在惰性初始化情况下出现死锁的可能性
 	 */
 	@Override
 	public final Object getSingletonMutex() {

@@ -73,6 +73,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Package-visible field for caching the determined Class of a given bean definition.
+	 * 包可见字段，用于缓存给定bean定义的已确定类
 	 */
 	@Nullable
 	volatile Class<?> resolvedTargetType;
@@ -86,62 +87,73 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Package-visible field for caching the return type of a generically typed factory method.
+	 * 用于缓存泛型工厂方法的返回类型的包可见字段
 	 */
 	@Nullable
 	volatile ResolvableType factoryMethodReturnType;
 
 	/**
 	 * Package-visible field for caching a unique factory method candidate for introspection.
+	 * 用于缓存用于自省的唯一工厂方法候选者的包可见字段
 	 */
 	@Nullable
 	volatile Method factoryMethodToIntrospect;
 
 	/**
 	 * Package-visible field for caching a resolved destroy method name (also for inferred).
+	 * 包可见字段，用于缓存已解析的销毁方法名称（也用于推断）
 	 */
 	@Nullable
 	volatile String resolvedDestroyMethodName;
 
 	/**
 	 * Common lock for the four constructor fields below.
+	 * 下面四个构造函数字段的公共锁
 	 */
 	final Object constructorArgumentLock = new Object();
 
 	/**
 	 * Package-visible field for caching the resolved constructor or factory method.
+	 * 包可见字段，用于缓存已解析的构造函数或工厂方法。
 	 */
 	@Nullable
 	Executable resolvedConstructorOrFactoryMethod;
 
 	/**
 	 * Package-visible field that marks the constructor arguments as resolved.
+	 * 将构造函数参数标记为已解析的包可见字段
 	 */
 	boolean constructorArgumentsResolved = false;
 
 	/**
 	 * Package-visible field for caching fully resolved constructor arguments.
+	 * 用于缓存完全解析的构造函数参数的包可见字段
 	 */
 	@Nullable
 	Object[] resolvedConstructorArguments;
 
 	/**
 	 * Package-visible field for caching partly prepared constructor arguments.
+	 * 用于缓存部分准备好的构造函数参数的包可见字段
 	 */
 	@Nullable
 	Object[] preparedConstructorArguments;
 
 	/**
 	 * Common lock for the two post-processing fields below.
+	 * 下面两个后处理字段的公用锁
 	 */
 	final Object postProcessingLock = new Object();
 
 	/**
 	 * Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied.
+	 * 指示已应用MergedBeanDefinitionPostProcessor的Package可见字段
 	 */
 	boolean postProcessed = false;
 
 	/**
 	 * Package-visible field that indicates a before-instantiation post-processor having kicked in.
+	 * 包可见字段，指示实例化前的后处理器已启动
 	 */
 	@Nullable
 	volatile Boolean beforeInstantiationResolved;
@@ -413,6 +425,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/**
 	 * Determine preferred constructors to use for default construction, if any.
 	 * Constructor arguments will be autowired if necessary.
+	 * 确定用于默认构造的首选构造函数（如果有的话）。如有必要，构造函数参数将自动连接
 	 *
 	 * @return one or more preferred constructors, or {@code null} if none
 	 * (in which case the regular no-arg default constructor will be called)
