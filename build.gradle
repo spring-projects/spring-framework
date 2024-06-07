@@ -151,7 +151,7 @@ configure(rootProject) {
 		def rootPath = file(rootDir).toPath()
 		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
 		projectDirs.forEach { dir ->
-			[ 'bin', 'build', 'out', '.settings' ]
+			[ 'bin', 'build', 'out', '.settings', 'node_modules' ]
 				.collect { rootPath.relativize(new File(dir, it).toPath()) }
 				.forEach { source.exclude "$it/**" }
 			[ '.classpath', '.project' ]
