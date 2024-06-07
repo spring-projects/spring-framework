@@ -196,6 +196,16 @@ class UriComponentsBuilderTests {
 		assertThat(result.getQuery()).isNull();
 		assertThat(result.getFragment()).isEqualTo("baz");
 
+		result = UriComponentsBuilder.fromUriString("mailto:user@example.com?subject=foo").build();
+		assertThat(result.getScheme()).isEqualTo("mailto");
+		assertThat(result.getUserInfo()).isNull();
+		assertThat(result.getHost()).isNull();
+		assertThat(result.getPort()).isEqualTo(-1);
+		assertThat(result.getSchemeSpecificPart()).isEqualTo("user@example.com?subject=foo");
+		assertThat(result.getPath()).isNull();
+		assertThat(result.getQuery()).isNull();
+		assertThat(result.getFragment()).isNull();
+
 		result = UriComponentsBuilder.fromUriString("docs/guide/collections/designfaq.html#28").build();
 		assertThat(result.getScheme()).isNull();
 		assertThat(result.getUserInfo()).isNull();
