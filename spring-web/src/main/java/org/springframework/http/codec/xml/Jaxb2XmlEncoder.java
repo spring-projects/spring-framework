@@ -92,7 +92,8 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 		if (super.canEncode(elementType, mimeType)) {
 			Class<?> outputClass = elementType.toClass();
 			return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
-					outputClass.isAnnotationPresent(XmlType.class));
+					outputClass.isAnnotationPresent(XmlType.class) ||
+					elementType.isAssignableFrom(JAXBElement.class));
 		}
 		else {
 			return false;
