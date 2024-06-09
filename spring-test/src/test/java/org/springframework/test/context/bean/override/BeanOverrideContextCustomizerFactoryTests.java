@@ -25,10 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideContextCustomizerFactoryTests.Test2.Green;
 import org.springframework.test.context.bean.override.BeanOverrideContextCustomizerFactoryTests.Test2.Orange;
-import org.springframework.test.context.bean.override.convention.TestBean;
+import org.springframework.test.context.bean.override.DummyBean.DummyBeanOverrideProcessor.DummyOverrideMetadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link BeanOverrideContextCustomizerFactory}.
@@ -48,14 +47,14 @@ class BeanOverrideContextCustomizerFactoryTests {
 	void createContextCustomizerWhenTestHasSingleBeanOverride() {
 		BeanOverrideContextCustomizer customizer = createContextCustomizer(Test1.class);
 		assertThat(customizer).isNotNull();
-		assertThat(customizer.getMetadata()).singleElement().satisfies(testMetadata(null, String.class));
+		assertThat(customizer.getMetadata()).singleElement().satisfies(dummyMetadata(null, String.class));
 	}
 
 	@Test
 	void createContextCustomizerWhenNestedTestHasSingleBeanOverrideInParent() {
 		BeanOverrideContextCustomizer customizer = createContextCustomizer(Orange.class);
 		assertThat(customizer).isNotNull();
-		assertThat(customizer.getMetadata()).singleElement().satisfies(testMetadata(null, String.class));
+		assertThat(customizer.getMetadata()).singleElement().satisfies(dummyMetadata(null, String.class));
 	}
 
 	@Test
@@ -63,25 +62,19 @@ class BeanOverrideContextCustomizerFactoryTests {
 		BeanOverrideContextCustomizer customizer = createContextCustomizer(Green.class);
 		assertThat(customizer).isNotNull();
 		assertThat(customizer.getMetadata())
-				.anySatisfy(testMetadata(null, String.class))
-				.anySatisfy(testMetadata("counterBean", Integer.class))
+				.anySatisfy(dummyMetadata(null, String.class))
+				.anySatisfy(dummyMetadata("counterBean", Integer.class))
 				.hasSize(2);
 	}
 
-	@Test
-	void createContextCustomizerWhenTestHasInvalidTestBeanTargetMethod() {
-		assertThatIllegalStateException()
-				.isThrownBy(() -> createContextCustomizer(InvalidTestMissingMethod.class))
-				.withMessageContaining("Failed to find a static test bean factory method");
+
+	private Consumer<OverrideMetadata> dummyMetadata(@Nullable String beanName, Class<?> beanType) {
+		return dummyMetadata(beanName, beanType, BeanOverrideStrategy.REPLACE_DEFINITION);
 	}
 
-
-	private Consumer<OverrideMetadata> testMetadata(@Nullable String beanName, Class<?> beanType) {
-		return overrideMetadata(beanName, beanType, BeanOverrideStrategy.REPLACE_DEFINITION);
-	}
-
-	private Consumer<OverrideMetadata> overrideMetadata(@Nullable String beanName, Class<?> beanType, BeanOverrideStrategy strategy) {
+	private Consumer<OverrideMetadata> dummyMetadata(@Nullable String beanName, Class<?> beanType, BeanOverrideStrategy strategy) {
 		return metadata -> {
+			assertThat(metadata).isExactlyInstanceOf(DummyOverrideMetadata.class);
 			assertThat(metadata.getBeanName()).isEqualTo(beanName);
 			assertThat(metadata.getBeanType().toClass()).isEqualTo(beanType);
 			assertThat(metadata.getStrategy()).isEqualTo(strategy);
@@ -95,23 +88,15 @@ class BeanOverrideContextCustomizerFactoryTests {
 
 	static class Test1 {
 
-		@TestBean(methodName = "descriptor")
+		@DummyBean
 		private String descriptor;
-
-		private static String descriptor() {
-			return "Overridden descriptor";
-		}
 
 	}
 
 	static class Test2 {
 
-		@TestBean(methodName = "name")
+		@DummyBean
 		private String name;
-
-		private static String name() {
-			return "Overridden name";
-		}
 
 		@Nested
 		class Orange {
@@ -121,24 +106,10 @@ class BeanOverrideContextCustomizerFactoryTests {
 		@Nested
 		class Green {
 
-			@TestBean(name = "counterBean", methodName = "counter")
+			@DummyBean(beanName = "counterBean")
 			private Integer counter;
 
-			private static Integer counter() {
-				return 42;
-			}
 		}
-	}
-
-	static class InvalidTestMissingMethod {
-
-		@TestBean(methodName = "descriptor")
-		private String descriptor;
-
-		private String descriptor() {
-			return "Never called, not static";
-		}
-
 	}
 
 }

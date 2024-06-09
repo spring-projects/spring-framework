@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.bean.override;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,9 +28,8 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.bean.override.DummyBean.DummyBeanOverrideProcessor.DummyOverrideMetadata;
 import org.springframework.test.context.bean.override.example.CustomQualifier;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.util.ReflectionUtils;
@@ -157,7 +154,7 @@ public class OverrideMetadataTests {
 	}
 
 	private OverrideMetadata createMetadata(Field field, @Nullable String name) {
-		return new DummyOverrideMetadata(field, field.getType(), name);
+		return new DummyOverrideMetadata(field, field.getType(), name, BeanOverrideStrategy.REPLACE_DEFINITION);
 	}
 
 	private Field field(Class<?> target, String fieldName) {
@@ -247,43 +244,5 @@ public class OverrideMetadataTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@DummyBean
 	public @interface MetaDummyBean {}
-
-	@Target({ ElementType.FIELD, ElementType.ANNOTATION_TYPE })
-	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
-	@BeanOverride(DummyBeanOverrideProcessor.class)
-	public @interface DummyBean {}
-
-	static class DummyBeanOverrideProcessor implements BeanOverrideProcessor {
-
-		@Override
-		public OverrideMetadata createMetadata(Annotation overrideAnnotation, Class<?> testClass, Field field) {
-			return new DummyOverrideMetadata(field, field.getType(), null);
-		}
-	}
-
-	static class DummyOverrideMetadata extends OverrideMetadata {
-
-		@Nullable
-		private final String beanName;
-
-		DummyOverrideMetadata(Field field, Class<?> typeToOverride, @Nullable String beanName) {
-			super(field, ResolvableType.forClass(typeToOverride), beanName, BeanOverrideStrategy.REPLACE_DEFINITION);
-			this.beanName = beanName;
-		}
-
-		@Override
-		@Nullable
-		public String getBeanName() {
-			return this.beanName;
-		}
-
-		@Override
-		protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
-				@Nullable Object existingBeanInstance) {
-
-			return BeanOverrideStrategy.REPLACE_DEFINITION;
-		}
-	}
 
 }
