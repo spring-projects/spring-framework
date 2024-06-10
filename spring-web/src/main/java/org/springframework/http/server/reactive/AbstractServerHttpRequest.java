@@ -19,6 +19,9 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,6 +70,9 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	@Nullable
 	private String logPrefix;
+
+	@Nullable
+	private Supplier<Map<String, Object>> attributesSupplier;
 
 
 	/**
@@ -120,6 +126,16 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public URI getURI() {
 		return this.uri;
+	}
+
+	@Override
+	public Map<String, Object> getAttributes() {
+		if (this.attributesSupplier != null) {
+			return this.attributesSupplier.get();
+		}
+		else {
+			return Collections.emptyMap();
+		}
 	}
 
 	@Override
@@ -230,4 +246,12 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		return getId();
 	}
 
+	/**
+	 * Set the attribute supplier.
+	 * <p><strong>Note:</strong> This is exposed mainly for internal framework
+	 * use.
+	 */
+	public void setAttributesSupplier(Supplier<Map<String, Object>> attributesSupplier) {
+		this.attributesSupplier = attributesSupplier;
+	}
 }

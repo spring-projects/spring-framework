@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.Map;
 
 import reactor.core.publisher.Flux;
 
@@ -68,6 +69,11 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	@Override
 	public URI getURI() {
 		return getDelegate().getURI();
+	}
+
+	@Override
+	public Map<String, Object> getAttributes() {
+		return getDelegate().getAttributes();
 	}
 
 	@Override

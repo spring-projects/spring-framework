@@ -56,7 +56,7 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 	@Override
 	public boolean supportsRequestAttributes() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -120,6 +120,8 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 			}));
 			bodySpec.header(HttpHeaders.COOKIE, String.join("; ", cookies));
 		}
+
+		bodySpec.attributes(attributes -> attributes.putAll(values.getAttributes()));
 
 		if (values.getBodyValue() != null) {
 			bodySpec.body(values.getBodyValue());

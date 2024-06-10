@@ -193,7 +193,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	@Override
 	public ServerRequest build() {
 		ServerHttpRequest serverHttpRequest = new BuiltServerHttpRequest(this.exchange.getRequest().getId(),
-				this.method, this.uri, this.contextPath, this.headers, this.cookies, this.body);
+				this.method, this.uri, this.contextPath, this.headers, this.cookies, this.body, this.attributes);
 		ServerWebExchange exchange = new DelegatingServerWebExchange(
 				serverHttpRequest, this.attributes, this.exchange, this.messageReaders);
 		return new DefaultServerRequest(exchange, this.messageReaders);
@@ -220,8 +220,10 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final Flux<DataBuffer> body;
 
+		private final Map<String, Object> attributes;
+
 		public BuiltServerHttpRequest(String id, HttpMethod method, URI uri, @Nullable String contextPath,
-				HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies, Flux<DataBuffer> body) {
+				HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies, Flux<DataBuffer> body, Map<String, Object> attributes) {
 
 			this.id = id;
 			this.method = method;
@@ -231,6 +233,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 			this.cookies = unmodifiableCopy(cookies);
 			this.queryParams = parseQueryParams(uri);
 			this.body = body;
+			this.attributes = attributes;
 		}
 
 		private static <K, V> MultiValueMap<K, V> unmodifiableCopy(MultiValueMap<K, V> original) {
@@ -271,6 +274,11 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		@Override
 		public URI getURI() {
 			return this.uri;
+		}
+
+		@Override
+		public Map<String, Object> getAttributes() {
+			return this.attributes;
 		}
 
 		@Override
