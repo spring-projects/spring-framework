@@ -50,6 +50,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class MockitoBeanByTypeIntegrationTests {
 
 	@MockitoBean
+	AnotherService serviceIsNotABean;
+
+	@MockitoBean
 	ExampleService anyNameForService;
 
 	@MockitoBean
@@ -60,6 +63,17 @@ public class MockitoBeanByTypeIntegrationTests {
 	@CustomQualifier
 	StringBuilder ambiguousMeta;
 
+	@Test
+	void mockIsCreatedWhenNoCandidateIsFound() {
+		assertThat(this.serviceIsNotABean)
+				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue());
+
+		when(this.serviceIsNotABean.hello()).thenReturn("Mocked hello");
+
+		assertThat(this.serviceIsNotABean.hello()).isEqualTo("Mocked hello");
+		verify(this.serviceIsNotABean, times(1)).hello();
+		verifyNoMoreInteractions(this.serviceIsNotABean);
+	}
 
 	@Test
 	void overrideIsFoundByType(ApplicationContext ctx) {
@@ -109,6 +123,11 @@ public class MockitoBeanByTypeIntegrationTests {
 		verifyNoMoreInteractions(this.ambiguousMeta);
 	}
 
+	interface AnotherService {
+
+		String hello();
+
+	}
 
 	@Configuration
 	static class Config {

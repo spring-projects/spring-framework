@@ -34,6 +34,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -62,6 +64,8 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	private final Set<OverrideMetadata> metadata;
 
 	private final BeanOverrideRegistrar overrideRegistrar;
+
+	private final BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
 
 
 	/**
@@ -133,18 +137,11 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		String beanNameIncludingFactory;
 		BeanDefinition existingBeanDefinition = null;
 		if (beanName == null) {
-			Set<String> candidateNames = getExistingBeanNamesByType(beanFactory, overrideMetadata, true);
-			int candidateCount = candidateNames.size();
-			if (candidateCount != 1) {
-				Field field = overrideMetadata.getField();
-				throw new IllegalStateException("Unable to select a bean definition to override: found " +
-						candidateCount + " bean definitions of type " + overrideMetadata.getBeanType() +
-						" (as required by annotated field '" + field.getDeclaringClass().getSimpleName() +
-						"." + field.getName() + "')" + (candidateCount > 0 ? ": " + candidateNames : ""));
-			}
-			beanNameIncludingFactory = candidateNames.iterator().next();
+			beanNameIncludingFactory = getBeanNameForType(beanFactory, registry, overrideMetadata, beanDefinition, enforceExistingDefinition);
 			beanName = BeanFactoryUtils.transformedBeanName(beanNameIncludingFactory);
-			existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
+			if (registry.containsBeanDefinition(beanName)) {
+				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
+			}
 		}
 		else {
 			Set<String> candidates = getExistingBeanNamesByType(beanFactory, overrideMetadata, false);
@@ -174,6 +171,30 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 		overrideMetadata.track(override, beanFactory);
 		this.overrideRegistrar.registerNameForMetadata(overrideMetadata, beanNameIncludingFactory);
+	}
+
+	private String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry,
+			OverrideMetadata overrideMetadata, RootBeanDefinition beanDefinition, boolean enforceExistingDefinition) {
+		Set<String> candidateNames = getExistingBeanNamesByType(beanFactory, overrideMetadata, true);
+		int candidateCount = candidateNames.size();
+		if (candidateCount == 1) {
+			return candidateNames.iterator().next();
+		}
+		else if (candidateCount == 0) {
+			if (enforceExistingDefinition) {
+				Field field = overrideMetadata.getField();
+				throw new IllegalStateException(
+						"Unable to override bean: no bean definitions of type %s (as required by annotated field '%s.%s')"
+								.formatted(overrideMetadata.getBeanType(), field.getDeclaringClass().getSimpleName(), field.getName()));
+			}
+			return this.beanNameGenerator.generateBeanName(beanDefinition, registry);
+		}
+		Field field = overrideMetadata.getField();
+		throw new IllegalStateException(String.format(
+				"Unable to select a bean definition to override: found %s bean definitions of type %s " +
+						"(as required by annotated field '%s.%s'): %s",
+				candidateCount, overrideMetadata.getBeanType(), field.getDeclaringClass().getSimpleName(),
+				field.getName(), candidateNames));
 	}
 
 	/**
@@ -209,7 +230,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	}
 
 	RootBeanDefinition createBeanDefinition(OverrideMetadata metadata) {
-		RootBeanDefinition definition = new RootBeanDefinition();
+		RootBeanDefinition definition = new RootBeanDefinition(metadata.getBeanType().resolve());
 		definition.setTargetType(metadata.getBeanType());
 		definition.setQualifiedElement(metadata.getField());
 		return definition;

@@ -51,8 +51,8 @@ class FailingTestBeanByTypeIntegrationTests {
 				cause(
 					instanceOf(IllegalStateException.class),
 					message("""
-						Unable to select a bean definition to override: found 0 bean definitions \
-						of type %s (as required by annotated field '%s.example')"""
+						Unable to override bean: no bean definitions of type \
+						%s (as required by annotated field '%s.example')"""
 							.formatted(ExampleService.class.getName(), testClass.getSimpleName())))));
 	}
 
