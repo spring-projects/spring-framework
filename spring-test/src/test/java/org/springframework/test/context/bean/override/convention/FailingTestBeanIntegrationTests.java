@@ -66,25 +66,21 @@ class FailingTestBeanIntegrationTests {
 
 	@Test
 	void testBeanFailingNoImplicitMethod() {
-		Class<?> testClass = ExplicitTestOverrideMethodNotPresentTestCase.class;
+		Class<?> testClass = ExplicitOverrideMethodNotPresentTestCase.class;
 		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
 			finishedWithFailure(
 					instanceOf(IllegalStateException.class),
-					message("""
-						Failed to find a static test bean factory method in %s with return type \
-						java.lang.String whose name matches one of the supported candidates \
-						[notPresent]""".formatted(testClass.getName()))));
+					message("No static method found named notPresent() in %s with return type %s"
+							.formatted(testClass.getName(), String.class.getName()))));
 	}
 
 	@Test
 	void testBeanFailingNoExplicitMethod() {
-		Class<?> testClass = ImplicitTestOverrideMethodNotPresentTestCase.class;
+		Class<?> testClass = ImplicitOverrideMethodNotPresentTestCase.class;
 		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
 			finishedWithFailure(instanceOf(IllegalStateException.class),
-					message("""
-						Failed to find a static test bean factory method in %s with return type \
-						java.lang.String whose name matches one of the supported candidates \
-						[fieldTestOverride]""".formatted(testClass.getName()))));
+					message("No static method found named field() in %s with return type %s"
+							.formatted(testClass.getName(), String.class.getName()))));
 	}
 
 	@Test
@@ -111,7 +107,7 @@ class FailingTestBeanIntegrationTests {
 			fail("should fail earlier");
 		}
 
-		static String noOriginalBeanTestOverride() {
+		static String noOriginalBean() {
 			return "should be ignored";
 		}
 	}
@@ -127,13 +123,13 @@ class FailingTestBeanIntegrationTests {
 			fail("should fail earlier");
 		}
 
-		static String notPresentTestOverride() {
+		static String notPresent() {
 			return "should be ignored";
 		}
 	}
 
 	@SpringJUnitConfig
-	static class ExplicitTestOverrideMethodNotPresentTestCase {
+	static class ExplicitOverrideMethodNotPresentTestCase {
 
 		@TestBean(methodName = "notPresent")
 		String field;
@@ -145,9 +141,9 @@ class FailingTestBeanIntegrationTests {
 	}
 
 	@SpringJUnitConfig
-	static class ImplicitTestOverrideMethodNotPresentTestCase {
+	static class ImplicitOverrideMethodNotPresentTestCase {
 
-		@TestBean // expects fieldTestOverride method
+		@TestBean // expects field method
 		String field;
 
 		@Test
@@ -167,7 +163,7 @@ class FailingTestBeanIntegrationTests {
 			fail("should fail earlier");
 		}
 
-		static String fieldTestOverride() {
+		static String field() {
 			return "should be ignored";
 		}
 

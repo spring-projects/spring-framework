@@ -5,19 +5,19 @@
 `ApplicationContext` with an instance provided by a conventionally named static factory
 method.
 
-By default, the associated factory method name is derived from the annotated field's name,
-but the annotation allows for a specific method name to be provided.
+The associated factory method name is derived from the annotated field's name, or bean
+name if specified. A `static` method with no argument that returns a type compatible
+with the type of the bean to override is expected. To make things more explicit, or if
+you'd rather use a different name, the annotation allows for a specific method name to
+be provided.
 
-The `@TestBean` annotation uses the `REPLACE_DEFINITION`
-xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy for test bean overriding].
 
 By default, the annotated field's type is used to search for candidate definitions to override.
 In that case it is required that exactly one definition matches, but note that `@Qualifier`
 annotations are also taken into account for the purpose of matching.
 Users can also make things entirely explicit by specifying a bean `name` in the annotation.
 
-The following example shows how to fully configure the `@TestBean` annotation, with
-explicit values equivalent to the defaults:
+The following example shows how to use the default behavior of the `@TestBean` annotation:
 
 [tabs]
 ======
@@ -26,17 +26,41 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	class OverrideBeanTests {
-		@TestBean(name = "service", methodName = "serviceTestOverride")  // <1>
+		@TestBean  // <1>
 		private CustomService service;
 
 		// test case body...
 
-		private static CustomService serviceTestOverride() { // <2>
+		private static CustomService service() { // <2>
 			return new MyFakeCustomService();
 		}
 	}
 ----
-<1> Mark a field for bean overriding in this test class.
+<1> Mark a field for overriding of the bean with type `CustomService`.
+<2> The result of this static method will be used as the instance and injected into the field.
+======
+
+
+The following example shows how to fully configure the `@TestBean` annotation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class OverrideBeanTests {
+		@TestBean(name = "service", methodName = "createCustomService")  // <1>
+		private CustomService service;
+
+		// test case body...
+
+		private static CustomService createCustomService() { // <2>
+			return new MyFakeCustomService();
+		}
+	}
+----
+<1> Mark a field for overriding of the bean with name `service`.
 <2> The result of this static method will be used as the instance and injected into the field.
 ======
 

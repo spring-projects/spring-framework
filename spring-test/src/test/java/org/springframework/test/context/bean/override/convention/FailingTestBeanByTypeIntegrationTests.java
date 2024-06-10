@@ -80,7 +80,7 @@ class FailingTestBeanByTypeIntegrationTests {
 		void test() {
 		}
 
-		static ExampleService exampleTestOverride() {
+		static ExampleService example() {
 			return fail("unexpected override");
 		}
 
@@ -100,7 +100,7 @@ class FailingTestBeanByTypeIntegrationTests {
 		void test() {
 		}
 
-		static ExampleService exampleTestOverride() {
+		static ExampleService example() {
 			return fail("unexpected override");
 		}
 

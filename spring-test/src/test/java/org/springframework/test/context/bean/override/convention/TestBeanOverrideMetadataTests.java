@@ -54,8 +54,8 @@ class TestBeanOverrideMetadataTests {
 	void forTestClassWithMissingMethod() {
 		assertThatIllegalStateException()
 				.isThrownBy(() ->OverrideMetadata.forTestClass(SampleMissingMethod.class))
-				.withMessageStartingWith("Failed to find a static test bean factory method")
-				.withMessageContaining("messageTestOverride");
+				.withMessage("No static method found named message() in %s with return type %s",
+						SampleMissingMethod.class.getName(), String.class.getName());
 	}
 
 	@Test
@@ -122,7 +122,7 @@ class TestBeanOverrideMetadataTests {
 
 	static class SampleOneOverride {
 
-		@TestBean(methodName = "message")
+		@TestBean
 		String message;
 
 		static String message() {
@@ -133,7 +133,7 @@ class TestBeanOverrideMetadataTests {
 
 	static class SampleOneOverrideWithName {
 
-		@TestBean(name = "anotherBean", methodName = "message")
+		@TestBean(name = "anotherBean")
 		String message;
 
 		static String message() {

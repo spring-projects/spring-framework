@@ -57,12 +57,12 @@ public class TestBeanInheritanceIntegrationTests {
 		@TestBean(name = "pojo2", methodName = "enclosingClassBeanOverride")
 		Pojo pojo2;
 
-		static Pojo someBeanTestOverride() {
+		static Pojo someBean() {
 			return new FakePojo("someBeanOverride");
 		}
 
-		// Hides otherBeanTestOverride() defined in AbstractTestBeanIntegrationTestCase.
-		static Pojo otherBeanTestOverride() {
+		// Hides otherBean() defined in AbstractTestBeanIntegrationTestCase.
+		static Pojo otherBean() {
 			return new FakePojo("otherBean in subclass");
 		}
 

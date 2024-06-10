@@ -50,17 +50,17 @@ public class TestBeanIntegrationTests {
 	@TestBean(name = "nestedField")
 	String renamed2;
 
-	@TestBean(name = "methodRenamed1", methodName = "fieldTestOverride")
+	@TestBean(name = "methodRenamed1", methodName = "field")
 	String methodRenamed1;
 
-	@TestBean(name = "methodRenamed2", methodName = "nestedFieldTestOverride")
+	@TestBean(name = "methodRenamed2", methodName = "nestedField")
 	String methodRenamed2;
 
-	static String fieldTestOverride() {
+	static String field() {
 		return "fieldOverride";
 	}
 
-	static String nestedFieldTestOverride() {
+	static String nestedField() {
 		return "nestedFieldOverride";
 	}
 
@@ -133,7 +133,7 @@ public class TestBeanIntegrationTests {
 	@DisplayName("With factory method in enclosing class")
 	public class TestBeanFactoryMethodInEnclosingClassTests {
 
-		@TestBean(methodName = "nestedFieldTestOverride", name = "nestedField")
+		@TestBean(methodName = "nestedField", name = "nestedField")
 		String nestedField2;
 
 		@Test
@@ -146,7 +146,7 @@ public class TestBeanIntegrationTests {
 		@DisplayName("With factory method in the enclosing class of the enclosing class")
 		public class TestBeanFactoryMethodInEnclosingClassLevel2Tests {
 
-			@TestBean(methodName = "nestedFieldTestOverride", name = "nestedField")
+			@TestBean(methodName = "nestedField", name = "nestedField")
 			String nestedField2;
 
 			@Test

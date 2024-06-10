@@ -21,9 +21,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ResolvableType;
@@ -41,6 +43,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Simon Baslé
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 6.2
  */
 class TestBeanOverrideProcessor implements BeanOverrideProcessor {
@@ -58,14 +61,14 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 			overrideMethod = findTestBeanFactoryMethod(testClass, field.getType(), methodName);
 		}
 		else {
-			// Otherwise, search for candidate factory methods using the convention
-			// suffix and the field name or explicit bean name (if any).
+			// Otherwise, search for candidate factory methods the field name
+			// or explicit bean name (if any).
 			List<String> candidateMethodNames = new ArrayList<>();
-			candidateMethodNames.add(field.getName() + TestBean.CONVENTION_SUFFIX);
+			candidateMethodNames.add(field.getName());
 
 			String beanName = testBeanAnnotation.name();
 			if (StringUtils.hasText(beanName)) {
-				candidateMethodNames.add(beanName + TestBean.CONVENTION_SUFFIX);
+				candidateMethodNames.add(beanName);
 			}
 			overrideMethod = findTestBeanFactoryMethod(testClass, field.getType(), candidateMethodNames);
 		}
@@ -75,7 +78,7 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	/**
 	 * Find a test bean factory {@link Method} for the given {@link Class}.
-	 * <p>Delegates to {@link #findTestBeanFactoryMethod(Class, Class, List)}.
+	 * <p>Delegates to {@link #findTestBeanFactoryMethod(Class, Class, Collection)}.
 	 */
 	Method findTestBeanFactoryMethod(Class<?> clazz, Class<?> methodReturnType, String... methodNames) {
 		return findTestBeanFactoryMethod(clazz, methodReturnType, List.of(methodNames));
@@ -104,7 +107,7 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 	 * @throws IllegalStateException if a matching factory method cannot
 	 * be found or multiple methods match
 	 */
-	Method findTestBeanFactoryMethod(Class<?> clazz, Class<?> methodReturnType, List<String> methodNames) {
+	Method findTestBeanFactoryMethod(Class<?> clazz, Class<?> methodReturnType, Collection<String> methodNames) {
 		Assert.notEmpty(methodNames, "At least one candidate method name is required");
 		Set<String> supportedNames = new LinkedHashSet<>(methodNames);
 		MethodFilter methodFilter = method -> (Modifier.isStatic(method.getModifiers()) &&
@@ -113,16 +116,16 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 		Set<Method> methods = findMethods(clazz, methodFilter);
 
-		Assert.state(!methods.isEmpty(), () -> """
-				Failed to find a static test bean factory method in %s with return type %s \
-				whose name matches one of the supported candidates %s""".formatted(
-				clazz.getName(), methodReturnType.getName(), supportedNames));
+		String methodNamesDescription = supportedNames.stream()
+				.map(name -> name + "()").collect(Collectors.joining(" or "));
+		Assert.state(!methods.isEmpty(), () ->
+				"No static method found named %s in %s with return type %s".formatted(
+						methodNamesDescription, clazz.getName(), methodReturnType.getName()));
 
 		long uniqueMethodNameCount = methods.stream().map(Method::getName).distinct().count();
-		Assert.state(uniqueMethodNameCount == 1, () -> """
-				Found %d competing static test bean factory methods in %s with return type %s \
-				whose name matches one of the supported candidates %s""".formatted(
-				uniqueMethodNameCount, clazz.getName(), methodReturnType.getName(), supportedNames));
+		Assert.state(uniqueMethodNameCount == 1, () ->
+				"Found %d competing static methods named %s in %s with return type %s".formatted(
+						uniqueMethodNameCount, methodNamesDescription, clazz.getName(), methodReturnType.getName()));
 
 		return methods.iterator().next();
 	}

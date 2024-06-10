@@ -18,7 +18,6 @@ package org.springframework.test.context.bean.override.convention;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -70,10 +69,8 @@ class TestBeanOverrideProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> this.processor.findTestBeanFactoryMethod(clazz, returnType, "example1", "example3"))
-				.withMessage("""
-						Failed to find a static test bean factory method in %s with return type %s \
-						whose name matches one of the supported candidates %s""",
-						clazz.getName(), returnType.getName(), List.of("example1", "example3"));
+				.withMessage("No static method found named example1() or example3() in %s with return type %s",
+						MethodConventionTestCase.class.getName(), ExampleService.class.getName());
 	}
 
 	@Test
@@ -83,10 +80,8 @@ class TestBeanOverrideProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> this.processor.findTestBeanFactoryMethod(clazz, returnType, "example2", "example4"))
-				.withMessage("""
-						Found %d competing static test bean factory methods in %s with return type %s \
-						whose name matches one of the supported candidates %s""".formatted(
-								2, clazz.getName(), returnType.getName(), List.of("example2", "example4")));
+				.withMessage("Found 2 competing static methods named example2() or example4() in %s with return type %s",
+						clazz.getName(), returnType.getName());
 	}
 
 	@Test
@@ -106,10 +101,8 @@ class TestBeanOverrideProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> this.processor.createMetadata(overrideAnnotation, clazz, field))
-				.withMessage("""
-						Failed to find a static test bean factory method in %s with return type %s \
-						whose name matches one of the supported candidates %s""",
-						clazz.getName(), returnType.getName(), List.of("explicit1"));
+				.withMessage("No static method found named explicit1() in %s with return type %s",
+						clazz.getName(), returnType.getName());
 	}
 
 	@Test
@@ -133,10 +126,8 @@ class TestBeanOverrideProcessorTests {
 
 		assertThatIllegalStateException().isThrownBy(() -> this.processor.createMetadata(
 				overrideAnnotation, clazz, field))
-				.withMessage("""
-						Failed to find a static test bean factory method in %s with return type %s \
-						whose name matches one of the supported candidates %s""",
-						clazz.getName(), returnType.getName(), List.of("fieldTestOverride", "someFieldTestOverride"));
+				.withMessage("No static method found named field() or someField() in %s with return type %s",
+						clazz.getName(), returnType.getName());
 	}
 
 	@Test

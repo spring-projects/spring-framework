@@ -32,11 +32,11 @@ abstract class AbstractTestBeanIntegrationTestCase {
 	@TestBean(name = "thirdBean")
 	Pojo anotherBean;
 
-	static Pojo otherBeanTestOverride() {
+	static Pojo otherBean() {
 		return new FakePojo("otherBean in superclass");
 	}
 
-	static Pojo thirdBeanTestOverride() {
+	static Pojo thirdBean() {
 		return new FakePojo("third in superclass");
 	}
 
