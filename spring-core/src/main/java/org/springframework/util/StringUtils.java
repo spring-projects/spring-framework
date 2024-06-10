@@ -58,6 +58,7 @@ import org.springframework.lang.Nullable;
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  * @since 16 April 2001
  */
 public abstract class StringUtils {
@@ -69,6 +70,8 @@ public abstract class StringUtils {
 	private static final char FOLDER_SEPARATOR_CHAR = '/';
 
 	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
+
+	private static final String DOUBLE_BACKLASHES = "\\\\";
 
 	private static final String TOP_PATH = "..";
 
@@ -690,7 +693,7 @@ public abstract class StringUtils {
 	 * Normalize the path by suppressing sequences like "path/.." and
 	 * inner simple dots.
 	 * <p>The result is convenient for path comparison. For other uses,
-	 * notice that Windows separators ("\") are replaced by simple slashes.
+	 * notice that Windows separators ("\" and "\\") are replaced by simple slashes.
 	 * <p><strong>NOTE</strong> that {@code cleanPath} should not be depended
 	 * upon in a security context. Other mechanisms should be used to prevent
 	 * path-traversal issues.
@@ -702,7 +705,15 @@ public abstract class StringUtils {
 			return path;
 		}
 
-		String normalizedPath = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
+		String normalizedPath;
+		// Optimize when there is no backslash
+		if (path.indexOf('\\') != -1) {
+			normalizedPath = replace(path, DOUBLE_BACKLASHES, FOLDER_SEPARATOR);
+			normalizedPath = replace(normalizedPath, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
+		}
+		else {
+			normalizedPath = path;
+		}
 		String pathToUse = normalizedPath;
 
 		// Shortcut if there is no work to do
