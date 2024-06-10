@@ -11,11 +11,21 @@ with the type of the bean to override is expected. To make things more explicit,
 you'd rather use a different name, the annotation allows for a specific method name to
 be provided.
 
+By default, the annotated field's type is used to search for candidate definitions to
+override. If multiple candidates match, the usual `@Qualifier` can be provided to
+narrow the candidate to override. Alternatively, a candidate whose bean definition name
+matches the name of the field will match.
 
-By default, the annotated field's type is used to search for candidate definitions to override.
-In that case it is required that exactly one definition matches, but note that `@Qualifier`
-annotations are also taken into account for the purpose of matching.
-Users can also make things entirely explicit by specifying a bean `name` in the annotation.
+To use a by-name override rather than a by-type override, specify the `name` attribute
+of the annotation.
+
+[WARNING]
+====
+The qualifiers, including the name of the field are used to determine if a separate
+`ApplicationContext` needs to be created. If you are using this feature to override
+the same bean in several tests, make sure to name the field consistently to avoid
+creating unnecessary contexts.
+====
 
 The following example shows how to use the default behavior of the `@TestBean` annotation:
 
@@ -27,11 +37,11 @@ Java::
 ----
 	class OverrideBeanTests {
 		@TestBean  // <1>
-		private CustomService service;
+		private CustomService customService;
 
 		// test case body...
 
-		private static CustomService service() { // <2>
+		private static CustomService customService() { // <2>
 			return new MyFakeCustomService();
 		}
 	}
@@ -40,8 +50,13 @@ Java::
 <2> The result of this static method will be used as the instance and injected into the field.
 ======
 
+In the example above, we are overriding the bean with type `CustomService`. If more that
+one bean with such type exist, the bean named `customService` is considered. Otherwise,
+the test will fail and you will need to provide a qualifier of some sort to identify which
+of the `CustomService` beans you want to override.
 
-The following example shows how to fully configure the `@TestBean` annotation:
+
+The following example uses a by-name lookup, rather than a by-type lookup:
 
 [tabs]
 ======
@@ -51,7 +66,7 @@ Java::
 ----
 	class OverrideBeanTests {
 		@TestBean(name = "service", methodName = "createCustomService")  // <1>
-		private CustomService service;
+		private CustomService customService;
 
 		// test case body...
 

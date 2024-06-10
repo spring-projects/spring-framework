@@ -62,9 +62,16 @@ class MockitoSpyBeanOverrideMetadataTests {
 	}
 
 	@Test
-	void isEqualToWithSameMetadataButDifferentField() {
+	void isNotEqualToByTypeLookupWithSameMetadataButDifferentField() {
 		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
 		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service2"));
+		assertThat(metadata).isNotEqualTo(metadata2);
+	}
+
+	@Test
+	void isEqualToByNameLookupWithSameMetadataButDifferentField() {
+		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service3"));
+		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service4"));
 		assertThat(metadata).isEqualTo(metadata2);
 		assertThat(metadata).hasSameHashCodeAs(metadata2);
 	}
@@ -79,14 +86,14 @@ class MockitoSpyBeanOverrideMetadataTests {
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentReset() {
 		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service4"));
+		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service5"));
 		assertThat(metadata).isNotEqualTo(metadata2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentProxyTargetAwareFlag() {
 		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service5"));
+		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service6"));
 		assertThat(metadata).isNotEqualTo(metadata2);
 	}
 
@@ -128,11 +135,14 @@ class MockitoSpyBeanOverrideMetadataTests {
 		@MockitoSpyBean(name = "beanToMock")
 		private String service3;
 
-		@MockitoSpyBean(reset = MockReset.BEFORE)
+		@MockitoSpyBean(name = "beanToMock")
 		private String service4;
 
-		@MockitoSpyBean(proxyTargetAware = false)
+		@MockitoSpyBean(reset = MockReset.BEFORE)
 		private String service5;
+
+		@MockitoSpyBean(proxyTargetAware = false)
+		private String service6;
 
 	}
 

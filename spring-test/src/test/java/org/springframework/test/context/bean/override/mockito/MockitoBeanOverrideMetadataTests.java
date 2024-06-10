@@ -64,9 +64,16 @@ class MockitoBeanOverrideMetadataTests {
 	}
 
 	@Test
-	void isEqualToWithSameMetadataButDifferentField() {
+	void isNotEqualEqualToByTypeLookupWithSameMetadataButDifferentField() {
 		MockitoBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
 		MockitoBeanOverrideMetadata metadata2 = createMetadata(sampleField("service2"));
+		assertThat(metadata).isNotEqualTo(metadata2);
+	}
+
+	@Test
+	void isEqualEqualToByNameLookupWithSameMetadataButDifferentField() {
+		MockitoBeanOverrideMetadata metadata = createMetadata(sampleField("service3"));
+		MockitoBeanOverrideMetadata metadata2 = createMetadata(sampleField("service4"));
 		assertThat(metadata).isEqualTo(metadata2);
 		assertThat(metadata).hasSameHashCodeAs(metadata2);
 	}
@@ -81,21 +88,21 @@ class MockitoBeanOverrideMetadataTests {
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentExtraInterfaces() {
 		MockitoBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		MockitoBeanOverrideMetadata metadata2 = createMetadata(sampleField("service4"));
+		MockitoBeanOverrideMetadata metadata2 = createMetadata(sampleField("service5"));
 		assertThat(metadata).isNotEqualTo(metadata2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentAnswers() {
 		MockitoBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		MockitoBeanOverrideMetadata metadata2 = createMetadata(sampleField("service5"));
+		MockitoBeanOverrideMetadata metadata2 = createMetadata(sampleField("service6"));
 		assertThat(metadata).isNotEqualTo(metadata2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentSerializableFlag() {
 		MockitoBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		MockitoBeanOverrideMetadata metadata2 = createMetadata(sampleField("service6"));
+		MockitoBeanOverrideMetadata metadata2 = createMetadata(sampleField("service7"));
 		assertThat(metadata).isNotEqualTo(metadata2);
 	}
 
@@ -137,14 +144,17 @@ class MockitoBeanOverrideMetadataTests {
 		@MockitoBean(name = "beanToMock")
 		private String service3;
 
-		@MockitoBean(extraInterfaces = Externalizable.class)
+		@MockitoBean(name = "beanToMock")
 		private String service4;
 
-		@MockitoBean(answers = Answers.RETURNS_MOCKS)
+		@MockitoBean(extraInterfaces = Externalizable.class)
 		private String service5;
 
-		@MockitoBean(serializable = true)
+		@MockitoBean(answers = Answers.RETURNS_MOCKS)
 		private String service6;
+
+		@MockitoBean(serializable = true)
+		private String service7;
 
 	}
 

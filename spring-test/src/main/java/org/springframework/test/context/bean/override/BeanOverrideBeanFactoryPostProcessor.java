@@ -259,6 +259,13 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		else {
 			beans.removeIf(ScopedProxyUtils::isScopedTarget);
 		}
+		// In case of multiple matches, last resort fallback on the field's name
+		if (beans.size() > 1) {
+			String fieldName = metadata.getField().getName();
+			if (beans.contains(fieldName)) {
+				return Set.of(fieldName);
+			}
+		}
 		return beans;
 	}
 

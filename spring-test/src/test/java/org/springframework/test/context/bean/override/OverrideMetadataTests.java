@@ -68,9 +68,9 @@ public class OverrideMetadataTests {
 		List<OverrideMetadata> overrideMetadata = OverrideMetadata.forTestClass(MultipleAnnotationsDuplicate.class);
 		assertThat(overrideMetadata).hasSize(2)
 				.anySatisfy(hasTestBeanMetadata(
-						field(MultipleAnnotationsDuplicate.class, "message1"), String.class, null))
+						field(MultipleAnnotationsDuplicate.class, "message1"), String.class, "messageBean"))
 				.anySatisfy(hasTestBeanMetadata(
-						field(MultipleAnnotationsDuplicate.class, "message2"), String.class, null));
+						field(MultipleAnnotationsDuplicate.class, "message2"), String.class, "messageBean"));
 		assertThat(new HashSet<>(overrideMetadata)).hasSize(1);
 	}
 
@@ -128,6 +128,14 @@ public class OverrideMetadataTests {
 	}
 
 	@Test
+	void isEqualToWithByNameLookupAndDifferentFieldNames() {
+		OverrideMetadata metadata = createMetadata(field(ConfigA.class, "noQualifier"), "beanToOverride");
+		OverrideMetadata metadata2 = createMetadata(field(ConfigB.class, "example"), "beanToOverride");
+		assertThat(metadata).isEqualTo(metadata2);
+		assertThat(metadata).hasSameHashCodeAs(metadata2);
+	}
+
+	@Test
 	void isEqualToWithSameMetadataAndSameQualifierValues() {
 		OverrideMetadata metadata = createMetadata(field(ConfigA.class, "directQualifier"));
 		OverrideMetadata metadata2 = createMetadata(field(ConfigB.class, "directQualifier"));
@@ -146,6 +154,13 @@ public class OverrideMetadataTests {
 	void isNotEqualToWithSameMetadataAndDifferentQualifiers() {
 		OverrideMetadata metadata = createMetadata(field(ConfigA.class, "directQualifier"));
 		OverrideMetadata metadata2 = createMetadata(field(ConfigA.class, "customQualifier"));
+		assertThat(metadata).isNotEqualTo(metadata2);
+	}
+
+	@Test
+	void isNotEqualToWithByTypeLookupAndDifferentFieldNames() {
+		OverrideMetadata metadata = createMetadata(field(ConfigA.class, "noQualifier"));
+		OverrideMetadata metadata2 = createMetadata(field(ConfigB.class, "example"));
 		assertThat(metadata).isNotEqualTo(metadata2);
 	}
 
@@ -195,10 +210,10 @@ public class OverrideMetadataTests {
 
 	static class MultipleAnnotationsDuplicate {
 
-		@DummyBean
+		@DummyBean(beanName = "messageBean")
 		String message1;
 
-		@DummyBean
+		@DummyBean(beanName = "messageBean")
 		String message2;
 
 	}
@@ -232,6 +247,8 @@ public class OverrideMetadataTests {
 	public static class ConfigB {
 
 		private ExampleService noQualifier;
+
+		private ExampleService example;
 
 		@Qualifier("test")
 		private ExampleService directQualifier;

@@ -74,11 +74,18 @@ class TestBeanOverrideMetadataTests {
 	}
 
 	@Test
-	void isEqualToWithSameMetadataButDifferentField() {
-		TestBeanOverrideMetadata metadata1 = createMetadata(sampleField("message"), sampleMethod("message"));
-		TestBeanOverrideMetadata metadata2 = createMetadata(sampleField("message2"), sampleMethod("message"));
+	void isEqualToWithSameMetadataByNameLookupAndDifferentField() {
+		TestBeanOverrideMetadata metadata1 = createMetadata(sampleField("message3"), sampleMethod("message"));
+		TestBeanOverrideMetadata metadata2 = createMetadata(sampleField("message4"), sampleMethod("message"));
 		assertThat(metadata1).isEqualTo(metadata2);
 		assertThat(metadata1).hasSameHashCodeAs(metadata2);
+	}
+
+	@Test
+	void isNotEqualToWithSameMetadataByTypeLookupAndDifferentField() {
+		TestBeanOverrideMetadata metadata1 = createMetadata(sampleField("message"), sampleMethod("message"));
+		TestBeanOverrideMetadata metadata2 = createMetadata(sampleField("message2"), sampleMethod("message"));
+		assertThat(metadata1).isNotEqualTo(metadata2);
 	}
 
 	@Test
@@ -98,7 +105,7 @@ class TestBeanOverrideMetadataTests {
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentAnnotations() {
 		TestBeanOverrideMetadata metadata1 = createMetadata(sampleField("message"), sampleMethod("message"));
-		TestBeanOverrideMetadata metadata2 = createMetadata(sampleField("message4"), sampleMethod("message"));
+		TestBeanOverrideMetadata metadata2 = createMetadata(sampleField("message5"), sampleMethod("message"));
 		assertThat(metadata1).isNotEqualTo(metadata2);
 	}
 
@@ -116,7 +123,7 @@ class TestBeanOverrideMetadataTests {
 
 	private TestBeanOverrideMetadata createMetadata(Field field, Method overrideMethod) {
 		TestBean annotation = field.getAnnotation(TestBean.class);
-		String beanName = (StringUtils.hasText(annotation.value()) ? annotation.value() : null);
+		String beanName = (StringUtils.hasText(annotation.name()) ? annotation.name() : null);
 		return new TestBeanOverrideMetadata(field, ResolvableType.forClass(field.getType()), beanName, overrideMethod);
 	}
 
@@ -162,9 +169,12 @@ class TestBeanOverrideMetadataTests {
 		@TestBean(name = "anotherBean")
 		private String message3;
 
+		@TestBean(name = "anotherBean")
+		private String message4;
+
 		@Qualifier("anotherBean")
 		@TestBean
-		private String message4;
+		private String message5;
 
 		static String message() {
 			return "OK";
