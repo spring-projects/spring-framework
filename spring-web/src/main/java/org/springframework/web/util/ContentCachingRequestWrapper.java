@@ -89,7 +89,12 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	public ContentCachingRequestWrapper(HttpServletRequest request, int contentCacheLimit) {
 		super(request);
 		int contentLength = request.getContentLength();
-		this.cachedContent = (contentLength > 0) ? new FastByteArrayOutputStream(contentLength) : new FastByteArrayOutputStream();
+		if (contentLength > 0) {
+			this.cachedContent = new FastByteArrayOutputStream(Math.min(contentLength, contentCacheLimit));
+		}
+		else {
+			this.cachedContent = new FastByteArrayOutputStream();
+		}
 		this.contentCacheLimit = contentCacheLimit;
 	}
 
