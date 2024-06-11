@@ -323,7 +323,8 @@ class ConfigurationClassParser {
 			List<Condition> registerBeanConditions = collectRegisterBeanConditions(configClass);
 			if (!registerBeanConditions.isEmpty()) {
 				throw new ApplicationContextException(
-						"Component scan could not be used with conditions in REGISTER_BEAN phase: " + registerBeanConditions);
+						"Component scan for configuration class [%s] could not be used with conditions in REGISTER_BEAN phase: %s"
+								.formatted(configClass.getMetadata().getClassName(), registerBeanConditions));
 			}
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
