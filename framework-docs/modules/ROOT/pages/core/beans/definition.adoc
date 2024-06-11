@@ -75,6 +75,31 @@ lead to concurrent access exceptions, inconsistent state in the bean container, 
 
 
 
+[[beans-definition-overriding]]
+== Overriding Beans
+
+Bean overriding is happening when a bean is registered using an identifier that is
+already allocated. While bean overriding is possible, it makes the configuration harder
+to read and this feature will be deprecated in a future release.
+
+To disable bean overriding altogether, you can set the `allowBeanDefinitionOverriding`
+flag to `false` on the `ApplicationContext` before it is refreshed. In such setup, an
+exception is thrown if bean overriding is used.
+
+By default, the container logs every bean overriding at `INFO` level so that you can
+adapt your configuration accordingly. While not recommended, you can silence those logs
+by setting the `allowBeanDefinitionOverriding` flag to `true`.
+
+.Java-configuration
+****
+If you use Java Configuration, a corresponding `@Bean` method always silently overrides
+a scanned bean class with the same component name as long as the return type of the
+`@Bean` method matches that bean class. This simply means that the container will call
+the `@Bean` factory method in favor of any pre-declared constructor on the bean class.
+****
+
+
+
 [[beans-beanname]]
 == Naming Beans
 
