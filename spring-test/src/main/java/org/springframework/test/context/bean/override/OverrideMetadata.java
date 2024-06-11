@@ -74,14 +74,15 @@ public abstract class OverrideMetadata {
 	}
 
 	/**
-	 * Parse the given {@code testClass} and provide the use of bean override.
+	 * Parse the given {@code testClass} and build the corresponding list of
+	 * bean {@code OverrideMetadata}.
 	 * @param testClass the class to parse
-	 * @return a list of bean overrides metadata
+	 * @return a list of {@code OverrideMetadata}
 	 */
 	public static List<OverrideMetadata> forTestClass(Class<?> testClass) {
-		List<OverrideMetadata> all = new LinkedList<>();
-		ReflectionUtils.doWithFields(testClass, field -> parseField(field, testClass, all));
-		return all;
+		List<OverrideMetadata> metadataList = new LinkedList<>();
+		ReflectionUtils.doWithFields(testClass, field -> parseField(field, testClass, metadataList));
+		return metadataList;
 	}
 
 	private static void parseField(Field field, Class<?> testClass, List<OverrideMetadata> metadataList) {
@@ -182,9 +183,9 @@ public abstract class OverrideMetadata {
 
 	@Override
 	public int hashCode() {
-		int hash = Objects.hash(getClass().hashCode(), this.beanType.getType(), this.beanName, this.strategy);
+		int hash = Objects.hash(getClass(), this.beanType.getType(), this.beanName, this.strategy);
 		return (this.beanName != null ? hash : hash +
-				Objects.hash(this.field.getName(), Arrays.hashCode(this.field.getAnnotations())));
+				31 * Objects.hash(this.field.getName(), Arrays.hashCode(this.field.getAnnotations())));
 	}
 
 	@Override
