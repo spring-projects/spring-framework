@@ -83,17 +83,17 @@ abstract class MockitoOverrideMetadata extends OverrideMetadata {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (obj == this) {
+	public boolean equals(@Nullable Object other) {
+		if (other == this) {
 			return true;
 		}
-		if (obj == null || !getClass().isAssignableFrom(obj.getClass())) {
+		if (other == null || !getClass().isAssignableFrom(other.getClass())) {
 			return false;
 		}
-		MockitoOverrideMetadata other = (MockitoOverrideMetadata) obj;
-		boolean result = super.equals(obj);
-		result = result && ObjectUtils.nullSafeEquals(this.reset, other.reset);
-		result = result && ObjectUtils.nullSafeEquals(this.proxyTargetAware, other.proxyTargetAware);
+		MockitoOverrideMetadata that = (MockitoOverrideMetadata) other;
+		boolean result = super.equals(that);
+		result = result && ObjectUtils.nullSafeEquals(this.reset, that.reset);
+		result = result && ObjectUtils.nullSafeEquals(this.proxyTargetAware, that.proxyTargetAware);
 		return result;
 	}
 

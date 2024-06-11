@@ -159,14 +159,14 @@ public abstract class OverrideMetadata {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(Object other) {
+		if (other == this) {
 			return true;
 		}
-		if (obj == null || !getClass().isAssignableFrom(obj.getClass())) {
+		if (other == null || !getClass().isAssignableFrom(other.getClass())) {
 			return false;
 		}
-		OverrideMetadata that = (OverrideMetadata) obj;
+		OverrideMetadata that = (OverrideMetadata) other;
 		if (!Objects.equals(this.beanType.getType(), that.beanType.getType()) ||
 				!Objects.equals(this.beanName, that.beanName) ||
 				!Objects.equals(this.strategy, that.strategy)) {
