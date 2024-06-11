@@ -231,27 +231,27 @@ public class OverrideMetadataTests {
 
 	public static class ConfigA {
 
-		private ExampleService noQualifier;
+		ExampleService noQualifier;
 
 		@Qualifier("test")
-		private ExampleService directQualifier;
+		ExampleService directQualifier;
 
 		@Qualifier("different")
-		private ExampleService differentDirectQualifier;
+		ExampleService differentDirectQualifier;
 
 		@CustomQualifier
-		private ExampleService customQualifier;
+		ExampleService customQualifier;
 
 	}
 
 	public static class ConfigB {
 
-		private ExampleService noQualifier;
+		ExampleService noQualifier;
 
-		private ExampleService example;
+		ExampleService example;
 
 		@Qualifier("test")
-		private ExampleService directQualifier;
+		ExampleService directQualifier;
 
 	}
 

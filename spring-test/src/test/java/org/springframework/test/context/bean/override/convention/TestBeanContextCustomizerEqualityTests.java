@@ -89,7 +89,7 @@ class TestBeanContextCustomizerEqualityTests {
 		@TestBean
 		private String description;
 
-		private static String description() {
+		static String description() {
 			return "overridden";
 		}
 	}
@@ -99,7 +99,7 @@ class TestBeanContextCustomizerEqualityTests {
 		@TestBean(name = "descriptionBean")
 		private String description;
 
-		private static String description() {
+		static String description() {
 			return "overridden";
 		}
 	}
