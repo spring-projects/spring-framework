@@ -203,7 +203,6 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				(this.protobufFormatSupport != null && this.protobufFormatSupport.supportsWriteOnly(mediaType)));
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void writeInternal(Message message, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
@@ -226,7 +225,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 		else if (TEXT_PLAIN.isCompatibleWith(contentType)) {
 			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
-			TextFormat.print(message, outputStreamWriter);  // deprecated on Protobuf 3.9
+			TextFormat.printer().print(message, outputStreamWriter);
 			outputStreamWriter.flush();
 			outputMessage.getBody().flush();
 		}
