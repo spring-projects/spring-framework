@@ -255,7 +255,7 @@ Kotlin::
 ----
 	class MovieRecommender {
 
-		@Autowired
+		@set:Autowired
 		lateinit var movieCatalogs: Set<MovieCatalog>
 
 		// ...
