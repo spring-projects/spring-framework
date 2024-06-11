@@ -99,23 +99,6 @@ class MockitoSpyBeanOverrideMetadata extends MockitoOverrideMetadata {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object other) {
-		if (other == this) {
-			return true;
-		}
-		// For SpyBean we want the class to be exactly the same.
-		if (other == null || other.getClass() != getClass()) {
-			return false;
-		}
-		return super.equals(other);
-	}
-
-	@Override
-	public int hashCode() {
-		return getClass().hashCode() * 29 + super.hashCode();
-	}
-
-	@Override
 	public String toString() {
 		return new ToStringCreator(this)
 				.append("beanName", getBeanName())

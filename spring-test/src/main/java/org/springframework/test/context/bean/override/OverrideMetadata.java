@@ -163,7 +163,7 @@ public abstract class OverrideMetadata {
 		if (other == this) {
 			return true;
 		}
-		if (other == null || !getClass().isAssignableFrom(other.getClass())) {
+		if (other == null || other.getClass() != getClass()) {
 			return false;
 		}
 		OverrideMetadata that = (OverrideMetadata) other;
@@ -182,7 +182,7 @@ public abstract class OverrideMetadata {
 
 	@Override
 	public int hashCode() {
-		int hash = Objects.hash(this.beanType.getType(), this.beanName, this.strategy);
+		int hash = Objects.hash(getClass().hashCode(), this.beanType.getType(), this.beanName, this.strategy);
 		return (this.beanName != null ? hash : hash +
 				Objects.hash(this.field.getName(), Arrays.hashCode(this.field.getAnnotations())));
 	}
