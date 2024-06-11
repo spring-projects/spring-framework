@@ -317,7 +317,7 @@ Kotlin::
 ----
 	class MovieRecommender {
 
-		@Autowired
+		@set:Autowired
 		lateinit var movieCatalogs: Map<String, MovieCatalog>
 
 		// ...
@@ -359,7 +359,7 @@ Kotlin::
 ----
 	class SimpleMovieLister {
 
-		@Autowired(required = false)
+		@set:Autowired(required = false)
 		var movieFinder: MovieFinder? = null
 
 		// ...
@@ -446,7 +446,7 @@ Kotlin::
 ----
 	class SimpleMovieLister {
 
-		@Autowired
+		@set:Autowired
 		var movieFinder: MovieFinder? = null
 
 		// ...
