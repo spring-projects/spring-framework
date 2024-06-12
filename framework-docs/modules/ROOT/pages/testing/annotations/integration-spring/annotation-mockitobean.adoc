@@ -43,7 +43,7 @@ Java::
 ----
 	class OverrideBeanTests {
 		@MockitoBean // <1>
-		CustomService customService;
+		private CustomService customService;
 
 		// test case body...
 	}
@@ -67,7 +67,7 @@ Java::
 ----
 	class OverrideBeanTests {
 		@MockitoBean(name = "service") // <1>
-		CustomService customService;
+		private CustomService customService;
 
 		// test case body...
 
@@ -88,7 +88,7 @@ Java::
 ----
 	class OverrideBeanTests {
 		@MockitoSpyBean // <1>
-		CustomService customService;
+		private CustomService customService;
 
 		// test case body...
 	}
@@ -111,7 +111,7 @@ Java::
 ----
 	class OverrideBeanTests {
 		@MockitoSpyBean(name = "service") // <1>
-		CustomService customService;
+		private CustomService customService;
 
 		// test case body...
 

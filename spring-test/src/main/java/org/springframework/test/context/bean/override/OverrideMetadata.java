@@ -80,9 +80,9 @@ public abstract class OverrideMetadata {
 	 * @return a list of {@code OverrideMetadata}
 	 */
 	public static List<OverrideMetadata> forTestClass(Class<?> testClass) {
-		List<OverrideMetadata> metadataList = new LinkedList<>();
-		ReflectionUtils.doWithFields(testClass, field -> parseField(field, testClass, metadataList));
-		return metadataList;
+		List<OverrideMetadata> metadata = new LinkedList<>();
+		ReflectionUtils.doWithFields(testClass, field -> parseField(field, testClass, metadata));
+		return metadata;
 	}
 
 	private static void parseField(Field field, Class<?> testClass, List<OverrideMetadata> metadataList) {
@@ -185,7 +185,7 @@ public abstract class OverrideMetadata {
 	public int hashCode() {
 		int hash = Objects.hash(getClass(), this.beanType.getType(), this.beanName, this.strategy);
 		return (this.beanName != null ? hash : hash +
-				31 * Objects.hash(this.field.getName(), Arrays.hashCode(this.field.getAnnotations())));
+				Objects.hash(this.field.getName(), Arrays.hashCode(this.field.getAnnotations())));
 	}
 
 	@Override

@@ -36,11 +36,11 @@ Java::
 ----
 	class OverrideBeanTests {
 		@TestBean // <1>
-		CustomService customService;
+		private CustomService customService;
 
 		// test case body...
 
-		static CustomService customService() { // <2>
+		private static CustomService customService() { // <2>
 			return new MyFakeCustomService();
 		}
 	}
@@ -64,11 +64,11 @@ Java::
 ----
 	class OverrideBeanTests {
 		@TestBean(name = "service", methodName = "createCustomService") // <1>
-		CustomService customService;
+		private CustomService customService;
 
 		// test case body...
 
-		static CustomService createCustomService() { // <2>
+		private static CustomService createCustomService() { // <2>
 			return new MyFakeCustomService();
 		}
 	}
