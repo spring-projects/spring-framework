@@ -60,10 +60,6 @@ import org.springframework.util.ClassUtils;
  * groups for specific phases, on startup/shutdown as well as for explicit start/stop
  * interactions on a {@link org.springframework.context.ConfigurableApplicationContext}.
  *
- * <p>Provides interaction with {@link Lifecycle} and {@link SmartLifecycle} beans in
- * groups for specific phases, on startup/shutdown as well as for explicit start/stop
- * interactions on a {@link org.springframework.context.ConfigurableApplicationContext}.
- *
  * <p>As of 6.1, this also includes support for JVM checkpoint/restore (Project CRaC)
  * when the {@code org.crac:crac} dependency on the classpath.
  *
