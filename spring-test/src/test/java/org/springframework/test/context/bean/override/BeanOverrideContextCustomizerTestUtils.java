@@ -18,8 +18,12 @@ package org.springframework.test.context.bean.override;
 
 import java.util.Collections;
 
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
+import org.springframework.test.context.MergedContextConfiguration;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Test utilities for {@link BeanOverrideContextCustomizer} that are public so
@@ -42,6 +46,19 @@ public abstract class BeanOverrideContextCustomizerTestUtils {
 	@Nullable
 	public static ContextCustomizer createContextCustomizer(Class<?> testClass) {
 		return factory.createContextCustomizer(testClass, Collections.emptyList());
+	}
+
+	/**
+	 * Configure the given {@linkplain ConfigurableApplicationContext application
+	 * context} for the given {@code testClass}.
+	 * @param testClass the test to process
+	 * @param context the context to configure
+	 */
+	public static void configureApplicationContext(Class<?> testClass, ConfigurableApplicationContext context) {
+		ContextCustomizer contextCustomizer = createContextCustomizer(testClass);
+		if (contextCustomizer != null) {
+			contextCustomizer.customizeContext(context, mock(MergedContextConfiguration.class));
+		}
 	}
 
 }

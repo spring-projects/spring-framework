@@ -35,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
- * @see FailingTestBeanByTypeIntegrationTests
  */
 @SpringJUnitConfig
 class TestBeanForByTypeLookupIntegrationTests {

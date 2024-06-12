@@ -22,8 +22,11 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.bean.override.convention.AbstractTestBeanIntegrationTestCase.FakePojo;
-import org.springframework.test.context.bean.override.convention.AbstractTestBeanIntegrationTestCase.Pojo;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.bean.override.convention.TestBeanForInheritanceIntegrationTests.AbstractTestBeanIntegrationTestCase.FakePojo;
+import org.springframework.test.context.bean.override.convention.TestBeanForInheritanceIntegrationTests.AbstractTestBeanIntegrationTestCase.Pojo;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,7 +39,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
- * @see FailingTestBeanInheritanceIntegrationTests
  */
 class TestBeanForInheritanceIntegrationTests {
 
@@ -44,9 +46,88 @@ class TestBeanForInheritanceIntegrationTests {
 		return new FakePojo("in enclosing test class");
 	}
 
+	@SpringJUnitConfig
+	abstract static class AbstractTestBeanIntegrationTestCase {
+
+		@TestBean(name = "someBean")
+		Pojo someBean;
+
+		@TestBean(name = "otherBean")
+		Pojo otherBean;
+
+		@TestBean(name = "thirdBean")
+		Pojo anotherBean;
+
+		static Pojo otherBean() {
+			return new FakePojo("otherBean in superclass");
+		}
+
+		static Pojo thirdBean() {
+			return new FakePojo("third in superclass");
+		}
+
+		static Pojo commonBeanOverride() {
+			return new FakePojo("in superclass");
+		}
+
+		interface Pojo {
+
+			default String getValue() {
+				return "Prod";
+			}
+		}
+
+		static class ProdPojo implements Pojo { }
+
+		static class FakePojo implements Pojo {
+			final String value;
+
+			protected FakePojo(String value) {
+				this.value = value;
+			}
+
+			@Override
+			public String getValue() {
+				return this.value;
+			}
+
+			@Override
+			public String toString() {
+				return getValue();
+			}
+		}
+
+		@Configuration
+		static class Config {
+
+			@Bean
+			Pojo someBean() {
+				return new ProdPojo();
+			}
+			@Bean
+			Pojo otherBean() {
+				return new ProdPojo();
+			}
+			@Bean
+			Pojo thirdBean() {
+				return new ProdPojo();
+			}
+			@Bean
+			Pojo pojo() {
+				return new ProdPojo();
+			}
+			@Bean
+			Pojo pojo2() {
+				return new ProdPojo();
+			}
+		}
+
+	}
+
 	@Nested
 	@DisplayName("Nested, concrete inherited tests with correct @TestBean setup")
 	class NestedConcreteTestBeanIntegrationTests extends AbstractTestBeanIntegrationTestCase {
+
 
 		@Autowired
 		ApplicationContext ctx;
@@ -60,7 +141,6 @@ class TestBeanForInheritanceIntegrationTests {
 		static Pojo someBean() {
 			return new FakePojo("someBeanOverride");
 		}
-
 		// Hides otherBean() defined in AbstractTestBeanIntegrationTestCase.
 		static Pojo otherBean() {
 			return new FakePojo("otherBean in subclass");
@@ -83,12 +163,10 @@ class TestBeanForInheritanceIntegrationTests {
 			assertThat(ctx.getBean("otherBean")).as("applicationContext").hasToString("otherBean in subclass");
 			assertThat(super.otherBean.getValue()).as("injection point").isEqualTo("otherBean in subclass");
 		}
-
 		@Test
 		void fieldInNestedClassWithFactoryMethodInEnclosingClass() {
 			assertThat(ctx.getBean("pojo2")).as("applicationContext").hasToString("in enclosing test class");
 			assertThat(this.pojo2.getValue()).as("injection point").isEqualTo("in enclosing test class");
 		}
 	}
-
 }

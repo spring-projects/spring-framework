@@ -41,7 +41,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
- * @see FailingMockitoSpyBeanByTypeIntegrationTests
  */
 @SpringJUnitConfig
 public class MockitoSpyBeanForByTypeLookupIntegrationTests {
