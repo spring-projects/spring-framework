@@ -43,6 +43,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -153,6 +154,8 @@ public class ScheduledAnnotationBeanPostProcessor
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks = new IdentityHashMap<>(16);
 
 	private final Map<Object, List<Runnable>> reactiveSubscriptions = new IdentityHashMap<>(16);
+
+	private final Set<Object> manualCancellationOnContextClose = Collections.newSetFromMap(new IdentityHashMap<>(16));
 
 
 	/**
@@ -303,6 +306,12 @@ public class ScheduledAnnotationBeanPostProcessor
 				if (logger.isTraceEnabled()) {
 					logger.trace(annotatedMethods.size() + " @Scheduled methods processed on bean '" + beanName +
 							"': " + annotatedMethods);
+				}
+				if ((this.beanFactory != null && !this.beanFactory.isSingleton(beanName)) ||
+						(this.beanFactory instanceof SingletonBeanRegistry sbr && sbr.containsSingleton(beanName))) {
+					// Either a prototype/scoped bean or a FactoryBean with a pre-existing managed singleton
+					// -> trigger manual cancellation when ContextClosedEvent comes in
+					this.manualCancellationOnContextClose.add(bean);
 				}
 			}
 		}
@@ -594,6 +603,18 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
+		cancelScheduledTasks(bean);
+		this.manualCancellationOnContextClose.remove(bean);
+	}
+
+	@Override
+	public boolean requiresDestruction(Object bean) {
+		synchronized (this.scheduledTasks) {
+			return (this.scheduledTasks.containsKey(bean) || this.reactiveSubscriptions.containsKey(bean));
+		}
+	}
+
+	private void cancelScheduledTasks(Object bean) {
 		Set<ScheduledTask> tasks;
 		List<Runnable> liveSubscriptions;
 		synchronized (this.scheduledTasks) {
@@ -613,13 +634,6 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	@Override
-	public boolean requiresDestruction(Object bean) {
-		synchronized (this.scheduledTasks) {
-			return (this.scheduledTasks.containsKey(bean) || this.reactiveSubscriptions.containsKey(bean));
-		}
-	}
-
-	@Override
 	public void destroy() {
 		synchronized (this.scheduledTasks) {
 			Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
@@ -635,7 +649,10 @@ public class ScheduledAnnotationBeanPostProcessor
 					liveSubscription.run();  // equivalent to cancelling the subscription
 				}
 			}
+			this.reactiveSubscriptions.clear();
+			this.manualCancellationOnContextClose.clear();
 		}
+
 		this.registrar.destroy();
 		if (this.localScheduler != null) {
 			this.localScheduler.destroy();
@@ -658,15 +675,10 @@ public class ScheduledAnnotationBeanPostProcessor
 				finishRegistration();
 			}
 			else if (event instanceof ContextClosedEvent) {
-				synchronized (this.scheduledTasks) {
-					Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
-					for (Set<ScheduledTask> tasks : allTasks) {
-						for (ScheduledTask task : tasks) {
-							// At this early point, let in-progress tasks complete still
-							task.cancel(false);
-						}
-					}
+				for (Object bean : this.manualCancellationOnContextClose) {
+					cancelScheduledTasks(bean);
 				}
+				this.manualCancellationOnContextClose.clear();
 			}
 		}
 	}
