@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -81,6 +82,8 @@ final class DefaultRestClient implements RestClient {
 	private static final Log logger = LogFactory.getLog(DefaultRestClient.class);
 
 	private static final ClientRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientRequestObservationConvention();
+
+	private static final String URI_TEMPLATE_ATTRIBUTE = RestClient.class.getName() + ".uriTemplate";
 
 
 	private final ClientHttpRequestFactory clientRequestFactory;
@@ -297,7 +300,7 @@ final class DefaultRestClient implements RestClient {
 		private InternalBody body;
 
 		@Nullable
-		private String uriTemplate;
+		private Map<String, Object> attributes;
 
 		@Nullable
 		private Consumer<ClientHttpRequest> httpRequestConsumer;
@@ -308,19 +311,19 @@ final class DefaultRestClient implements RestClient {
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
-			this.uriTemplate = uriTemplate;
+			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
 			return uri(DefaultRestClient.this.uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Map<String, ?> uriVariables) {
-			this.uriTemplate = uriTemplate;
+			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
 			return uri(DefaultRestClient.this.uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Function<UriBuilder, URI> uriFunction) {
-			this.uriTemplate = uriTemplate;
+			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
 			return uri(uriFunction.apply(DefaultRestClient.this.uriBuilderFactory.uriString(uriTemplate)));
 		}
 
@@ -390,6 +393,27 @@ final class DefaultRestClient implements RestClient {
 		public DefaultRequestBodyUriSpec ifNoneMatch(String... ifNoneMatches) {
 			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
 			return this;
+		}
+
+		@Override
+		public RequestBodySpec attribute(String name, Object value) {
+			getAttributes().put(name, value);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
+			attributesConsumer.accept(getAttributes());
+			return this;
+		}
+
+		private Map<String, Object> getAttributes() {
+			Map<String, Object> attributes = this.attributes;
+			if (attributes == null) {
+				attributes = new ConcurrentHashMap<>(4);
+				this.attributes = attributes;
+			}
+			return attributes;
 		}
 
 		@Override
@@ -483,8 +507,10 @@ final class DefaultRestClient implements RestClient {
 				HttpHeaders headers = initHeaders();
 				ClientHttpRequest clientRequest = createRequest(uri);
 				clientRequest.getHeaders().addAll(headers);
+				Map<String, Object> attributes = getAttributes();
+				clientRequest.getAttributes().putAll(attributes);
 				ClientRequestObservationContext observationContext = new ClientRequestObservationContext(clientRequest);
-				observationContext.setUriTemplate(this.uriTemplate);
+				observationContext.setUriTemplate((String) attributes.get(URI_TEMPLATE_ATTRIBUTE));
 				observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(observationConvention,
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry).start();
 				if (this.body != null) {

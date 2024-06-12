@@ -198,6 +198,19 @@ public class CookieAssertions {
 	}
 
 	/**
+	 * Assert a cookie's "Partitioned" attribute.
+	 * @since 6.2
+	 */
+	public WebTestClient.ResponseSpec partitioned(String name, boolean expected) {
+		boolean isPartitioned = getCookie(name).isPartitioned();
+		this.exchangeResult.assertWithDiagnostics(() -> {
+			String message = getMessage(name) + " isPartitioned";
+			assertEquals(message, expected, isPartitioned);
+		});
+		return this.responseSpec;
+	}
+
+	/**
 	 * Assert a cookie's "SameSite" attribute.
 	 */
 	public WebTestClient.ResponseSpec sameSite(String name, String expected) {

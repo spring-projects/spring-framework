@@ -17,6 +17,7 @@
 package org.springframework.test.context.bean.override;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 import org.springframework.test.context.TestContext;
@@ -74,12 +75,12 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 		if (Boolean.TRUE.equals(
 				testContext.getAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE))) {
 
-			postProcessFields(testContext, (testMetadata, postProcessor) -> {
+			postProcessFields(testContext, (testMetadata, registrar) -> {
 				Object testInstance = testMetadata.testInstance;
 				Field field = testMetadata.overrideMetadata.getField();
 				ReflectionUtils.makeAccessible(field);
 				ReflectionUtils.setField(field, testInstance, null);
-				postProcessor.inject(testInstance, testMetadata.overrideMetadata);
+				registrar.inject(testInstance, testMetadata.overrideMetadata);
 			});
 		}
 	}
@@ -90,13 +91,11 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 		Class<?> testClass = testContext.getTestClass();
 		Object testInstance = testContext.getTestInstance();
 
-		if (BeanOverrideParsingUtils.hasBeanOverride(testClass)) {
+		List<OverrideMetadata> metadataForFields = OverrideMetadata.forTestClass(testClass);
+		if (!metadataForFields.isEmpty()) {
 			BeanOverrideRegistrar registrar =
 					testContext.getApplicationContext().getBean(BeanOverrideRegistrar.class);
-			for (OverrideMetadata metadata : registrar.getOverrideMetadata()) {
-				if (!metadata.getField().getDeclaringClass().isAssignableFrom(testClass)) {
-					continue;
-				}
+			for (OverrideMetadata metadata : metadataForFields) {
 				consumer.accept(new TestContextOverrideMetadata(testInstance, metadata), registrar);
 			}
 		}

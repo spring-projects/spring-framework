@@ -902,7 +902,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		};
 
 		try {
-			return (MultiValueMap<String, String>) new FormHttpMessageConverter().read(null, message);
+			return new FormHttpMessageConverter().read(null, message);
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Failed to parse form data in request body", ex);

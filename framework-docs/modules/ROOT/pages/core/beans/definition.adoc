@@ -73,23 +73,37 @@ runtime (concurrently with live access to the factory) is not officially support
 lead to concurrent access exceptions, inconsistent state in the bean container, or both.
 ====
 
+
+
 [[beans-definition-overriding]]
 == Overriding Beans
 
-Bean overriding is happening when a bean is registered using an identifier that is
-already allocated. While bean overriding is possible, it makes the configuration harder
-to read and this feature will be deprecated in a future release.
+Bean overriding occurs when a bean is registered using an identifier that is already
+allocated. While bean overriding is possible, it makes the configuration harder to read.
+
+WARNING: Bean overriding will be deprecated in a future release.
 
 To disable bean overriding altogether, you can set the `allowBeanDefinitionOverriding`
-to `false` on the `ApplicationContext` before it is refreshed. In such setup, an
+flag to `false` on the `ApplicationContext` before it is refreshed. In such a setup, an
 exception is thrown if bean overriding is used.
 
-By default, the container logs every bean overriding at `INFO` level so that you can
-adapt your configuration accordingly. While not recommended, you can silence those logs
-by setting the `allowBeanDefinitionOverriding` flag to `true`.
+By default, the container logs every attempt to override a bean at `INFO` level so that
+you can adapt your configuration accordingly. While not recommended, you can silence
+those logs by setting the `allowBeanDefinitionOverriding` flag to `true`.
 
-NOTE: We acknowledge that overriding beans in a test is convenient, and there is
-explicit support for this. For more details please refer to xref:testing/testcontext-framework/bean-overriding.adoc[this section].
+.Java Configuration
+****
+If you use Java Configuration, a corresponding `@Bean` method always silently overrides
+a scanned bean class with the same component name as long as the return type of the
+`@Bean` method matches that bean class. This simply means that the container will call
+the `@Bean` factory method in favor of any pre-declared constructor on the bean class.
+****
+
+NOTE: We acknowledge that overriding beans in test scenarios is convenient, and there is
+explicit support for this as of Spring Framework 6.2. Please refer to
+xref:testing/testcontext-framework/bean-overriding.adoc[this section] for more details.
+
+
 
 [[beans-beanname]]
 == Naming Beans

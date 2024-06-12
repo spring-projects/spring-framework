@@ -18,6 +18,8 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -64,6 +66,11 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		@Override
 		public HttpHeaders getHeaders() {
 			return HttpHeaders.EMPTY;
+		}
+
+		@Override
+		public Map<String, Object> getAttributes() {
+			return Collections.emptyMap();
 		}
 	};
 

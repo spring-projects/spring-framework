@@ -61,8 +61,31 @@ class UrlParserTests {
 		else {
 			assertThat(result.port()).as("Port is not null").isNull();
 		}
+		assertThat(result.hasOpaquePath()).as("Result has opaque path").isFalse();
 		assertThat(result.path().toString()).as("Invalid path").isEqualTo(path);
 		assertThat(result.query()).as("Invalid query").isEqualTo(query);
 		assertThat(result.fragment()).as("Invalid fragment").isEqualTo(fragment);
+	}
+
+	@Test
+	void parseOpaque() {
+		testParseOpaque("mailto:user@example.com?subject=foo", "user@example.com", "subject=foo");
+
+	}
+
+	void testParseOpaque(String input, String path, @Nullable String query) {
+		UrlParser.UrlRecord result = UrlParser.parse("mailto:user@example.com?subject=foo", EMPTY_URL_RECORD, null, null);
+
+
+		assertThat(result.scheme()).as("Invalid scheme").isEqualTo("mailto");
+		assertThat(result.hasOpaquePath()).as("Result has no opaque path").isTrue();
+		assertThat(result.path().toString()).as("Invalid path").isEqualTo(path);
+		if (query != null) {
+			assertThat(result.query()).as("Query is null").isNotNull();
+			assertThat(result.query()).as("Invalid query").isEqualTo(query);
+		}
+		else {
+			assertThat(result.query()).as("Query is not null").isNull();
+		}
 	}
 }

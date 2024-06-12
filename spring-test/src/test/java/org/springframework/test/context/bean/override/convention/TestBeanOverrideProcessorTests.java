@@ -18,20 +18,17 @@ package org.springframework.test.context.bean.override.convention;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.NonNull;
-import org.springframework.test.context.bean.override.convention.TestBeanOverrideProcessor.TestBeanOverrideMetadata;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.springframework.test.context.bean.override.convention.TestBeanOverrideProcessor.findTestBeanFactoryMethod;
 
 /**
  * Tests for {@link TestBeanOverrideProcessor}.
@@ -42,12 +39,15 @@ import static org.springframework.test.context.bean.override.convention.TestBean
  */
 class TestBeanOverrideProcessorTests {
 
+	private final TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
+
 	@Test
 	void findTestBeanFactoryMethodFindsFromCandidateNames() {
 		Class<?> clazz = MethodConventionTestCase.class;
 		Class<?> returnType = ExampleService.class;
 
-		Method method = findTestBeanFactoryMethod(clazz, returnType, "example1", "example2", "example3");
+		Method method = this.processor.findTestBeanFactoryMethod(
+				clazz, returnType, "example1", "example2", "example3");
 
 		assertThat(method.getName()).isEqualTo("example2");
 	}
@@ -57,7 +57,7 @@ class TestBeanOverrideProcessorTests {
 		Class<?> clazz = SubTestCase.class;
 		Class<?> returnType = String.class;
 
-		Method method = findTestBeanFactoryMethod(clazz, returnType, "factory");
+		Method method = this.processor.findTestBeanFactoryMethod(clazz, returnType, "factory");
 
 		assertThat(method).isEqualTo(ReflectionUtils.findMethod(clazz, "factory"));
 	}
@@ -68,11 +68,9 @@ class TestBeanOverrideProcessorTests {
 		Class<?> returnType = ExampleService.class;
 
 		assertThatIllegalStateException()
-				.isThrownBy(() -> findTestBeanFactoryMethod(clazz, returnType, "example1", "example3"))
-				.withMessage("""
-						Failed to find a static test bean factory method in %s with return type %s \
-						whose name matches one of the supported candidates %s""",
-						clazz.getName(), returnType.getName(), List.of("example1", "example3"));
+				.isThrownBy(() -> this.processor.findTestBeanFactoryMethod(clazz, returnType, "example1", "example3"))
+				.withMessage("No static method found named example1() or example3() in %s with return type %s",
+						MethodConventionTestCase.class.getName(), ExampleService.class.getName());
 	}
 
 	@Test
@@ -81,17 +79,15 @@ class TestBeanOverrideProcessorTests {
 		Class<?> returnType = ExampleService.class;
 
 		assertThatIllegalStateException()
-				.isThrownBy(() -> findTestBeanFactoryMethod(clazz, returnType, "example2", "example4"))
-				.withMessage("""
-						Found %d competing static test bean factory methods in %s with return type %s \
-						whose name matches one of the supported candidates %s""".formatted(
-								2, clazz.getName(), returnType.getName(), List.of("example2", "example4")));
+				.isThrownBy(() -> this.processor.findTestBeanFactoryMethod(clazz, returnType, "example2", "example4"))
+				.withMessage("Found 2 competing static methods named example2() or example4() in %s with return type %s",
+						clazz.getName(), returnType.getName());
 	}
 
 	@Test
 	void findTestBeanFactoryMethodNoNameProvided() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> findTestBeanFactoryMethod(MethodConventionTestCase.class, ExampleService.class))
+				.isThrownBy(() -> this.processor.findTestBeanFactoryMethod(MethodConventionTestCase.class, ExampleService.class))
 				.withMessage("At least one candidate method name is required");
 	}
 
@@ -103,13 +99,10 @@ class TestBeanOverrideProcessorTests {
 		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
 		assertThat(overrideAnnotation).isNotNull();
 
-		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
 		assertThatIllegalStateException()
-				.isThrownBy(() -> processor.createMetadata(overrideAnnotation, clazz, field))
-				.withMessage("""
-						Failed to find a static test bean factory method in %s with return type %s \
-						whose name matches one of the supported candidates %s""",
-						clazz.getName(), returnType.getName(), List.of("explicit1"));
+				.isThrownBy(() -> this.processor.createMetadata(overrideAnnotation, clazz, field))
+				.withMessage("No static method found named explicit1() in %s with return type %s",
+						clazz.getName(), returnType.getName());
 	}
 
 	@Test
@@ -119,8 +112,7 @@ class TestBeanOverrideProcessorTests {
 		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
 		assertThat(overrideAnnotation).isNotNull();
 
-		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
-		assertThat(processor.createMetadata(overrideAnnotation, clazz, field))
+		assertThat(this.processor.createMetadata(overrideAnnotation, clazz, field))
 				.isInstanceOf(TestBeanOverrideMetadata.class);
 	}
 
@@ -132,13 +124,10 @@ class TestBeanOverrideProcessorTests {
 		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
 		assertThat(overrideAnnotation).isNotNull();
 
-		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
-		assertThatIllegalStateException().isThrownBy(() -> processor.createMetadata(
+		assertThatIllegalStateException().isThrownBy(() -> this.processor.createMetadata(
 				overrideAnnotation, clazz, field))
-				.withMessage("""
-						Failed to find a static test bean factory method in %s with return type %s \
-						whose name matches one of the supported candidates %s""",
-						clazz.getName(), returnType.getName(), List.of("fieldTestOverride", "someFieldTestOverride"));
+				.withMessage("No static method found named field() or someField() in %s with return type %s",
+						clazz.getName(), returnType.getName());
 	}
 
 	@Test
@@ -147,8 +136,7 @@ class TestBeanOverrideProcessorTests {
 		Field field = clazz.getField("field");
 		NonNull badAnnotation = AnnotationUtils.synthesizeAnnotation(NonNull.class);
 
-		TestBeanOverrideProcessor processor = new TestBeanOverrideProcessor();
-		assertThatIllegalStateException().isThrownBy(() -> processor.createMetadata(badAnnotation, clazz, field))
+		assertThatIllegalStateException().isThrownBy(() -> this.processor.createMetadata(badAnnotation, clazz, field))
 				.withMessage("Invalid annotation passed to TestBeanOverrideProcessor: expected @TestBean" +
 								" on field %s.%s", field.getDeclaringClass().getName(), field.getName());
 	}

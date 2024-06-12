@@ -1007,7 +1007,8 @@ method parameters:
   is supported for non-String values.
 
 | `@RequestAttribute`
-| Provide an `Object` to add as a request attribute. Only supported by `WebClient`.
+| Provide an `Object` to add as a request attribute. Only supported by `RestClient`
+  and `WebClient`.
 
 | `@RequestBody`
 | Provide the body of the request either as an Object to be serialized, or a

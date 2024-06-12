@@ -49,25 +49,40 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 			"org.springframework.test.context.bean.override.internalWrapEarlyBeanPostProcessor";
 
 
-	private final Set<Class<?>> detectedClasses;
+	private final Set<OverrideMetadata> metadata;
 
-	BeanOverrideContextCustomizer(Set<Class<?>> detectedClasses) {
-		this.detectedClasses = detectedClasses;
+	BeanOverrideContextCustomizer(Set<OverrideMetadata> metadata) {
+		this.metadata = metadata;
 	}
 
-	static void registerInfrastructure(BeanDefinitionRegistry registry, Set<Class<?>> detectedClasses) {
+	@Override
+	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
+		if (!(context instanceof BeanDefinitionRegistry registry)) {
+			throw new IllegalStateException("Cannot process bean overrides with an ApplicationContext " +
+					"that doesn't implement BeanDefinitionRegistry: " + context.getClass());
+		}
+		registerInfrastructure(registry);
+	}
+
+	Set<OverrideMetadata> getMetadata() {
+		return this.metadata;
+	}
+
+	private void registerInfrastructure(BeanDefinitionRegistry registry) {
 		addInfrastructureBeanDefinition(registry, BeanOverrideRegistrar.class, REGISTRAR_BEAN_NAME,
-				constructorArgs -> constructorArgs.addIndexedArgumentValue(0, detectedClasses));
+				constructorArgs -> {});
+
 		RuntimeBeanReference registrarReference = new RuntimeBeanReference(REGISTRAR_BEAN_NAME);
-		addInfrastructureBeanDefinition(
-				registry, WrapEarlyBeanPostProcessor.class, EARLY_INFRASTRUCTURE_BEAN_NAME,
+		addInfrastructureBeanDefinition(registry, WrapEarlyBeanPostProcessor.class, EARLY_INFRASTRUCTURE_BEAN_NAME,
 				constructorArgs -> constructorArgs.addIndexedArgumentValue(0, registrarReference));
-		addInfrastructureBeanDefinition(
-				registry, BeanOverrideBeanFactoryPostProcessor.class, INFRASTRUCTURE_BEAN_NAME,
-				constructorArgs -> constructorArgs.addIndexedArgumentValue(0, registrarReference));
+		addInfrastructureBeanDefinition(registry, BeanOverrideBeanFactoryPostProcessor.class, INFRASTRUCTURE_BEAN_NAME,
+				constructorArgs -> {
+					constructorArgs.addIndexedArgumentValue(0, this.metadata);
+					constructorArgs.addIndexedArgumentValue(1, registrarReference);
+				});
 	}
 
-	private static void addInfrastructureBeanDefinition(BeanDefinitionRegistry registry,
+	private void addInfrastructureBeanDefinition(BeanDefinitionRegistry registry,
 			Class<?> clazz, String beanName, Consumer<ConstructorArgumentValues> constructorArgumentsConsumer) {
 
 		if (!registry.containsBeanDefinition(beanName)) {
@@ -80,29 +95,20 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 	}
 
 	@Override
-	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-		if (!(context instanceof BeanDefinitionRegistry registry)) {
-			throw new IllegalStateException("Cannot process bean overrides with an ApplicationContext " +
-					"that doesn't implement BeanDefinitionRegistry: " + context.getClass());
-		}
-		registerInfrastructure(registry, this.detectedClasses);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(Object other) {
+		if (other == this) {
 			return true;
 		}
-		if (obj == null || obj.getClass() != getClass()) {
+		if (other == null || other.getClass() != getClass()) {
 			return false;
 		}
-		BeanOverrideContextCustomizer other = (BeanOverrideContextCustomizer) obj;
-		return this.detectedClasses.equals(other.detectedClasses);
+		BeanOverrideContextCustomizer that = (BeanOverrideContextCustomizer) other;
+		return this.metadata.equals(that.metadata);
 	}
 
 	@Override
 	public int hashCode() {
-		return this.detectedClasses.hashCode();
+		return this.metadata.hashCode();
 	}
 
 }

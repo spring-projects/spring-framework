@@ -1,23 +1,32 @@
 [[spring-testing-annotation-beanoverriding-testbean]]
 = `@TestBean`
 
-`@TestBean` is used on a test class field to override a specific bean in the test's
-`ApplicationContext` with an instance provided by a conventionally named static factory
-method.
+`@TestBean` is used on a field in a test class to override a specific bean in the test's
+`ApplicationContext` with an instance provided by a factory method.
 
-By default, the associated factory method name is derived from the annotated field's name,
-but the annotation allows for a specific method name to be provided.
+The associated factory method name is derived from the annotated field's name, or the
+bean name if specified. The factory method must be `static`, accept no arguments, and
+have a return type compatible with the type of the bean to override. To make things more
+explicit, or if you'd rather use a different name, the annotation allows for a specific
+method name to be provided.
 
-The `@TestBean` annotation uses the `REPLACE_DEFINITION`
-xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy for test bean overriding].
+By default, the annotated field's type is used to search for candidate bean definitions
+to override. If multiple candidates match, `@Qualifier` can be provided to narrow the
+candidate to override. Alternatively, a candidate whose bean definition name matches the
+name of the field will match.
 
-By default, the annotated field's type is used to search for candidate definitions to override.
-In that case it is required that exactly one definition matches, but note that `@Qualifier`
-annotations are also taken into account for the purpose of matching.
-Users can also make things entirely explicit by specifying a bean `name` in the annotation.
+To use a by-name override rather than a by-type override, specify the `name` attribute
+of the annotation.
 
-The following example shows how to fully configure the `@TestBean` annotation, with
-explicit values equivalent to the defaults:
+[WARNING]
+====
+Qualifiers, including the name of the field, are used to determine if a separate
+`ApplicationContext` needs to be created. If you are using this feature to override the
+same bean in several tests, make sure to name the field consistently to avoid creating
+unnecessary contexts.
+====
+
+The following example shows how to use the default behavior of the `@TestBean` annotation:
 
 [tabs]
 ======
@@ -26,17 +35,46 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	class OverrideBeanTests {
-		@TestBean(name = "service", methodName = "serviceTestOverride")  // <1>
-		private CustomService service;
+		@TestBean // <1>
+		CustomService customService;
 
 		// test case body...
 
-		private static CustomService serviceTestOverride() { // <2>
+		static CustomService customService() { // <2>
 			return new MyFakeCustomService();
 		}
 	}
 ----
-<1> Mark a field for bean overriding in this test class.
+<1> Mark a field for overriding the bean with type `CustomService`.
+<2> The result of this static method will be used as the instance and injected into the field.
+======
+
+In the example above, we are overriding the bean with type `CustomService`. If more than
+one bean of that type exists, the bean named `customService` is considered. Otherwise,
+the test will fail, and you will need to provide a qualifier of some sort to identify
+which of the `CustomService` beans you want to override.
+
+The following example uses a by-name lookup, rather than a by-type lookup:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class OverrideBeanTests {
+		@TestBean(name = "service", methodName = "createCustomService") // <1>
+		CustomService customService;
+
+		// test case body...
+
+		static CustomService createCustomService() { // <2>
+			return new MyFakeCustomService();
+		}
+	}
+----
+<1> Mark a field for overriding the bean with name `service`, and specify that the
+    factory method is named `createCustomService`.
 <2> The result of this static method will be used as the instance and injected into the field.
 ======
 

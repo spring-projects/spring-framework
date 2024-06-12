@@ -31,6 +31,8 @@ import org.springframework.lang.Nullable;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link JdkClientHttpRequestFactory}.
+ *
  * @author Marten Deinum
  */
 class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
@@ -68,12 +70,12 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Test
 	void customizeDisallowedHeaders() throws IOException {
-			ClientHttpRequest request = this.factory.createRequest(URI.create(this.baseUrl + "/status/299"), HttpMethod.PUT);
-			request.getHeaders().set("Expect", "299");
+		ClientHttpRequest request = this.factory.createRequest(URI.create(this.baseUrl + "/status/299"), HttpMethod.PUT);
+		request.getHeaders().set("Expect", "299");
 
-			try (ClientHttpResponse response = request.execute()) {
-				assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatusCode.valueOf(299));
-			}
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatusCode.valueOf(299));
+		}
 	}
 
 	@Test // gh-31451

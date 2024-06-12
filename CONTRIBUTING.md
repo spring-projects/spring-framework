@@ -18,7 +18,7 @@ First off, thank you for taking the time to contribute! :+1: :tada:
 
 This project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc).
 By participating you are expected to uphold this code.
-Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+Please report unacceptable behavior to spring-code-of-conduct@spring.io.
 
 ### How to Contribute
 

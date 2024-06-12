@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.annotation.Gh23206Tests.ConditionalConfiguration.NestedConfiguration;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
@@ -39,7 +40,9 @@ public class Gh23206Tests {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(context::refresh)
 				.withMessageContaining(ConditionalComponentScanConfiguration.class.getName())
 				.havingCause().isInstanceOf(ApplicationContextException.class)
-				.withMessageContaining("Component scan could not be used with conditions in REGISTER_BEAN phase");
+				.withMessageStartingWith("Component scan for configuration class [")
+				.withMessageContaining(ConditionalComponentScanConfiguration.class.getName())
+				.withMessageContaining("could not be used with conditions in REGISTER_BEAN phase");
 	}
 
 	@Test
@@ -49,7 +52,9 @@ public class Gh23206Tests {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(context::refresh)
 				.withMessageContaining(ConditionalConfiguration.class.getName())
 				.havingCause().isInstanceOf(ApplicationContextException.class)
-				.withMessageContaining("Component scan could not be used with conditions in REGISTER_BEAN phase");
+				.withMessageStartingWith("Component scan for configuration class [")
+				.withMessageContaining(NestedConfiguration.class.getName())
+				.withMessageContaining("could not be used with conditions in REGISTER_BEAN phase");
 	}
 
 

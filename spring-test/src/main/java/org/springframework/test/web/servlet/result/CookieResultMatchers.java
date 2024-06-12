@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,6 +226,17 @@ public class CookieResultMatchers {
 		return result -> {
 			Cookie cookie = getCookie(result, name);
 			assertEquals("Response cookie '" + name + "' httpOnly", httpOnly, cookie.isHttpOnly());
+		};
+	}
+
+	/**
+	 * Assert whether the cookie is partitioned.
+	 * @since 6.2
+	 */
+	public ResultMatcher partitioned(String name, boolean partitioned) {
+		return result -> {
+			Cookie cookie = getCookie(result, name);
+			assertEquals("Response cookie '" + name + "' partitioned", partitioned, cookie.getAttribute("Partitioned") != null);
 		};
 	}
 

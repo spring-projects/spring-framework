@@ -24,7 +24,7 @@ package org.springframework.test.context.bean.override.convention;
  */
 interface TestBeanFactory {
 
-	public static String createTestMessage() {
+	static String createTestMessage() {
 		return "test";
 	}
 

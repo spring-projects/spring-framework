@@ -44,19 +44,6 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.me
 class FailingMockitoBeanByTypeIntegrationTests {
 
 	@Test
-	void zeroCandidates() {
-		Class<?> testClass = ZeroCandidatesTestCase.class;
-		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
-			finishedWithFailure(
-				cause(
-					instanceOf(IllegalStateException.class),
-					message("""
-						Unable to select a bean definition to override: found 0 bean definitions \
-						of type %s (as required by annotated field '%s.example')"""
-							.formatted(ExampleService.class.getName(), testClass.getSimpleName())))));
-	}
-
-	@Test
 	void tooManyCandidates() {
 		Class<?> testClass = TooManyCandidatesTestCase.class;
 		EngineTestKitUtils.executeTestsForClass(testClass).assertThatEvents().haveExactly(1,
@@ -69,22 +56,6 @@ class FailingMockitoBeanByTypeIntegrationTests {
 							.formatted(ExampleService.class.getName(), testClass.getSimpleName(), List.of("bean1", "bean2"))))));
 	}
 
-
-	@SpringJUnitConfig
-	static class ZeroCandidatesTestCase {
-
-		@MockitoBean
-		ExampleService example;
-
-		@Test
-		void test() {
-			assertThat(example).isNotNull();
-		}
-
-		@Configuration
-		static class Config {
-		}
-	}
 
 	@SpringJUnitConfig
 	static class TooManyCandidatesTestCase {

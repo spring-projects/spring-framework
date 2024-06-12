@@ -39,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Adapt {@link ServerHttpResponse} to the Servlet {@link HttpServletResponse}.
@@ -48,6 +49,8 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
+
+	private static final boolean IS_SERVLET61 = ReflectionUtils.findField(HttpServletResponse.class, "SC_PERMANENT_REDIRECT") != null;
 
 	private final HttpServletResponse response;
 
@@ -181,6 +184,14 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 				}
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
+				if (httpCookie.isPartitioned()) {
+					if (IS_SERVLET61) {
+						cookie.setAttribute("Partitioned", "");
+					}
+					else {
+						cookie.setAttribute("Partitioned", "true");
+					}
+				}
 				this.response.addCookie(cookie);
 			}
 		}

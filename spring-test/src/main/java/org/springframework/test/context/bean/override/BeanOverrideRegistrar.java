@@ -19,7 +19,6 @@ package org.springframework.test.context.bean.override;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -45,20 +44,9 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 
 	private final Map<String, OverrideMetadata> earlyOverrideMetadata = new HashMap<>();
 
-	private final Set<OverrideMetadata> overrideMetadata;
-
 	@Nullable
 	private ConfigurableBeanFactory beanFactory;
 
-
-	/**
-	 * Create a new registrar and immediately parse the provided classes.
-	 * @param classesToParse the initial set of classes that have been
-	 * detected to contain bean overriding annotations
-	 */
-	BeanOverrideRegistrar(Set<Class<?>> classesToParse) {
-		this.overrideMetadata = BeanOverrideParsingUtils.parse(classesToParse);
-	}
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -67,13 +55,6 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 					"that doesn't implement ConfigurableBeanFactory: " + beanFactory.getClass());
 		}
 		this.beanFactory = cbf;
-	}
-
-	/**
-	 * Get the detected {@link OverrideMetadata} instances.
-	 */
-	Set<OverrideMetadata> getOverrideMetadata() {
-		return this.overrideMetadata;
 	}
 
 	/**

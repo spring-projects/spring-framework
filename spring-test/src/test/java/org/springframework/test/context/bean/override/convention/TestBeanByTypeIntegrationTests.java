@@ -51,7 +51,7 @@ public class TestBeanByTypeIntegrationTests {
 	@CustomQualifier
 	StringBuilder anyNameForStringBuilder2;
 
-	static ExampleService anyNameForServiceTestOverride() {
+	static ExampleService anyNameForService() {
 		return new RealExampleService("Mocked greeting");
 	}
 

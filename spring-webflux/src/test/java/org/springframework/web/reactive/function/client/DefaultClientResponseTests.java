@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.client;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
@@ -323,6 +324,11 @@ class DefaultClientResponseTests {
 			@Override
 			public HttpHeaders getHeaders() {
 				return HttpHeaders.EMPTY;
+			}
+
+			@Override
+			public Map<String, Object> getAttributes() {
+				return Collections.emptyMap();
 			}
 		};
 

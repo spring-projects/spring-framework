@@ -154,30 +154,32 @@ Letting qualifier values select against target bean names, within the type-match
 candidates, does not require a `@Qualifier` annotation at the injection point.
 If there is no other resolution indicator (such as a qualifier or a primary marker),
 for a non-unique dependency situation, Spring matches the injection point name
-(that is, the field name or parameter name) against the target bean names and chooses the
-same-named candidate, if any.
+(that is, the field name or parameter name) against the target bean names and chooses
+the same-named candidate, if any (either by bean name or by associated alias).
 
 Since version 6.1, this requires the `-parameters` Java compiler flag to be present.
+As of 6.2, the container applies fast shortcut resolution for bean name matches,
+bypassing the full type matching algorithm when the parameter name matches the
+bean name and no type, qualifier or primary conditions override the match. It is
+therefore recommendable for your parameter names to match the target bean names.
 ====
 
-That said, if you intend to express annotation-driven injection by name, do not
-primarily use `@Autowired`, even if it is capable of selecting by bean name among
-type-matching candidates. Instead, use the JSR-250 `@Resource` annotation, which is
-semantically defined to identify a specific target component by its unique name, with
-the declared type being irrelevant for the matching process. `@Autowired` has rather
-different semantics: After selecting candidate beans by type, the specified `String`
+As an alternative for injection by name, consider the JSR-250 `@Resource` annotation
+which is semantically defined to identify a specific target component by its unique name,
+with the declared type being irrelevant for the matching process. `@Autowired` has rather
+different semantics: after selecting candidate beans by type, the specified `String`
 qualifier value is considered within those type-selected candidates only (for example,
 matching an `account` qualifier against beans marked with the same qualifier label).
 
 For beans that are themselves defined as a collection, `Map`, or array type, `@Resource`
 is a fine solution, referring to the specific collection or array bean by unique name.
-That said, as of 4.3, you can match collection, `Map`, and array types through Spring's
+That said, you can match collection, `Map`, and array types through Spring's
 `@Autowired` type matching algorithm as well, as long as the element type information
 is preserved in `@Bean` return type signatures or collection inheritance hierarchies.
 In this case, you can use qualifier values to select among same-typed collections,
 as outlined in the previous paragraph.
 
-As of 4.3, `@Autowired` also considers self references for injection (that is, references
+`@Autowired` also considers self references for injection (that is, references
 back to the bean that is currently injected). Note that self injection is a fallback.
 Regular dependencies on other components always have precedence. In that sense, self
 references do not participate in regular candidate selection and are therefore in

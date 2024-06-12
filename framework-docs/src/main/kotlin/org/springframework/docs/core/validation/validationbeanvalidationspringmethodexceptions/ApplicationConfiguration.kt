@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.example;
+package org.springframework.docs.core.validation.validationbeanvalidationspringmethodexceptions
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor
 
-@Target({ElementType.FIELD, ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@ExampleBeanOverrideAnnotation("foo")
-public @interface TestBeanOverrideMetaAnnotation { }
+// tag::snippet[]
+@Configuration
+class ApplicationConfiguration {
+
+	companion object {
+
+		@Bean
+		@JvmStatic
+		fun validationPostProcessor() = MethodValidationPostProcessor().apply {
+			setAdaptConstraintViolations(true)
+		}
+	}
+}
+// end::snippet[]

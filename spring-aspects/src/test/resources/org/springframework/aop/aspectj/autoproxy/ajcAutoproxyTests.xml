@@ -21,8 +21,10 @@
 		<property name="foo" value="bar"/>
 	</bean>
 
-	<bean id="otherBean" class="java.lang.Object"/>
+	<bean id="otherBean" class="org.springframework.beans.factory.aspectj.ShouldBeConfiguredBySpring"/>
 
-	<bean id="yetAnotherBean" class="java.lang.Object"/>
+	<bean id="yetAnotherBean" class="org.springframework.beans.factory.aspectj.ShouldBeConfiguredBySpring"/>
+
+	<bean id="configuredBean" class="org.springframework.beans.factory.aspectj.ShouldBeConfiguredBySpring" lazy-init="true"/>
 
 </beans>

@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -147,6 +148,11 @@ public abstract class ExchangeFunctions {
 				@Override
 				public URI getURI() {
 					return request.url();
+				}
+
+				@Override
+				public Map<String, Object> getAttributes() {
+					return request.attributes();
 				}
 
 				@Override
