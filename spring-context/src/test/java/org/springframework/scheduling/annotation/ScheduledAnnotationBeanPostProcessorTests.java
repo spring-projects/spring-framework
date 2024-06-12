@@ -679,6 +679,32 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
+	static ScheduledMethodRunnableAssert assertThatScheduledRunnable(Runnable runnable) {
+		return new ScheduledMethodRunnableAssert(runnable);
+	}
+
+
+	static class ScheduledMethodRunnableAssert extends AbstractAssert<ScheduledMethodRunnableAssert, Runnable> {
+
+		public ScheduledMethodRunnableAssert(Runnable actual) {
+			super(actual, ScheduledMethodRunnableAssert.class);
+			assertThat(actual).extracting("runnable").isInstanceOf(ScheduledMethodRunnable.class);
+		}
+
+		public ScheduledMethodRunnableAssert hasTarget(Object target) {
+			isNotNull();
+			assertThat(actual).extracting("runnable.target").isEqualTo(target);
+			return this;
+		}
+
+		public ScheduledMethodRunnableAssert hasMethodName(String name) {
+			isNotNull();
+			assertThat(actual).extracting("runnable.method.name").isEqualTo(name);
+			return this;
+		}
+	}
+
+
 	static class FixedDelay {
 
 		@Scheduled(fixedDelay = 5_000)
@@ -1017,31 +1043,6 @@ class ScheduledAnnotationBeanPostProcessorTests {
 				}
 			}
 		}
-	}
-
-	static ScheduledMethodRunnableAssert assertThatScheduledRunnable(Runnable runnable) {
-		return new ScheduledMethodRunnableAssert(runnable);
-	}
-
-	static class ScheduledMethodRunnableAssert extends AbstractAssert<ScheduledMethodRunnableAssert, Runnable> {
-
-		public ScheduledMethodRunnableAssert(Runnable actual) {
-			super(actual, ScheduledMethodRunnableAssert.class);
-			assertThat(actual).extracting("runnable").isInstanceOf(ScheduledMethodRunnable.class);
-		}
-
-		public ScheduledMethodRunnableAssert hasTarget(Object target) {
-			isNotNull();
-			assertThat(actual).extracting("runnable.target").isEqualTo(target);
-			return this;
-		}
-
-		public ScheduledMethodRunnableAssert hasMethodName(String name) {
-			isNotNull();
-			assertThat(actual).extracting("runnable.method.name").isEqualTo(name);
-			return this;
-		}
-
 	}
 
 }
