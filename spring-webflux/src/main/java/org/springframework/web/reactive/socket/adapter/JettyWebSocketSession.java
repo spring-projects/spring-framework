@@ -83,7 +83,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 				boolean demand = false;
 				this.lock.lock();
 				try {
-					this.requested += n;
+					this.requested = Math.addExact(this.requested, n);
 					if (!this.awaitingMessage && this.requested > 0) {
 						this.requested--;
 						this.awaitingMessage = true;
