@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -352,9 +352,6 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(condition).isTrue();
 		CronTrigger cronTrigger = (CronTrigger) trigger;
 		ZonedDateTime dateTime = ZonedDateTime.of(2013, 4, 15, 4, 0, 0, 0, ZoneId.of("GMT+10"));
-//		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+10"));
-//		cal.clear();
-//		cal.set(2013, 3, 15, 4, 0);  // 15-04-2013 4:00 GMT+10;
 		Instant lastScheduledExecution = dateTime.toInstant();
 		Instant lastActualExecution = dateTime.toInstant();
 		dateTime = dateTime.plusMinutes(30);
@@ -1026,6 +1023,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		}
 	}
 
+
 	static class PropertyPlaceholderWithFixedDelayInSeconds {
 
 		@Scheduled(fixedDelayString = "${fixedDelay}", initialDelayString = "${initialDelay}", timeUnit = TimeUnit.SECONDS)
@@ -1040,6 +1038,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		void fixedRate() {
 		}
 	}
+
 
 	static class PropertyPlaceholderWithFixedRateInSeconds {
 
@@ -1071,9 +1070,11 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		}
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@ConvertWith(NameToClass.Converter.class)
 	private @interface NameToClass {
+
 		class Converter implements ArgumentConverter {
 			@Override
 			public Class<?> convert(Object beanClassName, ParameterContext context) throws ArgumentConversionException {
