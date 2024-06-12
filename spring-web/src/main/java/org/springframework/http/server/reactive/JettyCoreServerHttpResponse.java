@@ -159,7 +159,7 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 			}
 		}.iterate();
 
-		return doCommit(() -> Mono.fromFuture(callback));
+		return Mono.fromFuture(callback);
 	}
 
 	@SuppressWarnings("unchecked")
