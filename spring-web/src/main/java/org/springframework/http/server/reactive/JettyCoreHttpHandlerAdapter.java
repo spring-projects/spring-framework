@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,59 +20,40 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.JettyDataBufferFactory;
+import org.springframework.util.Assert;
 
 /**
  * Adapt {@link HttpHandler} to the Jetty {@link org.eclipse.jetty.server.Handler} abstraction.
  *
  * @author Greg Wilkins
  * @author Lachlan Roberts
+ * @author Arjen Poutsma
  * @since 6.2
  */
 public class JettyCoreHttpHandlerAdapter extends Handler.Abstract.NonBlocking {
 
 	private final HttpHandler httpHandler;
 
-	private final DataBufferFactory dataBufferFactory;
+	private JettyDataBufferFactory dataBufferFactory = new JettyDataBufferFactory();
+
 
 	public JettyCoreHttpHandlerAdapter(HttpHandler httpHandler) {
 		this.httpHandler = httpHandler;
-
-		// Currently we do not make a DataBufferFactory over the servers ByteBufferPool,
-		// because we mainly use wrap and there should be few allocation done by the factory.
-		// But it could be possible to use the servers buffer pool for allocations and to
-		// create PooledDataBuffers
-		this.dataBufferFactory = new DefaultDataBufferFactory();
 	}
+
+	public void setDataBufferFactory(JettyDataBufferFactory dataBufferFactory) {
+		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
+		this.dataBufferFactory = dataBufferFactory;
+	}
+
 
 	@Override
 	public boolean handle(Request request, Response response, Callback callback) throws Exception {
-		this.httpHandler.handle(new JettyCoreServerHttpRequest(this.dataBufferFactory, request), new JettyCoreServerHttpResponse(response))
-				.subscribe(new Subscriber<>() {
-					@Override
-					public void onSubscribe(Subscription s) {
-						s.request(Long.MAX_VALUE);
-					}
-
-					@Override
-					public void onNext(Void unused) {
-						// we can ignore the void as we only seek onError or onComplete
-					}
-
-					@Override
-					public void onError(Throwable t) {
-						callback.failed(t);
-					}
-
-					@Override
-					public void onComplete() {
-						callback.succeeded();
-					}
-				});
+		this.httpHandler.handle(new JettyCoreServerHttpRequest(request, this.dataBufferFactory),
+						new JettyCoreServerHttpResponse(response, this.dataBufferFactory))
+				.subscribe(unused -> {}, callback::failed, callback::succeeded);
 		return true;
 	}
 

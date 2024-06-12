@@ -41,8 +41,7 @@ import org.springframework.core.annotation.AliasFor;
  *     // ...
  * }</pre>
  *
- * <p>The annotated element can be any Spring bean class, constructor, field,
- * or method &mdash; for example:
+ * <p>The annotated element can be any Spring bean class or method &mdash; for example:
  *
  * <pre class="code">
  * &#064;Service

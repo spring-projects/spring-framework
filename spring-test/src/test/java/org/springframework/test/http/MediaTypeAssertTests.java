@@ -16,7 +16,6 @@
 
 package org.springframework.test.http;
 
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -65,9 +64,8 @@ class MediaTypeAssertTests {
 	void isEqualInvalidStringShouldFail() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(mediaType("application/json")).isEqualTo("example of a bad value"))
-				.withMessageContaining("[Media type]")
-				.withMessageEndingWith("To be a valid media type but got:\n" +
-						"  \"Invalid mime type \"example of a bad value\": does not contain '/'\"\n");
+				.withMessageContainingAll("[Media type]", "To be a valid media type but got:",
+						"\"Invalid mime type \"example of a bad value\": does not contain '/'\"");
 	}
 
 	@Test
@@ -110,9 +108,8 @@ class MediaTypeAssertTests {
 	void isNotEqualInvalidStringShouldFail() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(mediaType("application/json")).isNotEqualTo("example of a bad value"))
-				.withMessageContaining("[Media type]")
-				.withMessageEndingWith("To be a valid media type but got:\n" +
-						"  \"Invalid mime type \"example of a bad value\": does not contain '/'\"\n");
+				.withMessageContainingAll("[Media type]", "To be a valid media type but got:",
+						"\"Invalid mime type \"example of a bad value\": does not contain '/'\"");
 	}
 
 	@Test
@@ -168,7 +165,7 @@ class MediaTypeAssertTests {
 	void isCompatibleWithStringAndEmptyExpected() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(mediaType("application/json")).isCompatibleWith(""))
-				.withMessageContainingAll("Expecting:", "", "To be a valid media type but got:",
+				.withMessageContainingAll("Expecting:", "To be a valid media type but got:",
 						"'mimeType' must not be empty");
 	}
 

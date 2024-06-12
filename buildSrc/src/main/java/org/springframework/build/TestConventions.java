@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,12 @@ class TestConventions {
 		if (project.hasProperty("testGroups")) {
 			test.systemProperty("testGroups", project.getProperties().get("testGroups"));
 		}
-		test.jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED",
+		test.jvmArgs(
+				"--add-opens=java.base/java.lang=ALL-UNNAMED",
 				"--add-opens=java.base/java.util=ALL-UNNAMED",
-				"-Djava.locale.providers=COMPAT", "-Xshare:off");
+				"-Djava.locale.providers=COMPAT",
+				"-Xshare:off"
+		);
 	}
 
 	private void configureTestRetryPlugin(Project project, Test test) {

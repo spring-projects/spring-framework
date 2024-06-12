@@ -28,8 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @since 6.1
  */
-class ReactorNettyClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+class ReactorNettyClientRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
@@ -50,7 +51,20 @@ class ReactorNettyClientHttpRequestFactoryTests extends AbstractHttpRequestFacto
 		requestFactory.start();
 		assertThat(requestFactory.isRunning()).isTrue();
 		requestFactory.stop();
-		assertThat(requestFactory.isRunning()).isFalse();
+		assertThat(requestFactory.isRunning()).isTrue();
+		requestFactory.start();
+		assertThat(requestFactory.isRunning()).isTrue();
+	}
+
+	@Test
+	void restartWithHttpClient() {
+		HttpClient httpClient = HttpClient.create();
+		ReactorNettyClientRequestFactory requestFactory = new ReactorNettyClientRequestFactory(httpClient);
+		assertThat(requestFactory.isRunning()).isTrue();
+		requestFactory.start();
+		assertThat(requestFactory.isRunning()).isTrue();
+		requestFactory.stop();
+		assertThat(requestFactory.isRunning()).isTrue();
 		requestFactory.start();
 		assertThat(requestFactory.isRunning()).isTrue();
 	}
@@ -71,10 +85,12 @@ class ReactorNettyClientHttpRequestFactoryTests extends AbstractHttpRequestFacto
 	}
 
 	@Test
-	void restartWithHttpClient() {
-		HttpClient httpClient = HttpClient.create();
-		ReactorNettyClientRequestFactory requestFactory = new ReactorNettyClientRequestFactory(httpClient);
-		assertThat(requestFactory.isRunning()).isTrue();
+	void lateStartWithExternalResourceFactory() {
+		ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
+		Function<HttpClient, HttpClient> mapper = Function.identity();
+		ReactorNettyClientRequestFactory requestFactory = new ReactorNettyClientRequestFactory(resourceFactory, mapper);
+		assertThat(requestFactory.isRunning()).isFalse();
+		resourceFactory.start();
 		requestFactory.start();
 		assertThat(requestFactory.isRunning()).isTrue();
 		requestFactory.stop();

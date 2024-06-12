@@ -188,39 +188,64 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 
 		@SuppressWarnings("unchecked")
 		private void contributeHibernateHints(RuntimeHints hints, @Nullable ClassLoader classLoader, Class<?> managedClass) {
-			Class<? extends Annotation> embeddableInstantiatorClass = loadEmbeddableInstantiatorClass(classLoader);
-			if (embeddableInstantiatorClass == null) {
-				return;
-			}
 			ReflectionHints reflection = hints.reflection();
-			registerInstantiatorForReflection(reflection,
-					AnnotationUtils.findAnnotation(managedClass, embeddableInstantiatorClass));
-			ReflectionUtils.doWithFields(managedClass, field -> {
-				registerInstantiatorForReflection(reflection,
-						AnnotationUtils.findAnnotation(field, embeddableInstantiatorClass));
-				registerInstantiatorForReflection(reflection,
-						AnnotationUtils.findAnnotation(field.getType(), embeddableInstantiatorClass));
-			});
-		}
 
-		@SuppressWarnings("NullAway")
-		private void registerInstantiatorForReflection(ReflectionHints reflection, @Nullable Annotation annotation) {
-			if (annotation == null) {
-				return;
+			Class<? extends Annotation> embeddableInstantiatorClass = loadClass("org.hibernate.annotations.EmbeddableInstantiator", classLoader);
+			if (embeddableInstantiatorClass != null) {
+				registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(managedClass, embeddableInstantiatorClass), "value");
+				ReflectionUtils.doWithFields(managedClass, field -> {
+					registerForReflection(reflection,
+							AnnotationUtils.findAnnotation(field, embeddableInstantiatorClass), "value");
+					registerForReflection(reflection,
+							AnnotationUtils.findAnnotation(field.getType(), embeddableInstantiatorClass), "value");
+				});
+				ReflectionUtils.doWithMethods(managedClass, method -> registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(method, embeddableInstantiatorClass), "value"));
 			}
-			Class<?> embeddableInstantiatorClass = (Class<?>) AnnotationUtils.getAnnotationAttributes(annotation).get("value");
-			reflection.registerType(embeddableInstantiatorClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+
+			Class<? extends Annotation> valueGenerationTypeClass = loadClass("org.hibernate.annotations.ValueGenerationType", classLoader);
+			if (valueGenerationTypeClass != null) {
+				ReflectionUtils.doWithFields(managedClass, field -> registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(field, valueGenerationTypeClass), "generatedBy"));
+				ReflectionUtils.doWithMethods(managedClass, method -> registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(method, valueGenerationTypeClass), "generatedBy"));
+			}
+
+			Class<? extends Annotation> idGeneratorTypeClass = loadClass("org.hibernate.annotations.IdGeneratorType", classLoader);
+			if (idGeneratorTypeClass != null) {
+				ReflectionUtils.doWithFields(managedClass, field -> registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(field, idGeneratorTypeClass), "value"));
+				ReflectionUtils.doWithMethods(managedClass, method -> registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(method, idGeneratorTypeClass), "value"));
+			}
+
+			Class<? extends Annotation> attributeBinderTypeClass = loadClass("org.hibernate.annotations.AttributeBinderType", classLoader);
+			if (attributeBinderTypeClass != null) {
+				ReflectionUtils.doWithFields(managedClass, field -> registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(field, attributeBinderTypeClass), "binder"));
+				ReflectionUtils.doWithMethods(managedClass, method -> registerForReflection(reflection,
+						AnnotationUtils.findAnnotation(method, attributeBinderTypeClass), "binder"));
+			}
 		}
 
 		@Nullable
-		private static Class<? extends Annotation> loadEmbeddableInstantiatorClass(@Nullable ClassLoader classLoader) {
+		private static Class<? extends Annotation> loadClass(String className, @Nullable ClassLoader classLoader) {
 			try {
-				return (Class<? extends Annotation>) ClassUtils.forName(
-						"org.hibernate.annotations.EmbeddableInstantiator", classLoader);
+				return (Class<? extends Annotation>) ClassUtils.forName(className, classLoader);
 			}
 			catch (ClassNotFoundException ex) {
 				return null;
 			}
+		}
+
+		@SuppressWarnings("NullAway")
+		private void registerForReflection(ReflectionHints reflection, @Nullable Annotation annotation, String attribute) {
+			if (annotation == null) {
+				return;
+			}
+			Class<?> embeddableInstantiatorClass = (Class<?>) AnnotationUtils.getAnnotationAttributes(annotation).get(attribute);
+			reflection.registerType(embeddableInstantiatorClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		}
 	}
 }

@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.condition;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.assertj.core.api.StringAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -25,6 +24,7 @@ import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 
 /**
  * Tests for {@link PathPatternsRequestCondition}.
@@ -43,7 +43,7 @@ class PathPatternsRequestConditionTests {
 
 	@Test
 	void prependNonEmptyPatternsOnly() {
-		assertThat(createCondition("").getPatternValues(), StringAssert.class).element(0)
+		assertThat(createCondition("").getPatternValues()).first(STRING)
 				.as("Do not prepend empty patterns (SPR-8255)").isEmpty();
 	}
 

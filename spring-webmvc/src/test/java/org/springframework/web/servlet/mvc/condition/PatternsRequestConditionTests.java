@@ -19,13 +19,13 @@ package org.springframework.web.servlet.mvc.condition;
 import java.util.Collections;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.assertj.core.api.StringAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 
 /**
  * Tests for {@link PatternsRequestCondition}.
@@ -41,7 +41,7 @@ class PatternsRequestConditionTests {
 
 	@Test
 	void prependNonEmptyPatternsOnly() {
-		assertThat(new PatternsRequestCondition("").getPatterns(), StringAssert.class).element(0)
+		assertThat(new PatternsRequestCondition("").getPatterns()).first(STRING)
 				.as("Do not prepend empty patterns (SPR-8255)").isEmpty();
 	}
 
@@ -183,7 +183,7 @@ class PatternsRequestConditionTests {
 		match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns(), StringAssert.class).element(0)
+		assertThat(match.getPatterns()).first(STRING)
 				.as("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)")
 				.isEqualTo("/foo/");
 

@@ -51,12 +51,12 @@ public class MockitoBeanIntegrationTests {
 	@MockitoBean(name = "nestedNonExistingBean")
 	ExampleService nonExisting2;
 
+
 	@Test
 	void fieldHasOverride(ApplicationContext ctx) {
 		assertThat(ctx.getBean("field"))
 				.isInstanceOf(ExampleService.class)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock())
-						.as("isMock").isTrue())
+				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
 				.isSameAs(this.field);
 
 		assertThat(this.field.greeting()).as("mocked greeting").isNull();
@@ -66,8 +66,7 @@ public class MockitoBeanIntegrationTests {
 	void renamedFieldHasOverride(ApplicationContext ctx) {
 		assertThat(ctx.getBean("field"))
 				.isInstanceOf(ExampleService.class)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock())
-						.as("isMock").isTrue())
+				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
 				.isSameAs(this.renamed1);
 
 		assertThat(this.renamed1.greeting()).as("mocked greeting").isNull();
@@ -77,23 +76,22 @@ public class MockitoBeanIntegrationTests {
 	void fieldIsMockedWhenNoOriginalBean(ApplicationContext ctx) {
 		assertThat(ctx.getBean("nonExistingBean"))
 				.isInstanceOf(ExampleService.class)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock())
-						.as("isMock").isTrue())
+				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
 				.isSameAs(this.nonExisting1);
 
 		assertThat(this.nonExisting1.greeting()).as("mocked greeting").isNull();
 	}
 
+
 	@Nested
-	@DisplayName("With @MockitoBean on enclosing class")
-	class MockitoBeanNested {
+	@DisplayName("With @MockitoBean in enclosing class")
+	public class MockitoBeanNestedTests {
 
 		@Test
 		void fieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField"))
 					.isInstanceOf(ExampleService.class)
-					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock())
-							.as("isMock").isTrue())
+					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
 					.isSameAs(MockitoBeanIntegrationTests.this.nestedField);
 		}
 
@@ -101,8 +99,7 @@ public class MockitoBeanIntegrationTests {
 		void renamedFieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedField"))
 					.isInstanceOf(ExampleService.class)
-					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock())
-							.as("isMock").isTrue())
+					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
 					.isSameAs(MockitoBeanIntegrationTests.this.renamed2);
 		}
 
@@ -110,8 +107,7 @@ public class MockitoBeanIntegrationTests {
 		void fieldIsMockedWhenNoOriginalBean(ApplicationContext ctx) {
 			assertThat(ctx.getBean("nestedNonExistingBean"))
 					.isInstanceOf(ExampleService.class)
-					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock())
-							.as("isMock").isTrue())
+					.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
 					.isSameAs(MockitoBeanIntegrationTests.this.nonExisting2);
 		}
 	}
@@ -119,13 +115,16 @@ public class MockitoBeanIntegrationTests {
 
 	@Configuration
 	static class Config {
+
 		@Bean("field")
 		ExampleService bean1() {
 			return new RealExampleService("Hello Field");
 		}
+
 		@Bean("nestedField")
 		ExampleService bean2() {
 			return new RealExampleService("Hello Nested Field");
 		}
 	}
+
 }

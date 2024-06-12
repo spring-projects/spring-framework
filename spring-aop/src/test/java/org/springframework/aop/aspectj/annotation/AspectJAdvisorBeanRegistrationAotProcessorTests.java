@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.refl
  * Tests for {@link AspectJAdvisorBeanRegistrationAotProcessor}.
  *
  * @author Sebastien Deleuze
+ * @since 6.1
  */
 class AspectJAdvisorBeanRegistrationAotProcessorTests {
 
@@ -43,8 +44,9 @@ class AspectJAdvisorBeanRegistrationAotProcessorTests {
 
 	private final RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
 
+
 	@Test
-	void shouldProcessesAspectJClass() {
+	void shouldProcessAspectJClass() {
 		process(AspectJClass.class);
 		assertThat(reflection().onType(AspectJClass.class).withMemberCategory(MemberCategory.DECLARED_FIELDS))
 				.accepts(this.runtimeHints);

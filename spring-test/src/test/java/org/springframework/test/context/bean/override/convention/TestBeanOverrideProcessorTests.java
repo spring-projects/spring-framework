@@ -22,12 +22,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.test.context.bean.override.convention.TestBeanOverrideProcessor.TestBeanOverrideMetadata;
 import org.springframework.test.context.bean.override.example.ExampleService;
-import org.springframework.test.context.bean.override.example.FailingExampleService;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -45,7 +44,7 @@ class TestBeanOverrideProcessorTests {
 
 	@Test
 	void findTestBeanFactoryMethodFindsFromCandidateNames() {
-		Class<?> clazz = MethodConventionConf.class;
+		Class<?> clazz = MethodConventionTestCase.class;
 		Class<?> returnType = ExampleService.class;
 
 		Method method = findTestBeanFactoryMethod(clazz, returnType, "example1", "example2", "example3");
@@ -54,8 +53,18 @@ class TestBeanOverrideProcessorTests {
 	}
 
 	@Test
+	void findTestBeanFactoryMethodFindsLocalMethodWhenSubclassMethodHidesSuperclassMethod() {
+		Class<?> clazz = SubTestCase.class;
+		Class<?> returnType = String.class;
+
+		Method method = findTestBeanFactoryMethod(clazz, returnType, "factory");
+
+		assertThat(method).isEqualTo(ReflectionUtils.findMethod(clazz, "factory"));
+	}
+
+	@Test
 	void findTestBeanFactoryMethodNotFound() {
-		Class<?> clazz = MethodConventionConf.class;
+		Class<?> clazz = MethodConventionTestCase.class;
 		Class<?> returnType = ExampleService.class;
 
 		assertThatIllegalStateException()
@@ -68,7 +77,7 @@ class TestBeanOverrideProcessorTests {
 
 	@Test
 	void findTestBeanFactoryMethodTwoFound() {
-		Class<?> clazz = MethodConventionConf.class;
+		Class<?> clazz = MethodConventionTestCase.class;
 		Class<?> returnType = ExampleService.class;
 
 		assertThatIllegalStateException()
@@ -82,13 +91,13 @@ class TestBeanOverrideProcessorTests {
 	@Test
 	void findTestBeanFactoryMethodNoNameProvided() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> findTestBeanFactoryMethod(MethodConventionConf.class, ExampleService.class))
+				.isThrownBy(() -> findTestBeanFactoryMethod(MethodConventionTestCase.class, ExampleService.class))
 				.withMessage("At least one candidate method name is required");
 	}
 
 	@Test
 	void createMetaDataForUnknownExplicitMethod() throws Exception {
-		Class<?> clazz = ExplicitMethodNameConf.class;
+		Class<?> clazz = ExplicitMethodNameTestCase.class;
 		Class<?> returnType = ExampleService.class;
 		Field field = clazz.getField("a");
 		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
@@ -105,7 +114,7 @@ class TestBeanOverrideProcessorTests {
 
 	@Test
 	void createMetaDataForKnownExplicitMethod() throws Exception {
-		Class<?> clazz = ExplicitMethodNameConf.class;
+		Class<?> clazz = ExplicitMethodNameTestCase.class;
 		Field field = clazz.getField("b");
 		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
 		assertThat(overrideAnnotation).isNotNull();
@@ -118,7 +127,7 @@ class TestBeanOverrideProcessorTests {
 	@Test
 	void createMetaDataForConventionBasedFactoryMethod() throws Exception {
 		Class<?> returnType = ExampleService.class;
-		Class<?> clazz = MethodConventionConf.class;
+		Class<?> clazz = MethodConventionTestCase.class;
 		Field field = clazz.getField("field");
 		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
 		assertThat(overrideAnnotation).isNotNull();
@@ -129,12 +138,12 @@ class TestBeanOverrideProcessorTests {
 				.withMessage("""
 						Failed to find a static test bean factory method in %s with return type %s \
 						whose name matches one of the supported candidates %s""",
-						clazz.getName(), returnType.getName(), List.of("someFieldTestOverride", "fieldTestOverride"));
+						clazz.getName(), returnType.getName(), List.of("fieldTestOverride", "someFieldTestOverride"));
 	}
 
 	@Test
 	void failToCreateMetadataForOtherAnnotation() throws NoSuchFieldException {
-		Class<?> clazz = MethodConventionConf.class;
+		Class<?> clazz = MethodConventionTestCase.class;
 		Field field = clazz.getField("field");
 		NonNull badAnnotation = AnnotationUtils.synthesizeAnnotation(NonNull.class);
 
@@ -145,26 +154,25 @@ class TestBeanOverrideProcessorTests {
 	}
 
 
-	static class MethodConventionConf {
+	static class MethodConventionTestCase {
 
 		@TestBean(name = "someField")
 		public ExampleService field;
 
-		@Bean
 		ExampleService example1() {
-			return new FailingExampleService();
+			return null;
 		}
 
 		static ExampleService example2() {
-			return new FailingExampleService();
+			return null;
 		}
 
-		public static ExampleService example4() {
-			return new FailingExampleService();
+		static ExampleService example4() {
+			return null;
 		}
 	}
 
-	static class ExplicitMethodNameConf {
+	static class ExplicitMethodNameTestCase {
 
 		@TestBean(methodName = "explicit1")
 		public ExampleService a;
@@ -173,7 +181,25 @@ class TestBeanOverrideProcessorTests {
 		public ExampleService b;
 
 		static ExampleService explicit2() {
-			return new FailingExampleService();
+			return null;
+		}
+	}
+
+	static class BaseTestCase {
+
+		@TestBean(methodName = "factory")
+		public String field;
+
+		static String factory() {
+			return null;
+		}
+	}
+
+	static class SubTestCase extends BaseTestCase {
+
+		// Hides factory() in superclass.
+		static String factory() {
+			return null;
 		}
 	}
 

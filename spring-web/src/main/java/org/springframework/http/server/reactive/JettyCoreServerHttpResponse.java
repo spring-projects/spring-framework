@@ -44,7 +44,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.JettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
@@ -63,13 +63,8 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 
 	private final Response response;
 
-	public JettyCoreServerHttpResponse(Response response) {
-		this(null, response);
-	}
-
-	public JettyCoreServerHttpResponse(@Nullable DefaultDataBufferFactory dataBufferFactory, Response response) {
-		super(dataBufferFactory == null ? DefaultDataBufferFactory.sharedInstance : dataBufferFactory,
-				new HttpHeaders(new JettyHeadersAdapter(response.getHeaders())));
+	public JettyCoreServerHttpResponse(Response response, JettyDataBufferFactory dataBufferFactory) {
+		super(dataBufferFactory, new HttpHeaders(new JettyHeadersAdapter(response.getHeaders())));
 		this.response = response;
 
 		// remove all existing cookies from the response and add them to the cookie map, to be added back later
@@ -93,13 +88,13 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
 		return Flux.from(body)
-				.flatMap(this::sendDataBuffer, 1)
+				.concatMap(this::sendDataBuffer)
 				.then();
 	}
 
 	@Override
 	protected Mono<Void> writeAndFlushWithInternal(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		return Flux.from(body).flatMap(this::writeWithInternal, 1).then();
+		return Flux.from(body).concatMap(this::writeWithInternal).then();
 	}
 
 	@Override
@@ -110,7 +105,6 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 
 	@Override
 	protected void applyHeaders() {
-
 	}
 
 	@Override

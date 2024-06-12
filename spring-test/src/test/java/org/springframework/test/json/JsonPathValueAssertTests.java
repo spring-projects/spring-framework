@@ -28,7 +28,6 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -231,9 +230,8 @@ class JsonPathValueAssertTests {
 			Map<?, ?> user2 = Map.of("id", 5678, "name", "Sarah", "active", false);
 			Map<?, ?> user3 = Map.of("id", 9012, "name", "Sophia", "active", true);
 			assertThat(forValue(List.of(user1, user2, user3)))
-					.convertTo(new ParameterizedTypeReference<List<User>>() {})
-					.satisfies(users -> assertThat(users).hasSize(3).extracting("name")
-							.containsExactly("John", "Sarah", "Sophia"));
+					.convertTo(InstanceOfAssertFactories.list(User.class))
+					.hasSize(3).extracting("name").containsExactly("John", "Sarah", "Sophia");
 		}
 
 		@Test

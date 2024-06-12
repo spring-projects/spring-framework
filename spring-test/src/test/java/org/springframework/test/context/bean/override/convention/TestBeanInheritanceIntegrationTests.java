@@ -19,115 +19,76 @@ package org.springframework.test.context.bean.override.convention;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.testkit.engine.EngineExecutionResults;
-import org.junit.platform.testkit.engine.EngineTestKit;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.bean.override.convention.AbstractTestBeanIntegrationTestCase.FakePojo;
+import org.springframework.test.context.bean.override.convention.AbstractTestBeanIntegrationTestCase.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.THROWABLE;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
+/**
+ * {@link TestBean @TestBean} inheritance integration tests for success scenarios.
+ *
+ * <p>Tests inheritance within a class hierarchy as well as "inheritance" within
+ * an enclosing class hierarchy.
+ *
+ * @author Simon Baslé
+ * @author Sam Brannen
+ * @since 6.2
+ * @see FailingTestBeanInheritanceIntegrationTests
+ */
 public class TestBeanInheritanceIntegrationTests {
 
-	static AbstractTestBeanIntegrationTestCase.Pojo nestedBeanOverride() {
-		return new AbstractTestBeanIntegrationTestCase.FakePojo("in enclosing test class");
+	static Pojo enclosingClassBeanOverride() {
+		return new FakePojo("in enclosing test class");
 	}
 
 	@Nested
-	@DisplayName("Concrete inherited test with correct @TestBean setup")
-	class ConcreteTestBeanIntegrationTests extends AbstractTestBeanIntegrationTestCase {
+	@DisplayName("Nested, concrete inherited tests with correct @TestBean setup")
+	public class NestedConcreteTestBeanIntegrationTests extends AbstractTestBeanIntegrationTestCase {
+
+		@Autowired
+		ApplicationContext ctx;
 
 		@TestBean(name = "pojo", methodName = "commonBeanOverride")
 		Pojo pojo;
 
-		@TestBean(name = "pojo2", methodName = "nestedBeanOverride")
+		@TestBean(name = "pojo2", methodName = "enclosingClassBeanOverride")
 		Pojo pojo2;
 
 		static Pojo someBeanTestOverride() {
 			return new FakePojo("someBeanOverride");
 		}
 
-		@Test
-		void fieldInSupertypeMethodInType(ApplicationContext ctx) {
-			assertThat(ctx.getBean("someBean")).as("applicationContext").hasToString("someBeanOverride");
-			assertThat(this.someBean.getValue()).as("injection point").isEqualTo("someBeanOverride");
+		// Hides otherBeanTestOverride() defined in AbstractTestBeanIntegrationTestCase.
+		static Pojo otherBeanTestOverride() {
+			return new FakePojo("otherBean in subclass");
 		}
 
 		@Test
-		void fieldInTypeMethodInSuperType(ApplicationContext ctx) {
+		void fieldInSubtypeWithFactoryMethodInSupertype() {
 			assertThat(ctx.getBean("pojo")).as("applicationContext").hasToString("in superclass");
 			assertThat(this.pojo.getValue()).as("injection point").isEqualTo("in superclass");
 		}
 
 		@Test
-		void fieldInTypeMethodInEnclosingClass(ApplicationContext ctx) {
-			assertThat(ctx.getBean("pojo2")).as("applicationContext").hasToString("in enclosing test class");
-			assertThat(this.pojo2.getValue()).as("injection point").isEqualTo("in enclosing test class");
-		}
-
-		@Test
-		void fieldInSupertypePrioritizeMethodInType(ApplicationContext ctx) {
+		void fieldInSupertypeWithFactoryMethodInSubtype() {
 			assertThat(ctx.getBean("someBean")).as("applicationContext").hasToString("someBeanOverride");
 			assertThat(this.someBean.getValue()).as("injection point").isEqualTo("someBeanOverride");
 		}
-	}
-
-
-	@Test
-	void failsIfFieldInSupertypeButNoMethod() {
-		Class<?> clazz = Failing1.class;
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(clazz))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.rootCause().isInstanceOf(IllegalStateException.class)
-						.hasMessage("""
-			Failed to find a static test bean factory method in %s with return type %s \
-			whose name matches one of the supported candidates [someBeanTestOverride]""",
-			clazz.getName(), AbstractTestBeanIntegrationTestCase.Pojo.class.getName()));
-	}
-
-	@Test
-	void failsIfMethod1InSupertypeAndMethod2InType() {
-		Class<?> clazz = Failing2.class;
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(clazz))
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.rootCause().isInstanceOf(IllegalStateException.class)
-						.hasMessage("""
-			Found 2 competing static test bean factory methods in %s with return type %s \
-			whose name matches one of the supported candidates \
-			[thirdBeanTestOverride, anotherBeanTestOverride]""",
-			clazz.getName(), AbstractTestBeanIntegrationTestCase.Pojo.class.getName()));
-	}
-
-	static class Failing1 extends AbstractTestBeanIntegrationTestCase {
 
 		@Test
-		void ignored() {
-		}
-	}
-
-	static class Failing2 extends AbstractTestBeanIntegrationTestCase {
-
-		static Pojo someBeanTestOverride() {
-			return new FakePojo("ignored");
-		}
-
-		static Pojo anotherBeanTestOverride() {
-			return new FakePojo("sub2");
+		void fieldInSupertypeWithPrioritizedFactoryMethodInSubtype() {
+			assertThat(ctx.getBean("otherBean")).as("applicationContext").hasToString("otherBean in subclass");
+			assertThat(super.otherBean.getValue()).as("injection point").isEqualTo("otherBean in subclass");
 		}
 
 		@Test
-		void ignored2() { }
+		void fieldInNestedClassWithFactoryMethodInEnclosingClass() {
+			assertThat(ctx.getBean("pojo2")).as("applicationContext").hasToString("in enclosing test class");
+			assertThat(this.pojo2.getValue()).as("injection point").isEqualTo("in enclosing test class");
+		}
 	}
+
 }

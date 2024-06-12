@@ -17,9 +17,6 @@
 package org.springframework.test.context.bean.override.convention;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.testkit.engine.EngineExecutionResults;
-import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -31,11 +28,16 @@ import org.springframework.test.context.bean.override.example.RealExampleService
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.InstanceOfAssertFactories.THROWABLE;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
-@SpringJUnitConfig(TestBeanByTypeIntegrationTests.ConfigByType.class)
+/**
+ * {@link TestBean @TestBean} "by type" integration tests for success scenarios.
+ *
+ * @author Simon Baslé
+ * @author Sam Brannen
+ * @since 6.2
+ * @see FailingTestBeanByTypeIntegrationTests
+ */
+@SpringJUnitConfig
 public class TestBeanByTypeIntegrationTests {
 
 	@TestBean
@@ -61,6 +63,7 @@ public class TestBeanByTypeIntegrationTests {
 		return new StringBuilder("CustomQualifier TestBean String");
 	}
 
+
 	@Test
 	void overrideIsFoundByType(ApplicationContext ctx) {
 		assertThat(this.anyNameForService)
@@ -85,42 +88,10 @@ public class TestBeanByTypeIntegrationTests {
 		assertThat(ctx.getBean("one")).as("no qualifier needed").hasToString("Prod One");
 	}
 
-	@Test
-	void zeroCandidates() {
-		Class<?> caseClass = CaseNone.class;
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(caseClass))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.cause()
-						.isInstanceOf(IllegalStateException.class)
-						.hasMessage("Unable to select a bean definition to override, 0 bean definitions " +
-								"found of type %s (as required by annotated field '%s.example')",
-								ExampleService.class.getName(), caseClass.getSimpleName()));
-	}
-
-	@Test
-	void tooManyCandidates() {
-		Class<?> caseClass = CaseTooMany.class;
-		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(caseClass))//
-				.execute();
-
-		assertThat(results.allEvents().failed().stream()).hasSize(1).first()
-				.satisfies(e -> assertThat(e.getRequiredPayload(TestExecutionResult.class)
-						.getThrowable()).get(THROWABLE)
-						.cause()
-						.isInstanceOf(IllegalStateException.class)
-						.hasMessage("Unable to select a bean definition to override, 2 bean definitions " +
-								"found of type %s (as required by annotated field '%s.example')",
-								ExampleService.class.getName(), caseClass.getSimpleName()));
-	}
 
 	@Configuration
-	static class ConfigByType {
+	static class Config {
+
 		@Bean("example")
 		ExampleService bean1() {
 			return new RealExampleService("Production hello");
@@ -144,47 +115,4 @@ public class TestBeanByTypeIntegrationTests {
 		}
 	}
 
-	@SpringJUnitConfig(FailingNone.class)
-	static class CaseNone {
-		@TestBean
-		ExampleService example;
-
-		@Test
-		void test() {}
-
-		static ExampleService exampleTestOverride() {
-			fail("unexpected override");
-			return null;
-		}
-	}
-
-	@Configuration
-	static class FailingNone {
-	}
-
-	@SpringJUnitConfig(FailingTooMany.class)
-	static class CaseTooMany {
-		@TestBean
-		ExampleService example;
-
-		@Test
-		void test() {}
-
-		static ExampleService exampleTestOverride() {
-			fail("unexpected override");
-			return null;
-		}
-	}
-
-	@Configuration
-	static class FailingTooMany {
-		@Bean
-		ExampleService bean1() {
-			return new RealExampleService("1 Hello");
-		}
-		@Bean
-		ExampleService bean2() {
-			return new RealExampleService("2 Hello");
-		}
-	}
 }

@@ -355,7 +355,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
-	public DataBuffer split(int index) {
+	public DefaultDataBuffer split(int index) {
 		checkIndex(index);
 
 		ByteBuffer split = this.byteBuffer.duplicate().clear()

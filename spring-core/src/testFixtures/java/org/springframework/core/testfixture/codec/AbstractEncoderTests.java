@@ -251,7 +251,7 @@ public abstract class AbstractEncoderTests<E extends Encoder<?>> extends Abstrac
 		return dataBuffer -> {
 			String actual = dataBuffer.toString(UTF_8);
 			release(dataBuffer);
-			assertThat(actual).isEqualTo(expected);
+			assertThat(actual).isEqualToNormalizingNewlines(expected);
 		};
 	}
 

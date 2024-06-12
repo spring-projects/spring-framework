@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.util.StreamUtils;
  * Created via the {@link ReactorNettyClientRequestFactory}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 6.1
  */
 final class ReactorNettyClientRequest extends AbstractStreamingClientHttpRequest {
@@ -101,18 +102,8 @@ final class ReactorNettyClientRequest extends AbstractStreamingClientHttpRequest
 				return result;
 			}
 		}
-		catch (RuntimeException ex) { // Exceptions.ReactiveException is package private
-			Throwable cause = ex.getCause();
-
-			if (cause instanceof UncheckedIOException uioEx) {
-				throw uioEx.getCause();
-			}
-			else if (cause instanceof IOException ioEx) {
-				throw ioEx;
-			}
-			else {
-				throw ex;
-			}
+		catch (RuntimeException ex) {
+			throw convertException(ex);
 		}
 	}
 
@@ -134,6 +125,22 @@ final class ReactorNettyClientRequest extends AbstractStreamingClientHttpRequest
 		else {
 			return nettyOutbound;
 		}
+	}
+
+	static IOException convertException(RuntimeException ex) {
+		// Exceptions.ReactiveException is package private
+		Throwable cause = ex.getCause();
+
+		if (cause instanceof IOException ioEx) {
+			return ioEx;
+		}
+		if (cause instanceof UncheckedIOException uioEx) {
+			IOException ioEx = uioEx.getCause();
+			if (ioEx != null) {
+				return ioEx;
+			}
+		}
+		return new IOException(ex.getMessage(), cause);
 	}
 
 

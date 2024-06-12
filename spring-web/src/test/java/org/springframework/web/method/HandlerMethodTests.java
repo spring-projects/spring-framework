@@ -40,14 +40,14 @@ class HandlerMethodTests {
 	@Test
 	void shouldValidateArgsWithConstraintsDirectlyOnClass() {
 		Object target = new MyClass();
-		testValidateArgs(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons", "addNames"), true);
+		testValidateArgs(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons", "addPeople", "addNames"), true);
 		testValidateArgs(target, List.of("addPerson", "getPerson", "getIntValue", "addPersonNotValidated"), false);
 	}
 
 	@Test
 	void shouldValidateArgsWithConstraintsOnInterface() {
 		Object target = new MyInterfaceImpl();
-		testValidateArgs(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons"), true);
+		testValidateArgs(target, List.of("addIntValue", "addPersonAndIntValue", "addPersons", "addPeople"), true);
 		testValidateArgs(target, List.of("addPerson", "addPersonNotValidated", "getPerson", "getIntValue"), false);
 	}
 
@@ -115,6 +115,9 @@ class HandlerMethodTests {
 		public void addPersons(@Valid List<Person> persons) {
 		}
 
+		public void addPeople(List<@Valid Person> persons) {
+		}
+
 		public void addNames(List<@NotEmpty String> names) {
 		}
 
@@ -144,6 +147,8 @@ class HandlerMethodTests {
 
 		void addPersons(@Valid List<Person> persons);
 
+		void addPeople(List<@Valid Person> persons);
+
 		void addPersonNotValidated(Person person);
 
 		@Valid
@@ -171,6 +176,10 @@ class HandlerMethodTests {
 
 		@Override
 		public void addPersons(List<Person> persons) {
+		}
+
+		@Override
+		public void addPeople(List<@Valid Person> persons) {
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,24 @@
 
 package org.springframework.beans.factory.aot;
 
+import org.springframework.lang.Nullable;
+
 /**
- * Record class holding key information for beans registered in a bean factory.
+ * Abstract superclass for all exceptions thrown by ahead-of-time processing.
  *
- * @param beanName the name of the registered bean
- * @param beanClass the type of the registered bean
- * @author Brian Clozel
- * @since 6.0.8
+ * @author Stephane Nicoll
+ * @since 6.2
  */
-record BeanRegistrationKey(String beanName, Class<?> beanClass) {
+@SuppressWarnings("serial")
+public abstract class AotException extends RuntimeException {
+
+	/**
+	 * Create an instance with the specified message and root cause.
+	 * @param msg the detail message
+	 * @param cause the root cause
+	 */
+	protected AotException(@Nullable String msg, @Nullable Throwable cause) {
+		super(msg, cause);
+	}
+
 }
