@@ -30,7 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link TestBean @TestBean} "by type" integration tests for success scenarios.
+ * Integration tests for {@link TestBean} that use by-type lookup.
  *
  * @author Simon Baslé
  * @author Sam Brannen
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @see FailingTestBeanByTypeIntegrationTests
  */
 @SpringJUnitConfig
-public class TestBeanByTypeIntegrationTests {
+class TestBeanForByTypeLookupIntegrationTests {
 
 	@TestBean
 	ExampleService anyNameForService;

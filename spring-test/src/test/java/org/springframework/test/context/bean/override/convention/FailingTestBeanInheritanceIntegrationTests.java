@@ -31,7 +31,6 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.me
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
- * @see TestBeanInheritanceIntegrationTests
  */
 class FailingTestBeanInheritanceIntegrationTests {
 

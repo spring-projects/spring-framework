@@ -19,7 +19,6 @@ package org.springframework.test.context.bean.override.mockito;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -31,60 +30,42 @@ import org.springframework.test.context.bean.override.example.RealExampleService
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.BDDMockito.when;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * {@link MockitoBean @MockitoBean} "by type" integration tests for success scenarios.
+ * Integration tests for {@link MockitoSpyBean} that use by-type lookup.
  *
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
- * @see FailingMockitoBeanByTypeIntegrationTests
+ * @see FailingMockitoSpyBeanByTypeIntegrationTests
  */
 @SpringJUnitConfig
-public class MockitoBeanByTypeIntegrationTests {
+public class MockitoSpyBeanForByTypeLookupIntegrationTests {
 
-	@MockitoBean
-	AnotherService serviceIsNotABean;
-
-	@MockitoBean
+	@MockitoSpyBean
 	ExampleService anyNameForService;
 
-	@MockitoBean
+	@MockitoSpyBean
 	@Qualifier("prefer")
 	StringBuilder ambiguous;
 
-	@MockitoBean
+	@MockitoSpyBean
 	@CustomQualifier
 	StringBuilder ambiguousMeta;
 
-	@Test
-	void mockIsCreatedWhenNoCandidateIsFound() {
-		assertThat(this.serviceIsNotABean)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue());
-
-		when(this.serviceIsNotABean.hello()).thenReturn("Mocked hello");
-
-		assertThat(this.serviceIsNotABean.hello()).isEqualTo("Mocked hello");
-		verify(this.serviceIsNotABean, times(1)).hello();
-		verifyNoMoreInteractions(this.serviceIsNotABean);
-	}
 
 	@Test
 	void overrideIsFoundByType(ApplicationContext ctx) {
 		assertThat(this.anyNameForService)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
+				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
 				.isSameAs(ctx.getBean("example"))
 				.isSameAs(ctx.getBean(ExampleService.class));
 
-		when(this.anyNameForService.greeting()).thenReturn("Mocked greeting");
-
-		assertThat(this.anyNameForService.greeting()).isEqualTo("Mocked greeting");
+		assertThat(this.anyNameForService.greeting()).isEqualTo("Production hello");
 		verify(this.anyNameForService, times(1)).greeting();
 		verifyNoMoreInteractions(this.anyNameForService);
 	}
@@ -92,42 +73,35 @@ public class MockitoBeanByTypeIntegrationTests {
 	@Test
 	void overrideIsFoundByTypeAndDisambiguatedByQualifier(ApplicationContext ctx) {
 		assertThat(this.ambiguous)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
+				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
 				.isSameAs(ctx.getBean("ambiguous2"));
 
-		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
+		assertThatException()
 				.isThrownBy(() -> ctx.getBean(StringBuilder.class))
-				.satisfies(ex -> assertThat(ex.getBeanNamesFound()).containsOnly("ambiguous1", "ambiguous2"));
+				.withMessageEndingWith("but found 2: ambiguous1,ambiguous2");
 
-		assertThat(this.ambiguous).isEmpty();
-		assertThat(this.ambiguous.substring(0)).isNull();
+		assertThat(this.ambiguous.toString()).isEqualTo("bean3");
+		assertThat(this.ambiguous.length()).isEqualTo(5);
 		verify(this.ambiguous, times(1)).length();
-		verify(this.ambiguous, times(1)).substring(anyInt());
-		verifyNoMoreInteractions(this.ambiguous);
+		verifyNoMoreInteractions(this.ambiguous); //mockito doesn't verify toString
 	}
 
 	@Test
 	void overrideIsFoundByTypeAndDisambiguatedByMetaQualifier(ApplicationContext ctx) {
 		assertThat(this.ambiguousMeta)
-				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isMock()).as("isMock").isTrue())
+				.satisfies(o -> assertThat(Mockito.mockingDetails(o).isSpy()).as("isSpy").isTrue())
 				.isSameAs(ctx.getBean("ambiguous1"));
 
-		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
+		assertThatException()
 				.isThrownBy(() -> ctx.getBean(StringBuilder.class))
-				.satisfies(ex -> assertThat(ex.getBeanNamesFound()).containsOnly("ambiguous1", "ambiguous2"));
+				.withMessageEndingWith("but found 2: ambiguous1,ambiguous2");
 
-		assertThat(this.ambiguousMeta).isEmpty();
-		assertThat(this.ambiguousMeta.substring(0)).isNull();
+		assertThat(this.ambiguousMeta.toString()).isEqualTo("bean2");
+		assertThat(this.ambiguousMeta.length()).isEqualTo(5);
 		verify(this.ambiguousMeta, times(1)).length();
-		verify(this.ambiguousMeta, times(1)).substring(anyInt());
-		verifyNoMoreInteractions(this.ambiguousMeta);
+		verifyNoMoreInteractions(this.ambiguousMeta); //mockito doesn't verify toString
 	}
 
-	interface AnotherService {
-
-		String hello();
-
-	}
 
 	@Configuration
 	static class Config {

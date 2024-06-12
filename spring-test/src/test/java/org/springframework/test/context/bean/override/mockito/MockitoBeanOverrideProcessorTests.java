@@ -29,40 +29,40 @@ import org.springframework.test.context.bean.override.example.ExampleService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
+/**
+ * Tests for {@link MockitoBeanOverrideProcessorTests}
+ */
 public class MockitoBeanOverrideProcessorTests {
+
+	private final MockitoBeanOverrideProcessor processor = new MockitoBeanOverrideProcessor();
 
 	@Test
 	void mockAnnotationCreatesMockMetadata() throws NoSuchFieldException {
-		MockitoBeanOverrideProcessor processor = new MockitoBeanOverrideProcessor();
 		MockitoBean annotation = AnnotationUtils.synthesizeAnnotation(MockitoBean.class);
 		Class<?> clazz = MockitoConf.class;
 		Field field = clazz.getField("a");
-
-		OverrideMetadata object = processor.createMetadata(annotation, clazz, field);
+		OverrideMetadata object = this.processor.createMetadata(annotation, clazz, field);
 
 		assertThat(object).isExactlyInstanceOf(MockitoBeanOverrideMetadata.class);
 	}
 
 	@Test
 	void spyAnnotationCreatesSpyMetadata() throws NoSuchFieldException {
-		MockitoBeanOverrideProcessor processor = new MockitoBeanOverrideProcessor();
 		MockitoSpyBean annotation = AnnotationUtils.synthesizeAnnotation(MockitoSpyBean.class);
 		Class<?> clazz = MockitoConf.class;
 		Field field = clazz.getField("a");
-
-		OverrideMetadata object = processor.createMetadata(annotation, clazz, field);
+		OverrideMetadata object = this.processor.createMetadata(annotation, clazz, field);
 
 		assertThat(object).isExactlyInstanceOf(MockitoSpyBeanOverrideMetadata.class);
 	}
 
 	@Test
 	void otherAnnotationThrows() throws NoSuchFieldException {
-		MockitoBeanOverrideProcessor processor = new MockitoBeanOverrideProcessor();
 		Class<?> clazz = MockitoConf.class;
 		Field field = clazz.getField("a");
 		Annotation annotation = field.getAnnotation(Nullable.class);
 
-		assertThatIllegalStateException().isThrownBy(() -> processor.createMetadata(annotation, clazz, field))
+		assertThatIllegalStateException().isThrownBy(() -> this.processor.createMetadata(annotation, clazz, field))
 				.withMessage("Invalid annotation passed to MockitoBeanOverrideProcessor: expected " +
 						"@MockitoBean/@MockitoSpyBean on field %s.%s", field.getDeclaringClass().getName(),
 						field.getName());

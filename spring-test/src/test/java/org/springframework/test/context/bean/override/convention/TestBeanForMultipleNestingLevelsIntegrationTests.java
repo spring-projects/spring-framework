@@ -26,14 +26,14 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link TestBean @TestBean} integration tests with multiple levels of
+ * Integration tests for {@link TestBean} that use multiple levels of
  * {@link Nested @Nested} test classes.
  *
  * @author Sam Brannen
  * @since 6.2
  */
 @SpringJUnitConfig
-class MultipleNestingLevelsTestBeanIntegrationTests {
+class TestBeanForMultipleNestingLevelsIntegrationTests {
 
 	@TestBean(name = "field0", methodName = "testField0")
 	String field0;

@@ -25,14 +25,14 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link TestBean @TestBean} integration tests for test bean factory methods
+ * Integration tests for {@link TestBean} that use a bean factory methods
  * defined in implemented interfaces.
  *
  * @author Sam Brannen
  * @since 6.2
  */
 @SpringJUnitConfig
-public class TestBeanInterfaceIntegrationTests implements TestBeanFactory {
+class TestBeanForInterfaceIntegrationTests implements TestBeanFactory {
 
 	@TestBean(methodName = "createTestMessage")
 	String message;

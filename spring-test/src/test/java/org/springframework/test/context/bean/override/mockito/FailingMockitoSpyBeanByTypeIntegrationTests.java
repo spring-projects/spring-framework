@@ -38,7 +38,6 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.me
  *
  * @author Sam Brannen
  * @since 6.2
- * @see MockitoSpyBeanByTypeIntegrationTests
  */
 class FailingMockitoSpyBeanByTypeIntegrationTests {
 

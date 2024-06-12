@@ -36,7 +36,6 @@ import static org.springframework.test.context.junit.EngineTestKitUtils.rootCaus
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
- * @see TestBeanIntegrationTests
  */
 class FailingTestBeanIntegrationTests {
 

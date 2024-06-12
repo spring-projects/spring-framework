@@ -28,7 +28,7 @@ import org.springframework.test.context.bean.override.convention.AbstractTestBea
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link TestBean @TestBean} inheritance integration tests for success scenarios.
+ * Integration tests for {@link TestBean} that use inheritance.
  *
  * <p>Tests inheritance within a class hierarchy as well as "inheritance" within
  * an enclosing class hierarchy.
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.2
  * @see FailingTestBeanInheritanceIntegrationTests
  */
-public class TestBeanInheritanceIntegrationTests {
+class TestBeanForInheritanceIntegrationTests {
 
 	static Pojo enclosingClassBeanOverride() {
 		return new FakePojo("in enclosing test class");
@@ -46,7 +46,7 @@ public class TestBeanInheritanceIntegrationTests {
 
 	@Nested
 	@DisplayName("Nested, concrete inherited tests with correct @TestBean setup")
-	public class NestedConcreteTestBeanIntegrationTests extends AbstractTestBeanIntegrationTestCase {
+	class NestedConcreteTestBeanIntegrationTests extends AbstractTestBeanIntegrationTestCase {
 
 		@Autowired
 		ApplicationContext ctx;
