@@ -28,7 +28,7 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.7"
-			mavenBom "io.netty:netty-bom:4.1.109.Final"
+			mavenBom "io.netty:netty-bom:4.1.111.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.45"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR13"
 			mavenBom "io.rsocket:rsocket-bom:1.1.3"
@@ -362,7 +362,7 @@ configure([rootProject] + javaProjects) { project ->
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")
-		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.41")
+		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.42")
 	}
 
 	ext.javadocLinks = [
