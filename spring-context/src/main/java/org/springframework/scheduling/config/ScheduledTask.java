@@ -86,8 +86,9 @@ public final class ScheduledTask {
 	 */
 	@Nullable
 	public Instant nextExecution() {
-		if (this.future != null && !this.future.isCancelled()) {
-			long delay = this.future.getDelay(TimeUnit.MILLISECONDS);
+		ScheduledFuture<?> future = this.future;
+		if (future != null && !future.isCancelled()) {
+			long delay = future.getDelay(TimeUnit.MILLISECONDS);
 			if (delay > 0) {
 				return Instant.now().plusMillis(delay);
 			}

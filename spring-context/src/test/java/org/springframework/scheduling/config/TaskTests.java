@@ -24,7 +24,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link Task}.
+ *
  * @author Brian Clozel
+ * @since 6.2
  */
 class TaskTests {
 
@@ -77,9 +79,16 @@ class TaskTests {
 
 		@Override
 		public void run() {
+			try {
+				Thread.sleep(1);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
 			this.hasRun = true;
 		}
 	}
+
 
 	static class FailingTestRunnable implements Runnable {
 
@@ -87,10 +96,15 @@ class TaskTests {
 
 		@Override
 		public void run() {
+			try {
+				Thread.sleep(1);
+			}
+			catch (InterruptedException ex) {
+				throw new RuntimeException(ex);
+			}
 			this.hasRun = true;
 			throw new IllegalStateException("test exception");
 		}
 	}
-
 
 }
