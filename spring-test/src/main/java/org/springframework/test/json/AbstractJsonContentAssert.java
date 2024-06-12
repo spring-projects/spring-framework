@@ -18,15 +18,20 @@ package org.springframework.test.json;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractObjectAssert;
+import org.assertj.core.api.AssertFactory;
 import org.assertj.core.api.AssertProvider;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
 
@@ -35,8 +40,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.util.Assert;
 
 /**
@@ -89,6 +98,62 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 		this.jsonLoader = new JsonLoader(null, null);
 		as("JSON content");
 	}
+
+	/**
+	 * Verify that the actual value can be converted to an instance of the
+	 * given {@code target}, and produce a new {@linkplain AbstractObjectAssert
+	 * assertion} object narrowed to that type.
+	 * @param target the {@linkplain Class type} to convert the actual value to
+	 */
+	public <T> AbstractObjectAssert<?, T> convertTo(Class<T> target) {
+		isNotNull();
+		T value = convertToTargetType(target);
+		return Assertions.assertThat(value);
+	}
+
+	/**
+	 * Verify that the actual value can be converted to an instance of the type
+	 * defined by the given {@link AssertFactory} and return a new Assert narrowed
+	 * to that type.
+	 * <p>{@link InstanceOfAssertFactories} provides static factories for all the
+	 * types supported by {@link Assertions#assertThat}. Additional factories can
+	 * be created by implementing {@link AssertFactory}.
+	 * <p>Example: <pre><code class="java">
+	 * // Check that the JSON document is an array of 3 users
+	 * assertThat(json).convertTo(InstanceOfAssertFactories.list(User.class))
+	 *         hasSize(3); // ListAssert of User
+	 * </code></pre>
+	 * @param assertFactory the {@link AssertFactory} to use to produce a narrowed
+	 * Assert for the type that it defines.
+	 */
+	public <ASSERT extends AbstractAssert<?, ?>> ASSERT convertTo(AssertFactory<?, ASSERT> assertFactory) {
+		isNotNull();
+		return assertFactory.createAssert(this::convertToTargetType);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T convertToTargetType(Type targetType) {
+		String json = this.actual.getJson();
+		if (this.jsonMessageConverter == null) {
+			throw new IllegalStateException(
+					"No JSON message converter available to convert %s".formatted(json));
+		}
+		try {
+			return (T) this.jsonMessageConverter.read(targetType, getClass(), fromJson(json));
+		}
+		catch (Exception ex) {
+			throw failure(new ValueProcessingFailed(json,
+					"To convert successfully to:%n  %s%nBut it failed:%n  %s%n".formatted(
+							targetType.getTypeName(), ex.getMessage())));
+		}
+	}
+
+	private HttpInputMessage fromJson(String json) {
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(json.getBytes(StandardCharsets.UTF_8));
+		inputMessage.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+		return inputMessage;
+	}
+
 
 	// JsonPath support
 
@@ -522,6 +587,13 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 			private JsonPathNotExpected(String actual, String path) {
 				super("%nExpecting:%n  %s%nNot to match JSON path:%n  %s%n", actual, path);
 			}
+		}
+	}
+
+	private static final class ValueProcessingFailed extends BasicErrorMessageFactory {
+
+		private ValueProcessingFailed(String actualToString, String errorMessage) {
+			super("%nExpected:%n  %s%n%s".formatted(actualToString, errorMessage));
 		}
 	}
 
