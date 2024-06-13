@@ -88,7 +88,7 @@ final class ReactorNettyClientResponse implements ClientHttpResponse {
 		}
 
 		if (body == null) {
-			throw new IOException("Could not receive body");
+			body = InputStream.nullInputStream();
 		}
 		this.body = body;
 		return body;
