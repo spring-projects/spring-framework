@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -618,6 +619,14 @@ class MockHttpServletResponseTests {
 		assertThat(response.getContentType()).isEqualTo("text/plain");
 		contentTypeHeader = response.getHeader(CONTENT_TYPE);
 		assertThat(contentTypeHeader).isEqualTo("text/plain");
+	}
+
+	@Test  // gh-33019
+	void contentAsStringEncodingWithJson() throws IOException {
+		String content = "{\"name\": \"Jürgen\"}";
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		response.getWriter().write(content);
+		assertThat(response.getContentAsString()).isEqualTo(content);
 	}
 
 }

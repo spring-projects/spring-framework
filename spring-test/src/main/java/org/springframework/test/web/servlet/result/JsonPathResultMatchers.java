@@ -17,7 +17,6 @@
 package org.springframework.test.web.servlet.result;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 
 import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
@@ -238,7 +237,7 @@ public class JsonPathResultMatchers {
 	}
 
 	private String getContent(MvcResult result) throws UnsupportedEncodingException {
-		String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+		String content = result.getResponse().getContentAsString();
 		if (StringUtils.hasLength(this.prefix)) {
 			try {
 				String reason = String.format("Expected a JSON payload prefixed with \"%s\" but found: %s",
