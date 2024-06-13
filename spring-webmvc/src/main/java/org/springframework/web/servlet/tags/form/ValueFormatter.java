@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
+import java.util.function.UnaryOperator;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
@@ -51,6 +52,16 @@ abstract class ValueFormatter {
 
 	/**
 	 * Build the display value of the supplied {@code Object}, HTML escaped
+	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
+	 * @see #getDisplayString(Object, java.beans.PropertyEditor, UnaryOperator)
+	 */
+	public static String getDisplayString(@Nullable Object value, UnaryOperator<String> htmlEscape) {
+		String displayValue = ObjectUtils.getDisplayString(value);
+		return htmlEscape.apply(displayValue);
+	}
+
+	/**
+	 * Build the display value of the supplied {@code Object}, HTML escaped
 	 * as required. If the supplied value is not a {@link String} and the supplied
 	 * {@link PropertyEditor} is not null then the {@link PropertyEditor} is used
 	 * to obtain the display value.
@@ -58,6 +69,31 @@ abstract class ValueFormatter {
 	 */
 	public static String getDisplayString(
 			@Nullable Object value, @Nullable PropertyEditor propertyEditor, boolean htmlEscape) {
+
+		if (propertyEditor != null && !(value instanceof String)) {
+			try {
+				propertyEditor.setValue(value);
+				String text = propertyEditor.getAsText();
+				if (text != null) {
+					return getDisplayString(text, htmlEscape);
+				}
+			}
+			catch (Throwable ex) {
+				// The PropertyEditor might not support this value... pass through.
+			}
+		}
+		return getDisplayString(value, htmlEscape);
+	}
+
+	/**
+	 * Build the display value of the supplied {@code Object}, HTML escaped
+	 * as required. If the supplied value is not a {@link String} and the supplied
+	 * {@link PropertyEditor} is not null then the {@link PropertyEditor} is used
+	 * to obtain the display value.
+	 * @see #getDisplayString(Object, UnaryOperator)
+	 */
+	public static String getDisplayString(
+			@Nullable Object value, @Nullable PropertyEditor propertyEditor, UnaryOperator<String> htmlEscape) {
 
 		if (propertyEditor != null && !(value instanceof String)) {
 			try {

@@ -92,7 +92,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
 	 */
 	protected String getDisplayString(@Nullable Object value) {
-		return ValueFormatter.getDisplayString(value, isHtmlEscape());
+		return ValueFormatter.getDisplayString(value, this::htmlEscape);
 	}
 
 	/**
@@ -102,7 +102,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * to obtain the display value.
 	 */
 	protected String getDisplayString(@Nullable Object value, @Nullable PropertyEditor propertyEditor) {
-		return ValueFormatter.getDisplayString(value, propertyEditor, isHtmlEscape());
+		return ValueFormatter.getDisplayString(value, propertyEditor, this::htmlEscape);
 	}
 
 	/**
