@@ -49,6 +49,7 @@ import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
+import org.springframework.core.SmartClassLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
@@ -132,11 +133,19 @@ class ConfigurationClassEnhancer {
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-		enhancer.setAttemptLoad(true);
+		enhancer.setAttemptLoad(!isClassReloadable(configSuperClass, classLoader));
 		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
 		return enhancer;
+	}
+
+	/**
+	 * Checks whether the given configuration class is reloadable.
+	 */
+	private boolean isClassReloadable(Class<?> configSuperClass, @Nullable ClassLoader classLoader) {
+		return (classLoader instanceof SmartClassLoader smartClassLoader &&
+				smartClassLoader.isClassReloadable(configSuperClass));
 	}
 
 	/**
