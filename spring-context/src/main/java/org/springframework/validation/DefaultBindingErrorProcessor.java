@@ -66,7 +66,7 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 
 	@Override
 	public void processPropertyAccessException(PropertyAccessException ex, BindingResult bindingResult) {
-		// Create field error with the exceptions's code, e.g. "typeMismatch".
+		// Create field error with the code of the exception, e.g. "typeMismatch".
 		String field = ex.getPropertyName();
 		Assert.state(field != null, "No field in exception");
 		String[] codes = bindingResult.resolveMessageCodes(ex.getErrorCode(), field);
