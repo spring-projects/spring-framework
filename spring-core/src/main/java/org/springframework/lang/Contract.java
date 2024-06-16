@@ -52,7 +52,7 @@ import java.lang.annotation.Target;
  * <code>@Contract("true -> fail")</code> - a typical assertFalse method which throws an exception if <code>true</code> is passed to it<br/>
  *
  * @author Sebastien Deleuze
- * @since 6.2
+ * @since 6.2.0
  * @see <a href="https://github.com/uber/NullAway/wiki/Configuration#custom-contract-annotations">NullAway custom contract annotations</a>
  */
 @Documented
