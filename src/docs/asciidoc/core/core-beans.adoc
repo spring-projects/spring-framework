@@ -4547,7 +4547,7 @@ dataSource.url=jdbc:mysql:mydb
 ----
 
 This example file can be used with a container definition that contains a bean called
-`dataSource` that has `driver` and `url` properties.
+`dataSource` that has `driverClassName` and `url` properties.
 
 Compound property names are also supported, as long as every component of the path
 except the final property being overridden is already non-null (presumably initialized
