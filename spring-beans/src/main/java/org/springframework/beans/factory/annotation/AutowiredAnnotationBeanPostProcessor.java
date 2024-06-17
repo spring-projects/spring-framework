@@ -875,7 +875,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			int argumentCount = method.getParameterCount();
 			Object[] arguments = new Object[argumentCount];
 			DependencyDescriptor[] descriptors = new DependencyDescriptor[argumentCount];
-			Set<String> autowiredBeanNames = new LinkedHashSet<>(argumentCount * 2);
+			Set<String> autowiredBeanNames = CollectionUtils.newLinkedHashSet(argumentCount);
 			Assert.state(beanFactory != null, "No BeanFactory available");
 			TypeConverter typeConverter = beanFactory.getTypeConverter();
 			for (int i = 0; i < arguments.length; i++) {
