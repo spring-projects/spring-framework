@@ -31,10 +31,12 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.AbstractMockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -389,8 +391,42 @@ public final class MockMvcTester {
 	public final class MockMvcRequestBuilder extends AbstractMockHttpServletRequestBuilder<MockMvcRequestBuilder>
 			implements AssertProvider<MvcTestResultAssert> {
 
+		private final HttpMethod httpMethod;
+
 		private MockMvcRequestBuilder(HttpMethod httpMethod) {
 			super(httpMethod);
+			this.httpMethod = httpMethod;
+		}
+
+		/**
+		 * Enable file upload support using multipart.
+		 * @return a {@link MockMultipartMvcRequestBuilder} with the settings
+		 * configured thus far
+		 */
+		public MockMultipartMvcRequestBuilder multipart() {
+			return new MockMultipartMvcRequestBuilder(this);
+		}
+
+		public MvcTestResult exchange() {
+			return perform(this);
+		}
+
+		@Override
+		public MvcTestResultAssert assertThat() {
+			return new MvcTestResultAssert(exchange(), MockMvcTester.this.jsonMessageConverter);
+		}
+	}
+
+	/**
+	 * A builder for {@link MockMultipartHttpServletRequest} that supports AssertJ.
+	 */
+	public final class MockMultipartMvcRequestBuilder
+			extends AbstractMockMultipartHttpServletRequestBuilder<MockMultipartMvcRequestBuilder>
+			implements AssertProvider<MvcTestResultAssert> {
+
+		private MockMultipartMvcRequestBuilder(MockMvcRequestBuilder currentBuilder) {
+			super(currentBuilder.httpMethod);
+			merge(currentBuilder);
 		}
 
 		public MvcTestResult exchange() {
