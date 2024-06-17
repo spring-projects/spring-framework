@@ -276,7 +276,12 @@ public final class BridgeMethodResolver {
 	 */
 	public static boolean isVisibilityBridgeMethodPair(Method bridgeMethod, Method bridgedMethod) {
 		if (bridgeMethod == bridgedMethod) {
+			// Same method: for common purposes, return true to proceed as if it was a visibility bridge.
 			return true;
+		}
+		if (ClassUtils.getUserClass(bridgeMethod.getDeclaringClass()) != bridgeMethod.getDeclaringClass()) {
+			// Method on generated subclass: return false to consistently ignore it for visibility purposes.
+			return false;
 		}
 		return (bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType()) &&
 				bridgeMethod.getParameterCount() == bridgedMethod.getParameterCount() &&

@@ -26,6 +26,7 @@ import jakarta.inject.Provider;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +44,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -179,6 +181,14 @@ class AutowiredConfigurationTests {
 	void testValueInjectionWithProviderMethodArguments() {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(ValueConfigWithProviderMethodArguments.class);
+		doTestValueInjection(context);
+		context.close();
+	}
+
+	@Test
+	void testValueInjectionWithAccidentalAutowiredAnnotations() {
+		AnnotationConfigApplicationContext context =
+				new AnnotationConfigApplicationContext(ValueConfigWithAccidentalAutowiredAnnotations.class);
 		doTestValueInjection(context);
 		context.close();
 	}
@@ -489,6 +499,32 @@ class AutowiredConfigurationTests {
 
 		@Bean @Scope("prototype")
 		public TestBean testBean2(@Value("#{systemProperties[myProp]}") Provider<String> name2) {
+			return new TestBean(name2.get());
+		}
+	}
+
+
+	@Configuration
+	static class ValueConfigWithAccidentalAutowiredAnnotations implements InitializingBean {
+
+		boolean invoked;
+
+		@Override
+		public void afterPropertiesSet() {
+			Assert.state(!invoked, "Factory method must not get invoked on startup");
+		}
+
+		@Bean @Scope("prototype")
+		@Autowired
+		public TestBean testBean(@Value("#{systemProperties[myProp]}") Provider<String> name) {
+			invoked = true;
+			return new TestBean(name.get());
+		}
+
+		@Bean @Scope("prototype")
+		@Autowired
+		public TestBean testBean2(@Value("#{systemProperties[myProp]}") Provider<String> name2) {
+			invoked = true;
 			return new TestBean(name2.get());
 		}
 	}
