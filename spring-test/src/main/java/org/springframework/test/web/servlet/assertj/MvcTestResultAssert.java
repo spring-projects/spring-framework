@@ -28,7 +28,6 @@ import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.MapAssert;
-import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
 
@@ -126,17 +125,6 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	 */
 	public MapAssert<String, Object> flash() {
 		return new MapAssert<>(getMvcResult().getFlashMap());
-	}
-
-	/**
-	 * Verify that {@linkplain AbstractHttpServletRequestAssert#hasAsyncStarted(boolean)
-	 * asynchronous processing has started} and return a new
-	 * {@linkplain ObjectAssert assertion} object that uses the asynchronous
-	 * result as the object to test.
-	 */
-	public ObjectAssert<Object> asyncResult() {
-		request().hasAsyncStarted(true);
-		return Assertions.assertThat(getMvcResult().getAsyncResult()).as("Async result");
 	}
 
 	/**

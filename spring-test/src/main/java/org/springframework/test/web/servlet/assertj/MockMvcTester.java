@@ -17,12 +17,14 @@
 package org.springframework.test.web.servlet.assertj;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
+import jakarta.servlet.DispatcherType;
 import org.assertj.core.api.AssertProvider;
 
 import org.springframework.http.HttpMethod;
@@ -384,6 +386,34 @@ public final class MockMvcTester {
 				.findFirst().orElse(null);
 	}
 
+	/**
+	 * Execute the request using the specified {@link RequestBuilder}. If the
+	 * request is processing asynchronously, wait at most the given
+	 * {@code timeToWait} duration. If not specified, then fall back on the
+	 * timeout value associated with the async request, see
+	 * {@link org.springframework.mock.web.MockAsyncContext#setTimeout}.
+	 */
+	MvcTestResult exchange(RequestBuilder requestBuilder, @Nullable Duration timeToWait) {
+		MvcTestResult result = perform(requestBuilder);
+		if (result.getUnresolvedException() == null) {
+			if (result.getRequest().isAsyncStarted()) {
+				// Wait for async result before dispatching
+				long waitMs = (timeToWait != null ? timeToWait.toMillis() : -1);
+				result.getMvcResult().getAsyncResult(waitMs);
+
+				// Perform ASYNC dispatch
+				RequestBuilder dispatchRequest = servletContext -> {
+					MockHttpServletRequest request = result.getMvcResult().getRequest();
+					request.setDispatcherType(DispatcherType.ASYNC);
+					request.setAsyncStarted(false);
+					return request;
+				};
+				return perform(dispatchRequest);
+			}
+		}
+		return result;
+	}
+
 
 	/**
 	 * A builder for {@link MockHttpServletRequest} that supports AssertJ.
@@ -407,8 +437,31 @@ public final class MockMvcTester {
 			return new MockMultipartMvcRequestBuilder(this);
 		}
 
+		/**
+		 * Execute the request. If the request is processing asynchronously,
+		 * wait at most the given timeout value associated with the async request,
+		 * see {@link org.springframework.mock.web.MockAsyncContext#setTimeout}.
+		 * <p>For simple assertions, you can wrap this builder in
+		 * {@code assertThat} rather than calling this method explicitly:
+		 * <pre><code class="java">
+		 * // These two examples are equivalent
+		 * assertThat(mvc.get().uri("/greet")).hasStatusOk();
+		 * assertThat(mvc.get().uri("/greet").exchange()).hasStatusOk();
+		 * </code></pre>
+		 * @see #exchange(Duration) to customize the timeout for async requests
+		 */
 		public MvcTestResult exchange() {
-			return perform(this);
+			return MockMvcTester.this.exchange(this, null);
+		}
+
+		/**
+		 * Execute the request and wait at most the given {@code timeToWait}
+		 * duration for the asynchronous request to complete. If the request
+		 * is not asynchronous, the {@code timeToWait} is ignored.
+		 * @see #exchange()
+		 */
+		public MvcTestResult exchange(Duration timeToWait) {
+			return MockMvcTester.this.exchange(this, timeToWait);
 		}
 
 		@Override
@@ -429,8 +482,31 @@ public final class MockMvcTester {
 			merge(currentBuilder);
 		}
 
+		/**
+		 * Execute the request. If the request is processing asynchronously,
+		 * wait at most the given timeout value associated with the async request,
+		 * see {@link org.springframework.mock.web.MockAsyncContext#setTimeout}.
+		 * <p>For simple assertions, you can wrap this builder in
+		 * {@code assertThat} rather than calling this method explicitly:
+		 * <pre><code class="java">
+		 * // These two examples are equivalent
+		 * assertThat(mvc.get().uri("/greet")).hasStatusOk();
+		 * assertThat(mvc.get().uri("/greet").exchange()).hasStatusOk();
+		 * </code></pre>
+		 * @see #exchange(Duration) to customize the timeout for async requests
+		 */
 		public MvcTestResult exchange() {
-			return perform(this);
+			return MockMvcTester.this.exchange(this, null);
+		}
+
+		/**
+		 * Execute the request and wait at most the given {@code timeToWait}
+		 * duration for the asynchronous request to complete. If the request
+		 * is not asynchronous, the {@code timeToWait} is ignored.
+		 * @see #exchange()
+		 */
+		public MvcTestResult exchange(Duration timeToWait) {
+			return MockMvcTester.this.exchange(this, timeToWait);
 		}
 
 		@Override

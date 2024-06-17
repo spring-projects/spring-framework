@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -53,6 +55,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.assertj.MockMvcTester.MockMvcRequestBuilder;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,14 +76,16 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.InstanceOfAssertFactories.map;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Integration tests for {@link MockMvcTester}.
@@ -98,11 +103,59 @@ public class MockMvcTesterIntegrationTests {
 	}
 
 	@Nested
+	class PerformTests {
+
+		@Test
+		void syncRequestWithDefaultExchange() {
+			assertThat(mvc.get().uri("/greet")).hasStatusOk();
+		}
+
+		@Test
+		void asyncRequestWithDefaultExchange() {
+			assertThat(mvc.get().uri("/streaming").param("timeToWait", "100")).hasStatusOk()
+					.hasBodyTextEqualTo("name=Joe&someBoolean=true");
+		}
+
+		@Test
+		void syncRequestWithExplicitExchange() {
+			assertThat(mvc.get().uri("/greet").exchange()).hasStatusOk();
+		}
+
+		@Test
+		void asyncRequestWithExplicitExchange() {
+			assertThat(mvc.get().uri("/streaming").param("timeToWait", "100").exchange())
+					.hasStatusOk().hasBodyTextEqualTo("name=Joe&someBoolean=true");
+		}
+
+		@Test
+		void syncRequestWithExplicitExchangeIgnoresDuration() {
+			Duration timeToWait = mock(Duration.class);
+			assertThat(mvc.get().uri("/greet").exchange(timeToWait)).hasStatusOk();
+			verifyNoInteractions(timeToWait);
+		}
+
+		@Test
+		void asyncRequestWithExplicitExchangeAndEnoughTimeToWait() {
+			assertThat(mvc.get().uri("/streaming").param("timeToWait", "100").exchange(Duration.ofMillis(200)))
+					.hasStatusOk().hasBodyTextEqualTo("name=Joe&someBoolean=true");
+		}
+
+		@Test
+		void asyncRequestWithExplicitExchangeAndNotEnoughTimeToWait() {
+			MockMvcRequestBuilder builder = mvc.get().uri("/streaming").param("timeToWait", "500");
+			assertThatIllegalStateException()
+					.isThrownBy(() -> builder.exchange(Duration.ofMillis(100)))
+					.withMessageContaining("was not set during the specified timeToWait=100");
+		}
+	}
+
+	@Nested
 	class RequestTests {
 
 		@Test
 		void hasAsyncStartedTrue() {
-			assertThat(mvc.get().uri("/callable").accept(MediaType.APPLICATION_JSON))
+			// Need #perform as the regular exchange waits for async completion automatically
+			assertThat(mvc.perform(mvc.get().uri("/callable").accept(MediaType.APPLICATION_JSON)))
 					.request().hasAsyncStarted(true);
 		}
 
@@ -272,8 +325,10 @@ public class MockMvcTesterIntegrationTests {
 
 		@Test
 		void asyncResult() {
-			assertThat(mvc.get().uri("/callable").accept(MediaType.APPLICATION_JSON))
-					.asyncResult().asInstanceOf(map(String.class, Object.class))
+			// Need #perform as the regular exchange waits for async completion automatically
+			MvcTestResult result = mvc.perform(mvc.get().uri("/callable").accept(MediaType.APPLICATION_JSON));
+			assertThat(result.getMvcResult().getAsyncResult())
+					.asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
 					.containsOnly(entry("key", "value"));
 		}
 
@@ -439,12 +494,6 @@ public class MockMvcTesterIntegrationTests {
 		void assertAndApplyWithUnresolvedException() {
 			testAssertionFailureWithUnresolvableException(
 					result -> assertThat(result).apply(mvcResult -> {}));
-		}
-
-		@Test
-		void assertAsyncResultWithUnresolvedException() {
-			testAssertionFailureWithUnresolvableException(
-					result -> assertThat(result).asyncResult());
 		}
 
 		@Test
@@ -616,6 +665,21 @@ public class MockMvcTesterIntegrationTests {
 		@GetMapping("/callable")
 		public Callable<Map<String, String>> getCallable() {
 			return () -> Collections.singletonMap("key", "value");
+		}
+
+		@GetMapping("/streaming")
+		StreamingResponseBody streaming(@RequestParam long timeToWait) {
+			return out -> {
+				PrintStream stream = new PrintStream(out, true, StandardCharsets.UTF_8);
+				stream.print("name=Joe");
+				try {
+					Thread.sleep(timeToWait);
+					stream.print("&someBoolean=true");
+				}
+				catch (InterruptedException e) {
+					/* no-op */
+				}
+			};
 		}
 	}
 

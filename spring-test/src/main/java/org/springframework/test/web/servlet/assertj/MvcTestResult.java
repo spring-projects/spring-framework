@@ -38,6 +38,10 @@ import org.springframework.test.web.servlet.MvcResult;
  * {@linkplain #getMvcResult() result} will fail with an exception.</li>
  * </ol>
  *
+ * <p>If the request was asynchronous, it is fully resolved at this point and
+ * regular assertions can be applied without having to wait for the completion
+ * of the response.
+ *
  * @author Stephane Nicoll
  * @author Brian Clozel
  * @since 6.2
@@ -68,7 +72,6 @@ public interface MvcTestResult extends AssertProvider<MvcTestResultAssert> {
 	default MockHttpServletResponse getResponse() {
 		return getMvcResult().getResponse();
 	}
-
 
 	/**
 	 * Return the exception that was thrown unexpectedly while processing the
