@@ -109,7 +109,7 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	/**
 	 * Verify that a {@link ModelAndView} is available and return a new
 	 * {@linkplain AbstractStringAssert assertion} object that uses the
-	 * {@linkplain ModelAndView#getViewName()} view name} as the object to test.
+	 * {@linkplain ModelAndView#getViewName() view name} as the object to test.
 	 * @see #hasViewName(String)
 	 */
 	public AbstractStringAssert<?> viewName() {
