@@ -592,6 +592,9 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		if (!(parent instanceof AbstractMockHttpServletRequestBuilder<?> parentBuilder)) {
 			throw new IllegalArgumentException("Cannot merge with [" + parent.getClass().getName() + "]");
 		}
+		if (this.uri == null) {
+			this.uri = parentBuilder.uri;
+		}
 		if (!StringUtils.hasText(this.contextPath)) {
 			this.contextPath = parentBuilder.contextPath;
 		}
