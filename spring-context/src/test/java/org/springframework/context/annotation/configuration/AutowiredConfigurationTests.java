@@ -30,6 +30,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -47,6 +48,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * System tests covering use of {@link Autowired} and {@link Value} within
@@ -187,10 +189,8 @@ class AutowiredConfigurationTests {
 
 	@Test
 	void testValueInjectionWithAccidentalAutowiredAnnotations() {
-		AnnotationConfigApplicationContext context =
-				new AnnotationConfigApplicationContext(ValueConfigWithAccidentalAutowiredAnnotations.class);
-		doTestValueInjection(context);
-		context.close();
+		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
+				new AnnotationConfigApplicationContext(ValueConfigWithAccidentalAutowiredAnnotations.class));
 	}
 
 	private void doTestValueInjection(BeanFactory context) {
