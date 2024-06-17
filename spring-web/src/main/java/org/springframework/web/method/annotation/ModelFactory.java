@@ -37,7 +37,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -115,7 +114,7 @@ public final class ModelFactory {
 			if (!container.containsAttribute(name)) {
 				Object value = this.sessionAttributesHandler.retrieveAttribute(request, name);
 				if (value == null) {
-					throw new HttpSessionRequiredException("Expected session attribute '" + name + "'", name);
+					throw new IllegalStateException("Expected session attribute '" + name + "'");
 				}
 				container.addAttribute(name, value);
 			}
