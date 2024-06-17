@@ -27,7 +27,6 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
@@ -43,7 +42,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -151,7 +150,7 @@ class ModelFactoryTests {
 	void sessionAttributeNotPresent() throws Exception {
 		ModelFactory modelFactory = new ModelFactory(null, null, this.attributeHandler);
 		HandlerMethod handlerMethod = createHandlerMethod("handleSessionAttr", String.class);
-		assertThatExceptionOfType(HttpSessionRequiredException.class).isThrownBy(() ->
+		assertThatIllegalStateException().isThrownBy(() ->
 				modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod));
 
 		// Now add attribute and try again
@@ -164,7 +163,7 @@ class ModelFactoryTests {
 	void sessionAttributeByType() throws Exception {
 		ModelFactory modelFactory = new ModelFactory(null, null, this.attributeHandler);
 		HandlerMethod handlerMethod = createHandlerMethod("handleTestBean", TestBean.class);
-		assertThatExceptionOfType(HttpSessionRequiredException.class).isThrownBy(() ->
+		assertThatIllegalStateException().isThrownBy(() ->
 				modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod));
 
 		// Now add attribute and try again
