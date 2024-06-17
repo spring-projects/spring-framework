@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.context.ApplicationContext;
 public class ContextStoppedEvent extends ApplicationContextEvent {
 
 	/**
-	 * Create a new ContextStoppedEvent.
+	 * Create a new {@code ContextStoppedEvent}.
 	 * @param source the {@code ApplicationContext} that has been stopped
 	 * (must not be {@code null})
 	 */
