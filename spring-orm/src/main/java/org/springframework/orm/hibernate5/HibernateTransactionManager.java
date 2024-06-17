@@ -424,9 +424,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 
 		SessionFactory sessionFactory = obtainSessionFactory();
-		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (sessionHolder != null) {
+		Object sessionHolderObject = TransactionSynchronizationManager.getResource(sessionFactory);
+		if (sessionHolder instanceof SessionHolder) {
+			SessionHolder sessionHolder = (SessionHolder) sessionHolderObject;
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found thread-bound Session [" + sessionHolder.getSession() + "] for Hibernate transaction");
 			}
