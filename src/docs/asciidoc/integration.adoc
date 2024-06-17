@@ -2396,7 +2396,7 @@ your `@Configuration` classes, as the following example shows:
 By default, the infrastructure looks for a bean named `jmsListenerContainerFactory`
 as the source for the factory to use to create message listener containers. In this
 case (and ignoring the JMS infrastructure setup), you can invoke the `processOrder`
-method with a core poll size of three threads and a maximum pool size of ten threads.
+method with a core pool size of three threads and a maximum pool size of ten threads.
 
 You can customize the listener container factory to use for each annotation or you can
 configure an explicit default by implementing the `JmsListenerConfigurer` interface.
