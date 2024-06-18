@@ -18,6 +18,7 @@ package org.springframework.dao.annotation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.ChainedPersistenceExceptionTranslator;
 import org.springframework.dao.support.PersistenceExceptionTranslationInterceptor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
@@ -78,8 +80,35 @@ class PersistenceExceptionTranslationInterceptorTests extends PersistenceExcepti
 		given(invocation.proceed()).willThrow(exception);
 
 		assertThatThrownBy(() -> interceptor.invoke(invocation)).isSameAs(exception);
-
 		assertThat(callOrder).containsExactly(10, 20, 30);
+	}
+
+	@Test
+	void detectPersistenceExceptionTranslatorsOnShutdown() throws Throwable {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		bf.registerBeanDefinition("peti", new RootBeanDefinition(PersistenceExceptionTranslationInterceptor.class));
+		bf.registerBeanDefinition("pet", new RootBeanDefinition(ChainedPersistenceExceptionTranslator.class));
+
+		PersistenceExceptionTranslationInterceptor interceptor =
+				bf.getBean("peti", PersistenceExceptionTranslationInterceptor.class);
+		interceptor.setAlwaysTranslate(true);
+
+		RuntimeException exception = new RuntimeException();
+		MethodInvocation invocation = mock();
+		given(invocation.proceed()).willThrow(exception);
+
+		AtomicBoolean correctException = new AtomicBoolean(false);
+		bf.registerDisposableBean("disposable", () -> {
+			try {
+				interceptor.invoke(invocation);
+			}
+			catch (Throwable ex) {
+				correctException.set(ex == exception);
+			}
+		});
+		bf.destroySingletons();
+		assertThat(correctException).isTrue();
 	}
 
 
