@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
 public class DisconnectedClientHelper {
 
 	private static final Set<String> EXCEPTION_PHRASES =
-			Set.of("broken pipe", "connection reset by peer");
+			Set.of("broken pipe", "connection reset");
 
 	private static final Set<String> EXCEPTION_TYPE_NAMES =
 			Set.of("AbortedException", "ClientAbortException",
@@ -73,11 +73,12 @@ public class DisconnectedClientHelper {
 
 	/**
 	 * Whether the given exception indicates the client has gone away.
-	 * Known cases covered:
+	 * <p>Known cases covered:
 	 * <ul>
 	 * <li>ClientAbortException or EOFException for Tomcat
 	 * <li>EofException for Jetty
 	 * <li>IOException "Broken pipe" or "connection reset by peer"
+	 * <li>SocketException "Connection reset"
 	 * </ul>
 	 */
 	public static boolean isClientDisconnectedException(Throwable ex) {
