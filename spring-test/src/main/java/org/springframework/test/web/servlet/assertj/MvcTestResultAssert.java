@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.assertj;
 
 import java.io.BufferedReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -37,6 +38,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -134,6 +136,26 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	public ObjectAssert<Object> asyncResult() {
 		request().hasAsyncStarted(true);
 		return Assertions.assertThat(getMvcResult().getAsyncResult()).as("Async result");
+	}
+
+	/**
+	 * Print {@link MvcResult} details to {@code System.out}.
+	 * <p>You must call it <b>before</b> calling the assertion otherwise it is ignored
+	 * as the failing assertion breaks the chained call by throwing an
+	 * AssertionError.
+	 */
+	public MvcTestResultAssert debug() {
+		return debug(System.out);
+	}
+
+	/**
+	 * Print {@link MvcResult} details to the supplied {@link OutputStream}.
+	 * <p>You must call it <b>before</b> calling the assertion otherwise it is ignored
+	 * as the failing assertion breaks the chained call by throwing an
+	 * AssertionError.
+	 */
+	public MvcTestResultAssert debug(OutputStream stream) {
+		return apply(MockMvcResultHandlers.print(stream));
 	}
 
 	/**

@@ -16,6 +16,9 @@
 
 package org.springframework.test.web.servlet.assertj;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -30,6 +33,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -273,6 +278,44 @@ public class MockMvcTesterIntegrationTests {
 			assertThat(mvc.get().uri("/callable")).handler()
 					.isInvokedOn(AsyncController.class, AsyncController::getCallable);
 		}
+	}
+
+	@Nested
+	class DebugTests {
+
+		private final PrintStream standardOut = System.out;
+
+		private final ByteArrayOutputStream capturedOut = new ByteArrayOutputStream();
+
+		@BeforeEach
+		public void setUp() {
+			System.setOut(new PrintStream(capturedOut));
+		}
+
+		@AfterEach
+		public void tearDown() {
+			System.setOut(standardOut);
+		}
+
+		@Test
+		void debugUsesSystemOutByDefault() {
+			assertThat(mvc.get().uri("/greet")).debug().hasStatusOk();
+			assertThat(capturedOut()).contains("MockHttpServletRequest:", "MockHttpServletResponse:");
+		}
+
+		@Test
+		void debugCanPrintToCustomOutputStream() {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			assertThat(mvc.get().uri("/greet")).debug(out).hasStatusOk();
+			assertThat(out.toString(StandardCharsets.UTF_8))
+					.contains("MockHttpServletRequest:", "MockHttpServletResponse:");
+			assertThat(capturedOut()).isEmpty();
+		}
+
+		private String capturedOut() {
+			return this.capturedOut.toString(StandardCharsets.UTF_8);
+		}
+
 	}
 
 	@Nested
