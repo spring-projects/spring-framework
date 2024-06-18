@@ -59,13 +59,13 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	}
 
 	/**
-	 * Verify that the request failed with an unresolved exception, and
-	 * return a new {@linkplain AbstractThrowableAssert assertion} object
-	 * that uses the unresolved {@link Exception} as the object to test.
+	 * Verify that the request has failed and return a new
+	 * {@linkplain AbstractThrowableAssert assertion} object that uses the
+	 * failure as the object to test.
 	 */
-	public AbstractThrowableAssert<?, ? extends Throwable> unresolvedException() {
-		hasUnresolvedException();
-		return Assertions.assertThat(this.actual.getUnresolvedException());
+	public AbstractThrowableAssert<?, ? extends Throwable> failure() {
+		hasFailed();
+		return Assertions.assertThat(getFailure());
 	}
 
 	/**
@@ -137,20 +137,19 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	}
 
 	/**
-	 * Verify that the request failed with an unresolved exception.
-	 * @see #unresolvedException()
+	 * Verify that the request has failed.
 	 */
-	public MvcTestResultAssert hasUnresolvedException() {
-		Assertions.assertThat(this.actual.getUnresolvedException())
+	public MvcTestResultAssert hasFailed() {
+		Assertions.assertThat(getFailure())
 				.withFailMessage("Expected request to fail, but it succeeded").isNotNull();
 		return this;
 	}
 
 	/**
-	 * Verify that the request did not fail with an unresolved exception.
+	 * Verify that the request has not failed.
 	 */
-	public MvcTestResultAssert doesNotHaveUnresolvedException() {
-		Assertions.assertThat(this.actual.getUnresolvedException())
+	public MvcTestResultAssert doesNotHaveFailed() {
+		Assertions.assertThat(getFailure())
 				.withFailMessage("Expected request to succeed, but it failed").isNull();
 		return this;
 	}
@@ -184,6 +183,14 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 		return this.myself;
 	}
 
+	@Nullable
+	private Throwable getFailure() {
+		Exception unresolvedException = this.actual.getUnresolvedException();
+		if (unresolvedException != null) {
+			return unresolvedException;
+		}
+		return this.actual.getMvcResult().getResolvedException();
+	}
 
 	@SuppressWarnings("NullAway")
 	private ModelAndView getModelAndView() {

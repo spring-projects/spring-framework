@@ -89,12 +89,20 @@ import org.springframework.web.context.WebApplicationContext;
  * <p>One main difference between {@link MockMvc} and {@code MockMvcTester} is
  * that an unresolved exception is not thrown directly when using
  * {@code MockMvcTester}. Rather an {@link MvcTestResult} is available with an
- * {@linkplain MvcTestResult#getUnresolvedException() unresolved exception}
- * which allows you to assert that a request failed unexpectedly:
+ * {@linkplain MvcTestResult#getUnresolvedException() unresolved exception}.
+ * Both resolved and unresolved exceptions are considered a failure that can
+ * be asserted as follows:
  * <pre><code class="java">
- * // perform a GET on /boom and assert the message for the the unresolved exception
- * assertThat(mvc.get().uri("/boom")).hasUnresolvedException())
- *         .withMessage("Test exception");
+ * // perform a GET on /boom and assert the message for the the exception
+ * assertThat(mvc.get().uri("/boom")).hasFailed()
+ *         .failure().hasMessage("Test exception");
+ * </code></pre>
+ *
+ * <p>Any attempt to access the result with an unresolved exception will
+ * throw an {@link AssertionError}:
+ * <pre><code class="java">
+ * // throw an AssertionError with an unresolved exception
+ * assertThat(mvc.get().uri("/boom")).hasStatus5xxServerError();
  * </code></pre>
  *
  * <p>{@code MockMvcTester} can be configured with a list of

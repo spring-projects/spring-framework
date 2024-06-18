@@ -53,6 +53,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -278,40 +279,59 @@ public class MockMvcTesterIntegrationTests {
 	class ExceptionTests {
 
 		@Test
-		void doesNotHaveUnresolvedException() {
-			assertThat(mvc.get().uri("/greet")).doesNotHaveUnresolvedException();
+		void hasFailedWithUnresolvedException() {
+			assertThat(mvc.get().uri("/error/1")).hasFailed();
 		}
 
 		@Test
-		void hasUnresolvedException() {
-			assertThat(mvc.get().uri("/error/1")).hasUnresolvedException();
+		void hasFailedWithResolvedException() {
+			assertThat(mvc.get().uri("/error/2")).hasFailed().hasStatus(HttpStatus.PAYMENT_REQUIRED);
 		}
 
 		@Test
-		void doesNotHaveUnresolvedExceptionWithUnresolvedException() {
+		void doesNotHaveFailedWithoutException() {
+			assertThat(mvc.get().uri("/greet")).doesNotHaveFailed();
+		}
+
+		@Test
+		void doesNotHaveFailedWithUnresolvedException() {
 			assertThatExceptionOfType(AssertionError.class)
-					.isThrownBy(() -> assertThat(mvc.get().uri("/error/1")).doesNotHaveUnresolvedException())
+					.isThrownBy(() -> assertThat(mvc.get().uri("/error/1")).doesNotHaveFailed())
 					.withMessage("Expected request to succeed, but it failed");
 		}
 
 		@Test
-		void hasUnresolvedExceptionWithoutUnresolvedException() {
+		void doesNotHaveFailedWithResolvedException() {
 			assertThatExceptionOfType(AssertionError.class)
-					.isThrownBy(() -> assertThat(mvc.get().uri("/greet")).hasUnresolvedException())
+					.isThrownBy(() -> assertThat(mvc.get().uri("/error/2")).doesNotHaveFailed())
+					.withMessage("Expected request to succeed, but it failed");
+		}
+
+		@Test
+		void hasFailedWithoutException() {
+			assertThatExceptionOfType(AssertionError.class)
+					.isThrownBy(() -> assertThat(mvc.get().uri("/greet")).hasFailed())
 					.withMessage("Expected request to fail, but it succeeded");
 		}
 
 		@Test
-		void unresolvedExceptionWithFailedRequest() {
-			assertThat(mvc.get().uri("/error/1")).unresolvedException()
+		void failureWithUnresolvedException() {
+			assertThat(mvc.get().uri("/error/1")).failure()
 					.isInstanceOf(ServletException.class)
 					.cause().isInstanceOf(IllegalStateException.class).hasMessage("Expected");
 		}
 
 		@Test
-		void unresolvedExceptionWithSuccessfulRequest() {
+		void failureWithResolvedException() {
+			assertThat(mvc.get().uri("/error/2")).failure()
+					.isInstanceOfSatisfying(ResponseStatusException.class, ex ->
+							assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.PAYMENT_REQUIRED));
+		}
+
+		@Test
+		void failureWithoutException() {
 			assertThatExceptionOfType(AssertionError.class)
-					.isThrownBy(() -> assertThat(mvc.get().uri("/greet")).unresolvedException())
+					.isThrownBy(() -> assertThat(mvc.get().uri("/greet")).failure())
 					.withMessage("Expected request to fail, but it succeeded");
 		}
 
@@ -522,6 +542,11 @@ public class MockMvcTesterIntegrationTests {
 		@GetMapping("/error/1")
 		public String one() {
 			throw new IllegalStateException("Expected");
+		}
+
+		@GetMapping("/error/2")
+		public String two() {
+			throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED);
 		}
 
 		@GetMapping("/error/validation/{id}")
