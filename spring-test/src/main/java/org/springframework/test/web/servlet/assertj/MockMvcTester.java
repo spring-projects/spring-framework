@@ -61,8 +61,8 @@ import org.springframework.web.context.WebApplicationContext;
  *         builder -> builder.addFilters(filter).build());
  * </code></pre>
  *
- * <p>A tester can be created in standalone mode by providing the controller(s)
- * to include:<pre><code class="java">
+ * <p>A tester can be created in standalone mode by providing the controller
+ * instances to include:<pre><code class="java">
  * // Create an instance for PersonController
  * MockMvcTester mvc = MockMvcTester.of(new PersonController());
  * </code></pre>
@@ -74,7 +74,7 @@ import org.springframework.web.context.WebApplicationContext;
  * assertThat(mvc.get().uri("/hi")).hasStatusOk().hasBodyTextEqualTo("Hello");
  * </code></pre>
  *
- *<p>For more complex scenarios the {@linkplain MvcTestResult result} of the
+ * <p>For more complex scenarios the {@linkplain MvcTestResult result} of the
  * exchange can be assigned in a variable to run multiple assertions:
  * <pre><code class="java">
  * // perform a POST on /save and assert the response body is empty
@@ -83,12 +83,26 @@ import org.springframework.web.context.WebApplicationContext;
  * assertThat(result).body().isEmpty();
  * </code></pre>
  *
+ * <p>If the request is processing asynchronously, {@code exchange} waits for
+ * its completion, either using the
+ * {@linkplain org.springframework.mock.web.MockAsyncContext#setTimeout default
+ * timeout} or a given one. If you prefer to get the result of an
+ * asynchronous request immediately, use {@code asyncExchange}:
+ * <pre><code class="java">
+ * // perform a POST on /save and assert an asynchronous request has started
+ * assertThat(mvc.post().uri("/save").asyncExchange()).request().hasAsyncStarted();
+ * </code></pre>
+ *
  * <p>You can also perform requests using the static builders approach that
  * {@link MockMvc} uses. For instance:<pre><code class="java">
  * // perform a GET on /hi and assert the response body is equal to Hello
  * assertThat(mvc.perform(get("/hi")))
  *         .hasStatusOk().hasBodyTextEqualTo("Hello");
  * </code></pre>
+ *
+ * <p>Use this approach if you have a custom {@link RequestBuilder} implementation
+ * that you'd like to integrate here. This approach is also invoking {@link MockMvc}
+ * without any additional processing of asynchronous requests.
  *
  * <p>One main difference between {@link MockMvc} and {@code MockMvcTester} is
  * that an unresolved exception is not thrown directly when using
@@ -231,8 +245,10 @@ public final class MockMvcTester {
 	 * Prepare an HTTP GET request.
 	 * <p>The returned builder can be wrapped in {@code assertThat} to enable
 	 * assertions on the result. For multi-statements assertions, use
-	 * {@linkplain MockMvcRequestBuilder#exchange() exchange} to assign the
-	 * result.
+	 * {@link MockMvcRequestBuilder#exchange() exchange()} to assign the
+	 * result. To control the time to wait for asynchronous request to complete
+	 * on a per-request basis, use
+	 * {@link MockMvcRequestBuilder#exchange(Duration) exchange(Duration)}.
 	 * @return a request builder for specifying the target URI
 	 */
 	public MockMvcRequestBuilder get() {
@@ -243,8 +259,10 @@ public final class MockMvcTester {
 	 * Prepare an HTTP HEAD request.
 	 * <p>The returned builder can be wrapped in {@code assertThat} to enable
 	 * assertions on the result. For multi-statements assertions, use
-	 * {@linkplain MockMvcRequestBuilder#exchange() exchange} to assign the
-	 * result.
+	 * {@link MockMvcRequestBuilder#exchange() exchange()} to assign the
+	 * result. To control the time to wait for asynchronous request to complete
+	 * on a per-request basis, use
+	 * {@link MockMvcRequestBuilder#exchange(Duration) exchange(Duration)}.
 	 * @return a request builder for specifying the target URI
 	 */
 	public MockMvcRequestBuilder head() {
@@ -255,8 +273,10 @@ public final class MockMvcTester {
 	 * Prepare an HTTP POST request.
 	 * <p>The returned builder can be wrapped in {@code assertThat} to enable
 	 * assertions on the result. For multi-statements assertions, use
-	 * {@linkplain MockMvcRequestBuilder#exchange() exchange} to assign the
-	 * result.
+	 * {@link MockMvcRequestBuilder#exchange() exchange()} to assign the
+	 * result. To control the time to wait for asynchronous request to complete
+	 * on a per-request basis, use
+	 * {@link MockMvcRequestBuilder#exchange(Duration) exchange(Duration)}.
 	 * @return a request builder for specifying the target URI
 	 */
 	public MockMvcRequestBuilder post() {
@@ -267,8 +287,10 @@ public final class MockMvcTester {
 	 * Prepare an HTTP PUT request.
 	 * <p>The returned builder can be wrapped in {@code assertThat} to enable
 	 * assertions on the result. For multi-statements assertions, use
-	 * {@linkplain MockMvcRequestBuilder#exchange() exchange} to assign the
-	 * result.
+	 * {@link MockMvcRequestBuilder#exchange() exchange()} to assign the
+	 * result. To control the time to wait for asynchronous request to complete
+	 * on a per-request basis, use
+	 * {@link MockMvcRequestBuilder#exchange(Duration) exchange(Duration)}.
 	 * @return a request builder for specifying the target URI
 	 */
 	public MockMvcRequestBuilder put() {
@@ -279,8 +301,10 @@ public final class MockMvcTester {
 	 * Prepare an HTTP PATCH request.
 	 * <p>The returned builder can be wrapped in {@code assertThat} to enable
 	 * assertions on the result. For multi-statements assertions, use
-	 * {@linkplain MockMvcRequestBuilder#exchange() exchange} to assign the
-	 * result.
+	 * {@link MockMvcRequestBuilder#exchange() exchange()} to assign the
+	 * result. To control the time to wait for asynchronous request to complete
+	 * on a per-request basis, use
+	 * {@link MockMvcRequestBuilder#exchange(Duration) exchange(Duration)}.
 	 * @return a request builder for specifying the target URI
 	 */
 	public MockMvcRequestBuilder patch() {
@@ -291,8 +315,10 @@ public final class MockMvcTester {
 	 * Prepare an HTTP DELETE request.
 	 * <p>The returned builder can be wrapped in {@code assertThat} to enable
 	 * assertions on the result. For multi-statements assertions, use
-	 * {@linkplain MockMvcRequestBuilder#exchange() exchange} to assign the
-	 * result.
+	 * {@link MockMvcRequestBuilder#exchange() exchange()} to assign the
+	 * result. To control the time to wait for asynchronous request to complete
+	 * on a per-request basis, use
+	 * {@link MockMvcRequestBuilder#exchange(Duration) exchange(Duration)}.
 	 * @return a request builder for specifying the target URI
 	 */
 	public MockMvcRequestBuilder delete() {
@@ -303,8 +329,10 @@ public final class MockMvcTester {
 	 * Prepare an HTTP OPTIONS request.
 	 * <p>The returned builder can be wrapped in {@code assertThat} to enable
 	 * assertions on the result. For multi-statements assertions, use
-	 * {@linkplain MockMvcRequestBuilder#exchange() exchange} to assign the
-	 * result.
+	 * {@link MockMvcRequestBuilder#exchange() exchange()} to assign the
+	 * result. To control the time to wait for asynchronous request to complete
+	 * on a per-request basis, use
+	 * {@link MockMvcRequestBuilder#exchange(Duration) exchange(Duration)}.
 	 * @return a request builder for specifying the target URI
 	 */
 	public MockMvcRequestBuilder options() {
@@ -315,8 +343,10 @@ public final class MockMvcTester {
 	 * Prepare a request for the specified {@code HttpMethod}.
 	 * <p>The returned builder can be wrapped in {@code assertThat} to enable
 	 * assertions on the result. For multi-statements assertions, use
-	 * {@linkplain MockMvcRequestBuilder#exchange() exchange} to assign the
-	 * result.
+	 * {@link MockMvcRequestBuilder#exchange() exchange()} to assign the
+	 * result. To control the time to wait for asynchronous request to complete
+	 * on a per-request basis, use
+	 * {@link MockMvcRequestBuilder#exchange(Duration) exchange(Duration)}.
 	 * @return a request builder for specifying the target URI
 	 */
 	public MockMvcRequestBuilder method(HttpMethod method) {
@@ -324,17 +354,13 @@ public final class MockMvcTester {
 	}
 
 	/**
-	 * Perform a request using {@link MockMvcRequestBuilders} and return a
+	 * Perform a request using the given {@link RequestBuilder} and return a
 	 * {@link MvcTestResult result} that can be used with standard
 	 * {@link org.assertj.core.api.Assertions AssertJ} assertions.
-	 * <p>Use static methods of {@link MockMvcRequestBuilders} to prepare the
-	 * request, wrapping the invocation in {@code assertThat}. The following
-	 * asserts that a {@linkplain MockMvcRequestBuilders#get(URI) GET} request
-	 * against "/greet" has an HTTP status code 200 (OK) and a simple body:
-	 * <pre><code class="java">assertThat(mvc.perform(get("/greet")))
-	 *       .hasStatusOk()
-	 *       .body().asString().isEqualTo("Hello");
-	 * </code></pre>
+	 * <p>Use only this method if you need to provide a custom
+	 * {@link RequestBuilder}. For regular cases, users should initiate the
+	 * configuration of the request using one of the methods available on
+	 * this instance, e.g. {@link #get()} for HTTP GET.
 	 * <p>Contrary to {@link MockMvc#perform(RequestBuilder)}, this does not
 	 * throw an exception if the request fails with an unresolved exception.
 	 * Rather, the result provides the exception, if any. Assuming that a
@@ -342,17 +368,14 @@ public final class MockMvcTester {
 	 * {@code /boom} throws an {@code IllegalStateException}, the following
 	 * asserts that the invocation has indeed failed with the expected error
 	 * message:
-	 * <pre><code class="java">assertThat(mvc.perform(post("/boom")))
-	 *       .unresolvedException().isInstanceOf(IllegalStateException.class)
+	 * <pre><code class="java">assertThat(mvc.post().uri("/boom")))
+	 *       .failure().isInstanceOf(IllegalStateException.class)
 	 *       .hasMessage("Expected");
 	 * </code></pre>
-	 * @param requestBuilder used to prepare the request to execute;
-	 * see static factory methods in
-	 * {@link org.springframework.test.web.servlet.request.MockMvcRequestBuilders}
+	 * @param requestBuilder used to prepare the request to execute
 	 * @return an {@link MvcTestResult} to be wrapped in {@code assertThat}
 	 * @see MockMvc#perform(RequestBuilder)
-	 * @see #get()
-	 * @see #post()
+	 * @see #method(HttpMethod)
 	 */
 	public MvcTestResult perform(RequestBuilder requestBuilder) {
 		Object result = getMvcResultOrFailure(requestBuilder);

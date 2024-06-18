@@ -19,19 +19,25 @@ package org.springframework.test.web.servlet.assertj;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.cglib.core.internal.Function;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.json.AbstractJsonContentAssert;
+import org.springframework.test.web.servlet.assertj.MockMvcTester.MockMvcRequestBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,6 +62,8 @@ class MockMvcTesterTests {
 
 	private static final MappingJackson2HttpMessageConverter jsonHttpMessageConverter =
 			new MappingJackson2HttpMessageConverter(new ObjectMapper());
+
+	private final ServletContext servletContext = new MockServletContext();
 
 
 	@Test
@@ -137,6 +145,67 @@ class MockMvcTesterTests {
 		assertThat(result.getUnresolvedException()).isInstanceOf(ServletException.class)
 				.cause().isInstanceOf(IllegalStateException.class).hasMessage("Expected");
 		assertThat(result).hasFieldOrPropertyWithValue("mvcResult", null);
+	}
+
+	@Test
+	void getConfiguresBuilder() {
+		assertThat(createMockHttpServletRequest(tester -> tester.get().uri("/hello")))
+				.satisfies(hasSettings(HttpMethod.GET, "/hello"));
+	}
+
+	@Test
+	void headConfiguresBuilder() {
+		assertThat(createMockHttpServletRequest(tester -> tester.head().uri("/download")))
+				.satisfies(hasSettings(HttpMethod.HEAD, "/download"));
+	}
+
+	@Test
+	void postConfiguresBuilder() {
+		assertThat(createMockHttpServletRequest(tester -> tester.post().uri("/save")))
+				.satisfies(hasSettings(HttpMethod.POST, "/save"));
+	}
+
+	@Test
+	void putConfiguresBuilder() {
+		assertThat(createMockHttpServletRequest(tester -> tester.put().uri("/save")))
+				.satisfies(hasSettings(HttpMethod.PUT, "/save"));
+	}
+
+	@Test
+	void patchConfiguresBuilder() {
+		assertThat(createMockHttpServletRequest(tester -> tester.patch().uri("/update")))
+				.satisfies(hasSettings(HttpMethod.PATCH, "/update"));
+	}
+
+	@Test
+	void deleteConfiguresBuilder() {
+		assertThat(createMockHttpServletRequest(tester -> tester.delete().uri("/users/42")))
+				.satisfies(hasSettings(HttpMethod.DELETE, "/users/42"));
+	}
+
+	@Test
+	void optionsConfiguresBuilder() {
+		assertThat(createMockHttpServletRequest(tester -> tester.options().uri("/users")))
+				.satisfies(hasSettings(HttpMethod.OPTIONS, "/users"));
+	}
+
+	@Test
+	void methodConfiguresBuilderWithCustomMethod() {
+		HttpMethod customMethod = HttpMethod.valueOf("CUSTOM");
+		assertThat(createMockHttpServletRequest(tester -> tester.method(customMethod).uri("/hello")))
+				.satisfies(hasSettings(customMethod, "/hello"));
+	}
+
+	private MockHttpServletRequest createMockHttpServletRequest(Function<MockMvcTester, MockMvcRequestBuilder> builder) {
+		MockMvcTester mockMvcTester = MockMvcTester.of(HelloController.class);
+		return builder.apply(mockMvcTester).buildRequest(this.servletContext);
+	}
+
+	private Consumer<MockHttpServletRequest> hasSettings(HttpMethod method, String uri) {
+		return request -> {
+			assertThat(request.getMethod()).isEqualTo(method.name());
+			assertThat(request.getRequestURI()).isEqualTo(uri);
+		};
 	}
 
 	private GenericWebApplicationContext create(Class<?>... classes) {

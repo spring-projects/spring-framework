@@ -97,6 +97,10 @@ import static org.mockito.Mockito.verifyNoInteractions;
 @SpringJUnitWebConfig
 public class MockMvcTesterIntegrationTests {
 
+	private static final MockMultipartFile file = new MockMultipartFile("file", "content.txt", null,
+			"value".getBytes(StandardCharsets.UTF_8));
+
+
 	private final MockMvcTester mvc;
 
 	MockMvcTesterIntegrationTests(WebApplicationContext wac) {
@@ -105,9 +109,6 @@ public class MockMvcTesterIntegrationTests {
 
 	@Nested
 	class PerformTests {
-
-		private final MockMultipartFile file = new MockMultipartFile("file", "content.txt", null,
-				"value".getBytes(StandardCharsets.UTF_8));
 
 		@Test
 		void syncRequestWithDefaultExchange() {
@@ -123,7 +124,7 @@ public class MockMvcTesterIntegrationTests {
 		@Test
 		void asyncMultipartRequestWithDefaultExchange() {
 			assertThat(mvc.post().uri("/multipart-streaming").multipart()
-					.file(this.file).param("timeToWait", "100"))
+					.file(file).param("timeToWait", "100"))
 					.hasStatusOk().hasBodyTextEqualTo("name=Joe&file=content.txt");
 		}
 
@@ -141,7 +142,7 @@ public class MockMvcTesterIntegrationTests {
 		@Test
 		void asyncMultipartRequestWitExplicitExchange() {
 			assertThat(mvc.post().uri("/multipart-streaming").multipart()
-					.file(this.file).param("timeToWait", "100").exchange())
+					.file(file).param("timeToWait", "100").exchange())
 					.hasStatusOk().hasBodyTextEqualTo("name=Joe&file=content.txt");
 		}
 
@@ -161,7 +162,7 @@ public class MockMvcTesterIntegrationTests {
 		@Test
 		void asyncMultipartRequestWithExplicitExchangeAndEnoughTimeToWait() {
 			assertThat(mvc.post().uri("/multipart-streaming").multipart()
-					.file(this.file).param("timeToWait", "100").exchange(Duration.ofMillis(200)))
+					.file(file).param("timeToWait", "100").exchange(Duration.ofMillis(200)))
 					.hasStatusOk().hasBodyTextEqualTo("name=Joe&file=content.txt");
 		}
 
@@ -176,7 +177,7 @@ public class MockMvcTesterIntegrationTests {
 		@Test
 		void asyncMultipartRequestWithExplicitExchangeAndNotEnoughTimeToWait() {
 			MockMultipartMvcRequestBuilder builder = mvc.post().uri("/multipart-streaming").multipart()
-					.file(this.file).param("timeToWait", "500");
+					.file(file).param("timeToWait", "500");
 			assertThatIllegalStateException()
 					.isThrownBy(() -> builder.exchange(Duration.ofMillis(100)))
 					.withMessageContaining("was not set during the specified timeToWait=100");
@@ -193,8 +194,21 @@ public class MockMvcTesterIntegrationTests {
 		}
 
 		@Test
+		void hasAsyncStartedForMultipartTrue() {
+			assertThat(mvc.post().uri("/multipart-streaming").multipart()
+					.file(file).param("timeToWait", "100").asyncExchange())
+					.request().hasAsyncStarted(true);
+		}
+
+		@Test
 		void hasAsyncStartedFalse() {
 			assertThat(mvc.get().uri("/greet").asyncExchange()).request().hasAsyncStarted(false);
+		}
+
+		@Test
+		void hasAsyncStartedForMultipartFalse() {
+			assertThat(mvc.put().uri("/multipart-put").multipart().file(file).asyncExchange())
+					.request().hasAsyncStarted(false);
 		}
 
 		@Test
@@ -220,8 +234,7 @@ public class MockMvcTesterIntegrationTests {
 
 		@Test
 		void multipartWithPut() {
-			MockMultipartFile part = new MockMultipartFile("file", "content.txt", null, "value".getBytes(StandardCharsets.UTF_8));
-			assertThat(mvc.put().uri("/multipart-put").multipart().file(part).file(JSON_PART_FILE))
+			assertThat(mvc.put().uri("/multipart-put").multipart().file(file).file(JSON_PART_FILE))
 					.hasStatusOk()
 					.hasViewName("index")
 					.model().contains(entry("name", "file"));
