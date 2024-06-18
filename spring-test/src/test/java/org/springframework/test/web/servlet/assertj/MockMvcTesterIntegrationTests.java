@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.assertj;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -353,6 +354,15 @@ public class MockMvcTesterIntegrationTests {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			assertThat(mvc.get().uri("/greet")).debug(out).hasStatusOk();
 			assertThat(out.toString(StandardCharsets.UTF_8))
+					.contains("MockHttpServletRequest:", "MockHttpServletResponse:");
+			assertThat(capturedOut()).isEmpty();
+		}
+
+		@Test
+		void debugCanPrintToCustomWriter() {
+			StringWriter out = new StringWriter();
+			assertThat(mvc.get().uri("/greet")).debug(out).hasStatusOk();
+			assertThat(out.toString())
 					.contains("MockHttpServletRequest:", "MockHttpServletResponse:");
 			assertThat(capturedOut()).isEmpty();
 		}

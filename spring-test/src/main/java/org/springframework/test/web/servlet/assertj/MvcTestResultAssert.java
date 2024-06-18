@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 
 import jakarta.servlet.http.Cookie;
 import org.assertj.core.api.AbstractStringAssert;
@@ -156,6 +157,16 @@ public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<M
 	 */
 	public MvcTestResultAssert debug(OutputStream stream) {
 		return apply(MockMvcResultHandlers.print(stream));
+	}
+
+	/**
+	 * Print {@link MvcResult} details to the supplied {@link Writer}.
+	 * <p>You must call it <b>before</b> calling the assertion otherwise it is ignored
+	 * as the failing assertion breaks the chained call by throwing an
+	 * AssertionError.
+	 */
+	public MvcTestResultAssert debug(Writer writer) {
+		return apply(MockMvcResultHandlers.print(writer));
 	}
 
 	/**
