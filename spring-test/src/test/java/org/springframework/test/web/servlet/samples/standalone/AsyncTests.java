@@ -32,7 +32,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -265,9 +264,7 @@ class AsyncTests {
 		void printAsyncResult() {
 			StringWriter asyncWriter = new StringWriter();
 
-			// Use #perform to not complete asynchronous request automatically
-			RequestBuilder requestBuilder = this.mockMvc.get().uri("/1").param("deferredResult", "true");
-			MvcTestResult result = this.mockMvc.perform(requestBuilder);
+			MvcTestResult result = this.mockMvc.get().uri("/1").param("deferredResult", "true").asyncExchange();
 			assertThat(result).debug(asyncWriter).request().hasAsyncStarted(true);
 			assertThat(asyncWriter.toString()).contains("Async started = true");
 			asyncWriter = new StringWriter(); // Reset

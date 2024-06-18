@@ -448,6 +448,8 @@ public final class MockMvcTester {
 		 * assertThat(mvc.get().uri("/greet")).hasStatusOk();
 		 * assertThat(mvc.get().uri("/greet").exchange()).hasStatusOk();
 		 * </code></pre>
+		 * <p>For assertions on the original asynchronous request that might
+		 * still be in progress, use {@link #asyncExchange()}.
 		 * @see #exchange(Duration) to customize the timeout for async requests
 		 */
 		public MvcTestResult exchange() {
@@ -458,10 +460,21 @@ public final class MockMvcTester {
 		 * Execute the request and wait at most the given {@code timeToWait}
 		 * duration for the asynchronous request to complete. If the request
 		 * is not asynchronous, the {@code timeToWait} is ignored.
+		 * <p>For assertions on the original asynchronous request that might
+		 * still be in progress, use {@link #asyncExchange()}.
 		 * @see #exchange()
 		 */
 		public MvcTestResult exchange(Duration timeToWait) {
 			return MockMvcTester.this.exchange(this, timeToWait);
+		}
+
+		/**
+		 * Execute the request and do not attempt to wait for the completion of
+		 * an asynchronous request. Contrary to {@link #exchange()}, this returns
+		 * the original result that might still be in progress.
+		 */
+		public MvcTestResult asyncExchange() {
+			return MockMvcTester.this.perform(this);
 		}
 
 		@Override
@@ -493,6 +506,8 @@ public final class MockMvcTester {
 		 * assertThat(mvc.get().uri("/greet")).hasStatusOk();
 		 * assertThat(mvc.get().uri("/greet").exchange()).hasStatusOk();
 		 * </code></pre>
+		 * <p>For assertions on the original asynchronous request that might
+		 * still be in progress, use {@link #asyncExchange()}.
 		 * @see #exchange(Duration) to customize the timeout for async requests
 		 */
 		public MvcTestResult exchange() {
@@ -503,10 +518,21 @@ public final class MockMvcTester {
 		 * Execute the request and wait at most the given {@code timeToWait}
 		 * duration for the asynchronous request to complete. If the request
 		 * is not asynchronous, the {@code timeToWait} is ignored.
+		 * <p>For assertions on the original asynchronous request that might
+		 * still be in progress, use {@link #asyncExchange()}.
 		 * @see #exchange()
 		 */
 		public MvcTestResult exchange(Duration timeToWait) {
 			return MockMvcTester.this.exchange(this, timeToWait);
+		}
+
+		/**
+		 * Execute the request and do not attempt to wait for the completion of
+		 * an asynchronous request. Contrary to {@link #exchange()}, this returns
+		 * the original result that might still be in progress.
+		 */
+		public MvcTestResult asyncExchange() {
+			return MockMvcTester.this.perform(this);
 		}
 
 		@Override

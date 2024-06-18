@@ -55,6 +55,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.assertj.MockMvcTester.MockMultipartMvcRequestBuilder;
 import org.springframework.test.web.servlet.assertj.MockMvcTester.MockMvcRequestBuilder;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -105,6 +106,9 @@ public class MockMvcTesterIntegrationTests {
 	@Nested
 	class PerformTests {
 
+		private final MockMultipartFile file = new MockMultipartFile("file", "content.txt", null,
+				"value".getBytes(StandardCharsets.UTF_8));
+
 		@Test
 		void syncRequestWithDefaultExchange() {
 			assertThat(mvc.get().uri("/greet")).hasStatusOk();
@@ -117,6 +121,13 @@ public class MockMvcTesterIntegrationTests {
 		}
 
 		@Test
+		void asyncMultipartRequestWithDefaultExchange() {
+			assertThat(mvc.post().uri("/multipart-streaming").multipart()
+					.file(this.file).param("timeToWait", "100"))
+					.hasStatusOk().hasBodyTextEqualTo("name=Joe&file=content.txt");
+		}
+
+		@Test
 		void syncRequestWithExplicitExchange() {
 			assertThat(mvc.get().uri("/greet").exchange()).hasStatusOk();
 		}
@@ -125,6 +136,13 @@ public class MockMvcTesterIntegrationTests {
 		void asyncRequestWithExplicitExchange() {
 			assertThat(mvc.get().uri("/streaming").param("timeToWait", "100").exchange())
 					.hasStatusOk().hasBodyTextEqualTo("name=Joe&someBoolean=true");
+		}
+
+		@Test
+		void asyncMultipartRequestWitExplicitExchange() {
+			assertThat(mvc.post().uri("/multipart-streaming").multipart()
+					.file(this.file).param("timeToWait", "100").exchange())
+					.hasStatusOk().hasBodyTextEqualTo("name=Joe&file=content.txt");
 		}
 
 		@Test
@@ -141,8 +159,24 @@ public class MockMvcTesterIntegrationTests {
 		}
 
 		@Test
+		void asyncMultipartRequestWithExplicitExchangeAndEnoughTimeToWait() {
+			assertThat(mvc.post().uri("/multipart-streaming").multipart()
+					.file(this.file).param("timeToWait", "100").exchange(Duration.ofMillis(200)))
+					.hasStatusOk().hasBodyTextEqualTo("name=Joe&file=content.txt");
+		}
+
+		@Test
 		void asyncRequestWithExplicitExchangeAndNotEnoughTimeToWait() {
 			MockMvcRequestBuilder builder = mvc.get().uri("/streaming").param("timeToWait", "500");
+			assertThatIllegalStateException()
+					.isThrownBy(() -> builder.exchange(Duration.ofMillis(100)))
+					.withMessageContaining("was not set during the specified timeToWait=100");
+		}
+
+		@Test
+		void asyncMultipartRequestWithExplicitExchangeAndNotEnoughTimeToWait() {
+			MockMultipartMvcRequestBuilder builder = mvc.post().uri("/multipart-streaming").multipart()
+					.file(this.file).param("timeToWait", "500");
 			assertThatIllegalStateException()
 					.isThrownBy(() -> builder.exchange(Duration.ofMillis(100)))
 					.withMessageContaining("was not set during the specified timeToWait=100");
@@ -154,14 +188,13 @@ public class MockMvcTesterIntegrationTests {
 
 		@Test
 		void hasAsyncStartedTrue() {
-			// Need #perform as the regular exchange waits for async completion automatically
-			assertThat(mvc.perform(mvc.get().uri("/callable").accept(MediaType.APPLICATION_JSON)))
+			assertThat(mvc.get().uri("/callable").accept(MediaType.APPLICATION_JSON).asyncExchange())
 					.request().hasAsyncStarted(true);
 		}
 
 		@Test
 		void hasAsyncStartedFalse() {
-			assertThat(mvc.get().uri("/greet")).request().hasAsyncStarted(false);
+			assertThat(mvc.get().uri("/greet").asyncExchange()).request().hasAsyncStarted(false);
 		}
 
 		@Test
@@ -325,8 +358,7 @@ public class MockMvcTesterIntegrationTests {
 
 		@Test
 		void asyncResult() {
-			// Need #perform as the regular exchange waits for async completion automatically
-			MvcTestResult result = mvc.perform(mvc.get().uri("/callable").accept(MediaType.APPLICATION_JSON));
+			MvcTestResult result = mvc.get().uri("/callable").accept(MediaType.APPLICATION_JSON).asyncExchange();
 			assertThat(result.getMvcResult().getAsyncResult())
 					.asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
 					.containsOnly(entry("key", "value"));
@@ -694,8 +726,23 @@ public class MockMvcTesterIntegrationTests {
 		}
 
 		@PutMapping("/multipart-put")
-		public ModelAndView multiPartViaHttpPut(@RequestParam MultipartFile file) {
+		ModelAndView multiPartViaHttpPut(@RequestParam MultipartFile file) {
 			return new ModelAndView("index", Map.of("name", file.getName()));
+		}
+
+		@PostMapping("/multipart-streaming")
+		StreamingResponseBody streaming(@RequestParam MultipartFile file, @RequestParam long timeToWait) {
+			return out -> {
+				PrintStream stream = new PrintStream(out, true, StandardCharsets.UTF_8);
+				stream.print("name=Joe");
+				try {
+					Thread.sleep(timeToWait);
+					stream.print("&file=" + file.getOriginalFilename());
+				}
+				catch (InterruptedException e) {
+					/* no-op */
+				}
+			};
 		}
 	}
 
