@@ -16,12 +16,9 @@
 
 package org.springframework.test.web.servlet.request;
 
-import java.net.URI;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.Assert;
 
 /**
  * Default builder for {@link MockHttpServletRequest} required as input to
@@ -51,25 +48,9 @@ public class MockHttpServletRequestBuilder
 	 * the {@code MockHttpServletRequest} can be plugged in via
 	 * {@link #with(RequestPostProcessor)}.
 	 * @param httpMethod the HTTP method (GET, POST, etc.)
-	 * @param uriTemplate a URI template; the resulting URI will be encoded
-	 * @param uriVariables zero or more URI variables
 	 */
-	MockHttpServletRequestBuilder(HttpMethod httpMethod, String uriTemplate, Object... uriVariables) {
+	MockHttpServletRequestBuilder(HttpMethod httpMethod) {
 		super(httpMethod);
-		super.uri(uriTemplate, uriVariables);
-	}
-
-	/**
-	 * Alternative to {@link #MockHttpServletRequestBuilder(HttpMethod, String, Object...)}
-	 * with a pre-built URI.
-	 * @param httpMethod the HTTP method (GET, POST, etc.)
-	 * @param uri the URI
-	 * @since 4.0.3
-	 */
-	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI uri) {
-		super(httpMethod);
-		Assert.notNull(uri, "'uri' is required");
-		super.uri(uri);
 	}
 
 }

@@ -39,7 +39,7 @@ public class MockMultipartHttpServletRequestBuilderTests {
 	@Test // gh-26166
 	void addFileAndParts() throws Exception {
 		MockMultipartHttpServletRequest mockRequest =
-				(MockMultipartHttpServletRequest) new MockMultipartHttpServletRequestBuilder("/upload")
+				(MockMultipartHttpServletRequest) new MockMultipartHttpServletRequestBuilder().uri("/upload")
 						.file(new MockMultipartFile("file", "test.txt", "text/plain", "Test".getBytes(UTF_8)))
 						.part(new MockPart("name", "value".getBytes(UTF_8)))
 						.buildRequest(new MockServletContext());
@@ -55,7 +55,7 @@ public class MockMultipartHttpServletRequestBuilderTests {
 		jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		MockMultipartHttpServletRequest mockRequest =
-				(MockMultipartHttpServletRequest) new MockMultipartHttpServletRequestBuilder("/upload")
+				(MockMultipartHttpServletRequest) new MockMultipartHttpServletRequestBuilder().uri("/upload")
 						.file(new MockMultipartFile("file", "Test".getBytes(UTF_8)))
 						.part(jsonPart)
 						.buildRequest(new MockServletContext());
@@ -68,9 +68,9 @@ public class MockMultipartHttpServletRequestBuilderTests {
 
 	@Test
 	void mergeAndBuild() {
-		MockHttpServletRequestBuilder parent = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
+		MockHttpServletRequestBuilder parent = new MockHttpServletRequestBuilder(HttpMethod.GET).uri("/");
 		parent.characterEncoding("UTF-8");
-		Object result = new MockMultipartHttpServletRequestBuilder("/fileUpload").merge(parent);
+		Object result = new MockMultipartHttpServletRequestBuilder().uri("/fileUpload").merge(parent);
 
 		assertThat(result).isNotNull();
 		assertThat(result.getClass()).isEqualTo(MockMultipartHttpServletRequestBuilder.class);
