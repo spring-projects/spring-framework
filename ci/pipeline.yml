@@ -7,8 +7,8 @@ anchors:
   gradle-enterprise-task-params: &gradle-enterprise-task-params
     DEVELOCITY_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
   sonatype-task-params: &sonatype-task-params
-    SONATYPE_USERNAME: ((sonatype-username))
-    SONATYPE_PASSWORD: ((sonatype-password))
+    SONATYPE_USERNAME: ((s01-user-token))
+    SONATYPE_PASSWORD: ((s01-user-token-password))
     SONATYPE_URL: ((sonatype-url))
     SONATYPE_STAGING_PROFILE: ((sonatype-staging-profile))
   artifactory-task-params: &artifactory-task-params
