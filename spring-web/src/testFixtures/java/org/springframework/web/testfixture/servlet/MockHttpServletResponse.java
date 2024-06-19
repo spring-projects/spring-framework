@@ -24,6 +24,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -71,6 +72,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
 	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
+
+	private static final MediaType APPLICATION_PLUS_JSON = new MediaType("application", "*+json");
 
 
 	//---------------------------------------------------------------------
@@ -347,6 +350,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				MediaType mediaType = MediaType.parseMediaType(contentType);
 				if (mediaType.getCharset() != null) {
 					setExplicitCharacterEncoding(mediaType.getCharset().name());
+				}
+				else if (mediaType.isCompatibleWith(MediaType.APPLICATION_JSON) ||
+						mediaType.isCompatibleWith(APPLICATION_PLUS_JSON)) {
+						this.characterEncoding = StandardCharsets.UTF_8.name();
 				}
 			}
 			catch (Exception ex) {
