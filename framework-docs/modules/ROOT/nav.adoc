@@ -248,6 +248,7 @@
 **** xref:web/webmvc/mvc-servlet/multipart.adoc[]
 **** xref:web/webmvc/mvc-servlet/logging.adoc[]
 *** xref:web/webmvc/filters.adoc[]
+*** xref:web/webmvc/message-converters.adoc[]
 *** xref:web/webmvc/mvc-controller.adoc[]
 **** xref:web/webmvc/mvc-controller/ann.adoc[]
 **** xref:web/webmvc/mvc-controller/ann-requestmapping.adoc[]
