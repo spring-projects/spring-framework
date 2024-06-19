@@ -73,7 +73,6 @@ class RestClientObservationTests {
 
 	@BeforeEach
 	void setupEach() {
-
 		this.client = RestClient.builder()
 				.messageConverters(converters -> converters.add(0, this.converter))
 				.requestFactory(this.requestFactory)
@@ -267,6 +266,7 @@ class RestClientObservationTests {
 
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
+		TestObservationRegistryAssert.assertThat(this.observationRegistry).hasNumberOfObservationsWithNameEqualTo("http.client.requests",1);
 		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
 				.hasObservationWithNameEqualTo("http.client.requests").that();
 	}

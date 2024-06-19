@@ -240,19 +240,16 @@ final class DefaultRestClient implements RestClient {
 					ResolvableType.forType(bodyType) + "] and content type [" + contentType + "]", cause);
 			if (observation != null) {
 				observation.error(restClientException);
+				observation.stop();
 			}
 			throw restClientException;
 		}
 		catch (RestClientException restClientException) {
 			if (observation != null) {
 				observation.error(restClientException);
-			}
-			throw restClientException;
-		}
-		finally {
-			if (observation != null) {
 				observation.stop();
 			}
+			throw restClientException;
 		}
 	}
 
