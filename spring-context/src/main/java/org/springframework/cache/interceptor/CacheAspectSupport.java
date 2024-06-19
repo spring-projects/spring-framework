@@ -506,7 +506,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		for (Cache cache : context.getCaches()) {
 			if (CompletableFuture.class.isAssignableFrom(context.getMethod().getReturnType())) {
-				CompletableFuture<?> result = cache.retrieve(key);
+				CompletableFuture<?> result = Optional.ofNullable(cache.retrieve(key)).map(c -> c.exceptionally(ex -> {
+					getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
+					return null;
+				})).orElse(null);
 				if (result != null) {
 					return result.thenCompose(value -> (CompletableFuture<?>) evaluate(
 							(value != null ? CompletableFuture.completedFuture(unwrapCacheValue(value)) : null),
@@ -1136,12 +1139,30 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				if (adapter.isMultiValue()) {
 					return adapter.fromPublisher(Flux.from(Mono.fromFuture(cachedFuture))
 							.switchIfEmpty(Flux.defer(() -> (Flux) evaluate(null, invoker, method, contexts)))
-							.flatMap(v -> evaluate(valueToFlux(v, contexts), invoker, method, contexts)));
+							.flatMap(v -> evaluate(valueToFlux(v, contexts), invoker, method, contexts))
+							.onErrorResume(RuntimeException.class, ex -> {
+								try {
+									getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
+									return Flux.defer(() -> (Flux) evaluate(null, invoker, method, contexts));
+								}
+								catch (RuntimeException exception) {
+									return Flux.error(exception);
+								}
+							}));
 				}
 				else {
 					return adapter.fromPublisher(Mono.fromFuture(cachedFuture)
 							.switchIfEmpty(Mono.defer(() -> (Mono) evaluate(null, invoker, method, contexts)))
-							.flatMap(v -> evaluate(Mono.justOrEmpty(unwrapCacheValue(v)), invoker, method, contexts)));
+							.flatMap(v -> evaluate(Mono.justOrEmpty(unwrapCacheValue(v)), invoker, method, contexts))
+							.onErrorResume(RuntimeException.class, ex -> {
+								try {
+									getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
+									return Mono.defer(() -> (Mono) evaluate(null, invoker, method, contexts));
+								}
+								catch (RuntimeException exception) {
+									return Mono.error(exception);
+								}
+							}));
 				}
 			}
 			return NOT_HANDLED;
