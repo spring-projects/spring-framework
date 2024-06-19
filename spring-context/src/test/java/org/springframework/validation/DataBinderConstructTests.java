@@ -17,6 +17,7 @@
 package org.springframework.validation;
 
 import java.beans.ConstructorProperties;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -101,6 +102,63 @@ class DataBinderConstructTests {
 		assertThat(bindingResult.getFieldValue("param3")).isNull();
 	}
 
+	@Test
+	void listBinding() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of(
+				"dataClassList[0].param1", "value1", "dataClassList[0].param2", "true",
+				"dataClassList[1].param1", "value2", "dataClassList[1].param2", "true",
+				"dataClassList[2].param1", "value3", "dataClassList[2].param2", "true"));
+
+		DataBinder binder = initDataBinder(ListDataClass.class);
+		binder.construct(valueResolver);
+
+		ListDataClass dataClass = getTarget(binder);
+		List<DataClass> list = dataClass.dataClassList();
+
+		assertThat(list).hasSize(3);
+		assertThat(list.get(0).param1()).isEqualTo("value1");
+		assertThat(list.get(1).param1()).isEqualTo("value2");
+		assertThat(list.get(2).param1()).isEqualTo("value3");
+	}
+
+	@Test
+	void mapBinding() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of(
+				"dataClassMap[a].param1", "value1", "dataClassMap[a].param2", "true",
+				"dataClassMap[b].param1", "value2", "dataClassMap[b].param2", "true",
+				"dataClassMap['c'].param1", "value3", "dataClassMap['c'].param2", "true"));
+
+		DataBinder binder = initDataBinder(MapDataClass.class);
+		binder.construct(valueResolver);
+
+		MapDataClass dataClass = getTarget(binder);
+		Map<String, DataClass> map = dataClass.dataClassMap();
+
+		assertThat(map).hasSize(3);
+		assertThat(map.get("a").param1()).isEqualTo("value1");
+		assertThat(map.get("b").param1()).isEqualTo("value2");
+		assertThat(map.get("c").param1()).isEqualTo("value3");
+	}
+
+	@Test
+	void arrayBinding() {
+		MapValueResolver valueResolver = new MapValueResolver(Map.of(
+				"dataClassArray[0].param1", "value1", "dataClassArray[0].param2", "true",
+				"dataClassArray[1].param1", "value2", "dataClassArray[1].param2", "true",
+				"dataClassArray[2].param1", "value3", "dataClassArray[2].param2", "true"));
+
+		DataBinder binder = initDataBinder(ArrayDataClass.class);
+		binder.construct(valueResolver);
+
+		ArrayDataClass dataClass = getTarget(binder);
+		DataClass[] array = dataClass.dataClassArray();
+
+		assertThat(array).hasSize(3);
+		assertThat(array[0].param1()).isEqualTo("value1");
+		assertThat(array[1].param1()).isEqualTo("value2");
+		assertThat(array[2].param1()).isEqualTo("value3");
+	}
+
 	@SuppressWarnings("SameParameterValue")
 	private static DataBinder initDataBinder(Class<?> targetType) {
 		DataBinder binder = new DataBinder(null);
@@ -172,13 +230,19 @@ class DataBinderConstructTests {
 	}
 
 
-	private static class MapValueResolver implements DataBinder.ValueResolver {
+	private record ListDataClass(List<DataClass> dataClassList) {
+	}
 
-		private final Map<String, Object> map;
 
-		private MapValueResolver(Map<String, Object> map) {
-			this.map = map;
-		}
+	private record MapDataClass(Map<String, DataClass> dataClassMap) {
+	}
+
+
+	private record ArrayDataClass(DataClass[] dataClassArray) {
+	}
+
+
+	private record MapValueResolver(Map<String, Object> map) implements DataBinder.ValueResolver {
 
 		@Override
 		public Object resolveValue(String name, Class<?> type) {
