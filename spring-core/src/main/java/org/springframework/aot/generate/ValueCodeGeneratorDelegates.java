@@ -331,7 +331,7 @@ public abstract class ValueCodeGeneratorDelegates {
 				return CodeBlock.of("$T.NONE", ResolvableType.class);
 			}
 			Class<?> type = ClassUtils.getUserClass(resolvableType.toClass());
-			if (resolvableType.hasGenerics() && !resolvableType.hasUnresolvableGenerics()) {
+			if (resolvableType.hasGenerics() && resolvableType.hasResolvableGenerics()) {
 				return generateCodeWithGenerics(resolvableType, type);
 			}
 			if (allowClassResult) {
