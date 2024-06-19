@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,26 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.springframework.beans.BeansException;
+import org.springframework.core.OrderComparator;
 import org.springframework.lang.Nullable;
 
 /**
  * A variant of {@link ObjectFactory} designed specifically for injection points,
  * allowing for programmatic optionality and lenient not-unique handling.
  *
+ * <p>In a {@link BeanFactory} environment, every {@code ObjectProvider} obtained
+ * from the factory will be bound to its {@code BeanFactory} for a specific bean
+ * type, matching all provider calls against factory-registered bean definitions.
+ *
  * <p>As of 5.1, this interface extends {@link Iterable} and provides {@link Stream}
  * support. It can be therefore be used in {@code for} loops, provides {@link #forEach}
  * iteration and allows for collection-style {@link #stream} access.
+ *
+ * <p>As of 6.2, this interface declares default implementations for all methods.
+ * This makes it easier to implement in a custom fashion, e.g. for unit tests.
+ * For typical purposes, implement {@link #stream()} to enable all other methods.
+ * Alternatively, you may implement the specific methods that your callers expect,
+ * e.g. just {@link #getObject()} or {@link #getIfAvailable()}.
  *
  * @author Juergen Hoeller
  * @since 4.3
@@ -39,6 +50,19 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.beans.factory.annotation.Autowired
  */
 public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
+
+	@Override
+	default T getObject() throws BeansException {
+		Iterator<T> it = iterator();
+		if (!it.hasNext()) {
+			throw new NoSuchBeanDefinitionException(Object.class);
+		}
+		T result = it.next();
+		if (it.hasNext()) {
+			throw new NoUniqueBeanDefinitionException(Object.class, 2, "more than 1 matching bean");
+		}
+		return result;
+	}
 
 	/**
 	 * Return an instance (possibly shared or independent) of the object
@@ -50,7 +74,10 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
-	T getObject(Object... args) throws BeansException;
+	default T getObject(Object... args) throws BeansException {
+		throw new UnsupportedOperationException("Retrieval with arguments not supported -" +
+				"for custom ObjectProvider classes, implement getObject(Object...) for your purposes");
+	}
 
 	/**
 	 * Return an instance (possibly shared or independent) of the object
@@ -60,7 +87,17 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @see #getObject()
 	 */
 	@Nullable
-	T getIfAvailable() throws BeansException;
+	default T getIfAvailable() throws BeansException {
+		try {
+			return getObject();
+		}
+		catch (NoUniqueBeanDefinitionException ex) {
+			throw ex;
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			return null;
+		}
+	}
 
 	/**
 	 * Return an instance (possibly shared or independent) of the object
@@ -103,7 +140,14 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @see #getObject()
 	 */
 	@Nullable
-	T getIfUnique() throws BeansException;
+	default T getIfUnique() throws BeansException {
+		try {
+			return getObject();
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			return null;
+		}
+	}
 
 	/**
 	 * Return an instance (possibly shared or independent) of the object
@@ -157,7 +201,8 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @see #orderedStream()
 	 */
 	default Stream<T> stream() {
-		throw new UnsupportedOperationException("Multi element access not supported");
+		throw new UnsupportedOperationException("Element access not supported - " +
+				"for custom ObjectProvider classes, implement stream() to enable all other methods");
 	}
 
 	/**
@@ -168,12 +213,16 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * and in case of annotation-based configuration also considering the
 	 * {@link org.springframework.core.annotation.Order} annotation,
 	 * analogous to multi-element injection points of list/array type.
+	 * <p>The default method applies an {@link OrderComparator} to the
+	 * {@link #stream()} method. You may override this to apply an
+	 * {@link org.springframework.core.annotation.AnnotationAwareOrderComparator}
+	 * if necessary.
 	 * @since 5.1
 	 * @see #stream()
 	 * @see org.springframework.core.OrderComparator
 	 */
 	default Stream<T> orderedStream() {
-		throw new UnsupportedOperationException("Ordered element access not supported");
+		return stream().sorted(OrderComparator.INSTANCE);
 	}
 
 }
