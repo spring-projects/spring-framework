@@ -25,8 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
@@ -48,16 +47,25 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  */
 class ViewResolutionIntegrationTests {
 
+	private static final String EXPECTED_BODY = "<html><body>Hello World!</body></html>";
+
+
 	@Test
 	void freemarker() throws Exception {
 		MockHttpServletResponse response = runTest(FreeMarkerWebConfig.class);
-		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
+		assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+	}
+
+	@Test  // SPR-12013
+	void freemarkerWithExistingViewResolver() throws Exception {
+		MockHttpServletResponse response = runTest(ExistingViewResolverConfig.class);
+		assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
 	}
 
 	@Test
 	void groovyMarkup() throws Exception {
 		MockHttpServletResponse response = runTest(GroovyMarkupWebConfig.class);
-		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
+		assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
 	}
 
 	@Test
@@ -72,14 +80,6 @@ class ViewResolutionIntegrationTests {
 		assertThatRuntimeException()
 			.isThrownBy(() -> runTest(InvalidGroovyMarkupWebConfig.class))
 			.withMessageContaining("In addition to a Groovy markup view resolver ");
-	}
-
-	// SPR-12013
-
-	@Test
-	void existingViewResolver() throws Exception {
-		MockHttpServletResponse response = runTest(ExistingViewResolverConfig.class);
-		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
 	}
 
 
@@ -104,7 +104,7 @@ class ViewResolutionIntegrationTests {
 	@Controller
 	static class SampleController {
 
-		@RequestMapping(value = "/", method = RequestMethod.GET)
+		@GetMapping
 		public String sample(ModelMap model) {
 			model.addAttribute("hello", "Hello World!");
 			return "index";
@@ -126,6 +126,25 @@ class ViewResolutionIntegrationTests {
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.freeMarker();
+		}
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer() {
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+			configurer.setTemplateLoaderPath("/WEB-INF/");
+			return configurer;
+		}
+	}
+
+	/**
+	 * Test @EnableWebMvc in the presence of a pre-existing ViewResolver.
+	 */
+	@Configuration
+	static class ExistingViewResolverConfig extends AbstractWebConfig {
+
+		@Bean
+		public FreeMarkerViewResolver freeMarkerViewResolver() {
+			return new FreeMarkerViewResolver("", ".ftl");
 		}
 
 		@Bean
@@ -167,25 +186,6 @@ class ViewResolutionIntegrationTests {
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.groovy();
-		}
-	}
-
-	/**
-	 * Test @EnableWebMvc in the presence of pre-existing ViewResolver.
-	 */
-	@Configuration
-	static class ExistingViewResolverConfig extends AbstractWebConfig {
-
-		@Bean
-		public FreeMarkerViewResolver freeMarkerViewResolver() {
-			return new FreeMarkerViewResolver("", ".ftl");
-		}
-
-		@Bean
-		public FreeMarkerConfigurer freeMarkerConfigurer() {
-			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-			configurer.setTemplateLoaderPath("/WEB-INF/");
-			return configurer;
 		}
 	}
 
