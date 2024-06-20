@@ -140,7 +140,7 @@ final class ReactorNettyClientRequest extends AbstractStreamingClientHttpRequest
 				return ioEx;
 			}
 		}
-		return new IOException(ex.getMessage(), cause);
+		return new IOException(ex.getMessage(), (cause != null ? cause : ex));
 	}
 
 
