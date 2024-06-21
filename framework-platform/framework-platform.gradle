@@ -128,7 +128,7 @@ dependencies {
 		api("org.hibernate:hibernate-core-jakarta:5.6.15.Final")
 		api("org.hibernate:hibernate-validator:7.0.5.Final")
 		api("org.hsqldb:hsqldb:2.7.2")
-		api("org.htmlunit:htmlunit:4.1.0")
+		api("org.htmlunit:htmlunit:4.2.0")
 		api("org.javamoney:moneta:1.4.2")
 		api("org.jruby:jruby:9.4.7.0")
 		api("org.junit.support:testng-engine:1.0.5")
