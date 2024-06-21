@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.micrometer.context.ContextSnapshot;
+import io.micrometer.context.ContextSnapshotFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -517,14 +518,16 @@ class ReactiveTypeHandler {
 
 	private static class ContextSnapshotHelper {
 
-		@SuppressWarnings("deprecation")
+		private static final ContextSnapshotFactory factory = ContextSnapshotFactory.builder().build();
+
+		@SuppressWarnings("ReactiveStreamsUnusedPublisher")
 		public static Object writeReactorContext(Object returnValue) {
 			if (Mono.class.isAssignableFrom(returnValue.getClass())) {
-				ContextSnapshot snapshot = ContextSnapshot.captureAll();
+				ContextSnapshot snapshot = factory.captureAll();
 				return ((Mono<?>) returnValue).contextWrite(snapshot::updateContext);
 			}
 			else if (Flux.class.isAssignableFrom(returnValue.getClass())) {
-				ContextSnapshot snapshot = ContextSnapshot.captureAll();
+				ContextSnapshot snapshot = factory.captureAll();
 				return ((Flux<?>) returnValue).contextWrite(snapshot::updateContext);
 			}
 			else {
