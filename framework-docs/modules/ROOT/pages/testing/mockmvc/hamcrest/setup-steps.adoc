@@ -1,0 +1,63 @@
+[[mockmvc-server-setup-steps]]
+= Setup Features
+
+No matter which MockMvc builder you use, all `MockMvcBuilder` implementations provide
+some common and very useful features. For example, you can declare an `Accept` header for
+all requests and expect a status of 200 as well as a `Content-Type` header in all
+responses, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// static import of MockMvcBuilders.standaloneSetup
+
+	MockMvc mockMvc = standaloneSetup(new MusicController())
+		.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON))
+		.alwaysExpect(status().isOk())
+		.alwaysExpect(content().contentType("application/json;charset=UTF-8"))
+		.build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+----
+======
+
+In addition, third-party frameworks (and applications) can pre-package setup
+instructions, such as those in a `MockMvcConfigurer`. The Spring Framework has one such
+built-in implementation that helps to save and re-use the HTTP session across requests.
+You can use it as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// static import of SharedHttpSessionConfigurer.sharedHttpSession
+
+	MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
+			.apply(sharedHttpSession())
+			.build();
+
+	// Use mockMvc to perform requests...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+----
+======
+
+See the javadoc for
+{spring-framework-api}/test/web/servlet/setup/ConfigurableMockMvcBuilder.html[`ConfigurableMockMvcBuilder`]
+for a list of all MockMvc builder features or use the IDE to explore the available options.
+

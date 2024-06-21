@@ -1,0 +1,29 @@
+[[mockmvc-server-setup-options]]
+= Setup Options
+
+MockMvc can be setup in one of two ways. One is to point directly to the controllers you
+want to test and programmatically configure Spring MVC infrastructure. The second is to
+point to Spring configuration with Spring MVC and controller infrastructure in it.
+
+Which setup option should you use?
+
+The use of an `ApplicationContext` loads your actual Spring MVC configuration, resulting
+The `WebApplicationContext`-based test loads your actual Spring MVC configuration,
+resulting in a more complete integration test. Since the TestContext framework caches
+the loaded Spring configuration, it helps keep tests running fast, even as you introduce
+more tests in your test suite using the same configuration. Furthermore, you can
+override services used by your controller using `@MockitoBean` to remain focused on
+testing the web layer.
+
+The standalone test, on the other hand, is a little closer to a unit test. It tests one
+controller at a time. You can manually inject the controller with mock dependencies, and
+it does not involve loading Spring configuration. Such tests are more focused on style
+and make it easier to see which controller is being tested, whether any specific Spring
+MVC configuration is required to work, and so on. The standalone setup is also a very
+convenient way to write ad-hoc tests to verify specific behavior or to debug an issue.
+
+As with most "`integration versus unit testing`" debates, there is no right or wrong
+answer. However, using standalone tests does imply the need for additional integration
+tests to verify your Spring MVC configuration. Alternatively, you can write all your
+tests with a `WebApplicationContext`, so that they always test against your actual Spring
+MVC configuration.

@@ -1,0 +1,125 @@
+[[mockmvc-server-htmlunit-geb]]
+= MockMvc and Geb
+
+In the previous section, we saw how to use MockMvc with WebDriver. In this section, we
+use https://www.gebish.org/[Geb] to make our tests even Groovy-er.
+
+[[mockmvc-server-htmlunit-geb-why]]
+== Why Geb and MockMvc?
+
+Geb is backed by WebDriver, so it offers many of the
+xref:testing/mockmvc/htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-why[same benefits] that we get from
+WebDriver. However, Geb makes things even easier by taking care of some of the
+boilerplate code for us.
+
+[[mockmvc-server-htmlunit-geb-setup]]
+== MockMvc and Geb Setup
+
+We can easily initialize a Geb `Browser` with a Selenium WebDriver that uses MockMvc, as
+follows:
+
+[source,groovy]
+----
+def setup() {
+	browser.driver = MockMvcHtmlUnitDriverBuilder
+		.webAppContextSetup(context)
+		.build()
+}
+----
+
+NOTE: This is a simple example of using `MockMvcHtmlUnitDriverBuilder`. For more advanced
+usage, see xref:testing/mockmvc/htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-advanced-builder[Advanced `MockMvcHtmlUnitDriverBuilder`].
+
+This ensures that any URL referencing `localhost` as the server is directed to our
+`MockMvc` instance without the need for a real HTTP connection. Any other URL is
+requested by using a network connection as normal. This lets us easily test the use of
+CDNs.
+
+[[mockmvc-server-htmlunit-geb-usage]]
+== MockMvc and Geb Usage
+
+Now we can use Geb as we normally would but without the need to deploy our application to
+a Servlet container. For example, we can request the view to create a message with the
+following:
+
+[source,groovy]
+----
+to CreateMessagePage
+----
+
+We can then fill out the form and submit it to create a message, as follows:
+
+[source,groovy]
+----
+when:
+form.summary = expectedSummary
+form.text = expectedMessage
+submit.click(ViewMessagePage)
+----
+
+Any unrecognized method calls or property accesses or references that are not found are
+forwarded to the current page object. This removes a lot of the boilerplate code we
+needed when using WebDriver directly.
+
+As with direct WebDriver usage, this improves on the design of our
+xref:testing/mockmvc/htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-usage[HtmlUnit test] by using the Page Object
+Pattern. As mentioned previously, we can use the Page Object Pattern with HtmlUnit and
+WebDriver, but it is even easier with Geb. Consider our new Groovy-based
+`CreateMessagePage` implementation:
+
+[source,groovy]
+----
+class CreateMessagePage extends Page {
+	static url = 'messages/form'
+	static at = { assert title == 'Messages : Create'; true }
+	static content =  {
+		submit { $('input[type=submit]') }
+		form { $('form') }
+		errors(required:false) { $('label.error, .alert-error')?.text() }
+	}
+}
+----
+
+Our `CreateMessagePage` extends `Page`. We do not go over the details of `Page`, but, in
+summary, it contains common functionality for all of our pages. We define a URL in which
+this page can be found. This lets us navigate to the page, as follows:
+
+[source,groovy]
+----
+to CreateMessagePage
+----
+
+We also have an `at` closure that determines if we are at the specified page. It should
+return `true` if we are on the correct page. This is why we can assert that we are on the
+correct page, as follows:
+
+[source,groovy]
+----
+then:
+at CreateMessagePage
+errors.contains('This field is required.')
+----
+
+NOTE: We use an assertion in the closure so that we can determine where things went wrong
+if we were at the wrong page.
+
+Next, we create a `content` closure that specifies all the areas of interest within the
+page. We can use a
+https://www.gebish.org/manual/current/#the-jquery-ish-navigator-api[jQuery-ish Navigator
+API] to select the content in which we are interested.
+
+Finally, we can verify that a new message was created successfully, as follows:
+
+[source,groovy]
+----
+then:
+at ViewMessagePage
+success == 'Successfully created a new message'
+id
+date
+summary == expectedSummary
+message == expectedMessage
+----
+
+For further details on how to get the most out of Geb, see
+https://www.gebish.org/manual/current/[The Book of Geb] user's manual.

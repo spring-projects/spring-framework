@@ -49,6 +49,7 @@ dependencies {
 	api(project(":spring-webmvc"))
 	api(project(":spring-context-support"))
 	api(project(":spring-aspects"))
+	api(project(":spring-test"))
 	api(project(":spring-websocket"))
 
 	api("org.jetbrains.kotlin:kotlin-stdlib")

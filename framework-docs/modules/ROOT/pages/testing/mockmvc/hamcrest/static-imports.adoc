@@ -1,0 +1,18 @@
+[[mockmvc-server-static-imports]]
+= Static Imports
+:page-section-summary-toc: 1
+
+When using MockMvc directly to perform requests, you'll need static imports for:
+
+- `MockMvcBuilders.{asterisk}`
+- `MockMvcRequestBuilders.{asterisk}`
+- `MockMvcResultMatchers.{asterisk}`
+- `MockMvcResultHandlers.{asterisk}`
+
+An easy way to remember that is search for `MockMvc*`. If using Eclipse be sure to also
+add the above as "`favorite static members`" in the Eclipse preferences.
+
+When using MockMvc through the xref:testing/webtestclient.adoc[WebTestClient] you do not need static imports.
+The `WebTestClient` provides a fluent API without static imports.
+
+

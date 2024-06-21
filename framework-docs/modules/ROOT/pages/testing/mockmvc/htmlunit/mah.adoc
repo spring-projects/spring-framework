@@ -1,0 +1,279 @@
+[[mockmvc-server-htmlunit-mah]]
+= MockMvc and HtmlUnit
+
+This section describes how to integrate MockMvc and HtmlUnit. Use this option if you want
+to use the raw HtmlUnit libraries.
+
+[[mockmvc-server-htmlunit-mah-setup]]
+== MockMvc and HtmlUnit Setup
+
+First, make sure that you have included a test dependency on
+`org.htmlunit:htmlunit`.
+
+We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by using the
+`MockMvcWebClientBuilder`, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	WebClient webClient;
+
+	@BeforeEach
+	void setup(WebApplicationContext context) {
+		webClient = MockMvcWebClientBuilder
+				.webAppContextSetup(context)
+				.build();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	lateinit var webClient: WebClient
+
+	@BeforeEach
+	fun setup(context: WebApplicationContext) {
+		webClient = MockMvcWebClientBuilder
+				.webAppContextSetup(context)
+				.build()
+	}
+----
+======
+
+NOTE: This is a simple example of using `MockMvcWebClientBuilder`. For advanced usage,
+see xref:testing/mockmvc/htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-advanced-builder[Advanced `MockMvcWebClientBuilder`].
+
+This ensures that any URL that references `localhost` as the server is directed to our
+`MockMvc` instance without the need for a real HTTP connection. Any other URL is
+requested by using a network connection, as normal. This lets us easily test the use of
+CDNs.
+
+[[mockmvc-server-htmlunit-mah-usage]]
+== MockMvc and HtmlUnit Usage
+
+Now we can use HtmlUnit as we normally would but without the need to deploy our
+application to a Servlet container. For example, we can request the view to create a
+message with the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	HtmlPage createMsgFormPage = webClient.getPage("http://localhost/messages/form");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val createMsgFormPage = webClient.getPage("http://localhost/messages/form")
+----
+======
+
+NOTE: The default context path is `""`. Alternatively, we can specify the context path,
+as described in xref:testing/mockmvc/htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-advanced-builder[Advanced `MockMvcWebClientBuilder`].
+
+Once we have a reference to the `HtmlPage`, we can then fill out the form and submit it
+to create a message, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	HtmlForm form = createMsgFormPage.getHtmlElementById("messageForm");
+	HtmlTextInput summaryInput = createMsgFormPage.getHtmlElementById("summary");
+	summaryInput.setValueAttribute("Spring Rocks");
+	HtmlTextArea textInput = createMsgFormPage.getHtmlElementById("text");
+	textInput.setText("In case you didn't know, Spring Rocks!");
+	HtmlSubmitInput submit = form.getOneHtmlElementByAttribute("input", "type", "submit");
+	HtmlPage newMessagePage = submit.click();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val form = createMsgFormPage.getHtmlElementById("messageForm")
+	val summaryInput = createMsgFormPage.getHtmlElementById("summary")
+	summaryInput.setValueAttribute("Spring Rocks")
+	val textInput = createMsgFormPage.getHtmlElementById("text")
+	textInput.setText("In case you didn't know, Spring Rocks!")
+	val submit = form.getOneHtmlElementByAttribute("input", "type", "submit")
+	val newMessagePage = submit.click()
+----
+======
+
+Finally, we can verify that a new message was created successfully. The following
+assertions use the {assertj-docs}[AssertJ] library:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	assertThat(newMessagePage.getUrl().toString()).endsWith("/messages/123");
+	String id = newMessagePage.getHtmlElementById("id").getTextContent();
+	assertThat(id).isEqualTo("123");
+	String summary = newMessagePage.getHtmlElementById("summary").getTextContent();
+	assertThat(summary).isEqualTo("Spring Rocks");
+	String text = newMessagePage.getHtmlElementById("text").getTextContent();
+	assertThat(text).isEqualTo("In case you didn't know, Spring Rocks!");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	assertThat(newMessagePage.getUrl().toString()).endsWith("/messages/123")
+	val id = newMessagePage.getHtmlElementById("id").getTextContent()
+	assertThat(id).isEqualTo("123")
+	val summary = newMessagePage.getHtmlElementById("summary").getTextContent()
+	assertThat(summary).isEqualTo("Spring Rocks")
+	val text = newMessagePage.getHtmlElementById("text").getTextContent()
+	assertThat(text).isEqualTo("In case you didn't know, Spring Rocks!")
+----
+======
+
+The preceding code improves on our
+xref:testing/mockmvc/htmlunit/why.adoc#spring-mvc-test-server-htmlunit-mock-mvc-test[MockMvc test] in a number of ways.
+First, we no longer have to explicitly verify our form and then create a request that
+looks like the form. Instead, we request the form, fill it out, and submit it, thereby
+significantly reducing the overhead.
+
+Another important factor is that https://htmlunit.sourceforge.io/javascript.html[HtmlUnit
+uses the Mozilla Rhino engine] to evaluate JavaScript. This means that we can also test
+the behavior of JavaScript within our pages.
+
+See the https://htmlunit.sourceforge.io/gettingStarted.html[HtmlUnit documentation] for
+additional information about using HtmlUnit.
+
+[[mockmvc-server-htmlunit-mah-advanced-builder]]
+== Advanced `MockMvcWebClientBuilder`
+
+In the examples so far, we have used `MockMvcWebClientBuilder` in the simplest way
+possible, by building a `WebClient` based on the `WebApplicationContext` loaded for us by
+the Spring TestContext Framework. This approach is repeated in the following example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	WebClient webClient;
+
+	@BeforeEach
+	void setup(WebApplicationContext context) {
+		webClient = MockMvcWebClientBuilder
+				.webAppContextSetup(context)
+				.build();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	lateinit var webClient: WebClient
+
+	@BeforeEach
+	fun setup(context: WebApplicationContext) {
+		webClient = MockMvcWebClientBuilder
+				.webAppContextSetup(context)
+				.build()
+	}
+----
+======
+
+We can also specify additional configuration options, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	WebClient webClient;
+
+	@BeforeEach
+	void setup() {
+		webClient = MockMvcWebClientBuilder
+			// demonstrates applying a MockMvcConfigurer (Spring Security)
+			.webAppContextSetup(context, springSecurity())
+			// for illustration only - defaults to ""
+			.contextPath("")
+			// By default MockMvc is used for localhost only;
+			// the following will use MockMvc for example.com and example.org as well
+			.useMockMvcForHosts("example.com","example.org")
+			.build();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	lateinit var webClient: WebClient
+
+	@BeforeEach
+	fun setup() {
+		webClient = MockMvcWebClientBuilder
+			// demonstrates applying a MockMvcConfigurer (Spring Security)
+			.webAppContextSetup(context, springSecurity())
+			// for illustration only - defaults to ""
+			.contextPath("")
+			// By default MockMvc is used for localhost only;
+			// the following will use MockMvc for example.com and example.org as well
+			.useMockMvcForHosts("example.com","example.org")
+			.build()
+	}
+----
+======
+
+As an alternative, we can perform the exact same setup by configuring the `MockMvc`
+instance separately and supplying it to the `MockMvcWebClientBuilder`, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	MockMvc mockMvc = MockMvcBuilders
+			.webAppContextSetup(context)
+			.apply(springSecurity())
+			.build();
+
+	webClient = MockMvcWebClientBuilder
+			.mockMvcSetup(mockMvc)
+			// for illustration only - defaults to ""
+			.contextPath("")
+			// By default MockMvc is used for localhost only;
+			// the following will use MockMvc for example.com and example.org as well
+			.useMockMvcForHosts("example.com","example.org")
+			.build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+----
+======
+
+This is more verbose, but, by building the `WebClient` with a `MockMvc` instance, we have
+the full power of MockMvc at our fingertips.
+
+TIP: For additional information on creating a `MockMvc` instance, see
+xref:testing/mockmvc/hamcrest/setup.adoc[Configuring MockMvc].
+

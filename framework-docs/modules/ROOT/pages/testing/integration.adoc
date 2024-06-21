@@ -30,7 +30,7 @@ integration support, and the rest of this chapter then focuses on dedicated topi
 * xref:testing/support-jdbc.adoc[JDBC Testing Support]
 * xref:testing/testcontext-framework.adoc[Spring TestContext Framework]
 * xref:testing/webtestclient.adoc[WebTestClient]
-* xref:testing/spring-mvc-test-framework.adoc[MockMvc]
+* xref:testing/mockmvc.adoc[MockMvc]
 * xref:testing/spring-mvc-test-client.adoc[Testing Client Applications]
 * xref:testing/annotations.adoc[Annotations]
 

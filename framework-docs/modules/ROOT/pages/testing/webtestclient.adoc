@@ -51,7 +51,7 @@ For Spring MVC, use the following which delegates to the
 {spring-framework-api}/test/web/servlet/setup/StandaloneMockMvcBuilder.html[StandaloneMockMvcBuilder]
 to load infrastructure equivalent to the xref:web/webmvc/mvc-config.adoc[WebMvc Java config],
 registers the given controller(s), and creates an instance of
-xref:testing/spring-mvc-test-framework.adoc[MockMvc] to handle requests:
+xref:testing/mockmvc.adoc[MockMvc] to handle requests:
 
 [tabs]
 ======
@@ -128,7 +128,7 @@ Kotlin::
 
 For Spring MVC, use the following where the Spring `ApplicationContext` is passed to
 {spring-framework-api}/test/web/servlet/setup/MockMvcBuilders.html#webAppContextSetup-org.springframework.web.context.WebApplicationContext-[MockMvcBuilders.webAppContextSetup]
-to create a xref:testing/spring-mvc-test-framework.adoc[MockMvc] instance to handle
+to create a xref:testing/mockmvc.adoc[MockMvc] instance to handle
 requests:
 
 [tabs]

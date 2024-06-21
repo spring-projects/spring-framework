@@ -68,8 +68,8 @@ or alternative Servlet API mock objects (such as http://www.mockobjects.com[Mock
 TIP: Since Spring Framework 6.0, the mock objects in `org.springframework.mock.web` are
 based on the Servlet 6.0 API.
 
-The Spring MVC Test framework builds on the mock Servlet API objects to provide an
-integration testing framework for Spring MVC. See xref:testing/spring-mvc-test-framework.adoc[MockMvc].
+MockMvc builds on the mock Servlet API objects to provide an integration testing
+framework for Spring MVC. See xref:testing/mockmvc.adoc[MockMvc].
 
 
 [[mock-objects-web-reactive]]
@@ -165,4 +165,4 @@ combined with `MockHttpServletRequest`, `MockHttpSession`, and so on from Spring
 xref:testing/unit.adoc#mock-objects-servlet[Servlet API mocks]. For thorough integration testing of your
 Spring MVC and REST `Controller` classes in conjunction with your `WebApplicationContext`
 configuration for Spring MVC, use the
-xref:testing/spring-mvc-test-framework.adoc[Spring MVC Test Framework] instead.
+xref:testing/mockmvc.adoc[MockMvc] instead.

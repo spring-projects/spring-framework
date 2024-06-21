@@ -1,0 +1,574 @@
+[[mockmvc-server-htmlunit-webdriver]]
+= MockMvc and WebDriver
+
+In the previous sections, we have seen how to use MockMvc in conjunction with the raw
+HtmlUnit APIs. In this section, we use additional abstractions within the Selenium
+https://docs.seleniumhq.org/projects/webdriver/[WebDriver] to make things even easier.
+
+[[mockmvc-server-htmlunit-webdriver-why]]
+== Why WebDriver and MockMvc?
+
+We can already use HtmlUnit and MockMvc, so why would we want to use WebDriver? The
+Selenium WebDriver provides a very elegant API that lets us easily organize our code. To
+better show how it works, we explore an example in this section.
+
+NOTE: Despite being a part of https://docs.seleniumhq.org/[Selenium], WebDriver does not
+require a Selenium Server to run your tests.
+
+Suppose we need to ensure that a message is created properly. The tests involve finding
+the HTML form input elements, filling them out, and making various assertions.
+
+This approach results in numerous separate tests because we want to test error conditions
+as well. For example, we want to ensure that we get an error if we fill out only part of
+the form. If we fill out the entire form, the newly created message should be displayed
+afterwards.
+
+If one of the fields were named "`summary`", we might have something that resembles the
+following repeated in multiple places within our tests:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
+	summaryInput.setValueAttribute(summary);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val summaryInput = currentPage.getHtmlElementById("summary")
+	summaryInput.setValueAttribute(summary)
+----
+======
+
+So what happens if we change the `id` to `smmry`? Doing so would force us to update all
+of our tests to incorporate this change. This violates the DRY principle, so we should
+ideally extract this code into its own method, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public HtmlPage createMessage(HtmlPage currentPage, String summary, String text) {
+		setSummary(currentPage, summary);
+		// ...
+	}
+
+	public void setSummary(HtmlPage currentPage, String summary) {
+		HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
+		summaryInput.setValueAttribute(summary);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	fun createMessage(currentPage: HtmlPage, summary:String, text:String) :HtmlPage{
+		setSummary(currentPage, summary);
+		// ...
+	}
+
+	fun setSummary(currentPage:HtmlPage , summary: String) {
+		val summaryInput = currentPage.getHtmlElementById("summary")
+		summaryInput.setValueAttribute(summary)
+	}
+----
+======
+
+Doing so ensures that we do not have to update all of our tests if we change the UI.
+
+We might even take this a step further and place this logic within an `Object` that
+represents the `HtmlPage` we are currently on, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class CreateMessagePage {
+
+		final HtmlPage currentPage;
+
+		final HtmlTextInput summaryInput;
+
+		final HtmlSubmitInput submit;
+
+		public CreateMessagePage(HtmlPage currentPage) {
+			this.currentPage = currentPage;
+			this.summaryInput = currentPage.getHtmlElementById("summary");
+			this.submit = currentPage.getHtmlElementById("submit");
+		}
+
+		public <T> T createMessage(String summary, String text) throws Exception {
+			setSummary(summary);
+
+			HtmlPage result = submit.click();
+			boolean error = CreateMessagePage.at(result);
+
+			return (T) (error ? new CreateMessagePage(result) : new ViewMessagePage(result));
+		}
+
+		public void setSummary(String summary) throws Exception {
+			summaryInput.setValueAttribute(summary);
+		}
+
+		public static boolean at(HtmlPage page) {
+			return "Create Message".equals(page.getTitleText());
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class CreateMessagePage(private val currentPage: HtmlPage) {
+
+		val summaryInput: HtmlTextInput = currentPage.getHtmlElementById("summary")
+
+		val submit: HtmlSubmitInput = currentPage.getHtmlElementById("submit")
+
+		fun <T> createMessage(summary: String, text: String): T {
+			setSummary(summary)
+
+			val result = submit.click()
+			val error = at(result)
+
+			return (if (error) CreateMessagePage(result) else ViewMessagePage(result)) as T
+		}
+
+		fun setSummary(summary: String) {
+			summaryInput.setValueAttribute(summary)
+		}
+
+		fun at(page: HtmlPage): Boolean {
+			return "Create Message" == page.getTitleText()
+		}
+	}
+}
+----
+======
+
+Formerly, this pattern was known as the
+https://github.com/SeleniumHQ/selenium/wiki/PageObjects[Page Object Pattern]. While we
+can certainly do this with HtmlUnit, WebDriver provides some tools that we explore in the
+following sections to make this pattern much easier to implement.
+
+[[mockmvc-server-htmlunit-webdriver-setup]]
+== MockMvc and WebDriver Setup
+
+To use Selenium WebDriver with `MockMvc`, make sure that your project includes a test
+dependency on `org.seleniumhq.selenium:selenium-htmlunit3-driver`.
+
+We can easily create a Selenium WebDriver that integrates with MockMvc by using the
+`MockMvcHtmlUnitDriverBuilder` as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	WebDriver driver;
+
+	@BeforeEach
+	void setup(WebApplicationContext context) {
+		driver = MockMvcHtmlUnitDriverBuilder
+				.webAppContextSetup(context)
+				.build();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	lateinit var driver: WebDriver
+
+	@BeforeEach
+	fun setup(context: WebApplicationContext) {
+		driver = MockMvcHtmlUnitDriverBuilder
+				.webAppContextSetup(context)
+				.build()
+	}
+----
+======
+
+NOTE: This is a simple example of using `MockMvcHtmlUnitDriverBuilder`. For more advanced
+usage, see xref:testing/mockmvc/htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-advanced-builder[Advanced `MockMvcHtmlUnitDriverBuilder`].
+
+The preceding example ensures that any URL that references `localhost` as the server is
+directed to our `MockMvc` instance without the need for a real HTTP connection. Any other
+URL is requested by using a network connection, as normal. This lets us easily test the
+use of CDNs.
+
+[[mockmvc-server-htmlunit-webdriver-usage]]
+== MockMvc and WebDriver Usage
+
+Now we can use WebDriver as we normally would but without the need to deploy our
+application to a Servlet container. For example, we can request the view to create a
+message with the following:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	CreateMessagePage page = CreateMessagePage.to(driver);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val page = CreateMessagePage.to(driver)
+----
+======
+--
+
+We can then fill out the form and submit it to create a message, as follows:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	ViewMessagePage viewMessagePage =
+			page.createMessage(ViewMessagePage.class, expectedSummary, expectedText);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val viewMessagePage =
+		page.createMessage(ViewMessagePage::class, expectedSummary, expectedText)
+----
+======
+--
+
+This improves on the design of our xref:testing/mockmvc/htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-usage[HtmlUnit test]
+by leveraging the Page Object Pattern. As we mentioned in
+xref:testing/mockmvc/htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-why[Why WebDriver and MockMvc?], we can use the Page Object Pattern
+with HtmlUnit, but it is much easier with WebDriver. Consider the following
+`CreateMessagePage` implementation:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class CreateMessagePage extends AbstractPage { // <1>
+
+		// <2>
+		private WebElement summary;
+		private WebElement text;
+
+		@FindBy(css = "input[type=submit]") // <3>
+		private WebElement submit;
+
+		public CreateMessagePage(WebDriver driver) {
+			super(driver);
+		}
+
+		public <T> T createMessage(Class<T> resultPage, String summary, String details) {
+			this.summary.sendKeys(summary);
+			this.text.sendKeys(details);
+			this.submit.click();
+			return PageFactory.initElements(driver, resultPage);
+		}
+
+		public static CreateMessagePage to(WebDriver driver) {
+			driver.get("http://localhost:9990/mail/messages/form");
+			return PageFactory.initElements(driver, CreateMessagePage.class);
+		}
+	}
+----
+<1> `CreateMessagePage` extends the `AbstractPage`. We do not go over the details of
+`AbstractPage`, but, in summary, it contains common functionality for all of our pages.
+For example, if our application has a navigational bar, global error messages, and other
+features, we can place this logic in a shared location.
+<2> We have a member variable for each of the parts of the HTML page in which we are
+interested. These are of type `WebElement`. WebDriver's
+https://github.com/SeleniumHQ/selenium/wiki/PageFactory[`PageFactory`] lets us remove a
+lot of code from the HtmlUnit version of `CreateMessagePage` by automatically resolving
+each `WebElement`. The
+https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/support/PageFactory.html#initElements-org.openqa.selenium.WebDriver-java.lang.Class-[`PageFactory#initElements(WebDriver,Class<T>)`]
+method automatically resolves each `WebElement` by using the field name and looking it up
+by the `id` or `name` of the element within the HTML page.
+<3> We can use the
+https://github.com/SeleniumHQ/selenium/wiki/PageFactory#making-the-example-work-using-annotations[`@FindBy` annotation]
+to override the default lookup behavior. Our example shows how to use the `@FindBy`
+annotation to look up our submit button with a `css` selector (`input[type=submit]`).
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class CreateMessagePage(private val driver: WebDriver) : AbstractPage(driver) { // <1>
+
+		// <2>
+		private lateinit var summary: WebElement
+		private lateinit var text: WebElement
+
+		@FindBy(css = "input[type=submit]") // <3>
+		private lateinit var submit: WebElement
+
+		fun <T> createMessage(resultPage: Class<T>, summary: String, details: String): T {
+			this.summary.sendKeys(summary)
+			text.sendKeys(details)
+			submit.click()
+			return PageFactory.initElements(driver, resultPage)
+		}
+		companion object {
+			fun to(driver: WebDriver): CreateMessagePage {
+				driver.get("http://localhost:9990/mail/messages/form")
+				return PageFactory.initElements(driver, CreateMessagePage::class.java)
+			}
+		}
+	}
+----
+<1> `CreateMessagePage` extends the `AbstractPage`. We do not go over the details of
+`AbstractPage`, but, in summary, it contains common functionality for all of our pages.
+For example, if our application has a navigational bar, global error messages, and other
+features, we can place this logic in a shared location.
+<2> We have a member variable for each of the parts of the HTML page in which we are
+interested. These are of type `WebElement`. WebDriver's
+https://github.com/SeleniumHQ/selenium/wiki/PageFactory[`PageFactory`] lets us remove a
+lot of code from the HtmlUnit version of `CreateMessagePage` by automatically resolving
+each `WebElement`. The
+https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/support/PageFactory.html#initElements-org.openqa.selenium.WebDriver-java.lang.Class-[`PageFactory#initElements(WebDriver,Class<T>)`]
+method automatically resolves each `WebElement` by using the field name and looking it up
+by the `id` or `name` of the element within the HTML page.
+<3> We can use the
+https://github.com/SeleniumHQ/selenium/wiki/PageFactory#making-the-example-work-using-annotations[`@FindBy` annotation]
+to override the default lookup behavior. Our example shows how to use the `@FindBy`
+annotation to look up our submit button with a `css` selector (*input[type=submit]*).
+======
+--
+
+Finally, we can verify that a new message was created successfully. The following
+assertions use the {assertj-docs}[AssertJ] assertion library:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	assertThat(viewMessagePage.getMessage()).isEqualTo(expectedMessage);
+	assertThat(viewMessagePage.getSuccess()).isEqualTo("Successfully created a new message");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	assertThat(viewMessagePage.message).isEqualTo(expectedMessage)
+	assertThat(viewMessagePage.success).isEqualTo("Successfully created a new message")
+----
+======
+--
+
+We can see that our `ViewMessagePage` lets us interact with our custom domain model. For
+example, it exposes a method that returns a `Message` object:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public Message getMessage() throws ParseException {
+		Message message = new Message();
+		message.setId(getId());
+		message.setCreated(getCreated());
+		message.setSummary(getSummary());
+		message.setText(getText());
+		return message;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	fun getMessage() = Message(getId(), getCreated(), getSummary(), getText())
+----
+======
+--
+
+We can then use the rich domain objects in our assertions.
+
+Lastly, we must not forget to close the `WebDriver` instance when the test is complete,
+as follows:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@AfterEach
+	void destroy() {
+		if (driver != null) {
+			driver.close();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@AfterEach
+	fun destroy() {
+		if (driver != null) {
+			driver.close()
+		}
+	}
+----
+======
+--
+
+For additional information on using WebDriver, see the Selenium
+https://github.com/SeleniumHQ/selenium/wiki/Getting-Started[WebDriver documentation].
+
+[[mockmvc-server-htmlunit-webdriver-advanced-builder]]
+== Advanced `MockMvcHtmlUnitDriverBuilder`
+
+In the examples so far, we have used `MockMvcHtmlUnitDriverBuilder` in the simplest way
+possible, by building a `WebDriver` based on the `WebApplicationContext` loaded for us by
+the Spring TestContext Framework. This approach is repeated here, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	WebDriver driver;
+
+	@BeforeEach
+	void setup(WebApplicationContext context) {
+		driver = MockMvcHtmlUnitDriverBuilder
+				.webAppContextSetup(context)
+				.build();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	lateinit var driver: WebDriver
+
+	@BeforeEach
+	fun setup(context: WebApplicationContext) {
+		driver = MockMvcHtmlUnitDriverBuilder
+				.webAppContextSetup(context)
+				.build()
+	}
+----
+======
+
+We can also specify additional configuration options, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	WebDriver driver;
+
+	@BeforeEach
+	void setup() {
+		driver = MockMvcHtmlUnitDriverBuilder
+				// demonstrates applying a MockMvcConfigurer (Spring Security)
+				.webAppContextSetup(context, springSecurity())
+				// for illustration only - defaults to ""
+				.contextPath("")
+				// By default MockMvc is used for localhost only;
+				// the following will use MockMvc for example.com and example.org as well
+				.useMockMvcForHosts("example.com","example.org")
+				.build();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	lateinit var driver: WebDriver
+
+	@BeforeEach
+	fun setup() {
+		driver = MockMvcHtmlUnitDriverBuilder
+				// demonstrates applying a MockMvcConfigurer (Spring Security)
+				.webAppContextSetup(context, springSecurity())
+				// for illustration only - defaults to ""
+				.contextPath("")
+				// By default MockMvc is used for localhost only;
+				// the following will use MockMvc for example.com and example.org as well
+				.useMockMvcForHosts("example.com","example.org")
+				.build()
+	}
+----
+======
+
+As an alternative, we can perform the exact same setup by configuring the `MockMvc`
+instance separately and supplying it to the `MockMvcHtmlUnitDriverBuilder`, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	MockMvc mockMvc = MockMvcBuilders
+			.webAppContextSetup(context)
+			.apply(springSecurity())
+			.build();
+
+	driver = MockMvcHtmlUnitDriverBuilder
+			.mockMvcSetup(mockMvc)
+			// for illustration only - defaults to ""
+			.contextPath("")
+			// By default MockMvc is used for localhost only;
+			// the following will use MockMvc for example.com and example.org as well
+			.useMockMvcForHosts("example.com","example.org")
+			.build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+----
+======
+
+This is more verbose, but, by building the `WebDriver` with a `MockMvc` instance, we have
+the full power of MockMvc at our fingertips.
+
+TIP: For additional information on creating a `MockMvc` instance, see
+xref:testing/mockmvc/hamcrest/setup.adoc[Configuring MockMvc].
+
