@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.io.ArrayByteBufferPool;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.websocket.server.WebSocketUpgradeHandler;
+import org.eclipse.jetty.websocket.server.ServerWebSocketContainer;
 
 import org.springframework.http.server.reactive.JettyCoreHttpHandlerAdapter;
 
@@ -51,9 +51,7 @@ public class JettyCoreHttpServer extends AbstractHttpServer {
 		this.jettyServer.addConnector(connector);
 		this.jettyServer.setHandler(createHandlerAdapter());
 
-		// TODO: We don't actually want the upgrade handler but this will create the WebSocketContainer.
-		//  This requires a change in Jetty.
-		WebSocketUpgradeHandler.from(jettyServer);
+		ServerWebSocketContainer.ensure(jettyServer);
 	}
 
 	private JettyCoreHttpHandlerAdapter createHandlerAdapter() {

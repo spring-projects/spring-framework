@@ -84,8 +84,14 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 				this.lock.lock();
 				try {
 					this.requested = Math.addExact(this.requested, n);
+					if (this.requested < 0L) {
+						this.requested = Long.MAX_VALUE;
+					}
+
 					if (!this.awaitingMessage && this.requested > 0) {
-						this.requested--;
+						if (this.requested != Long.MAX_VALUE) {
+							this.requested--;
+						}
 						this.awaitingMessage = true;
 						demand = true;
 					}
@@ -113,7 +119,9 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 			}
 			this.awaitingMessage = false;
 			if (this.requested > 0) {
-				this.requested--;
+				if (this.requested != Long.MAX_VALUE) {
+					this.requested--;
+				}
 				this.awaitingMessage = true;
 				demand = true;
 			}
