@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.javapoet.JavaFile;
 import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.TypeSpec;
+import org.springframework.lang.Nullable;
+import org.springframework.util.function.ThrowingConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -40,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Tests for {@link GeneratedFiles}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class GeneratedFilesTests {
 
@@ -159,30 +162,45 @@ class GeneratedFilesTests {
 		return this.generatedFiles.assertThatFileAdded(kind, path);
 	}
 
-	static class TestGeneratedFiles implements GeneratedFiles {
+	static class TestGeneratedFiles extends GeneratedFiles {
 
 		private Kind kind;
 
 		private String path;
 
-		private InputStreamSource content;
+		private final TestFileHandler fileHandler = new TestFileHandler();
 
 		@Override
-		public void addFile(Kind kind, String path, InputStreamSource content) {
+		public void handleFile(Kind kind, String path, ThrowingConsumer<FileHandler> handler) {
 			this.kind = kind;
 			this.path = path;
-			this.content = content;
+			handler.accept(this.fileHandler);
 		}
 
 		AbstractStringAssert<?> assertThatFileAdded(Kind kind, String path)
 				throws IOException {
 			assertThat(this.kind).as("kind").isEqualTo(kind);
 			assertThat(this.path).as("path").isEqualTo(path);
+			assertThat(this.fileHandler.content).as("content").isNotNull();
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			this.content.getInputStream().transferTo(out);
+			this.fileHandler.content.getInputStream().transferTo(out);
 			return assertThat(out.toString(StandardCharsets.UTF_8));
 		}
 
+		private static class TestFileHandler extends FileHandler {
+
+			@Nullable
+			private InputStreamSource content;
+
+			TestFileHandler() {
+				super(false, () -> null);
+			}
+
+			@Override
+			protected void copy(InputStreamSource content, boolean override) {
+				this.content = content;
+			}
+		}
 	}
 
 }

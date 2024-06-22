@@ -44,7 +44,7 @@ class InMemoryGeneratedFilesTests {
 		this.generatedFiles.addResourceFile("META-INF/test", "test");
 		assertThatIllegalStateException().isThrownBy(
 				() -> this.generatedFiles.addResourceFile("META-INF/test", "test"))
-				.withMessage("Path 'META-INF/test' already in use");
+				.withMessage("META-INF/test already exists");
 	}
 
 	@Test
