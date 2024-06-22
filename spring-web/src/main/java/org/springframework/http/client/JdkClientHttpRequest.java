@@ -176,7 +176,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	/**
 	 * By default, {@link HttpRequest} does not allow {@code Connection},
 	 * {@code Content-Length}, {@code Expect}, {@code Host}, or {@code Upgrade}
-	 * headers to be set, but this can be overriden with the
+	 * headers to be set, but this can be overridden with the
 	 * {@code jdk.httpclient.allowRestrictedHeaders} system property.
 	 * @see jdk.internal.net.http.common.Utils#getDisallowedHeaders()
 	 */
