@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class AntPathMatcherTests {
 
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
+	private final AntPathMatcher dotSeparatedPathMatcher = new AntPathMatcher(".");
 
 
 	@Test
@@ -355,6 +356,24 @@ class AntPathMatcherTests {
 		expected.put("name", "test");
 		expected.put("extension", "html");
 		assertThat(result).isEqualTo(expected);
+	}
+
+	@Test // gh-26264
+	void extractUriTemplateVariablesFromDotSeparatedPath() {
+		Map<String, String> result = dotSeparatedPathMatcher.extractUriTemplateVariables("price.stock.{tickerSymbol}", "price.stock.aaa");
+		assertThat(result).isEqualTo(Collections.singletonMap("tickerSymbol", "aaa"));
+
+		result = dotSeparatedPathMatcher.extractUriTemplateVariables("price.stock.{ticker/symbol}", "price.stock.aaa");
+		assertThat(result).isEqualTo(Collections.singletonMap("ticker/symbol", "aaa"));
+
+		result = dotSeparatedPathMatcher.extractUriTemplateVariables("notification.**.{operation}", "notification.foo.update");
+		assertThat(result).isEqualTo(Collections.singletonMap("operation", "update"));
+
+		result = dotSeparatedPathMatcher.extractUriTemplateVariables("news.sports.feed/{type}", "news.sports.feed/xml");
+		assertThat(result).isEqualTo(Collections.singletonMap("type", "xml"));
+
+		result = dotSeparatedPathMatcher.extractUriTemplateVariables("news.sports.{operation}/*", "news.sports.feed/xml");
+		assertThat(result).isEqualTo(Collections.singletonMap("operation", "feed"));
 	}
 
 	@Test

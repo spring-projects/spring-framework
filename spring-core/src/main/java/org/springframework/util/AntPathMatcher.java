@@ -462,7 +462,7 @@ public class AntPathMatcher implements PathMatcher {
 			matcher = this.stringMatcherCache.get(pattern);
 		}
 		if (matcher == null) {
-			matcher = new AntPathStringMatcher(pattern, this.caseSensitive);
+			matcher = new AntPathStringMatcher(pattern, this.pathSeparator, this.caseSensitive);
 			if (cachePatterns == null && this.stringMatcherCache.size() >= CACHE_TURNOFF_THRESHOLD) {
 				// Try to adapt to the runtime situation that we're encountering:
 				// There are obviously too many different patterns coming in here...
@@ -646,8 +646,6 @@ public class AntPathMatcher implements PathMatcher {
 	 */
 	protected static class AntPathStringMatcher {
 
-		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
-
 		private static final String DEFAULT_VARIABLE_PATTERN = "((?s).*)";
 
 		private final String rawPattern;
@@ -661,15 +659,11 @@ public class AntPathMatcher implements PathMatcher {
 
 		private final List<String> variableNames = new ArrayList<>();
 
-		public AntPathStringMatcher(String pattern) {
-			this(pattern, true);
-		}
-
-		public AntPathStringMatcher(String pattern, boolean caseSensitive) {
+		public AntPathStringMatcher(String pattern, String pathSeparator, boolean caseSensitive) {
 			this.rawPattern = pattern;
 			this.caseSensitive = caseSensitive;
 			StringBuilder patternBuilder = new StringBuilder();
-			Matcher matcher = GLOB_PATTERN.matcher(pattern);
+			Matcher matcher = getGlobPattern(pathSeparator).matcher(pattern);
 			int end = 0;
 			while (matcher.find()) {
 				patternBuilder.append(quote(pattern, end, matcher.start()));
@@ -708,6 +702,10 @@ public class AntPathMatcher implements PathMatcher {
 				this.pattern = Pattern.compile(patternBuilder.toString(),
 						Pattern.DOTALL | (this.caseSensitive ? 0 : Pattern.CASE_INSENSITIVE));
 			}
+		}
+
+		private static Pattern getGlobPattern(String pathSeparator) {
+			return Pattern.compile(String.format("\\?|\\*|\\{((?:\\{[^%s]+?\\}|[^%s{}]|\\\\[{}])+?)\\}", pathSeparator, pathSeparator));
 		}
 
 		private String quote(String s, int start, int end) {
