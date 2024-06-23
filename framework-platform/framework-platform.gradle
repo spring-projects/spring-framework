@@ -119,7 +119,7 @@ dependencies {
 		api("org.eclipse:yasson:2.0.4")
 		api("org.ehcache:ehcache:3.10.8")
 		api("org.ehcache:jcache:1.0.1")
-		api("org.freemarker:freemarker:2.3.32")
+		api("org.freemarker:freemarker:2.3.33")
 		api("org.glassfish.external:opendmk_jmxremote_optional_jar:1.0-b01-ea")
 		api("org.glassfish:jakarta.el:4.0.2")
 		api("org.glassfish.tyrus:tyrus-container-servlet:2.1.3")
