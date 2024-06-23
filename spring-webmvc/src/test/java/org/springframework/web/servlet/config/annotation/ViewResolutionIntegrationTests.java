@@ -16,9 +16,10 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
-import jakarta.servlet.ServletException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
@@ -43,47 +44,197 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  * Integration tests for view resolution with {@code @EnableWebMvc}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.1
  */
 class ViewResolutionIntegrationTests {
 
-	private static final String EXPECTED_BODY = "<html><body>Hello World!</body></html>";
+	private static final String EXPECTED_BODY = "<html><body>Hello, Java Café</body></html>";
 
 
-	@Test
-	void freemarker() throws Exception {
-		MockHttpServletResponse response = runTest(FreeMarkerWebConfig.class);
-		assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
-	}
-
-	@Test  // SPR-12013
-	void freemarkerWithExistingViewResolver() throws Exception {
-		MockHttpServletResponse response = runTest(ExistingViewResolverConfig.class);
-		assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
-	}
-
-	@Test
-	void groovyMarkup() throws Exception {
-		MockHttpServletResponse response = runTest(GroovyMarkupWebConfig.class);
-		assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
-	}
-
-	@Test
-	void freemarkerInvalidConfig() {
-		assertThatRuntimeException()
-			.isThrownBy(() -> runTest(InvalidFreeMarkerWebConfig.class))
-			.withMessageContaining("In addition to a FreeMarker view resolver ");
-	}
-
-	@Test
-	void groovyMarkupInvalidConfig() {
-		assertThatRuntimeException()
-			.isThrownBy(() -> runTest(InvalidGroovyMarkupWebConfig.class))
-			.withMessageContaining("In addition to a Groovy markup view resolver ");
+	@BeforeAll
+	static void verifyDefaultFileEncoding() {
+		assertThat(System.getProperty("file.encoding")).as("JVM default file encoding").isEqualTo("UTF-8");
 	}
 
 
-	private MockHttpServletResponse runTest(Class<?> configClass) throws ServletException, IOException {
+	@Nested
+	class FreeMarkerTests {
+
+		@Test
+		void freemarkerWithInvalidConfig() {
+			assertThatRuntimeException()
+				.isThrownBy(() -> runTest(InvalidFreeMarkerWebConfig.class))
+				.withMessageContaining("In addition to a FreeMarker view resolver ");
+		}
+
+		@Test
+		void freemarkerWithDefaults() throws Exception {
+			MockHttpServletResponse response = runTest(FreeMarkerWebConfig.class);
+			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
+			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+			// Prior to Spring Framework 6.2, the charset is not updated in the Content-Type.
+			// Thus, we expect ISO-8859-1 instead of UTF-8.
+			assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
+			assertThat(response.getContentType()).isEqualTo("text/html;charset=ISO-8859-1");
+		}
+
+		@Test  // gh-16629, gh-33071
+		void freemarkerWithExistingViewResolver() throws Exception {
+			MockHttpServletResponse response = runTest(ExistingViewResolverConfig.class);
+			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
+			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+			// Prior to Spring Framework 6.2, the charset is not updated in the Content-Type.
+			// Thus, we expect ISO-8859-1 instead of UTF-8.
+			assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
+			assertThat(response.getContentType()).isEqualTo("text/html;charset=ISO-8859-1");
+		}
+
+		@Test  // gh-33071
+		void freemarkerWithExplicitDefaultEncoding() throws Exception {
+			MockHttpServletResponse response = runTest(ExplicitDefaultEncodingConfig.class);
+			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
+			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+			// Prior to Spring Framework 6.2, the charset is not updated in the Content-Type.
+			// Thus, we expect ISO-8859-1 instead of UTF-8.
+			assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
+			assertThat(response.getContentType()).isEqualTo("text/html;charset=ISO-8859-1");
+		}
+
+		@Test  // gh-33071
+		void freemarkerWithExplicitDefaultEncodingAndContentType() throws Exception {
+			MockHttpServletResponse response = runTest(ExplicitDefaultEncodingAndContentTypeConfig.class);
+			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
+			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+			// When the Content-Type is explicitly set on the view resolver, it should be used.
+			assertThat(response.getCharacterEncoding()).isEqualTo("UTF-16");
+			assertThat(response.getContentType()).isEqualTo("text/html;charset=UTF-16");
+		}
+
+
+		@Configuration
+		static class InvalidFreeMarkerWebConfig extends WebMvcConfigurationSupport {
+
+			@Override
+			public void configureViewResolvers(ViewResolverRegistry registry) {
+				registry.freeMarker();
+			}
+		}
+
+		@Configuration
+		static class FreeMarkerWebConfig extends AbstractWebConfig {
+
+			@Override
+			public void configureViewResolvers(ViewResolverRegistry registry) {
+				registry.freeMarker();
+			}
+
+			@Bean
+			public FreeMarkerConfigurer freeMarkerConfigurer() {
+				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+				configurer.setTemplateLoaderPath("/WEB-INF/");
+				return configurer;
+			}
+		}
+
+		@Configuration
+		static class ExistingViewResolverConfig extends AbstractWebConfig {
+
+			@Bean
+			public FreeMarkerViewResolver freeMarkerViewResolver() {
+				return new FreeMarkerViewResolver("", ".ftl");
+			}
+
+			@Bean
+			public FreeMarkerConfigurer freeMarkerConfigurer() {
+				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+				configurer.setTemplateLoaderPath("/WEB-INF/");
+				return configurer;
+			}
+		}
+
+		@Configuration
+		static class ExplicitDefaultEncodingConfig extends AbstractWebConfig {
+
+			@Override
+			public void configureViewResolvers(ViewResolverRegistry registry) {
+				registry.freeMarker();
+			}
+
+			@Bean
+			public FreeMarkerConfigurer freeMarkerConfigurer() {
+				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+				configurer.setTemplateLoaderPath("/WEB-INF/");
+				configurer.setDefaultEncoding(StandardCharsets.UTF_8.name());
+				return configurer;
+			}
+		}
+
+		@Configuration
+		static class ExplicitDefaultEncodingAndContentTypeConfig extends AbstractWebConfig {
+
+			@Bean
+			public FreeMarkerViewResolver freeMarkerViewResolver() {
+				FreeMarkerViewResolver resolver = new FreeMarkerViewResolver("", ".ftl");
+				resolver.setContentType("text/html;charset=UTF-16");
+				return resolver;
+			}
+
+			@Bean
+			public FreeMarkerConfigurer freeMarkerConfigurer() {
+				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+				configurer.setTemplateLoaderPath("/WEB-INF/");
+				configurer.setDefaultEncoding(StandardCharsets.UTF_8.name());
+				return configurer;
+			}
+		}
+	}
+
+	@Nested
+	class GroovyMarkupTests {
+
+		@Test
+		void groovyMarkupInvalidConfig() {
+			assertThatRuntimeException()
+				.isThrownBy(() -> runTest(InvalidGroovyMarkupWebConfig.class))
+				.withMessageContaining("In addition to a Groovy markup view resolver ");
+		}
+
+		@Test
+		void groovyMarkup() throws Exception {
+			MockHttpServletResponse response = runTest(GroovyMarkupWebConfig.class);
+			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+		}
+
+
+		@Configuration
+		static class InvalidGroovyMarkupWebConfig extends WebMvcConfigurationSupport {
+
+			@Override
+			public void configureViewResolvers(ViewResolverRegistry registry) {
+				registry.groovy();
+			}
+		}
+
+		@Configuration
+		static class GroovyMarkupWebConfig extends AbstractWebConfig {
+
+			@Override
+			public void configureViewResolvers(ViewResolverRegistry registry) {
+				registry.groovy();
+			}
+
+			@Bean
+			public GroovyMarkupConfigurer groovyMarkupConfigurer() {
+				GroovyMarkupConfigurer configurer = new GroovyMarkupConfigurer();
+				configurer.setResourceLoaderPath("/WEB-INF/");
+				return configurer;
+			}
+		}
+	}
+
+
+	private static MockHttpServletResponse runTest(Class<?> configClass) throws Exception {
 		String basePath = "org/springframework/web/servlet/config/annotation";
 		MockServletContext servletContext = new MockServletContext(basePath);
 		MockServletConfig servletConfig = new MockServletConfig(servletContext);
@@ -105,8 +256,8 @@ class ViewResolutionIntegrationTests {
 	static class SampleController {
 
 		@GetMapping
-		public String sample(ModelMap model) {
-			model.addAttribute("hello", "Hello World!");
+		String index(ModelMap model) {
+			model.put("hello", "Hello");
 			return "index";
 		}
 	}
@@ -117,75 +268,6 @@ class ViewResolutionIntegrationTests {
 		@Bean
 		public SampleController sampleController() {
 			return new SampleController();
-		}
-	}
-
-	@Configuration
-	static class FreeMarkerWebConfig extends AbstractWebConfig {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.freeMarker();
-		}
-
-		@Bean
-		public FreeMarkerConfigurer freeMarkerConfigurer() {
-			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-			configurer.setTemplateLoaderPath("/WEB-INF/");
-			return configurer;
-		}
-	}
-
-	/**
-	 * Test @EnableWebMvc in the presence of a pre-existing ViewResolver.
-	 */
-	@Configuration
-	static class ExistingViewResolverConfig extends AbstractWebConfig {
-
-		@Bean
-		public FreeMarkerViewResolver freeMarkerViewResolver() {
-			return new FreeMarkerViewResolver("", ".ftl");
-		}
-
-		@Bean
-		public FreeMarkerConfigurer freeMarkerConfigurer() {
-			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-			configurer.setTemplateLoaderPath("/WEB-INF/");
-			return configurer;
-		}
-	}
-
-	@Configuration
-	static class GroovyMarkupWebConfig extends AbstractWebConfig {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.groovy();
-		}
-
-		@Bean
-		public GroovyMarkupConfigurer groovyMarkupConfigurer() {
-			GroovyMarkupConfigurer configurer = new GroovyMarkupConfigurer();
-			configurer.setResourceLoaderPath("/WEB-INF/");
-			return configurer;
-		}
-	}
-
-	@Configuration
-	static class InvalidFreeMarkerWebConfig extends WebMvcConfigurationSupport {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.freeMarker();
-		}
-	}
-
-	@Configuration
-	static class InvalidGroovyMarkupWebConfig extends WebMvcConfigurationSupport {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.groovy();
 		}
 	}
 

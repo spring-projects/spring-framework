@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,16 +56,40 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * A {@code View} implementation that uses the FreeMarker template engine.
  *
+ * <p>Exposes the following configuration properties:
+ * <ul>
+ * <li><b>{@link #setUrl(String) url}</b>: the location of the FreeMarker template
+ * relative to the FreeMarkerConfigurer's
+ * {@link FreeMarkerConfigurer#setTemplateLoaderPath templateLoaderPath}.</li>
+ * <li><b>{@link #setEncoding(String) encoding}</b>: the encoding used to decode
+ * byte sequences to character sequences when reading the FreeMarker template file.
+ * Default is determined by the FreeMarker {@link Configuration}.</li>
+ * </ul>
+ *
  * <p>Depends on a single {@link FreeMarkerConfig} object such as
  * {@link FreeMarkerConfigurer} being accessible in the application context.
- * Alternatively the FreeMarker {@link Configuration} can be set directly on this
- * class via {@link #setConfiguration}.
+ * Alternatively the FreeMarker {@link Configuration} can be set directly via
+ * {@link #setConfiguration}.
  *
- * <p>The {@link #setUrl(String) url} property is the location of the FreeMarker
- * template relative to the FreeMarkerConfigurer's
- * {@link FreeMarkerConfigurer#setTemplateLoaderPath templateLoaderPath}.
+ * <p><b>Note:</b> To ensure that the correct encoding is used when rendering the
+ * response as well as when the client reads the response, the following steps
+ * must be taken.
+ * <ul>
+ * <li>Either set the {@linkplain Configuration#setDefaultEncoding(String)
+ * default encoding} in the FreeMarker {@code Configuration} or set the
+ * {@linkplain #setEncoding(String) encoding} for this view.</li>
+ * <li>Configure the supported media type with a {@code charset} equal to the
+ * configured {@code encoding} via {@link #setSupportedMediaTypes(java.util.List)}
+ * or {@link FreeMarkerViewResolver#setSupportedMediaTypes(java.util.List)}.</li>
+ * </ul>
  *
- * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
+ * Note, however, that {@link FreeMarkerConfigurer} sets the default encoding in
+ * the FreeMarker {@code Configuration} to "UTF-8" and that
+ * {@link org.springframework.web.reactive.result.view.AbstractView AbstractView}
+ * sets the supported media type to {@code "text/html;charset=UTF-8"} by default.
+ * Thus, those default values are likely suitable for most applications.
+ *
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.21 or higher.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -124,18 +148,37 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Set the encoding of the FreeMarker template file.
-	 * <p>By default {@link FreeMarkerConfigurer} sets the default encoding in
-	 * the FreeMarker configuration to "UTF-8". It's recommended to specify the
-	 * encoding in the FreeMarker {@link Configuration} rather than per template
-	 * if all your templates share a common encoding.
+	 * Set the encoding used to decode byte sequences to character sequences when
+	 * reading the FreeMarker template file for this view.
+	 * <p>Defaults to {@code null} to signal that the FreeMarker
+	 * {@link Configuration} should be used to determine the encoding.
+	 * <p>A non-null encoding will override the default encoding determined by
+	 * the FreeMarker {@code Configuration}.
+	 * <p>If the encoding is not explicitly set here or in the FreeMarker
+	 * {@code Configuration}, FreeMarker will read template files using the platform
+	 * file encoding (defined by the JVM system property {@code file.encoding})
+	 * or {@code "utf-8"} if the platform file encoding is undefined. Note,
+	 * however, that {@link FreeMarkerConfigurer} sets the default encoding in the
+	 * FreeMarker {@code Configuration} to "UTF-8".
+	 * <p>It's recommended to specify the encoding in the FreeMarker {@code Configuration}
+	 * rather than per template if all your templates share a common encoding.
+	 * <p>Note that the specified or default encoding is not used for template
+	 * rendering. Instead, an explicit encoding must be specified for the rendering
+	 * process. See the note in the {@linkplain FreeMarkerView class-level
+	 * documentation} for details.
+	 * @see freemarker.template.Configuration#setDefaultEncoding
+	 * @see #getEncoding()
 	 */
 	public void setEncoding(@Nullable String encoding) {
 		this.encoding = encoding;
 	}
 
 	/**
-	 * Get the encoding for the FreeMarker template.
+	 * Get the encoding used to decode byte sequences to character sequences
+	 * when reading the FreeMarker template file for this view, or {@code null}
+	 * to signal that the FreeMarker {@link Configuration} should be used to
+	 * determine the encoding.
+	 * @see #setEncoding(String)
 	 */
 	@Nullable
 	protected String getEncoding() {
