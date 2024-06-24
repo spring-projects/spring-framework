@@ -101,10 +101,10 @@ class FileSystemGeneratedFilesTests {
 	@Test
 	void addFileWhenFileAlreadyAddedThrowsException() {
 		FileSystemGeneratedFiles generatedFiles = new FileSystemGeneratedFiles(this.root);
-		generatedFiles.addResourceFile("META-INF/test", "test");
-		assertThatIllegalStateException().isThrownBy(
-						() -> generatedFiles.addResourceFile("META-INF/test", "test"))
-				.withMessageContaining("META-INF/test", "already exists");
+		generatedFiles.addResourceFile("META-INF/mydir", "test");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> generatedFiles.addResourceFile("META-INF/mydir", "test"))
+				.withMessageContainingAll("META-INF", "mydir", "already exists");
 	}
 
 	@Test
@@ -122,20 +122,21 @@ class FileSystemGeneratedFilesTests {
 	@Test
 	void handleFileWhenFileExistsFailsToCreate() {
 		FileSystemGeneratedFiles generatedFiles = new FileSystemGeneratedFiles(this.root);
-		generatedFiles.addResourceFile("META-INF/test", "test");
-		ThrowingConsumer<FileHandler> consumer = handler -> handler.create(new ByteArrayResource("should fail".getBytes(StandardCharsets.UTF_8)));
+		generatedFiles.addResourceFile("META-INF/mydir", "test");
+		ThrowingConsumer<FileHandler> consumer = handler ->
+				handler.create(new ByteArrayResource("should fail".getBytes(StandardCharsets.UTF_8)));
 		assertThatIllegalStateException()
-				.isThrownBy(() -> generatedFiles.handleFile(Kind.RESOURCE, "META-INF/test", consumer))
-				.withMessageContaining("META-INF/test", "already exists");
+				.isThrownBy(() -> generatedFiles.handleFile(Kind.RESOURCE, "META-INF/mydir", consumer))
+				.withMessageContainingAll("META-INF", "mydir", "already exists");
 	}
 
 	@Test
 	void handleFileWhenFileExistsCanOverrideContent() {
 		FileSystemGeneratedFiles generatedFiles = new FileSystemGeneratedFiles(this.root);
-		generatedFiles.addResourceFile("META-INF/test", "test");
-		generatedFiles.handleFile(Kind.RESOURCE, "META-INF/test", handler ->
+		generatedFiles.addResourceFile("META-INF/mydir", "test");
+		generatedFiles.handleFile(Kind.RESOURCE, "META-INF/mydir", handler ->
 				handler.override(new ByteArrayResource("overridden".getBytes(StandardCharsets.UTF_8))));
-		assertThat(this.root.resolve("resources/META-INF/test")).content().isEqualTo("overridden");
+		assertThat(this.root.resolve("resources/META-INF/mydir")).content().isEqualTo("overridden");
 	}
 
 	private void assertPathMustBeRelative(FileSystemGeneratedFiles generatedFiles, String path) {
