@@ -170,11 +170,14 @@ public abstract class GeneratedFiles {
 	}
 
 	/**
-	 * Add a generated file of the specified {@link Kind} with the given
-	 * {@linkplain FileHandler handler}.
-	 * @param kind the kind of file being written
+	 * Handle a generated file of the specified {@link Kind} with the given
+	 * {@linkplain FileHandler handler}. The file handler lets you consume
+	 * the content of the already generated file, if any and provide a way
+	 * to override its content if necessary.
+	 * @param kind the kind of file
 	 * @param path the relative path of the file
 	 * @param handler a consumer of a {@link FileHandler} for the file
+	 * @since 6.2
 	 */
 	public abstract void handleFile(Kind kind, String path, ThrowingConsumer<FileHandler> handler);
 
@@ -235,6 +238,8 @@ public abstract class GeneratedFiles {
 	/**
 	 * Provide access to a particular file and offer convenient method to save
 	 * or override its content.
+	 *
+	 * @since 6.2
 	 */
 	public abstract static class FileHandler {
 

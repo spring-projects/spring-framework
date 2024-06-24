@@ -19,12 +19,14 @@ package org.springframework.aot.generate;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.lang.model.element.Modifier;
 
 import org.assertj.core.api.AbstractStringAssert;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.generate.GeneratedFiles.FileHandler;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamSource;
@@ -37,6 +39,7 @@ import org.springframework.util.function.ThrowingConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link GeneratedFiles}.
@@ -157,10 +160,68 @@ class GeneratedFilesTests {
 		assertThatFileAdded(Kind.SOURCE, "com/example/HelloWorld.java").isEqualTo("{}");
 	}
 
-	private AbstractStringAssert<?> assertThatFileAdded(Kind kind, String path)
+	@Test
+	void handleFileWhenFileDoesNotExist() throws IOException {
+		this.generatedFiles.setFileHandler(new TestFileHandler());
+		AtomicBoolean called = new AtomicBoolean(false);
+		this.generatedFiles.handleFile(Kind.RESOURCE, "META-INF/test", handler -> {
+			called.set(true);
+			handler.create(createSource("content"));
+		});
+		assertThat(called).isTrue();
+		assertThatFileAdded(Kind.RESOURCE, "META-INF/test").isEqualTo("content").hasOverride(false);
+	}
+
+	@Test
+	void handleFileWhenFileExistsCanOverride() throws IOException {
+		this.generatedFiles.setFileHandler(new TestFileHandler(createSource("existing")));
+		AtomicBoolean called = new AtomicBoolean(false);
+		this.generatedFiles.handleFile(Kind.RESOURCE, "META-INF/test", handler -> {
+			called.set(true);
+			handler.override(createSource("overridden"));
+		});
+		assertThat(called).isTrue();
+		assertThatFileAdded(Kind.RESOURCE, "META-INF/test").isEqualTo("overridden").hasOverride(true);
+	}
+
+	@Test
+	void handleFileWhenFileExistsCanOverrideUsingExistingContent() throws IOException {
+		this.generatedFiles.setFileHandler(new TestFileHandler(createSource("existing")));
+		AtomicBoolean called = new AtomicBoolean(false);
+		this.generatedFiles.handleFile(Kind.RESOURCE, "META-INF/test", handler -> {
+			called.set(true);
+			String existing = readSource(handler.getContent());
+			handler.override(createSource(existing+"-override"));
+		});
+		assertThat(called).isTrue();
+		assertThatFileAdded(Kind.RESOURCE, "META-INF/test").isEqualTo("existing-override").hasOverride(true);
+	}
+
+	@Test
+	void handleFileWhenFileExistsFailedToCreate() {
+		TestFileHandler fileHandler = new TestFileHandler(createSource("existing"));
+		this.generatedFiles.setFileHandler(fileHandler);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.generatedFiles.handleFile(Kind.RESOURCE, "META-INF/test", handler ->
+						handler.create(createSource("should fail"))))
+				.withMessage("%s already exists".formatted(fileHandler));
+	}
+
+	private static InputStreamSource createSource(String content) {
+		return new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8));
+	}
+
+	private static String readSource(InputStreamSource content) throws IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		content.getInputStream().transferTo(out);
+		return out.toString(StandardCharsets.UTF_8);
+	}
+
+	private GeneratedFileAssert assertThatFileAdded(Kind kind, String path)
 			throws IOException {
 		return this.generatedFiles.assertThatFileAdded(kind, path);
 	}
+
 
 	static class TestGeneratedFiles extends GeneratedFiles {
 
@@ -168,7 +229,11 @@ class GeneratedFilesTests {
 
 		private String path;
 
-		private final TestFileHandler fileHandler = new TestFileHandler();
+		private TestFileHandler fileHandler = new TestFileHandler();
+
+		void setFileHandler(TestFileHandler fileHandler) {
+			this.fileHandler = fileHandler;
+		}
 
 		@Override
 		public void handleFile(Kind kind, String path, ThrowingConsumer<FileHandler> handler) {
@@ -177,29 +242,51 @@ class GeneratedFilesTests {
 			handler.accept(this.fileHandler);
 		}
 
-		AbstractStringAssert<?> assertThatFileAdded(Kind kind, String path)
+		GeneratedFileAssert assertThatFileAdded(Kind kind, String path)
 				throws IOException {
 			assertThat(this.kind).as("kind").isEqualTo(kind);
 			assertThat(this.path).as("path").isEqualTo(path);
 			assertThat(this.fileHandler.content).as("content").isNotNull();
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			this.fileHandler.content.getInputStream().transferTo(out);
-			return assertThat(out.toString(StandardCharsets.UTF_8));
+			return new GeneratedFileAssert(this.fileHandler);
+		}
+	}
+
+	private static class GeneratedFileAssert extends AbstractStringAssert<GeneratedFileAssert> {
+
+		private final TestFileHandler fileHandler;
+
+		GeneratedFileAssert(TestFileHandler fileHandler) throws IOException {
+			super(readSource(fileHandler.content), GeneratedFileAssert.class);
+			this.fileHandler = fileHandler;
 		}
 
-		private static class TestFileHandler extends FileHandler {
+		public GeneratedFileAssert hasOverride(boolean expected) {
+			assertThat(this.fileHandler.override).isEqualTo(expected);
+			return this.myself;
+		}
+	}
 
-			@Nullable
-			private InputStreamSource content;
+	private static class TestFileHandler extends FileHandler {
 
-			TestFileHandler() {
-				super(false, () -> null);
-			}
+		@Nullable
+		private InputStreamSource content;
 
-			@Override
-			protected void copy(InputStreamSource content, boolean override) {
-				this.content = content;
-			}
+		@Nullable
+		private Boolean override;
+
+		TestFileHandler(@Nullable InputStreamSource content) {
+			super(content != null, () -> content);
+			this.content = content;
+		}
+
+		TestFileHandler() {
+			this(null);
+		}
+
+		@Override
+		protected void copy(InputStreamSource content, boolean override) {
+			this.content = content;
+			this.override = override;
 		}
 	}
 
