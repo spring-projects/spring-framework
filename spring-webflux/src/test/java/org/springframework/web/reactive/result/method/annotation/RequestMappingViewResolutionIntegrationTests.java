@@ -111,10 +111,11 @@ class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappin
 
 		@Bean
 		public FreeMarkerConfigurer freeMarkerConfig() {
-			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-			configurer.setPreferFileSystemAccess(false);
-			configurer.setTemplateLoaderPath("classpath*:org/springframework/web/reactive/view/freemarker/");
-			return configurer;
+			// No need to configure a custom template loader path via setTemplateLoaderPath(),
+			// since FreeMarkerConfigurer already registers a
+			// new ClassTemplateLoader(FreeMarkerConfigurer.class, ""), which automatically
+			// finds template files in the same package as this test class.
+			return new FreeMarkerConfigurer();
 		}
 	}
 
