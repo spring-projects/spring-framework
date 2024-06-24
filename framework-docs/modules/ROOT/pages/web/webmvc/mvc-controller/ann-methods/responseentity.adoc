@@ -40,7 +40,9 @@ content of the provided resource to the response `OutputStream`. Note that the
 `InputStream` should be lazily retrieved by the `Resource` handle in order to reliably
 close it after it has been copied to the response. If you are using `InputStreamResource`
 for such a purpose, make sure to construct it with an on-demand `InputStreamSource`
-(e.g. through a lambda expression that retrieves the actual `InputStream`).
+(e.g. through a lambda expression that retrieves the actual `InputStream`). Also, custom
+subclasses of `InputStreamResource` are only supported in combination with a custom
+`contentLength()` implementation which avoids consuming the stream for that purpose.
 
 Spring MVC supports using a single value xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[reactive type]
 to produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive

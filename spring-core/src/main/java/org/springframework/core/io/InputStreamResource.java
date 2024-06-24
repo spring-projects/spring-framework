@@ -40,6 +40,13 @@ import org.springframework.util.Assert;
  * times. This also applies when constructed with an {@code InputStreamSource}
  * which lazily obtains the stream but only allows for single access as well.
  *
+ * <p><b>NOTE: This class does not provide an independent {@link #contentLength()}
+ * implementation: Any such call will consume the given {@code InputStream}!</b>
+ * Consider overriding {@code #contentLength()} with a custom implementation if
+ * possible. For any other purpose, it is not recommended to extend from this
+ * class; this is particularly true when used with Spring's web resource rendering
+ * which specifically skips {@code #contentLength()} for this exact class only.
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 28.12.2003
@@ -132,8 +139,8 @@ public class InputStreamResource extends AbstractResource {
 	@Override
 	public InputStream getInputStream() throws IOException, IllegalStateException {
 		if (this.read) {
-			throw new IllegalStateException("InputStream has already been read - " +
-					"do not use InputStreamResource if a stream needs to be read multiple times");
+			throw new IllegalStateException("InputStream has already been read (possibly for early content length " +
+					"determination) - do not use InputStreamResource if a stream needs to be read multiple times");
 		}
 		this.read = true;
 		return this.inputStreamSource.getInputStream();
