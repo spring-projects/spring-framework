@@ -28,11 +28,8 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -94,14 +91,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
 		try {
 			HttpRequest request = buildRequest(headers, body);
-			HttpResponse<InputStream> response;
-			if (this.timeout != null) {
-				response = this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
-						.get(this.timeout.toMillis(), TimeUnit.MILLISECONDS);
-			}
-			else {
-				response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-			}
+			HttpResponse<InputStream> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 			return new JdkClientHttpResponse(response);
 		}
 		catch (UncheckedIOException ex) {
@@ -110,25 +100,6 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
 			throw new IOException("Request was interrupted: " + ex.getMessage(), ex);
-		}
-		catch (ExecutionException ex) {
-			Throwable cause = ex.getCause();
-
-			if (cause instanceof UncheckedIOException uioEx) {
-				throw uioEx.getCause();
-			}
-			if (cause instanceof RuntimeException rtEx) {
-				throw rtEx;
-			}
-			else if (cause instanceof IOException ioEx) {
-				throw ioEx;
-			}
-			else {
-				throw new IOException(cause.getMessage(), cause);
-			}
-		}
-		catch (TimeoutException ex) {
-			throw new IOException("Request timed out: " + ex.getMessage(), ex);
 		}
 	}
 
