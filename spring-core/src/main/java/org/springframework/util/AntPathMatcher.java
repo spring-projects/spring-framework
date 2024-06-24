@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -659,7 +659,7 @@ public class AntPathMatcher implements PathMatcher {
 
 		private final List<String> variableNames = new ArrayList<>();
 
-		public AntPathStringMatcher(String pattern, String pathSeparator, boolean caseSensitive) {
+		protected AntPathStringMatcher(String pattern, String pathSeparator, boolean caseSensitive) {
 			this.rawPattern = pattern;
 			this.caseSensitive = caseSensitive;
 			StringBuilder patternBuilder = new StringBuilder();
@@ -705,7 +705,8 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		private static Pattern getGlobPattern(String pathSeparator) {
-			return Pattern.compile(String.format("\\?|\\*|\\{((?:\\{[^%s]+?\\}|[^%s{}]|\\\\[{}])+?)\\}", pathSeparator, pathSeparator));
+			String pattern = "\\?|\\*|\\{((?:\\{[^" + pathSeparator + "]+?\\}|[^" + pathSeparator + "{}]|\\\\[{}])+?)\\}";
+			return Pattern.compile(pattern);
 		}
 
 		private String quote(String s, int start, int end) {
