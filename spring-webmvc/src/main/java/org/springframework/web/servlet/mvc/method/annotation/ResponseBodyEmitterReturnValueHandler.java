@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.sseMessageConverters = initSseConverters(messageConverters);
-		this.reactiveHandler = new ReactiveTypeHandler(registry, executor, manager);
+		this.reactiveHandler = new ReactiveTypeHandler(registry, executor, manager, null);
 	}
 
 	private static List<HttpMessageConverter<?>> initSseConverters(List<HttpMessageConverter<?>> converters) {
