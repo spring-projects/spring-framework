@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.converter;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -49,14 +50,14 @@ class ProtobufMessageConverterTests {
 
 	private Message<byte[]> messageWithoutContentType = MessageBuilder.withPayload(this.testMsg.toByteArray()).build();
 
-	private final Message<String> messageJson = MessageBuilder.withPayload("""
+	private final Message<byte[]> messageJson = MessageBuilder.withPayload("""
 			{
 				"foo": "Foo",
 				"blah": {
 					"blah": 123
 				}
 			}
-			""")
+			""".getBytes(StandardCharsets.UTF_8))
 			.setHeader(CONTENT_TYPE, APPLICATION_JSON)
 			.build();
 
@@ -113,10 +114,10 @@ class ProtobufMessageConverterTests {
 		Message<?> message = converter.toMessage(testMsg, new MessageHeaders(Map.of(CONTENT_TYPE, APPLICATION_JSON)));
 		assertThat(message).isNotNull();
 		assertThat(message.getHeaders().get(CONTENT_TYPE)).isEqualTo(APPLICATION_JSON);
-		JSONAssert.assertEquals(messageJson.getPayload(), message.getPayload().toString(), true);
+		JSONAssert.assertEquals(new String(messageJson.getPayload()), message.getPayload().toString(), true);
 
 		//convertFrom
-		assertThat(converter.fromMessage(message, Msg.class)).isEqualTo(testMsg);
+		assertThat(converter.fromMessage(messageJson, Msg.class)).isEqualTo(testMsg);
 	}
 
 }
