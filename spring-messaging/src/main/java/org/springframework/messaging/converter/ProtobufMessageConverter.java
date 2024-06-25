@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -265,7 +265,12 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 				throws IOException, MessageConversionException {
 
 			if (contentType.isCompatibleWith(APPLICATION_JSON)) {
-				this.parser.merge(message.getPayload().toString(), builder);
+				if (message.getPayload() instanceof byte[] bytes) {
+					this.parser.merge(new String(bytes, charset), builder);
+				}
+				else {
+					this.parser.merge(message.getPayload().toString(), builder);
+				}
 			}
 			else {
 				throw new MessageConversionException(
