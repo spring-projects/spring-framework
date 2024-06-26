@@ -17,6 +17,7 @@
 package org.springframework.transaction.annotation;
 
 import java.time.Duration;
+import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 
 import io.vavr.control.Try;
@@ -26,8 +27,11 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ReactiveTypeDescriptor;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.transaction.reactive.ReactiveAdapterRegistryProvider;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 import org.springframework.transaction.testfixture.ReactiveCallCountingTransactionManager;
@@ -237,6 +241,35 @@ class AnnotationTransactionInterceptorTests {
 
 		StepVerifier.withVirtualTime(proxy::fluxSuccess).thenAwait(Duration.ofSeconds(1)).thenCancel().verify();
 		assertReactiveGetTransactionAndRollbackCount(1);
+	}
+
+	@Test
+	void withCustomizedReactiveAdapterRegistry() {
+		// setup registry to tolerate String as a result type for public methods in a reactive transactional bean
+		ReactiveAdapterRegistry registry = ServiceLoader.load(ReactiveAdapterRegistryProvider.class)
+				.findFirst()
+				.map(ReactiveAdapterRegistryProvider::get)
+				.orElseThrow(() -> new IllegalStateException("No ReactiveAdapterRegistryProvider found"));
+		registry.registerReactiveType(ReactiveTypeDescriptor.singleOptionalValue(String.class, () -> null),
+				Mono::justOrEmpty, p -> Mono.from(p).block());
+
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithReactiveAndNonReactive());
+		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
+		TestWithReactiveAndNonReactive proxy = (TestWithReactiveAndNonReactive) proxyFactory.getProxy();
+
+		StepVerifier.withVirtualTime(proxy::monoSuccess).thenAwait(Duration.ofSeconds(10)).verifyComplete();
+		assertReactiveGetTransactionAndCommitCount(1);
+		assertThat(proxy.getSomeString()).isEqualTo("string value");
+	}
+
+	@Test
+	void withDefaultReactiveAdapterRegistry() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithReactiveAndNonReactive());
+		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
+		TestWithReactiveAndNonReactive proxy = (TestWithReactiveAndNonReactive) proxyFactory.getProxy();
+		assertThatIllegalStateException().isThrownBy(proxy::getSomeString);
 	}
 
 	@Test
@@ -588,6 +621,17 @@ class AnnotationTransactionInterceptorTests {
 		}
 	}
 
+	@Transactional
+	static class TestWithReactiveAndNonReactive {
+
+		public Mono<Void> monoSuccess() {
+			return Mono.delay(Duration.ofSeconds(10)).then();
+		}
+
+		public String getSomeString() {
+			return "string value";
+		}
+	}
 
 	@Transactional
 	public static class TestWithCompletableFuture {
