@@ -506,12 +506,12 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		for (Cache cache : context.getCaches()) {
 			if (CompletableFuture.class.isAssignableFrom(context.getMethod().getReturnType())) {
-				CompletableFuture<?> result = Optional.ofNullable(cache.retrieve(key)).map(c -> c.exceptionally(ex -> {
-					getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
-					return null;
-				})).orElse(null);
+					CompletableFuture<?> result = cache.retrieve(key);
 				if (result != null) {
-					return result.thenCompose(value -> (CompletableFuture<?>) evaluate(
+					return result.exceptionally(ex -> {
+						getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
+						return null;
+					}).thenCompose(value -> (CompletableFuture<?>) evaluate(
 							(value != null ? CompletableFuture.completedFuture(unwrapCacheValue(value)) : null),
 							invoker, method, contexts));
 				}
