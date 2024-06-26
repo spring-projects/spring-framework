@@ -201,7 +201,7 @@ the original class. Consider the following example:
 		<!-- inject dependencies here as required -->
 	</bean>
 
-	<!-- commandProcessor uses statefulCommandHelper -->
+	<!-- commandManager uses myCommand prototype bean -->
 	<bean id="commandManager" class="fiona.apple.CommandManager">
 		<lookup-method name="createCommand" bean="myCommand"/>
 	</bean>
