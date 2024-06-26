@@ -69,7 +69,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 
 
 	public FreeMarkerConfigurer() {
-		setDefaultEncoding(StandardCharsets.UTF_8);
+		setDefaultCharset(StandardCharsets.UTF_8);
 	}
 
 

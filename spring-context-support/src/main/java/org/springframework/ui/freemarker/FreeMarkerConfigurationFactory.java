@@ -158,15 +158,15 @@ public class FreeMarkerConfigurationFactory {
 	}
 
 	/**
-	 * Set the default encoding for the FreeMarker {@link Configuration}, which
-	 * is used to decode byte sequences to character sequences when reading template
-	 * files.
+	 * Set the {@link Charset} for the default encoding for the FreeMarker
+	 * {@link Configuration}, which is used to decode byte sequences to character
+	 * sequences when reading template files.
 	 * <p>See {@link #setDefaultEncoding(String)} for details.
 	 * @since 6.2
 	 * @see java.nio.charset.StandardCharsets
 	 */
-	public void setDefaultEncoding(Charset defaultEncoding) {
-		setDefaultEncoding(defaultEncoding.name());
+	public void setDefaultCharset(Charset defaultCharset) {
+		this.defaultEncoding = defaultCharset.name();
 	}
 
 	/**

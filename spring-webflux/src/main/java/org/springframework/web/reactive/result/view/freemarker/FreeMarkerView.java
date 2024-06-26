@@ -167,7 +167,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * process. See the note in the {@linkplain FreeMarkerView class-level
 	 * documentation} for details.
 	 * @see freemarker.template.Configuration#setDefaultEncoding
-	 * @see #setEncoding(Charset)
+	 * @see #setCharset(Charset)
 	 * @see #getEncoding()
 	 */
 	public void setEncoding(@Nullable String encoding) {
@@ -175,14 +175,14 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Set the encoding used to decode byte sequences to character sequences when
-	 * reading the FreeMarker template file for this view.
+	 * Set the {@link Charset} used to decode byte sequences to character sequences
+	 * when reading the FreeMarker template file for this view.
 	 * <p>See {@link #setEncoding(String)} for details.
 	 * @since 6.2
 	 * @see java.nio.charset.StandardCharsets
 	 */
-	public void setEncoding(@Nullable Charset encoding) {
-		setEncoding(encoding != null ? encoding.name() : null);
+	public void setCharset(@Nullable Charset charset) {
+		this.encoding = (charset != null ? charset.name() : null);
 	}
 
 	/**

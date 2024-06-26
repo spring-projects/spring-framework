@@ -164,7 +164,7 @@ class ViewResolutionIntegrationTests {
 			public FreeMarkerConfigurer freeMarkerConfigurer() {
 				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 				configurer.setTemplateLoaderPath("/WEB-INF/");
-				configurer.setDefaultEncoding(UTF_8);
+				configurer.setDefaultCharset(UTF_8);
 				return configurer;
 			}
 		}
@@ -183,7 +183,7 @@ class ViewResolutionIntegrationTests {
 			public FreeMarkerConfigurer freeMarkerConfigurer() {
 				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 				configurer.setTemplateLoaderPath("/WEB-INF/");
-				configurer.setDefaultEncoding(UTF_8);
+				configurer.setDefaultCharset(UTF_8);
 				return configurer;
 			}
 		}
