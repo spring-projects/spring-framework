@@ -135,7 +135,7 @@ class WebFluxViewResolutionIntegrationTests {
 			public FreeMarkerConfigurer freeMarkerConfigurer() {
 				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 				configurer.setPreTemplateLoaders(classTemplateLoader);
-				configurer.setDefaultEncoding(UTF_8.name());
+				configurer.setDefaultEncoding(UTF_8);
 				return configurer;
 			}
 		}
@@ -158,7 +158,7 @@ class WebFluxViewResolutionIntegrationTests {
 			public FreeMarkerConfigurer freeMarkerConfigurer() {
 				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 				configurer.setPreTemplateLoaders(classTemplateLoader);
-				configurer.setDefaultEncoding(ISO_8859_1.name());
+				configurer.setDefaultEncoding(ISO_8859_1);
 				return configurer;
 			}
 

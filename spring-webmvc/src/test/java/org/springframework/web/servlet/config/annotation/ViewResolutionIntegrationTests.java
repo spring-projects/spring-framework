@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.nio.charset.StandardCharsets;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -37,6 +35,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
@@ -165,7 +164,7 @@ class ViewResolutionIntegrationTests {
 			public FreeMarkerConfigurer freeMarkerConfigurer() {
 				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 				configurer.setTemplateLoaderPath("/WEB-INF/");
-				configurer.setDefaultEncoding(StandardCharsets.UTF_8.name());
+				configurer.setDefaultEncoding(UTF_8);
 				return configurer;
 			}
 		}
@@ -184,7 +183,7 @@ class ViewResolutionIntegrationTests {
 			public FreeMarkerConfigurer freeMarkerConfigurer() {
 				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 				configurer.setTemplateLoaderPath("/WEB-INF/");
-				configurer.setDefaultEncoding(StandardCharsets.UTF_8.name());
+				configurer.setDefaultEncoding(UTF_8);
 				return configurer;
 			}
 		}

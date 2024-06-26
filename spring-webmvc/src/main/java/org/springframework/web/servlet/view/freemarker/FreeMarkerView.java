@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.freemarker;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Map;
 
@@ -115,11 +116,23 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * process. See the note in the {@linkplain FreeMarkerView class-level
 	 * documentation} for details.
 	 * @see freemarker.template.Configuration#setDefaultEncoding
+	 * @see #setEncoding(Charset)
 	 * @see #getEncoding()
 	 * @see #setContentType(String)
 	 */
 	public void setEncoding(@Nullable String encoding) {
 		this.encoding = encoding;
+	}
+
+	/**
+	 * Set the encoding used to decode byte sequences to character sequences when
+	 * reading the FreeMarker template file for this view.
+	 * <p>See {@link #setEncoding(String)} for details.
+	 * @since 6.2
+	 * @see java.nio.charset.StandardCharsets
+	 */
+	public void setEncoding(@Nullable Charset encoding) {
+		setEncoding(encoding != null ? encoding.name() : null);
 	}
 
 	/**
@@ -316,10 +329,10 @@ public class FreeMarkerView extends AbstractTemplateView {
 	}
 
 	/**
-	 * Retrieve the FreeMarker {@link Template} for the given locale, to be
-	 * rendered by this view.
-	 * <p>By default, the template specified by the "url" bean property
-	 * will be retrieved.
+	 * Retrieve the FreeMarker {@link Template} to be rendered by this view, for
+	 * the specified locale and using the {@linkplain #setEncoding(String) configured
+	 * encoding} if set.
+	 * <p>By default, the template specified by the "url" bean property will be retrieved.
 	 * @param locale the current locale
 	 * @return the FreeMarker {@code Template} to render
 	 * @throws IOException if the template file could not be retrieved
@@ -333,8 +346,9 @@ public class FreeMarkerView extends AbstractTemplateView {
 	}
 
 	/**
-	 * Retrieve the FreeMarker {@link Template} for the specified name and locale,
-	 * using the {@linkplain #setEncoding(String) configured encoding} if set.
+	 * Retrieve the FreeMarker {@link Template} to be rendered by this view, for
+	 * the specified name and locale and using the {@linkplain #setEncoding(String)
+	 * configured encoding} if set.
 	 * <p>Can be called by subclasses to retrieve a specific template,
 	 * for example to render multiple templates into a single view.
 	 * @param name the file name of the desired template

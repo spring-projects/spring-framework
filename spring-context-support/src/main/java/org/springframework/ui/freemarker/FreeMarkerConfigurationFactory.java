@@ -18,6 +18,7 @@ package org.springframework.ui.freemarker;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -146,6 +147,7 @@ public class FreeMarkerConfigurationFactory {
 	 * <p>Note that the encoding is not used for template rendering. Instead, an
 	 * explicit encoding must be specified for the rendering process &mdash; for
 	 * example, via Spring's {@code FreeMarkerView} or {@code FreeMarkerViewResolver}.
+	 * @see #setDefaultEncoding(Charset)
 	 * @see freemarker.template.Configuration#setDefaultEncoding
 	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerView#setEncoding
 	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerView#setContentType
@@ -153,6 +155,18 @@ public class FreeMarkerConfigurationFactory {
 	 */
 	public void setDefaultEncoding(String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
+	}
+
+	/**
+	 * Set the default encoding for the FreeMarker {@link Configuration}, which
+	 * is used to decode byte sequences to character sequences when reading template
+	 * files.
+	 * <p>See {@link #setDefaultEncoding(String)} for details.
+	 * @since 6.2
+	 * @see java.nio.charset.StandardCharsets
+	 */
+	public void setDefaultEncoding(Charset defaultEncoding) {
+		setDefaultEncoding(defaultEncoding.name());
 	}
 
 	/**

@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.view.freemarker;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import freemarker.cache.ClassTemplateLoader;
@@ -68,7 +69,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 
 
 	public FreeMarkerConfigurer() {
-		setDefaultEncoding("UTF-8");
+		setDefaultEncoding(StandardCharsets.UTF_8);
 	}
 
 

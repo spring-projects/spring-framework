@@ -167,10 +167,22 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * process. See the note in the {@linkplain FreeMarkerView class-level
 	 * documentation} for details.
 	 * @see freemarker.template.Configuration#setDefaultEncoding
+	 * @see #setEncoding(Charset)
 	 * @see #getEncoding()
 	 */
 	public void setEncoding(@Nullable String encoding) {
 		this.encoding = encoding;
+	}
+
+	/**
+	 * Set the encoding used to decode byte sequences to character sequences when
+	 * reading the FreeMarker template file for this view.
+	 * <p>See {@link #setEncoding(String)} for details.
+	 * @since 6.2
+	 * @see java.nio.charset.StandardCharsets
+	 */
+	public void setEncoding(@Nullable Charset encoding) {
+		setEncoding(encoding != null ? encoding.name() : null);
 	}
 
 	/**
@@ -364,7 +376,9 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Get the FreeMarker template for the given locale, to be rendered by this view.
+	 * Retrieve the FreeMarker {@link Template} to be rendered by this view, for
+	 * the specified locale and using the {@linkplain #setEncoding(String) configured
+	 * encoding} if set.
 	 * <p>By default, the template specified by the "url" bean property will be retrieved.
 	 * @param locale the current locale
 	 * @return the FreeMarker template to render
@@ -379,7 +393,9 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Retrieve the FreeMarker template for the given locale, to be rendered by this view.
+	 * Retrieve the FreeMarker {@link Template} to be rendered by this view, for
+	 * the specified locale and using the {@linkplain #setEncoding(String) configured
+	 * encoding} if set.
 	 * <p>By default, the template specified by the "url" bean property will be retrieved,
 	 * and the returned mono will subscribe on the
 	 * {@linkplain Schedulers#boundedElastic() bounded elastic scheduler} as template
