@@ -16,6 +16,8 @@
 
 package org.springframework.validation.beanvalidation;
 
+import jakarta.validation.Validation;
+import jakarta.validation.constraints.NotBlank;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -45,7 +47,9 @@ import org.springframework.scheduling.annotation.AsyncAnnotationAdvisor;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.method.MethodValidationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -66,7 +70,18 @@ class MethodValidationProxyTests {
 		ProxyFactory factory = new ProxyFactory(bean);
 		factory.addAdvice(new MethodValidationInterceptor());
 		factory.addAdvisor(new AsyncAnnotationAdvisor());
-		doTestProxyValidation((MyValidInterface<String>) factory.getProxy());
+		doTestProxyValidation((MyValidInterface<String>) factory.getProxy(), ValidationException.class);
+	}
+
+	@Test	// gh-33105
+	@SuppressWarnings("unchecked")
+	public void testAdaptingMethodValidationInterceptor() {
+		MyValidBean bean = new MyValidBean();
+		ProxyFactory factory = new ProxyFactory(bean);
+		factory.addAdvice(new MethodValidationInterceptor(SingletonSupplier.of(Validation.buildDefaultValidatorFactory()::getValidator),
+				true));
+		factory.addAdvisor(new AsyncAnnotationAdvisor());
+		doTestProxyValidation((MyValidInterface<String>) factory.getProxy(), MethodValidationException.class);
 	}
 
 	@Test
@@ -79,7 +94,25 @@ class MethodValidationProxyTests {
 		context.registerSingleton("aapp", AsyncAnnotationBeanPostProcessor.class, pvs);
 		context.registerSingleton("bean", MyValidBean.class);
 		context.refresh();
-		doTestProxyValidation(context.getBean("bean", MyValidInterface.class));
+		doTestProxyValidation(context.getBean("bean", MyValidInterface.class), ValidationException.class);
+		context.close();
+	}
+
+	@Test	// gh-33105
+	@SuppressWarnings("unchecked")
+	public void testAdaptingMethodValidationPostProcessor() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerBean(MethodValidationPostProcessor.class, () -> {
+			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
+			postProcessor.setAdaptConstraintViolations(true);
+			return postProcessor;
+		});
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("beforeExistingAdvisors", false);
+		context.registerSingleton("aapp", AsyncAnnotationBeanPostProcessor.class, pvs);
+		context.registerSingleton("bean", MyValidBean.class);
+		context.refresh();
+		doTestProxyValidation(context.getBean("bean", MyValidInterface.class), MethodValidationException.class);
 		context.close();
 	}
 
@@ -91,21 +124,21 @@ class MethodValidationProxyTests {
 		context.registerBean(MyValidInterface.class, () ->
 				ProxyFactory.getProxy(MyValidInterface.class, new MyValidClientInterfaceMethodInterceptor()));
 		context.refresh();
-		doTestProxyValidation(context.getBean(MyValidInterface.class));
+		doTestProxyValidation(context.getBean(MyValidInterface.class), ValidationException.class);
 		context.close();
 	}
 
 	@SuppressWarnings("DataFlowIssue")
-	private void doTestProxyValidation(MyValidInterface<String> proxy) {
+	private void doTestProxyValidation(MyValidInterface<String> proxy, Class<? extends Exception> exceptionClass) {
 		assertThat(proxy.myValidMethod("value", 5)).isNotNull();
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myValidMethod("value", 15));
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myValidMethod(null, 5));
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myValidMethod("value", 0));
+		assertThatExceptionOfType(exceptionClass).isThrownBy(() -> proxy.myValidMethod("value", 15));
+		assertThatExceptionOfType(exceptionClass).isThrownBy(() -> proxy.myValidMethod(null, 5));
+		assertThatExceptionOfType(exceptionClass).isThrownBy(() -> proxy.myValidMethod("value", 0));
 		proxy.myValidAsyncMethod("value", 5);
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myValidAsyncMethod("value", 15));
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myValidAsyncMethod(null, 5));
+		assertThatExceptionOfType(exceptionClass).isThrownBy(() -> proxy.myValidAsyncMethod("value", 15));
+		assertThatExceptionOfType(exceptionClass).isThrownBy(() -> proxy.myValidAsyncMethod(null, 5));
 		assertThat(proxy.myGenericMethod("myValue")).isEqualTo("myValue");
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myGenericMethod(null));
+		assertThatExceptionOfType(exceptionClass).isThrownBy(() -> proxy.myGenericMethod(null));
 	}
 
 	@Test
@@ -121,6 +154,11 @@ class MethodValidationProxyTests {
 	@Test
 	void testLazyValidatorForMethodValidationWithValidatorProvider() {
 		doTestLazyValidatorForMethodValidation(LazyMethodValidationConfigWithValidatorProvider.class);
+	}
+
+	@Test	// gh-33105
+	void testLazyAdaptingMethodValidationConfigWithValidatorProvider() {
+		doTestLazyValidatorForMethodValidation(LazyAdaptingMethodValidationConfigWithValidatorProvider.class);
 	}
 
 	private void doTestLazyValidatorForMethodValidation(Class<?> configClass) {
@@ -143,7 +181,7 @@ class MethodValidationProxyTests {
 		@SuppressWarnings("DataFlowIssue")
 		@NotNull
 		@Override
-		public Object myValidMethod(String arg1, int arg2) {
+		public String myValidMethod(String arg1, int arg2) {
 			return (arg2 == 0 ? null : "value");
 		}
 
@@ -172,9 +210,9 @@ class MethodValidationProxyTests {
 		}
 
 		@SuppressWarnings("DataFlowIssue")
-		@NotNull
+		@NotBlank
 		@Override
-		public Object myValidMethod(String arg1, int arg2) {
+		public String myValidMethod(String arg1, int arg2) {
 			return (arg2 == 0 ? null : "value");
 		}
 
@@ -192,8 +230,8 @@ class MethodValidationProxyTests {
 	@MyStereotype
 	public interface MyValidInterface<T> {
 
-		@NotNull
-		Object myValidMethod(@NotNull(groups = MyGroup.class) String arg1, @Max(10) int arg2);
+		@NotBlank
+		String myValidMethod(@NotNull(groups = MyGroup.class) String arg1, @Max(10) int arg2);
 
 		@MyValid
 		@Async
@@ -275,6 +313,18 @@ class MethodValidationProxyTests {
 		public static MethodValidationPostProcessor methodValidationPostProcessor(ObjectProvider<Validator> validator) {
 			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
 			postProcessor.setValidatorProvider(validator);
+			return postProcessor;
+		}
+	}
+
+	@Configuration
+	public static class LazyAdaptingMethodValidationConfigWithValidatorProvider {
+
+		@Bean
+		public static MethodValidationPostProcessor methodValidationPostProcessor(ObjectProvider<Validator> validator) {
+			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
+			postProcessor.setValidatorProvider(validator);
+			postProcessor.setAdaptConstraintViolations(true);
 			return postProcessor;
 		}
 	}
