@@ -44,6 +44,7 @@ import org.springframework.util.Assert;
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 5.0
  * @see reactor.netty.http.client.HttpClient
  */
@@ -62,6 +63,8 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 
 	@Nullable
 	private volatile HttpClient httpClient;
+
+	private boolean lazyStart = false;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -112,6 +115,9 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 		if (resourceFactory.isRunning()) {
 			this.httpClient = createHttpClient(resourceFactory, mapper);
 		}
+		else {
+			this.lazyStart = true;
+		}
 	}
 
 	private static HttpClient createHttpClient(ReactorResourceFactory factory, Function<HttpClient, HttpClient> mapper) {
@@ -127,7 +133,21 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 		HttpClient httpClient = this.httpClient;
 		if (httpClient == null) {
 			Assert.state(this.resourceFactory != null && this.mapper != null, "Illegal configuration");
-			httpClient = createHttpClient(this.resourceFactory, this.mapper);
+			if (this.resourceFactory.isRunning()) {
+				// Retain HttpClient instance if resource factory has been started in the meantime,
+				// considering this connector instance as lazily started as well.
+				synchronized (this.lifecycleMonitor) {
+					httpClient = this.httpClient;
+					if (httpClient == null && this.lazyStart) {
+						httpClient = createHttpClient(this.resourceFactory, this.mapper);
+						this.httpClient = httpClient;
+						this.lazyStart = false;
+					}
+				}
+			}
+			if (httpClient == null) {
+				httpClient = createHttpClient(this.resourceFactory, this.mapper);
+			}
 		}
 
 		HttpClient.RequestSender requestSender = httpClient
@@ -176,6 +196,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 			synchronized (this.lifecycleMonitor) {
 				if (this.httpClient == null) {
 					this.httpClient = createHttpClient(this.resourceFactory, this.mapper);
+					this.lazyStart = false;
 				}
 			}
 		}
@@ -190,6 +211,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 		if (this.resourceFactory != null && this.mapper != null) {
 			synchronized (this.lifecycleMonitor) {
 				this.httpClient = null;
+				this.lazyStart = false;
 			}
 		}
 	}
