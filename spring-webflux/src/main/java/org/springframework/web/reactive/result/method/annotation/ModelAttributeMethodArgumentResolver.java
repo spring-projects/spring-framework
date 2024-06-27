@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.BindingResult;
@@ -53,9 +54,10 @@ import org.springframework.web.server.ServerWebExchange;
  * {@code @jakarta.validation.Valid} or Spring's own
  * {@code @org.springframework.validation.annotation.Validated}.
  *
- * <p>When this handler is created with {@code useDefaultResolution=true}
- * any non-simple type argument and return value is regarded as a model
- * attribute with or without the presence of an {@code @ModelAttribute}.
+ * <p>When this handler is created with {@code useDefaultResolution=true} any
+ * non-simple type argument or return value (excluding those of type
+ * {@link ModelMap}) is regarded as a model attribute with or without the
+ * presence of {@code @ModelAttribute}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -88,7 +90,8 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 			return true;
 		}
 		else if (this.useDefaultResolution) {
-			return checkParameterType(parameter, type -> !BeanUtils.isSimpleProperty(type));
+			return checkParameterType(parameter, type ->
+					!(ModelMap.class.isAssignableFrom(type) || BeanUtils.isSimpleProperty(type)));
 		}
 		return false;
 	}

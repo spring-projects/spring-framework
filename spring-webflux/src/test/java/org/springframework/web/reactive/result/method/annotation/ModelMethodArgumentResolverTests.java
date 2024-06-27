@@ -32,12 +32,14 @@ import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Tests for {@link ModelMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 class ModelMethodArgumentResolverTests {
 
@@ -52,11 +54,11 @@ class ModelMethodArgumentResolverTests {
 	@Test
 	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(this.resolvable.arg(Model.class))).isTrue();
-		assertThat(this.resolver.supportsParameter(this.resolvable.arg(ModelMap.class))).isTrue();
 		assertThat(this.resolver.supportsParameter(
 				this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class))).isTrue();
 
 		assertThat(this.resolver.supportsParameter(this.resolvable.arg(Object.class))).isFalse();
+		assertThat(this.resolver.supportsParameter(this.resolvable.arg(ModelMap.class))).isFalse();
 		assertThat(this.resolver.supportsParameter(
 				this.resolvable.annotPresent(RequestBody.class).arg(Map.class, String.class, Object.class))).isFalse();
 	}
@@ -65,7 +67,13 @@ class ModelMethodArgumentResolverTests {
 	void resolveArgument() {
 		testResolveArgument(this.resolvable.arg(Model.class));
 		testResolveArgument(this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class));
-		testResolveArgument(this.resolvable.arg(ModelMap.class));
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> testResolveArgument(this.resolvable.arg(Object.class)))
+				.withMessage("Unexpected method parameter type: " + Object.class.getName());
+		assertThatIllegalStateException()
+				.isThrownBy(() -> testResolveArgument(this.resolvable.arg(ModelMap.class)))
+				.withMessage("Unexpected method parameter type: " + ModelMap.class.getName());
 	}
 
 	private void testResolveArgument(MethodParameter parameter) {
