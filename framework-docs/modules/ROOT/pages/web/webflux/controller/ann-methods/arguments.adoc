@@ -89,9 +89,9 @@ and others) and is equivalent to `required=false`.
   Note that use of `@ModelAttribute` is optional -- for example, to set its attributes.
   See "`Any other argument`" later in this table.
 
-| `Errors`, `BindingResult`
+| `Errors` or `BindingResult`
 | For access to errors from validation and data binding for a command object, i.e. a
-  `@ModelAttribute` argument. An `Errors`, or `BindingResult` argument must be declared
+  `@ModelAttribute` argument. An `Errors` or `BindingResult` argument must be declared
   immediately after the validated method argument.
 
 | `SessionStatus` + class-level `@SessionAttributes`
