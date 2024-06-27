@@ -48,9 +48,6 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  */
 class ViewResolutionIntegrationTests {
 
-	private static final String EXPECTED_BODY = "<html><body>Hello, Java Café</body></html>";
-
-
 	@BeforeAll
 	static void verifyDefaultFileEncoding() {
 		assertThat(System.getProperty("file.encoding")).as("JVM default file encoding").isEqualTo("UTF-8");
@@ -59,6 +56,15 @@ class ViewResolutionIntegrationTests {
 
 	@Nested
 	class FreeMarkerTests {
+
+		private static final String EXPECTED_BODY = """
+				<html>
+				<body>
+				<h1>Hello, Java Café</h1>
+				<p>output_encoding: %s</p>
+				</body>
+				</html>
+				""";
 
 		@Test
 		void freemarkerWithInvalidConfig() {
@@ -69,45 +75,49 @@ class ViewResolutionIntegrationTests {
 
 		@Test
 		void freemarkerWithDefaults() throws Exception {
+			String encoding = "ISO-8859-1";
 			MockHttpServletResponse response = runTest(FreeMarkerWebConfig.class);
 			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
-			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY.formatted(encoding));
 			// Prior to Spring Framework 6.2, the charset is not updated in the Content-Type.
 			// Thus, we expect ISO-8859-1 instead of UTF-8.
-			assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
-			assertThat(response.getContentType()).isEqualTo("text/html;charset=ISO-8859-1");
+			assertThat(response.getCharacterEncoding()).isEqualTo(encoding);
+			assertThat(response.getContentType()).isEqualTo("text/html;charset=" + encoding);
 		}
 
 		@Test  // gh-16629, gh-33071
 		void freemarkerWithExistingViewResolver() throws Exception {
+			String encoding = "ISO-8859-1";
 			MockHttpServletResponse response = runTest(ExistingViewResolverConfig.class);
 			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
-			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY.formatted(encoding));
 			// Prior to Spring Framework 6.2, the charset is not updated in the Content-Type.
 			// Thus, we expect ISO-8859-1 instead of UTF-8.
-			assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
-			assertThat(response.getContentType()).isEqualTo("text/html;charset=ISO-8859-1");
+			assertThat(response.getCharacterEncoding()).isEqualTo(encoding);
+			assertThat(response.getContentType()).isEqualTo("text/html;charset=" + encoding);
 		}
 
 		@Test  // gh-33071
 		void freemarkerWithExplicitDefaultEncoding() throws Exception {
+			String encoding = "ISO-8859-1";
 			MockHttpServletResponse response = runTest(ExplicitDefaultEncodingConfig.class);
 			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
-			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY.formatted(encoding));
 			// Prior to Spring Framework 6.2, the charset is not updated in the Content-Type.
 			// Thus, we expect ISO-8859-1 instead of UTF-8.
-			assertThat(response.getCharacterEncoding()).isEqualTo("ISO-8859-1");
-			assertThat(response.getContentType()).isEqualTo("text/html;charset=ISO-8859-1");
+			assertThat(response.getCharacterEncoding()).isEqualTo(encoding);
+			assertThat(response.getContentType()).isEqualTo("text/html;charset=" + encoding);
 		}
 
 		@Test  // gh-33071
 		void freemarkerWithExplicitDefaultEncodingAndContentType() throws Exception {
+			String encoding = "UTF-16";
 			MockHttpServletResponse response = runTest(ExplicitDefaultEncodingAndContentTypeConfig.class);
 			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
-			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY.formatted(encoding));
 			// When the Content-Type is explicitly set on the view resolver, it should be used.
-			assertThat(response.getCharacterEncoding()).isEqualTo("UTF-16");
-			assertThat(response.getContentType()).isEqualTo("text/html;charset=UTF-16");
+			assertThat(response.getCharacterEncoding()).isEqualTo(encoding);
+			assertThat(response.getContentType()).isEqualTo("text/html;charset=" + encoding);
 		}
 
 
@@ -202,7 +212,7 @@ class ViewResolutionIntegrationTests {
 		@Test
 		void groovyMarkup() throws Exception {
 			MockHttpServletResponse response = runTest(GroovyMarkupWebConfig.class);
-			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY);
+			assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello, Java Café</body></html>");
 		}
 
 

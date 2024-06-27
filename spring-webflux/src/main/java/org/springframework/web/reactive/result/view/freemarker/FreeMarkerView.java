@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import freemarker.core.Environment;
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
@@ -333,7 +334,9 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 									FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
 									Charset charset = getCharset(contentType);
 									Writer writer = new OutputStreamWriter(bos, charset);
-									template.process(freeMarkerModel, writer);
+									Environment env = template.createProcessingEnvironment(freeMarkerModel, writer);
+									env.setOutputEncoding(charset.name());
+									env.process();
 									byte[] bytes = bos.toByteArrayUnsafe();
 									DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
 									return Mono.just(buffer);

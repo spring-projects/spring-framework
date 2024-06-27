@@ -22,6 +22,7 @@ import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Map;
 
+import freemarker.core.Environment;
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
@@ -364,19 +365,26 @@ public class FreeMarkerView extends AbstractTemplateView {
 	}
 
 	/**
-	 * Process the FreeMarker template to the servlet response.
+	 * Process the FreeMarker template and write the result to the response.
+	 * <p>As of Spring Framework 6.2, this method sets the
+	 * {@linkplain Environment#setOutputEncoding(String) output encoding} of the
+	 * FreeMarker {@link Environment} to the character encoding of the supplied
+	 * {@link HttpServletResponse}.
 	 * <p>Can be overridden to customize the behavior.
 	 * @param template the template to process
 	 * @param model the model for the template
 	 * @param response servlet response (use this to get the OutputStream or Writer)
 	 * @throws IOException if the template file could not be retrieved
 	 * @throws TemplateException if thrown by FreeMarker
-	 * @see freemarker.template.Template#process(Object, java.io.Writer)
+	 * @see freemarker.template.Template#createProcessingEnvironment(Object, java.io.Writer)
+	 * @see freemarker.core.Environment#process()
 	 */
 	protected void processTemplate(Template template, SimpleHash model, HttpServletResponse response)
 			throws IOException, TemplateException {
 
-		template.process(model, response.getWriter());
+		Environment env = template.createProcessingEnvironment(model, response.getWriter());
+		env.setOutputEncoding(response.getCharacterEncoding());
+		env.process();
 	}
 
 

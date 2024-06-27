@@ -58,11 +58,19 @@ class WebFluxViewResolutionIntegrationTests {
 
 	private static final MediaType TEXT_HTML_ISO_8859_1 = MediaType.parseMediaType("text/html;charset=ISO-8859-1");
 
-	private static final String EXPECTED_BODY = "<html><body>Hello, Java Café</body></html>";
 
 
 	@Nested
 	class FreeMarkerTests {
+
+		private static final String EXPECTED_BODY = """
+			<html>
+			<body>
+			<h1>Hello, Java Café</h1>
+			<p>output_encoding: %s</p>
+			</body>
+			</html>
+			""";
 
 		private static final ClassTemplateLoader classTemplateLoader =
 				new ClassTemplateLoader(WebFluxViewResolutionIntegrationTests.class, "");
@@ -77,21 +85,21 @@ class WebFluxViewResolutionIntegrationTests {
 		@Test
 		void freemarkerWithDefaults() throws Exception {
 			MockServerHttpResponse response = runTest(FreeMarkerWebFluxConfig.class);
-			StepVerifier.create(response.getBodyAsString()).expectNext(EXPECTED_BODY).expectComplete().verify();
+			StepVerifier.create(response.getBodyAsString()).expectNext(EXPECTED_BODY.formatted("UTF-8")).expectComplete().verify();
 			assertThat(response.getHeaders().getContentType()).isEqualTo(TEXT_HTML_UTF8);
 		}
 
 		@Test
 		void freemarkerWithExplicitDefaultEncoding() throws Exception {
 			MockServerHttpResponse response = runTest(ExplicitDefaultEncodingConfig.class);
-			StepVerifier.create(response.getBodyAsString()).expectNext(EXPECTED_BODY).expectComplete().verify();
+			StepVerifier.create(response.getBodyAsString()).expectNext(EXPECTED_BODY.formatted("UTF-8")).expectComplete().verify();
 			assertThat(response.getHeaders().getContentType()).isEqualTo(TEXT_HTML_UTF8);
 		}
 
 		@Test
 		void freemarkerWithExplicitDefaultEncodingAndContentType() throws Exception {
 			MockServerHttpResponse response = runTest(ExplicitDefaultEncodingAndContentTypeConfig.class);
-			StepVerifier.create(response.getBodyAsString()).expectNext(EXPECTED_BODY).expectComplete().verify();
+			StepVerifier.create(response.getBodyAsString()).expectNext(EXPECTED_BODY.formatted("ISO-8859-1")).expectComplete().verify();
 			// When the Content-Type (supported media type) is explicitly set on the view resolver, it should be used.
 			assertThat(response.getHeaders().getContentType()).isEqualTo(TEXT_HTML_ISO_8859_1);
 		}
