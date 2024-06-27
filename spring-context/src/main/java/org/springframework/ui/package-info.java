@@ -1,6 +1,6 @@
 /**
  * Generic support for UI layer concepts.
- * Provides a generic ModelMap for model holding.
+ * <p>Provides generic {@code Model} and {@code ModelMap} holders for model attributes.
  */
 @NonNullApi
 @NonNullFields

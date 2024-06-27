@@ -17,11 +17,10 @@
 package org.springframework.web.reactive.result.view;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
@@ -30,8 +29,6 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
@@ -48,7 +45,7 @@ class HttpMessageWriterViewTests {
 
 	private HttpMessageWriterView view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 
-	private final ModelMap model = new ExtendedModelMap();
+	private final Map<String, Object> model = new HashMap<>();
 
 	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
@@ -63,18 +60,18 @@ class HttpMessageWriterViewTests {
 
 	@Test
 	void singleMatch() throws Exception {
-		this.view.setModelKeys(Collections.singleton("foo2"));
-		this.model.addAttribute("foo1", Collections.singleton("bar1"));
-		this.model.addAttribute("foo2", Collections.singleton("bar2"));
-		this.model.addAttribute("foo3", Collections.singleton("bar3"));
+		this.view.setModelKeys(Set.of("foo2"));
+		this.model.put("foo1", Set.of("bar1"));
+		this.model.put("foo2", Set.of("bar2"));
+		this.model.put("foo3", Set.of("bar3"));
 
 		assertThat(doRender()).isEqualTo("[\"bar2\"]");
 	}
 
 	@Test
 	void noMatch() throws Exception {
-		this.view.setModelKeys(Collections.singleton("foo2"));
-		this.model.addAttribute("foo1", "bar1");
+		this.view.setModelKeys(Set.of("foo2"));
+		this.model.put("foo1", "bar1");
 
 		assertThat(doRender()).isEmpty();
 	}
@@ -82,18 +79,18 @@ class HttpMessageWriterViewTests {
 	@Test
 	void noMatchBecauseNotSupported() throws Exception {
 		this.view = new HttpMessageWriterView(new Jaxb2XmlEncoder());
-		this.view.setModelKeys(new HashSet<>(Collections.singletonList("foo1")));
-		this.model.addAttribute("foo1", "bar1");
+		this.view.setModelKeys(Set.of("foo1"));
+		this.model.put("foo1", "bar1");
 
 		assertThat(doRender()).isEmpty();
 	}
 
 	@Test
 	void multipleMatches() throws Exception {
-		this.view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
-		this.model.addAttribute("foo1", Collections.singleton("bar1"));
-		this.model.addAttribute("foo2", Collections.singleton("bar2"));
-		this.model.addAttribute("foo3", Collections.singleton("bar3"));
+		this.view.setModelKeys(Set.of("foo1", "foo2"));
+		this.model.put("foo1", Set.of("bar1"));
+		this.model.put("foo2", Set.of("bar2"));
+		this.model.put("foo3", Set.of("bar3"));
 
 		assertThat(doRender()).isEqualTo("{\"foo1\":[\"bar1\"],\"foo2\":[\"bar2\"]}");
 	}
@@ -101,13 +98,13 @@ class HttpMessageWriterViewTests {
 	@Test
 	void multipleMatchesNotSupported() throws Exception {
 		this.view = new HttpMessageWriterView(CharSequenceEncoder.allMimeTypes());
-		this.view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
-		this.model.addAttribute("foo1", "bar1");
-		this.model.addAttribute("foo2", "bar2");
+		this.view.setModelKeys(Set.of("foo1", "foo2"));
+		this.model.put("foo1", "bar1");
+		this.model.put("foo2", "bar2");
 
-		assertThatIllegalStateException().isThrownBy(
-				this::doRender)
-			.withMessageContaining("Map rendering is not supported");
+		assertThatIllegalStateException()
+				.isThrownBy(this::doRender)
+				.withMessageContaining("Map rendering is not supported");
 	}
 
 	@Test
@@ -115,8 +112,8 @@ class HttpMessageWriterViewTests {
 		Map<String, String> pojoData = new LinkedHashMap<>();
 		pojoData.put("foo", "f");
 		pojoData.put("bar", "b");
-		this.model.addAttribute("pojoData", pojoData);
-		this.view.setModelKeys(Collections.singleton("pojoData"));
+		this.model.put("pojoData", pojoData);
+		this.view.setModelKeys(Set.of("pojoData"));
 
 		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange).block(Duration.ZERO);
 
