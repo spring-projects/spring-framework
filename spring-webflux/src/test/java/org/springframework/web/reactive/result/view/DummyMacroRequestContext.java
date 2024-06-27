@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -38,7 +37,7 @@ public class DummyMacroRequestContext {
 
 	private final ServerWebExchange exchange;
 
-	private final ModelMap model;
+	private final Map<String, Object> model;
 
 	private final GenericApplicationContext context;
 
@@ -46,7 +45,7 @@ public class DummyMacroRequestContext {
 
 	private String contextPath;
 
-	public DummyMacroRequestContext(ServerWebExchange exchange, ModelMap model, GenericApplicationContext context) {
+	public DummyMacroRequestContext(ServerWebExchange exchange, Map<String, Object> model, GenericApplicationContext context) {
 		this.exchange = exchange;
 		this.model = model;
 		this.context = context;

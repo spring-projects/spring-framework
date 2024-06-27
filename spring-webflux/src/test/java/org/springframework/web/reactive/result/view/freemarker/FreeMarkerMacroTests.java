@@ -37,8 +37,6 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.result.view.BindStatus;
@@ -322,7 +320,7 @@ class FreeMarkerMacroTests {
 		names.put("Fred", "Fred Bloggs");
 		names.put("Rob&Harrop", "Rob Harrop");
 
-		ModelMap model = new ExtendedModelMap();
+		Map<String, Object> model = new HashMap<>();
 		DummyMacroRequestContext rc = new DummyMacroRequestContext(this.exchange, model,
 				this.applicationContext);
 		rc.setMessageMap(msgMap);
