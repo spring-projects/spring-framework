@@ -549,7 +549,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 				return true;
 			}
 		}
-		return false;
+		Class<?> superclass = clazz.getSuperclass();
+		return (superclass != null && compiledByAjc(superclass));
 	}
 
 
