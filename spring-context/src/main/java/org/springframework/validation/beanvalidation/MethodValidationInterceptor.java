@@ -174,7 +174,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Object returnValue = invocation.proceed();
 
 		if (this.adaptViolations) {
-			this.validationAdapter.applyReturnValueValidation(target, method, null, arguments, groups);
+			this.validationAdapter.applyReturnValueValidation(target, method, null, returnValue, groups);
 		}
 		else {
 			violations = this.validationAdapter.invokeValidatorForReturnValue(target, method, returnValue, groups);
