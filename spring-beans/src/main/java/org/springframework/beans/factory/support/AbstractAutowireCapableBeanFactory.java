@@ -853,7 +853,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 		catch (IllegalArgumentException ex) {
-			throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName, ex.getMessage());
+			throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
+					String.valueOf(ex.getMessage()));
 		}
 
 		// For instance supplied beans, try the target type and bean class immediately

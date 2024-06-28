@@ -1723,7 +1723,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 		}
 		catch (IllegalArgumentException ex) {
-			throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName, ex.getMessage());
+			throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
+					String.valueOf(ex.getMessage()));
 		}
 
 		if (allowInit && mbd.isSingleton()) {
