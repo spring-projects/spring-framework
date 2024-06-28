@@ -20,8 +20,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
-import jakarta.validation.ValidationException;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.groups.Default;
@@ -45,7 +47,9 @@ import org.springframework.scheduling.annotation.AsyncAnnotationAdvisor;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.method.MethodValidationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -66,7 +70,19 @@ class MethodValidationProxyTests {
 		ProxyFactory factory = new ProxyFactory(bean);
 		factory.addAdvice(new MethodValidationInterceptor());
 		factory.addAdvisor(new AsyncAnnotationAdvisor());
-		doTestProxyValidation((MyValidInterface<String>) factory.getProxy());
+		doTestProxyValidation((MyValidInterface<String>) factory.getProxy(), ConstraintViolationException.class);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testMethodValidationInterceptorWithAdaptConstraintViolations() {
+		MyValidBean bean = new MyValidBean();
+		ProxyFactory factory = new ProxyFactory(bean);
+		try (ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()) {
+			factory.addAdvice(new MethodValidationInterceptor(SingletonSupplier.of(validatorFactory.getValidator()), true));
+			factory.addAdvisor(new AsyncAnnotationAdvisor());
+			doTestProxyValidation((MyValidInterface<String>) factory.getProxy(), MethodValidationException.class);
+		}
 	}
 
 	@Test
@@ -79,7 +95,26 @@ class MethodValidationProxyTests {
 		context.registerSingleton("aapp", AsyncAnnotationBeanPostProcessor.class, pvs);
 		context.registerSingleton("bean", MyValidBean.class);
 		context.refresh();
-		doTestProxyValidation(context.getBean("bean", MyValidInterface.class));
+		doTestProxyValidation(context.getBean("bean", MyValidInterface.class), ConstraintViolationException.class);
+		context.close();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testMethodValidationPostProcessorWithAdaptConstraintViolations() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerBean(MethodValidationPostProcessor.class, () -> {
+			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
+			postProcessor.setAdaptConstraintViolations(true);
+			return postProcessor;
+		});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("beforeExistingAdvisors", false);
+		context.registerSingleton("aapp", AsyncAnnotationBeanPostProcessor.class, pvs);
+		context.registerSingleton("bean", MyValidBean.class);
+		context.refresh();
+		doTestProxyValidation(context.getBean("bean", MyValidInterface.class), MethodValidationException.class);
 		context.close();
 	}
 
@@ -91,21 +126,38 @@ class MethodValidationProxyTests {
 		context.registerBean(MyValidInterface.class, () ->
 				ProxyFactory.getProxy(MyValidInterface.class, new MyValidClientInterfaceMethodInterceptor()));
 		context.refresh();
-		doTestProxyValidation(context.getBean(MyValidInterface.class));
+		doTestProxyValidation(context.getBean(MyValidInterface.class), ConstraintViolationException.class);
+		context.close();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testMethodValidationPostProcessorForInterfaceOnlyProxyWithAdaptConstraintViolations() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.registerBean(MethodValidationPostProcessor.class, () -> {
+			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
+			postProcessor.setAdaptConstraintViolations(true);
+			return postProcessor;
+		});
+
+		context.registerBean(MyValidInterface.class, () ->
+				ProxyFactory.getProxy(MyValidInterface.class, new MyValidClientInterfaceMethodInterceptor()));
+		context.refresh();
+		doTestProxyValidation(context.getBean(MyValidInterface.class), MethodValidationException.class);
 		context.close();
 	}
 
 	@SuppressWarnings("DataFlowIssue")
-	private void doTestProxyValidation(MyValidInterface<String> proxy) {
+	private void doTestProxyValidation(MyValidInterface<String> proxy, Class<? extends Exception> expectedExceptionClass) {
 		assertThat(proxy.myValidMethod("value", 5)).isNotNull();
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myValidMethod("value", 15));
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myValidMethod(null, 5));
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myValidMethod("value", 0));
+		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() -> proxy.myValidMethod("value", 15));
+		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() -> proxy.myValidMethod(null, 5));
+		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() -> proxy.myValidMethod("value", 0));
 		proxy.myValidAsyncMethod("value", 5);
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myValidAsyncMethod("value", 15));
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myValidAsyncMethod(null, 5));
+		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() -> proxy.myValidAsyncMethod("value", 15));
+		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() -> proxy.myValidAsyncMethod(null, 5));
 		assertThat(proxy.myGenericMethod("myValue")).isEqualTo("myValue");
-		assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> proxy.myGenericMethod(null));
+		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() -> proxy.myGenericMethod(null));
 	}
 
 	@Test
@@ -121,6 +173,11 @@ class MethodValidationProxyTests {
 	@Test
 	void testLazyValidatorForMethodValidationWithValidatorProvider() {
 		doTestLazyValidatorForMethodValidation(LazyMethodValidationConfigWithValidatorProvider.class);
+	}
+
+	@Test
+	void testLazyValidatorForMethodValidationWithAdaptConstraintViolations() {
+		doTestLazyValidatorForMethodValidation(LazyMethodValidationConfigWithAdaptConstraintViolations.class);
 	}
 
 	private void doTestLazyValidatorForMethodValidation(Class<?> configClass) {
@@ -275,6 +332,18 @@ class MethodValidationProxyTests {
 		public static MethodValidationPostProcessor methodValidationPostProcessor(ObjectProvider<Validator> validator) {
 			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
 			postProcessor.setValidatorProvider(validator);
+			return postProcessor;
+		}
+	}
+
+	@Configuration
+	public static class LazyMethodValidationConfigWithAdaptConstraintViolations {
+
+		@Bean
+		public static MethodValidationPostProcessor methodValidationPostProcessor(ObjectProvider<Validator> validator) {
+			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
+			postProcessor.setValidatorProvider(validator);
+			postProcessor.setAdaptConstraintViolations(true);
 			return postProcessor;
 		}
 	}
