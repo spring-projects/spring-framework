@@ -62,7 +62,7 @@ import org.springframework.util.CollectionUtils;
  * <p>The simplest way to use this class is to specify a "templateLoaderPath";
  * FreeMarker does not need any further configuration then.
  *
- * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.21 or higher.
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.26 or higher.
  *
  * @author Darren Davison
  * @author Juergen Hoeller
@@ -143,15 +143,18 @@ public class FreeMarkerConfigurationFactory {
 	 * files.
 	 * <p>If not specified, FreeMarker will read template files using the platform
 	 * file encoding (defined by the JVM system property {@code file.encoding})
-	 * or {@code "utf-8"} if the platform file encoding is undefined.
-	 * <p>Note that the encoding is not used for template rendering. Instead, an
-	 * explicit encoding must be specified for the rendering process &mdash; for
-	 * example, via Spring's {@code FreeMarkerView} or {@code FreeMarkerViewResolver}.
+	 * or UTF-8 if the platform file encoding is undefined.
+	 * <p>Note that the supplied encoding may or may not be used for template
+	 * rendering. See the documentation for Spring's {@code FreeMarkerView} and
+	 * {@code FreeMarkerViewResolver} implementations for further details.
 	 * @see #setDefaultEncoding(Charset)
 	 * @see freemarker.template.Configuration#setDefaultEncoding
 	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerView#setEncoding
 	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerView#setContentType
 	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver#setContentType
+	 * @see org.springframework.web.reactive.result.view.freemarker.FreeMarkerView#setEncoding
+	 * @see org.springframework.web.reactive.result.view.freemarker.FreeMarkerView#setSupportedMediaTypes
+	 * @see org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver#setSupportedMediaTypes
 	 */
 	public void setDefaultEncoding(String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
@@ -170,7 +173,7 @@ public class FreeMarkerConfigurationFactory {
 	}
 
 	/**
-	 * Set a List of {@link TemplateLoader TemplateLoaders} that will be used to
+	 * Set a list of {@link TemplateLoader TemplateLoaders} that will be used to
 	 * search for templates.
 	 * <p>For example, one or more custom loaders such as database loaders could
 	 * be configured and injected here.
@@ -186,7 +189,7 @@ public class FreeMarkerConfigurationFactory {
 	}
 
 	/**
-	 * Set a List of {@link TemplateLoader TemplateLoaders} that will be used to
+	 * Set a list of {@link TemplateLoader TemplateLoaders} that will be used to
 	 * search for templates.
 	 * <p>For example, one or more custom loaders such as database loaders could
 	 * be configured and injected here.

@@ -90,7 +90,7 @@ import org.springframework.web.server.ServerWebExchange;
  * sets the supported media type to {@code "text/html;charset=UTF-8"} by default.
  * Thus, those default values are likely suitable for most applications.
  *
- * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.21 or higher.
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.26 or higher.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -158,7 +158,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * <p>If the encoding is not explicitly set here or in the FreeMarker
 	 * {@code Configuration}, FreeMarker will read template files using the platform
 	 * file encoding (defined by the JVM system property {@code file.encoding})
-	 * or {@code "utf-8"} if the platform file encoding is undefined. Note,
+	 * or UTF-8 if the platform file encoding is undefined. Note,
 	 * however, that {@link FreeMarkerConfigurer} sets the default encoding in the
 	 * FreeMarker {@code Configuration} to "UTF-8".
 	 * <p>It's recommended to specify the encoding in the FreeMarker {@code Configuration}

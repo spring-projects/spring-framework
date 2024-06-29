@@ -36,6 +36,7 @@ Java::
 			public FreeMarkerConfigurer freeMarkerConfigurer() {
 				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 				configurer.setTemplateLoaderPath("/WEB-INF/freemarker");
+				configurer.setDefaultCharset(StandardCharsets.UTF_8);
 				return configurer;
 			}
 		}
@@ -58,6 +59,7 @@ Kotlin::
 		@Bean
 		fun freeMarkerConfigurer() = FreeMarkerConfigurer().apply {
 			setTemplateLoaderPath("/WEB-INF/freemarker")
+			setDefaultCharset(StandardCharsets.UTF_8)
 		}
 	}
 ----
@@ -86,6 +88,7 @@ properties, as the following example shows:
 ----
 	<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
 		<property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
+		<property name="defaultEncoding" value="UTF-8"/>
 	</bean>
 ----
 

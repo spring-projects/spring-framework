@@ -57,6 +57,8 @@ class ViewResolutionIntegrationTests {
 	@Nested
 	class FreeMarkerTests {
 
+		private static final String DEFAULT_ENCODING = "ISO-8859-1";
+
 		private static final String EXPECTED_BODY = """
 				<html>
 				<body>
@@ -74,48 +76,37 @@ class ViewResolutionIntegrationTests {
 		}
 
 		@Test
-		void freemarkerWithDefaults() throws Exception {
-			String encoding = "ISO-8859-1";
-			MockHttpServletResponse response = runTest(FreeMarkerWebConfig.class);
-			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
-			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY.formatted(encoding));
-			// Prior to Spring Framework 6.2, the charset is not updated in the Content-Type.
-			// Thus, we expect ISO-8859-1 instead of UTF-8.
-			assertThat(response.getCharacterEncoding()).isEqualTo(encoding);
-			assertThat(response.getContentType()).isEqualTo("text/html;charset=" + encoding);
+		void freemarkerWithDefaultEncoding() throws Exception {
+			// Since no explicit encoding or content type has been set, we expect ISO-8859-1,
+			// which is the default.
+			runTestAndAssertResults(DEFAULT_ENCODING, FreeMarkerDefaultEncodingConfig.class);
 		}
 
 		@Test  // gh-16629, gh-33071
-		void freemarkerWithExistingViewResolver() throws Exception {
-			String encoding = "ISO-8859-1";
-			MockHttpServletResponse response = runTest(ExistingViewResolverConfig.class);
-			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
-			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY.formatted(encoding));
-			// Prior to Spring Framework 6.2, the charset is not updated in the Content-Type.
-			// Thus, we expect ISO-8859-1 instead of UTF-8.
-			assertThat(response.getCharacterEncoding()).isEqualTo(encoding);
-			assertThat(response.getContentType()).isEqualTo("text/html;charset=" + encoding);
+		void freemarkerWithExistingViewResolverWithDefaultEncoding() throws Exception {
+			// Since no explicit encoding or content type has been set, we expect ISO-8859-1,
+			// which is the default.
+			runTestAndAssertResults(DEFAULT_ENCODING, ExistingViewResolverConfig.class);
 		}
 
-		@Test  // gh-33071
+		@Test  // gh-33071, gh-33119
 		void freemarkerWithExplicitDefaultEncoding() throws Exception {
-			String encoding = "ISO-8859-1";
-			MockHttpServletResponse response = runTest(ExplicitDefaultEncodingConfig.class);
-			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
-			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY.formatted(encoding));
-			// Prior to Spring Framework 6.2, the charset is not updated in the Content-Type.
-			// Thus, we expect ISO-8859-1 instead of UTF-8.
-			assertThat(response.getCharacterEncoding()).isEqualTo(encoding);
-			assertThat(response.getContentType()).isEqualTo("text/html;charset=" + encoding);
+			// As of Spring Framework 6.2, the charset is automatically updated in the Content-Type, as
+			// long as the user didn't configure the Content-Type directly in the FreeMarkerViewResolver.
+			runTestAndAssertResults("UTF-8", ExplicitDefaultEncodingConfig.class);
 		}
 
 		@Test  // gh-33071
 		void freemarkerWithExplicitDefaultEncodingAndContentType() throws Exception {
-			String encoding = "UTF-16";
-			MockHttpServletResponse response = runTest(ExplicitDefaultEncodingAndContentTypeConfig.class);
+			// When the Content-Type is explicitly set on the view resolver, it should be used.
+			runTestAndAssertResults("UTF-16", ExplicitDefaultEncodingAndContentTypeConfig.class);
+		}
+
+
+		private static void runTestAndAssertResults(String encoding, Class<?> configClass) throws Exception {
+			MockHttpServletResponse response = runTest(configClass);
 			assertThat(response.isCharset()).as("character encoding set in response").isTrue();
 			assertThat(response.getContentAsString()).isEqualTo(EXPECTED_BODY.formatted(encoding));
-			// When the Content-Type is explicitly set on the view resolver, it should be used.
 			assertThat(response.getCharacterEncoding()).isEqualTo(encoding);
 			assertThat(response.getContentType()).isEqualTo("text/html;charset=" + encoding);
 		}
@@ -131,7 +122,7 @@ class ViewResolutionIntegrationTests {
 		}
 
 		@Configuration
-		static class FreeMarkerWebConfig extends AbstractWebConfig {
+		static class FreeMarkerDefaultEncodingConfig extends AbstractWebConfig {
 
 			@Override
 			public void configureViewResolvers(ViewResolverRegistry registry) {

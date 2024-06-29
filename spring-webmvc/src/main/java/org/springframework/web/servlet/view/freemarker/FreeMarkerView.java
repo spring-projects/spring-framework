@@ -56,8 +56,8 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * byte sequences to character sequences when reading the FreeMarker template file.
  * Default is determined by the FreeMarker {@link Configuration}.</li>
  * <li><b>{@link #setContentType(String) contentType}</b>: the content type of the
- * rendered response. Defaults to {@code "text/html;charset=ISO-8859-1"} but should
- * typically be set to a value that corresponds to the actual generated content
+ * rendered response. Defaults to {@code "text/html;charset=ISO-8859-1"} but may
+ * need to be set to a value that corresponds to the actual generated content
  * type (see note below).</li>
  * </ul>
  *
@@ -72,9 +72,13 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * {@code "text/html;charset=UTF-8"}. When using {@link FreeMarkerViewResolver}
  * to create the view for you, set the
  * {@linkplain FreeMarkerViewResolver#setContentType(String) content type}
- * directly in the {@code FreeMarkerViewResolver}.
+ * directly in the {@code FreeMarkerViewResolver}; however, as of Spring Framework
+ * 6.2, it is no longer necessary to explicitly set the content type in the
+ * {@code FreeMarkerViewResolver} if you have set an explicit encoding via either
+ * {@link #setEncoding(String)}, {@link FreeMarkerConfigurer#setDefaultEncoding(String)},
+ * or {@link Configuration#setDefaultEncoding(String)}.
  *
- * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.21 or higher.
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.26 or higher.
  * As of Spring Framework 6.0, FreeMarker templates are rendered in a minimal
  * fashion without JSP support, just exposing request attributes in addition
  * to the MVC-provided model map for alignment with common Servlet resources.
@@ -109,13 +113,11 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * <p>If the encoding is not explicitly set here or in the FreeMarker
 	 * {@code Configuration}, FreeMarker will read template files using the platform
 	 * file encoding (defined by the JVM system property {@code file.encoding})
-	 * or {@code "utf-8"} if the platform file encoding is undefined.
+	 * or UTF-8 if the platform file encoding is undefined.
 	 * <p>It's recommended to specify the encoding in the FreeMarker {@code Configuration}
 	 * rather than per template if all your templates share a common encoding.
-	 * <p>Note that the specified or default encoding is not used for template
-	 * rendering. Instead, an explicit encoding must be specified for the rendering
-	 * process. See the note in the {@linkplain FreeMarkerView class-level
-	 * documentation} for details.
+	 * <p>See the note in the {@linkplain FreeMarkerView class-level documentation}
+	 * for details regarding the encoding used to render the response.
 	 * @see freemarker.template.Configuration#setDefaultEncoding
 	 * @see #setCharset(Charset)
 	 * @see #getEncoding()

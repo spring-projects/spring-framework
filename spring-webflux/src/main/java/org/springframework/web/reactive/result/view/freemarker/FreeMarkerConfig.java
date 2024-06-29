@@ -24,6 +24,8 @@ import freemarker.template.Configuration;
  *
  * <p>Detected and used by {@link FreeMarkerView}.
  *
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.26 or higher.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
