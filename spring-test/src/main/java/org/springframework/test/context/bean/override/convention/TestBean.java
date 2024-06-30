@@ -29,17 +29,20 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * Mark a field to override a bean definition in the {@code BeanFactory}.
  *
  * <p>By default, the bean to override is inferred from the type of the
- * annotated field. This requires that exactly one matching definition is
+ * annotated field. This requires that exactly one matching bean definition is
  * present in the application context. A {@code @Qualifier} annotation can be
- * used to help disambiguate. Alternatively, you can explicitly specify a bean
- * name to replace by setting the {@link #value()} or {@link #name()} attribute.
+ * used to help disambiguate. In the absence of a {@code @Qualifier} annotation,
+ * the name of the annotated field will be used as a qualifier. Alternatively,
+ * you can explicitly specify a bean name to replace by setting the
+ * {@link #value()} or {@link #name()} attribute.
  *
  * <p>The instance is created from a zero-argument static factory method in the
  * test class whose return type is compatible with the annotated field. In the
- * case of a nested test class, the enclosing class hierarchy is also considered.
+ * case of a nested test class, the enclosing class hierarchy is also searched.
  * Similarly, if the test class extends from a base class or implements any
- * interfaces, the entire type hierarchy is considered. The method is deduced as
+ * interfaces, the entire type hierarchy is searched. The method is deduced as
  * follows.
+ *
  * <ul>
  * <li>If the {@link #methodName()} is specified, look for a static method with
  * that name.</li>
@@ -109,18 +112,19 @@ public @interface TestBean {
 	/**
 	 * Name of the bean to override.
 	 * <p>If left unspecified, the bean to override is selected according to
-	 * the annotated field's type.
+	 * the annotated field's type, taking qualifiers into account if necessary.
+	 * See the {@linkplain TestBean class-level documentation} for details.
 	 * @see #value()
 	 */
 	@AliasFor("value")
 	String name() default "";
 
 	/**
-	 * Name of a static factory method to look for in the test class, which will
-	 * be used to instantiate the bean to override.
-	 * <p>In the case of a nested test, any enclosing class it might have is
-	 * also considered. Similarly, in case the test class inherits from a base
-	 * class the whole class hierarchy is considered.
+	 * Name of the static factory method that will be used to instantiate the bean
+	 * to override.
+	 * <p>A search will be performed to find the factory method in the test class,
+	 * in one of its superclasses, or in any implemented interfaces. In the case
+	 * of a nested test class, the enclosing class hierarchy will also be searched.
 	 * <p>If left unspecified, the name of the factory method will be detected
 	 * based either on the name of the annotated field or the name of the bean.
 	 */
