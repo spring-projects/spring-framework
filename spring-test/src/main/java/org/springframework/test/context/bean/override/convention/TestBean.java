@@ -40,8 +40,12 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * test class whose return type is compatible with the annotated field. In the
  * case of a nested test class, the enclosing class hierarchy is also searched.
  * Similarly, if the test class extends from a base class or implements any
- * interfaces, the entire type hierarchy is searched. The method is deduced as
- * follows.
+ * interfaces, the entire type hierarchy is searched. Alternatively, a factory
+ * method in an external class can be referenced via its fully-qualified method
+ * name following the syntax {@code <fully-qualified class name>#<method name>}
+ * &mdash; for example, {@code "org.example.TestUtils#createCustomerRepository"}.
+ *
+ * <p>The factory method is deduced as follows.
  *
  * <ul>
  * <li>If the {@link #methodName()} is specified, look for a static method with
@@ -125,6 +129,10 @@ public @interface TestBean {
 	 * <p>A search will be performed to find the factory method in the test class,
 	 * in one of its superclasses, or in any implemented interfaces. In the case
 	 * of a nested test class, the enclosing class hierarchy will also be searched.
+	 * <p>Alternatively, a factory method in an external class can be referenced
+	 * via its fully-qualified method name following the syntax
+	 * {@code <fully-qualified class name>#<method name>} &mdash; for example,
+	 * {@code "org.example.TestUtils#createCustomerRepository"}.
 	 * <p>If left unspecified, the name of the factory method will be detected
 	 * based either on the name of the annotated field or the name of the bean.
 	 */

@@ -78,5 +78,12 @@ Java::
 <2> The result of this static method will be used as the instance and injected into the field.
 ======
 
-NOTE: Spring searches for the factory method to invoke in the test class, in the test
-class hierarchy, and in the enclosing class hierarchy for a `@Nested` test class.
+[NOTE]
+====
+Spring searches for the factory method to invoke in the test class, in the test class
+hierarchy, and in the enclosing class hierarchy for a `@Nested` test class.
+
+Alternatively, a factory method in an external class can be referenced via its
+fully-qualified method name following the syntax `<fully-qualified class name>#<method name>`
+– for example, `methodName = "org.example.TestUtils#createCustomService"`.
+====

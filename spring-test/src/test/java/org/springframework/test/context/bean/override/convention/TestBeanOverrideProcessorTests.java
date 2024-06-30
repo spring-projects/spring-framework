@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.test.context.bean.override.example.ExampleService;
+import org.springframework.test.context.bean.override.example.TestBeanFactory;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,6 +90,64 @@ class TestBeanOverrideProcessorTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> this.processor.findTestBeanFactoryMethod(MethodConventionTestCase.class, ExampleService.class))
 				.withMessage("At least one candidate method name is required");
+	}
+
+	@Test
+	void findTestBeanFactoryMethodByFullyQualifiedName() {
+		Class<?> clazz = getClass();
+		Class<?> returnType = String.class;
+		String methodName = TestBeanFactory.class.getName() + "#createTestMessage";
+
+		Method method = this.processor.findTestBeanFactoryMethod(clazz, returnType, methodName);
+
+		assertThat(method).isEqualTo(ReflectionUtils.findMethod(TestBeanFactory.class, "createTestMessage"));
+	}
+
+	@Test
+	void findTestBeanFactoryMethodByFullyQualifiedNameWithNonexistentMethod() {
+		Class<?> clazz = getClass();
+		Class<?> returnType = String.class;
+		String factoryClassName = TestBeanFactory.class.getName();
+		String methodName = factoryClassName + "#bogus";
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.processor.findTestBeanFactoryMethod(clazz, returnType, methodName))
+				.withMessage("No static method found named %s in %s with return type %s",
+						"bogus", factoryClassName, returnType.getName());
+	}
+
+	@Test
+	void findTestBeanFactoryMethodByFullyQualifiedNameWithNonexistentClass() {
+		Class<?> clazz = getClass();
+		Class<?> returnType = String.class;
+		String methodName = "org.example.Bogus#createTestBean";
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.processor.findTestBeanFactoryMethod(clazz, returnType, methodName))
+				.withMessage("Failed to load class for fully-qualified method name: %s", methodName)
+				.withCauseInstanceOf(ClassNotFoundException.class);
+	}
+
+	@Test
+	void findTestBeanFactoryMethodByFullyQualifiedNameWithMissingMethodName() {
+		Class<?> clazz = getClass();
+		Class<?> returnType = String.class;
+		String methodName = TestBeanFactory.class.getName() + "#";
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.processor.findTestBeanFactoryMethod(clazz, returnType, methodName))
+				.withMessage("No method name present in fully-qualified method name: %s", methodName);
+	}
+
+	@Test
+	void findTestBeanFactoryMethodByFullyQualifiedNameWithMissingClassName() {
+		Class<?> clazz = getClass();
+		Class<?> returnType = String.class;
+		String methodName = "#createTestBean";
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.processor.findTestBeanFactoryMethod(clazz, returnType, methodName))
+				.withMessage("No class name present in fully-qualified method name: %s", methodName);
 	}
 
 	@Test
@@ -176,7 +235,6 @@ class TestBeanOverrideProcessorTests {
 
 	static class BaseTestCase {
 
-		@TestBean(methodName = "factory")
 		public String field;
 
 		static String factory() {

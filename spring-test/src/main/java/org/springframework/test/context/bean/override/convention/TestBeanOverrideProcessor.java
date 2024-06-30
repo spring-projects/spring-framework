@@ -32,6 +32,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.bean.override.BeanOverrideProcessor;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
 
@@ -109,12 +111,40 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 	 */
 	Method findTestBeanFactoryMethod(Class<?> clazz, Class<?> methodReturnType, Collection<String> methodNames) {
 		Assert.notEmpty(methodNames, "At least one candidate method name is required");
-		Set<String> supportedNames = new LinkedHashSet<>(methodNames);
+		Set<Method> methods = new LinkedHashSet<>();
+		Set<String> originalNames = new LinkedHashSet<>(methodNames);
+
+		// Process fully-qualified method names first.
+		for (String methodName : methodNames) {
+			int indexOfHash = methodName.lastIndexOf('#');
+			if (indexOfHash != -1) {
+				String className = methodName.substring(0, indexOfHash).trim();
+				Assert.hasText(className, () -> "No class name present in fully-qualified method name: " + methodName);
+				String methodNameToUse = methodName.substring(indexOfHash + 1).trim();
+				Assert.hasText(methodNameToUse, () -> "No method name present in fully-qualified method name: " + methodName);
+				Class<?> declaringClass;
+				try {
+					declaringClass = ClassUtils.forName(className, getClass().getClassLoader());
+				}
+				catch (ClassNotFoundException | LinkageError ex) {
+					throw new IllegalStateException(
+							"Failed to load class for fully-qualified method name: " + methodName, ex);
+				}
+				Method externalMethod = ReflectionUtils.findMethod(declaringClass, methodNameToUse);
+				Assert.state(externalMethod != null && Modifier.isStatic(externalMethod.getModifiers()) &&
+						methodReturnType.isAssignableFrom(externalMethod.getReturnType()), () ->
+								"No static method found named %s in %s with return type %s".formatted(
+										methodNameToUse, className, methodReturnType.getName()));
+				methods.add(externalMethod);
+				originalNames.remove(methodName);
+			}
+		}
+
+		Set<String> supportedNames = new LinkedHashSet<>(originalNames);
 		MethodFilter methodFilter = method -> (Modifier.isStatic(method.getModifiers()) &&
 				supportedNames.contains(method.getName()) &&
 				methodReturnType.isAssignableFrom(method.getReturnType()));
-
-		Set<Method> methods = findMethods(clazz, methodFilter);
+		findMethods(methods, clazz, methodFilter);
 
 		String methodNamesDescription = supportedNames.stream()
 				.map(name -> name + "()").collect(Collectors.joining(" or "));
@@ -130,10 +160,10 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 		return methods.iterator().next();
 	}
 
-	private static Set<Method> findMethods(Class<?> clazz, MethodFilter methodFilter) {
-		Set<Method> methods = MethodIntrospector.selectMethods(clazz, methodFilter);
+	private static Set<Method> findMethods(Set<Method> methods, Class<?> clazz, MethodFilter methodFilter) {
+		methods.addAll(MethodIntrospector.selectMethods(clazz, methodFilter));
 		if (methods.isEmpty() && TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
-			methods = findMethods(clazz.getEnclosingClass(), methodFilter);
+			findMethods(methods, clazz.getEnclosingClass(), methodFilter);
 		}
 		return methods;
 	}
