@@ -20,12 +20,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link HttpHeadersAssert}.
@@ -42,7 +43,7 @@ class HttpHeadersAssertTests {
 	@Test
 	void containsHeaderWithNameNotPresent() {
 		Map<String, String> map = Map.of("first", "1");
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).containsHeader("wrong-name"))
 				.withMessageContainingAll("HTTP headers", "first", "wrong-name");
 	}
@@ -56,7 +57,7 @@ class HttpHeadersAssertTests {
 	@Test
 	void containsHeadersWithSeveralNamesNotPresent() {
 		Map<String, String> map = Map.of("first", "1", "second", "2", "third", "3");
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).containsHeaders("first", "wrong-name", "another-wrong-name", "third"))
 				.withMessageContainingAll("HTTP headers", "first", "wrong-name", "another-wrong-name");
 	}
@@ -69,7 +70,7 @@ class HttpHeadersAssertTests {
 	@Test
 	void doesNotContainHeaderWithNamePresent() {
 		Map<String, String> map = Map.of("first", "1");
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).doesNotContainKey("first"))
 				.withMessageContainingAll("HTTP headers", "first");
 	}
@@ -83,7 +84,7 @@ class HttpHeadersAssertTests {
 	@Test
 	void doesNotContainHeadersWithSeveralNamesPresent() {
 		Map<String, String> map = Map.of("first", "1", "second", "2", "third", "3");
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).doesNotContainsHeaders("first", "another-wrong-name", "second"))
 				.withMessageContainingAll("HTTP headers", "first", "second");
 	}
@@ -100,7 +101,7 @@ class HttpHeadersAssertTests {
 	void hasValueWithStringMatchOnSecondaryValue() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.addAll("header", List.of("first", "second", "third"));
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).hasValue("header", "second"))
 				.withMessageContainingAll("check primary value for HTTP header 'header'", "first", "second");
 	}
@@ -109,7 +110,7 @@ class HttpHeadersAssertTests {
 	void hasValueWithNoStringMatch() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.addAll("header", List.of("first", "second", "third"));
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(headers).hasValue("wrong-name", "second"))
 				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
 	}
@@ -118,7 +119,7 @@ class HttpHeadersAssertTests {
 	void hasValueWithNonPresentHeader() {
 		HttpHeaders map = new HttpHeaders();
 		map.add("test-header", "a");
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", "a"))
 				.withMessageContainingAll("HTTP headers", "test-header", "wrong-name");
 	}
@@ -134,7 +135,7 @@ class HttpHeadersAssertTests {
 	void hasValueWithLongMatchOnSecondaryValue() {
 		HttpHeaders map = new HttpHeaders();
 		map.addAll("header", List.of("123", "456", "789"));
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).hasValue("header", 456))
 				.withMessageContainingAll("check primary long value for HTTP header 'header'", "123", "456");
 	}
@@ -143,7 +144,7 @@ class HttpHeadersAssertTests {
 	void hasValueWithNoLongMatch() {
 		HttpHeaders map = new HttpHeaders();
 		map.addAll("header", List.of("123", "456", "789"));
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", 456))
 				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
 	}
@@ -161,7 +162,7 @@ class HttpHeadersAssertTests {
 		Instant instant = Instant.now();
 		HttpHeaders map = new HttpHeaders();
 		map.setInstant("header", instant);
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", instant.minusSeconds(30)))
 				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
 	}
@@ -171,7 +172,7 @@ class HttpHeadersAssertTests {
 		Instant instant = Instant.now();
 		HttpHeaders map = new HttpHeaders();
 		map.setInstant("header", instant);
-		Assertions.assertThatExceptionOfType(AssertionError.class)
+		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(map).hasValue("wrong-name", instant.minusSeconds(1)))
 				.withMessageContainingAll("HTTP headers", "header", "wrong-name");
 	}

@@ -21,7 +21,6 @@ import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Stephane Nicoll
  */
 public class AbstractHttpServletRequestAssertTests {
-
 
 	@Nested
 	class AttributesTests {
@@ -90,7 +88,6 @@ public class AbstractHttpServletRequestAssertTests {
 		private HttpServletRequest createRequest(Map<String, Object> attributes) {
 			MockHttpServletRequest request = new MockHttpServletRequest();
 			HttpSession session = request.getSession();
-			Assertions.assertThat(session).isNotNull();
 			attributes.forEach(session::setAttribute);
 			return request;
 		}
@@ -127,19 +124,18 @@ public class AbstractHttpServletRequestAssertTests {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertThat(request).hasAsyncStarted(false))
 				.withMessage("Async expected not to have started");
-
 	}
 
 
-	private static ResponseAssert assertThat(HttpServletRequest response) {
-		return new ResponseAssert(response);
+	private static RequestAssert assertThat(HttpServletRequest request) {
+		return new RequestAssert(request);
 	}
 
 
-	private static final class ResponseAssert extends AbstractHttpServletRequestAssert<ResponseAssert, HttpServletRequest> {
+	private static final class RequestAssert extends AbstractHttpServletRequestAssert<RequestAssert, HttpServletRequest> {
 
-		ResponseAssert(HttpServletRequest actual) {
-			super(actual, ResponseAssert.class);
+		RequestAssert(HttpServletRequest actual) {
+			super(actual, RequestAssert.class);
 		}
 	}
 

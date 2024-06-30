@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class MockitoBeanContextCustomizerEqualityTests {
 
-
 	@Test
 	void contextCustomizerWithSameMockByNameInDifferentClassIsEqual() {
 		assertThat(createContextCustomizer(Case1ByName.class)).isEqualTo(createContextCustomizer(Case2ByName.class));

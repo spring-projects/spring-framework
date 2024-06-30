@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.assertj;
 import java.lang.reflect.Method;
 
 import org.assertj.core.api.AssertProvider;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.ResponseEntity;
@@ -120,7 +119,7 @@ class HandlerResultAssertTests {
 
 	private static Method method(Class<?> target, String name, Class<?>... parameterTypes) {
 		Method method = ReflectionUtils.findMethod(target, name, parameterTypes);
-		Assertions.assertThat(method).isNotNull();
+		assertThat(method).isNotNull();
 		return method;
 	}
 

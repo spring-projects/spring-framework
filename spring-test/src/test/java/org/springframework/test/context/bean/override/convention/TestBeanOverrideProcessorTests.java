@@ -124,8 +124,8 @@ class TestBeanOverrideProcessorTests {
 		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
 		assertThat(overrideAnnotation).isNotNull();
 
-		assertThatIllegalStateException().isThrownBy(() -> this.processor.createMetadata(
-				overrideAnnotation, clazz, field))
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.processor.createMetadata(overrideAnnotation, clazz, field))
 				.withMessage("No static method found named field() or someField() in %s with return type %s",
 						clazz.getName(), returnType.getName());
 	}
@@ -136,7 +136,8 @@ class TestBeanOverrideProcessorTests {
 		Field field = clazz.getField("field");
 		NonNull badAnnotation = AnnotationUtils.synthesizeAnnotation(NonNull.class);
 
-		assertThatIllegalStateException().isThrownBy(() -> this.processor.createMetadata(badAnnotation, clazz, field))
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.processor.createMetadata(badAnnotation, clazz, field))
 				.withMessage("Invalid annotation passed to TestBeanOverrideProcessor: expected @TestBean" +
 								" on field %s.%s", field.getDeclaringClass().getName(), field.getName());
 	}

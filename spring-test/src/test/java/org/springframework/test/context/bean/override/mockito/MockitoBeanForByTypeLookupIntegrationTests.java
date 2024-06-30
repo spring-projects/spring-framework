@@ -122,6 +122,7 @@ public class MockitoBeanForByTypeLookupIntegrationTests {
 		verifyNoMoreInteractions(this.ambiguousMeta);
 	}
 
+
 	interface AnotherService {
 
 		String hello();

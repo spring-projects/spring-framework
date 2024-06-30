@@ -18,11 +18,12 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.util.List;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.bean.override.BeanOverrideContextCustomizerTestUtils;
+
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link MockitoSpyBean}.
@@ -35,8 +36,9 @@ class MockitoSpyBeanTests {
 	void contextCustomizerCannotBeCreatedWithNoSuchBeanName() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean("present", String.class, () -> "example");
-		BeanOverrideContextCustomizerTestUtils.configureApplicationContext(ByNameSingleLookup.class, context);
-		Assertions.assertThatIllegalStateException().isThrownBy(context::refresh)
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(ByNameSingleLookup.class, context);
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to override bean 'beanToSpy' by wrapping: \
 						there is no existing bean instance with that name of type %s""".formatted(
@@ -46,8 +48,9 @@ class MockitoSpyBeanTests {
 	@Test
 	void contextCustomizerCannotBeCreatedWithNoSuchBeanType() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		BeanOverrideContextCustomizerTestUtils.configureApplicationContext(ByTypeSingleLookup.class, context);
-		Assertions.assertThatIllegalStateException().isThrownBy(context::refresh)
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(ByTypeSingleLookup.class, context);
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to select a bean to override by wrapping: found 0 bean instances of \
 						type %s (as required by annotated field '%s.example')""".formatted(
@@ -59,8 +62,9 @@ class MockitoSpyBeanTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean("bean1", String.class, () -> "example1");
 		context.registerBean("bean2", String.class, () -> "example2");
-		BeanOverrideContextCustomizerTestUtils.configureApplicationContext(ByTypeSingleLookup.class, context);
-		Assertions.assertThatIllegalStateException().isThrownBy(context::refresh)
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(ByTypeSingleLookup.class, context);
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to select a bean to override by wrapping: found 2 bean instances \
 						of type %s (as required by annotated field '%s.example'): %s""".formatted(

@@ -48,4 +48,5 @@ public interface BeanOverrideProcessor {
 	 * given field
 	 */
 	OverrideMetadata createMetadata(Annotation overrideAnnotation, Class<?> testClass, Field field);
+
 }

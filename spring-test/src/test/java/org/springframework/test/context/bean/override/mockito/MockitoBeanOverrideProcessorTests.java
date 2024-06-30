@@ -62,7 +62,8 @@ public class MockitoBeanOverrideProcessorTests {
 		Field field = clazz.getField("a");
 		Annotation annotation = field.getAnnotation(Nullable.class);
 
-		assertThatIllegalStateException().isThrownBy(() -> this.processor.createMetadata(annotation, clazz, field))
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.processor.createMetadata(annotation, clazz, field))
 				.withMessage("Invalid annotation passed to MockitoBeanOverrideProcessor: expected " +
 						"@MockitoBean/@MockitoSpyBean on field %s.%s", field.getDeclaringClass().getName(),
 						field.getName());

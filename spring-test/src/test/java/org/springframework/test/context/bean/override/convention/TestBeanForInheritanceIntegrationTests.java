@@ -128,7 +128,6 @@ class TestBeanForInheritanceIntegrationTests {
 	@DisplayName("Nested, concrete inherited tests with correct @TestBean setup")
 	class NestedConcreteTestBeanIntegrationTests extends AbstractTestBeanIntegrationTestCase {
 
-
 		@Autowired
 		ApplicationContext ctx;
 
@@ -141,6 +140,7 @@ class TestBeanForInheritanceIntegrationTests {
 		static Pojo someBean() {
 			return new FakePojo("someBeanOverride");
 		}
+
 		// Hides otherBean() defined in AbstractTestBeanIntegrationTestCase.
 		static Pojo otherBean() {
 			return new FakePojo("otherBean in subclass");
@@ -169,4 +169,5 @@ class TestBeanForInheritanceIntegrationTests {
 			assertThat(this.pojo2.getValue()).as("injection point").isEqualTo("in enclosing test class");
 		}
 	}
+
 }

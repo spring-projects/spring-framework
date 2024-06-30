@@ -33,7 +33,6 @@ import static org.mockito.Mockito.mock;
  */
 public abstract class BeanOverrideContextCustomizerTestUtils {
 
-
 	private static final BeanOverrideContextCustomizerFactory factory = new BeanOverrideContextCustomizerFactory();
 
 	/**
@@ -49,12 +48,12 @@ public abstract class BeanOverrideContextCustomizerTestUtils {
 	}
 
 	/**
-	 * Configure the given {@linkplain ConfigurableApplicationContext application
+	 * Customize the given {@linkplain ConfigurableApplicationContext application
 	 * context} for the given {@code testClass}.
 	 * @param testClass the test to process
-	 * @param context the context to configure
+	 * @param context the context to customize
 	 */
-	public static void configureApplicationContext(Class<?> testClass, ConfigurableApplicationContext context) {
+	public static void customizeApplicationContext(Class<?> testClass, ConfigurableApplicationContext context) {
 		ContextCustomizer contextCustomizer = createContextCustomizer(testClass);
 		if (contextCustomizer != null) {
 			contextCustomizer.customizeContext(context, mock(MergedContextConfiguration.class));

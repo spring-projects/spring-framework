@@ -18,11 +18,12 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.util.List;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.bean.override.BeanOverrideContextCustomizerTestUtils;
+
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link MockitoBean}.
@@ -36,8 +37,9 @@ class MockitoMockBeanTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean("bean1", String.class, () -> "example1");
 		context.registerBean("bean2", String.class, () -> "example2");
-		BeanOverrideContextCustomizerTestUtils.configureApplicationContext(ByTypeSingleLookup.class, context);
-		Assertions.assertThatIllegalStateException().isThrownBy(context::refresh)
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(ByTypeSingleLookup.class, context);
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to select a bean definition to override: found 2 bean definitions \
 						of type %s (as required by annotated field '%s.example'): %s""".formatted(
@@ -51,4 +53,5 @@ class MockitoMockBeanTests {
 		String example;
 
 	}
+
 }

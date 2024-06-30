@@ -17,14 +17,13 @@
 package org.springframework.test.context.bean.override.mockito;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -35,10 +34,8 @@ import static org.mockito.Mockito.mock;
  *
  * @author Phillip Webb
  */
-@ExtendWith(SpringExtension.class)
+@SpringJUnitConfig
 class MockitoBeanForBeanFactoryIntegrationTests {
-
-	// spring-boot/gh-7439
 
 	@MockitoBean
 	private TestFactoryBean testFactoryBean;
