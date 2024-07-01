@@ -23,6 +23,7 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import jakarta.servlet.AsyncEvent;
 import jakarta.servlet.AsyncListener;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -98,6 +99,11 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 	}
 
 	@Override
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
+	}
+
+	@Override
 	@SuppressWarnings("try")
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
@@ -117,8 +123,9 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 			if (request.isAsyncStarted()) {
 				request.getAsyncContext().addListener(new ObservationAsyncListener(observation));
 			}
-			// Stop Observation right now if async processing has not been started.
-			else {
+			// scope is opened for ASYNC dispatches, but the observation will be closed
+			// by the async listener.
+			else if (request.getDispatcherType() != DispatcherType.ASYNC){
 				Throwable error = fetchException(request);
 				if (error != null) {
 					observation.error(error);
@@ -188,7 +195,6 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 		@Override
 		public void onError(AsyncEvent event) {
 			this.currentObservation.error(unwrapServletException(event.getThrowable()));
-			this.currentObservation.stop();
 		}
 
 	}
