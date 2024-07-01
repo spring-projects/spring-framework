@@ -1,7 +1,7 @@
 [[spring-jcl]]
 = Logging
 
-Since Spring Framework 5.0, Spring comes with its own Commons Logging bridge implemented
+Spring comes with its own Commons Logging bridge implemented
 in the `spring-jcl` module. The implementation checks for the presence of the Log4j 2.x
 API and the SLF4J 1.7 API in the classpath and uses the first one of those found as the
 logging implementation, falling back to the Java platform's core logging facilities (also

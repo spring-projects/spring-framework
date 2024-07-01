@@ -168,7 +168,8 @@ Kotlin::
 
 [NOTE]
 ====
-As of Spring Framework 5.2, `@TestPropertySource` can be used as _repeatable annotation_.
+`@TestPropertySource` can be used as _repeatable annotation_.
+
 That means that you can have multiple declarations of `@TestPropertySource` on a single
 test class, with the `locations` and `properties` from later `@TestPropertySource`
 annotations overriding those from previous `@TestPropertySource` annotations.
@@ -261,8 +262,8 @@ If the `inheritLocations` or `inheritProperties` attribute in `@TestPropertySour
 set to `false`, the locations or inlined properties, respectively, for the test class
 shadow and effectively replace the configuration defined by superclasses.
 
-NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
-classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
+NOTE: Test configuration may also be inherited from enclosing classes. See
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
 
 In the next example, the `ApplicationContext` for `BaseTest` is loaded by using only the
 `base.properties` file as a test property source. In contrast, the `ApplicationContext`

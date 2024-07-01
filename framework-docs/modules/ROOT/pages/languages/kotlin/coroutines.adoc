@@ -209,7 +209,7 @@ class UserHandler(builder: WebClient.Builder) {
 == Transactions
 
 Transactions on Coroutines are supported via the programmatic variant of the Reactive
-transaction management provided as of Spring Framework 5.2.
+transaction management.
 
 For suspending functions, a `TransactionalOperator.executeAndAwait` extension is provided.
 

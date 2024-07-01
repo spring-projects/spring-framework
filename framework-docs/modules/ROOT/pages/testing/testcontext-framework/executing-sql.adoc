@@ -495,7 +495,7 @@ details).
 [[testcontext-executing-sql-declaratively-script-merging]]
 === Merging and Overriding Configuration with `@SqlMergeMode`
 
-As of Spring Framework 5.2, it is possible to merge method-level `@Sql` declarations with
+It is possible to merge method-level `@Sql` declarations with
 class-level declarations. For example, this allows you to provide the configuration for a
 database schema or some common test data once per test class and then provide additional,
 use case specific test data per test method. To enable `@Sql` merging, annotate either

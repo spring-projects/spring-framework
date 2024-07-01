@@ -183,18 +183,17 @@ The default _test constructor autowire mode_ can be changed by setting the
 default mode may be set via the
 xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
 
-As of Spring Framework 5.3, the default mode may also be configured as a
+The default mode may also be configured as a
 https://junit.org/junit5/docs/current/user-guide/#running-tests-config-params[JUnit Platform configuration parameter].
 
 If the `spring.test.constructor.autowire.mode` property is not set, test class
 constructors will not be automatically autowired.
 =====
 
-NOTE: As of Spring Framework 5.2, `@TestConstructor` is only supported in conjunction
-with the `SpringExtension` for use with JUnit Jupiter. Note that the `SpringExtension` is
-often automatically registered for you – for example, when using annotations such as
-`@SpringJUnitConfig` and `@SpringJUnitWebConfig` or various test-related annotations from
-Spring Boot Test.
+NOTE: `@TestConstructor` is only supported in conjunction with the `SpringExtension` for
+use with JUnit Jupiter. Note that the `SpringExtension` is often automatically registered
+for you – for example, when using annotations such as `@SpringJUnitConfig` and
+`@SpringJUnitWebConfig` or various test-related annotations from Spring Boot Test.
 
 [[integration-testing-annotations-nestedtestconfiguration]]
 == `@NestedTestConfiguration`

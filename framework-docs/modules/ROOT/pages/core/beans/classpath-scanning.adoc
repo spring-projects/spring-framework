@@ -751,7 +751,7 @@ and bean definition show.
 TIP: If you run into naming conflicts due to multiple autodetected components having the
 same non-qualified class name (i.e., classes with identical names but residing in
 different packages), you may need to configure a `BeanNameGenerator` that defaults to the
-fully qualified class name for the generated bean name. As of Spring Framework 5.2.3, the
+fully qualified class name for the generated bean name. The
 `FullyQualifiedAnnotationBeanNameGenerator` located in package
 `org.springframework.context.annotation` can be used for such purposes.
 

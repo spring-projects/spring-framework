@@ -19,8 +19,8 @@ marks a transaction for rollback only in the case of runtime, unchecked exceptio
 That is, when the thrown exception is an instance or subclass of `RuntimeException`.
 (`Error` instances also, by default, result in a rollback).
 
-As of Spring Framework 5.2, the default configuration also provides support for
-Vavr's `Try` method to trigger transaction rollbacks when it returns a 'Failure'.
+The default configuration also provides support for Vavr's `Try` method to trigger
+transaction rollbacks when it returns a 'Failure'.
 This allows you to handle functional-style errors using Try and have the transaction
 automatically rolled back in case of a failure. For more information on Vavr's Try,
 refer to the https://docs.vavr.io/#_try[official Vavr documentation].

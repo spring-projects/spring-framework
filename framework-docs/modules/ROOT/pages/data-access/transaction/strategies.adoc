@@ -45,9 +45,9 @@ exists in the current call stack. The implication in this latter case is that, a
 Jakarta EE transaction contexts, a `TransactionStatus` is associated with a thread of
 execution.
 
-As of Spring Framework 5.2, Spring also provides a transaction management abstraction for
-reactive applications that make use of reactive types or Kotlin Coroutines. The following
-listing shows the transaction strategy defined by
+Spring also provides a transaction management abstraction for reactive applications that
+make use of reactive types or Kotlin Coroutines. The following listing shows the
+transaction strategy defined by
 `org.springframework.transaction.ReactiveTransactionManager`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
