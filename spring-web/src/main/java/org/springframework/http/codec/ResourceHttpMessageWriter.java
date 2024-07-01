@@ -137,17 +137,6 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 	/**
 	 * Adds the default headers for the given resource to the given message.
-	 * @since 6.0
-	 * @deprecated since 6.1, in favor of {@link #addDefaultHeaders(ReactiveHttpOutputMessage, Resource, MediaType, Map)},
-	 * for removal = 6.2
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public void addHeaders(ReactiveHttpOutputMessage message, Resource resource, @Nullable MediaType contentType, Map<String, Object> hints) {
-		addDefaultHeaders(message, resource, contentType, hints).block();
-	}
-
-	/**
-	 * Adds the default headers for the given resource to the given message.
 	 * @since 6.1
 	 */
 	public Mono<Void> addDefaultHeaders(ReactiveHttpOutputMessage message, Resource resource, @Nullable MediaType contentType, Map<String, Object> hints) {
