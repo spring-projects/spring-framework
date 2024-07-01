@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * <em>Spring TestContext Framework</em>.
  *
  * <p>This annotation may also be used as a <em>meta-annotation</em> to create
- * custom <em>composed annotations</em>. As of Spring Framework 5.1, a locally
+ * custom <em>composed annotations</em>. Note, however, that a locally
  * declared {@code @BootstrapWith} annotation (i.e., one that is <em>directly
  * present</em> on the current test class) will override any meta-present
  * declarations of {@code @BootstrapWith}.

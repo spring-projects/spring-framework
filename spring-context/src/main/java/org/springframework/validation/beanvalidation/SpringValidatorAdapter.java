@@ -55,8 +55,7 @@ import org.springframework.validation.SmartValidator;
  * {@link CustomValidatorBean} and {@link LocalValidatorFactoryBean},
  * and as the primary implementation of the {@link SmartValidator} interface.
  *
- * <p>As of Spring Framework 5.0, this adapter is fully compatible with
- * Bean Validation 1.1 as well as 2.0.
+ * <p>This adapter is fully compatible with Bean Validation 1.1 as well as 2.0.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen

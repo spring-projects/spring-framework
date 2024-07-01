@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  * are provided as additional arguments so that these can be injected as
  * method arguments if necessary.
  *
- * <p>As of Spring Framework 5.3.26, {@code MessagingMessageListenerAdapter} implements
+ * <p>Note that {@code MessagingMessageListenerAdapter} implements
  * {@link SubscriptionNameProvider} in order to provide a meaningful default
  * subscription name. See {@link #getSubscriptionName()} for details.
  *

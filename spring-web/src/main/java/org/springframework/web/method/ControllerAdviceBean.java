@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,9 +220,8 @@ public class ControllerAdviceBean implements Ordered {
 	/**
 	 * Get the bean instance for this {@code ControllerAdviceBean}, if necessary
 	 * resolving the bean name through the {@link BeanFactory}.
-	 * <p>As of Spring Framework 5.2, once the bean instance has been resolved it
-	 * will be cached if it is a singleton, thereby avoiding repeated lookups in
-	 * the {@code BeanFactory}.
+	 * <p>Once the bean instance has been resolved it will be cached if it is a
+	 * singleton, thereby avoiding repeated lookups in the {@code BeanFactory}.
 	 */
 	public Object resolveBean() {
 		if (this.resolvedBean == null) {
@@ -276,8 +275,8 @@ public class ControllerAdviceBean implements Ordered {
 	 * Find beans annotated with {@link ControllerAdvice @ControllerAdvice} in the
 	 * given {@link ApplicationContext} and wrap them as {@code ControllerAdviceBean}
 	 * instances.
-	 * <p>As of Spring Framework 5.2, the {@code ControllerAdviceBean} instances
-	 * in the returned list are sorted using {@link OrderComparator#sort(List)}.
+	 * <p>Note that the {@code ControllerAdviceBean} instances in the returned list
+	 * are sorted using {@link OrderComparator#sort(List)}.
 	 * @see #getOrder()
 	 * @see OrderComparator
 	 * @see Ordered

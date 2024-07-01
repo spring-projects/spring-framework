@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,18 +54,17 @@ import java.lang.annotation.Target;
  *
  * <h3>Autowired Parameters</h3>
  * <p>Although {@code @Autowired} can technically be declared on individual method
- * or constructor parameters since Spring Framework 5.0, most parts of the
- * framework ignore such declarations. The only part of the core Spring Framework
- * that actively supports autowired parameters is the JUnit Jupiter support in
- * the {@code spring-test} module (see the
+ * or constructor parameters, most parts of the framework ignore such declarations.
+ * The only part of the core Spring Framework that actively supports autowired
+ * parameters is the JUnit Jupiter support in the {@code spring-test} module (see the
  * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/testing.html#testcontext-junit-jupiter-di">TestContext framework</a>
  * reference documentation for details).
  *
  * <h3>Multiple Arguments and 'required' Semantics</h3>
  * <p>In the case of a multi-arg constructor or method, the {@link #required} attribute
  * is applicable to all arguments. Individual parameters may be declared as Java-8 style
- * {@link java.util.Optional} or, as of Spring Framework 5.0, also as {@code @Nullable}
- * or a not-null parameter type in Kotlin, overriding the base 'required' semantics.
+ * {@link java.util.Optional} as well as {@code @Nullable} or a not-null parameter
+ * type in Kotlin, overriding the base 'required' semantics.
  *
  * <h3>Autowiring Arrays, Collections, and Maps</h3>
  * <p>In case of an array, {@link java.util.Collection}, or {@link java.util.Map}

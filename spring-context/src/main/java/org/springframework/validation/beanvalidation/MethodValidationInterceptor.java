@@ -69,7 +69,7 @@ import org.springframework.validation.method.ParameterValidationResult;
  * at the type level of the containing target class, applying to all public service methods
  * of that class. By default, JSR-303 will validate against its default group only.
  *
- * <p>As of Spring 5.0, this functionality requires a Bean Validation 1.1+ provider.
+ * <p>This functionality requires a Bean Validation 1.1+ provider.
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev

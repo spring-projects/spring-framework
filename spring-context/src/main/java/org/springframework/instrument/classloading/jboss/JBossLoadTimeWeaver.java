@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link LoadTimeWeaver} implementation for JBoss's instrumentable ClassLoader.
  * Thanks to Ales Justin and Marius Bogoevici for the initial prototype.
  *
- * <p>As of Spring Framework 5.0, this weaver supports WildFly 8+.
- * As of Spring Framework 5.1.5, it also supports WildFly 13+.
+ * <p>This weaver supports WildFly 13+.
  *
  * @author Costin Leau
  * @author Juergen Hoeller

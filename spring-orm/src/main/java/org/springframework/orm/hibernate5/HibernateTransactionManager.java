@@ -189,11 +189,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Set the JDBC DataSource that this instance should manage transactions for.
-	 * The DataSource should match the one used by the Hibernate SessionFactory:
+	 * <p>The DataSource should match the one used by the Hibernate SessionFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the SessionFactory was configured with LocalDataSourceConnectionProvider,
 	 * i.e. by Spring's LocalSessionFactoryBean with a specified "dataSource",
-	 * the DataSource will be auto-detected: You can still explicitly specify the
+	 * the DataSource will be auto-detected. You can still explicitly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
@@ -210,7 +210,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * for the actual target DataSource. Alternatively, consider switching
 	 * {@link #setPrepareConnection "prepareConnection"} to {@code false}.</b>
 	 * In both cases, this transaction manager will not eagerly acquire a
-	 * JDBC Connection for each Hibernate Session anymore (as of Spring 5.1).
+	 * JDBC Connection for each Hibernate Session.
 	 * @see #setAutodetectDataSource
 	 * @see TransactionAwareDataSourceProxy
 	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy

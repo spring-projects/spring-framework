@@ -60,14 +60,13 @@ import org.springframework.util.StringUtils;
  * <h3>Multipart Data</h3>
  *
  * <p>By default, {@code "multipart/form-data"} is used as the content type when
- * {@linkplain #write writing} multipart data. As of Spring Framework 5.2 it is
- * also possible to write multipart data using other multipart subtypes such as
- * {@code "multipart/mixed"} and {@code "multipart/related"}, as long as the
- * multipart subtype is registered as a {@linkplain #getSupportedMediaTypes
- * supported media type} <em>and</em> the desired multipart subtype is specified
- * as the content type when {@linkplain #write writing} the multipart data. Note
- * that {@code "multipart/mixed"} is registered as a supported media type by
- * default.
+ * {@linkplain #write writing} multipart data. It is also possible to write
+ * multipart data using other multipart subtypes such as {@code "multipart/mixed"}
+ * and {@code "multipart/related"}, as long as the multipart subtype is registered
+ * as a {@linkplain #getSupportedMediaTypes supported media type} <em>and</em> the
+ * desired multipart subtype is specified as the content type when
+ * {@linkplain #write writing} the multipart data. Note that {@code "multipart/mixed"}
+ * is registered as a supported media type by default.
  *
  * <p>When writing multipart data, this converter uses other
  * {@link HttpMessageConverter HttpMessageConverters} to write the respective

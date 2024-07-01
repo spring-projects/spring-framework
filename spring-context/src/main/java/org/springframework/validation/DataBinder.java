@@ -549,11 +549,10 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * well as direct equality.
 	 * <p>The default implementation of this method stores disallowed field patterns
 	 * in {@linkplain PropertyAccessorUtils#canonicalPropertyName(String) canonical}
-	 * form. As of Spring Framework 5.2.21, the default implementation also transforms
-	 * disallowed field patterns to {@linkplain String#toLowerCase() lowercase} to
-	 * support case-insensitive pattern matching in {@link #isAllowed}. Subclasses
-	 * which override this method must therefore take both of these transformations
-	 * into account.
+	 * form and also transforms disallowed field patterns to
+	 * {@linkplain String#toLowerCase() lowercase} to support case-insensitive
+	 * pattern matching in {@link #isAllowed}. Subclasses which override this
+	 * method must therefore take both of these transformations into account.
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>allowed</i> field patterns.
