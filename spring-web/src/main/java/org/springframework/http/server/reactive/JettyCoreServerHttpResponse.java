@@ -69,6 +69,7 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 						.maxAge(httpCookie.getMaxAge())
 						.sameSite(httpCookie.getSameSite().name())
 						.secure(httpCookie.isSecure())
+						.partitioned(httpCookie.isPartitioned())
 						.build();
 				this.addCookie(responseCookie);
 				i.remove();
@@ -224,7 +225,7 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 
 		@Override
 		public boolean isPartitioned() {
-			return false;
+			return this.responseCookie.isPartitioned();
 		}
 
 		@Override
