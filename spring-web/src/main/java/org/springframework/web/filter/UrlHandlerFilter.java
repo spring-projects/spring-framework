@@ -18,7 +18,6 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -37,17 +36,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
- * {@code Filter} that can be configured to trim trailing slashes, and either
- * send a redirect or wrap the request and continue processing.
+ * {@link jakarta.servlet.Filter} that modifies the URL, and then redirects or
+ * wraps the request to apply the change.
  *
- * <p>Use the static {@link #trailingSlashHandler(String...)} method to begin to
- * configure and build an instance. For example:
+ * <p>To create an instance, you can use the following:
  *
  * <pre>
  * UrlHandlerFilter filter = UrlHandlerFilter
@@ -56,8 +56,8 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *    .build();
  * </pre>
  *
- * <p>Note that this {@code Filter} should be ordered after
- * {@link ForwardedHeaderFilter} and before the Spring Security filter chain.
+ * <p>This {@code Filter} should be ordered after {@link ForwardedHeaderFilter}
+ * and before any security filters.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
@@ -67,11 +67,11 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 	private static final Log logger = LogFactory.getLog(UrlHandlerFilter.class);
 
 
-	private final Map<PathPattern, UrlHandler> handlers;
+	private final MultiValueMap<UrlHandler, PathPattern> handlers;
 
 
-	private UrlHandlerFilter(Map<PathPattern, UrlHandler> handlers) {
-		this.handlers = new LinkedHashMap<>(handlers);
+	private UrlHandlerFilter(MultiValueMap<UrlHandler, PathPattern> handlers) {
+		this.handlers = new LinkedMultiValueMap<>(handlers);
 	}
 
 
@@ -95,11 +95,15 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 			if (path == null) {
 				path = ServletRequestPathUtils.parseAndCache(request);
 			}
-			for (Map.Entry<PathPattern, UrlHandler> entry : this.handlers.entrySet()) {
-				UrlHandler handler = entry.getValue();
-				if (entry.getKey().matches(path) && handler.canHandle(request)) {
-					handler.handle(request, response, chain);
-					return;
+			for (Map.Entry<UrlHandler, List<PathPattern>> entry : this.handlers.entrySet()) {
+				if (!entry.getKey().canHandle(request)) {
+					continue;
+				}
+				for (PathPattern pattern : entry.getValue()) {
+					if (pattern.matches(path)) {
+						entry.getKey().handle(request, response, chain);
+						return;
+					}
 				}
 			}
 		}
@@ -114,8 +118,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * Create a builder for a {@link UrlHandlerFilter} by adding a handler for
-	 * URL's with a trailing slash.
+	 * Create a builder by adding a handler for URL's with a trailing slash.
 	 * @param pathPatterns path patterns to map the handler to, e.g.
 	 * <code>"/path/&#42;"</code>, <code>"/path/&#42;&#42;"</code>,
 	 * <code>"/path/foo/"</code>.
@@ -153,8 +156,8 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		interface TrailingSlashSpec {
 
 			/**
-			 * Intercept requests with a trailing slash. The callback is invoked
-			 * just before the configured trailing slash handler.
+			 * Configure a request consumer to be called just before the handler
+			 * is invoked when a URL with a trailing slash is matched.
 			 */
 			TrailingSlashSpec intercept(Consumer<HttpServletRequest> consumer);
 
@@ -185,7 +188,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 		private final PathPatternParser patternParser = new PathPatternParser();
 
-		private final Map<PathPattern, UrlHandler> handlers = new LinkedHashMap<>();
+		private final MultiValueMap<UrlHandler, PathPattern> handlers = new LinkedMultiValueMap<>();
 
 		@Override
 		public TrailingSlashSpec trailingSlashHandler(String... patterns) {
@@ -193,7 +196,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		}
 
 		private DefaultBuilder addHandler(List<PathPattern> pathPatterns, UrlHandler handler) {
-			pathPatterns.forEach(pattern -> this.handlers.put(pattern, handler));
+			pathPatterns.forEach(pattern -> this.handlers.add(handler, pattern));
 			return this;
 		}
 
