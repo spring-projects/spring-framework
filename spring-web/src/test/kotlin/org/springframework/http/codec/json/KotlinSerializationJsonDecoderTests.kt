@@ -19,9 +19,11 @@ package org.springframework.http.codec.json
 import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.core.MethodParameter
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
 import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.testfixture.codec.AbstractDecoderTests
 import org.springframework.http.MediaType
 import reactor.core.publisher.Flux
@@ -32,6 +34,7 @@ import java.lang.UnsupportedOperationException
 import java.math.BigDecimal
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * Tests for the JSON decoding using kotlinx.serialization.
@@ -128,6 +131,22 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 		}, null, null)
 	}
 
+	@Test
+	fun decodeToMonoWithNullableWithNull() {
+		val input = Flux.concat(
+			stringBuffer("{\"value\":null}\n"),
+		)
+
+		val methodParameter = MethodParameter.forExecutable(::handleMapWithNullable::javaMethod.get()!!, -1)
+		val elementType = ResolvableType.forMethodParameter(methodParameter)
+
+		testDecodeToMonoAll(input, elementType, {
+			it.expectNext(mapOf("value" to null))
+				.expectComplete()
+				.verify()
+		}, null, null)
+	}
+
 	private fun stringBuffer(value: String): Mono<DataBuffer> {
 		return stringBuffer(value, StandardCharsets.UTF_8)
 	}
@@ -144,5 +163,7 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 
 	@Serializable
 	data class Pojo(val foo: String, val bar: String, val pojo: Pojo? = null)
+
+	fun handleMapWithNullable(map: Map<String, String?>) = map
 
 }
