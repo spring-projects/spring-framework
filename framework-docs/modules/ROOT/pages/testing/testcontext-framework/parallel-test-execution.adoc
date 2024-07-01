@@ -1,10 +1,9 @@
 [[testcontext-parallel-test-execution]]
 = Parallel Test Execution
 
-Spring Framework 5.0 introduced basic support for executing tests in parallel within a
-single JVM when using the Spring TestContext Framework. In general, this means that most
-test classes or test methods can be run in parallel without any changes to test code
-or configuration.
+The Spring TestContext Framework provides basic support for executing tests in parallel
+within a single JVM. In general, this means that most test classes or test methods can be
+run in parallel without any changes to test code or configuration.
 
 TIP: For details on how to set up parallel test execution, see the documentation for your
 testing framework, build tool, or IDE.
@@ -44,5 +43,4 @@ the javadoc for {spring-framework-api}/test/context/TestContext.html[`TestContex
 `DefaultTestContext` used in Spring provides such a constructor. However, if you use a
 third-party library that provides a custom `TestContext` implementation, you need to
 verify that it is suitable for parallel test execution.
-
 
