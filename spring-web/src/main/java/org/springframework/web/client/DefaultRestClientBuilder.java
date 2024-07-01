@@ -16,6 +16,7 @@
 
 package org.springframework.web.client;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -242,6 +243,12 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	@Override
 	public RestClient.Builder baseUrl(String baseUrl) {
 		this.baseUrl = baseUrl;
+		return this;
+	}
+
+	@Override
+	public RestClient.Builder baseUrl(URI baseUrl) {
+		this.baseUrl = baseUrl.toString();
 		return this;
 	}
 

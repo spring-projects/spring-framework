@@ -21,6 +21,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -921,6 +923,28 @@ class RestClientIntegrationTests {
 
 		expectRequestCount(1);
 		expectRequest(request -> assertThat(request.getHeader("Accept")).isEqualTo(MediaType.TEXT_PLAIN_VALUE));
+	}
+
+	@ParameterizedRestClientTest
+	void relativeUri(ClientHttpRequestFactory requestFactory) throws URISyntaxException {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+
+		URI uri = new URI(null, null, "/foo bar", null);
+
+		String result = this.restClient
+				.get()
+				.uri(uri)
+				.accept(MediaType.TEXT_PLAIN)
+				.retrieve()
+				.body(String.class);
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
+		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/foo%20bar"));
 	}
 
 

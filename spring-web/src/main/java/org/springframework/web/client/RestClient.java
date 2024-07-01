@@ -155,6 +155,17 @@ public interface RestClient {
 	}
 
 	/**
+	 * Variant of {@link #create()} that accepts a default base {@code URI}. For more
+	 * details see {@link Builder#baseUrl(URI) Builder.baseUrl(URI)}.
+	 * @param baseUrl the base URI for all requests
+	 * @since 6.2
+	 * @see #builder()
+	 */
+	static RestClient create(URI baseUrl) {
+		return new DefaultRestClientBuilder().baseUrl(baseUrl).build();
+	}
+
+	/**
 	 * Create a new {@code RestClient} based on the configuration of the given
 	 * {@code RestTemplate}.
 	 * <p>The returned builder is configured with the following attributes of
@@ -229,6 +240,26 @@ public interface RestClient {
 		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
 		Builder baseUrl(String baseUrl);
+
+		/**
+		 * Configure a base {@code URI} for requests. Effectively a shortcut for:
+		 * <pre class="code">
+		 * URI baseUrl = URI.create("https://abc.go.com/v1");
+		 * DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl.toString());
+		 * RestClient client = RestClient.builder().uriBuilderFactory(factory).build();
+		 * </pre>
+		 * <p>The {@code DefaultUriBuilderFactory} is used to prepare the URL
+		 * for every request with the given base URL, unless the URL request
+		 * for a given URL is absolute in which case the base URL is ignored.
+		 * <p><strong>Note:</strong> this method is mutually exclusive with
+		 * {@link #uriBuilderFactory(UriBuilderFactory)}. If both are used, the
+		 * {@code baseUrl} value provided here will be ignored.
+		 * @return this builder
+		 * @since 6.2
+		 * @see DefaultUriBuilderFactory#DefaultUriBuilderFactory(String)
+		 * @see #uriBuilderFactory(UriBuilderFactory)
+		 */
+		Builder baseUrl(URI baseUrl);
 
 		/**
 		 * Configure default URL variable values to use when expanding URI
@@ -414,7 +445,11 @@ public interface RestClient {
 	interface UriSpec<S extends RequestHeadersSpec<?>> {
 
 		/**
-		 * Specify the URI using an absolute, fully constructed {@link URI}.
+		 * Specify the URI using a fully constructed {@link URI}.
+		 * <p>If the given URI is absolute, it is used as given. If it is
+		 * a relative URI, the {@link UriBuilderFactory} configured for
+		 * the client (e.g. with a base URI) will be used to
+		 * {@linkplain URI#resolve(URI) resolve} the given URI against.
 		 */
 		S uri(URI uri);
 

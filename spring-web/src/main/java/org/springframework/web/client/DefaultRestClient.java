@@ -341,7 +341,13 @@ final class DefaultRestClient implements RestClient {
 
 		@Override
 		public RequestBodySpec uri(URI uri) {
-			this.uri = uri;
+			if (uri.isAbsolute()) {
+				this.uri = uri;
+			}
+			else {
+				URI baseUri = DefaultRestClient.this.uriBuilderFactory.expand("");
+				this.uri = baseUri.resolve(uri);
+			}
 			return this;
 		}
 
