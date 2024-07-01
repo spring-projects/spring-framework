@@ -49,6 +49,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -318,7 +319,13 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 						return (T) genericMessageConverter.read(bodyType, bodyClass, inputMessage);
 					}
 				}
-				if (messageConverter.canRead(bodyClass, contentType)) {
+				else if (messageConverter instanceof SmartHttpMessageConverter<?> smartMessageConverter) {
+					ResolvableType resolvableType = ResolvableType.forType(bodyType);
+					if (smartMessageConverter.canRead(resolvableType, contentType)) {
+						return (T) smartMessageConverter.read(resolvableType, inputMessage, null);
+					}
+				}
+				else if (messageConverter.canRead(bodyClass, contentType)) {
 					HttpMessageConverter<T> theConverter =
 							(HttpMessageConverter<T>) messageConverter;
 					Class<? extends T> clazz = (Class<? extends T>) bodyClass;

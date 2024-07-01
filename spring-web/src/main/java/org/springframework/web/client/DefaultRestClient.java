@@ -60,6 +60,7 @@ import org.springframework.http.client.observation.DefaultClientRequestObservati
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -212,15 +213,24 @@ final class DefaultRestClient implements RestClient {
 			}
 
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof GenericHttpMessageConverter genericHttpMessageConverter) {
-					if (genericHttpMessageConverter.canRead(bodyType, null, contentType)) {
+				if (messageConverter instanceof GenericHttpMessageConverter genericMessageConverter) {
+					if (genericMessageConverter.canRead(bodyType, null, contentType)) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Reading to [" + ResolvableType.forType(bodyType) + "]");
 						}
-						return (T) genericHttpMessageConverter.read(bodyType, null, responseWrapper);
+						return (T) genericMessageConverter.read(bodyType, null, responseWrapper);
 					}
 				}
-				if (messageConverter.canRead(bodyClass, contentType)) {
+				else if (messageConverter instanceof SmartHttpMessageConverter smartMessageConverter) {
+					ResolvableType resolvableType = ResolvableType.forType(bodyType);
+					if (smartMessageConverter.canRead(resolvableType, contentType)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Reading to [" + resolvableType + "]");
+						}
+						return (T) smartMessageConverter.read(resolvableType, responseWrapper, null);
+					}
+				}
+				else if (messageConverter.canRead(bodyClass, contentType)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Reading to [" + bodyClass.getName() + "] as \"" + contentType + "\"");
 					}
@@ -453,7 +463,15 @@ final class DefaultRestClient implements RestClient {
 						return;
 					}
 				}
-				if (messageConverter.canWrite(bodyClass, contentType)) {
+				else if (messageConverter instanceof SmartHttpMessageConverter smartMessageConverter) {
+					ResolvableType resolvableType = ResolvableType.forType(bodyType);
+					if (smartMessageConverter.canWrite(resolvableType, bodyClass, contentType)) {
+						logBody(body, contentType, smartMessageConverter);
+						smartMessageConverter.write(body, resolvableType, contentType, clientRequest, null);
+						return;
+					}
+				}
+				else if (messageConverter.canWrite(bodyClass, contentType)) {
 					logBody(body, contentType, messageConverter);
 					messageConverter.write(body, contentType, clientRequest);
 					return;

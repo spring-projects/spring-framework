@@ -33,6 +33,7 @@ import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.ObservationRegistry;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -52,6 +53,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
 import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
@@ -1030,12 +1032,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		private boolean canReadResponse(Type responseType, HttpMessageConverter<?> converter) {
-			Class<?> responseClass = (responseType instanceof Class<?> clazz ? clazz : null);
-			if (responseClass != null) {
-				return converter.canRead(responseClass, null);
-			}
-			else if (converter instanceof GenericHttpMessageConverter<?> genericConverter) {
+			if (converter instanceof GenericHttpMessageConverter<?> genericConverter) {
 				return genericConverter.canRead(responseType, null, null);
+			}
+			else if (converter instanceof SmartHttpMessageConverter<?> smartConverter) {
+				return smartConverter.canRead(ResolvableType.forType(responseType), null);
+			}
+			else if (responseType instanceof Class<?> responseClass) {
+				return converter.canRead(responseClass, null);
 			}
 			return false;
 		}
@@ -1111,6 +1115,17 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 							}
 							logBody(requestBody, requestContentType, genericConverter);
 							genericConverter.write(requestBody, requestBodyType, requestContentType, httpRequest);
+							return;
+						}
+					}
+					else if (messageConverter instanceof SmartHttpMessageConverter smartConverter) {
+						ResolvableType resolvableType = ResolvableType.forType(requestBodyType);
+						if (smartConverter.canWrite(resolvableType, requestBodyClass, requestContentType)) {
+							if (!requestHeaders.isEmpty()) {
+								requestHeaders.forEach((key, values) -> httpHeaders.put(key, new ArrayList<>(values)));
+							}
+							logBody(requestBody, requestContentType, smartConverter);
+							smartConverter.write(requestBody, resolvableType, requestContentType, httpRequest, null);
 							return;
 						}
 					}

@@ -25,6 +25,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
@@ -33,12 +34,14 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -161,6 +164,26 @@ class HttpMessageConverterExtractorTests {
 		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
 		given(converter.canRead(type, null, contentType)).willReturn(true);
 		given(converter.read(eq(type), eq(null), any(HttpInputMessage.class))).willReturn(expected);
+
+		Object result = extractor.extractData(response);
+		assertThat(result).isEqualTo(expected);
+	}
+
+	@Test
+	void smartConverter() throws IOException {
+		responseHeaders.setContentType(contentType);
+		String expected = "Foo";
+		ParameterizedTypeReference<List<String>> reference = new ParameterizedTypeReference<>() {};
+		ResolvableType resolvableType = ResolvableType.forType(reference.getType());
+
+		SmartHttpMessageConverter<String> converter = mock();
+		HttpMessageConverterExtractor<?> extractor = new HttpMessageConverterExtractor<List<String>>(resolvableType.getType(), List.of(converter));
+
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
+		given(converter.canRead(resolvableType, contentType)).willReturn(true);
+		given(converter.read(eq(resolvableType), any(HttpInputMessage.class), isNull())).willReturn(expected);
 
 		Object result = extractor.extractData(response);
 		assertThat(result).isEqualTo(expected);

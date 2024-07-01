@@ -58,6 +58,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
@@ -210,7 +211,13 @@ class DefaultServerRequest implements ServerRequest {
 					return (T) genericMessageConverter.read(bodyType, bodyClass, this.serverHttpRequest);
 				}
 			}
-			if (messageConverter.canRead(bodyClass, contentType)) {
+			else if (messageConverter instanceof SmartHttpMessageConverter<?> smartMessageConverter) {
+				ResolvableType resolvableType = ResolvableType.forType(bodyType);
+				if (smartMessageConverter.canRead(resolvableType, contentType)) {
+					return (T) smartMessageConverter.read(resolvableType, this.serverHttpRequest, null);
+				}
+			}
+			else if (messageConverter.canRead(bodyClass, contentType)) {
 				HttpMessageConverter<T> theConverter =
 						(HttpMessageConverter<T>) messageConverter;
 				Class<? extends T> clazz = (Class<? extends T>) bodyClass;

@@ -35,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -50,6 +51,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -669,6 +671,41 @@ class RestTemplateTests {
 		given(response.getBody()).willReturn(new ByteArrayInputStream(Integer.toString(42).getBytes()));
 		given(converter.canRead(intList.getType(), null, MediaType.TEXT_PLAIN)).willReturn(true);
 		given(converter.read(eq(intList.getType()), eq(null), any(HttpInputMessage.class))).willReturn(expected);
+
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.set("MyHeader", "MyValue");
+		HttpEntity<String> requestEntity = new HttpEntity<>("Hello World", entityHeaders);
+		ResponseEntity<List<Integer>> result = template.exchange("https://example.com", POST, requestEntity, intList);
+		assertThat(result.getBody()).as("Invalid POST result").isEqualTo(expected);
+		assertThat(result.getHeaders().getContentType()).as("Invalid Content-Type").isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(requestHeaders.getFirst("Accept")).as("Invalid Accept header").isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(requestHeaders.getFirst("MyHeader")).as("Invalid custom header").isEqualTo("MyValue");
+		assertThat(result.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
+
+		verify(response).close();
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	void exchangeParameterizedTypeWithSmartConverter() throws Exception {
+		SmartHttpMessageConverter converter = mock();
+		template.setMessageConverters(Collections.singletonList(converter));
+		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<>() {};
+		given(converter.canRead(ResolvableType.forType(intList.getType()), null)).willReturn(true);
+		given(converter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(converter.canWrite(ResolvableType.forClass(String.class), String.class, null)).willReturn(true);
+
+		HttpHeaders requestHeaders = new HttpHeaders();
+		mockSentRequest(POST, "https://example.com", requestHeaders);
+		List<Integer> expected = Collections.singletonList(42);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
+		responseHeaders.setContentLength(10);
+		mockResponseStatus(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream(Integer.toString(42).getBytes()));
+		given(converter.canRead(ResolvableType.forType(intList.getType()), MediaType.TEXT_PLAIN)).willReturn(true);
+		given(converter.read(eq(ResolvableType.forType(intList.getType())), any(HttpInputMessage.class), eq(null))).willReturn(expected);
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");

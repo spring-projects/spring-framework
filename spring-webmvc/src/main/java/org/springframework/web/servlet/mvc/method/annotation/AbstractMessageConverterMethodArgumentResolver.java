@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.log.LogFormatUtils;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
@@ -46,6 +47,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -64,6 +66,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.1
  */
 public abstract class AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver {
@@ -76,6 +79,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final List<HttpMessageConverter<?>> messageConverters;
+
+	protected enum ConverterType { BASE, GENERIC, SMART };
 
 	private final RequestResponseBodyAdviceChain advice;
 
@@ -98,7 +103,6 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		this.messageConverters = converters;
 		this.advice = new RequestResponseBodyAdviceChain(requestResponseBodyAdvice);
 	}
-
 
 	/**
 	 * Return the configured {@link RequestBodyAdvice} and
@@ -147,8 +151,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 		Class<?> contextClass = parameter.getContainingClass();
 		Class<T> targetClass = (targetType instanceof Class clazz ? clazz : null);
+		ResolvableType resolvableType = ResolvableType.forMethodParameter(parameter);
 		if (targetClass == null) {
-			ResolvableType resolvableType = ResolvableType.forMethodParameter(parameter);
 			targetClass = (Class<T>) resolvableType.resolve();
 		}
 
@@ -171,26 +175,46 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 		EmptyBodyCheckingHttpInputMessage message = null;
 		try {
+			ResolvableType targetResolvableType = null;
 			message = new EmptyBodyCheckingHttpInputMessage(inputMessage);
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
-				Class<HttpMessageConverter<?>> converterType = (Class<HttpMessageConverter<?>>) converter.getClass();
-				GenericHttpMessageConverter<?> genericConverter =
-						(converter instanceof GenericHttpMessageConverter ghmc ? ghmc : null);
-				if (genericConverter != null ? genericConverter.canRead(targetType, contextClass, contentType) :
-						(targetClass != null && converter.canRead(targetClass, contentType))) {
+				Class<HttpMessageConverter<?>> converterClass = (Class<HttpMessageConverter<?>>) converter.getClass();
+				ConverterType converterTypeToUse = null;
+				if (converter instanceof GenericHttpMessageConverter<?> genericConverter) {
+					if (genericConverter.canRead(targetType, contextClass, contentType)) {
+						converterTypeToUse = ConverterType.GENERIC;
+					}
+				}
+				else if (converter instanceof SmartHttpMessageConverter<?> smartConverter) {
+					if (targetResolvableType == null) {
+						targetResolvableType = getNestedTypeIfNeeded(resolvableType);
+					}
+					if (smartConverter.canRead(targetResolvableType, contentType)) {
+						converterTypeToUse = ConverterType.SMART;
+					}
+				}
+				else if (targetClass != null && converter.canRead(targetClass, contentType)) {
+					converterTypeToUse = ConverterType.BASE;
+				}
+				if (converterTypeToUse != null) {
 					if (message.hasBody()) {
 						HttpInputMessage msgToUse =
-								getAdvice().beforeBodyRead(message, parameter, targetType, converterType);
-						body = (genericConverter != null ? genericConverter.read(targetType, contextClass, msgToUse) :
-								((HttpMessageConverter<T>) converter).read(targetClass, msgToUse));
-						body = getAdvice().afterBodyRead(body, msgToUse, parameter, targetType, converterType);
+								getAdvice().beforeBodyRead(message, parameter, targetType, converterClass);
+						body = switch (converterTypeToUse) {
+							case BASE -> ((HttpMessageConverter<T>) converter).read(targetClass, msgToUse);
+							case GENERIC -> ((GenericHttpMessageConverter<?>) converter).read(targetType, contextClass, msgToUse);
+							case SMART -> ((SmartHttpMessageConverter<?>) converter).read(targetResolvableType, msgToUse, null);
+						};
+						body = getAdvice().afterBodyRead(body, msgToUse, parameter, targetType, converterClass);
 					}
 					else {
-						body = getAdvice().handleEmptyBody(null, message, parameter, targetType, converterType);
+						body = getAdvice().handleEmptyBody(null, message, parameter, targetType, converterClass);
 					}
 					break;
 				}
+
 			}
+
 			if (body == NO_VALUE && noContentType && !message.hasBody()) {
 				body = getAdvice().handleEmptyBody(
 						null, message, parameter, targetType, NoContentTypeHttpMessageConverter.class);
@@ -222,6 +246,22 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 		return body;
 	}
+
+	/**
+	 * Return the generic type of the {@code returnType} (or of the nested type
+	 * if it is an {@link HttpEntity} or/and an {@link Optional}).
+	 */
+	protected ResolvableType getNestedTypeIfNeeded(ResolvableType type) {
+		ResolvableType genericType = type;
+		if (Optional.class.isAssignableFrom(genericType.toClass())) {
+			genericType = genericType.getNested(2);
+		}
+		if (HttpEntity.class.isAssignableFrom(genericType.toClass())) {
+			genericType = genericType.getNested(2);
+		}
+		return genericType;
+	}
+
 
 	/**
 	 * Create a new {@link HttpInputMessage} from the given {@link NativeWebRequest}.

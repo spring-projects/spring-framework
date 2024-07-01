@@ -50,6 +50,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -74,6 +75,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.1
  */
 public abstract class AbstractMessageConverterMethodProcessor extends AbstractMessageConverterMethodArgumentResolver
@@ -202,7 +204,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * be written by a converter, or if the content-type chosen by the server
 	 * has no compatible converter.
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({"rawtypes", "unchecked", "NullAway"})
 	protected <T> void writeWithMessageConverters(@Nullable T value, MethodParameter returnType,
 			ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
@@ -312,25 +314,36 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
-			for (HttpMessageConverter<?> converter : this.messageConverters) {
-				GenericHttpMessageConverter genericConverter =
-						(converter instanceof GenericHttpMessageConverter ghmc ? ghmc : null);
-				if (genericConverter != null ?
-						((GenericHttpMessageConverter) converter).canWrite(targetType, valueType, selectedMediaType) :
-						converter.canWrite(valueType, selectedMediaType)) {
+
+			ResolvableType targetResolvableType = null;
+			for (HttpMessageConverter converter : this.messageConverters) {
+				ConverterType converterTypeToUse = null;
+				if (converter instanceof GenericHttpMessageConverter genericConverter) {
+					if (genericConverter.canWrite(targetType, valueType, selectedMediaType)) {
+						converterTypeToUse = ConverterType.GENERIC;
+					}
+				}
+				else if (converter instanceof SmartHttpMessageConverter smartConverter) {
+					targetResolvableType = getNestedTypeIfNeeded(ResolvableType.forMethodParameter(returnType));
+					if (smartConverter.canWrite(targetResolvableType, valueType, selectedMediaType)) {
+						converterTypeToUse = ConverterType.SMART;
+					}
+				}
+				else if (converter.canWrite(valueType, selectedMediaType)){
+					converterTypeToUse = ConverterType.BASE;
+				}
+				if (converterTypeToUse != null) {
 					body = getAdvice().beforeBodyWrite(body, returnType, selectedMediaType,
-							(Class<? extends HttpMessageConverter<?>>) converter.getClass(),
-							inputMessage, outputMessage);
+							(Class<? extends HttpMessageConverter<?>>) converter.getClass(), inputMessage, outputMessage);
 					if (body != null) {
 						Object theBody = body;
 						LogFormatUtils.traceDebug(logger, traceOn ->
 								"Writing [" + LogFormatUtils.formatValue(theBody, !traceOn) + "]");
 						addContentDispositionHeader(inputMessage, outputMessage);
-						if (genericConverter != null) {
-							genericConverter.write(body, targetType, selectedMediaType, outputMessage);
-						}
-						else {
-							((HttpMessageConverter) converter).write(body, selectedMediaType, outputMessage);
+						switch (converterTypeToUse) {
+							case BASE -> converter.write(body, selectedMediaType, outputMessage);
+							case GENERIC -> ((GenericHttpMessageConverter) converter).write(body, targetType, selectedMediaType, outputMessage);
+							case SMART -> ((SmartHttpMessageConverter) converter).write(body, targetResolvableType, selectedMediaType, outputMessage, null);
 						}
 					}
 					else {
@@ -416,8 +429,14 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 		Set<MediaType> result = new LinkedHashSet<>();
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
-			if (converter instanceof GenericHttpMessageConverter<?> ghmc && targetType != null) {
-				if (ghmc.canWrite(targetType, valueClass, null)) {
+			if (converter instanceof GenericHttpMessageConverter<?> genericConverter && targetType != null) {
+				if (genericConverter.canWrite(targetType, valueClass, null)) {
+					result.addAll(converter.getSupportedMediaTypes(valueClass));
+				}
+			}
+			else if (converter instanceof SmartHttpMessageConverter<?> smartConverter && targetType != null) {
+				ResolvableType resolvableType = ResolvableType.forType(targetType);
+				if (smartConverter.canWrite(resolvableType, valueClass, null)) {
 					result.addAll(converter.getSupportedMediaTypes(valueClass));
 				}
 			}

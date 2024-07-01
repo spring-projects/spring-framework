@@ -29,6 +29,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -104,14 +105,21 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 						return (T) genericMessageConverter.read(this.responseType, null, responseWrapper);
 					}
 				}
-				if (this.responseClass != null) {
-					if (messageConverter.canRead(this.responseClass, contentType)) {
+				else if (messageConverter instanceof SmartHttpMessageConverter smartMessageConverter) {
+					ResolvableType resolvableType = ResolvableType.forType(this.responseType);
+					if (smartMessageConverter.canRead(resolvableType, contentType)) {
 						if (logger.isDebugEnabled()) {
-							String className = this.responseClass.getName();
-							logger.debug("Reading to [" + className + "] as \"" + contentType + "\"");
+							logger.debug("Reading to [" + resolvableType + "]");
 						}
-						return (T) messageConverter.read((Class) this.responseClass, responseWrapper);
+						return (T) smartMessageConverter.read(resolvableType, responseWrapper, null);
 					}
+				}
+				else if (this.responseClass != null && messageConverter.canRead(this.responseClass, contentType)) {
+					if (logger.isDebugEnabled()) {
+						String className = this.responseClass.getName();
+						logger.debug("Reading to [" + className + "] as \"" + contentType + "\"");
+					}
+					return (T) messageConverter.read((Class) this.responseClass, responseWrapper);
 				}
 			}
 		}
