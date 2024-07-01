@@ -32,6 +32,7 @@ import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.io.RetainableByteBuffer;
+import org.eclipse.jetty.io.content.ByteBufferContentSource;
 import org.eclipse.jetty.server.HttpCookieUtils;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.BufferUtil;
@@ -119,10 +120,7 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 		Callback.Completable callback = new Callback.Completable();
 		Mono<Void> mono = Mono.fromFuture(callback);
 		try {
-			// The method can block, but it is not expected to do so for any significant time.
-			@SuppressWarnings("BlockingMethodInNonBlockingContext")
-			SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ);
-			new ContentWriterIteratingCallback(channel, position, count, this.response, callback).iterate();
+			Content.copy(Content.Source.from(null, file, position, count), this.response, callback);
 		}
 		catch (Throwable th) {
 			callback.failed(th);
@@ -242,68 +240,6 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 		@Override
 		public Map<String, String> getAttributes() {
 			return Collections.emptyMap();
-		}
-	}
-
-	private static class ContentWriterIteratingCallback extends IteratingCallback {
-		private final SeekableByteChannel source;
-
-		private final Content.Sink sink;
-
-		private final Callback callback;
-
-		private final RetainableByteBuffer buffer;
-
-		private final long length;
-
-		private long totalRead = 0;
-
-		public ContentWriterIteratingCallback(SeekableByteChannel content, long position, long count, Response target, Callback callback) throws IOException {
-			this.source = content;
-			this.sink = target;
-			this.callback = callback;
-			this.length = count;
-			this.source.position(position);
-
-			ByteBufferPool bufferPool = target.getRequest().getComponents().getByteBufferPool();
-			int outputBufferSize = target.getRequest().getConnectionMetaData().getHttpConfiguration().getOutputBufferSize();
-			boolean useOutputDirectByteBuffers = target.getRequest().getConnectionMetaData().getHttpConfiguration().isUseOutputDirectByteBuffers();
-			this.buffer = bufferPool.acquire(outputBufferSize, useOutputDirectByteBuffers);
-		}
-
-		@Override
-		protected Action process() throws Throwable {
-			if (!this.source.isOpen() || this.totalRead == this.length) {
-				return Action.SUCCEEDED;
-			}
-
-			ByteBuffer byteBuffer = this.buffer.getByteBuffer();
-			BufferUtil.clearToFill(byteBuffer);
-			byteBuffer.limit((int) Math.min(this.buffer.capacity(), this.length - this.totalRead));
-			int read = this.source.read(byteBuffer);
-			if (read == -1) {
-				IO.close(this.source);
-				this.sink.write(true, BufferUtil.EMPTY_BUFFER, this);
-				return Action.SCHEDULED;
-			}
-			this.totalRead += read;
-			BufferUtil.flipToFlush(byteBuffer, 0);
-			this.sink.write(false, byteBuffer, this);
-			return Action.SCHEDULED;
-		}
-
-		@Override
-		protected void onCompleteSuccess() {
-			this.buffer.release();
-			IO.close(this.source);
-			this.callback.succeeded();
-		}
-
-		@Override
-		protected void onCompleteFailure(Throwable x) {
-			this.buffer.release();
-			IO.close(this.source);
-			this.callback.failed(x);
 		}
 	}
 }
