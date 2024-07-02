@@ -181,7 +181,9 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		if (key instanceof String string) {
 			String caseInsensitiveKey = this.caseInsensitiveKeys.get(convertKey(string));
 			if (caseInsensitiveKey != null) {
-				return this.targetMap.get(caseInsensitiveKey);
+				V v = this.targetMap.get(caseInsensitiveKey);
+				if (v != null)
+					return v;
 			}
 		}
 		return defaultValue;
