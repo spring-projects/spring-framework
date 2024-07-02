@@ -128,7 +128,7 @@ public class MessageHeaderAccessor {
 	 * A constructor to create new headers.
 	 */
 	public MessageHeaderAccessor() {
-		this(null);
+		this((Map<String, Object>) null);
 	}
 
 	/**
@@ -136,7 +136,15 @@ public class MessageHeaderAccessor {
 	 * @param message a message to copy the headers from, or {@code null} if none
 	 */
 	public MessageHeaderAccessor(@Nullable Message<?> message) {
-		this.headers = new MutableMessageHeaders(message != null ? message.getHeaders() : null);
+		this(message != null ? message.getHeaders() : null);
+	}
+
+	/**
+	 * A constructor accepting the headers of an existing headers map to copy.
+	 * @param headers a headers map to copy, or {@code null} if none
+	 */
+	public MessageHeaderAccessor(@Nullable Map<String, Object> headers) {
+		this.headers = new MutableMessageHeaders(headers);
 	}
 
 

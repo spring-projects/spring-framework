@@ -24,6 +24,8 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -47,14 +49,16 @@ class MessageHeaderAccessorTests {
 		assertThat(accessor.toMap()).isEmpty();
 	}
 
-	@Test
-	void existingHeaders() {
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void existingHeaders(boolean instantiateWithMessage) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("bar", "baz");
-		GenericMessage<String> message = new GenericMessage<>("payload", map);
 
-		MessageHeaderAccessor accessor = new MessageHeaderAccessor(message);
+		MessageHeaderAccessor accessor = instantiateWithMessage ?
+				new MessageHeaderAccessor(new GenericMessage<>("payload", map)) :
+				new MessageHeaderAccessor(map);
 		MessageHeaders actual = accessor.getMessageHeaders();
 
 		assertThat(actual).hasSize(3);
