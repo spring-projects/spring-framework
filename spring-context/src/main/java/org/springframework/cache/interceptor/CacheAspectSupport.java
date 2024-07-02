@@ -506,7 +506,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		for (Cache cache : context.getCaches()) {
 			if (CompletableFuture.class.isAssignableFrom(context.getMethod().getReturnType())) {
-					CompletableFuture<?> result = cache.retrieve(key);
+				CompletableFuture<?> result = cache.retrieve(key);
 				if (result != null) {
 					return result.exceptionally(ex -> {
 						getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
@@ -1143,7 +1143,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 							.onErrorResume(RuntimeException.class, ex -> {
 								try {
 									getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
-									return Flux.defer(() -> (Flux) evaluate(null, invoker, method, contexts));
+									return evaluate(null, invoker, method, contexts);
 								}
 								catch (RuntimeException exception) {
 									return Flux.error(exception);
@@ -1157,7 +1157,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 							.onErrorResume(RuntimeException.class, ex -> {
 								try {
 									getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
-									return Mono.defer(() -> (Mono) evaluate(null, invoker, method, contexts));
+									return evaluate(null, invoker, method, contexts);
 								}
 								catch (RuntimeException exception) {
 									return Mono.error(exception);

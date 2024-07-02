@@ -51,11 +51,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 class ReactiveCachingTests {
 
 	@ParameterizedTest
-	@ValueSource(
-			classes = {EarlyCacheHitDeterminationConfig.class,
-					EarlyCacheHitDeterminationWithoutNullValuesConfig.class,
-					LateCacheHitDeterminationConfig.class,
-					LateCacheHitDeterminationWithValueWrapperConfig.class})
+	@ValueSource(classes = {EarlyCacheHitDeterminationConfig.class,
+			EarlyCacheHitDeterminationWithoutNullValuesConfig.class,
+			LateCacheHitDeterminationConfig.class,
+			LateCacheHitDeterminationWithValueWrapperConfig.class})
 	void cacheHitDetermination(Class<?> configClass) {
 
 		AnnotationConfigApplicationContext ctx =
@@ -165,11 +164,10 @@ class ReactiveCachingTests {
 	}
 
 	@ParameterizedTest
-	@ValueSource(
-			classes = {EarlyCacheHitDeterminationConfig.class,
-					EarlyCacheHitDeterminationWithoutNullValuesConfig.class,
-					LateCacheHitDeterminationConfig.class,
-					LateCacheHitDeterminationWithValueWrapperConfig.class})
+	@ValueSource(classes = {EarlyCacheHitDeterminationConfig.class,
+			EarlyCacheHitDeterminationWithoutNullValuesConfig.class,
+			LateCacheHitDeterminationConfig.class,
+			LateCacheHitDeterminationWithValueWrapperConfig.class})
 	void fluxCacheDoesntDependOnFirstRequest(Class<?> configClass) {
 
 		AnnotationConfigApplicationContext ctx =
