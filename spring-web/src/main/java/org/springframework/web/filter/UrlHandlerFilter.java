@@ -21,8 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -67,10 +65,10 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 	private static final Log logger = LogFactory.getLog(UrlHandlerFilter.class);
 
 
-	private final MultiValueMap<UrlHandler, PathPattern> handlers;
+	private final MultiValueMap<Handler, PathPattern> handlers;
 
 
-	private UrlHandlerFilter(MultiValueMap<UrlHandler, PathPattern> handlers) {
+	private UrlHandlerFilter(MultiValueMap<Handler, PathPattern> handlers) {
 		this.handlers = new LinkedMultiValueMap<>(handlers);
 	}
 
@@ -95,7 +93,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 			if (path == null) {
 				path = ServletRequestPathUtils.parseAndCache(request);
 			}
-			for (Map.Entry<UrlHandler, List<PathPattern>> entry : this.handlers.entrySet()) {
+			for (Map.Entry<Handler, List<PathPattern>> entry : this.handlers.entrySet()) {
 				if (!entry.getKey().canHandle(request)) {
 					continue;
 				}
@@ -188,14 +186,14 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 		private final PathPatternParser patternParser = new PathPatternParser();
 
-		private final MultiValueMap<UrlHandler, PathPattern> handlers = new LinkedMultiValueMap<>();
+		private final MultiValueMap<Handler, PathPattern> handlers = new LinkedMultiValueMap<>();
 
 		@Override
 		public TrailingSlashSpec trailingSlashHandler(String... patterns) {
 			return new DefaultTrailingSlashSpec(patterns);
 		}
 
-		private DefaultBuilder addHandler(List<PathPattern> pathPatterns, UrlHandler handler) {
+		private DefaultBuilder addHandler(List<PathPattern> pathPatterns, Handler handler) {
 			pathPatterns.forEach(pattern -> this.handlers.add(handler, pattern));
 			return this;
 		}
@@ -207,18 +205,10 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 		private final class DefaultTrailingSlashSpec implements TrailingSlashSpec {
 
-			private static final Predicate<HttpServletRequest> trailingSlashPredicate =
-					request -> request.getRequestURI().endsWith("/");
-
-			private static final Function<String, String> tralingSlashTrimFunction = path -> {
-				int index = (StringUtils.hasLength(path) ? path.lastIndexOf('/') : -1);
-				return (index != -1 ? path.substring(0, index) : path);
-			};
-
 			private final List<PathPattern> pathPatterns;
 
 			@Nullable
-			private Consumer<HttpServletRequest> requestConsumer;
+			private Consumer<HttpServletRequest> interceptor;
 
 			private DefaultTrailingSlashSpec(String[] patterns) {
 				this.pathPatterns = Arrays.stream(patterns)
@@ -229,33 +219,20 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 			@Override
 			public TrailingSlashSpec intercept(Consumer<HttpServletRequest> consumer) {
-				this.requestConsumer = (this.requestConsumer != null ?
-						this.requestConsumer.andThen(consumer) : consumer);
+				this.interceptor = (this.interceptor != null ? this.interceptor.andThen(consumer) : consumer);
 				return this;
 			}
 
 			@Override
 			public Builder redirect(HttpStatus status) {
-				return DefaultBuilder.this.addHandler(
-						this.pathPatterns, new RedirectUrlHandler(
-								trailingSlashPredicate, tralingSlashTrimFunction, status, initRequestConsumer()));
+				Handler handler = new RedirectTrailingSlashHandler(status, this.interceptor);
+				return DefaultBuilder.this.addHandler(this.pathPatterns, handler);
 			}
 
 			@Override
 			public Builder wrapRequest() {
-				return DefaultBuilder.this.addHandler(
-						this.pathPatterns, new RequestWrappingUrlHandler(
-								trailingSlashPredicate, tralingSlashTrimFunction, initRequestConsumer()));
-			}
-
-			private Consumer<HttpServletRequest> initRequestConsumer() {
-				return this.requestConsumer != null ? this.requestConsumer :
-						(request -> {
-							if (logger.isTraceEnabled()) {
-								logger.trace("Trimmed trailing slash: " +
-										request.getMethod() + " " + request.getRequestURI());
-							}
-						});
+				Handler handler = new RequestWrappingTrailingSlashHandler(this.interceptor);
+				return DefaultBuilder.this.addHandler(this.pathPatterns, handler);
 			}
 		}
 	}
@@ -265,7 +242,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 	/**
 	 * Internal handler to encapsulate different ways to handle a request.
 	 */
-	private interface UrlHandler {
+	private interface Handler {
 
 		/**
 		 * Whether the handler handles the given request.
@@ -281,60 +258,56 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * Base class for {@code UrlHandler} implementations.
+	 * Base class for trailing slash {@link Handler} implementations.
 	 */
-	private abstract static class AbstractUrlHandler implements UrlHandler {
+	private abstract static class AbstractTrailingSlashHandler implements Handler {
 
-		private final Predicate<HttpServletRequest> requestPredicate;
+		private static final Consumer<HttpServletRequest> defaultInterceptor = request -> {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Handling trailing slash URL: " +
+						request.getMethod() + " " + request.getRequestURI());
+			}
+		};
 
-		private final Function<String, String> pathFunction;
+		private final Consumer<HttpServletRequest> interceptor;
 
-		private final Consumer<HttpServletRequest> requestConsumer;
-
-		AbstractUrlHandler(
-				Predicate<HttpServletRequest> requestPredicate, Function<String, String> pathFunction,
-				Consumer<HttpServletRequest> requestConsumer) {
-
-			this.requestPredicate = requestPredicate;
-			this.pathFunction = pathFunction;
-			this.requestConsumer = requestConsumer;
-		}
-
-		protected Function<String, String> getPathFunction() {
-			return this.pathFunction;
+		protected AbstractTrailingSlashHandler(@Nullable Consumer<HttpServletRequest> interceptor) {
+			this.interceptor = (interceptor != null ? interceptor : defaultInterceptor);
 		}
 
 		@Override
 		public boolean canHandle(HttpServletRequest request) {
-			return this.requestPredicate.test(request);
+			return request.getRequestURI().endsWith("/");
 		}
 
 		@Override
 		public void handle(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 				throws ServletException, IOException {
 
-			this.requestConsumer.accept(request);
+			this.interceptor.accept(request);
 			handleInternal(request, response, chain);
 		}
 
 		protected abstract void handleInternal(
 				HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 				throws ServletException, IOException;
+
+		protected String trimTrailingSlash(String path) {
+			int index = (StringUtils.hasLength(path) ? path.lastIndexOf('/') : -1);
+			return (index != -1 ? path.substring(0, index) : path);
+		}
 	}
 
 
 	/**
 	 * Path handler that sends a redirect.
 	 */
-	private static final class RedirectUrlHandler extends AbstractUrlHandler {
+	private static final class RedirectTrailingSlashHandler extends AbstractTrailingSlashHandler {
 
 		private final HttpStatus httpStatus;
 
-		RedirectUrlHandler(
-				Predicate<HttpServletRequest> pathPredicate, Function<String, String> pathFunction,
-				HttpStatus httpStatus, Consumer<HttpServletRequest> interceptor) {
-
-			super(pathPredicate, pathFunction, interceptor);
+		RedirectTrailingSlashHandler(HttpStatus httpStatus, @Nullable Consumer<HttpServletRequest> interceptor) {
+			super(interceptor);
 			this.httpStatus = httpStatus;
 		}
 
@@ -342,11 +315,9 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		public void handleInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 				throws IOException {
 
-			String location = getPathFunction().apply(request.getRequestURI());
-
 			response.resetBuffer();
 			response.setStatus(this.httpStatus.value());
-			response.setHeader(HttpHeaders.LOCATION, location);
+			response.setHeader(HttpHeaders.LOCATION, trimTrailingSlash(request.getRequestURI()));
 			response.flushBuffer();
 		}
 	}
@@ -355,20 +326,27 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 	/**
 	 * Path handler that wraps the request and continues processing.
 	 */
-	private static final class RequestWrappingUrlHandler extends AbstractUrlHandler {
+	private static final class RequestWrappingTrailingSlashHandler extends AbstractTrailingSlashHandler {
 
-		RequestWrappingUrlHandler(
-				Predicate<HttpServletRequest> pathPredicate, Function<String, String> pathFunction,
-				Consumer<HttpServletRequest> interceptor) {
-
-			super(pathPredicate, pathFunction, interceptor);
+		RequestWrappingTrailingSlashHandler(@Nullable Consumer<HttpServletRequest> interceptor) {
+			super(interceptor);
 		}
 
 		@Override
 		public void handleInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 				throws ServletException, IOException {
 
-			request = new PathHttpServletRequestWrapper(request, getPathFunction());
+			String servletPath = request.getServletPath();
+			String pathInfo = request.getPathInfo();
+			boolean hasPathInfo = StringUtils.hasText(pathInfo);
+
+			request = new TrailingSlashHttpServletRequest(
+					request,
+					trimTrailingSlash(request.getRequestURI()),
+					trimTrailingSlash(request.getRequestURL().toString()),
+					hasPathInfo ? servletPath : trimTrailingSlash(servletPath),
+					hasPathInfo ? trimTrailingSlash(pathInfo) : pathInfo);
+
 			chain.doFilter(request, response);
 		}
 	}
@@ -377,7 +355,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 	/**
 	 * Wraps the request to return modified path information.
 	 */
-	private static class PathHttpServletRequestWrapper extends HttpServletRequestWrapper {
+	private static class TrailingSlashHttpServletRequest extends HttpServletRequestWrapper {
 
 		private final String requestURI;
 
@@ -387,18 +365,14 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 		private final String pathInfo;
 
-		PathHttpServletRequestWrapper(HttpServletRequest request, Function<String, String> pathFunction) {
+		TrailingSlashHttpServletRequest(HttpServletRequest request,
+				String requestURI, String requestURL, String servletPath, String pathInfo) {
+
 			super(request);
-			this.requestURI = pathFunction.apply(request.getRequestURI());
-			this.requestURL = new StringBuffer(pathFunction.apply(request.getRequestURL().toString()));
-			if (StringUtils.hasText(request.getPathInfo())) {
-				this.servletPath = request.getServletPath();
-				this.pathInfo = pathFunction.apply(request.getPathInfo());
-			}
-			else {
-				this.servletPath = pathFunction.apply(request.getServletPath());
-				this.pathInfo = request.getPathInfo();
-			}
+			this.requestURI = requestURI;
+			this.requestURL = new StringBuffer(requestURL);
+			this.servletPath = servletPath;
+			this.pathInfo = pathInfo;
 		}
 
 		@Override
