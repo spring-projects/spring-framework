@@ -16,6 +16,16 @@
 
 package org.springframework.beans.support;
 
+import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.PropertyEditorRegistrySupport;
+import org.springframework.beans.propertyeditors.*;
+import org.springframework.core.env.PropertyResolver;
+import org.springframework.core.io.*;
+import org.springframework.core.io.support.ResourceArrayPropertyEditor;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.xml.sax.InputSource;
+
 import java.beans.PropertyEditor;
 import java.io.File;
 import java.io.InputStream;
@@ -23,29 +33,6 @@ import java.io.Reader;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
-
-import org.xml.sax.InputSource;
-
-import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.beans.PropertyEditorRegistry;
-import org.springframework.beans.PropertyEditorRegistrySupport;
-import org.springframework.beans.propertyeditors.ClassArrayEditor;
-import org.springframework.beans.propertyeditors.ClassEditor;
-import org.springframework.beans.propertyeditors.FileEditor;
-import org.springframework.beans.propertyeditors.InputSourceEditor;
-import org.springframework.beans.propertyeditors.InputStreamEditor;
-import org.springframework.beans.propertyeditors.PathEditor;
-import org.springframework.beans.propertyeditors.ReaderEditor;
-import org.springframework.beans.propertyeditors.URIEditor;
-import org.springframework.beans.propertyeditors.URLEditor;
-import org.springframework.core.env.PropertyResolver;
-import org.springframework.core.io.ContextResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceEditor;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.WritableResource;
-import org.springframework.core.io.support.ResourceArrayPropertyEditor;
-import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * PropertyEditorRegistrar implementation that populates a given
@@ -69,8 +56,10 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	/**
 	 * Create a new ResourceEditorRegistrar for the given {@link ResourceLoader}
 	 * and {@link PropertyResolver}.
-	 * @param resourceLoader the ResourceLoader (or ResourcePatternResolver)
-	 * to create editors for (usually an ApplicationContext)
+	 * 为给定的{@link ResourceLoader}和{@link PropertyResolver}创建一个新的ResourceEditorRegister。
+	 *
+	 * @param resourceLoader   the ResourceLoader (or ResourcePatternResolver)
+	 *                         to create editors for (usually an ApplicationContext)
 	 * @param propertyResolver the PropertyResolver (usually an Environment)
 	 * @see org.springframework.core.env.Environment
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
@@ -88,6 +77,9 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 * URIEditor, ClassEditor, ClassArrayEditor.
 	 * <p>If this registrar has been configured with a {@link ResourcePatternResolver},
 	 * a ResourceArrayPropertyEditor will be registered as well.
+	 * 使用以下资源编辑器填充给定的{@code registry} :ResourceEditor、InputStreamEditor、InputSourceEditor、FileEditor、URLEditor、URIEditor、ClassEditor、ClassArrayEditor
+	 * 如果此注册器已配置有 {@link ResourcePatternResolver}，则还会注册ResourceArrayPropertyEditor。
+	 *
 	 * @see org.springframework.core.io.ResourceEditor
 	 * @see org.springframework.beans.propertyeditors.InputStreamEditor
 	 * @see org.springframework.beans.propertyeditors.InputSourceEditor
@@ -125,12 +117,13 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	/**
 	 * Override default editor, if possible (since that's what we really mean to do here);
 	 * otherwise register as a custom editor.
+	 * 如果可能的话，覆盖默认编辑器（因为这就是我们在这里真正想要做的）
+	 * 否则注册为自定义编辑器
 	 */
 	private void doRegisterEditor(PropertyEditorRegistry registry, Class<?> requiredType, PropertyEditor editor) {
 		if (registry instanceof PropertyEditorRegistrySupport) {
 			((PropertyEditorRegistrySupport) registry).overrideDefaultEditor(requiredType, editor);
-		}
-		else {
+		} else {
 			registry.registerCustomEditor(requiredType, editor);
 		}
 	}

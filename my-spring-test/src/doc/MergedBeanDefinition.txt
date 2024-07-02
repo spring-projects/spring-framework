@@ -1,0 +1,7 @@
+MergedBeanDefinition：这个词其实不是一个官方词，但是很接近，该词主要是用来表示 “合并的bean 定义”，因为每次都写 “合并的 bean 定义” 有点太绕口，因此我在之后的注释或解析中或统一使用 MergedBeanDefinition 来表示 “合并的bean 定义”。
+之所以称之为“合并的”，是因为存在 “子定义” 和 “父定义” 的情况。对于一个 bean 定义来说，可能存在以下几种情况：
+1.    该 BeanDefinition 存在“父定义”：首先使用 “父定义” 的参数构建一个 RootBeanDefinition，然后再使用该 BeanDefinition 的参数来进行覆盖。
+2.    该 BeanDefinition 不存在“父定义”，并且该 BeanDefinition 的类型是 RootBeanDefinition：直接返回该 RootBeanDefinition 的一个克隆。
+3.    该 BeanDefinition 不存在“父定义”，但是该 BeanDefinition 的类型不是 RootBeanDefinition：使用该BeanDefinition 的参数构建一个 RootBeanDefinition。
+之所以区分出2和3，是因为通常 BeanDefinition 在之前加载到 BeanFactory中的时候，通常是被封装成 GenericBeanDefinition 或ScannedGenericBeanDefinition，但是从这边之后 bean 的后续流程处理都是针对 RootBeanDefinition，因此在这边会统一将 BeanDefinition 转换成 RootBeanDefinition。
+在我们日常使用的过程中，通常会是上面的第3种情况。如果我们使用 XML 配置来注册 bean，则该 bean 定义会被封装成：GenericBeanDefinition；如果我们使用注解的方式来注册 bean，也就是<context:component-scan /> + @Compoment，则该 bean 定义会被封装成 ScannedGenericBeanDefinition。

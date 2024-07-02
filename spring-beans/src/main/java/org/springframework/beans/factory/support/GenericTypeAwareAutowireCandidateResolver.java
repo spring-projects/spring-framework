@@ -16,9 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Method;
-import java.util.Properties;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -29,6 +26,9 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.lang.reflect.Method;
+import java.util.Properties;
 
 /**
  * Basic {@link AutowireCandidateResolver} that performs a full generic type
@@ -59,7 +59,9 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		return this.beanFactory;
 	}
 
-
+	/**
+	 * 继续检查依赖的类型 dependencyType 和实际注入的类型 targetType 上的泛型是否匹配。核心方法：checkGenericTypeMatch
+	 */
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		if (!super.isAutowireCandidate(bdHolder, descriptor)) {
@@ -72,6 +74,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 	/**
 	 * Match the given dependency type with its generic type information against the given
 	 * candidate bean definition.
+	 * 根据给定的候选bean定义, 将给定的依赖类型与其泛型类型信息进行匹配
 	 */
 	protected boolean checkGenericTypeMatch(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		ResolvableType dependencyType = descriptor.getResolvableType();
@@ -182,14 +185,14 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 	 * This implementation clones all instance fields through standard
 	 * {@link Cloneable} support, allowing for subsequent reconfiguration
 	 * of the cloned instance through a fresh {@link #setBeanFactory} call.
+	 *
 	 * @see #clone()
 	 */
 	@Override
 	public AutowireCandidateResolver cloneIfNecessary() {
 		try {
 			return (AutowireCandidateResolver) clone();
-		}
-		catch (CloneNotSupportedException ex) {
+		} catch (CloneNotSupportedException ex) {
 			throw new IllegalStateException(ex);
 		}
 	}

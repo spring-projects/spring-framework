@@ -31,10 +31,10 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.web.context.support.XmlWebApplicationContext}.
  *
  * @author Juergen Hoeller
- * @since 2.5.2
  * @see #setConfigLocation
  * @see #setConfigLocations
  * @see #getDefaultConfigLocations
+ * @since 2.5.2
  */
 public abstract class AbstractRefreshableConfigApplicationContext extends AbstractRefreshableApplicationContext
 		implements BeanNameAware, InitializingBean {
@@ -47,12 +47,14 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 
 	/**
 	 * Create a new AbstractRefreshableConfigApplicationContext with no parent.
+	 * 创建不带父级的新 AbstractRefreshableConfigApplicationContext
 	 */
 	public AbstractRefreshableConfigApplicationContext() {
 	}
 
 	/**
 	 * Create a new AbstractRefreshableConfigApplicationContext with the given parent context.
+	 * 使用给定的父上下文创建新的 AbstractRefreshableConfigApplicationContext
 	 * @param parent the parent context
 	 */
 	public AbstractRefreshableConfigApplicationContext(@Nullable ApplicationContext parent) {
@@ -83,8 +85,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 				// 解析给定路径
 				this.configLocations[i] = resolvePath(locations[i]).trim();
 			}
-		}
-		else {
+		} else {
 			this.configLocations = null;
 		}
 	}
@@ -95,6 +96,9 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * patterns, which will get resolved via a ResourcePatternResolver.
 	 * <p>The default implementation returns {@code null}. Subclasses can override
 	 * this to provide a set of resource locations to load bean definitions from.
+	 * 返回一个资源位置数组，引用应该用来构建此上下文的XML bean定义文件。还可以包括位置模式，这些模式将通过ResourcePatternResolver解决
+	 * 默认实现返回 {@code null}。子类可以覆盖这一点，以提供一组资源位置来加载bean定义。
+	 *
 	 * @return an array of resource locations, or {@code null} if none
 	 * @see #getResources
 	 * @see #getResourcePatternResolver
@@ -109,6 +113,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * explicit config locations have been specified.
 	 * <p>The default implementation returns {@code null},
 	 * requiring explicit config locations.
+	 *
 	 * @return an array of default config locations, if any
 	 * @see #setConfigLocations
 	 */
@@ -121,6 +126,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * Resolve the given path, replacing placeholders with corresponding
 	 * environment property values if necessary. Applied to config locations.
 	 * 解析给定的路径，如有必要，将占位符替换为相应的环境属性值。应用于配置位置
+	 *
 	 * @param path the original file path
 	 * @return the resolved file path
 	 * @see org.springframework.core.env.Environment#resolveRequiredPlaceholders(String)

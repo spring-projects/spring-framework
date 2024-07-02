@@ -125,8 +125,10 @@ public interface BeanFactory {
 	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
 	 * will return the factory, not the instance returned by the factory.
 	 * <p>
-	 * 用于区分和FactoryBean创建的bean。
-	 * 例: 如果名为{@code myJndiObject}的bean是FactoryBean，那么获取{@code &myJndiObject｝将返回工厂，而不是工厂创建的bean。
+	 * 用于区分和FactoryBean创建的bean
+	 * 为了区分“FactoryBean” 和 “FactoryBean 创建的 bean实例”，Spring 使用了 “&” 前缀
+	 * 假设我们的 beanName 为 apple，则 getBean("apple") 获得的是 AppleFactoryBean 通过 getObject()方法创建的 bean 实例
+	 * 而getBean("&apple") 获得的是 AppleFactoryBean 本身
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
 

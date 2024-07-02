@@ -16,8 +16,6 @@
 
 package org.springframework.context;
 
-import java.io.Closeable;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -26,6 +24,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ProtocolResolver;
 import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.lang.Nullable;
+
+import java.io.Closeable;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
@@ -47,6 +47,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Any number of these characters are considered delimiters between
 	 * multiple context config paths in a single String value.
+	 * 这些字符中的任意数量都被视为单个字符串值中多个上下文配置路径之间的分隔符。
+	 *
 	 * @see org.springframework.context.support.AbstractXmlApplicationContext#setConfigLocation
 	 * @see org.springframework.web.context.ContextLoader#CONFIG_LOCATION_PARAM
 	 * @see org.springframework.web.servlet.FrameworkServlet#setContextConfigLocation
@@ -56,8 +58,10 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Name of the ConversionService bean in the factory.
 	 * If none is supplied, default conversion rules apply.
-	 * @since 3.0
+	 * 工厂中ConversionService bean的名称。如果未提供，则应用默认转换规则
+	 *
 	 * @see org.springframework.core.convert.ConversionService
+	 * @since 3.0
 	 */
 	String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
 
@@ -65,31 +69,42 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Name of the LoadTimeWeaver bean in the factory. If such a bean is supplied,
 	 * the context will use a temporary ClassLoader for type matching, in order
 	 * to allow the LoadTimeWeaver to process all actual bean classes.
-	 * @since 2.5
+	 * 工厂中LoadTimeWeaver bean的名称。如果提供了这样的bean，那么上下文将使用临时ClassLoader进行类型匹配
+	 * 以便允许LoadTimeWeaver处理所有实际的bean类
+	 *
 	 * @see org.springframework.instrument.classloading.LoadTimeWeaver
+	 * @since 2.5
 	 */
 	String LOAD_TIME_WEAVER_BEAN_NAME = "loadTimeWeaver";
 
 	/**
 	 * Name of the {@link Environment} bean in the factory.
+	 * 工厂中｛@link Environment｝bean的名称。
+	 *
 	 * @since 3.1
 	 */
 	String ENVIRONMENT_BEAN_NAME = "environment";
 
 	/**
 	 * Name of the System properties bean in the factory.
+	 * 工厂中的系统属性bean的名称
+	 *
 	 * @see java.lang.System#getProperties()
 	 */
 	String SYSTEM_PROPERTIES_BEAN_NAME = "systemProperties";
 
 	/**
 	 * Name of the System environment bean in the factory.
+	 * 工厂中系统环境bean的名称
+	 *
 	 * @see java.lang.System#getenv()
 	 */
 	String SYSTEM_ENVIRONMENT_BEAN_NAME = "systemEnvironment";
 
 	/**
 	 * Name of the {@link ApplicationStartup} bean in the factory.
+	 * 工厂中 {@link ApplicationStartup}bean的名称
+	 *
 	 * @since 5.3
 	 */
 	String APPLICATION_STARTUP_BEAN_NAME = "applicationStartup";
@@ -97,14 +112,17 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * {@link Thread#getName() Name} of the {@linkplain #registerShutdownHook()
 	 * shutdown hook} thread: {@value}.
-	 * @since 5.2
+	 * {@linkplain #registerShutdownHook()  shutdown hook}线程的 {@link Thread#getName() Name} : {@value}
+	 *
 	 * @see #registerShutdownHook()
+	 * @since 5.2
 	 */
 	String SHUTDOWN_HOOK_THREAD_NAME = "SpringContextShutdownHook";
 
 
 	/**
 	 * Set the unique id of this application context.
+	 *
 	 * @since 3.0
 	 */
 	void setId(String id);
@@ -114,6 +132,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * <p>Note that the parent shouldn't be changed: It should only be set outside
 	 * a constructor if it isn't available when an object of this class is created,
 	 * for example in case of WebApplicationContext setup.
+	 *
 	 * @param parent the parent context
 	 * @see org.springframework.web.context.ConfigurableWebApplicationContext
 	 */
@@ -121,6 +140,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 	/**
 	 * Set the {@code Environment} for this application context.
+	 *
 	 * @param environment the new environment
 	 * @since 3.1
 	 */
@@ -129,6 +149,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Return the {@code Environment} for this application context in configurable
 	 * form, allowing for further customization.
+	 *
 	 * @since 3.1
 	 */
 	@Override
@@ -138,6 +159,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Set the {@link ApplicationStartup} for this application context.
 	 * <p>This allows the application context to record metrics
 	 * during startup.
+	 *
 	 * @param applicationStartup the new context event factory
 	 * @since 5.3
 	 */
@@ -145,6 +167,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 	/**
 	 * Return the {@link ApplicationStartup} for this application context.
+	 *
 	 * @since 5.3
 	 */
 	ApplicationStartup getApplicationStartup();
@@ -153,6 +176,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Add a new BeanFactoryPostProcessor that will get applied to the internal
 	 * bean factory of this application context on refresh, before any of the
 	 * bean definitions get evaluated. To be invoked during context configuration.
+	 *
 	 * @param postProcessor the factory processor to register
 	 */
 	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor);
@@ -163,6 +187,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * <p>Note that any ApplicationListener registered here will be applied
 	 * on refresh if the context is not active yet, or on the fly with the
 	 * current event multicaster in case of a context that is already active.
+	 *
 	 * @param listener the ApplicationListener to register
 	 * @see org.springframework.context.event.ContextRefreshedEvent
 	 * @see org.springframework.context.event.ContextClosedEvent
@@ -172,9 +197,10 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Specify the ClassLoader to load class path resources and bean classes with.
 	 * <p>This context class loader will be passed to the internal bean factory.
-	 * @since 5.2.7
+	 *
 	 * @see org.springframework.core.io.DefaultResourceLoader#DefaultResourceLoader(ClassLoader)
 	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setBeanClassLoader
+	 * @since 5.2.7
 	 */
 	void setClassLoader(ClassLoader classLoader);
 
@@ -183,6 +209,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * allowing for additional resource protocols to be handled.
 	 * <p>Any such resolver will be invoked ahead of this context's standard
 	 * resolution rules. It may therefore also override any default rules.
+	 *
 	 * @since 4.3
 	 */
 	void addProtocolResolver(ProtocolResolver resolver);
@@ -194,9 +221,10 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * <p>As this is a startup method, it should destroy already created singletons
 	 * if it fails, to avoid dangling resources. In other words, after invocation
 	 * of this method, either all or no singletons at all should be instantiated.
-	 * @throws BeansException if the bean factory could not be initialized
+	 *
+	 * @throws BeansException        if the bean factory could not be initialized
 	 * @throws IllegalStateException if already initialized and multiple refresh
-	 * attempts are not supported
+	 *                               attempts are not supported
 	 */
 	void refresh() throws BeansException, IllegalStateException;
 
@@ -207,6 +235,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * (at max) will be registered for each context instance.
 	 * <p>As of Spring Framework 5.2, the {@linkplain Thread#getName() name} of
 	 * the shutdown hook thread should be {@link #SHUTDOWN_HOOK_THREAD_NAME}.
+	 *
 	 * @see java.lang.Runtime#addShutdownHook
 	 * @see #close()
 	 */
@@ -226,6 +255,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Determine whether this application context is active, that is,
 	 * whether it has been refreshed at least once and has not been closed yet.
+	 *
 	 * @return whether the context is still active
 	 * @see #refresh()
 	 * @see #close()
@@ -243,10 +273,11 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * is active, that is, in-between {@link #refresh()} and {@link #close()}.
 	 * The {@link #isActive()} flag can be used to check whether the context
 	 * is in an appropriate state.
+	 *
 	 * @return the underlying bean factory
 	 * @throws IllegalStateException if the context does not hold an internal
-	 * bean factory (usually if {@link #refresh()} hasn't been called yet or
-	 * if {@link #close()} has already been called)
+	 *                               bean factory (usually if {@link #refresh()} hasn't been called yet or
+	 *                               if {@link #close()} has already been called)
 	 * @see #isActive()
 	 * @see #refresh()
 	 * @see #close()

@@ -24,7 +24,10 @@ import org.springframework.lang.Nullable;
 /**
  * Strategy interface for determining whether a specific bean definition
  * qualifies as an autowire candidate for a specific dependency.
+ * 用于确定特定bean定义是否符合特定依赖项的自动连线候选条件的策略接口
  *
+ * AutowireCandidateResolver 用来判断一个给定的 bean 是否可以注入，最主要的方法是 isAutowireCandidate
+ * 简单来说 isAutowireCandidate 就根据 @Qualifier 添加过滤规则来判断 bean 是否合法
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5
@@ -36,6 +39,8 @@ public interface AutowireCandidateResolver {
 	 * autowire candidate for the given dependency.
 	 * <p>The default implementation checks
 	 * {@link org.springframework.beans.factory.config.BeanDefinition#isAutowireCandidate()}.
+	 * 判断给定的 bdHolder 是否可以注入 descriptor，BeanDefinition#autowireCandidate 默认为 true
+	 * DependencyDescriptor 是对字段、方法、参数的封装，便于统一处理，这里一般是对属性写方法参数的封装
 	 *
 	 * @param bdHolder   the bean definition including bean name and aliases
 	 * @param descriptor the descriptor for the target method parameter or field
@@ -49,6 +54,7 @@ public interface AutowireCandidateResolver {
 	/**
 	 * Determine whether the given descriptor is effectively required.
 	 * <p>The default implementation checks {@link DependencyDescriptor#isRequired()}.
+	 * 判断是否必须注入，如果是字段类型是 Optional 或有 @Null 注解时为 false
 	 *
 	 * @param descriptor the descriptor for the target method parameter or field
 	 * @return whether the descriptor is marked as required or possibly indicating
@@ -64,6 +70,7 @@ public interface AutowireCandidateResolver {
 	 * Determine whether the given descriptor declares a qualifier beyond the type
 	 * (typically - but not necessarily - a specific kind of annotation).
 	 * <p>The default implementation returns {@code false}.
+	 * 判断是否有 @Qualifier(Spring 或 JDK) 或自定义的注解
 	 *
 	 * @param descriptor the descriptor for the target method parameter or field
 	 * @return whether the descriptor declares a qualifier, narrowing the candidate
@@ -78,6 +85,8 @@ public interface AutowireCandidateResolver {
 	/**
 	 * Determine whether a default value is suggested for the given dependency.
 	 * <p>The default implementation simply returns {@code null}.
+	 * 确定是否建议为给定的依赖项使用默认值
+	 * 默认实现只返回{@code null}
 	 *
 	 * @param descriptor the descriptor for the target method parameter or field
 	 * @return the value suggested (typically an expression String),
@@ -96,6 +105,7 @@ public interface AutowireCandidateResolver {
 	 * 如果注入点需要，则为实际依赖目标的延迟解析构建一个代理
 	 * 默认实现只返回｛@code null｝。
 	 * 如有必要，获取懒惰解析代理
+	 *
 	 * @param descriptor the descriptor for the target method parameter or field
 	 * @param beanName   the name of the bean that contains the injection point
 	 * @return the lazy resolution proxy for the actual dependency target,

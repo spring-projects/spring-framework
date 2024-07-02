@@ -49,6 +49,7 @@ public interface StartupStep {
 	 * name should be "." namespaced and can be reused to describe other instances of
 	 * similar steps during application startup.
 	 * 返回启动步骤的名称
+	 * 步骤名称描述当前操作或阶段。此技术名称应为“.”名称空间，并可重复使用以描述应用程序启动期间类似步骤的其他实例。
 	 */
 	String getName();
 

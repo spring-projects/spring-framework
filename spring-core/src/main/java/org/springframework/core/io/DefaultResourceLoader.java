@@ -81,6 +81,8 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * for using the thread context class loader at the time of actual resource access.
 	 * <p>The default is that ClassLoader access will happen using the thread context
 	 * class loader at the time of actual resource access (since 5.3).
+	 * 指定ClassLoader以加载类路径资源，或者指定{@code null}以在实际访问资源时使用线程上下文类加载器
+	 * 默认情况下，ClassLoader访问将在实际资源访问时使用线程上下文类加载器进行（自5.3起）。
 	 */
 	public void setClassLoader(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
@@ -90,6 +92,8 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * Return the ClassLoader to load class path resources with.
 	 * <p>Will get passed to ClassPathResource's constructor for all
 	 * ClassPathResource objects created by this resource loader.
+	 * 返回用于加载类路径资源的ClassLoader
+	 * 将被传递给此资源加载程序创建的所有ClassPathResource对象的ClassPathResource的构造函数。
 	 * @see ClassPathResource
 	 */
 	@Override
@@ -103,6 +107,8 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * additional protocols to be handled.
 	 * <p>Any such resolver will be invoked ahead of this loader's standard
 	 * resolution rules. It may therefore also override any default rules.
+	 * 使用此资源加载程序注册给定的解析程序，允许处理其他协议
+	 * 任何这样的解析器都将在该加载程序的标准解析规则之前调用。因此，它也可以覆盖任何默认规则。
 	 * @since 4.3
 	 * @see #getProtocolResolvers()
 	 */

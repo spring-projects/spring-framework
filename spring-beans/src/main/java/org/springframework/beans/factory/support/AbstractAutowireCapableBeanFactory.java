@@ -220,6 +220,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * <p><b>NOTE:</b> It is generally recommended to not rely on circular references
 	 * between your beans. Refactor your application logic to have the two beans
 	 * involved delegate to a third bean that encapsulates their common logic.
+	 * <p>
+	 * 设置是否允许bean之间的循环引用, 并自动尝试解析它们
+	 * 请注意, 循环引用解析意味着其中一个涉及的bean将接收到对另一个尚未完全初始化的bean的引用
+	 * 这可能会对初始化产生微妙而不那么微妙的副作用; 不过, 它确实适用于许多场景
+	 * 默认值为“true”。关闭此选项可在遇到循环引用时引发异常, 从而完全禁止循环引用
+	 * 注意：通常建议不要依赖于bean之间的循环引用。重构应用程序逻辑，使所涉及的两个bean委托给封装其公共逻辑的第三个bean
+	 * <p>
+	 * 是否允许bean之间的循环引用
 	 */
 	public void setAllowCircularReferences(boolean allowCircularReferences) {
 		this.allowCircularReferences = allowCircularReferences;
@@ -683,19 +691,28 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@Override
 	@Nullable
 	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
+		// 1.拿到beanName的类型
 		Class<?> targetType = determineTargetType(beanName, mbd, typesToMatch);
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
+		// 2.应用SmartInstantiationAwareBeanPostProcessors后置处理器，来预测实例化的最终类型，
+		// SmartInstantiationAwareBeanPostProcessors继承了InstantiationAwareBeanPostProcessor，
+		// InstantiationAwareBeanPostProcessor的postProcessBeforeInstantiation方法可以改变Bean实例的类型，
+		// 而SmartInstantiationAwareBeanPostProcessors的predictBeanType方法可以预测这个类型
 		if (targetType != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			boolean matchingOnlyFactoryBean = (typesToMatch.length == 1 && typesToMatch[0] == FactoryBean.class);
 			for (SmartInstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().smartInstantiationAware) {
+				// 3.调用predictBeanType方法
 				Class<?> predicted = bp.predictBeanType(targetType, beanName);
 				if (predicted != null &&
 						(!matchingOnlyFactoryBean || FactoryBean.class.isAssignableFrom(predicted))) {
+					// 4.如果predicted不为空 && (typesToMatch长度不为1 || typesToMatch[0]不为FactoryBean.class ||
+					// predicted是FactoryBean本身、子类或子接口)，则返回predicted
 					return predicted;
 				}
 			}
 		}
+		// 5.否则返回beanName的类型
 		return targetType;
 	}
 
@@ -1351,6 +1368,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Instantiate the given bean using its default constructor.
+	 * 使用给定bean的默认构造函数实例化该bean
 	 *
 	 * @param beanName the name of the bean
 	 * @param mbd      the bean definition for the bean
@@ -1900,6 +1918,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * a custom init method, and invoking the necessary callback(s) if it does.
 	 * 现在给一个bean一个反应的机会，它的所有属性都设置好了，并有机会了解它所拥有的bean工厂（这个对象）
 	 * 这意味着检查bean是否实现InitializingBean或定义了自定义init方法，如果实现了，则调用必要的回调。
+	 *
 	 * @param beanName the bean name in the factory (for debugging purposes)
 	 * @param bean     the new bean instance we may need to initialize
 	 * @param mbd      the merged bean definition that the bean was created with
@@ -1907,7 +1926,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @throws Throwable if thrown by init methods or by the invocation process
 	 * @see #invokeCustomInitMethod
 	 */
-	protected void invokeInitMethods(String beanName, Object bean, @Nullable RootBeanDefinition mbd)			throws Throwable {
+	protected void invokeInitMethods(String beanName, Object bean, @Nullable RootBeanDefinition mbd) throws Throwable {
 		//首先会检查是否是InitializingBean，如果是的话需要调用afterPropertiesSet 方法
 		boolean isInitializingBean = (bean instanceof InitializingBean);
 		if (isInitializingBean && (mbd == null || !mbd.hasAnyExternallyManagedInitMethod("afterPropertiesSet"))) {

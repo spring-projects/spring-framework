@@ -47,7 +47,10 @@ import org.springframework.util.Assert;
  * @since 4.0
  */
 public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotationAutowireCandidateResolver {
-
+	/**
+	 * 如果标注 @Lazy 注解, 会生成一个代理对象
+	 * 只有使用到该对象时才会真正调用 beanFactory#doResolveDependency 查找依赖, 其实原理和 ObjectProvider 延迟注入的原理都差不多
+	 */
 	@Override
 	@Nullable
 	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {

@@ -36,12 +36,19 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	 */
 	public static final SimpleAutowireCandidateResolver INSTANCE = new SimpleAutowireCandidateResolver();
 
-
+	/**
+	 * 直接判断 bd.autowireCandidate=true，默认为 true，也就是可以注入
+	 */
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		return bdHolder.getBeanDefinition().isAutowireCandidate();
 	}
 
+	/**
+	 * 直接判断 descriptor.required=true, 默认为 true
+	 * 也就是不能注入时抛出异常
+	 * 如果是 Optional 类型时会修改 descriptor.required=false
+	 */
 	@Override
 	public boolean isRequired(DependencyDescriptor descriptor) {
 		return descriptor.isRequired();
@@ -52,6 +59,9 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 		return false;
 	}
 
+	/**
+	 * 直接返回 null
+	 */
 	@Override
 	@Nullable
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {

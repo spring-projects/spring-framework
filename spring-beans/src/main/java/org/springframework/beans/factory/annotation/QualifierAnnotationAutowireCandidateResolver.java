@@ -16,13 +16,6 @@
 
 package org.springframework.beans.factory.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
@@ -41,6 +34,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link AutowireCandidateResolver} implementation that matches bean definition qualifiers
@@ -140,6 +140,9 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * the same qualifier or match by meta attributes. A "value" attribute will
 	 * fall back to match against the bean name or an alias if a qualifier or
 	 * attribute does not match.
+	 *
+	 * 继续判断 @Autowire 注解, 仅当 @Autowire(required=false) 时, 返回 false
+	 * 如果不存在 @Autowire 或未指定 required 属性都会返回 true
 	 * @see Qualifier
 	 */
 	@Override
@@ -162,6 +165,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 
 	/**
 	 * Match the given qualifier annotations against the candidate bean definition.
+	 * 将给定的限定符注释与候选bean定义相匹配
 	 */
 	protected boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch) {
 		if (ObjectUtils.isEmpty(annotationsToSearch)) {
@@ -315,6 +319,8 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	/**
 	 * Determine whether the given dependency declares an autowired annotation,
 	 * checking its required flag.
+	 *
+	 * {@code @Autowired } 默认 require=true
 	 * @see Autowired#required()
 	 */
 	@Override
@@ -343,13 +349,21 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 
 	/**
 	 * Determine whether the given dependency declares a value annotation.
+	 * 确定给定的依赖项是否声明了值注释
+	 * 读取 @Value 注解的 value 属性值, 作为指定值注入
+	 *
+	 * getSuggestedValue 方法先处理注入点(包括字段或方法参数上)的注解信息
+	 * 如果没有再查找方法上的注解
+	 * 如下, @Value 和 @Qualifier 两个注解，方法参数上的注解都优先于方法上的注解
 	 * @see Value
 	 */
 	@Override
 	@Nullable
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {
+		//  查找字段或方法参数上的注解
 		Object value = findValue(descriptor.getAnnotations());
 		if (value == null) {
+			// 查找方法上的注解
 			MethodParameter methodParam = descriptor.getMethodParameter();
 			if (methodParam != null) {
 				value = findValue(methodParam.getMethodAnnotations());

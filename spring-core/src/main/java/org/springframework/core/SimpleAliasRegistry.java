@@ -237,6 +237,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		// bean的别名可能存在多次映射(别名多次映射为其他别名)
 		String resolvedName;
 		do {
+			// 将别名解析成真正的beanName
 			resolvedName = this.aliasMap.get(canonicalName);
 			if (resolvedName != null) {
 				canonicalName = resolvedName;
