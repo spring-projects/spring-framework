@@ -308,8 +308,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		Method testMethod = (methodLevel ? testContext.getTestMethod() : null);
 
 		String[] scripts = getScripts(sql, testContext.getTestClass(), testMethod, classLevel);
+		ApplicationContext applicationContext = testContext.getApplicationContext();
 		List<Resource> scriptResources = TestContextResourceUtils.convertToResourceList(
-				testContext.getApplicationContext(), scripts);
+				applicationContext, applicationContext.getEnvironment(), scripts);
 		for (String stmt : sql.statements()) {
 			if (StringUtils.hasText(stmt)) {
 				stmt = stmt.trim();

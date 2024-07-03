@@ -122,6 +122,9 @@ classpath resource (for example, `"/org/example/schema.sql"`). A path that refer
 URL (for example, a path prefixed with `classpath:`, `file:`, `http:`) is loaded by using
 the specified resource protocol.
 
+As of Spring Framework 6.2, paths may contain property placeholders (`${...}`) that will
+be replaced by properties stored in the `Environment` of the test's `ApplicationContext`.
+
 The following example shows how to use `@Sql` at the class level and at the method level
 within a JUnit Jupiter based integration test class:
 

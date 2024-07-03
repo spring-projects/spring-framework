@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
@@ -143,6 +144,28 @@ public abstract class TestContextResourceUtils {
 	 */
 	public static List<Resource> convertToResourceList(ResourceLoader resourceLoader, String... paths) {
 		return stream(resourceLoader, paths).collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	/**
+	 * Convert the supplied paths to a list of {@link Resource} handles using the given
+	 * {@link ResourceLoader} and {@link Environment}.
+	 * @param resourceLoader the {@code ResourceLoader} to use to convert the paths
+	 * @param environment the {@code Environment} to use to resolve property placeholders
+	 * in the paths
+	 * @param paths the paths to be converted
+	 * @return a new, mutable list of resources
+	 * @since 6.2
+	 * @see #convertToResources(ResourceLoader, String...)
+	 * @see #convertToClasspathResourcePaths
+	 * @see Environment#resolveRequiredPlaceholders(String)
+	 */
+	public static List<Resource> convertToResourceList(
+			ResourceLoader resourceLoader, Environment environment, String... paths) {
+
+		return Arrays.stream(paths)
+				.map(environment::resolveRequiredPlaceholders)
+				.map(resourceLoader::getResource)
+				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	private static Stream<Resource> stream(ResourceLoader resourceLoader, String... paths) {
