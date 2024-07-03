@@ -19,6 +19,7 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditor;
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 
@@ -46,9 +47,9 @@ class PathEditorTests {
 
 	@Test
 	void testWithNonExistentResource() {
-		PropertyEditor propertyEditor = new PathEditor();
+		PropertyEditor pathEditor = new PathEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				propertyEditor.setAsText("classpath:/no_way_this_file_is_found.doc"));
+				pathEditor.setAsText("classpath:/no_way_this_file_is_found.doc"));
 	}
 
 	@Test
@@ -96,6 +97,16 @@ class PathEditorTests {
 				throw ex;
 			}
 		}
+	}
+
+	@Test
+	void testCurrentDirectory() {
+		PropertyEditor pathEditor = new PathEditor();
+		pathEditor.setAsText("file:.");
+		Object value = pathEditor.getValue();
+		assertThat(value).isInstanceOf(Path.class);
+		Path path = (Path) value;
+		assertThat(path).isEqualTo(Paths.get("."));
 	}
 
 	@Test
