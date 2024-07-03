@@ -46,9 +46,9 @@ class FileEditorTests {
 
 	@Test
 	void testWithNonExistentResource() {
-		PropertyEditor propertyEditor = new FileEditor();
+		PropertyEditor fileEditor = new FileEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				propertyEditor.setAsText("classpath:no_way_this_file_is_found.doc"));
+				fileEditor.setAsText("classpath:no_way_this_file_is_found.doc"));
 	}
 
 	@Test
@@ -69,6 +69,16 @@ class FileEditorTests {
 		assertThat(value).isInstanceOf(File.class);
 		File file = (File) value;
 		assertThat(file).doesNotExist();
+	}
+
+	@Test
+	void testCurrentDirectory() {
+		PropertyEditor fileEditor = new FileEditor();
+		fileEditor.setAsText("file:.");
+		Object value = fileEditor.getValue();
+		assertThat(value).isInstanceOf(File.class);
+		File file = (File) value;
+		assertThat(file).isEqualTo(new File("."));
 	}
 
 	@Test

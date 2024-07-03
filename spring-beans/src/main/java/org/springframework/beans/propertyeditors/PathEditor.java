@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,9 +92,9 @@ public class PathEditor extends PropertyEditorSupport {
 				// a file prefix (let's try as Spring resource location)
 				nioPathCandidate = !text.startsWith(ResourceUtils.FILE_URL_PREFIX);
 			}
-			catch (FileSystemNotFoundException ex) {
-				// URI scheme not registered for NIO (let's try URL
-				// protocol handlers via Spring's resource mechanism).
+			catch (FileSystemNotFoundException | IllegalArgumentException ex) {
+				// URI scheme not registered for NIO or not meeting Paths requirements:
+				// let's try URL protocol handlers via Spring's resource mechanism.
 			}
 		}
 
@@ -111,8 +111,13 @@ public class PathEditor extends PropertyEditorSupport {
 				setValue(resource.getFile().toPath());
 			}
 			catch (IOException ex) {
-				throw new IllegalArgumentException(
-						"Could not retrieve file for " + resource + ": " + ex.getMessage());
+				String msg = "Could not resolve \"" + text + "\" to 'java.nio.file.Path' for " + resource + ": " +
+						ex.getMessage();
+				if (nioPathCandidate) {
+					msg += " - In case of ambiguity, consider adding the 'file:' prefix for an explicit reference " +
+							"to a file system resource of the same name: \"file:" + text + "\"";
+				}
+				throw new IllegalArgumentException(msg);
 			}
 		}
 	}
