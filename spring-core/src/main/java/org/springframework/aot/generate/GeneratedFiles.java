@@ -39,14 +39,14 @@ import org.springframework.util.function.ThrowingConsumer;
  * @see InMemoryGeneratedFiles
  * @see FileSystemGeneratedFiles
  */
-public abstract class GeneratedFiles {
+public interface GeneratedFiles {
 
 	/**
 	 * Add a generated {@link Kind#SOURCE source file} with content from the
 	 * given {@link JavaFile}.
 	 * @param javaFile the java file to add
 	 */
-	public void addSourceFile(JavaFile javaFile) {
+	default void addSourceFile(JavaFile javaFile) {
 		validatePackage(javaFile.packageName, javaFile.typeSpec.name);
 		String className = javaFile.packageName + "." + javaFile.typeSpec.name;
 		addSourceFile(className, javaFile::writeTo);
@@ -59,7 +59,7 @@ public abstract class GeneratedFiles {
 	 * of the file
 	 * @param content the contents of the file
 	 */
-	public void addSourceFile(String className, CharSequence content) {
+	default void addSourceFile(String className, CharSequence content) {
 		addSourceFile(className, appendable -> appendable.append(content));
 	}
 
@@ -71,7 +71,7 @@ public abstract class GeneratedFiles {
 	 * @param content a {@link ThrowingConsumer} that accepts an
 	 * {@link Appendable} which will receive the file contents
 	 */
-	public void addSourceFile(String className, ThrowingConsumer<Appendable> content) {
+	default void addSourceFile(String className, ThrowingConsumer<Appendable> content) {
 		addFile(Kind.SOURCE, getClassNamePath(className), content);
 	}
 
@@ -83,7 +83,7 @@ public abstract class GeneratedFiles {
 	 * @param content an {@link InputStreamSource} that will provide an input
 	 * stream containing the file contents
 	 */
-	public void addSourceFile(String className, InputStreamSource content) {
+	default void addSourceFile(String className, InputStreamSource content) {
 		addFile(Kind.SOURCE, getClassNamePath(className), content);
 	}
 
@@ -93,7 +93,7 @@ public abstract class GeneratedFiles {
 	 * @param path the relative path of the file
 	 * @param content the contents of the file
 	 */
-	public void addResourceFile(String path, CharSequence content) {
+	default void addResourceFile(String path, CharSequence content) {
 		addResourceFile(path, appendable -> appendable.append(content));
 	}
 
@@ -104,7 +104,7 @@ public abstract class GeneratedFiles {
 	 * @param content a {@link ThrowingConsumer} that accepts an
 	 * {@link Appendable} which will receive the file contents
 	 */
-	public void addResourceFile(String path, ThrowingConsumer<Appendable> content) {
+	default void addResourceFile(String path, ThrowingConsumer<Appendable> content) {
 		addFile(Kind.RESOURCE, path, content);
 	}
 
@@ -115,7 +115,7 @@ public abstract class GeneratedFiles {
 	 * @param content an {@link InputStreamSource} that will provide an input
 	 * stream containing the file contents
 	 */
-	public void addResourceFile(String path, InputStreamSource content) {
+	default void addResourceFile(String path, InputStreamSource content) {
 		addFile(Kind.RESOURCE, path, content);
 	}
 
@@ -126,7 +126,7 @@ public abstract class GeneratedFiles {
 	 * @param content an {@link InputStreamSource} that will provide an input
 	 * stream containing the file contents
 	 */
-	public void addClassFile(String path, InputStreamSource content) {
+	default void addClassFile(String path, InputStreamSource content) {
 		addFile(Kind.CLASS, path, content);
 	}
 
@@ -137,7 +137,7 @@ public abstract class GeneratedFiles {
 	 * @param path the relative path of the file
 	 * @param content the contents of the file
 	 */
-	public void addFile(Kind kind, String path, CharSequence content) {
+	default void addFile(Kind kind, String path, CharSequence content) {
 		addFile(kind, path, appendable -> appendable.append(content));
 	}
 
@@ -149,7 +149,7 @@ public abstract class GeneratedFiles {
 	 * @param content a {@link ThrowingConsumer} that accepts an
 	 * {@link Appendable} which will receive the file contents
 	 */
-	public void addFile(Kind kind, String path, ThrowingConsumer<Appendable> content) {
+	default void addFile(Kind kind, String path, ThrowingConsumer<Appendable> content) {
 		Assert.notNull(content, "'content' must not be null");
 		addFile(kind, path, new AppendableConsumerInputStreamSource(content));
 	}
@@ -162,7 +162,7 @@ public abstract class GeneratedFiles {
 	 * @param content an {@link InputStreamSource} that will provide an input
 	 * stream containing the file contents
 	 */
-	public void addFile(Kind kind, String path, InputStreamSource content) {
+	default void addFile(Kind kind, String path, InputStreamSource content) {
 		Assert.notNull(kind, "'kind' must not be null");
 		Assert.hasLength(path, "'path' must not be empty");
 		Assert.notNull(content, "'content' must not be null");
@@ -179,7 +179,7 @@ public abstract class GeneratedFiles {
 	 * @param handler a consumer of a {@link FileHandler} for the file
 	 * @since 6.2
 	 */
-	public abstract void handleFile(Kind kind, String path, ThrowingConsumer<FileHandler> handler);
+	void handleFile(Kind kind, String path, ThrowingConsumer<FileHandler> handler);
 
 	private static String getClassNamePath(String className) {
 		Assert.hasLength(className, "'className' must not be empty");
@@ -214,7 +214,7 @@ public abstract class GeneratedFiles {
 	/**
 	 * The various kinds of generated files that are supported.
 	 */
-	public enum Kind {
+	enum Kind {
 
 		/**
 		 * A source file containing Java code that should be compiled.
@@ -241,7 +241,7 @@ public abstract class GeneratedFiles {
 	 *
 	 * @since 6.2
 	 */
-	public abstract static class FileHandler {
+	abstract class FileHandler {
 
 		private final boolean exists;
 

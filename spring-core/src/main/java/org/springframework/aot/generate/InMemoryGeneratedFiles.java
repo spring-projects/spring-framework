@@ -35,7 +35,7 @@ import org.springframework.util.function.ThrowingConsumer;
  * @author Stephane Nicoll
  * @since 6.0
  */
-public class InMemoryGeneratedFiles extends GeneratedFiles {
+public class InMemoryGeneratedFiles implements GeneratedFiles {
 
 	private final Map<Kind, Map<String, InputStreamSource>> files = new HashMap<>();
 

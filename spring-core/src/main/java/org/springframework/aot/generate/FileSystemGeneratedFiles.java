@@ -40,7 +40,7 @@ import org.springframework.util.function.ThrowingConsumer;
  * @author Stephane Nicoll
  * @since 6.0
  */
-public class FileSystemGeneratedFiles extends GeneratedFiles {
+public class FileSystemGeneratedFiles implements GeneratedFiles {
 
 	private final Function<Kind, Path> roots;
 

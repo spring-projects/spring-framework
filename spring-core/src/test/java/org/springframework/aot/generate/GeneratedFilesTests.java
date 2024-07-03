@@ -223,7 +223,7 @@ class GeneratedFilesTests {
 	}
 
 
-	static class TestGeneratedFiles extends GeneratedFiles {
+	static class TestGeneratedFiles implements GeneratedFiles {
 
 		private Kind kind;
 
