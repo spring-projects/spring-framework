@@ -18,8 +18,8 @@ package org.springframework.test.json;
 
 import org.assertj.core.api.AssertProvider;
 
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.Assert;
 
 /**
@@ -35,21 +35,20 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 	private final String json;
 
 	@Nullable
-	private final GenericHttpMessageConverter<Object> jsonMessageConverter;
+	private final HttpMessageContentConverter contentConverter;
 
 
 	/**
 	 * Create a new {@code JsonContent} instance with the message converter to
 	 * use to deserialize content.
 	 * @param json the actual JSON content
-	 * @param jsonMessageConverter the message converter to use
+	 * @param contentConverter the content converter to use
 	 */
-	public JsonContent(String json, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
+	public JsonContent(String json, @Nullable HttpMessageContentConverter contentConverter) {
 		Assert.notNull(json, "JSON must not be null");
 		this.json = json;
-		this.jsonMessageConverter = jsonMessageConverter;
+		this.contentConverter = contentConverter;
 	}
-
 
 	/**
 	 * Create a new {@code JsonContent} instance.
@@ -58,6 +57,7 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 	public JsonContent(String json) {
 		this(json, null);
 	}
+
 
 	/**
 	 * Use AssertJ's {@link org.assertj.core.api.Assertions#assertThat assertThat}
@@ -76,11 +76,11 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 	}
 
 	/**
-	 * Return the message converter to use to deserialize content.
+	 * Return the {@link HttpMessageContentConverter} to use to deserialize content.
 	 */
 	@Nullable
-	GenericHttpMessageConverter<Object> getJsonMessageConverter() {
-		return this.jsonMessageConverter;
+	HttpMessageContentConverter getContentConverter() {
+		return this.contentConverter;
 	}
 
 	@Override

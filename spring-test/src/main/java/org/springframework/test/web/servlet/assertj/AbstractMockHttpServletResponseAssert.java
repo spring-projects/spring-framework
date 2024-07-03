@@ -23,9 +23,9 @@ import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ByteArrayAssert;
 
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.test.json.AbstractJsonContentAssert;
 import org.springframework.test.json.JsonContent;
 import org.springframework.test.json.JsonContentAssert;
@@ -44,13 +44,13 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 		extends AbstractHttpServletResponseAssert<MockHttpServletResponse, SELF, ACTUAL> {
 
 	@Nullable
-	private final GenericHttpMessageConverter<Object> jsonMessageConverter;
+	private final HttpMessageContentConverter contentConverter;
 
 	protected AbstractMockHttpServletResponseAssert(
-			@Nullable GenericHttpMessageConverter<Object> jsonMessageConverter, ACTUAL actual, Class<?> selfType) {
+			@Nullable HttpMessageContentConverter contentConverter, ACTUAL actual, Class<?> selfType) {
 
 		super(actual, selfType);
-		this.jsonMessageConverter = jsonMessageConverter;
+		this.contentConverter = contentConverter;
 	}
 
 
@@ -93,7 +93,7 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	 * </code></pre>
 	 */
 	public AbstractJsonContentAssert<?> bodyJson() {
-		return new JsonContentAssert(new JsonContent(readBody(), this.jsonMessageConverter));
+		return new JsonContentAssert(new JsonContent(readBody(), this.contentConverter));
 	}
 
 	private String readBody() {

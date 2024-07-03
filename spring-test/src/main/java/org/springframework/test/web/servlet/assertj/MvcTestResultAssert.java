@@ -31,10 +31,10 @@ import org.assertj.core.api.MapAssert;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
 
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -51,8 +51,8 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class MvcTestResultAssert extends AbstractMockHttpServletResponseAssert<MvcTestResultAssert, MvcTestResult> {
 
-	MvcTestResultAssert(MvcTestResult actual, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
-		super(jsonMessageConverter, actual, MvcTestResultAssert.class);
+	MvcTestResultAssert(MvcTestResult actual, @Nullable HttpMessageContentConverter contentConverter) {
+		super(contentConverter, actual, MvcTestResultAssert.class);
 	}
 
 	@Override

@@ -16,8 +16,8 @@
 
 package org.springframework.test.web.servlet.assertj;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -125,8 +125,7 @@ class MockMvcTesterTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
-	void withHttpMessageConverterDetectsJsonConverter() {
+	void withHttpMessageConverterUsesConverter() {
 		MappingJackson2HttpMessageConverter converter = spy(jsonHttpMessageConverter);
 		MockMvcTester mockMvc = MockMvcTester.of(HelloController.class)
 				.withHttpMessageConverters(List.of(mock(), mock(), converter));
@@ -135,7 +134,7 @@ class MockMvcTesterTests {
 					assertThat(message.message()).isEqualTo("Hello World");
 					assertThat(message.counter()).isEqualTo(42);
 				});
-		verify(converter).canWrite(Map.class, MediaType.APPLICATION_JSON);
+		verify(converter).canWrite(LinkedHashMap.class, LinkedHashMap.class, MediaType.APPLICATION_JSON);
 	}
 
 	@Test

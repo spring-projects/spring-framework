@@ -51,9 +51,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,8 +85,8 @@ class AbstractJsonContentAssertTests {
 
 	private static final String DIFFERENT = loadJson("different.json");
 
-	private static final MappingJackson2HttpMessageConverter jsonHttpMessageConverter =
-			new MappingJackson2HttpMessageConverter(new ObjectMapper());
+	private static final HttpMessageContentConverter jsonContentConverter = HttpMessageContentConverter.of(
+			new MappingJackson2HttpMessageConverter(new ObjectMapper()));
 
 	private static final JsonComparator comparator = JsonAssert.comparator(JsonCompareMode.LENIENT);
 
@@ -108,14 +108,14 @@ class AbstractJsonContentAssertTests {
 
 		@Test
 		void convertToTargetType() {
-			assertThat(forJson(SIMPSONS, jsonHttpMessageConverter))
+			assertThat(forJson(SIMPSONS, jsonContentConverter))
 					.convertTo(Family.class)
 					.satisfies(family -> assertThat(family.familyMembers()).hasSize(5));
 		}
 
 		@Test
 		void convertToIncompatibleTargetTypeShouldFail() {
-			AbstractJsonContentAssert<?> jsonAssert = assertThat(forJson(SIMPSONS, jsonHttpMessageConverter));
+			AbstractJsonContentAssert<?> jsonAssert = assertThat(forJson(SIMPSONS, jsonContentConverter));
 			assertThatExceptionOfType(AssertionError.class)
 					.isThrownBy(() -> jsonAssert.convertTo(Member.class))
 					.withMessageContainingAll("To convert successfully to:",
@@ -124,15 +124,15 @@ class AbstractJsonContentAssertTests {
 
 		@Test
 		void convertUsingAssertFactory() {
-			assertThat(forJson(SIMPSONS, jsonHttpMessageConverter))
+			assertThat(forJson(SIMPSONS, jsonContentConverter))
 					.convertTo(new FamilyAssertFactory())
 					.hasFamilyMember("Homer");
 		}
 
 		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json,
-				@Nullable GenericHttpMessageConverter<Object> jsonHttpMessageConverter) {
+				@Nullable HttpMessageContentConverter jsonContentConverter) {
 
-			return () -> new TestJsonContentAssert(json, jsonHttpMessageConverter);
+			return () -> new TestJsonContentAssert(json, jsonContentConverter);
 		}
 
 		private static class FamilyAssertFactory extends InstanceOfAssertFactory<Family, FamilyAssert> {
@@ -320,14 +320,14 @@ class AbstractJsonContentAssertTests {
 
 		@Test
 		void convertToTargetType() {
-			assertThat(forJson(SIMPSONS, jsonHttpMessageConverter))
+			assertThat(forJson(SIMPSONS, jsonContentConverter))
 					.extractingPath("$.familyMembers[0]").convertTo(Member.class)
 					.satisfies(member -> assertThat(member.name).isEqualTo("Homer"));
 		}
 
 		@Test
 		void convertToIncompatibleTargetTypeShouldFail() {
-			JsonPathValueAssert path = assertThat(forJson(SIMPSONS, jsonHttpMessageConverter))
+			JsonPathValueAssert path = assertThat(forJson(SIMPSONS, jsonContentConverter))
 					.extractingPath("$.familyMembers[0]");
 			assertThatExceptionOfType(AssertionError.class)
 					.isThrownBy(() -> path.convertTo(ExtractingPathTests.Customer.class))
@@ -337,7 +337,7 @@ class AbstractJsonContentAssertTests {
 
 		@Test
 		void convertArrayUsingAssertFactory() {
-			assertThat(forJson(SIMPSONS, jsonHttpMessageConverter))
+			assertThat(forJson(SIMPSONS, jsonContentConverter))
 					.extractingPath("$.familyMembers")
 					.convertTo(InstanceOfAssertFactories.list(Member.class))
 					.hasSize(5).element(0).isEqualTo(new Member("Homer"));
@@ -395,8 +395,8 @@ class AbstractJsonContentAssertTests {
 			return () -> new TestJsonContentAssert(json, null);
 		}
 
-		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json, GenericHttpMessageConverter<Object> jsonHttpMessageConverter) {
-			return () -> new TestJsonContentAssert(json, jsonHttpMessageConverter);
+		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json, HttpMessageContentConverter jsonContentConverter) {
+			return () -> new TestJsonContentAssert(json, jsonContentConverter);
 		}
 	}
 
@@ -895,8 +895,8 @@ class AbstractJsonContentAssertTests {
 
 	private static class TestJsonContentAssert extends AbstractJsonContentAssert<TestJsonContentAssert> {
 
-		public TestJsonContentAssert(@Nullable String json, @Nullable GenericHttpMessageConverter<Object> jsonMessageConverter) {
-			super((json != null ? new JsonContent(json, jsonMessageConverter) : null), TestJsonContentAssert.class);
+		public TestJsonContentAssert(@Nullable String json, @Nullable HttpMessageContentConverter jsonContentConverter) {
+			super((json != null ? new JsonContent(json, jsonContentConverter) : null), TestJsonContentAssert.class);
 		}
 	}
 

@@ -35,6 +35,7 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -43,9 +44,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.MockHttpInputMessage;
+import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.Assert;
 
 /**
@@ -77,7 +78,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 
 
 	@Nullable
-	private final GenericHttpMessageConverter<Object> jsonMessageConverter;
+	private final HttpMessageContentConverter contentConverter;
 
 	@Nullable
 	private Class<?> resourceLoadClass;
@@ -94,7 +95,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 */
 	protected AbstractJsonContentAssert(@Nullable JsonContent actual, Class<?> selfType) {
 		super(actual, selfType);
-		this.jsonMessageConverter = (actual != null ? actual.getJsonMessageConverter() : null);
+		this.contentConverter = (actual != null ? actual.getContentConverter() : null);
 		this.jsonLoader = new JsonLoader(null, null);
 		as("JSON content");
 	}
@@ -131,15 +132,15 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 		return assertFactory.createAssert(this::convertToTargetType);
 	}
 
-	@SuppressWarnings("unchecked")
 	private <T> T convertToTargetType(Type targetType) {
 		String json = this.actual.getJson();
-		if (this.jsonMessageConverter == null) {
+		if (this.contentConverter == null) {
 			throw new IllegalStateException(
 					"No JSON message converter available to convert %s".formatted(json));
 		}
 		try {
-			return (T) this.jsonMessageConverter.read(targetType, getClass(), fromJson(json));
+			return this.contentConverter.convert(fromJson(json), MediaType.APPLICATION_JSON,
+					ResolvableType.forType(targetType));
 		}
 		catch (Exception ex) {
 			throw failure(new ValueProcessingFailed(json,
@@ -165,7 +166,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 */
 	public JsonPathValueAssert extractingPath(String path) {
 		Object value = new JsonPathValue(path).getValue();
-		return new JsonPathValueAssert(value, path, this.jsonMessageConverter);
+		return new JsonPathValueAssert(value, path, this.contentConverter);
 	}
 
 	/**
@@ -176,7 +177,7 @@ public abstract class AbstractJsonContentAssert<SELF extends AbstractJsonContent
 	 */
 	public SELF hasPathSatisfying(String path, Consumer<AssertProvider<JsonPathValueAssert>> valueRequirements) {
 		Object value = new JsonPathValue(path).assertHasPath();
-		JsonPathValueAssert valueAssert = new JsonPathValueAssert(value, path, this.jsonMessageConverter);
+		JsonPathValueAssert valueAssert = new JsonPathValueAssert(value, path, this.contentConverter);
 		valueRequirements.accept(() -> valueAssert);
 		return this.myself;
 	}

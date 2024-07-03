@@ -33,12 +33,9 @@ import org.assertj.core.error.BasicErrorMessageFactory;
 import org.assertj.core.internal.Failures;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.HttpInputMessage;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.http.MockHttpInputMessage;
-import org.springframework.mock.http.MockHttpOutputMessage;
+import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -68,14 +65,14 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 	private final Failures failures = Failures.instance();
 
 	@Nullable
-	private final GenericHttpMessageConverter<Object> httpMessageConverter;
+	private final HttpMessageContentConverter contentConverter;
 
 
 	protected AbstractJsonValueAssert(@Nullable Object actual, Class<?> selfType,
-			@Nullable GenericHttpMessageConverter<Object> httpMessageConverter) {
+			@Nullable HttpMessageContentConverter contentConverter) {
 
 		super(actual, selfType);
-		this.httpMessageConverter = httpMessageConverter;
+		this.contentConverter = contentConverter;
 	}
 
 
@@ -199,30 +196,18 @@ public abstract class AbstractJsonValueAssert<SELF extends AbstractJsonValueAsse
 		return this.myself;
 	}
 
-
-	@SuppressWarnings("unchecked")
 	private <T> T convertToTargetType(Type targetType) {
-		if (this.httpMessageConverter == null) {
+		if (this.contentConverter == null) {
 			throw new IllegalStateException(
 					"No JSON message converter available to convert %s".formatted(actualToString()));
 		}
 		try {
-			MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-			this.httpMessageConverter.write(this.actual, ResolvableType.forInstance(this.actual).getType(),
-					MediaType.APPLICATION_JSON, outputMessage);
-			return (T) this.httpMessageConverter.read(targetType, getClass(),
-					fromHttpOutputMessage(outputMessage));
+			return this.contentConverter.convertViaJson(this.actual, ResolvableType.forType(targetType));
 		}
 		catch (Exception ex) {
 			throw valueProcessingFailed("To convert successfully to:%n  %s%nBut it failed:%n  %s%n"
 					.formatted(targetType.getTypeName(), ex.getMessage()));
 		}
-	}
-
-	private HttpInputMessage fromHttpOutputMessage(MockHttpOutputMessage message) {
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(message.getBodyAsBytes());
-		inputMessage.getHeaders().addAll(message.getHeaders());
-		return inputMessage;
 	}
 
 	protected String getExpectedErrorMessagePrefix() {
