@@ -27,10 +27,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.function.ThrowingConsumer;
 
 /**
- * Interface that can be used to add {@link Kind#SOURCE source},
+ * Repository of generated files. Can be used to add {@link Kind#SOURCE source},
  * {@link Kind#RESOURCE resource}, or {@link Kind#CLASS class} files generated
  * during ahead-of-time processing. Source and resource files are written using
- * UTF-8 encoding.
+ * {@code UTF-8} encoding.
  *
  * @author Phillip Webb
  * @author Brian Clozel
@@ -236,8 +236,8 @@ public interface GeneratedFiles {
 	}
 
 	/**
-	 * Provide access to a particular file and offer convenient method to save
-	 * or override its content.
+	 * Provide access to a particular file and offer convenient methods to retrieve,
+	 * save, or override its content.
 	 *
 	 * @since 6.2
 	 */

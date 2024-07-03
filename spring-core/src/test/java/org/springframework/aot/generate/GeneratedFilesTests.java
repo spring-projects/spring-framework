@@ -190,6 +190,7 @@ class GeneratedFilesTests {
 		AtomicBoolean called = new AtomicBoolean(false);
 		this.generatedFiles.handleFile(Kind.RESOURCE, "META-INF/test", handler -> {
 			called.set(true);
+			assertThat(handler.getContent()).isNotNull();
 			String existing = readSource(handler.getContent());
 			handler.override(createSource(existing+"-override"));
 		});
@@ -225,8 +226,10 @@ class GeneratedFilesTests {
 
 	static class TestGeneratedFiles implements GeneratedFiles {
 
+		@Nullable
 		private Kind kind;
 
+		@Nullable
 		private String path;
 
 		private TestFileHandler fileHandler = new TestFileHandler();
@@ -247,21 +250,22 @@ class GeneratedFilesTests {
 			assertThat(this.kind).as("kind").isEqualTo(kind);
 			assertThat(this.path).as("path").isEqualTo(path);
 			assertThat(this.fileHandler.content).as("content").isNotNull();
-			return new GeneratedFileAssert(this.fileHandler);
+			return new GeneratedFileAssert(this.fileHandler.content, this.fileHandler.override);
 		}
 	}
 
 	private static class GeneratedFileAssert extends AbstractStringAssert<GeneratedFileAssert> {
 
-		private final TestFileHandler fileHandler;
+		@Nullable
+		private final Boolean override;
 
-		GeneratedFileAssert(TestFileHandler fileHandler) throws IOException {
-			super(readSource(fileHandler.content), GeneratedFileAssert.class);
-			this.fileHandler = fileHandler;
+		GeneratedFileAssert(InputStreamSource content, @Nullable Boolean override) throws IOException {
+			super(readSource(content), GeneratedFileAssert.class);
+			this.override = override;
 		}
 
 		public GeneratedFileAssert hasOverride(boolean expected) {
-			assertThat(this.fileHandler.override).isEqualTo(expected);
+			assertThat(this.override).isEqualTo(expected);
 			return this.myself;
 		}
 	}
