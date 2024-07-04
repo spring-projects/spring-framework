@@ -128,9 +128,10 @@ class GsonFactoryBeanTests {
 		cal.set(Calendar.DATE, 1);
 		Date date = cal.getTime();
 		bean.setDate(date);
+		// \p{Zs} matches any Unicode space character
 		assertThat(gson.toJson(bean))
 				.startsWith("{\"date\":\"Jan 1, 2014")
-				.endsWith("12:00:00 AM\"}");
+				.matches(".+?12:00:00\\p{Zs}AM\"}");
 	}
 
 	@Test
