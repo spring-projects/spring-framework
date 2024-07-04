@@ -19,6 +19,7 @@ package org.springframework.validation.beanvalidation;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import jakarta.validation.Valid;
@@ -39,6 +40,7 @@ import org.springframework.validation.method.ParameterErrors;
 import org.springframework.validation.method.ParameterValidationResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.SET;
 
 /**
  * Tests for {@link MethodValidationAdapter}.
@@ -213,6 +215,24 @@ class MethodValidationAdapterTests {
 		});
 	}
 
+	@Test
+	void validateValueSetArgument() {
+		MyService target = new MyService();
+		Method method = getMethod(target, "addUniqueHobbies");
+
+		testArgs(target, method, new Object[] {Set.of("test", "   ")}, ex -> {
+
+			assertThat(ex.getAllValidationResults()).hasSize(1);
+
+			assertValueResult(ex.getValueResults().get(0), 0, Set.of("test", "   "), List.of("""
+				org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [NotBlank.myService#addUniqueHobbies.hobbies,NotBlank.hobbies,NotBlank.java.util.Set,NotBlank]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [myService#addUniqueHobbies.hobbies,hobbies]; \
+				arguments []; default message [hobbies]]; default message [must not be blank]"""));
+		});
+	}
+
 	private void testArgs(Object target, Method method, Object[] args, Consumer<MethodValidationResult> consumer) {
 		consumer.accept(this.validationAdapter.validateArguments(target, method, null, args, new Class<?>[0]));
 	}
@@ -271,6 +291,8 @@ class MethodValidationAdapterTests {
 		public void addHobbies(List<@NotBlank String> hobbies) {
 		}
 
+		public void addUniqueHobbies(Set<@NotBlank String> hobbies) {
+		}
 	}
 
 

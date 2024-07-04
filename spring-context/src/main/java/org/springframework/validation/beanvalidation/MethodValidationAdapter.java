@@ -346,6 +346,10 @@ public class MethodValidationAdapter implements MethodValidator {
 					value = map.get(key);
 					container = map;
 				}
+				else if (arg instanceof Set<?>) {
+					value = arg;
+					container = null;
+				}
 				else if (arg instanceof Optional<?> optional) {
 					value = optional.orElse(null);
 					container = optional;
