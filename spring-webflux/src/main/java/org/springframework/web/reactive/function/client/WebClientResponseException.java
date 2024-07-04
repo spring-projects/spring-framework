@@ -274,10 +274,11 @@ public class WebClientResponseException extends WebClientException {
 
 	@Override
 	public String getMessage() {
+		String message = String.valueOf(super.getMessage());
 		if (shouldHintAtResponseFailure()) {
-			return super.getMessage() + ", but response failed with cause: " + getCause();
+			return message + ", but response failed with cause: " + getCause();
 		}
-		return super.getMessage();
+		return message;
 	}
 
 	private boolean shouldHintAtResponseFailure() {
