@@ -147,7 +147,7 @@ public class FreeMarkerConfigurationFactory {
 	 * <p>Note that the supplied encoding may or may not be used for template
 	 * rendering. See the documentation for Spring's {@code FreeMarkerView} and
 	 * {@code FreeMarkerViewResolver} implementations for further details.
-	 * @see #setDefaultEncoding(Charset)
+	 * @see #setDefaultCharset(Charset)
 	 * @see freemarker.template.Configuration#setDefaultEncoding
 	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerView#setEncoding
 	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerView#setContentType
