@@ -109,7 +109,7 @@ dependencies {
 		api("org.aspectj:aspectjrt:1.9.22.1")
 		api("org.aspectj:aspectjtools:1.9.22.1")
 		api("org.aspectj:aspectjweaver:1.9.22.1")
-		api("org.awaitility:awaitility:4.2.1")
+		api("org.awaitility:awaitility:4.2.0")
 		api("org.bouncycastle:bcpkix-jdk18on:1.72")
 		api("org.codehaus.jettison:jettison:1.5.4")
 		api("org.crac:crac:1.4.0")
