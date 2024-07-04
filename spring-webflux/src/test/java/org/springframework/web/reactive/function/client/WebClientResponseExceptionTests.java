@@ -20,6 +20,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Tests for {@link WebClientResponseException}.
+ *
+ * @author Simon Baslé
+ */
 class WebClientResponseExceptionTests {
 
 	@Test
@@ -31,34 +36,34 @@ class WebClientResponseExceptionTests {
 
 	@Test
 	void constructWith1xxStatusCodeAndCauseAdditionalMessage() {
-		final WebClientResponseException ex = new WebClientResponseException(100, "reasonPhrase", null, null, null);
+		WebClientResponseException ex = new WebClientResponseException(100, "reasonPhrase", null, null, null);
 		ex.initCause(new RuntimeException("example cause"));
 		assertThat(ex).hasMessage("100 reasonPhrase, but response failed with cause: java.lang.RuntimeException: example cause");
 	}
 
 	@Test
 	void constructWith2xxStatusCodeAndCauseAdditionalMessage() {
-		final WebClientResponseException ex = new WebClientResponseException(200, "reasonPhrase", null, null, null);
+		WebClientResponseException ex = new WebClientResponseException(200, "reasonPhrase", null, null, null);
 		ex.initCause(new RuntimeException("example cause"));
 		assertThat(ex).hasMessage("200 reasonPhrase, but response failed with cause: java.lang.RuntimeException: example cause");
 	}
 
 	@Test
 	void constructWith3xxStatusCodeAndCauseAdditionalMessage() {
-		final WebClientResponseException ex = new WebClientResponseException(300, "reasonPhrase", null, null, null);
+		WebClientResponseException ex = new WebClientResponseException(300, "reasonPhrase", null, null, null);
 		ex.initCause(new RuntimeException("example cause"));
 		assertThat(ex).hasMessage("300 reasonPhrase, but response failed with cause: java.lang.RuntimeException: example cause");
 	}
 
 	@Test
 	void constructWithExplicitMessageAndNotErrorCodeAdditionalMessage() {
-		final WebClientResponseException ex = new WebClientResponseException("explicit message", 100, "reasonPhrase", null, null, null);
+		WebClientResponseException ex = new WebClientResponseException("explicit message", 100, "reasonPhrase", null, null, null);
 		assertThat(ex).hasMessage("explicit message, but response failed with cause: null");
 	}
 
 	@Test
 	void constructWithExplicitMessageAndNotErrorCodeAndCauseAdditionalMessage() {
-		final WebClientResponseException ex = new WebClientResponseException("explicit message", 100, "reasonPhrase", null, null, null);
+		WebClientResponseException ex = new WebClientResponseException("explicit message", 100, "reasonPhrase", null, null, null);
 		ex.initCause(new RuntimeException("example cause"));
 		assertThat(ex).hasMessage("explicit message, but response failed with cause: java.lang.RuntimeException: example cause")
 				.hasRootCauseMessage("example cause");
@@ -66,22 +71,23 @@ class WebClientResponseExceptionTests {
 
 	@Test
 	void constructWithExplicitMessageAndErrorCodeAndCauseNoAdditionalMessage() {
-		final WebClientResponseException ex = new WebClientResponseException("explicit message", 404, "reasonPhrase", null, null, null);
+		WebClientResponseException ex = new WebClientResponseException("explicit message", 404, "reasonPhrase", null, null, null);
 		ex.initCause(new RuntimeException("example cause"));
 		assertThat(ex).hasMessage("explicit message").hasRootCauseMessage("example cause");
 	}
 
 	@Test
 	void constructWith4xxStatusCodeAndCauseNoAdditionalMessage() {
-		final WebClientResponseException ex = new WebClientResponseException(400, "reasonPhrase", null, null, null);
+		WebClientResponseException ex = new WebClientResponseException(400, "reasonPhrase", null, null, null);
 		ex.initCause(new RuntimeException("example cause"));
 		assertThat(ex).hasMessage("400 reasonPhrase").hasRootCauseMessage("example cause");
 	}
 
 	@Test
 	void constructWith5xxStatusCodeAndCauseNoAdditionalMessage() {
-		final WebClientResponseException ex = new WebClientResponseException(500, "reasonPhrase", null, null, null);
+		WebClientResponseException ex = new WebClientResponseException(500, "reasonPhrase", null, null, null);
 		ex.initCause(new RuntimeException("example cause"));
 		assertThat(ex).hasMessage("500 reasonPhrase").hasRootCauseMessage("example cause");
 	}
+
 }
