@@ -272,6 +272,19 @@ public class WebClientResponseException extends WebClientException {
 		this.bodyDecodeFunction = decoderFunction;
 	}
 
+	@Override
+	public String getMessage() {
+		if (shouldHintAtResponseFailure()) {
+			return super.getMessage() + ", but response failed with cause: " + getCause();
+		}
+		return super.getMessage();
+	}
+
+	private boolean shouldHintAtResponseFailure() {
+		return this.statusCode.is1xxInformational() ||
+				this.statusCode.is2xxSuccessful() ||
+				this.statusCode.is3xxRedirection();
+	}
 
 	/**
 	 * Create {@code WebClientResponseException} or an HTTP status specific subclass.
