@@ -78,8 +78,8 @@ class DateTimeFormatterFactoryTests {
 	void createDateTimeFormatterInOrderOfPropertyPriority() {
 		factory.setStylePattern("SS");
 		String value = applyLocale(factory.createDateTimeFormatter()).format(dateTime);
-		assertThat(value).startsWith("10/21/09");
-		assertThat(value).endsWith("12:10 PM");
+		// \p{Zs} matches any Unicode space character
+		assertThat(value).startsWith("10/21/09").matches(".+?12:10\\p{Zs}PM");
 
 		factory.setIso(ISO.DATE);
 		assertThat(applyLocale(factory.createDateTimeFormatter()).format(dateTime)).isEqualTo("2009-10-21");
