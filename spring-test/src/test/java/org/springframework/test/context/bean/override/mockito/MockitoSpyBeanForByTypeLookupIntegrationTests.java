@@ -31,7 +31,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -50,11 +49,11 @@ public class MockitoSpyBeanForByTypeLookupIntegrationTests {
 
 	@MockitoSpyBean
 	@Qualifier("prefer")
-	StringBuilder ambiguous;
+	StringHolder ambiguous;
 
 	@MockitoSpyBean
 	@CustomQualifier
-	StringBuilder ambiguousMeta;
+	StringHolder ambiguousMeta;
 
 
 	@Test
@@ -65,7 +64,7 @@ public class MockitoSpyBeanForByTypeLookupIntegrationTests {
 				.isSameAs(ctx.getBean(ExampleService.class));
 
 		assertThat(this.anyNameForService.greeting()).isEqualTo("Production hello");
-		verify(this.anyNameForService, times(1)).greeting();
+		verify(this.anyNameForService).greeting();
 		verifyNoMoreInteractions(this.anyNameForService);
 	}
 
@@ -76,13 +75,14 @@ public class MockitoSpyBeanForByTypeLookupIntegrationTests {
 				.isSameAs(ctx.getBean("ambiguous2"));
 
 		assertThatException()
-				.isThrownBy(() -> ctx.getBean(StringBuilder.class))
+				.isThrownBy(() -> ctx.getBean(StringHolder.class))
 				.withMessageEndingWith("but found 2: ambiguous1,ambiguous2");
 
-		assertThat(this.ambiguous.toString()).isEqualTo("bean3");
-		assertThat(this.ambiguous.length()).isEqualTo(5);
-		verify(this.ambiguous, times(1)).length();
-		verifyNoMoreInteractions(this.ambiguous); //mockito doesn't verify toString
+		assertThat(this.ambiguous.getValue()).isEqualTo("bean3");
+		assertThat(this.ambiguous.size()).isEqualTo(5);
+		verify(this.ambiguous).getValue();
+		verify(this.ambiguous).size();
+		verifyNoMoreInteractions(this.ambiguous);
 	}
 
 	@Test
@@ -92,12 +92,13 @@ public class MockitoSpyBeanForByTypeLookupIntegrationTests {
 				.isSameAs(ctx.getBean("ambiguous1"));
 
 		assertThatException()
-				.isThrownBy(() -> ctx.getBean(StringBuilder.class))
+				.isThrownBy(() -> ctx.getBean(StringHolder.class))
 				.withMessageEndingWith("but found 2: ambiguous1,ambiguous2");
 
-		assertThat(this.ambiguousMeta.toString()).isEqualTo("bean2");
-		assertThat(this.ambiguousMeta.length()).isEqualTo(5);
-		verify(this.ambiguousMeta, times(1)).length();
+		assertThat(this.ambiguousMeta.getValue()).isEqualTo("bean2");
+		assertThat(this.ambiguousMeta.size()).isEqualTo(5);
+		verify(this.ambiguousMeta).getValue();
+		verify(this.ambiguousMeta).size();
 		verifyNoMoreInteractions(this.ambiguousMeta); //mockito doesn't verify toString
 	}
 
@@ -113,15 +114,32 @@ public class MockitoSpyBeanForByTypeLookupIntegrationTests {
 		@Bean("ambiguous1")
 		@Order(1)
 		@CustomQualifier
-		StringBuilder bean2() {
-			return new StringBuilder("bean2");
+		StringHolder bean2() {
+			return new StringHolder("bean2");
 		}
 
 		@Bean("ambiguous2")
 		@Order(2)
 		@Qualifier("prefer")
-		StringBuilder bean3() {
-			return new StringBuilder("bean3");
+		StringHolder bean3() {
+			return new StringHolder("bean3");
+		}
+	}
+
+	static class StringHolder {
+
+		private final String value;
+
+		StringHolder(String value) {
+			this.value = value;
+		}
+
+		public String getValue() {
+			return this.value;
+		}
+
+		public int size() {
+			return this.value.length();
 		}
 	}
 
