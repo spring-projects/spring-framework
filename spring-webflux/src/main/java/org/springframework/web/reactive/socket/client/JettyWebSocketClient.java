@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,14 +39,29 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 
+/**
+ * A {@link WebSocketClient} implementation for use with Jetty 12
+ * {@link org.eclipse.jetty.websocket.client.WebSocketClient}.
+ *
+ * @author Lachlan Roberts
+ * @since 6.2
+ */
 public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 
 	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
 
+	/**
+	 * Default constructor that creates and manages an instance of a Jetty
+	 * {@link org.eclipse.jetty.websocket.client.WebSocketClient WebSocketClient}.
+	 */
 	public JettyWebSocketClient() {
 		this(new org.eclipse.jetty.websocket.client.WebSocketClient());
 	}
 
+	/**
+	 * Constructor that accepts an existing instance of a Jetty
+	 * {@link org.eclipse.jetty.websocket.client.WebSocketClient WebSocketClient}.
+	 */
 	public JettyWebSocketClient(org.eclipse.jetty.websocket.client.WebSocketClient client) {
 		this.client = client;
 	}
