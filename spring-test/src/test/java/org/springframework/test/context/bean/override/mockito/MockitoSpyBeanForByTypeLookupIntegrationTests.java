@@ -99,7 +99,7 @@ public class MockitoSpyBeanForByTypeLookupIntegrationTests {
 		assertThat(this.ambiguousMeta.size()).isEqualTo(5);
 		verify(this.ambiguousMeta).getValue();
 		verify(this.ambiguousMeta).size();
-		verifyNoMoreInteractions(this.ambiguousMeta); //mockito doesn't verify toString
+		verifyNoMoreInteractions(this.ambiguousMeta);
 	}
 
 
