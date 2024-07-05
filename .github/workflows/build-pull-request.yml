@@ -6,7 +6,7 @@ permissions:
 
 jobs:
   build:
-    name: Build pull request
+    name: Build Pull Request
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'spring-projects/spring-framework' }}
     steps:
@@ -15,27 +15,21 @@ jobs:
         with:
           java-version: '17'
           distribution: 'liberica'
-
-      - name: Check out code
+      - name: Check Out
         uses: actions/checkout@v4
-
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@699bb18358f12c5b78b37bb0111d3a0e2276e0e2
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5
-
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
+      - name: Set Up Gradle
+        uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
       - name: Build
         env:
           CI: 'true'
           GRADLE_ENTERPRISE_URL: 'https://ge.spring.io'
         run: ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false --no-daemon --no-parallel --continue build
-
-      - name: Print JVM thread dumps when cancelled
+      - name: Print JVM Thread Dumps When Cancelled
         uses: ./.github/actions/print-jvm-thread-dumps
         if: cancelled()
-
-      - name: Upload build reports
+      - name: Upload Build Reports
         uses: actions/upload-artifact@v4
         if: failure()
         with:
