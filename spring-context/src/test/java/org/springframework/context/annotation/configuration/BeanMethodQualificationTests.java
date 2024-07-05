@@ -102,12 +102,10 @@ class BeanMethodQualificationTests {
 		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
 		assertThat(pojo.testBean2.getSpouse().getName()).isEqualTo("interesting");
-		assertThat((List<Object>) pojo.testBean2.getPets()).contains(
-				ctx.getBean("testBean1x"), ctx.getBean("testBean2x"));  // array injection
-		assertThat((List<Object>) pojo.testBean2.getSomeList()).contains(
-				ctx.getBean("testBean1x"), ctx.getBean("testBean2x"));  // list injection
-		assertThat((Map<String, TestBean>) pojo.testBean2.getSomeMap()).containsKeys(
-				"testBean1x", "testBean2x");  // map injection
+		List<?> otherBeans = List.of(ctx.getBean("testBean1"), ctx.getBean("testBean1x"), ctx.getBean("testBean2x"));
+		assertThat((List<Object>) pojo.testBean2.getPets()).containsAll(otherBeans);  // array injection
+		assertThat((List<Object>) pojo.testBean2.getSomeList()).containsAll(otherBeans);  // list injection
+		assertThat((Map<String, TestBean>) pojo.testBean2.getSomeMap()).containsOnlyKeys("testBean1", "testBean1x", "testBean2x");  // map injection
 
 		ConstructorPojo pojo2 = ctx.getBean(ConstructorPojo.class);
 		assertThat(pojo2.testBean).isSameAs(pojo.testBean);
