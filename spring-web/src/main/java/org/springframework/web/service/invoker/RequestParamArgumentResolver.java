@@ -16,9 +16,12 @@
 
 package org.springframework.web.service.invoker;
 
+import java.util.List;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.CollectionFormat;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -72,7 +75,22 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 	protected void addRequestValue(
 			String name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
-		requestValues.addRequestParameter(name, (String) value);
-	}
+		CollectionFormat annotation = parameter.getParameterAnnotation(CollectionFormat.class);
+		String parameterValue = (String) value;
 
+		if (annotation != null) {
+			List<String> existingValues = requestValues.getRequestParameter(name);
+
+			if (existingValues != null && !existingValues.isEmpty()) {
+				String combinedValue = existingValues.get(0) + annotation.value().separator + parameterValue;
+				requestValues.setRequestParameter(name, combinedValue);
+			}
+			else {
+				requestValues.addRequestParameter(name, parameterValue);
+			}
+		}
+		else {
+			requestValues.addRequestParameter(name, parameterValue);
+		}
+	}
 }

@@ -546,6 +546,20 @@ public class HttpRequestValues {
 					this.httpMethod, uri, uriBuilderFactory, uriTemplate,
 					uriVars, headers, cookies, attributes, bodyValue);
 		}
-	}
 
+		@Nullable
+		List<String> getRequestParameter(String name) {
+			if (this.requestParams != null) {
+				return this.requestParams.get(name);
+			}
+			return Collections.emptyList();
+		}
+
+		@Nullable
+		void setRequestParameter(String name, String collect) {
+			if (this.requestParams != null) {
+				this.requestParams.set(name, collect);
+			}
+		}
+	}
 }
