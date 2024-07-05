@@ -61,12 +61,11 @@ class DateFormattingTests {
 
 	@BeforeEach
 	void setup() {
-		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
-		setup(registrar);
+		DefaultConversionService.addDefaultConverters(conversionService);
+		setup(new DateFormatterRegistrar());
 	}
 
 	private void setup(DateFormatterRegistrar registrar) {
-		DefaultConversionService.addDefaultConverters(conversionService);
 		registrar.registerFormatters(conversionService);
 
 		SimpleDateBean bean = new SimpleDateBean();
@@ -172,7 +171,7 @@ class DateFormattingTests {
 	@Test
 	@Disabled
 	void testBindDateAnnotatedWithFallbackError() {
-		// TODO This currently passes because of the Date(String) constructor fallback is used
+		// TODO This currently passes because the Date(String) constructor fallback is used
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleDate", "Oct 031, 2009");
 		binder.bind(propertyValues);
@@ -181,7 +180,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindDateAnnotatedPattern() {
+	void testBindDateTimePatternAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternDate", "10/31/09 1:05");
 		binder.bind(propertyValues);
@@ -190,7 +189,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindDateAnnotatedPatternWithGlobalFormat() {
+	void testBindDateTimePatternAnnotatedWithGlobalFormat() {
 		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
 		DateFormatter dateFormatter = new DateFormatter();
 		dateFormatter.setIso(ISO.DATE_TIME);
@@ -205,7 +204,7 @@ class DateFormattingTests {
 	}
 
 	@Test
-	void testBindDateTimeOverflow() {
+	void testBindDateTimePatternAnnotatedWithOverflow() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternDate", "02/29/09 12:00 PM");
 		binder.bind(propertyValues);
