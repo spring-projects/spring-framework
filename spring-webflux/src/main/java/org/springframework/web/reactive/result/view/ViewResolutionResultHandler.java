@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -35,10 +36,15 @@ import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -159,6 +165,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 		return (CharSequence.class.isAssignableFrom(type) ||
 				Rendering.class.isAssignableFrom(type) ||
+				FragmentRendering.class.isAssignableFrom(type) ||
 				Model.class.isAssignableFrom(type) ||
 				Map.class.isAssignableFrom(type) ||
 				View.class.isAssignableFrom(type) ||
@@ -174,8 +181,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 		if (adapter != null) {
 			if (adapter.isMultiValue()) {
-				throw new IllegalArgumentException(
-						"Multi-value reactive types not supported in view resolution: " + result.getReturnType());
+				throw new IllegalArgumentException("Multi-value producer: " + result.getReturnType());
 			}
 
 			valueMono = (result.getReturnValue() != null ?
@@ -196,6 +202,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 					Mono<List<View>> viewsMono;
 					Model model = result.getModel();
 					MethodParameter parameter = result.getReturnTypeSource();
+					BindingContext bindingContext = result.getBindingContext();
 					Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
 
 					Class<?> clazz = valueType.toClass();
@@ -224,6 +231,20 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 						viewsMono = (view instanceof String viewName ? resolveViews(viewName, locale) :
 								Mono.just(Collections.singletonList((View) view)));
 					}
+					else if (FragmentRendering.class.isAssignableFrom(clazz)) {
+						FragmentRendering render = (FragmentRendering) returnValue;
+						HttpStatusCode status = render.status();
+						if (status != null) {
+							exchange.getResponse().setStatusCode(status);
+						}
+						exchange.getResponse().getHeaders().putAll(render.headers());
+
+						bindingContext.updateModel(exchange);
+						Flux<Flux<DataBuffer>> renderFlux = render.fragments()
+								.concatMap(fragment -> renderFragment(fragment, locale, bindingContext, exchange));
+
+						return exchange.getResponse().writeAndFlushWith(renderFlux);
+					}
 					else if (Model.class.isAssignableFrom(clazz)) {
 						model.addAllAttributes(((Model) returnValue).asMap());
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
@@ -240,12 +261,10 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 						model.addAttribute(name, returnValue);
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
-					BindingContext bindingContext = result.getBindingContext();
 					bindingContext.updateModel(exchange);
 					return viewsMono.flatMap(views -> render(views, model.asMap(), bindingContext, exchange));
 				});
 	}
-
 
 	private boolean hasModelAnnotation(MethodParameter parameter) {
 		return parameter.hasMethodAnnotation(ModelAttribute.class);
@@ -278,6 +297,23 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 					views.addAll(getDefaultViews());
 					return views;
 				});
+	}
+
+	private Mono<Flux<DataBuffer>> renderFragment(
+			Fragment fragment, Locale locale, BindingContext bindingContext, ServerWebExchange exchange) {
+
+		// Merge attributes from top-level model
+		bindingContext.getModel().asMap().forEach((key, value) -> fragment.model().putIfAbsent(key, value));
+
+		BodySavingResponse response = new BodySavingResponse(exchange.getResponse());
+		ServerWebExchange mutatedExchange = exchange.mutate().response(response).build();
+
+		Mono<List<View>> selectedViews = (fragment.isResolved() ?
+				Mono.just(List.of(fragment.view())) :
+				resolveViews(fragment.viewName() != null ? fragment.viewName() : getDefaultViewName(exchange), locale));
+
+		return selectedViews.flatMap(views -> render(views, fragment.model(), bindingContext, mutatedExchange))
+				.then(Mono.fromSupplier(response::getBodyFlux));
 	}
 
 	private String getNameForReturnValue(MethodParameter returnType) {
@@ -334,6 +370,45 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 		return views.stream()
 				.flatMap(view -> view.getSupportedMediaTypes().stream())
 				.toList();
+	}
+
+
+	/**
+	 * ServerHttpResponse that saves the body Flux and does not write.
+	 */
+	private static class BodySavingResponse extends ServerHttpResponseDecorator {
+
+		@Nullable
+		private Flux<DataBuffer> bodyFlux;
+
+		private final HttpHeaders headers;
+
+		BodySavingResponse(ServerHttpResponse delegate) {
+			super(delegate);
+			this.headers = new HttpHeaders(delegate.getHeaders()); // Ignore header changes
+		}
+
+		@Override
+		public HttpHeaders getHeaders() {
+			return this.headers;
+		}
+
+		public Flux<DataBuffer> getBodyFlux() {
+			Assert.state(this.bodyFlux != null, "Body not set");
+			return this.bodyFlux;
+		}
+
+		@Override
+		public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+			this.bodyFlux = Flux.from(body);
+			return Mono.empty();
+		}
+
+		@Override
+		public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
+			this.bodyFlux = Flux.from(body).flatMap(Flux::from);
+			return Mono.empty();
+		}
 	}
 
 }

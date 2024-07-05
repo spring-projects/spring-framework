@@ -79,6 +79,7 @@ class ViewResolutionResultHandlerTests {
 		testSupports(on(Handler.class).resolveReturnType(Mono.class, String.class));
 
 		testSupports(on(Handler.class).resolveReturnType(Rendering.class));
+		testSupports(on(Handler.class).resolveReturnType(FragmentRendering.class));
 		testSupports(on(Handler.class).resolveReturnType(Mono.class, Rendering.class));
 
 		testSupports(on(Handler.class).resolveReturnType(View.class));
@@ -433,6 +434,8 @@ class ViewResolutionResultHandlerTests {
 
 		Rendering rendering() { return null; }
 		Mono<Rendering> monoRendering() { return null; }
+
+		FragmentRendering fragmentRendering() { return null; }
 
 		View view() { return null; }
 		Mono<View> monoView() { return null; }

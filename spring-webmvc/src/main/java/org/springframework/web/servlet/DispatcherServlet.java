@@ -1418,6 +1418,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
+		if (view instanceof SmartView smartView) {
+			smartView.resolveNestedViews(this::resolveViewNameInternal, locale);
+		}
+
 		// Delegate to the View object for rendering.
 		if (logger.isTraceEnabled()) {
 			logger.trace("Rendering view [" + view + "] ");
@@ -1466,6 +1470,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected View resolveViewName(String viewName, @Nullable Map<String, Object> model,
 			Locale locale, HttpServletRequest request) throws Exception {
 
+		return resolveViewNameInternal(viewName, locale);
+	}
+
+	@Nullable
+	private View resolveViewNameInternal(String viewName, Locale locale) throws Exception {
 		if (this.viewResolvers != null) {
 			for (ViewResolver viewResolver : this.viewResolvers) {
 				View view = viewResolver.resolveViewName(viewName, locale);
