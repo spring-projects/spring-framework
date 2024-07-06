@@ -517,32 +517,28 @@ Library authors can reuse this annotation for their own purposes.
 If components other than Spring beans need to be processed, a `BeanFactoryInitializationAotProcessor` can detect the relevant types and use `ReflectiveRuntimeHintsRegistrar` to process them.
 
 
-[[aot.hints.register-reflection-for-binding]]
-=== `@RegisterReflectionForBinding`
+[[aot.hints.register-reflection]]
+=== `@RegisterReflection`
 
-{spring-framework-api}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`] is a specialization of `@Reflective` that registers the need for serializing arbitrary types.
+{spring-framework-api}/aot/hint/annotation/RegisterReflection.html[`@RegisterReflection`] is a specialization of `@Reflective` that provides a declarative way of registering reflection for arbitrary types.
+
+In the following example, public constructors and public methods can be invoked via reflection on `AccountService`:
+
+include-code::./MyConfiguration[tag=snippet,indent=0]
+
+`@RegisterReflection` can be applied to any Spring bean at the class level, but it can also be applied directly to a method to better indicate where the hints are actually required.
+
+`@RegisterReflection` can be used as a meta-annotation to provide more specific needs.
+{spring-framework-api}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`] is such composed annotation and registers the need for serializing arbitrary types.
 A typical use case is the use of DTOs that the container cannot infer, such as using a web client within a method body.
 
-`@RegisterReflectionForBinding` can be applied to any Spring bean at the class level, but it can also be applied directly to a method, field, or constructor to better indicate where the hints are actually required.
-The following example registers `Account` for serialization.
+The following example registers `Order` for serialization.
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	@Component
-	public class OrderService {
+include-code::./OrderService[tag=snippet,indent=0]
 
-		@RegisterReflectionForBinding(Account.class)
-		public void process(Order order) {
-			// ...
-		}
-
-	}
-----
-======
+This registers hints for constructors, fields, properties, and record components of `Order`.
+Hints are also registered for types transitively used on properties and record components.
+In other words, if `Order` exposes others types, hints are registered for those as well.
 
 [[aot.hints.testing]]
 === Testing Runtime Hints

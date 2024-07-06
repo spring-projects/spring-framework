@@ -63,7 +63,7 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
  * @since 6.0
  * @see org.springframework.aot.hint.RuntimeHints
  * @see org.springframework.aot.hint.annotation.Reflective
- * @see org.springframework.aot.hint.annotation.RegisterReflectionForBinding
+ * @see org.springframework.aot.hint.annotation.RegisterReflection
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
