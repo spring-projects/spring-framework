@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  * Default implementation of {@link ErrorResponse.Builder}.
  *
  * @author Rossen Stoyanchev
+ * @author 海子 Yang
  * @since 6.0
  */
 final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
@@ -66,16 +67,23 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 
 	@Override
 	public ErrorResponse.Builder header(String headerName, String... headerValues) {
-		this.headers = (this.headers != null ? this.headers : new HttpHeaders());
 		for (String headerValue : headerValues) {
-			this.headers.add(headerName, headerValue);
+			httpHeaders().add(headerName, headerValue);
 		}
 		return this;
 	}
 
 	@Override
 	public ErrorResponse.Builder headers(Consumer<HttpHeaders> headersConsumer) {
+		headersConsumer.accept(httpHeaders());
 		return this;
+	}
+
+	private HttpHeaders httpHeaders() {
+		if (this.headers == null) {
+			this.headers = new HttpHeaders();
+		}
+		return this.headers;
 	}
 
 	@Override
