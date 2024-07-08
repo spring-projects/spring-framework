@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,16 +66,23 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 
 	@Override
 	public ErrorResponse.Builder header(String headerName, String... headerValues) {
-		this.headers = (this.headers != null ? this.headers : new HttpHeaders());
 		for (String headerValue : headerValues) {
-			this.headers.add(headerName, headerValue);
+			getHeaders().add(headerName, headerValue);
 		}
 		return this;
 	}
 
 	@Override
 	public ErrorResponse.Builder headers(Consumer<HttpHeaders> headersConsumer) {
+		headersConsumer.accept(getHeaders());
 		return this;
+	}
+
+	private HttpHeaders getHeaders() {
+		if (this.headers == null) {
+			this.headers = new HttpHeaders();
+		}
+		return this.headers;
 	}
 
 	@Override
