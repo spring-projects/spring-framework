@@ -123,12 +123,16 @@ public class MessageHeaderAccessor {
 	@Nullable
 	private IdGenerator idGenerator;
 
+	private MessageHeaderAccessor(@Nullable MessageHeaders headers) {
+		this.headers = new MutableMessageHeaders(headers);
+	}
+
 
 	/**
 	 * A constructor to create new headers.
 	 */
 	public MessageHeaderAccessor() {
-		this(null);
+		this((MessageHeaders) null);
 	}
 
 	/**
@@ -136,7 +140,26 @@ public class MessageHeaderAccessor {
 	 * @param message a message to copy the headers from, or {@code null} if none
 	 */
 	public MessageHeaderAccessor(@Nullable Message<?> message) {
-		this.headers = new MutableMessageHeaders(message != null ? message.getHeaders() : null);
+		this(message != null ? message.getHeaders() : null);
+	}
+
+
+	/**
+	 * Create an instance from a plain {@link Map}.
+	 * @param map the raw headers
+	 * @since 6.2
+	 */
+	public static MessageHeaderAccessor fromMap(@Nullable Map<String, Object> map) {
+		return fromMessageHeaders(new MessageHeaders(map));
+	}
+
+	/**
+	 * Create an instance from an existing {@link MessageHeaders} instance.
+	 * @param headers the headers
+	 * @since 6.2
+	 */
+	public static MessageHeaderAccessor fromMessageHeaders(@Nullable MessageHeaders headers) {
+		return new MessageHeaderAccessor(headers);
 	}
 
 
