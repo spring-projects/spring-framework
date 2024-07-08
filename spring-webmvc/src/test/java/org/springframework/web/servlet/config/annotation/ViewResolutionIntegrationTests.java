@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -48,10 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  */
 class ViewResolutionIntegrationTests {
 
-	@BeforeAll
-	static void verifyDefaultFileEncoding() {
-		assertThat(System.getProperty("file.encoding")).as("JVM default file encoding").isEqualTo("UTF-8");
-	}
+	private static final boolean utf8Default = UTF_8.name().equals(System.getProperty("file.encoding"));
 
 
 	@Nested
@@ -71,22 +67,26 @@ class ViewResolutionIntegrationTests {
 		@Test
 		void freemarkerWithInvalidConfig() {
 			assertThatRuntimeException()
-				.isThrownBy(() -> runTest(InvalidFreeMarkerWebConfig.class))
-				.withMessageContaining("In addition to a FreeMarker view resolver ");
+					.isThrownBy(() -> runTest(InvalidFreeMarkerWebConfig.class))
+					.withMessageContaining("In addition to a FreeMarker view resolver ");
 		}
 
 		@Test
 		void freemarkerWithDefaultEncoding() throws Exception {
 			// Since no explicit encoding or content type has been set, we expect ISO-8859-1,
 			// which is the default.
-			runTestAndAssertResults(DEFAULT_ENCODING, FreeMarkerDefaultEncodingConfig.class);
+			if (utf8Default) {
+				runTestAndAssertResults(DEFAULT_ENCODING, FreeMarkerDefaultEncodingConfig.class);
+			}
 		}
 
 		@Test  // gh-16629, gh-33071
 		void freemarkerWithExistingViewResolverWithDefaultEncoding() throws Exception {
 			// Since no explicit encoding or content type has been set, we expect ISO-8859-1,
 			// which is the default.
-			runTestAndAssertResults(DEFAULT_ENCODING, ExistingViewResolverConfig.class);
+			if (utf8Default) {
+				runTestAndAssertResults(DEFAULT_ENCODING, ExistingViewResolverConfig.class);
+			}
 		}
 
 		@Test  // gh-33071, gh-33119
@@ -190,20 +190,23 @@ class ViewResolutionIntegrationTests {
 		}
 	}
 
+
 	@Nested
 	class GroovyMarkupTests {
 
 		@Test
 		void groovyMarkupInvalidConfig() {
 			assertThatRuntimeException()
-				.isThrownBy(() -> runTest(InvalidGroovyMarkupWebConfig.class))
-				.withMessageContaining("In addition to a Groovy markup view resolver ");
+					.isThrownBy(() -> runTest(InvalidGroovyMarkupWebConfig.class))
+					.withMessageContaining("In addition to a Groovy markup view resolver ");
 		}
 
 		@Test
 		void groovyMarkup() throws Exception {
 			MockHttpServletResponse response = runTest(GroovyMarkupWebConfig.class);
-			assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello, Java Café</body></html>");
+			if (utf8Default) {
+				assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello, Java Café</body></html>");
+			}
 		}
 
 

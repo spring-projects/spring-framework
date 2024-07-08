@@ -78,8 +78,8 @@ class WebFluxViewResolutionIntegrationTests {
 		@Test
 		void freemarkerWithInvalidConfig() {
 			assertThatRuntimeException()
-				.isThrownBy(() -> runTest(InvalidFreeMarkerWebFluxConfig.class))
-				.withMessageContaining("In addition to a FreeMarker view resolver ");
+					.isThrownBy(() -> runTest(InvalidFreeMarkerWebFluxConfig.class))
+					.withMessageContaining("In addition to a FreeMarker view resolver ");
 		}
 
 		@Test
