@@ -1,10 +1,8 @@
-package org.springframework.circular.dependency.main;
+package org.springframework.ioc.circular.dependency.main;
 
-import org.springframework.circular.dependency.config.MainConfig;
-import org.springframework.circular.dependency.model.InstanceA;
-import org.springframework.context.ApplicationContext;
+import org.springframework.ioc.circular.dependency.config.MainConfig;
+import org.springframework.ioc.circular.dependency.model.InstanceA;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class MainClass {
 

@@ -1,4 +1,4 @@
-package org.springframework.circular.dependency.model;
+package org.springframework.ioc.circular.dependency.model;
 
 public class InstanceA {
 

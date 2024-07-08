@@ -1,4 +1,4 @@
-package org.springframework.circular.dependency.config;
+package org.springframework.ioc.circular.dependency.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;

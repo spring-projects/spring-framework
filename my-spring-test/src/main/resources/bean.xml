@@ -6,7 +6,7 @@
 						http://www.springframework.org/schema/util
 						http://www.springframework.org/schema/util/spring-util-4.0.xsd"
 >
-	<bean id="user" class="org.springframework.model.User">
+	<bean id="user" class="org.springframework.ioc.model.User">
 		<property name="name" value="小明"/>
 		<property name="age" value="20"/>
 	</bean>

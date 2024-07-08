@@ -1,13 +1,9 @@
-package org.springframework.test1;
+package org.springframework.ioc.test1;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.model.User;
+import org.springframework.ioc.model.User;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * @author sushuaiqiang

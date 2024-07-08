@@ -7,11 +7,11 @@
        ">
 
 	<!--    <bean id="a" class="com.qf.spring.pojo.A" abstract="false" depends-on="b">-->
-	<bean id="instanceA" class="org.springframework.circular.dependency.model.InstanceA">
+	<bean id="instanceA" class="org.springframework.ioc.circular.dependency.model.InstanceA">
 		        <property name="instanceB" ref="instanceB"></property>
 	</bean>
 
-	<bean id="instanceB" class="org.springframework.circular.dependency.model.InstanceB">
+	<bean id="instanceB" class="org.springframework.ioc.circular.dependency.model.InstanceB">
 		<property name="instanceA" ref="instanceA"></property>
 	</bean>
 </beans>

@@ -1,8 +1,8 @@
-package org.springframework;
+package org.springframework.ioc;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.model.User;
+import org.springframework.ioc.model.User;
 
 public class Main {
 
