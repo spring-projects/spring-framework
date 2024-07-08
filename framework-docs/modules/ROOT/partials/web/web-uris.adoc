@@ -389,7 +389,7 @@ template.
 encode URI component value _after_ URI variables are expanded.
 * `NONE`: No encoding is applied.
 
-The `RestTemplate` is set to `EncodingMode.URI_COMPONENT` for historic
+The `RestTemplate` is set to `EncodingMode.URI_COMPONENT` for historical
 reasons and for backwards compatibility. The `WebClient` relies on the default value
 in `DefaultUriBuilderFactory`, which was changed from `EncodingMode.URI_COMPONENT` in
 5.0.x to `EncodingMode.TEMPLATE_AND_VALUES` in 5.1.
