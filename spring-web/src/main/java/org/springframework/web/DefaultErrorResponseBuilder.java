@@ -30,7 +30,6 @@ import org.springframework.util.Assert;
  * Default implementation of {@link ErrorResponse.Builder}.
  *
  * @author Rossen Stoyanchev
- * @author 海子 Yang
  * @since 6.0
  */
 final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
@@ -68,18 +67,18 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 	@Override
 	public ErrorResponse.Builder header(String headerName, String... headerValues) {
 		for (String headerValue : headerValues) {
-			httpHeaders().add(headerName, headerValue);
+			getHeaders().add(headerName, headerValue);
 		}
 		return this;
 	}
 
 	@Override
 	public ErrorResponse.Builder headers(Consumer<HttpHeaders> headersConsumer) {
-		headersConsumer.accept(httpHeaders());
+		headersConsumer.accept(getHeaders());
 		return this;
 	}
 
-	private HttpHeaders httpHeaders() {
+	private HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
 		}
