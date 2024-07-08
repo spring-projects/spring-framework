@@ -76,7 +76,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	protected AbstractNamedValueMethodArgumentResolver(ConversionService conversionService,
 			@Nullable ConfigurableBeanFactory beanFactory) {
 
-		// Fallback on shared ConversionService for now for historic reasons.
+		// Fallback on shared ConversionService for now for historical reasons.
 		// Possibly remove after discussion in gh-23882.
 
 		//noinspection ConstantConditions
