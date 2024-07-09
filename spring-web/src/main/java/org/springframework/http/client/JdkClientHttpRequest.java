@@ -28,9 +28,12 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
-
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -89,26 +92,55 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	@Override
 	@SuppressWarnings("NullAway")
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
+		HttpRequest request = buildRequest(headers, body);
+		CompletableFuture<HttpResponse<InputStream>> responsefuture =
+				this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
 		try {
-			HttpRequest request = buildRequest(headers, body);
-			HttpResponse<InputStream> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-			return new JdkClientHttpResponse(response);
-		}
-		catch (UncheckedIOException ex) {
-			throw ex.getCause();
+			if (this.timeout != null) {
+				CompletableFuture<Void> timeoutFuture = new CompletableFuture<Void>()
+						.completeOnTimeout(null, this.timeout.toMillis(), TimeUnit.MILLISECONDS);
+				timeoutFuture.thenRun(() -> {
+					if (!responsefuture.cancel(true) && !responsefuture.isCompletedExceptionally()) {
+						try {
+							responsefuture.resultNow().body().close();
+						} catch (IOException ignored) {}
+					}
+				});
+				var response = responsefuture.get();
+				// TODO: cancel timeoutFuture when body is consumed
+				return new JdkClientHttpResponse(response.statusCode(), response.headers(), response.body());
+
+			} else {
+				var response = responsefuture.get();
+				return new JdkClientHttpResponse(response.statusCode(), response.headers(), response.body());
+			}
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
+			responsefuture.cancel(true);
 			throw new IOException("Request was interrupted: " + ex.getMessage(), ex);
+		}
+		catch (ExecutionException ex) {
+			Throwable cause = ex.getCause();
+
+			if (cause instanceof UncheckedIOException uioEx) {
+				throw uioEx.getCause();
+			}
+			if (cause instanceof RuntimeException rtEx) {
+				throw rtEx;
+			}
+			else if (cause instanceof IOException ioEx) {
+				throw ioEx;
+			}
+			else {
+				throw new IOException(cause.getMessage(), cause);
+			}
 		}
 	}
 
 
 	private HttpRequest buildRequest(HttpHeaders headers, @Nullable Body body) {
 		HttpRequest.Builder builder = HttpRequest.newBuilder().uri(this.uri);
-		if (this.timeout != null) {
-			builder.timeout(this.timeout);
-		}
 
 		headers.forEach((headerName, headerValues) -> {
 			if (!DISALLOWED_HEADERS.contains(headerName.toLowerCase())) {

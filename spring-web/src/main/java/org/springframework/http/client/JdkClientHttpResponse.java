@@ -19,7 +19,6 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,22 +40,21 @@ import org.springframework.util.StreamUtils;
  */
 class JdkClientHttpResponse implements ClientHttpResponse {
 
-	private final HttpResponse<InputStream> response;
+	private final int statusCode;
 
 	private final HttpHeaders headers;
 
 	private final InputStream body;
 
 
-	public JdkClientHttpResponse(HttpResponse<InputStream> response) {
-		this.response = response;
-		this.headers = adaptHeaders(response);
-		InputStream inputStream = response.body();
-		this.body = (inputStream != null ? inputStream : InputStream.nullInputStream());
+	public JdkClientHttpResponse(int statusCode, java.net.http.HttpHeaders headers, InputStream body) {
+        this.statusCode = statusCode;
+        this.headers = adaptHeaders(headers);
+		this.body = body != null ? body : InputStream.nullInputStream();
 	}
 
-	private static HttpHeaders adaptHeaders(HttpResponse<?> response) {
-		Map<String, List<String>> rawHeaders = response.headers().map();
+	private static HttpHeaders adaptHeaders(java.net.http.HttpHeaders headers) {
+		Map<String, List<String>> rawHeaders = headers.map();
 		Map<String, List<String>> map = new LinkedCaseInsensitiveMap<>(rawHeaders.size(), Locale.ENGLISH);
 		MultiValueMap<String, String> multiValueMap = CollectionUtils.toMultiValueMap(map);
 		multiValueMap.putAll(rawHeaders);
@@ -66,7 +64,7 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpStatusCode getStatusCode() {
-		return HttpStatusCode.valueOf(this.response.statusCode());
+		return HttpStatusCode.valueOf(statusCode);
 	}
 
 	@Override
