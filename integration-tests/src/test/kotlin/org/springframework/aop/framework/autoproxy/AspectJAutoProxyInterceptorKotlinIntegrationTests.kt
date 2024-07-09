@@ -20,6 +20,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
+import org.aspectj.lang.ProceedingJoinPoint
+import org.aspectj.lang.annotation.Around
+import org.aspectj.lang.annotation.Aspect
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.aop.framework.autoproxy.AspectJAutoProxyInterceptorKotlinIntegrationTests.InterceptorConfig
@@ -28,10 +31,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.EnableAspectJAutoProxy
+import org.springframework.stereotype.Component
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
+import org.springframework.transaction.annotation.EnableTransactionManagement
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.testfixture.ReactiveCallCountingTransactionManager
 import reactor.core.publisher.Mono
 import java.lang.reflect.Method
+import kotlin.annotation.AnnotationTarget.ANNOTATION_CLASS
+import kotlin.annotation.AnnotationTarget.CLASS
+import kotlin.annotation.AnnotationTarget.FUNCTION
+import kotlin.annotation.AnnotationTarget.TYPE
 
 
 /**
@@ -43,7 +54,9 @@ import java.lang.reflect.Method
 class AspectJAutoProxyInterceptorKotlinIntegrationTests(
     @Autowired val echo: Echo,
     @Autowired val firstAdvisor: TestPointcutAdvisor,
-    @Autowired val secondAdvisor: TestPointcutAdvisor) {
+    @Autowired val secondAdvisor: TestPointcutAdvisor,
+    @Autowired val countingAspect: CountingAspect,
+    @Autowired val reactiveTransactionManager: ReactiveCallCountingTransactionManager) {
 
     @Test
     fun `Multiple interceptors with regular function`() {
@@ -67,8 +80,22 @@ class AspectJAutoProxyInterceptorKotlinIntegrationTests(
 		assertThat(secondAdvisor.interceptor.invocations).singleElement().matches { Mono::class.java.isAssignableFrom(it) }
     }
 
+	@Test // gh-33095
+	fun `Aspect and reactive transactional with suspending function`() {
+		assertThat(countingAspect.counter).isZero()
+		assertThat(reactiveTransactionManager.commits).isZero()
+		val value = "Hello!"
+		runBlocking {
+			assertThat(echo.suspendingTransactionalEcho(value)).isEqualTo(value)
+		}
+		assertThat(countingAspect.counter).`as`("aspect applied").isOne()
+		assertThat(reactiveTransactionManager.begun).isOne()
+		assertThat(reactiveTransactionManager.commits).`as`("transactional applied").isOne()
+	}
+
     @Configuration
     @EnableAspectJAutoProxy
+    @EnableTransactionManagement
     open class InterceptorConfig {
 
         @Bean
@@ -77,6 +104,13 @@ class AspectJAutoProxyInterceptorKotlinIntegrationTests(
         @Bean
         open fun secondAdvisor() = TestPointcutAdvisor().apply { order = 1 }
 
+		@Bean
+		open fun countingAspect() = CountingAspect()
+
+		@Bean
+		open fun transactionManager(): ReactiveCallCountingTransactionManager {
+			return ReactiveCallCountingTransactionManager()
+		}
 
         @Bean
         open fun echo(): Echo {
@@ -107,6 +141,24 @@ class AspectJAutoProxyInterceptorKotlinIntegrationTests(
         }
     }
 
+	@Target(CLASS, FUNCTION, ANNOTATION_CLASS, TYPE)
+	@Retention(AnnotationRetention.RUNTIME)
+	annotation class Counting()
+
+	@Aspect
+	@Component
+	class CountingAspect {
+
+		var counter: Long = 0
+
+		@Around("@annotation(org.springframework.aop.framework.autoproxy.AspectJAutoProxyInterceptorKotlinIntegrationTests.Counting)")
+		fun logging(joinPoint: ProceedingJoinPoint): Any {
+			return (joinPoint.proceed(joinPoint.args) as Mono<*>).doOnTerminate {
+				counter++
+			}
+		}
+	}
+
     open class Echo {
 
         open fun echo(value: String): String {
@@ -117,6 +169,13 @@ class AspectJAutoProxyInterceptorKotlinIntegrationTests(
             delay(1)
             return value
         }
+
+		@Transactional
+		@Counting
+		open suspend fun suspendingTransactionalEcho(value: String): String {
+			delay(1)
+			return value
+		}
 
     }
 
