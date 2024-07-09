@@ -26,6 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.StringDecoder;
@@ -101,7 +102,14 @@ public abstract class KotlinSerializationStringDecoder<T extends StringFormat> e
 			}
 			return this.stringDecoder
 					.decode(inputStream, elementType, mimeType, hints)
-					.map(string -> format().decodeFromString(serializer, string));
+					.handle((string, sink) -> {
+						try {
+							sink.next(format().decodeFromString(serializer, string));
+						}
+						catch (IllegalArgumentException ex) {
+							sink.error(processException(ex));
+						}
+					});
 		});
 	}
 
@@ -115,8 +123,20 @@ public abstract class KotlinSerializationStringDecoder<T extends StringFormat> e
 			}
 			return this.stringDecoder
 					.decodeToMono(inputStream, elementType, mimeType, hints)
-					.map(string -> format().decodeFromString(serializer, string));
+					.handle((string, sink) -> {
+						try {
+							sink.next(format().decodeFromString(serializer, string));
+							sink.complete();
+						}
+						catch (IllegalArgumentException ex) {
+							sink.error(processException(ex));
+						}
+					});
 		});
+	}
+
+	private CodecException processException(IllegalArgumentException ex) {
+		return new DecodingException("Decoding error: " + ex.getMessage(), ex);
 	}
 
 }
