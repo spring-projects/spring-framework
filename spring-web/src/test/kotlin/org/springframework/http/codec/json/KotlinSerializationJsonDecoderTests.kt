@@ -22,15 +22,14 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
+import org.springframework.core.codec.DecodingException
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.testfixture.codec.AbstractDecoderTests
 import org.springframework.http.MediaType
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.test.StepVerifier
 import reactor.test.StepVerifier.FirstStep
-import java.lang.UnsupportedOperationException
 import java.math.BigDecimal
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
@@ -83,6 +82,29 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 				.expectComplete()
 				.verify()
 		}, null, null)
+	}
+
+	@Test
+	fun decodeWithUnexpectedFormat() {
+		val input = Flux.concat(
+			stringBuffer("{\"ba\":\"b1\",\"fo\":\"f1\"}\n"),
+		)
+
+		testDecode(input, ResolvableType.forClass(Pojo::class.java), { step: FirstStep<Pojo> ->
+			step
+				.expectError(DecodingException::class.java)
+				.verify() }, null, null)
+	}
+
+	@Test
+	fun decodeToMonoWithUnexpectedFormat() {
+		val input = Flux.concat(
+			stringBuffer("{\"ba\":\"b1\",\"fo\":\"f1\"}\n"),
+		)
+
+		testDecodeToMono(input, ResolvableType.forClass(Pojo::class.java), { step: FirstStep<Pojo> ->
+			step.expectError(DecodingException::class.java)
+				.verify() }, null, null)
 	}
 
 	@Test
