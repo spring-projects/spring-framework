@@ -50,7 +50,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -321,7 +320,7 @@ public class MethodValidationAdapter implements MethodValidator {
 
 				Object arg = argumentFunction.apply(parameter.getParameterIndex());
 
-				// If the arg is a container, we need to element, but the only way to extract it
+				// If the arg is a container, we need the element, but the only way to extract it
 				// is to check for and use a container index or key on the next node:
 				// https://github.com/jakartaee/validation/issues/194
 
@@ -346,12 +345,16 @@ public class MethodValidationAdapter implements MethodValidator {
 					value = map.get(key);
 					container = map;
 				}
+				else if (arg instanceof Iterable<?>) {
+					// No index or key, cannot access the specific value
+					value = arg;
+					container = arg;
+				}
 				else if (arg instanceof Optional<?> optional) {
 					value = optional.orElse(null);
 					container = optional;
 				}
 				else {
-					Assert.state(!node.isInIterable(), "No way to unwrap Iterable without index");
 					value = arg;
 					container = null;
 				}

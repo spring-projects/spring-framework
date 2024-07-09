@@ -19,6 +19,7 @@ package org.springframework.validation.beanvalidation;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import jakarta.validation.Valid;
@@ -201,14 +202,28 @@ class MethodValidationAdapterTests {
 		Method method = getMethod(target, "addHobbies");
 
 		testArgs(target, method, new Object[] {List.of("   ")}, ex -> {
-
 			assertThat(ex.getAllValidationResults()).hasSize(1);
-
 			assertValueResult(ex.getValueResults().get(0), 0, "   ", List.of("""
 				org.springframework.context.support.DefaultMessageSourceResolvable: \
 				codes [NotBlank.myService#addHobbies.hobbies,NotBlank.hobbies,NotBlank.java.util.List,NotBlank]; \
 				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
 				codes [myService#addHobbies.hobbies,hobbies]; \
+				arguments []; default message [hobbies]]; default message [must not be blank]"""));
+		});
+	}
+
+	@Test // gh-33150
+	void validateValueSetArgument() {
+		MyService target = new MyService();
+		Method method = getMethod(target, "addUniqueHobbies");
+
+		testArgs(target, method, new Object[] {Set.of("test", "   ")}, ex -> {
+			assertThat(ex.getAllValidationResults()).hasSize(1);
+			assertValueResult(ex.getValueResults().get(0), 0, Set.of("test", "   "), List.of("""
+				org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [NotBlank.myService#addUniqueHobbies.hobbies,NotBlank.hobbies,NotBlank.java.util.Set,NotBlank]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [myService#addUniqueHobbies.hobbies,hobbies]; \
 				arguments []; default message [hobbies]]; default message [must not be blank]"""));
 		});
 	}
@@ -271,6 +286,8 @@ class MethodValidationAdapterTests {
 		public void addHobbies(List<@NotBlank String> hobbies) {
 		}
 
+		public void addUniqueHobbies(Set<@NotBlank String> hobbies) {
+		}
 	}
 
 
