@@ -40,7 +40,6 @@ import org.springframework.validation.method.ParameterErrors;
 import org.springframework.validation.method.ParameterValidationResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.SET;
 
 /**
  * Tests for {@link MethodValidationAdapter}.
@@ -203,9 +202,7 @@ class MethodValidationAdapterTests {
 		Method method = getMethod(target, "addHobbies");
 
 		testArgs(target, method, new Object[] {List.of("   ")}, ex -> {
-
 			assertThat(ex.getAllValidationResults()).hasSize(1);
-
 			assertValueResult(ex.getValueResults().get(0), 0, "   ", List.of("""
 				org.springframework.context.support.DefaultMessageSourceResolvable: \
 				codes [NotBlank.myService#addHobbies.hobbies,NotBlank.hobbies,NotBlank.java.util.List,NotBlank]; \
@@ -215,15 +212,13 @@ class MethodValidationAdapterTests {
 		});
 	}
 
-	@Test
+	@Test // gh-33150
 	void validateValueSetArgument() {
 		MyService target = new MyService();
 		Method method = getMethod(target, "addUniqueHobbies");
 
 		testArgs(target, method, new Object[] {Set.of("test", "   ")}, ex -> {
-
 			assertThat(ex.getAllValidationResults()).hasSize(1);
-
 			assertValueResult(ex.getValueResults().get(0), 0, Set.of("test", "   "), List.of("""
 				org.springframework.context.support.DefaultMessageSourceResolvable: \
 				codes [NotBlank.myService#addUniqueHobbies.hobbies,NotBlank.hobbies,NotBlank.java.util.Set,NotBlank]; \
