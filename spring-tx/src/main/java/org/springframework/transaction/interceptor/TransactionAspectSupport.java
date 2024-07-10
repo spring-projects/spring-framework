@@ -23,12 +23,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import io.vavr.control.Try;
-import kotlin.coroutines.Continuation;
-import kotlin.coroutines.CoroutineContext;
-import kotlinx.coroutines.Job;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -37,7 +33,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
-import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.NamedThreadLocal;
@@ -356,10 +351,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
 			boolean hasSuspendingFlowReturnType = isSuspendingFunction &&
 					COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName());
-			if (isSuspendingFunction && !(invocation instanceof CoroutinesInvocationCallback)) {
-				throw new IllegalStateException("Coroutines invocation not supported: " + method);
-			}
-			CoroutinesInvocationCallback corInv = (isSuspendingFunction ? (CoroutinesInvocationCallback) invocation : null);
 
 			ReactiveTransactionSupport txSupport = this.transactionSupportCache.computeIfAbsent(method, key -> {
 				Class<?> reactiveType =
@@ -372,11 +363,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				return new ReactiveTransactionSupport(adapter);
 			});
 
-			InvocationCallback callback = invocation;
-			if (corInv != null) {
-				callback = () -> KotlinDelegate.invokeSuspendingFunction(method, corInv);
-			}
-			return txSupport.invokeWithinTransaction(method, targetClass, callback, txAttr, rtm);
+			return txSupport.invokeWithinTransaction(method, targetClass, invocation, txAttr, rtm);
 		}
 
 		PlatformTransactionManager ptm = asPlatformTransactionManager(tm);
@@ -865,22 +852,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 
 	/**
-	 * Coroutines-supporting extension of the callback interface.
-	 */
-	protected interface CoroutinesInvocationCallback extends InvocationCallback {
-
-		Object getTarget();
-
-		Object[] getArguments();
-
-		default Object getContinuation() {
-			Object[] args = getArguments();
-			return args[args.length - 1];
-		}
-	}
-
-
-	/**
 	 * Internal holder class for a Throwable in a callback transaction model.
 	 */
 	private static class ThrowableHolder {
@@ -926,18 +897,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 			});
 		}
-	}
-
-	/**
-	 * Inner class to avoid a hard dependency on Kotlin at runtime.
-	 */
-	private static class KotlinDelegate {
-
-		public static Publisher<?> invokeSuspendingFunction(Method method, CoroutinesInvocationCallback callback) {
-			CoroutineContext coroutineContext = ((Continuation<?>) callback.getContinuation()).getContext().minusKey(Job.Key);
-			return CoroutinesUtils.invokeSuspendingFunction(coroutineContext, method, callback.getTarget(), callback.getArguments());
-		}
-
 	}
 
 
