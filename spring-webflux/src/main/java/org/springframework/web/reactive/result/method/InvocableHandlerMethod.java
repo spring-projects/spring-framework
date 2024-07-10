@@ -325,7 +325,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		@Nullable
 		@SuppressWarnings({"deprecation", "DataFlowIssue"})
 		public static Object invokeFunction(Method method, Object target, Object[] args, boolean isSuspendingFunction,
-				ServerWebExchange exchange) throws InvocationTargetException, IllegalAccessException {
+				ServerWebExchange exchange) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
 
 			if (isSuspendingFunction) {
 				Object coroutineContext = exchange.getAttribute(COROUTINE_CONTEXT_ATTRIBUTE);
@@ -369,6 +369,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					}
 				}
 				Object result = function.callBy(argMap);
+				if (result != null && KotlinDetector.isInlineClass(result.getClass())) {
+					return result.getClass().getDeclaredMethod("unbox-impl").invoke(result);
+				}
 				return (result == Unit.INSTANCE ? null : result);
 			}
 		}

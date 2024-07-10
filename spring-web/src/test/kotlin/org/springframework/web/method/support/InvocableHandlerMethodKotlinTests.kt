@@ -105,6 +105,12 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun valueClassReturnValue() {
+		val value = getInvocable(ValueClassHandler::valueClassReturnValue.javaMethod!!).invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo("foo")
+	}
+
+	@Test
 	fun valueClassDefaultValue() {
 		composite.addResolver(StubArgumentResolver(Double::class.java))
 		val value = getInvocable(ValueClassHandler::doubleValueClass.javaMethod!!).invokeForRequest(request, null)
@@ -200,6 +206,9 @@ class InvocableHandlerMethodKotlinTests {
 
 	private class ValueClassHandler {
 
+		fun valueClassReturnValue() =
+			StringValueClass("foo")
+
 		fun longValueClass(limit: LongValueClass) =
 			limit.value
 
@@ -245,6 +254,9 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	data class Animal(override val name: String) : Named
+
+	@JvmInline
+	value class StringValueClass(val value: String)
 
 	@JvmInline
 	value class LongValueClass(val value: Long)

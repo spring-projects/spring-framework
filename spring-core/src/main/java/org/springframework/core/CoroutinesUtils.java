@@ -44,6 +44,7 @@ import kotlinx.coroutines.reactor.ReactorFlowKt;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -145,7 +146,7 @@ public abstract class CoroutinesUtils {
 					}
 					return KCallables.callSuspendBy(function, argMap, continuation);
 				})
-				.filter(result -> result != Unit.INSTANCE)
+				.handle(CoroutinesUtils::handleResult)
 				.onErrorMap(InvocationTargetException.class, InvocationTargetException::getTargetException);
 
 		KType returnType = function.getReturnType();
@@ -165,4 +166,22 @@ public abstract class CoroutinesUtils {
 		return ReactorFlowKt.asFlux(((Flow<?>) flow));
 	}
 
+	private static void handleResult(Object result, SynchronousSink<Object> sink) {
+		if (result == Unit.INSTANCE) {
+			sink.complete();
+		}
+		else if (KotlinDetector.isInlineClass(result.getClass())) {
+			try {
+				sink.next(result.getClass().getDeclaredMethod("unbox-impl").invoke(result));
+				sink.complete();
+			}
+			catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
+				sink.error(ex);
+			}
+		}
+		else {
+			sink.next(result);
+			sink.complete();
+		}
+	}
 }

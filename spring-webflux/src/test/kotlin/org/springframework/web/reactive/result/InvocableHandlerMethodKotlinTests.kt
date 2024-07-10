@@ -206,6 +206,13 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun valueClassReturnValue() {
+		val method = ValueClassController::valueClassReturnValue.javaMethod!!
+		val result = invoke(ValueClassController(), method,)
+		assertHandlerResultValue(result, "foo")
+	}
+
+	@Test
 	fun valueClassWithDefaultValue() {
 		this.resolvers.add(stubResolver(null, Double::class.java))
 		val method = ValueClassController::valueClassWithDefault.javaMethod!!
@@ -376,6 +383,9 @@ class InvocableHandlerMethodKotlinTests {
 		fun valueClass(limit: LongValueClass) =
 			"${limit.value}"
 
+		fun valueClassReturnValue() =
+			StringValueClass("foo")
+
 		fun valueClassWithDefault(limit: DoubleValueClass = DoubleValueClass(3.1)) =
 			"${limit.value}"
 
@@ -419,6 +429,9 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	data class Animal(override val name: String) : Named
+
+	@JvmInline
+	value class StringValueClass(val value: String)
 
 	@JvmInline
 	value class LongValueClass(val value: Long)
