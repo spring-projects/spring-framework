@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -106,22 +105,6 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		evaluate("#varargsFunction2(9,'a',null,'b')", "9-[a, null, b]", String.class);
 	}
 
-	@Disabled("Disabled until bugs are reported and fixed")
-	@Test
-	void functionWithVarargsViaMethodHandle_CurrentlyFailing() {
-		// Calling 'public static String formatObjectVarargs(String format, Object... args)' -> String.format(format, args)
-
-		// No conversion necessary
-		evaluate("#formatObjectVarargs('x -> %s', new Object[]{''})", "x -> ", String.class);
-		evaluate("#formatObjectVarargs('x -> %s', new String[]{''})", "x -> ", String.class);
-		evaluate("#formatObjectVarargs('x -> %s', new Object[]{' '})", "x ->  ", String.class);
-		evaluate("#formatObjectVarargs('x -> %s', new String[]{' '})", "x ->  ", String.class);
-		evaluate("#formatObjectVarargs('x -> %s', new Object[]{'a'})", "x -> a", String.class);
-		evaluate("#formatObjectVarargs('x -> %s', new String[]{'a'})", "x -> a", String.class);
-		evaluate("#formatObjectVarargs('x -> %s %s %s', new Object[]{'a', 'b', 'c'})", "x -> a b c", String.class);
-		evaluate("#formatObjectVarargs('x -> %s %s %s', new String[]{'a', 'b', 'c'})", "x -> a b c", String.class);
-	}
-
 	@Test  // gh-33013
 	void functionWithVarargsViaMethodHandle() {
 		// Calling 'public static String formatObjectVarargs(String format, Object... args)' -> String.format(format, args)
@@ -138,6 +121,14 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		evaluate("#formatObjectVarargs('x -> %s', ' ')", "x ->  ", String.class);
 		evaluate("#formatObjectVarargs('x -> %s', 'a')", "x -> a", String.class);
 		evaluate("#formatObjectVarargs('x -> %s %s %s', 'a', 'b', 'c')", "x -> a b c", String.class);
+		evaluate("#formatObjectVarargs('x -> %s', new Object[]{''})", "x -> ", String.class);
+		evaluate("#formatObjectVarargs('x -> %s', new String[]{''})", "x -> ", String.class);
+		evaluate("#formatObjectVarargs('x -> %s', new Object[]{' '})", "x ->  ", String.class);
+		evaluate("#formatObjectVarargs('x -> %s', new String[]{' '})", "x ->  ", String.class);
+		evaluate("#formatObjectVarargs('x -> %s', new Object[]{'a'})", "x -> a", String.class);
+		evaluate("#formatObjectVarargs('x -> %s', new String[]{'a'})", "x -> a", String.class);
+		evaluate("#formatObjectVarargs('x -> %s %s %s', new Object[]{'a', 'b', 'c'})", "x -> a b c", String.class);
+		evaluate("#formatObjectVarargs('x -> %s %s %s', new String[]{'a', 'b', 'c'})", "x -> a b c", String.class);
 
 		// Conversion necessary
 		evaluate("#add('2', 5.0)", 7, Integer.class);
