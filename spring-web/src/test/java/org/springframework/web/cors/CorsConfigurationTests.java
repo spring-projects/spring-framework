@@ -305,6 +305,11 @@ class CorsConfigurationTests {
 		assertThat(config.checkOrigin("https://a1.com")).isEqualTo("https://a1.com");
 		assertThat(config.checkOrigin("https://a2.com/")).isEqualTo("https://a2.com/");
 
+		// comma-delimited origins list with space
+		config.setAllowedOrigins(Collections.singletonList("https://a1.com, https://a2.com"));
+		assertThat(config.checkOrigin("https://a1.com")).isEqualTo("https://a1.com");
+		assertThat(config.checkOrigin("https://a2.com/")).isEqualTo("https://a2.com/");
+
 		// specific origin matches Origin header with or without trailing "/"
 		config.setAllowedOrigins(Collections.singletonList("https://domain.com"));
 		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
