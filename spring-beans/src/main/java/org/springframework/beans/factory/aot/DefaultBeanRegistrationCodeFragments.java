@@ -104,8 +104,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	/**
 	 * Extract the target class of a public {@link FactoryBean} based on its
 	 * constructor. If the implementation does not resolve the target class
-	 * because it itself uses a generic, attempt to extract it from the
-	 * bean type.
+	 * because it itself uses a generic, attempt to extract it from the bean type.
 	 * @param factoryBeanType the factory bean type
 	 * @param beanType the bean type
 	 * @return the target class to use
@@ -172,9 +171,11 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 
 		Loader loader = AotServices.factories(this.registeredBean.getBeanFactory().getBeanClassLoader());
 		List<Delegate> additionalDelegates = loader.load(Delegate.class).asList();
-		return new BeanDefinitionPropertiesCodeGenerator(generationContext.getRuntimeHints(),
-				attributeFilter, beanRegistrationCode.getMethods(),
-				additionalDelegates, (name, value) -> generateValueCode(generationContext, name, value))
+
+		return new BeanDefinitionPropertiesCodeGenerator(
+				generationContext.getRuntimeHints(), attributeFilter,
+				beanRegistrationCode.getMethods(), additionalDelegates,
+				(name, value) -> generateValueCode(generationContext, name, value))
 				.generateCode(beanDefinition);
 	}
 
@@ -234,8 +235,8 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 			throw new IllegalStateException("Default code generation is not supported for bean definitions " +
 					"declaring an instance supplier callback: " + this.registeredBean.getMergedBeanDefinition());
 		}
-		return new InstanceSupplierCodeGenerator(generationContext, beanRegistrationCode.getClassName(),
-				beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
+		return new InstanceSupplierCodeGenerator(generationContext,
+				beanRegistrationCode.getClassName(), beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)
 				.generateCode(this.registeredBean, this.instantiationDescriptor.get());
 	}
 
