@@ -33,6 +33,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
@@ -44,42 +45,46 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Named.named;
 import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
- * Tests for multi-view rendering through {@link ViewResolutionResultHandler}.
+ * Tests for {@link Fragment} rendering through {@link ViewResolutionResultHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class FragmentResolutionResultHandlerTests {
+public class FragmentViewResolutionResultHandlerTests {
 
-		static Stream<Arguments> arguments() {
-			Fragment f1 = Fragment.create("fragment1", Map.of("foo", "Foo"));
-			Fragment f2 = Fragment.create("fragment2", Map.of("bar", "Bar"));
-			return Stream.of(
-					Arguments.of(named("Flux",
-							FragmentRendering.fromPublisher(Flux.just(f1, f2).subscribeOn(Schedulers.boundedElastic()))
-									.headers(headers -> headers.setContentType(MediaType.TEXT_HTML))
-									.build())),
-					Arguments.of(named("List",
-							FragmentRendering.fromCollection(List.of(f1, f2))
-									.headers(headers -> headers.setContentType(MediaType.TEXT_HTML))
-									.build()))
-			);}
+	static Stream<Arguments> arguments() {
+		Fragment f1 = Fragment.create("fragment1", Map.of("foo", "Foo"));
+		Fragment f2 = Fragment.create("fragment2", Map.of("bar", "Bar"));
+		return Stream.of(
+				Arguments.of(
+						FragmentRendering.fromPublisher(Flux.just(f1, f2).subscribeOn(Schedulers.boundedElastic()))
+								.headers(headers -> headers.setContentType(MediaType.TEXT_HTML))
+								.build(),
+						on(Handler.class).resolveReturnType(FragmentRendering.class)),
+				Arguments.of(
+						FragmentRendering.fromCollection(List.of(f1, f2))
+								.headers(headers -> headers.setContentType(MediaType.TEXT_HTML))
+								.build(),
+						on(Handler.class).resolveReturnType(FragmentRendering.class)),
+				Arguments.of(
+						Flux.just(f1, f2).subscribeOn(Schedulers.boundedElastic()),
+						on(Handler.class).resolveReturnType(Flux.class, Fragment.class)),
+				Arguments.of(
+						List.of(f1, f2),
+						on(Handler.class).resolveReturnType(List.class, Fragment.class)));
+	}
 
 
 	@ParameterizedTest
 	@MethodSource("arguments")
-	void render(FragmentRendering rendering) {
-
+	void render(Object returnValue, MethodParameter parameter) {
 		Locale locale = Locale.ENGLISH;
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").acceptLanguageAsLocales(locale).build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
-		HandlerResult result = new HandlerResult(
-				new Handler(), rendering, on(Handler.class).resolveReturnType(FragmentRendering.class),
-				new BindingContext());
+		HandlerResult result = new HandlerResult(new Handler(), returnValue, parameter, new BindingContext());
 
 		String body = initHandler().handleResult(exchange, result)
 				.then(Mono.defer(() -> exchange.getResponse().getBodyAsString()))
@@ -102,9 +107,14 @@ public class FragmentResolutionResultHandlerTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Handler {
 
 		FragmentRendering rendering() { return null; }
+
+		Flux<Fragment> fragmentFlux() { return null; }
+
+		List<Fragment> fragmentList() { return null; }
 
 	}
 
