@@ -782,7 +782,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		@Override
 		public CodeBlock generateSetBeanDefinitionPropertiesCode(GenerationContext generationContext,
-				BeanRegistrationCode beanRegistrationCode, RootBeanDefinition beanDefinition, Predicate<String> attributeFilter) {
+				BeanRegistrationCode beanRegistrationCode, RootBeanDefinition beanDefinition,
+				Predicate<String> attributeFilter) {
 
 			CodeBlock.Builder code = CodeBlock.builder();
 			code.add(super.generateSetBeanDefinitionPropertiesCode(generationContext,
@@ -803,7 +804,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					.generateCode(this.registeredBean, instantiationDescriptor);
 		}
 
-		private InstantiationDescriptor proxyInstantiationDescriptor(RuntimeHints runtimeHints, InstantiationDescriptor instantiationDescriptor) {
+		private InstantiationDescriptor proxyInstantiationDescriptor(
+				RuntimeHints runtimeHints, InstantiationDescriptor instantiationDescriptor) {
+
 			Executable userExecutable = instantiationDescriptor.executable();
 			if (userExecutable instanceof Constructor<?> userConstructor) {
 				try {
