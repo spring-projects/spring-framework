@@ -18,7 +18,11 @@ package org.springframework.web.servlet.view;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.SmartView;
 
@@ -33,6 +37,17 @@ import org.springframework.web.servlet.SmartView;
  * @since 6.2
  */
 public interface FragmentsRendering extends SmartView {
+
+	/**
+	 * Return the HTTP status to set the response to.
+	 */
+	@Nullable
+	HttpStatusCode status();
+
+	/**
+	 * Return headers to add to the response.
+	 */
+	HttpHeaders headers();
 
 
 	/**
@@ -72,6 +87,29 @@ public interface FragmentsRendering extends SmartView {
 	 * Defines a builder for {@link FragmentsRendering}.
 	 */
 	interface Builder {
+
+		/**
+		 * Specify the status to use for the response.
+		 * @param status the status to set
+		 * @return this builder
+		 */
+		Builder status(HttpStatusCode status);
+
+		/**
+		 * Add the given, single header value under the given name.
+		 * @param headerName  the header name
+		 * @param headerValues the header value(s)
+		 * @return this builder
+		 */
+		Builder header(String headerName, String... headerValues);
+
+		/**
+		 * Provides access to every header declared so far with the possibility
+		 * to add, replace, or remove values.
+		 * @param headersConsumer the consumer to provide access to
+		 * @return this builder
+		 */
+		Builder headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
 		 * Add a fragment with a view name and a model.

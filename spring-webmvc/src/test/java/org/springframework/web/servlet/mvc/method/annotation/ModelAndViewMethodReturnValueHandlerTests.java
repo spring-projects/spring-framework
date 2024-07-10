@@ -33,6 +33,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import org.springframework.web.servlet.view.FragmentsRendering;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,7 +57,7 @@ class ModelAndViewMethodReturnValueHandlerTests {
 	void setup() throws Exception {
 		this.handler = new ModelAndViewMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
-		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
+		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 		this.returnParamModelAndView = getReturnValueParam("modelAndView");
 	}
 
@@ -90,10 +91,13 @@ class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	void handleFragmentsRendering() throws Exception {
-		FragmentsRendering rendering = FragmentsRendering.with("viewName").build();
+		FragmentsRendering rendering = FragmentsRendering.with("viewName")
+				.header("headerName", "headerValue")
+				.build();
 
 		handler.handleReturnValue(rendering, returnParamModelAndView, mavContainer, webRequest);
 		assertThat(mavContainer.getView()).isInstanceOf(SmartView.class);
+		assertThat(this.webRequest.getResponse().getHeader("headerName")).isEqualTo("headerValue");
 	}
 
 	@Test

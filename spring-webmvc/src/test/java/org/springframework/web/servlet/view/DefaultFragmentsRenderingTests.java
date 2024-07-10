@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.view;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -28,7 +27,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -59,9 +57,9 @@ public class DefaultFragmentsRenderingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		DefaultFragmentsRendering view = new DefaultFragmentsRendering(List.of(
-				new ModelAndView("fragment1", Map.of("foo", "Foo")),
-				new ModelAndView("fragment2", Map.of("bar", "Bar"))));
+		FragmentsRendering view = FragmentsRendering.with("fragment1", Map.of("foo", "Foo"))
+				.fragment("fragment2", Map.of("bar", "Bar"))
+				.build();
 
 		view.resolveNestedViews(viewResolver, Locale.ENGLISH);
 		view.render(Collections.emptyMap(), request, response);

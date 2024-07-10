@@ -29,6 +29,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.ModelAndView;
@@ -44,13 +46,33 @@ import org.springframework.web.servlet.ViewResolver;
  */
 final class DefaultFragmentsRendering implements FragmentsRendering {
 
+	@Nullable
+	private final HttpStatusCode status;
+
+	private final HttpHeaders headers;
+
 	private final Collection<ModelAndView> modelAndViews;
 
 
-	DefaultFragmentsRendering(Collection<ModelAndView> modelAndViews) {
-		this.modelAndViews = new ArrayList<>(modelAndViews);
+	DefaultFragmentsRendering(
+			@Nullable HttpStatusCode status, HttpHeaders headers, Collection<ModelAndView> fragments) {
+
+		this.status = status;
+		this.headers = headers;
+		this.modelAndViews = new ArrayList<>(fragments);
 	}
 
+
+	@Nullable
+	@Override
+	public HttpStatusCode status() {
+		return this.status;
+	}
+
+	@Override
+	public HttpHeaders headers() {
+		return this.headers;
+	}
 
 	@Override
 	public boolean isRedirectView() {
