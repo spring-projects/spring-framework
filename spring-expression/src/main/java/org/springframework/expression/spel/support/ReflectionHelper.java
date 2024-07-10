@@ -380,12 +380,11 @@ public abstract class ReflectionHelper {
 				conversionOccurred |= (argument != arguments[i]);
 			}
 
-			Class<?> varArgClass = methodHandleType.lastParameterType().componentType();
+			Class<?> varArgClass = methodHandleType.lastParameterType();
 			ResolvableType varArgResolvableType = ResolvableType.forClass(varArgClass);
-			TypeDescriptor targetType = new TypeDescriptor(varArgResolvableType, varArgClass, null);
+			TypeDescriptor targetType = new TypeDescriptor(varArgResolvableType, varArgClass.componentType(), null);
 			TypeDescriptor componentTypeDesc = targetType.getElementTypeDescriptor();
-			// TODO Determine why componentTypeDesc can be null.
-			// Assert.state(componentTypeDesc != null, "Component type must not be null for a varargs array");
+			Assert.state(componentTypeDesc != null, "Component type must not be null for a varargs array");
 
 			// If the target is varargs and there is just one more argument, then convert it here.
 			if (varargsPosition == arguments.length - 1) {
@@ -393,7 +392,7 @@ public abstract class ReflectionHelper {
 				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
 				if (argument == null) {
 					// Perform the equivalent of GenericConversionService.convertNullSource() for a single argument.
-					if (componentTypeDesc != null && componentTypeDesc.getObjectType() == Optional.class) {
+					if (componentTypeDesc.getObjectType() == Optional.class) {
 						arguments[varargsPosition] = Optional.empty();
 						conversionOccurred = true;
 					}
@@ -402,7 +401,7 @@ public abstract class ReflectionHelper {
 				// convert it or wrap it in an array. For example, using StringToArrayConverter to
 				// convert a String containing a comma would result in the String being split and
 				// repackaged in an array when it should be used as-is.
-				else if (componentTypeDesc != null && !sourceType.isAssignableTo(componentTypeDesc)) {
+				else if (!sourceType.isAssignableTo(componentTypeDesc)) {
 					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
 				}
 				// Possible outcomes of the above if-else block:
@@ -420,7 +419,7 @@ public abstract class ReflectionHelper {
 			else {
 				for (int i = varargsPosition; i < arguments.length; i++) {
 					Object argument = arguments[i];
-					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), componentTypeDesc);
 					conversionOccurred |= (argument != arguments[i]);
 				}
 			}
