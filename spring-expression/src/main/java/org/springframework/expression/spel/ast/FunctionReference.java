@@ -180,13 +180,28 @@ public class FunctionReference extends SpelNodeImpl {
 		int spelParamCount = functionArgs.length;
 		int declaredParamCount = declaredParams.parameterCount();
 
+		// We don't use methodHandle.isVarargsCollector(), because a MethodHandle created via
+		// MethodHandle#bindTo() is "never a variable-arity method handle, even if the original
+		// target method handle was." Thus, we merely assume/suspect that varargs are supported
+		// if the last parameter type is an array.
 		boolean isSuspectedVarargs = declaredParams.lastParameterType().isArray();
 
-		if (spelParamCount < declaredParamCount || (spelParamCount > declaredParamCount && !isSuspectedVarargs)) {
-			// incorrect number, including more arguments and not a vararg
-			// perhaps a subset of arguments was provided but the MethodHandle wasn't bound?
+		if (isSuspectedVarargs) {
+			if (spelParamCount < declaredParamCount - 1) {
+				// Varargs, but the number of provided arguments (potentially 0) is insufficient
+				// for a varargs invocation for the number of declared parameters.
+				//
+				// As stated in the Javadoc for MethodHandle#asVarargsCollector(), "the caller
+				// must supply, at a minimum, N-1 arguments, where N is the arity of the target."
+				throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,
+						this.name, spelParamCount, (declaredParamCount - 1) + " or more");
+			}
+		}
+		else if (spelParamCount != declaredParamCount) {
+			// Incorrect number and not varargs. Perhaps a subset of arguments was provided,
+			// but the MethodHandle wasn't bound?
 			throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,
-					this.name, functionArgs.length, declaredParamCount);
+					this.name, spelParamCount, declaredParamCount);
 		}
 
 		// simplest case: the MethodHandle is fully bound or represents a static method with no params:

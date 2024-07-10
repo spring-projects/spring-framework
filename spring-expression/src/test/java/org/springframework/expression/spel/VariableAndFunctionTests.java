@@ -54,9 +54,13 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		evaluateAndCheckError("#reverseInt(1,2)", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "reverseInt", 2, 3);
 		evaluateAndCheckError("#reverseInt(1,2,3,4)", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "reverseInt", 4, 3);
 
-		// MethodHandle: #message(template, args...)
-		evaluateAndCheckError("#message()", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "message", 0, 2);
-		evaluateAndCheckError("#message('%s')", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "message", 1, 2);
+		// MethodHandle: #message(String, Object...)
+		evaluateAndCheckError("#message()", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "message", 0, "1 or more");
+
+		// MethodHandle: #add(int, int)
+		evaluateAndCheckError("#add()", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "add", 0, 2);
+		evaluateAndCheckError("#add(1)", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "add", 1, 2);
+		evaluateAndCheckError("#add(1, 2, 3)", INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION, 0, "add", 3, 2);
 	}
 
 	@Test
@@ -107,12 +111,6 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 	void functionWithVarargsViaMethodHandle_CurrentlyFailing() {
 		// Calling 'public static String formatObjectVarargs(String format, Object... args)' -> String.format(format, args)
 
-		// No var-args and no conversion necessary
-		evaluate("#formatObjectVarargs('x')", "x", String.class);
-
-		// No var-args but conversion necessary
-		evaluate("#formatObjectVarargs(9)", "9", String.class);
-
 		// No conversion necessary
 		evaluate("#formatObjectVarargs('x -> %s', new Object[]{''})", "x -> ", String.class);
 		evaluate("#formatObjectVarargs('x -> %s', new String[]{''})", "x -> ", String.class);
@@ -128,13 +126,21 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 	void functionWithVarargsViaMethodHandle() {
 		// Calling 'public static String formatObjectVarargs(String format, Object... args)' -> String.format(format, args)
 
+		// No var-args and no conversion necessary
+		evaluate("#formatObjectVarargs('x')", "x", String.class);
+
+		// No var-args but conversion necessary
+		evaluate("#formatObjectVarargs(9)", "9", String.class);
+
 		// No conversion necessary
+		evaluate("#add(3, 4)", 7, Integer.class);
 		evaluate("#formatObjectVarargs('x -> %s', '')", "x -> ", String.class);
 		evaluate("#formatObjectVarargs('x -> %s', ' ')", "x ->  ", String.class);
 		evaluate("#formatObjectVarargs('x -> %s', 'a')", "x -> a", String.class);
 		evaluate("#formatObjectVarargs('x -> %s %s %s', 'a', 'b', 'c')", "x -> a b c", String.class);
 
 		// Conversion necessary
+		evaluate("#add('2', 5.0)", 7, Integer.class);
 		evaluate("#formatObjectVarargs('x -> %s %s', 2, 3)", "x -> 2 3", String.class);
 		evaluate("#formatObjectVarargs('x -> %s %s', 'a', 3.0d)", "x -> a 3.0", String.class);
 
