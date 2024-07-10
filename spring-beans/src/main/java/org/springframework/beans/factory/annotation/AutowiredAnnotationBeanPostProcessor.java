@@ -1098,7 +1098,6 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 				}
 			}
 		}
-
 	}
 
 }
