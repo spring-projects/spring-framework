@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,12 +55,18 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	}
 
 	/**
-	 * Set the factory method currently being invoked or {@code null} to reset.
+	 * Set the factory method currently being invoked or {@code null} to remove
+	 * the  current value, if any.
 	 * @param method the factory method currently being invoked or {@code null}
 	 * @since 6.0
 	 */
 	public static void setCurrentlyInvokedFactoryMethod(@Nullable Method method) {
-		currentlyInvokedFactoryMethod.set(method);
+		if (method != null) {
+			currentlyInvokedFactoryMethod.set(method);
+		}
+		else {
+			currentlyInvokedFactoryMethod.remove();
+		}
 	}
 
 
@@ -134,9 +140,9 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		try {
 			ReflectionUtils.makeAccessible(factoryMethod);
 
-			Method priorInvokedFactoryMethod = currentlyInvokedFactoryMethod.get();
+			Method priorInvokedFactoryMethod = getCurrentlyInvokedFactoryMethod();
 			try {
-				currentlyInvokedFactoryMethod.set(factoryMethod);
+				setCurrentlyInvokedFactoryMethod(factoryMethod);
 				Object result = factoryMethod.invoke(factoryBean, args);
 				if (result == null) {
 					result = new NullBean();
@@ -144,12 +150,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 				return result;
 			}
 			finally {
-				if (priorInvokedFactoryMethod != null) {
-					currentlyInvokedFactoryMethod.set(priorInvokedFactoryMethod);
-				}
-				else {
-					currentlyInvokedFactoryMethod.remove();
-				}
+				setCurrentlyInvokedFactoryMethod(priorInvokedFactoryMethod);
 			}
 		}
 		catch (IllegalArgumentException ex) {
