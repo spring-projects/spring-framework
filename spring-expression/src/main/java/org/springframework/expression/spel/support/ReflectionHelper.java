@@ -356,10 +356,10 @@ public abstract class ReflectionHelper {
 			MethodHandle methodHandle, @Nullable Integer varargsPosition) throws EvaluationException {
 
 		boolean conversionOccurred = false;
-		MethodType methodHandleArgumentTypes = methodHandle.type();
+		MethodType methodHandleType = methodHandle.type();
 		if (varargsPosition == null) {
 			for (int i = 0; i < arguments.length; i++) {
-				Class<?> argumentClass = methodHandleArgumentTypes.parameterType(i);
+				Class<?> argumentClass = methodHandleType.parameterType(i);
 				ResolvableType resolvableType = ResolvableType.forClass(argumentClass);
 				TypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);
 
@@ -371,7 +371,7 @@ public abstract class ReflectionHelper {
 		else {
 			// Convert everything up to the varargs position
 			for (int i = 0; i < varargsPosition; i++) {
-				Class<?> argumentClass = methodHandleArgumentTypes.parameterType(i);
+				Class<?> argumentClass = methodHandleType.parameterType(i);
 				ResolvableType resolvableType = ResolvableType.forClass(argumentClass);
 				TypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);
 
@@ -380,10 +380,10 @@ public abstract class ReflectionHelper {
 				conversionOccurred |= (argument != arguments[i]);
 			}
 
-			Class<?> varArgClass = methodHandleArgumentTypes.lastParameterType().componentType();
+			Class<?> varArgClass = methodHandleType.lastParameterType().componentType();
 			ResolvableType varArgResolvableType = ResolvableType.forClass(varArgClass);
-			TypeDescriptor varArgComponentType = new TypeDescriptor(varArgResolvableType, varArgClass, null);
-			TypeDescriptor componentTypeDesc = varArgComponentType.getElementTypeDescriptor();
+			TypeDescriptor targetType = new TypeDescriptor(varArgResolvableType, varArgClass, null);
+			TypeDescriptor componentTypeDesc = targetType.getElementTypeDescriptor();
 			// TODO Determine why componentTypeDesc can be null.
 			// Assert.state(componentTypeDesc != null, "Component type must not be null for a varargs array");
 
@@ -403,7 +403,7 @@ public abstract class ReflectionHelper {
 				// convert a String containing a comma would result in the String being split and
 				// repackaged in an array when it should be used as-is.
 				else if (componentTypeDesc != null && !sourceType.isAssignableTo(componentTypeDesc)) {
-					arguments[varargsPosition] = converter.convertValue(argument, sourceType, varArgComponentType);
+					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
 				}
 				// Possible outcomes of the above if-else block:
 				// 1) the input argument was null, and nothing was done.
@@ -420,7 +420,7 @@ public abstract class ReflectionHelper {
 			else {
 				for (int i = varargsPosition; i < arguments.length; i++) {
 					Object argument = arguments[i];
-					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), varArgComponentType);
+					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
 					conversionOccurred |= (argument != arguments[i]);
 				}
 			}

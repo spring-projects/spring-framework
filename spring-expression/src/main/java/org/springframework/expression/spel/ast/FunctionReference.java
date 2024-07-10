@@ -217,7 +217,7 @@ public class FunctionReference extends SpelNodeImpl {
 			}
 		}
 
-		// more complex case, we need to look at conversion and vararg repacking
+		// more complex case, we need to look at conversion and varargs repackaging
 		Integer varArgPosition = null;
 		if (isSuspectedVarargs) {
 			varArgPosition = declaredParamCount - 1;
