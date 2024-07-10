@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -23,17 +24,18 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -107,8 +109,14 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 					}
 				});
 				var response = responsefuture.get();
-				// TODO: cancel timeoutFuture when body is consumed
-				return new JdkClientHttpResponse(response.statusCode(), response.headers(), response.body());
+				return new JdkClientHttpResponse(response.statusCode(), response.headers(), new FilterInputStream(response.body()) {
+
+					@Override
+					public void close() throws IOException {
+						timeoutFuture.cancel(false);
+						super.close();
+					}
+				});
 
 			} else {
 				var response = responsefuture.get();
@@ -123,6 +131,9 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		catch (ExecutionException ex) {
 			Throwable cause = ex.getCause();
 
+			if (cause instanceof CancellationException caEx) {
+				throw new HttpTimeoutException("Request timed out");
+			}
 			if (cause instanceof UncheckedIOException uioEx) {
 				throw uioEx.getCause();
 			}
