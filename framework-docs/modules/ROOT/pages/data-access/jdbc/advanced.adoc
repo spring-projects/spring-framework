@@ -211,19 +211,28 @@ the JDBC driver. If the count is not available, the JDBC driver returns a value 
 ====
 In such a scenario, with automatic setting of values on an underlying `PreparedStatement`,
 the corresponding JDBC type for each value needs to be derived from the given Java type.
-While this usually works well, there is a potential for issues (for example, with Map-contained
-`null` values). Spring, by default, calls `ParameterMetaData.getParameterType` in such a
-case, which can be expensive with your JDBC driver. You should use a recent driver
+While this usually works well, there is a potential for issues (for example, with
+Map-contained `null` values). Spring, by default, calls `ParameterMetaData.getParameterType`
+in such a case, which can be expensive with your JDBC driver. You should use a recent driver
 version and consider setting the `spring.jdbc.getParameterType.ignore` property to `true`
 (as a JVM system property or via the
-xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism) if you encounter
-a performance issue (as reported on Oracle 12c, JBoss, and PostgreSQL).
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism)
+if you encounter a specific performance issue for your application.
 
-Alternatively, you might consider specifying the corresponding JDBC types explicitly,
-either through a `BatchPreparedStatementSetter` (as shown earlier), through an explicit type
-array given to a `List<Object[]>` based call, through `registerSqlType` calls on a
-custom `MapSqlParameterSource` instance, or through a `BeanPropertySqlParameterSource`
-that derives the SQL type from the Java-declared property type even for a null value.
+As of 6.1.2, Spring bypasses the default `getParameterType` resolution on PostgreSQL and
+MS SQL Server. This is a common optimization to avoid further roundtrips to the DBMS just
+for parameter type resolution which is known to make a very significant difference on
+PostgreSQL and MS SQL Server specifically, in particular for batch operations. If you
+happen to see a side effect e.g. when setting a byte array to null without specific type
+indication, you may explicitly set the `spring.jdbc.getParameterType.ignore=false` flag
+as a system property (see above) to restore full `getParameterType` resolution.
+
+Alternatively, you could consider specifying the corresponding JDBC types explicitly,
+either through a `BatchPreparedStatementSetter` (as shown earlier), through an explicit
+type array given to a `List<Object[]>` based call, through `registerSqlType` calls on a
+custom `MapSqlParameterSource` instance, through a `BeanPropertySqlParameterSource`
+that derives the SQL type from the Java-declared property type even for a null value, or
+through providing individual `SqlParameterValue` instances instead of plain null values.
 ====
 
 
