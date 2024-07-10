@@ -49,14 +49,14 @@ public @interface RequestHeader {
 	/**
 	 * Alias for {@link #name}.
 	 */
-	@AliasFor("name")
+	@AliasFor("value")
 	String value() default "";
 
 	/**
 	 * The name of the request header to bind to.
 	 * @since 4.2
 	 */
-	@AliasFor("value")
+	@AliasFor("name")
 	String name() default "";
 
 	/**
