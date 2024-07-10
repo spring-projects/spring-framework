@@ -220,7 +220,7 @@ public class FunctionReference extends SpelNodeImpl {
 			}
 		}
 
-		// more complex case, we need to look at conversion and vararg repacking
+		// more complex case, we need to look at conversion and varargs repackaging
 		Integer varArgPosition = null;
 		if (isSuspectedVarargs) {
 			varArgPosition = declaredParamCount - 1;
@@ -228,10 +228,29 @@ public class FunctionReference extends SpelNodeImpl {
 		TypeConverter converter = state.getEvaluationContext().getTypeConverter();
 		ReflectionHelper.convertAllMethodHandleArguments(converter, functionArgs, methodHandle, varArgPosition);
 
-		if (isSuspectedVarargs && declaredParamCount == 1) {
-			// we only repack the varargs if it is the ONLY argument
-			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(
-					methodHandle.type().parameterArray(), functionArgs);
+		if (isSuspectedVarargs) {
+			if (declaredParamCount == 1) {
+				// We only repackage the varargs if it is the ONLY argument -- for example,
+				// when we are dealing with a bound MethodHandle.
+				functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(
+						methodHandle.type().parameterArray(), functionArgs);
+			}
+			else if (spelParamCount == declaredParamCount) {
+				// If the varargs were supplied already packaged in an array, we have to create
+				// a new array, add the non-varargs arguments to the beginning of that array,
+				// and add the unpackaged varargs arguments to the end of that array. The reason
+				// is that MethodHandle.invokeWithArguments(Object...) does not expect varargs
+				// to be packaged in an array, in contrast to how method invocation works with
+				// reflection.
+				int actualVarargsIndex = functionArgs.length - 1;
+				if (actualVarargsIndex >= 0 && functionArgs[actualVarargsIndex].getClass().isArray()) {
+					Object[] argsToUnpack = (Object[]) functionArgs[actualVarargsIndex];
+					Object[] newArgs = new Object[actualVarargsIndex + argsToUnpack.length];
+					System.arraycopy(functionArgs, 0, newArgs, 0, actualVarargsIndex);
+					System.arraycopy(argsToUnpack, 0, newArgs, actualVarargsIndex, argsToUnpack.length);
+					functionArgs = newArgs;
+				}
+			}
 		}
 
 		try {
