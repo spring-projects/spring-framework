@@ -737,12 +737,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		private CodeBlock handleNull(@Nullable Object value, Supplier<CodeBlock> nonNull) {
-			if (value == null) {
-				return CodeBlock.of("null");
-			}
-			else {
-				return nonNull.get();
-			}
+			return (value == null ? CodeBlock.of("null") : nonNull.get());
 		}
 	}
 
@@ -757,8 +752,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		@Override
-		public CodeBlock generateSetBeanDefinitionPropertiesCode(GenerationContext generationContext,
-				BeanRegistrationCode beanRegistrationCode, RootBeanDefinition beanDefinition, Predicate<String> attributeFilter) {
+		public CodeBlock generateSetBeanDefinitionPropertiesCode(
+				GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
+				RootBeanDefinition beanDefinition, Predicate<String> attributeFilter) {
 
 			CodeBlock.Builder code = CodeBlock.builder();
 			code.add(super.generateSetBeanDefinitionPropertiesCode(generationContext,
@@ -769,9 +765,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		@Override
-		public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
-				BeanRegistrationCode beanRegistrationCode, Executable constructorOrFactoryMethod,
-				boolean allowDirectSupplierShortcut) {
+		public CodeBlock generateInstanceSupplierCode(
+				GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
+				Executable constructorOrFactoryMethod, boolean allowDirectSupplierShortcut) {
 
 			Executable executableToUse = proxyExecutable(generationContext.getRuntimeHints(), constructorOrFactoryMethod);
 			return super.generateInstanceSupplierCode(generationContext, beanRegistrationCode,

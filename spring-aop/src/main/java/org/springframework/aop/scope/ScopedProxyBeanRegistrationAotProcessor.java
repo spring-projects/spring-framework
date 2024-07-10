@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ class ScopedProxyBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 
 
 	@Override
+	@Nullable
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		if (beanClass.equals(ScopedProxyFactoryBean.class)) {
@@ -79,8 +80,8 @@ class ScopedProxyBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 	}
 
 	@Nullable
-	private BeanDefinition getTargetBeanDefinition(ConfigurableBeanFactory beanFactory,
-			@Nullable String targetBeanName) {
+	private BeanDefinition getTargetBeanDefinition(
+			ConfigurableBeanFactory beanFactory, @Nullable String targetBeanName) {
 
 		if (targetBeanName != null && beanFactory.containsBean(targetBeanName)) {
 			return beanFactory.getMergedBeanDefinition(targetBeanName);
@@ -123,42 +124,32 @@ class ScopedProxyBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 
 		@Override
 		public CodeBlock generateSetBeanDefinitionPropertiesCode(
-				GenerationContext generationContext,
-				BeanRegistrationCode beanRegistrationCode,
+				GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
 				RootBeanDefinition beanDefinition, Predicate<String> attributeFilter) {
 
-			RootBeanDefinition processedBeanDefinition = new RootBeanDefinition(
-					beanDefinition);
-			processedBeanDefinition
-					.setTargetType(this.targetBeanDefinition.getResolvableType());
-			processedBeanDefinition.getPropertyValues()
-					.removePropertyValue("targetBeanName");
+			RootBeanDefinition processedBeanDefinition = new RootBeanDefinition(beanDefinition);
+			processedBeanDefinition.setTargetType(this.targetBeanDefinition.getResolvableType());
+			processedBeanDefinition.getPropertyValues().removePropertyValue("targetBeanName");
 			return super.generateSetBeanDefinitionPropertiesCode(generationContext,
 					beanRegistrationCode, processedBeanDefinition, attributeFilter);
 		}
 
 		@Override
-		public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
-				BeanRegistrationCode beanRegistrationCode,
-				Executable constructorOrFactoryMethod,
-				boolean allowDirectSupplierShortcut) {
+		public CodeBlock generateInstanceSupplierCode(
+				GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
+				Executable constructorOrFactoryMethod, boolean allowDirectSupplierShortcut) {
 
 			GeneratedMethod generatedMethod = beanRegistrationCode.getMethods()
 					.add("getScopedProxyInstance", method -> {
-						method.addJavadoc(
-								"Create the scoped proxy bean instance for '$L'.",
+						method.addJavadoc("Create the scoped proxy bean instance for '$L'.",
 								this.registeredBean.getBeanName());
 						method.addModifiers(Modifier.PRIVATE, Modifier.STATIC);
 						method.returns(ScopedProxyFactoryBean.class);
-						method.addParameter(RegisteredBean.class,
-								REGISTERED_BEAN_PARAMETER_NAME);
+						method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER_NAME);
 						method.addStatement("$T factory = new $T()",
-								ScopedProxyFactoryBean.class,
-								ScopedProxyFactoryBean.class);
-						method.addStatement("factory.setTargetBeanName($S)",
-								this.targetBeanName);
-						method.addStatement(
-								"factory.setBeanFactory($L.getBeanFactory())",
+								ScopedProxyFactoryBean.class, ScopedProxyFactoryBean.class);
+						method.addStatement("factory.setTargetBeanName($S)", this.targetBeanName);
+						method.addStatement("factory.setBeanFactory($L.getBeanFactory())",
 								REGISTERED_BEAN_PARAMETER_NAME);
 						method.addStatement("return factory");
 					});
