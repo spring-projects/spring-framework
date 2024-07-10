@@ -1,0 +1,28 @@
+changelog:
+  repository: spring-projects/spring-framework
+  sections:
+    - title: ":star: New Features"
+      labels:
+        - "type: enhancement"
+    - title: ":lady_beetle: Bug Fixes"
+      labels:
+        - "type: bug"
+        - "type: regression"
+    - title: ":notebook_with_decorative_cover: Documentation"
+      labels:
+        - "type: documentation"
+    - title: ":hammer: Dependency Upgrades"
+      sort: "title"
+      labels:
+        - "type: dependency-upgrade"
+  contributors:
+    exclude:
+      names:
+        - "bclozel"
+        - "jhoeller"
+        - "poutsma"
+        - "rstoyanchev"
+        - "sbrannen"
+        - "sdeleuze"
+        - "simonbasle"
+        - "snicoll"
