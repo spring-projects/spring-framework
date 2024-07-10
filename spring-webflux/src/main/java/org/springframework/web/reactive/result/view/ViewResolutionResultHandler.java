@@ -174,7 +174,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 		return (CharSequence.class.isAssignableFrom(type) ||
 				Rendering.class.isAssignableFrom(type) ||
-				FragmentRendering.class.isAssignableFrom(type) ||
+				FragmentsRendering.class.isAssignableFrom(type) ||
 				Model.class.isAssignableFrom(type) ||
 				Map.class.isAssignableFrom(type) ||
 				View.class.isAssignableFrom(type) ||
@@ -201,10 +201,10 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 		if (adapter != null) {
 			if (adapter.isMultiValue()) {
 				valueMono = (result.getReturnValue() != null ?
-						Mono.just(FragmentRendering.fromPublisher(adapter.toPublisher(result.getReturnValue())).build()) :
+						Mono.just(FragmentsRendering.withPublisher(adapter.toPublisher(result.getReturnValue())).build()) :
 						Mono.empty());
 
-				valueType = ResolvableType.forClass(FragmentRendering.class);
+				valueType = ResolvableType.forClass(FragmentsRendering.class);
 			}
 			else {
 				valueMono = (result.getReturnValue() != null ?
@@ -235,8 +235,8 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 					}
 
 					if (Collection.class.isAssignableFrom(clazz)) {
-						returnValue = FragmentRendering.fromCollection((Collection<Fragment>) returnValue).build();
-						clazz = FragmentRendering.class;
+						returnValue = FragmentsRendering.withCollection((Collection<Fragment>) returnValue).build();
+						clazz = FragmentsRendering.class;
 					}
 
 					if (returnValue == NO_VALUE || ClassUtils.isVoidType(clazz)) {
@@ -260,8 +260,8 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 						viewsMono = (view instanceof String viewName ? resolveViews(viewName, locale) :
 								Mono.just(Collections.singletonList((View) view)));
 					}
-					else if (FragmentRendering.class.isAssignableFrom(clazz)) {
-						FragmentRendering render = (FragmentRendering) returnValue;
+					else if (FragmentsRendering.class.isAssignableFrom(clazz)) {
+						FragmentsRendering render = (FragmentsRendering) returnValue;
 						HttpStatusCode status = render.status();
 						if (status != null) {
 							exchange.getResponse().setStatusCode(status);
@@ -328,7 +328,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 			Fragment fragment, Locale locale, BindingContext bindingContext, ServerWebExchange exchange) {
 
 		// Merge attributes from top-level model
-		bindingContext.getModel().asMap().forEach((key, value) -> fragment.model().putIfAbsent(key, value));
+		fragment.mergeAttributes(bindingContext.getModel());
 
 		BodySavingResponse response = new BodySavingResponse(exchange.getResponse());
 		ServerWebExchange mutatedExchange = exchange.mutate().response(response).build();

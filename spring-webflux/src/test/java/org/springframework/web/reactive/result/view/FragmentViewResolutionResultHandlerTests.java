@@ -59,15 +59,15 @@ public class FragmentViewResolutionResultHandlerTests {
 		Fragment f2 = Fragment.create("fragment2", Map.of("bar", "Bar"));
 		return Stream.of(
 				Arguments.of(
-						FragmentRendering.fromPublisher(Flux.just(f1, f2).subscribeOn(Schedulers.boundedElastic()))
+						FragmentsRendering.withPublisher(Flux.just(f1, f2).subscribeOn(Schedulers.boundedElastic()))
 								.headers(headers -> headers.setContentType(MediaType.TEXT_HTML))
 								.build(),
-						on(Handler.class).resolveReturnType(FragmentRendering.class)),
+						on(Handler.class).resolveReturnType(FragmentsRendering.class)),
 				Arguments.of(
-						FragmentRendering.fromCollection(List.of(f1, f2))
+						FragmentsRendering.withCollection(List.of(f1, f2))
 								.headers(headers -> headers.setContentType(MediaType.TEXT_HTML))
 								.build(),
-						on(Handler.class).resolveReturnType(FragmentRendering.class)),
+						on(Handler.class).resolveReturnType(FragmentsRendering.class)),
 				Arguments.of(
 						Flux.just(f1, f2).subscribeOn(Schedulers.boundedElastic()),
 						on(Handler.class).resolveReturnType(Flux.class, Fragment.class)),
@@ -110,7 +110,7 @@ public class FragmentViewResolutionResultHandlerTests {
 	@SuppressWarnings("unused")
 	private static class Handler {
 
-		FragmentRendering rendering() { return null; }
+		FragmentsRendering rendering() { return null; }
 
 		Flux<Fragment> fragmentFlux() { return null; }
 

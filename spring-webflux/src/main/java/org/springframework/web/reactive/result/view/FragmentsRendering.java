@@ -17,15 +17,19 @@
 package org.springframework.web.reactive.result.view;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
+import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Public API for HTML rendering from a collection or from a stream of
@@ -39,7 +43,7 @@ import org.springframework.lang.Nullable;
  * @author Rossen Stoyanchev
  * @since 6.2
  */
-public interface FragmentRendering {
+public interface FragmentsRendering {
 
 	/**
 	 * Return the HTTP status to set the response to.
@@ -59,31 +63,58 @@ public interface FragmentRendering {
 
 
 	/**
+	 * Create a builder and add a fragment with a view name and a model.
+	 * @param viewName the name of the view for the fragment
+	 * @param model attributes for the fragment in addition to model
+	 * attributes inherited from the model for the request
+	 * @return this builder
+	 */
+	static Builder with(String viewName, Map<String, Object> model) {
+		return withCollection(List.of(Fragment.create(viewName, model)));
+	}
+
+	/**
+	 * Create a builder and add a fragment with a view name only, also
+	 * inheriting model attributes from the model for the request.
+	 * @param viewName the name of the view for the fragment
+	 * @return this builder
+	 */
+	static Builder with(String viewName) {
+		return withCollection(List.of(Fragment.create(viewName)));
+	}
+
+	/**
 	 * Create a builder to render with a collection of Fragments.
 	 */
-	static Builder fromCollection(Collection<Fragment> fragments) {
-		return new DefaultFragmentRenderingBuilder(fragments);
+	static Builder withCollection(Collection<Fragment> fragments) {
+		return new DefaultFragmentsRenderingBuilder(fragments);
 	}
 
 	/**
 	 * Create a builder to render with a {@link Publisher} of Fragments.
 	 */
-	static <P extends Publisher<Fragment>> Builder fromPublisher(P fragments) {
-		return new DefaultFragmentRenderingBuilder(fragments);
+	static <P extends Publisher<Fragment>> Builder withPublisher(P fragmentsPublisher) {
+		return new DefaultFragmentsRenderingBuilder(fragmentsPublisher);
 	}
 
 	/**
-	 * Variant of {@link #fromPublisher(Publisher)} that allows using any
+	 * Variant of {@link #withPublisher(Publisher)} that allows using any
 	 * producer that can be resolved to {@link Publisher} via
 	 * {@link ReactiveAdapterRegistry}.
 	 */
-	static Builder fromProducer(Object fragments) {
-		return new DefaultFragmentRenderingBuilder(fragments);
+	static Builder withProducer(Object fragmentsProducer) {
+		return new DefaultFragmentsRenderingBuilder(adaptProducer(fragmentsProducer));
+	}
+
+	private static Publisher<Fragment> adaptProducer(Object producer) {
+		ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(producer.getClass());
+		Assert.isTrue(adapter != null, "Unknown producer " + producer.getClass());
+		return adapter.toPublisher(producer);
 	}
 
 
 	/**
-	 * Defines a builder for {@link FragmentRendering}.
+	 * Defines a builder for {@link FragmentsRendering}.
 	 */
 	interface Builder {
 
@@ -111,9 +142,33 @@ public interface FragmentRendering {
 		Builder headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * Build the {@link FragmentRendering} instance.
+		 * Add a fragment with a view name and a model.
+		 * @param viewName the name of the view for the fragment
+		 * @param model attributes for the fragment in addition to model
+		 * attributes inherited from the model for the request
+		 * @return this builder
 		 */
-		FragmentRendering build();
+		Builder fragment(String viewName, Map<String, Object> model);
+
+		/**
+		 * Add a fragment with a view name only, inheriting model attributes from
+		 * the model for the request.
+		 * @param viewName the name of the view for the fragment
+		 * @return this builder
+		 */
+		Builder fragment(String viewName);
+
+		/**
+		 * Add a fragment.
+		 * @param fragment the fragment to add
+		 * @return this builder
+		 */
+		Builder fragment(Fragment fragment);
+
+		/**
+		 * Build the {@link FragmentsRendering} instance.
+		 */
+		FragmentsRendering build();
 	}
 
 }

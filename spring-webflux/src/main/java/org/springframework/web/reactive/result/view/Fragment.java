@@ -16,19 +16,23 @@
 
 package org.springframework.web.reactive.result.view;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
+import org.springframework.ui.Model;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
- * Container for a model and a view for use with {@link FragmentRendering} and
+ * Container for a model and a view for use with {@link FragmentsRendering} and
  * multi-view rendering. For full page rendering with a single model and view,
  * use {@link Rendering}.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
- * @see FragmentRendering
+ * @see FragmentsRendering
  */
 public final class Fragment {
 
@@ -38,10 +42,11 @@ public final class Fragment {
 	@Nullable
 	private final View view;
 
-	private final Map<String, Object> model;
+	@Nullable
+	private Map<String, Object> model;
 
 
-	private Fragment(@Nullable String viewName, @Nullable View view, Map<String, Object> model) {
+	private Fragment(@Nullable String viewName, @Nullable View view, @Nullable Map<String, Object> model) {
 		this.viewName = viewName;
 		this.view = view;
 		this.model = model;
@@ -73,15 +78,29 @@ public final class Fragment {
 	}
 
 	/**
-	 * Return the model for this Fragment.
+	 * Return the model for this Fragment, or an empty map.
 	 */
 	public Map<String, Object> model() {
-		return this.model;
+		return (this.model != null ? this.model : Collections.emptyMap());
 	}
+
+	/**
+	 * Merge attributes from the request model if not already present.
+	 */
+	public void mergeAttributes(Model model) {
+		if (CollectionUtils.isEmpty(model.asMap())) {
+			return;
+		}
+		if (this.model == null) {
+			this.model = new LinkedHashMap<>();
+		}
+		model.asMap().forEach((key, value) -> this.model.putIfAbsent(key, value));
+	}
+
 
 	@Override
 	public String toString() {
-		return "Fragment [view=" + formatView() + "; model=" + this.model + "]";
+		return "Fragment [view=" + formatView() + "; model=" + model() + "]";
 	}
 
 	private String formatView() {
@@ -90,14 +109,23 @@ public final class Fragment {
 
 
 	/**
-	 * Create a Fragment with a view name and a model.
+	 * Create a Fragment with a view name and a model, also inheriting model
+	 * attributes from the top-level model for the request.
 	 */
 	public static Fragment create(String viewName, Map<String, Object> model) {
 		return new Fragment(viewName, null, model);
 	}
 
 	/**
-	 * Create a Fragment with a resolved {@link View} instance and a model.
+	 * Create a Fragment with a view name only, inheriting model attributes from
+	 * the top-level model for the request.
+	 */
+	public static Fragment create(String viewName) {
+		return new Fragment(viewName, null, null);
+	}
+
+	/**
+	 * Variant of {@link #create(String, Map)} with a resolved {@link View}.
 	 */
 	public static Fragment create(View view, Map<String, Object> model) {
 		return new Fragment(null, view, model);
