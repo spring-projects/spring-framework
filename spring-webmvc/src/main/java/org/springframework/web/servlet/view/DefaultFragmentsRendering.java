@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.view;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -31,27 +32,23 @@ import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
 /**
- * {@link View} that enables rendering of a collection of fragments, each with
- * its own view and model, also inheriting common attributes from the top-level model.
+ * Default implementation of {@link FragmentsRendering} that can render fragments
+ * through the {@link org.springframework.web.servlet.SmartView} contract.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
  */
-public class FragmentsView implements SmartView {
+final class DefaultFragmentsRendering implements FragmentsRendering {
 
 	private final Collection<ModelAndView> modelAndViews;
 
 
-	/**
-	 * Protected constructor to allow extension.
-	 */
-	protected FragmentsView(Collection<ModelAndView> modelAndViews) {
-		this.modelAndViews = modelAndViews;
+	DefaultFragmentsRendering(Collection<ModelAndView> modelAndViews) {
+		this.modelAndViews = new ArrayList<>(modelAndViews);
 	}
 
 
@@ -95,20 +92,9 @@ public class FragmentsView implements SmartView {
 		}
 	}
 
-
 	@Override
 	public String toString() {
-		return "FragmentsView " + this.modelAndViews;
-	}
-
-
-	/**
-	 * Factory method to create an instance with the given fragments.
-	 * @param modelAndViews the {@link ModelAndView} to use
-	 * @return the created {@code FragmentsView} instance
-	 */
-	public static FragmentsView create(Collection<ModelAndView> modelAndViews) {
-		return new FragmentsView(modelAndViews);
+		return "DefaultFragmentsRendering " + this.modelAndViews;
 	}
 
 

@@ -38,12 +38,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.condition.JRE.JAVA_21;
 
 /**
- * Tests for rendering through {@link FragmentsView}.
+ * Tests for rendering through {@link DefaultFragmentsRendering}.
  *
  * @author Rossen Stoyanchev
  */
 @DisabledForJreRange(min = JAVA_21, disabledReason = "Kotlin doesn't support Java 21+ yet")
-public class FragmentsViewTests {
+public class DefaultFragmentsRenderingTests {
 
 
 	@Test
@@ -59,7 +59,7 @@ public class FragmentsViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		FragmentsView view = FragmentsView.create(List.of(
+		DefaultFragmentsRendering view = new DefaultFragmentsRendering(List.of(
 				new ModelAndView("fragment1", Map.of("foo", "Foo")),
 				new ModelAndView("fragment2", Map.of("bar", "Bar"))));
 
