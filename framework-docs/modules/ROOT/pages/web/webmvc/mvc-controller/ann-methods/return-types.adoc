@@ -56,6 +56,9 @@ supported for all return values.
 | `ModelAndView` object
 | The view and model attributes to use and, optionally, a response status.
 
+| `FragmentsRendering`, `Collection<ModelAndView>`
+| For rendering one or more fragments each with its own view and model.
+
 | `void`
 | A method with a `void` return type (or `null` return value) is considered to have fully
   handled the response if it also has a `ServletResponse`, an `OutputStream` argument, or
