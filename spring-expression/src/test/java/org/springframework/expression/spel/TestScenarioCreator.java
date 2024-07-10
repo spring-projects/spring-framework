@@ -100,7 +100,12 @@ class TestScenarioCreator {
 		MethodHandle messageStaticFullyBound = messageStaticPartiallyBound
 				.bindTo(new String[] { "prerecorded", "3", "Oh Hello World", "ignored"});
 		testContext.registerFunction("messageStaticBound", messageStaticFullyBound);
-	}
+
+		// #formatObjectVarargs(format, args...)
+		MethodHandle formatObjectVarargs = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
+				"formatObjectVarargs", MethodType.methodType(String.class, String.class, Object[].class));
+		testContext.registerFunction("formatObjectVarargs", formatObjectVarargs);
+}
 
 	/**
 	 * Register some variables that can be referenced from the tests
@@ -152,6 +157,10 @@ class TestScenarioCreator {
 
 	public static String message(String template, String... args) {
 		return template.formatted((Object[]) args);
+	}
+
+	public static String formatObjectVarargs(String format, Object... args) {
+		return String.format(format, args);
 	}
 
 }

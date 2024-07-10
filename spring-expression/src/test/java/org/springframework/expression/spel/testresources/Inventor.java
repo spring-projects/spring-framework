@@ -217,6 +217,11 @@ public class Inventor {
 		return str1 + "-" + String.join("-", strings);
 	}
 
+	public String formatObjectVarargs(String format, Object... args) {
+		return String.format(format, args);
+	}
+
+
 	public Inventor(String... strings) {
 		if (strings.length > 0) {
 			this.name = strings[0];

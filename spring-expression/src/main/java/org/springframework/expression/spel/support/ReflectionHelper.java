@@ -308,11 +308,11 @@ public abstract class ReflectionHelper {
 						conversionOccurred = true;
 					}
 				}
-				// If the argument type is equal to the varargs component type, there is no need to
+				// If the argument type is assignable to the varargs component type, there is no need to
 				// convert it or wrap it in an array. For example, using StringToArrayConverter to
 				// convert a String containing a comma would result in the String being split and
 				// repackaged in an array when it should be used as-is.
-				else if (!sourceType.equals(componentTypeDesc)) {
+				else if (!sourceType.isAssignableTo(componentTypeDesc)) {
 					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
 				}
 				// Possible outcomes of the above if-else block:
@@ -384,7 +384,7 @@ public abstract class ReflectionHelper {
 			ResolvableType varArgResolvableType = ResolvableType.forClass(varArgClass);
 			TypeDescriptor varArgComponentType = new TypeDescriptor(varArgResolvableType, varArgClass, null);
 			TypeDescriptor componentTypeDesc = varArgComponentType.getElementTypeDescriptor();
-			// TODO Determine why componentTypeDesc is null.
+			// TODO Determine why componentTypeDesc can be null.
 			// Assert.state(componentTypeDesc != null, "Component type must not be null for a varargs array");
 
 			// If the target is varargs and there is just one more argument, then convert it here.
@@ -398,11 +398,11 @@ public abstract class ReflectionHelper {
 						conversionOccurred = true;
 					}
 				}
-				// If the argument type is equal to the varargs component type, there is no need to
+				// If the argument type is assignable to the varargs component type, there is no need to
 				// convert it or wrap it in an array. For example, using StringToArrayConverter to
 				// convert a String containing a comma would result in the String being split and
 				// repackaged in an array when it should be used as-is.
-				else if (!sourceType.equals(componentTypeDesc)) {
+				else if (componentTypeDesc != null && !sourceType.isAssignableTo(componentTypeDesc)) {
 					arguments[varargsPosition] = converter.convertValue(argument, sourceType, varArgComponentType);
 				}
 				// Possible outcomes of the above if-else block:
