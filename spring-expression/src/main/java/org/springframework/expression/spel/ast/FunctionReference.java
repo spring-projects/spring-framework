@@ -243,8 +243,7 @@ public class FunctionReference extends SpelNodeImpl {
 				// to be packaged in an array, in contrast to how method invocation works with
 				// reflection.
 				int actualVarargsIndex = functionArgs.length - 1;
-				if (actualVarargsIndex >= 0 && functionArgs[actualVarargsIndex].getClass().isArray()) {
-					Object[] argsToUnpack = (Object[]) functionArgs[actualVarargsIndex];
+				if (actualVarargsIndex >= 0 && functionArgs[actualVarargsIndex] instanceof Object[] argsToUnpack) {
 					Object[] newArgs = new Object[actualVarargsIndex + argsToUnpack.length];
 					System.arraycopy(functionArgs, 0, newArgs, 0, actualVarargsIndex);
 					System.arraycopy(argsToUnpack, 0, newArgs, actualVarargsIndex, argsToUnpack.length);

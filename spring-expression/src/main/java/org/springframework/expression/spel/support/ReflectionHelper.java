@@ -278,7 +278,8 @@ public abstract class ReflectionHelper {
 			for (int i = 0; i < arguments.length; i++) {
 				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forExecutable(executable, i));
 				Object argument = arguments[i];
-				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				arguments[i] = converter.convertValue(argument, sourceType, targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
 		}
@@ -287,7 +288,8 @@ public abstract class ReflectionHelper {
 			for (int i = 0; i < varargsPosition; i++) {
 				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forExecutable(executable, i));
 				Object argument = arguments[i];
-				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				arguments[i] = converter.convertValue(argument, sourceType, targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
 
@@ -317,7 +319,7 @@ public abstract class ReflectionHelper {
 				// Possible outcomes of the above if-else block:
 				// 1) the input argument was null, and nothing was done.
 				// 2) the input argument was null; the varargs component type is Optional; and the argument was converted to Optional.empty().
-				// 3) the input argument was correct type but not wrapped in an array, and nothing was done.
+				// 3) the input argument was the correct type but not wrapped in an array, and nothing was done.
 				// 4) the input argument was already compatible (i.e., array of valid type), and nothing was done.
 				// 5) the input argument was the wrong type and got converted and wrapped in an array.
 				if (argument != arguments[varargsPosition] &&
@@ -363,7 +365,8 @@ public abstract class ReflectionHelper {
 				TypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);
 
 				Object argument = arguments[i];
-				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				arguments[i] = converter.convertValue(argument, sourceType, targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
 		}
@@ -375,7 +378,8 @@ public abstract class ReflectionHelper {
 				TypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);
 
 				Object argument = arguments[i];
-				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				arguments[i] = converter.convertValue(argument, sourceType, targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
 
@@ -406,9 +410,9 @@ public abstract class ReflectionHelper {
 				// Possible outcomes of the above if-else block:
 				// 1) the input argument was null, and nothing was done.
 				// 2) the input argument was null; the varargs component type is Optional; and the argument was converted to Optional.empty().
-				// 3) the input argument was correct type but not wrapped in an array, and nothing was done.
-				// 4) the input argument was already compatible (i.e., array of valid type), and nothing was done.
-				// 5) the input argument was the wrong type and got converted and wrapped in an array.
+				// 3) the input argument was the correct type but not wrapped in an array, and nothing was done.
+				// 4) the input argument was already compatible (i.e., an Object array of valid type), and nothing was done.
+				// 5) the input argument was the wrong type and got converted as explained in the comments above.
 				if (argument != arguments[varargsPosition] &&
 						!isFirstEntryInArray(argument, arguments[varargsPosition])) {
 					conversionOccurred = true; // case 5
@@ -418,7 +422,8 @@ public abstract class ReflectionHelper {
 			else {
 				for (int i = varargsPosition; i < arguments.length; i++) {
 					Object argument = arguments[i];
-					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), componentTypeDesc);
+					TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+					arguments[i] = converter.convertValue(argument, sourceType, componentTypeDesc);
 					conversionOccurred |= (argument != arguments[i]);
 				}
 			}
