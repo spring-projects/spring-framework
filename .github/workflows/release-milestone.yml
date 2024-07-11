@@ -72,3 +72,4 @@ jobs:
         with:
           milestone: ${{ needs.build-and-stage-release.outputs.version }}
           token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
+          prerelease: 'true'
