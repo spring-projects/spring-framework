@@ -1118,10 +1118,11 @@ public class DispatcherServlet extends FrameworkServlet {
 				if (mappedHandler != null) {
 					mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
 				}
+				asyncManager.setMultipartRequestParsed(multipartRequestParsed);
 			}
 			else {
 				// Clean up any resources used by a multipart request.
-				if (multipartRequestParsed) {
+				if (multipartRequestParsed || asyncManager.isMultipartRequestParsed()) {
 					cleanupMultipart(processedRequest);
 				}
 			}
