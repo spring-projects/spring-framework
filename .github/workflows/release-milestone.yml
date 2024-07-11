@@ -49,6 +49,7 @@ jobs:
     name: Promote Release
     needs:
       - build-and-stage-release
+      - verify
     runs-on: ubuntu-latest
     steps:
       - name: Set up JFrog CLI
