@@ -27,7 +27,7 @@ jobs:
           uri: 'https://repo.spring.io'
           username: ${{ secrets.ARTIFACTORY_USERNAME }}
           password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-          build-name: ${{ format('spring-framework-{0}', github.ref_name)}}
+          build-name: 'spring-framework-6.0.x'
           repository: 'libs-snapshot-local'
           folder: 'deployment-repository'
           signing-key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -47,3 +47,14 @@ jobs:
           run-name: ${{ format('{0} | Linux | Java 17', github.ref_name) }}
     outputs:
       version: ${{ steps.build-and-publish.outputs.version }}
+  verify:
+    name: Verify
+    needs: build-and-deploy-snapshot
+    uses: ./.github/workflows/verify.yml
+    secrets:
+      google-chat-webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+      repository-password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      repository-username: ${{ secrets.ARTIFACTORY_USERNAME }}
+      token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
+    with:
+      version: ${{ needs.build-and-deploy-snapshot.outputs.version }}
