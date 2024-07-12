@@ -47,7 +47,9 @@ public class ParameterErrors extends ParameterValidationResult implements Errors
 			MethodParameter parameter, @Nullable Object argument, Errors errors,
 			@Nullable Object container, @Nullable Integer index, @Nullable Object key) {
 
-		super(parameter, argument, errors.getAllErrors(), container, index, key);
+		super(parameter, argument, errors.getAllErrors(),
+				container, index, key, (error, sourceType) -> ((FieldError) error).unwrap(sourceType));
+
 		this.errors = errors;
 	}
 

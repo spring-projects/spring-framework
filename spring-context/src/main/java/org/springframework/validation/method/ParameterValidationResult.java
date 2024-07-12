@@ -18,6 +18,8 @@ package org.springframework.validation.method;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.MethodParameter;
@@ -62,13 +64,16 @@ public class ParameterValidationResult {
 	@Nullable
 	private final Object containerKey;
 
+	private final BiFunction<MessageSourceResolvable, Class<?>, Object> sourceLookup;
+
 
 	/**
 	 * Create a {@code ParameterValidationResult}.
 	 */
 	public ParameterValidationResult(
 			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors,
-			@Nullable Object container, @Nullable Integer index, @Nullable Object key) {
+			@Nullable Object container, @Nullable Integer index, @Nullable Object key,
+			BiFunction<MessageSourceResolvable, Class<?>, Object> sourceLookup) {
 
 		Assert.notNull(param, "MethodParameter is required");
 		Assert.notEmpty(errors, "`resolvableErrors` must not be empty");
@@ -78,18 +83,36 @@ public class ParameterValidationResult {
 		this.container = container;
 		this.containerIndex = index;
 		this.containerKey = key;
+		this.sourceLookup = sourceLookup;
 	}
 
 	/**
 	 * Create a {@code ParameterValidationResult}.
 	 * @deprecated in favor of
-	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object)}
+	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object, Function)}
+	 */
+	@Deprecated(since = "6.2", forRemoval = true)
+	public ParameterValidationResult(
+			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors,
+			@Nullable Object container, @Nullable Integer index, @Nullable Object key) {
+
+		this(param, arg, errors, container, index, key, (error, sourceType) -> {
+			throw new IllegalArgumentException("No source object of the given type");
+		});
+	}
+
+	/**
+	 * Create a {@code ParameterValidationResult}.
+	 * @deprecated in favor of
+	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object, Function)}
 	 */
 	@Deprecated(since = "6.1.3", forRemoval = true)
 	public ParameterValidationResult(
 			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors) {
 
-		this(param, arg, errors, null, null, null);
+		this(param, arg, errors, null, null, null, (error, sourceType) -> {
+			throw new IllegalArgumentException("No source object of the given type");
+		});
 	}
 
 
@@ -164,6 +187,17 @@ public class ParameterValidationResult {
 		return this.containerKey;
 	}
 
+	/**
+	 * Unwrap the source behind the given error. For Jakarta Bean validation the
+	 * source is a {@link jakarta.validation.ConstraintViolation}.
+	 * @param sourceType the expected source type
+	 * @return the source object of the given type
+	 * @since 6.2
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T unwrap(MessageSourceResolvable error, Class<T> sourceType) {
+		return (T) this.sourceLookup.apply(error, sourceType);
+	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {

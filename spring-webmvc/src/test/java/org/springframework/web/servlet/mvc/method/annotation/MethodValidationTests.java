@@ -183,7 +183,7 @@ class MethodValidationTests {
 		));
 
 		assertValueResult(ex.getValueResults().get(0), 2, "123", List.of("""
-			org.springframework.context.support.DefaultMessageSourceResolvable: \
+			org.springframework.validation.beanvalidation.MethodValidationAdapter$ViolationMessageSourceResolvable: \
 			codes [Size.validController#handle.myHeader,Size.myHeader,Size.java.lang.String,Size]; \
 			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
 			codes [validController#handle.myHeader,myHeader]; arguments []; default message [myHeader],10,5]; \
