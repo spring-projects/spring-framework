@@ -43,6 +43,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -604,6 +605,12 @@ class DefaultConversionServiceTests {
 	}
 
 	@Test
+	void convertIntArrayToStringArray() {
+		String[] result = conversionService.convert(new int[] {1, 2, 3}, String[].class);
+		assertThat(result).containsExactly("1", "2", "3");
+	}
+
+	@Test
 	void convertIntegerArrayToIntegerArray() {
 		Integer[] result = conversionService.convert(new Integer[] {1, 2, 3}, Integer[].class);
 		assertThat(result).containsExactly(1, 2, 3);
@@ -613,6 +620,12 @@ class DefaultConversionServiceTests {
 	void convertIntegerArrayToIntArray() {
 		int[] result = conversionService.convert(new Integer[] {1, 2, 3}, int[].class);
 		assertThat(result).containsExactly(1, 2, 3);
+	}
+
+	@Test
+	void convertIntArrayToIntegerArray() {
+		Integer[] result = conversionService.convert(new int[] {1, 2}, Integer[].class);
+		assertThat(result).containsExactly(1, 2);
 	}
 
 	@Test
@@ -627,15 +640,34 @@ class DefaultConversionServiceTests {
 		assertThat(result).containsExactly(1, 2, 3);
 	}
 
+	@Disabled("Primitive array to Object[] conversion is not currently supported")
 	@Test
-	void convertByteArrayToWrapperArray() {
+	void convertIntArrayToObjectArray() {
+		Object[] result = conversionService.convert(new int[] {1, 2}, Object[].class);
+		assertThat(result).containsExactly(1, 2);
+	}
+
+	@Test
+	void convertIntArrayToFloatArray() {
+		Float[] result = conversionService.convert(new int[] {1, 2}, Float[].class);
+		assertThat(result).containsExactly(1.0F, 2.0F);
+	}
+
+	@Test
+	void convertIntArrayToPrimitiveFloatArray() {
+		float[] result = conversionService.convert(new int[] {1, 2}, float[].class);
+		assertThat(result).containsExactly(1.0F, 2.0F);
+	}
+
+	@Test
+	void convertPrimitiveByteArrayToByteWrapperArray() {
 		byte[] byteArray = {1, 2, 3};
 		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
 		assertThat(converted).isEqualTo(new Byte[]{1, 2, 3});
 	}
 
 	@Test
-	void convertArrayToArrayAssignable() {
+	void convertIntArrayToIntArray() {
 		int[] result = conversionService.convert(new int[] {1, 2, 3}, int[].class);
 		assertThat(result).containsExactly(1, 2, 3);
 	}

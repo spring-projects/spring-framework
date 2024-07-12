@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -196,6 +197,21 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		evaluate("#formatPrimitiveVarargs('x -> %s %s', '2', 3.0F)", "x -> 2 3", String.class); // String/Float to int
 		evaluate("#formatPrimitiveVarargs('x -> %s %s %s', new Integer[]{1, 2, 3})", "x -> 1 2 3", String.class); // Integer[] to int[]
 		evaluate("#formatPrimitiveVarargs('x -> %s %s %s', new String[]{'1', '2', '3'})", "x -> 1 2 3", String.class); // String[] to int[]
+	}
+
+	@Disabled("Primitive array to Object[] conversion is not currently supported")
+	@Test
+	void functionFromMethodWithVarargsAndPrimitiveArrayToObjectArrayConversion() {
+		evaluate("#varargsObjectFunction(new short[]{1, 2, 3})", "[1, 2, 3]", String.class); // short[] to Object[]
+		evaluate("#varargsObjectFunction(new int[]{1, 2, 3})", "[1, 2, 3]", String.class); // int[] to Object[]
+	}
+
+	@Disabled("Primitive array to Object[] conversion is not currently supported")
+	@Test
+	void functionFromMethodHandleWithVarargsAndPrimitiveArrayToObjectArrayConversion() {
+		evaluate("#message('x -> %s %s %s', new short[]{1, 2, 3})", "x -> 1 2 3", String.class);  // short[] to Object[]
+		evaluate("#message('x -> %s %s %s', new int[]{1, 2, 3})", "x -> 1 2 3", String.class); // int[] to Object[]
+		evaluate("#formatObjectVarargs('x -> %s %s %s', new int[]{1, 2, 3})", "x -> 1 2 3", String.class); // int[] to Object[]
 	}
 
 	@Test
