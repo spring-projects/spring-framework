@@ -389,7 +389,6 @@ public abstract class ReflectionHelper {
 			// FunctionReference#executeFunctionViaMethodHandle().
 			Class<?> varargsComponentClass = ClassUtils.resolvePrimitiveIfNecessary(varargsArrayClass.componentType());
 			TypeDescriptor varargsArrayType = TypeDescriptor.array(TypeDescriptor.valueOf(varargsComponentClass));
-			Assert.state(varargsArrayType != null, "Array type must not be null for a varargs array");
 			TypeDescriptor varargsComponentType = varargsArrayType.getElementTypeDescriptor();
 			Assert.state(varargsComponentType != null, "Component type must not be null for a varargs array");
 

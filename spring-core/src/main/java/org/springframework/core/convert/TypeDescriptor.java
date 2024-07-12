@@ -644,6 +644,7 @@ public class TypeDescriptor implements Serializable {
 	 * @since 3.2.1
 	 */
 	@Nullable
+	@Contract("!null -> !null; null -> null")
 	public static TypeDescriptor array(@Nullable TypeDescriptor elementTypeDescriptor) {
 		if (elementTypeDescriptor == null) {
 			return null;
