@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -80,9 +81,11 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		evaluate("#varargsFunction(new String[0])", "[]", String.class);
 		evaluate("#varargsFunction('a')", "[a]", String.class);
 		evaluate("#varargsFunction('a','b','c')", "[a, b, c]", String.class);
+		evaluate("#varargsFunction(new String[]{'a','b','c'})", "[a, b, c]", String.class);
 		// Conversion from int to String
 		evaluate("#varargsFunction(25)", "[25]", String.class);
 		evaluate("#varargsFunction('b',25)", "[b, 25]", String.class);
+		evaluate("#varargsFunction(new int[]{1, 2, 3})", "[1, 2, 3]", String.class);
 		// Strings that contain a comma
 		evaluate("#varargsFunction('a,b')", "[a,b]", String.class);
 		evaluate("#varargsFunction('a', 'x,y', 'd')", "[a, x,y, d]", String.class);
@@ -103,6 +106,21 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		// null values
 		evaluate("#varargsFunction2(9,null)", "9-[null]", String.class);
 		evaluate("#varargsFunction2(9,'a',null,'b')", "9-[a, null, b]", String.class);
+
+		evaluate("#varargsObjectFunction()", "[]", String.class);
+		evaluate("#varargsObjectFunction(new String[0])", "[]", String.class);
+		evaluate("#varargsObjectFunction('a')", "[a]", String.class);
+		evaluate("#varargsObjectFunction('a','b','c')", "[a, b, c]", String.class);
+		evaluate("#varargsObjectFunction(new String[]{'a','b','c'})", "[a, b, c]", String.class);
+		// Conversion from int to String
+		evaluate("#varargsObjectFunction(25)", "[25]", String.class);
+		evaluate("#varargsObjectFunction('b',25)", "[b, 25]", String.class);
+		// Strings that contain a comma
+		evaluate("#varargsObjectFunction('a,b')", "[a,b]", String.class);
+		evaluate("#varargsObjectFunction('a', 'x,y', 'd')", "[a, x,y, d]", String.class);
+		// null values
+		evaluate("#varargsObjectFunction(null)", "[null]", String.class);
+		evaluate("#varargsObjectFunction('a',null,'b')", "[a, null, b]", String.class);
 	}
 
 	@Test  // gh-33013
@@ -110,17 +128,25 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		// Calling 'public static String formatObjectVarargs(String format, Object... args)' -> String.format(format, args)
 
 		// No var-args and no conversion necessary
+		evaluate("#message('x')", "x", String.class);
 		evaluate("#formatObjectVarargs('x')", "x", String.class);
 
 		// No var-args but conversion necessary
+		evaluate("#message(9)", "9", String.class);
 		evaluate("#formatObjectVarargs(9)", "9", String.class);
 
 		// No conversion necessary
 		evaluate("#add(3, 4)", 7, Integer.class);
+		evaluate("#message('x -> %s %s %s', 'a', 'b', 'c')", "x -> a b c", String.class);
 		evaluate("#formatObjectVarargs('x -> %s', '')", "x -> ", String.class);
 		evaluate("#formatObjectVarargs('x -> %s', ' ')", "x ->  ", String.class);
 		evaluate("#formatObjectVarargs('x -> %s', 'a')", "x -> a", String.class);
 		evaluate("#formatObjectVarargs('x -> %s %s %s', 'a', 'b', 'c')", "x -> a b c", String.class);
+		evaluate("#message('x -> %s %s %s', new Object[]{'a', 'b', 'c'})", "x -> a b c", String.class); // Object[] instanceof Object[]
+		evaluate("#message('x -> %s %s %s', new String[]{'a', 'b', 'c'})", "x -> a b c", String.class); // String[] instanceof Object[]
+		evaluate("#message('x -> %s %s %s', new Integer[]{1, 2, 3})", "x -> 1 2 3", String.class); // Integer[] instanceof Object[]
+		evaluate("#formatObjectVarargs('x -> %s %s', 2, 3)", "x -> 2 3", String.class); // Integer instanceof Object
+		evaluate("#formatObjectVarargs('x -> %s %s', 'a', 3.0F)", "x -> a 3.0", String.class); // String/Float instanceof Object
 		evaluate("#formatObjectVarargs('x -> %s', new Object[]{''})", "x -> ", String.class);
 		evaluate("#formatObjectVarargs('x -> %s', new String[]{''})", "x -> ", String.class);
 		evaluate("#formatObjectVarargs('x -> %s', new Object[]{' '})", "x ->  ", String.class);
@@ -131,9 +157,12 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		evaluate("#formatObjectVarargs('x -> %s %s %s', new String[]{'a', 'b', 'c'})", "x -> a b c", String.class);
 
 		// Conversion necessary
-		evaluate("#add('2', 5.0)", 7, Integer.class);
-		evaluate("#formatObjectVarargs('x -> %s %s', 2, 3)", "x -> 2 3", String.class);
-		evaluate("#formatObjectVarargs('x -> %s %s', 'a', 3.0d)", "x -> a 3.0", String.class);
+		evaluate("#add('2', 5.0)", 7, Integer.class); // String/Double to Integer
+		evaluate("#messageStatic('x -> %s %s %s', 1, 2, 3)", "x -> 1 2 3", String.class); // Integer to String
+		evaluate("#messageStatic('x -> %s %s %s', new Integer[]{1, 2, 3})", "x -> 1 2 3", String.class); // Integer[] to String[]
+		evaluate("#messageStatic('x -> %s %s %s', new int[]{1, 2, 3})", "x -> 1 2 3", String.class); // int[] to String[]
+		evaluate("#messageStatic('x -> %s %s %s', new short[]{1, 2, 3})", "x -> 1 2 3", String.class);  // short[] to String[]
+		evaluate("#formatObjectVarargs('x -> %s %s %s', new Integer[]{1, 2, 3})", "x -> 1 2 3", String.class); // Integer[] to String[]
 
 		// Individual string contains a comma with multiple varargs arguments
 		evaluate("#formatObjectVarargs('foo -> %s %s', ',', 'baz')", "foo -> , baz", String.class);
@@ -145,6 +174,44 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		evaluate("#formatObjectVarargs('foo -> %s', ',bar')", "foo -> ,bar", String.class);
 		evaluate("#formatObjectVarargs('foo -> %s', 'bar,')", "foo -> bar,", String.class);
 		evaluate("#formatObjectVarargs('foo -> %s', 'bar,baz')", "foo -> bar,baz", String.class);
+	}
+
+	@Test
+	void functionWithPrimitiveVarargsViaMethodHandle() {
+		// Calling 'public String formatPrimitiveVarargs(String format, int... nums)' -> effectively String.format(format, args)
+
+		// No var-args and no conversion necessary
+		evaluate("#formatPrimitiveVarargs(9)", "9", String.class);
+
+		// No var-args but conversion necessary
+		evaluate("#formatPrimitiveVarargs('7')", "7", String.class);
+
+		// No conversion necessary
+		evaluate("#formatPrimitiveVarargs('x -> %s', 9)", "x -> 9", String.class);
+		evaluate("#formatPrimitiveVarargs('x -> %s %s %s', 1, 2, 3)", "x -> 1 2 3", String.class);
+		evaluate("#formatPrimitiveVarargs('x -> %s', new int[]{1})", "x -> 1", String.class);
+		evaluate("#formatPrimitiveVarargs('x -> %s %s %s', new int[]{1, 2, 3})", "x -> 1 2 3", String.class);
+
+		// Conversion necessary
+		evaluate("#formatPrimitiveVarargs('x -> %s %s', '2', '3')", "x -> 2 3", String.class); // String to int
+		evaluate("#formatPrimitiveVarargs('x -> %s %s', '2', 3.0F)", "x -> 2 3", String.class); // String/Float to int
+		evaluate("#formatPrimitiveVarargs('x -> %s %s %s', new Integer[]{1, 2, 3})", "x -> 1 2 3", String.class); // Integer[] to int[]
+		evaluate("#formatPrimitiveVarargs('x -> %s %s %s', new String[]{'1', '2', '3'})", "x -> 1 2 3", String.class); // String[] to int[]
+	}
+
+	@Disabled("Primitive array to Object[] conversion is not currently supported")
+	@Test
+	void functionFromMethodWithVarargsAndPrimitiveArrayToObjectArrayConversion() {
+		evaluate("#varargsObjectFunction(new short[]{1, 2, 3})", "[1, 2, 3]", String.class); // short[] to Object[]
+		evaluate("#varargsObjectFunction(new int[]{1, 2, 3})", "[1, 2, 3]", String.class); // int[] to Object[]
+	}
+
+	@Disabled("Primitive array to Object[] conversion is not currently supported")
+	@Test
+	void functionFromMethodHandleWithVarargsAndPrimitiveArrayToObjectArrayConversion() {
+		evaluate("#message('x -> %s %s %s', new short[]{1, 2, 3})", "x -> 1 2 3", String.class);  // short[] to Object[]
+		evaluate("#message('x -> %s %s %s', new int[]{1, 2, 3})", "x -> 1 2 3", String.class); // int[] to Object[]
+		evaluate("#formatObjectVarargs('x -> %s %s %s', new int[]{1, 2, 3})", "x -> 1 2 3", String.class); // int[] to Object[]
 	}
 
 	@Test
