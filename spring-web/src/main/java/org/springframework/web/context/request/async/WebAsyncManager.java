@@ -79,6 +79,8 @@ public final class WebAsyncManager {
 
 	private AsyncTaskExecutor taskExecutor = DEFAULT_TASK_EXECUTOR;
 
+	private boolean isMultipartRequestParsed;
+
 	@Nullable
 	private volatile Object concurrentResult = RESULT_NONE;
 
@@ -240,6 +242,24 @@ public final class WebAsyncManager {
 			String key = interceptor.getClass().getName() + ":" + interceptor.hashCode();
 			this.deferredResultInterceptors.put(key, interceptor);
 		}
+	}
+
+	/**
+	 * Mark the {@link WebAsyncManager} as wrapping a
+	 * multipart async request.
+	 * @since 6.1.12
+	 */
+	public void setMultipartRequestParsed(boolean isMultipart) {
+		this.isMultipartRequestParsed = isMultipart;
+	}
+
+	/**
+	 * Return {@code true} if this {@link WebAsyncManager} was previously marked
+	 * as wrapping a multipart async request, {@code false} otherwise.
+	 * @since 6.1.12
+	 */
+	public boolean isMultipartRequestParsed() {
+		return this.isMultipartRequestParsed;
 	}
 
 	/**
