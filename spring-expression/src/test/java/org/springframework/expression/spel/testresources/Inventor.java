@@ -221,6 +221,14 @@ public class Inventor {
 		return String.format(format, args);
 	}
 
+	public String formatPrimitiveVarargs(String format, int... nums) {
+		Object[] args = new Object[nums.length];
+		for (int i = 0; i < nums.length; i++) {
+			args[i] = nums[i];
+		}
+		return String.format(format, args);
+	}
+
 
 	public Inventor(String... strings) {
 		if (strings.length > 0) {
