@@ -606,7 +606,7 @@ class ResourceWebHandlerTests {
 			setBestMachingPattern(exchange, "/**");
 			this.handler.handle(exchange).block(TIMEOUT);
 
-			assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.parseMediaType("application/javascript"));
+			assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.parseMediaType("text/javascript"));
 			assertResponseBody(exchange, "function foo() { console.log(\"hello world\"); }");
 		}
 
@@ -619,12 +619,11 @@ class ResourceWebHandlerTests {
 			this.handler.handle(exchange).block(TIMEOUT);
 
 			HttpHeaders headers = exchange.getResponse().getHeaders();
-			assertThat(headers.getContentType()).isEqualTo(MediaType.parseMediaType("application/javascript"));
+			assertThat(headers.getContentType()).isEqualTo(MediaType.parseMediaType("text/javascript"));
 			assertResponseBody(exchange, "function foo() { console.log(\"hello world\"); }");
 		}
 
-		@Test
-			// gh-27538, gh-27624
+		@Test  // gh-27538, gh-27624
 		void filterNonExistingLocations() throws Exception {
 			this.handler.afterPropertiesSet();
 			ResourceWebHandler handler = new ResourceWebHandler();
