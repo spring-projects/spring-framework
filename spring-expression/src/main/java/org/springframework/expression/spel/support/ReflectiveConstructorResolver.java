@@ -30,6 +30,7 @@ import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
+import org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind;
 import org.springframework.lang.Nullable;
 
 /**
@@ -75,7 +76,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 				for (int i = 0; i < paramCount; i++) {
 					paramDescriptors.add(new TypeDescriptor(new MethodParameter(ctor, i)));
 				}
-				ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
+				ArgumentsMatchKind matchKind = null;
 				if (ctor.isVarArgs() && argumentTypes.size() >= paramCount - 1) {
 					// *sigh* complicated
 					// Basically.. we have to have all parameters match up until the varargs one, then the rest of what is
@@ -83,20 +84,20 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 					// the same type whilst the final argument to the method must be an array of that (oh, how easy...not) -
 					// or the final parameter
 					// we are supplied does match exactly (it is an array already).
-					matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
+					matchKind = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
 				}
 				else if (paramCount == argumentTypes.size()) {
 					// worth a closer look
-					matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
+					matchKind = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 				}
-				if (matchInfo != null) {
-					if (matchInfo.isExactMatch()) {
+				if (matchKind != null) {
+					if (matchKind.isExactMatch()) {
 						return new ReflectiveConstructorExecutor(ctor);
 					}
-					else if (matchInfo.isCloseMatch()) {
+					else if (matchKind.isCloseMatch()) {
 						closeMatch = ctor;
 					}
-					else if (matchInfo.isMatchRequiringConversion()) {
+					else if (matchKind.isMatchRequiringConversion()) {
 						matchRequiringConversion = ctor;
 					}
 				}

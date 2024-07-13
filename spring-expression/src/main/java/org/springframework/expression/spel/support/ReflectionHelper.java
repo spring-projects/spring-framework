@@ -58,7 +58,7 @@ public abstract class ReflectionHelper {
 	 * or {@code null} if it was not a match
 	 */
 	@Nullable
-	static ArgumentsMatchInfo compareArguments(
+	static ArgumentsMatchKind compareArguments(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
 		Assert.isTrue(expectedArgTypes.size() == suppliedArgTypes.size(),
@@ -88,7 +88,7 @@ public abstract class ReflectionHelper {
 				}
 			}
 		}
-		return (match != null ? new ArgumentsMatchInfo(match) : null);
+		return match;
 	}
 
 	/**
@@ -143,11 +143,11 @@ public abstract class ReflectionHelper {
 	 * @param expectedArgTypes the types the method/constructor is expecting
 	 * @param suppliedArgTypes the types that are being supplied at the point of invocation
 	 * @param typeConverter a registered type converter
-	 * @return an {@code ArgumentsMatchInfo} object indicating what kind of match it was,
+	 * @return an {@code ArgumentsMatchKind} object indicating what kind of match it was,
 	 * or {@code null} if it was not a match
 	 */
 	@Nullable
-	static ArgumentsMatchInfo compareArgumentsVarargs(
+	static ArgumentsMatchKind compareArgumentsVarargs(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
 		Assert.isTrue(!CollectionUtils.isEmpty(expectedArgTypes),
@@ -231,7 +231,7 @@ public abstract class ReflectionHelper {
 			}
 		}
 
-		return (match != null ? new ArgumentsMatchInfo(match) : null);
+		return match;
 	}
 
 	/**
@@ -507,45 +507,37 @@ public abstract class ReflectionHelper {
 
 
 	/**
-	 * Arguments match kinds.
+	 * {@code ArgumentsMatchKind} describes what kind of match was achieved between two sets
+	 * of arguments: the set that a method/constructor is expecting and the set that is being
+	 * supplied at the point of invocation.
 	 */
 	enum ArgumentsMatchKind {
 
-		/** An exact match is where the parameter types exactly match what the method/constructor is expecting. */
+		/**
+		 * An exact match is where the parameter types exactly match what the method/constructor is expecting.
+		 */
 		EXACT,
 
-		/** A close match is where the parameter types either exactly match or are assignment-compatible. */
+		/**
+		 * A close match is where the parameter types either exactly match or are assignment-compatible.
+		 */
 		CLOSE,
 
-		/** A conversion match is where the type converter must be used to transform some of the parameter types. */
-		REQUIRES_CONVERSION
-	}
-
-
-	/**
-	 * An instance of {@code ArgumentsMatchInfo} describes what kind of match was achieved
-	 * between two sets of arguments - the set that a method/constructor is expecting
-	 * and the set that is being supplied at the point of invocation.
-	 *
-	 * @param kind the kind of match that was achieved
-	 */
-	record ArgumentsMatchInfo(ArgumentsMatchKind kind) {
+		/**
+		 * A conversion match is where the type converter must be used to transform some of the parameter types.
+		 */
+		REQUIRES_CONVERSION;
 
 		public boolean isExactMatch() {
-			return (this.kind == ArgumentsMatchKind.EXACT);
+			return (this == EXACT);
 		}
 
 		public boolean isCloseMatch() {
-			return (this.kind == ArgumentsMatchKind.CLOSE);
+			return (this == CLOSE);
 		}
 
 		public boolean isMatchRequiringConversion() {
-			return (this.kind == ArgumentsMatchKind.REQUIRES_CONVERSION);
-		}
-
-		@Override
-		public String toString() {
-			return "ArgumentsMatchInfo: " + this.kind;
+			return (this == REQUIRES_CONVERSION);
 		}
 	}
 
