@@ -461,12 +461,12 @@ class GenericConversionServiceTests {
 		assertThat(converter.getSourceTypes().stream().allMatch(td -> Integer.class.equals(td.getType()))).isTrue();
 	}
 
-	@Test
+	@Test  // gh-14200, SPR-9566
 	void convertOptimizeArray() {
-		// SPR-9566
 		byte[] byteArray = new byte[] { 1, 2, 3 };
 		byte[] converted = conversionService.convert(byteArray, byte[].class);
 		assertThat(converted).isSameAs(byteArray);
+		assertThat(converted).containsExactly(1, 2, 3);
 	}
 
 	@Test

@@ -666,9 +666,19 @@ class DefaultConversionServiceTests {
 		assertThat(converted).isEqualTo(new Byte[]{1, 2, 3});
 	}
 
-	@Test
+	@Test  // gh-14200, SPR-9566
+	void convertPrimitiveByteArrayToPrimitiveByteArray() {
+		byte[] byteArray = new byte[] {1, 2, 3};
+		byte[] result = conversionService.convert(byteArray, byte[].class);
+		assertThat(result).isSameAs(byteArray);
+		assertThat(result).containsExactly(1, 2, 3);
+	}
+
+	@Test  // gh-14200, SPR-9566
 	void convertIntArrayToIntArray() {
-		int[] result = conversionService.convert(new int[] {1, 2, 3}, int[].class);
+		int[] intArray = new int[] {1, 2, 3};
+		int[] result = conversionService.convert(intArray, int[].class);
+		assertThat(result).isSameAs(intArray);
 		assertThat(result).containsExactly(1, 2, 3);
 	}
 
