@@ -136,8 +136,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			// The readerCache will only contain gettable properties (let's not worry about setters for now).
 			Property property = new Property(type, method, null);
 			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
-			Method methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method, type);
-			this.readerCache.put(cacheKey, new InvokerPair(methodToInvoke, typeDescriptor, method));
+			Method methodToInvoke = ClassUtils.getPubliclyAccessibleMethodIfPossible(method, type);
+			this.readerCache.put(cacheKey, new InvokerPair(methodToInvoke, typeDescriptor));
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
 		}
@@ -180,8 +180,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					// The readerCache will only contain gettable properties (let's not worry about setters for now).
 					Property property = new Property(type, method, null);
 					TypeDescriptor typeDescriptor = new TypeDescriptor(property);
-					methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method, type);
-					invoker = new InvokerPair(methodToInvoke, typeDescriptor, method);
+					methodToInvoke = ClassUtils.getPubliclyAccessibleMethodIfPossible(method, type);
+					invoker = new InvokerPair(methodToInvoke, typeDescriptor);
 					this.readerCache.put(cacheKey, invoker);
 				}
 			}
@@ -238,7 +238,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			// Treat it like a property
 			Property property = new Property(type, null, method);
 			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
-			method = ClassUtils.getInterfaceMethodIfPossible(method, type);
+			method = ClassUtils.getPubliclyAccessibleMethodIfPossible(method, type);
 			this.writerCache.put(cacheKey, method);
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
@@ -287,7 +287,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (method == null) {
 				method = findSetterForProperty(name, type, target);
 				if (method != null) {
-					method = ClassUtils.getInterfaceMethodIfPossible(method, type);
+					method = ClassUtils.getPubliclyAccessibleMethodIfPossible(method, type);
 					cachedMember = method;
 					this.writerCache.put(cacheKey, cachedMember);
 				}
@@ -512,7 +512,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * field) to use each time {@link #read(EvaluationContext, Object, String)}
 	 * is called.
 	 * <p>This method will return this {@code ReflectivePropertyAccessor} instance
-	 * if it is unable to build a optimized accessor.
+	 * if it is unable to build an optimized accessor.
 	 * <p>Note: An optimized accessor is currently only usable for read attempts.
 	 * Do not call this method if you need a read-write accessor.
 	 */
@@ -536,9 +536,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				method = findGetterForProperty(name, type, target);
 				if (method != null) {
 					TypeDescriptor typeDescriptor = new TypeDescriptor(new MethodParameter(method, -1));
-					Method methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method, type);
-					invokerPair = new InvokerPair(methodToInvoke, typeDescriptor, method);
+					Method methodToInvoke = ClassUtils.getPubliclyAccessibleMethodIfPossible(method, type);
 					ReflectionUtils.makeAccessible(methodToInvoke);
+					invokerPair = new InvokerPair(methodToInvoke, typeDescriptor);
 					this.readerCache.put(cacheKey, invokerPair);
 				}
 			}
@@ -552,8 +552,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (field == null) {
 				field = findField(name, type, target instanceof Class);
 				if (field != null) {
-					invokerPair = new InvokerPair(field, new TypeDescriptor(field));
 					ReflectionUtils.makeAccessible(field);
+					invokerPair = new InvokerPair(field, new TypeDescriptor(field));
 					this.readerCache.put(cacheKey, invokerPair);
 				}
 			}
@@ -576,13 +576,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	/**
 	 * Captures the member (method/field) to call reflectively to access a property value
 	 * and the type descriptor for the value returned by the reflective call.
-	 * <p>The {@code originalMethod} is only used if the member is a method.
 	 */
-	private record InvokerPair(Member member, TypeDescriptor typeDescriptor, @Nullable Method originalMethod) {
-
-		InvokerPair(Member member, TypeDescriptor typeDescriptor) {
-			this(member, typeDescriptor, null);
-		}
+	private record InvokerPair(Member member, TypeDescriptor typeDescriptor) {
 	}
 
 	private record PropertyCacheKey(Class<?> clazz, String property, boolean targetIsClass)
@@ -617,16 +612,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		private final TypeDescriptor typeDescriptor;
 
-		/**
-		 * The original method, or {@code null} if the member is not a method.
-		 */
-		@Nullable
-		private final Method originalMethod;
 
 		OptimalPropertyAccessor(InvokerPair invokerPair) {
 			this.member = invokerPair.member;
 			this.typeDescriptor = invokerPair.typeDescriptor;
-			this.originalMethod = invokerPair.originalMethod;
 		}
 
 		@Override
@@ -695,14 +684,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		@Override
 		public boolean isCompilable() {
-			if (Modifier.isPublic(this.member.getModifiers()) &&
-					Modifier.isPublic(this.member.getDeclaringClass().getModifiers())) {
-				return true;
-			}
-			if (this.originalMethod != null) {
-				return (CodeFlow.findPublicDeclaringClass(this.originalMethod) != null);
-			}
-			return false;
+			return (Modifier.isPublic(this.member.getModifiers()) &&
+					Modifier.isPublic(this.member.getDeclaringClass().getModifiers()));
 		}
 
 		@Override
@@ -718,12 +701,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		@Override
 		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
 			Class<?> publicDeclaringClass = this.member.getDeclaringClass();
-			if (!Modifier.isPublic(publicDeclaringClass.getModifiers()) && this.originalMethod != null) {
-				publicDeclaringClass = CodeFlow.findPublicDeclaringClass(this.originalMethod);
-			}
-			Assert.state(publicDeclaringClass != null && Modifier.isPublic(publicDeclaringClass.getModifiers()),
-					() -> "Failed to find public declaring class for: " +
-							(this.originalMethod != null ? this.originalMethod : this.member));
+			Assert.state(Modifier.isPublic(publicDeclaringClass.getModifiers()),
+					() -> "Failed to find public declaring class for: " + this.member);
 
 			String classDesc = publicDeclaringClass.getName().replace('.', '/');
 			boolean isStatic = Modifier.isStatic(this.member.getModifiers());

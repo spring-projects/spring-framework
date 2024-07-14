@@ -135,9 +135,16 @@ public abstract class ClassUtils {
 	private static final Set<Class<?>> javaLanguageInterfaces;
 
 	/**
-	 * Cache for equivalent methods on an interface implemented by the declaring class.
+	 * Cache for equivalent methods on a public interface implemented by the declaring class.
 	 */
 	private static final Map<Method, Method> interfaceMethodCache = new ConcurrentReferenceHashMap<>(256);
+
+	/**
+	 * Cache for equivalent public methods in a public declaring type within the type hierarchy
+	 * of the method's declaring class.
+	 * @since 6.2
+	 */
+	private static final Map<Method, Method> publiclyAccessibleMethodCache = new ConcurrentReferenceHashMap<>(256);
 
 
 	static {
@@ -1394,7 +1401,7 @@ public abstract class ClassUtils {
 	 * @param method the method to be invoked, potentially from an implementation class
 	 * @return the corresponding interface method, or the original method if none found
 	 * @since 5.1
-	 * @deprecated in favor of {@link #getInterfaceMethodIfPossible(Method, Class)}
+	 * @deprecated in favor of {@link #getPubliclyAccessibleMethodIfPossible(Method, Class)}
 	 */
 	@Deprecated
 	public static Method getInterfaceMethodIfPossible(Method method) {
@@ -1407,37 +1414,45 @@ public abstract class ClassUtils {
 	 * Module System which allows the method to be invoked via reflection without an illegal
 	 * access warning.
 	 * @param method the method to be invoked, potentially from an implementation class
-	 * @param targetClass the target class to check for declared interfaces
+	 * @param targetClass the target class to invoke the method on, or {@code null} if unknown
 	 * @return the corresponding interface method, or the original method if none found
 	 * @since 5.3.16
+	 * @see #getPubliclyAccessibleMethodIfPossible(Method, Class)
 	 * @see #getMostSpecificMethod
+	 * @deprecated in favor of {@link #getPubliclyAccessibleMethodIfPossible(Method, Class)}
 	 */
+	@Deprecated(since = "6.2")
 	public static Method getInterfaceMethodIfPossible(Method method, @Nullable Class<?> targetClass) {
-		if (!Modifier.isPublic(method.getModifiers()) || method.getDeclaringClass().isInterface()) {
+		Class<?> declaringClass = method.getDeclaringClass();
+		if (!Modifier.isPublic(method.getModifiers()) || declaringClass.isInterface()) {
 			return method;
 		}
+		String methodName = method.getName();
+		Class<?>[] parameterTypes = method.getParameterTypes();
+
 		// Try cached version of method in its declaring class
 		Method result = interfaceMethodCache.computeIfAbsent(method,
-				key -> findInterfaceMethodIfPossible(key, key.getParameterTypes(), key.getDeclaringClass(),
-						Object.class));
-		if (result == method && targetClass != null) {
+				key -> findInterfaceMethodIfPossible(methodName, parameterTypes, declaringClass, Object.class));
+		if (result == null && targetClass != null) {
 			// No interface method found yet -> try given target class (possibly a subclass of the
 			// declaring class, late-binding a base class method to a subclass-declared interface:
 			// see e.g. HashMap.HashIterator.hasNext)
-			result = findInterfaceMethodIfPossible(method, method.getParameterTypes(), targetClass,
-					method.getDeclaringClass());
+			result = findInterfaceMethodIfPossible(methodName, parameterTypes, targetClass, declaringClass);
 		}
-		return result;
+		return (result != null ? result : method);
 	}
 
-	private static Method findInterfaceMethodIfPossible(Method method, Class<?>[] parameterTypes,
+	@Nullable
+	private static Method findInterfaceMethodIfPossible(String methodName, Class<?>[] parameterTypes,
 			Class<?> startClass, Class<?> endClass) {
 
 		Class<?> current = startClass;
 		while (current != null && current != endClass) {
 			for (Class<?> ifc : current.getInterfaces()) {
 				try {
-					return ifc.getMethod(method.getName(), parameterTypes);
+					if (Modifier.isPublic(ifc.getModifiers())) {
+						return ifc.getMethod(methodName, parameterTypes);
+					}
 				}
 				catch (NoSuchMethodException ex) {
 					// ignore
@@ -1445,7 +1460,72 @@ public abstract class ClassUtils {
 			}
 			current = current.getSuperclass();
 		}
-		return method;
+		return null;
+	}
+
+	/**
+	 * Get the first publicly accessible method in the supplied method's type hierarchy that
+	 * has a method signature equivalent to the supplied method, if possible.
+	 * <p>If the supplied method is {@code public} and declared in a {@code public} type,
+	 * the supplied method will be returned.
+	 * <p>Otherwise, this method recursively searches the class hierarchy and implemented
+	 * interfaces for an equivalent method that is {@code public} and declared in a
+	 * {@code public} type.
+	 * <p>If a publicly accessible equivalent method cannot be found, the supplied method
+	 * will be returned, indicating that no such equivalent method exists. Consequently,
+	 * callers of this method must manually validate the accessibility of the returned method
+	 * if public access is a requirement.
+	 * <p>This is particularly useful for arriving at a public exported type on the Java
+	 * Module System which allows the method to be invoked via reflection without an illegal
+	 * access warning. This is also useful for invoking methods via a public API in bytecode
+	 * &mdash; for example, for use with the Spring Expression Language (SpEL) compiler.
+	 * For example, if a non-public class overrides {@code toString()}, this method will
+	 * traverse up the type hierarchy to find the first public type that declares the method
+	 * (if there is one). For {@code toString()}, it may traverse as far as {@link Object}.
+	 * @param method the method to be invoked, potentially from an implementation class
+	 * @param targetClass the target class to invoke the method on, or {@code null} if unknown
+	 * @return the corresponding publicly accessible method, or the original method if none
+	 * found
+	 * @since 6.2
+	 * @see #getInterfaceMethodIfPossible(Method, Class)
+	 * @see #getMostSpecificMethod(Method, Class)
+	 */
+	public static Method getPubliclyAccessibleMethodIfPossible(Method method, @Nullable Class<?> targetClass) {
+		Class<?> declaringClass = method.getDeclaringClass();
+		// If the method is not public, we can abort the search immediately; or if the method's
+		// declaring class is public, the method is already publicly accessible.
+		if (!Modifier.isPublic(method.getModifiers()) || Modifier.isPublic(declaringClass.getModifiers())) {
+			return method;
+		}
+
+		Method interfaceMethod = getInterfaceMethodIfPossible(method, targetClass);
+		// If we found a method in a public interface, return the interface method.
+		if (!interfaceMethod.equals(method)) {
+			return interfaceMethod;
+		}
+
+		Method result = publiclyAccessibleMethodCache.computeIfAbsent(method,
+				key -> findPubliclyAccessibleMethodIfPossible(key.getName(), key.getParameterTypes(), declaringClass));
+		return (result != null ? result : method);
+	}
+
+	@Nullable
+	private static Method findPubliclyAccessibleMethodIfPossible(
+			String methodName, Class<?>[] parameterTypes, Class<?> declaringClass) {
+
+		Class<?> current = declaringClass.getSuperclass();
+		while (current != null) {
+			if (Modifier.isPublic(current.getModifiers())) {
+				try {
+					return current.getDeclaredMethod(methodName, parameterTypes);
+				}
+				catch (NoSuchMethodException ex) {
+					// ignore
+				}
+			}
+			current = current.getSuperclass();
+		}
+		return null;
 	}
 
 	/**

@@ -159,7 +159,7 @@ public class ReflectiveIndexAccessor implements CompilableIndexAccessor {
 					.formatted(readMethodName, getName(indexType), getName(targetType)));
 		}
 
-		this.readMethodToInvoke = ClassUtils.getInterfaceMethodIfPossible(this.readMethod, targetType);
+		this.readMethodToInvoke = ClassUtils.getPubliclyAccessibleMethodIfPossible(this.readMethod, targetType);
 		ReflectionUtils.makeAccessible(this.readMethodToInvoke);
 
 		if (writeMethodName != null) {
@@ -173,7 +173,7 @@ public class ReflectiveIndexAccessor implements CompilableIndexAccessor {
 						.formatted(writeMethodName, getName(indexType), getName(indexedValueType),
 								getName(targetType)));
 			}
-			this.writeMethodToInvoke = ClassUtils.getInterfaceMethodIfPossible(writeMethod, targetType);
+			this.writeMethodToInvoke = ClassUtils.getPubliclyAccessibleMethodIfPossible(writeMethod, targetType);
 			ReflectionUtils.makeAccessible(this.writeMethodToInvoke);
 		}
 		else {
@@ -250,10 +250,7 @@ public class ReflectiveIndexAccessor implements CompilableIndexAccessor {
 	public void generateCode(SpelNode index, MethodVisitor mv, CodeFlow cf) {
 		// Find the public declaring class.
 		Class<?> publicDeclaringClass = this.readMethodToInvoke.getDeclaringClass();
-		if (!Modifier.isPublic(publicDeclaringClass.getModifiers())) {
-			publicDeclaringClass = CodeFlow.findPublicDeclaringClass(this.readMethod);
-		}
-		Assert.state(publicDeclaringClass != null && Modifier.isPublic(publicDeclaringClass.getModifiers()),
+		Assert.state(Modifier.isPublic(publicDeclaringClass.getModifiers()),
 				() -> "Failed to find public declaring class for read-method: " + this.readMethod);
 		String classDesc = publicDeclaringClass.getName().replace('.', '/');
 

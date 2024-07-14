@@ -301,9 +301,7 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		Method method = executor.getMethod();
-		return ((Modifier.isPublic(method.getModifiers()) &&
-				(Modifier.isPublic(method.getDeclaringClass().getModifiers()) ||
-						executor.getPublicDeclaringClass() != null)));
+		return (Modifier.isPublic(method.getModifiers()) && executor.getPublicDeclaringClass() != null);
 	}
 
 	@Override
@@ -314,13 +312,7 @@ public class MethodReference extends SpelNodeImpl {
 		}
 		Method method = methodExecutor.getMethod();
 
-		Class<?> publicDeclaringClass;
-		if (Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-			publicDeclaringClass = method.getDeclaringClass();
-		}
-		else {
-			publicDeclaringClass = methodExecutor.getPublicDeclaringClass();
-		}
+		Class<?> publicDeclaringClass = methodExecutor.getPublicDeclaringClass();
 		Assert.state(publicDeclaringClass != null,
 				() -> "Failed to find public declaring class for method: " + method);
 

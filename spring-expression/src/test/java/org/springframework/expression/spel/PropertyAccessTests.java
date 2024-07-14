@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -145,10 +146,25 @@ class PropertyAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void accessingPropertyOfClass() {
+	void accessingPropertyOfJavaLangClass() {
 		Expression expression = parser.parseExpression("name");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
 		assertThat(value).isEqualTo("java.lang.String");
+	}
+
+	@Test  // gh-33216
+	void accessingPropertyOfJavaTimeZoneIdDeclaredInNonPublicSubclass() throws Exception {
+		String ID = "CET";
+		ZoneId zoneId = ZoneId.of(ID);
+
+		// Prerequisites for this use case:
+		assertThat(zoneId.getClass()).isPackagePrivate();
+		assertThat(zoneId.getId()).isEqualTo(ID);
+
+		Expression expression = parser.parseExpression("id");
+
+		String result = expression.getValue(new StandardEvaluationContext(zoneId), String.class);
+		assertThat(result).isEqualTo(ID);
 	}
 
 	@Test

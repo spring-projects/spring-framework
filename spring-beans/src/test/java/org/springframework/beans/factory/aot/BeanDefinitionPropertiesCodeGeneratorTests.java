@@ -631,7 +631,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	}
 
-	interface Initializable {
+	public interface Initializable {
 
 		void initialize();
 	}
@@ -643,7 +643,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		}
 	}
 
-	interface Disposable {
+	public interface Disposable {
 
 		void dispose();
 	}

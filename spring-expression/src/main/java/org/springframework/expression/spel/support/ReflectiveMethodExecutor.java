@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -24,7 +25,6 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.CodeFlow;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -42,18 +42,15 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	private final Method originalMethod;
 
 	/**
-	 * The method to invoke via reflection, which is not necessarily the method
-	 * to invoke in a compiled expression.
+	 * The method to invoke via reflection or in a compiled expression.
 	 */
 	private final Method methodToInvoke;
 
 	@Nullable
 	private final Integer varargsPosition;
 
-	private boolean computedPublicDeclaringClass = false;
-
 	@Nullable
-	private Class<?> publicDeclaringClass;
+	private final Class<?> publicDeclaringClass;
 
 	private boolean argumentConversionOccurred = false;
 
@@ -69,18 +66,15 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	/**
 	 * Create a new executor for the given method.
 	 * @param method the method to invoke
-	 * @param targetClass the target class to invoke the method on
+	 * @param targetClass the target class to invoke the method on, or {@code null} if unknown
 	 * @since 5.3.16
 	 */
 	public ReflectiveMethodExecutor(Method method, @Nullable Class<?> targetClass) {
 		this.originalMethod = method;
-		this.methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method, targetClass);
-		if (method.isVarArgs()) {
-			this.varargsPosition = method.getParameterCount() - 1;
-		}
-		else {
-			this.varargsPosition = null;
-		}
+		this.methodToInvoke = ClassUtils.getPubliclyAccessibleMethodIfPossible(method, targetClass);
+		Class<?> declaringClass = this.methodToInvoke.getDeclaringClass();
+		this.publicDeclaringClass = (Modifier.isPublic(declaringClass.getModifiers()) ? declaringClass : null);
+		this.varargsPosition = (method.isVarArgs() ? method.getParameterCount() - 1 : null);
 	}
 
 
@@ -92,19 +86,15 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	}
 
 	/**
-	 * Find a public class or interface in the method's class hierarchy that
-	 * declares the {@linkplain #getMethod() original method}.
-	 * <p>See {@link CodeFlow#findPublicDeclaringClass(Method)} for
+	 * Get the public class or interface in the method's type hierarchy that declares the
+	 * {@linkplain #getMethod() original method}.
+	 * <p>See {@link ClassUtils#getPubliclyAccessibleMethodIfPossible(Method, Class)} for
 	 * details.
-	 * @return the public class or interface that declares the method, or
-	 * {@code null} if no such public type could be found
+	 * @return the public class or interface that declares the method, or {@code null} if
+	 * no such public type could be found
 	 */
 	@Nullable
 	public Class<?> getPublicDeclaringClass() {
-		if (!this.computedPublicDeclaringClass) {
-			this.publicDeclaringClass = CodeFlow.findPublicDeclaringClass(this.originalMethod);
-			this.computedPublicDeclaringClass = true;
-		}
 		return this.publicDeclaringClass;
 	}
 
