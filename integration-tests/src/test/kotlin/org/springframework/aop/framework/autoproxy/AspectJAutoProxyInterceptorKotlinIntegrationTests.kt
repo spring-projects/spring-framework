@@ -28,6 +28,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.aop.framework.autoproxy.AspectJAutoProxyInterceptorKotlinIntegrationTests.InterceptorConfig
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.CacheManager
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.EnableCaching
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.EnableAspectJAutoProxy
@@ -93,9 +97,26 @@ class AspectJAutoProxyInterceptorKotlinIntegrationTests(
 		assertThat(reactiveTransactionManager.commits).`as`("transactional applied").isOne()
 	}
 
+	@Test // gh-33210
+	fun `Aspect and cacheable with suspending function`() {
+		assertThat(countingAspect.counter).isZero()
+		val value = "Hello!"
+		runBlocking {
+			assertThat(echo.suspendingCacheableEcho(value)).isEqualTo("$value 0")
+			assertThat(echo.suspendingCacheableEcho(value)).isEqualTo("$value 0")
+			assertThat(echo.suspendingCacheableEcho(value)).isEqualTo("$value 0")
+			assertThat(countingAspect.counter).`as`("aspect applied once").isOne()
+
+			assertThat(echo.suspendingCacheableEcho("$value bis")).isEqualTo("$value bis 1")
+			assertThat(echo.suspendingCacheableEcho("$value bis")).isEqualTo("$value bis 1")
+		}
+		assertThat(countingAspect.counter).`as`("aspect applied once per key").isEqualTo(2)
+	}
+
     @Configuration
     @EnableAspectJAutoProxy
     @EnableTransactionManagement
+	@EnableCaching
     open class InterceptorConfig {
 
         @Bean
@@ -110,6 +131,11 @@ class AspectJAutoProxyInterceptorKotlinIntegrationTests(
 		@Bean
 		open fun transactionManager(): ReactiveCallCountingTransactionManager {
 			return ReactiveCallCountingTransactionManager()
+		}
+
+		@Bean
+		open fun cacheManager(): CacheManager {
+			return ConcurrentMapCacheManager()
 		}
 
         @Bean
@@ -155,7 +181,7 @@ class AspectJAutoProxyInterceptorKotlinIntegrationTests(
 		fun logging(joinPoint: ProceedingJoinPoint): Any {
 			return (joinPoint.proceed(joinPoint.args) as Mono<*>).doOnTerminate {
 				counter++
-			}
+			}.checkpoint("CountingAspect")
 		}
 	}
 
@@ -175,6 +201,15 @@ class AspectJAutoProxyInterceptorKotlinIntegrationTests(
 		open suspend fun suspendingTransactionalEcho(value: String): String {
 			delay(1)
 			return value
+		}
+
+		open var cacheCounter: Int = 0
+
+		@Counting
+		@Cacheable("something")
+		open suspend fun suspendingCacheableEcho(value: String): String {
+			delay(1)
+			return "$value ${cacheCounter++}"
 		}
 
     }
