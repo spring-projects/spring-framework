@@ -274,14 +274,16 @@ public class CorsConfiguration {
 				case ']' -> withinPortRange = false;
 				case ',' -> {
 					if (!withinPortRange) {
-						valueConsumer.accept(rawValue.substring(start, current).trim());
+						String originValue = rawValue.substring(start, current).trim();
+						valueConsumer.accept(originValue);
 						start = current + 1;
 					}
 				}
 			}
 		}
 		if (start < rawValue.length()) {
-			valueConsumer.accept(rawValue.substring(start).trim());
+			String originValue = rawValue.substring(start).trim();
+			valueConsumer.accept(originValue);
 		}
 	}
 
