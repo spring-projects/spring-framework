@@ -18,8 +18,12 @@ package org.springframework.web.service.invoker;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.*;
+
+import java.util.List;
 
 /**
  * {@link HttpServiceArgumentResolver} for {@link RequestParam @RequestParam}
@@ -54,9 +58,16 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public class RequestParamArgumentResolver extends AbstractNamedValueArgumentResolver {
 
+	private boolean formatAsSingleValue;
 
 	public RequestParamArgumentResolver(ConversionService conversionService) {
 		super(conversionService);
+		this.formatAsSingleValue = true;
+	}
+
+	public RequestParamArgumentResolver(ConversionService conversionService, boolean formatAsSingleValue) {
+		super(conversionService);
+		this.formatAsSingleValue = formatAsSingleValue;
 	}
 
 
@@ -64,8 +75,45 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 	@Nullable
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		RequestParam annot = parameter.getParameterAnnotation(RequestParam.class);
+		boolean formatAsSingleValue = this.formatAsSingleValue;
+		if (annot == null) {
+			return null;
+		}
+
+		List<String> invalidContentType = List.of(
+				MediaType.APPLICATION_FORM_URLENCODED_VALUE.toLowerCase(),
+				MediaType.MULTIPART_FORM_DATA_VALUE.toLowerCase(),
+				MediaType.MULTIPART_FORM_DATA_VALUE.toLowerCase(),
+				MediaType.MULTIPART_MIXED_VALUE.toLowerCase(),
+				MediaType.MULTIPART_RELATED_VALUE.toLowerCase());
+
+		PostExchange annot1 = parameter.getMethodAnnotation(PostExchange.class);
+		if (annot1 != null && invalidContentType.contains(annot1.contentType().toLowerCase())) {
+			formatAsSingleValue = true;
+		}
+
+		PutExchange annot2 = parameter.getMethodAnnotation(PutExchange.class);
+		if (annot2 != null && invalidContentType.contains(annot2.contentType().toLowerCase())) {
+			formatAsSingleValue = true;
+		}
+
+		DeleteExchange annot3 = parameter.getMethodAnnotation(DeleteExchange.class);
+		if (annot3 != null && invalidContentType.contains(annot3.contentType().toLowerCase())) {
+			formatAsSingleValue = true;
+		}
+
+		PatchExchange annot4 = parameter.getMethodAnnotation(PatchExchange.class);
+		if (annot4 != null && invalidContentType.contains(annot4.contentType().toLowerCase())) {
+			formatAsSingleValue = true;
+		}
+
+		HttpExchange annot5 = parameter.getDeclaringClass().getAnnotation(HttpExchange.class);
+		if (annot5 != null && invalidContentType.contains(annot5.contentType().toLowerCase())) {
+			formatAsSingleValue = true;
+		}
+
 		return (annot == null ? null :
-				new NamedValueInfo(annot.name(), annot.required(), annot.defaultValue(), "request parameter", true));
+				new NamedValueInfo(annot.name(), annot.required(), annot.defaultValue(), "request parameter", formatAsSingleValue));
 	}
 
 	@Override
