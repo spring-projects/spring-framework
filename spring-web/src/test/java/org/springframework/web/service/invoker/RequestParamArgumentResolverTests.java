@@ -16,12 +16,16 @@
 
 package org.springframework.web.service.invoker;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,14 +45,14 @@ class RequestParamArgumentResolverTests {
 
 	private final TestExchangeAdapter client = new TestExchangeAdapter();
 
-	private final Service service =
-			HttpServiceProxyFactory.builderFor(this.client).build().createClient(Service.class);
+	private final HttpServiceProxyFactory.Builder builder = HttpServiceProxyFactory.builderFor(this.client);
 
 
 	@Test
 	@SuppressWarnings("unchecked")
 	void requestParam() {
-		this.service.postForm("value 1", "value 2");
+		Service service = builder.build().createClient(Service.class);
+		service.postForm("value 1", "value 2");
 
 		Object body = this.client.getRequestValues().getBodyValue();
 		assertThat(body).isInstanceOf(MultiValueMap.class);
@@ -57,12 +61,34 @@ class RequestParamArgumentResolverTests {
 				.containsEntry("param2", List.of("value 2"));
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	void requestParamWithDisabledFormattingCollectionValue() {
+		ConversionService conversionService = new DefaultConversionService();
+		boolean formatAsSingleValue = false;
+		Service service = builder.customArgumentResolver(
+						new RequestParamArgumentResolver(conversionService, formatAsSingleValue))
+				.build()
+				.createClient(Service.class);
+		List<String> collectionParams = List.of("1", "2", "3");
+		service.getForm("value 1", collectionParams);
+
+		Object uriVariables = this.client.getRequestValues().getUriVariables();
+		assertThat(uriVariables).isNotInstanceOf(MultiValueMap.class).isInstanceOf(HashMap.class);
+		assertThat((HashMap<String, String>) uriVariables).hasSize(4)
+				.containsEntry("queryParam0", "param1")
+				.containsEntry("queryParam0[0]", "value 1")
+				.containsEntry("queryParam1", "param2")
+				.containsEntry("queryParam1[0]", String.join(",", collectionParams));
+	}
 
 	private interface Service {
 
 		@PostExchange(contentType = "application/x-www-form-urlencoded")
 		void postForm(@RequestParam String param1, @RequestParam String param2);
 
+		@GetExchange
+		void getForm(@RequestParam String param1, @RequestParam List<String> param2);
 	}
 
 }

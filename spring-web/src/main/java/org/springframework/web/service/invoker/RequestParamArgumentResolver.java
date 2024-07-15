@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.service.invoker;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -54,18 +55,41 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public class RequestParamArgumentResolver extends AbstractNamedValueArgumentResolver {
 
+	private boolean formatAsSingleValue = true;
+
 
 	public RequestParamArgumentResolver(ConversionService conversionService) {
 		super(conversionService);
 	}
 
+	public RequestParamArgumentResolver(ConversionService conversionService, boolean formatAsSingleValue) {
+		super(conversionService);
+		this.formatAsSingleValue = formatAsSingleValue;
+	}
+
+
+	@Override
+	@Nullable
+	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter, HttpRequestValues.Metadata requestValues) {
+		MediaType contentType = requestValues.getContentType();
+		if (contentType != null && isMultiValueFormContentType(contentType)) {
+			this.formatAsSingleValue = true;
+		}
+
+		return createNamedValueInfo(parameter);
+	}
 
 	@Override
 	@Nullable
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		RequestParam annot = parameter.getParameterAnnotation(RequestParam.class);
+		if (annot == null) {
+			return null;
+		}
+
 		return (annot == null ? null :
-				new NamedValueInfo(annot.name(), annot.required(), annot.defaultValue(), "request parameter", true));
+				new NamedValueInfo(annot.name(), annot.required(), annot.defaultValue(),
+						"request parameter", this.formatAsSingleValue));
 	}
 
 	@Override
@@ -73,6 +97,19 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 			String name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
 		requestValues.addRequestParameter(name, (String) value);
+	}
+
+	protected boolean isFormatAsSingleValue() {
+		return this.formatAsSingleValue;
+	}
+
+	protected void setFormatAsSingleValue(boolean formatAsSingleValue) {
+		this.formatAsSingleValue = formatAsSingleValue;
+	}
+
+	protected boolean isMultiValueFormContentType(MediaType contentType) {
+		return contentType.equals(MediaType.APPLICATION_FORM_URLENCODED)
+				|| contentType.getType().equals("multipart");
 	}
 
 }
