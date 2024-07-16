@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 	public boolean resolve(
 			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
-		NamedValueInfo info = getNamedValueInfo(parameter);
+		NamedValueInfo info = getNamedValueInfo(parameter, requestValues);
 		if (info == null) {
 			return false;
 		}
@@ -102,10 +102,10 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 	}
 
 	@Nullable
-	private NamedValueInfo getNamedValueInfo(MethodParameter parameter) {
+	private NamedValueInfo getNamedValueInfo(MethodParameter parameter, HttpRequestValues.Metadata requestValues) {
 		NamedValueInfo info = this.namedValueInfoCache.get(parameter);
 		if (info == null) {
-			info = createNamedValueInfo(parameter);
+			info = createNamedValueInfo(parameter, requestValues);
 			if (info == null) {
 				return null;
 			}
@@ -121,6 +121,18 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 	 */
 	@Nullable
 	protected abstract NamedValueInfo createNamedValueInfo(MethodParameter parameter);
+
+	/**
+	 * Variant of {@link #createNamedValueInfo(MethodParameter)} that also provides
+	 * access to the static values set from {@code @HttpExchange} attributes.
+	 * @since 6.2
+	 */
+	@Nullable
+	protected NamedValueInfo createNamedValueInfo(
+			MethodParameter parameter, HttpRequestValues.Metadata requestValues) {
+
+		return createNamedValueInfo(parameter);
+	}
 
 	private NamedValueInfo updateNamedValueInfo(MethodParameter parameter, NamedValueInfo info) {
 		String name = info.name;

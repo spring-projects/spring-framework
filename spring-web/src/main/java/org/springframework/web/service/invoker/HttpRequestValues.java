@@ -184,9 +184,41 @@ public class HttpRequestValues {
 
 
 	/**
+	 * Expose static metadata from {@code @HttpExchange} annotation attributes.
+	 * @since 6.2
+	 */
+	public interface Metadata {
+
+		/**
+		 * Return the HTTP method, if known.
+		 */
+		@Nullable
+		HttpMethod getHttpMethod();
+
+		/**
+		 * Return the URI template, if set already.
+		 */
+		@Nullable
+		String getUriTemplate();
+
+		/**
+		 * Return the content type, if set already.
+		 */
+		@Nullable
+		MediaType getContentType();
+
+		/**
+		 * Return the acceptable media types, if set already.
+		 */
+		@Nullable
+		List<MediaType> getAcceptMediaTypes();
+	}
+
+
+	/**
 	 * Builder for {@link HttpRequestValues}.
 	 */
-	public static class Builder {
+	public static class Builder implements Metadata {
 
 		@Nullable
 		private HttpMethod httpMethod;
@@ -356,6 +388,34 @@ public class HttpRequestValues {
 		public void setBodyValue(@Nullable Object bodyValue) {
 			this.bodyValue = bodyValue;
 		}
+
+
+		// Implementation of {@link Metadata} methods
+
+		@Override
+		@Nullable
+		public HttpMethod getHttpMethod() {
+			return this.httpMethod;
+		}
+
+		@Override
+		@Nullable
+		public String getUriTemplate() {
+			return this.uriTemplate;
+		}
+
+		@Override
+		@Nullable
+		public MediaType getContentType() {
+			return (this.headers != null ? this.headers.getContentType() : null);
+		}
+
+		@Override
+		@Nullable
+		public List<MediaType> getAcceptMediaTypes() {
+			return (this.headers != null ? this.headers.getAccept() : null);
+		}
+
 
 		/**
 		 * Build the {@link HttpRequestValues} instance.
