@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link MapAccessor}.
  *
  * @author Andy Clement
+ * @author Yanming Zhou
  */
 class MapAccessorTests {
 
@@ -78,6 +79,16 @@ class MapAccessorTests {
 		assertThat(ex.getValue(sec,testMap)).isEqualTo("bar2");
 		assertThat(SpelCompiler.compile(ex)).isTrue();
 		assertThat(ex.getValue(sec,testMap)).isEqualTo("bar2");
+	}
+
+	@Test
+	void mapAccessorNotWritable() {
+		Map<String, Object> testMap = getSimpleTestMap();
+		StandardEvaluationContext sec = new StandardEvaluationContext();
+		sec.addPropertyAccessor(new MapAccessor(false));
+		SpelExpressionParser sep = new SpelExpressionParser();
+		Expression ex = sep.parseExpression("foo");
+		assertThat(ex.isWritable(sec, testMap)).isFalse();
 	}
 
 	public static class MapGetter {
