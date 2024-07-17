@@ -198,7 +198,7 @@ class ServerHttpRequestTests {
 	void mutateContextPathWithoutUpdatingPathShouldFail() throws Exception {
 		ServerHttpRequest request = createRequest("/context/path", "/context");
 
-		assertThatThrownBy(() -> request.mutate().contextPath("/fail").build())
+		assertThatThrownBy(() -> request.mutate().contextPath("/fail").build().getPath())
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Invalid contextPath '/fail': must match the start of requestPath: '/context/path'");
 	}
