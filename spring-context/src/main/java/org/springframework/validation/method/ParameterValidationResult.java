@@ -19,7 +19,6 @@ package org.springframework.validation.method;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.MethodParameter;
@@ -89,7 +88,7 @@ public class ParameterValidationResult {
 	/**
 	 * Create a {@code ParameterValidationResult}.
 	 * @deprecated in favor of
-	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object, Function)}
+	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object, BiFunction)}
 	 */
 	@Deprecated(since = "6.2", forRemoval = true)
 	public ParameterValidationResult(
@@ -104,7 +103,7 @@ public class ParameterValidationResult {
 	/**
 	 * Create a {@code ParameterValidationResult}.
 	 * @deprecated in favor of
-	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object, Function)}
+	 * {@link ParameterValidationResult#ParameterValidationResult(MethodParameter, Object, Collection, Object, Integer, Object, BiFunction)}
 	 */
 	@Deprecated(since = "6.1.3", forRemoval = true)
 	public ParameterValidationResult(
