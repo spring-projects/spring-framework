@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,29 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Andy Clement
+ * @author Yanming Zhou
  * @since 3.0
  */
 public class MapAccessor implements CompilablePropertyAccessor {
+
+	private final boolean allowWrite;
+
+	/**
+	 * Create a new map accessor for reading as well as writing.
+	 * @see #MapAccessor(boolean)
+	 */
+	public MapAccessor() {
+		this(true);
+	}
+
+	/**
+	 * Create a new map accessor for reading and possibly also writing.
+	 * @param allowWrite whether to allow write operations on a target instance
+	 * @see #canWrite
+	 */
+	public MapAccessor(boolean allowWrite) {
+		this.allowWrite = allowWrite;
+	}
 
 	@Override
 	public Class<?>[] getSpecificTargetClasses() {
@@ -60,7 +80,7 @@ public class MapAccessor implements CompilablePropertyAccessor {
 
 	@Override
 	public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
-		return true;
+		return this.allowWrite;
 	}
 
 	@Override
