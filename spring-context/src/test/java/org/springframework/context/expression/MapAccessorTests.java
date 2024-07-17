@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link MapAccessor}.
  *
  * @author Andy Clement
- * @author Yanming Zhou
  */
 class MapAccessorTests {
 

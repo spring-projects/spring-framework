@@ -33,7 +33,6 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Andy Clement
- * @author Yanming Zhou
  * @since 3.0
  */
 public class MapAccessor implements CompilablePropertyAccessor {
@@ -42,6 +41,7 @@ public class MapAccessor implements CompilablePropertyAccessor {
 
 	/**
 	 * Create a new map accessor for reading as well as writing.
+	 * @since 6.2
 	 * @see #MapAccessor(boolean)
 	 */
 	public MapAccessor() {
@@ -51,6 +51,7 @@ public class MapAccessor implements CompilablePropertyAccessor {
 	/**
 	 * Create a new map accessor for reading and possibly also writing.
 	 * @param allowWrite whether to allow write operations on a target instance
+	 * @since 6.2
 	 * @see #canWrite
 	 */
 	public MapAccessor(boolean allowWrite) {
