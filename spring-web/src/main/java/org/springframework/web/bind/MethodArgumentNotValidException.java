@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,13 @@
 
 package org.springframework.web.bind;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.springframework.context.MessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -90,45 +87,6 @@ public class MethodArgumentNotValidException extends BindException implements Er
 		return new Object[] {
 				BindErrorUtils.resolveAndJoin(getGlobalErrors()),
 				BindErrorUtils.resolveAndJoin(getFieldErrors())};
-	}
-
-	/**
-	 * Convert each given {@link ObjectError} to a String.
-	 * @since 6.0
-	 * @deprecated in favor of using {@link BindErrorUtils} and
-	 * {@link #getAllErrors()}, to be removed in 6.2
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public static List<String> errorsToStringList(List<? extends ObjectError> errors) {
-		return BindErrorUtils.resolve(errors).values().stream().toList();
-	}
-
-	/**
-	 * Convert each given {@link ObjectError} to a String, and use a
-	 * {@link MessageSource} to resolve each error.
-	 * @since 6.0
-	 * @deprecated in favor of {@link BindErrorUtils}, to be removed in 6.2
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public static List<String> errorsToStringList(
-			List<? extends ObjectError> errors, @Nullable MessageSource messageSource, Locale locale) {
-
-		return (messageSource != null ?
-				BindErrorUtils.resolve(errors, messageSource, locale).values().stream().toList() :
-				BindErrorUtils.resolve(errors).values().stream().toList());
-	}
-
-	/**
-	 * Resolve global and field errors to messages with the given
-	 * {@link MessageSource} and {@link Locale}.
-	 * @return a Map with errors as keys and resolved messages as values
-	 * @since 6.0.3
-	 * @deprecated in favor of using {@link BindErrorUtils} and
-	 * {@link #getAllErrors()}, to be removed in 6.2
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {
-		return BindErrorUtils.resolve(getAllErrors(), messageSource, locale);
 	}
 
 	@Override

@@ -23,7 +23,6 @@ import java.util.Map;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -78,28 +77,6 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 	@Nullable
 	public ParameterizedTypeReference<?> getBodyPublisherElementType() {
 		return this.bodyElementType;
-	}
-
-	/**
-	 * Return the request body as a {@link Publisher}.
-	 * <p>This is mutually exclusive with {@link #getBodyValue()}.
-	 * Only one of the two or neither is set.
-	 */
-	@Override
-	@SuppressWarnings("removal")
-	@Nullable
-	public Publisher<?> getBody() {
-		return getBodyPublisher();
-	}
-
-	/**
-	 * Return the element type for a {@linkplain #getBodyPublisher() body publisher}.
-	 */
-	@Override
-	@SuppressWarnings("removal")
-	@Nullable
-	public ParameterizedTypeReference<?> getBodyElementType() {
-		return getBodyPublisherElementType();
 	}
 
 
@@ -211,12 +188,6 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 			return this;
 		}
 
-		@SuppressWarnings("removal")
-		@Override
-		public <T, P extends Publisher<T>> Builder addRequestPart(String name, P publisher, ResolvableType type) {
-			return addRequestPartPublisher(name, publisher, ParameterizedTypeReference.forType(type.getType()));
-		}
-
 		/**
 		 * {@inheritDoc}
 		 * <p>This is mutually exclusive with and resets any previously set
@@ -240,12 +211,6 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 			this.body = body;
 			this.bodyElementType = elementTye;
 			super.setBodyValue(null);
-		}
-
-		@SuppressWarnings("removal")
-		@Override
-		public <T, P extends Publisher<T>> void setBody(P body, ParameterizedTypeReference<T> elementTye) {
-			setBodyPublisher(body, elementTye);
 		}
 
 		@Override

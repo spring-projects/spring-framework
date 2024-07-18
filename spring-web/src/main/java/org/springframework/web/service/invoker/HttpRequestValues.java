@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.reactivestreams.Publisher;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -79,22 +75,6 @@ public class HttpRequestValues {
 	@Nullable
 	private final Object bodyValue;
 
-
-	/**
-	 * Constructor without UriBuilderFactory.
-	 * @deprecated in favour of
-	 * {@link HttpRequestValues#HttpRequestValues(HttpMethod, URI, UriBuilderFactory, String, Map, HttpHeaders, MultiValueMap, Map, Object)}
-	 * to be removed in 6.2.
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	protected HttpRequestValues(@Nullable HttpMethod httpMethod,
-			@Nullable URI uri, @Nullable String uriTemplate,
-			Map<String, String> uriVariables,
-			HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
-			@Nullable Object bodyValue) {
-
-		this(httpMethod, uri, null, uriTemplate, uriVariables, headers, cookies, attributes, bodyValue);
-	}
 
 	/**
 	 * Construct {@link HttpRequestValues}.
@@ -195,30 +175,6 @@ public class HttpRequestValues {
 	@Nullable
 	public Object getBodyValue() {
 		return this.bodyValue;
-	}
-
-	/**
-	 * Return the request body as a Publisher.
-	 * <p>This is mutually exclusive with {@link #getBodyValue()}.
-	 * Only one of the two or neither is set.
-	 * @deprecated in favor of {@link ReactiveHttpRequestValues#getBodyPublisher()};
-	 * to be removed in 6.2
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	@Nullable
-	public Publisher<?> getBody() {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * Return the element type for a Publisher body.
-	 * @deprecated in favor of {@link ReactiveHttpRequestValues#getBodyPublisherElementType()};
-	 * to be removed in 6.2
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	@Nullable
-	public ParameterizedTypeReference<?> getBodyElementType() {
-		throw new UnsupportedOperationException();
 	}
 
 
@@ -384,17 +340,6 @@ public class HttpRequestValues {
 		}
 
 		/**
-		 * Variant of {@link #addRequestPart(String, Object)} that allows the
-		 * part value to be produced by a {@link Publisher}.
-		 * @deprecated in favor of {@link ReactiveHttpRequestValues.Builder#addRequestPartPublisher};
-		 * to be removed in 6.2
-		 */
-		@Deprecated(since = "6.1", forRemoval = true)
-		public <T, P extends Publisher<T>> Builder addRequestPart(String name, P publisher, ResolvableType type) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
 		 * Configure an attribute to associate with the request.
 		 * @param name the attribute name
 		 * @param value the attribute value
@@ -410,18 +355,6 @@ public class HttpRequestValues {
 		 */
 		public void setBodyValue(@Nullable Object bodyValue) {
 			this.bodyValue = bodyValue;
-		}
-
-		/**
-		 * Set the request body as a Reactive Streams Publisher.
-		 * <p>This is mutually exclusive with, and resets any previously set
-		 * {@linkplain #setBodyValue(Object) body value}.
-		 * @deprecated in favor of {@link ReactiveHttpRequestValues.Builder#setBodyPublisher};
-		 * to be removed in 6.2
-		 */
-		@Deprecated(since = "6.1", forRemoval = true)
-		public <T, P extends Publisher<T>> void setBody(P body, ParameterizedTypeReference<T> elementTye) {
-			throw new UnsupportedOperationException();
 		}
 
 		/**
@@ -511,24 +444,6 @@ public class HttpRequestValues {
 				i++;
 			}
 			return uriComponentsBuilder.build().toUriString();
-		}
-
-		/**
-		 * Create {@link HttpRequestValues} from values passed to the {@link Builder}.
-		 * @deprecated in favour of
-		 * {@link Builder#createRequestValues(HttpMethod, URI, UriBuilderFactory, String, Map, HttpHeaders, MultiValueMap, Map, Object)}
-		 * to be removed in 6.2.
-		 */
-		@Deprecated(since = "6.1", forRemoval = true)
-		protected HttpRequestValues createRequestValues(
-				@Nullable HttpMethod httpMethod,
-				@Nullable URI uri, @Nullable String uriTemplate,
-				Map<String, String> uriVars,
-				HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
-				@Nullable Object bodyValue) {
-
-			return createRequestValues(httpMethod, uri, null, uriTemplate,
-					uriVars, headers, cookies, attributes, bodyValue);
 		}
 
 		/**

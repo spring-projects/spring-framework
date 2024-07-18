@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.service.invoker;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,6 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
-import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -113,17 +111,6 @@ public final class HttpServiceProxyFactory {
 	}
 
 	/**
-	 * Return a builder that's initialized with the given client.
-	 * @deprecated in favor of {@link #builderFor(HttpExchangeAdapter)};
-	 * to be removed in 6.2.
-	 */
-	@SuppressWarnings("removal")
-	@Deprecated(since = "6.1", forRemoval = true)
-	public static Builder builder(HttpClientAdapter clientAdapter) {
-		return new Builder().exchangeAdapter(clientAdapter.asReactorExchangeAdapter());
-	}
-
-	/**
 	 * Return an empty builder, with the client to be provided to builder.
 	 */
 	public static Builder builder() {
@@ -162,20 +149,6 @@ public final class HttpServiceProxyFactory {
 		}
 
 		/**
-		 * Provide the HTTP client to perform requests through.
-		 * @param clientAdapter a client adapted to {@link HttpClientAdapter}
-		 * @return this same builder instance
-		 * @deprecated in favor of {@link #exchangeAdapter(HttpExchangeAdapter)};
-		 * to be removed in 6.2
-		 */
-		@SuppressWarnings("removal")
-		@Deprecated(since = "6.1", forRemoval = true)
-		public Builder clientAdapter(HttpClientAdapter clientAdapter) {
-			this.exchangeAdapter = clientAdapter.asReactorExchangeAdapter();
-			return this;
-		}
-
-		/**
 		 * Register a custom argument resolver, invoked ahead of default resolvers.
 		 * @param resolver the resolver to add
 		 * @return this same builder instance
@@ -204,40 +177,6 @@ public final class HttpServiceProxyFactory {
 		 */
 		public Builder embeddedValueResolver(StringValueResolver embeddedValueResolver) {
 			this.embeddedValueResolver = embeddedValueResolver;
-			return this;
-		}
-
-		/**
-		 * Set the {@link ReactiveAdapterRegistry} to use to support different
-		 * asynchronous types for HTTP service method return values.
-		 * <p>By default this is {@link ReactiveAdapterRegistry#getSharedInstance()}.
-		 * @return this same builder instance
-		 * @deprecated in favor of setting the same directly on the {@link HttpExchangeAdapter}
-		 */
-		@Deprecated(since = "6.1", forRemoval = true)
-		public Builder reactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
-			if (this.exchangeAdapter instanceof AbstractReactorHttpExchangeAdapter settable) {
-				settable.setReactiveAdapterRegistry(registry);
-			}
-			return this;
-		}
-
-		/**
-		 * Configure how long to block for the response of an HTTP service method
-		 * with a synchronous (blocking) method signature.
-		 * <p>By default this is not set, in which case the behavior depends on
-		 * connection and request timeout settings of the underlying HTTP client.
-		 * We recommend configuring timeout values directly on the underlying HTTP
-		 * client, which provides more control over such settings.
-		 * @param blockTimeout the timeout value
-		 * @return this same builder instance
-		 * @deprecated in favor of setting the same directly on the {@link HttpExchangeAdapter}
-		 */
-		@Deprecated(since = "6.1", forRemoval = true)
-		public Builder blockTimeout(@Nullable Duration blockTimeout) {
-			if (this.exchangeAdapter instanceof AbstractReactorHttpExchangeAdapter settable) {
-				settable.setBlockTimeout(blockTimeout);
-			}
 			return this;
 		}
 

@@ -91,11 +91,11 @@ class FreeMarkerViewTests {
 	}
 
 	@Test
-	void checkResourceExists() throws Exception {
+	void checkResourceExists() {
 		freeMarkerView.setConfiguration(this.freeMarkerConfig);
 		freeMarkerView.setUrl("test.ftl");
 
-		assertThat(freeMarkerView.checkResourceExists(Locale.US)).isTrue();
+		assertThat(freeMarkerView.resourceExists(Locale.US).block(Duration.ofSeconds(1))).isTrue();
 	}
 
 	@Test

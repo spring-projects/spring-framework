@@ -248,24 +248,9 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * multiple templates to be rendered into a single view.
 	 */
 	@Override
-	public boolean checkResourceExists(Locale locale) throws Exception {
-		try {
-			// Check that we can get the template, even if we might subsequently get it again.
-			getTemplate(locale);
-			return true;
-		}
-		catch (FileNotFoundException ex) {
-			// Allow for ViewResolver chaining...
-			return false;
-		}
-		catch (ParseException ex) {
-			throw new ApplicationContextException(
-					"Failed to parse FreeMarker template for URL [" + getUrl() + "]", ex);
-		}
-		catch (IOException ex) {
-			throw new ApplicationContextException(
-					"Could not load FreeMarker template for URL [" + getUrl() + "]", ex);
-		}
+	public boolean checkResourceExists(Locale locale) {
+		throw new UnsupportedOperationException(
+				"This should never be called as we override resourceExists returning Mono<Boolean>");
 	}
 
 	/**
@@ -376,23 +361,6 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		ObjectWrapper ow = obtainConfiguration().getObjectWrapper();
 		Version version = Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS;
 		return (ow != null ? ow : new DefaultObjectWrapperBuilder(version).build());
-	}
-
-	/**
-	 * Retrieve the FreeMarker {@link Template} to be rendered by this view, for
-	 * the specified locale and using the {@linkplain #setEncoding(String) configured
-	 * encoding} if set.
-	 * <p>By default, the template specified by the "url" bean property will be retrieved.
-	 * @param locale the current locale
-	 * @return the FreeMarker template to render
-	 * @deprecated since 6.1, in favor of {@link #lookupTemplate(Locale)}, to be
-	 * removed in 6.2
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	protected Template getTemplate(Locale locale) throws IOException {
-		return (getEncoding() != null ?
-				obtainConfiguration().getTemplate(getUrl(), locale, getEncoding()) :
-				obtainConfiguration().getTemplate(getUrl(), locale));
 	}
 
 	/**
