@@ -121,7 +121,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 
 	@Override
 	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
-		return (AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null && canWrite(mediaType));
+		return ((JAXBElement.class.isAssignableFrom(clazz) || AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null) && canWrite(mediaType));
 	}
 
 	@Override
@@ -192,7 +192,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	@Override
 	protected void writeToResult(Object o, HttpHeaders headers, Result result) throws Exception {
 		try {
-			Class<?> clazz = ClassUtils.getUserClass(o);
+			Class<?> clazz = getMarshallerType(o);
 			Marshaller marshaller = createMarshaller(clazz);
 			setCharset(headers.getContentType(), marshaller);
 			marshaller.marshal(o, result);
@@ -202,6 +202,15 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException("Invalid JAXB setup: " + ex.getMessage(), ex);
+		}
+	}
+
+	private static Class<?> getMarshallerType(Object o) {
+		if (o instanceof JAXBElement<?> jaxbElement) {
+			return jaxbElement.getDeclaredType();
+		}
+		else {
+			return ClassUtils.getUserClass(o);
 		}
 	}
 
