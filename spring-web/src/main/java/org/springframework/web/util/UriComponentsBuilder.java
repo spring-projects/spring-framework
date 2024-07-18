@@ -265,7 +265,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param httpUrl the source URI
 	 * @return the URI components of the URI
 	 * @deprecated as of 6.2, in favor of {@link #fromUriString(String)};
-	 * scheduled for removal in 8.0.
+	 * scheduled for removal in 7.0.
 	 */
 	@Deprecated(since = "6.2")
 	public static UriComponentsBuilder fromHttpUrl(String httpUrl) throws InvalidUrlException {
@@ -291,7 +291,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return the URI components of the URI
 	 * @since 4.1.5
 	 * @deprecated in favor of {@link ForwardedHeaderUtils#adaptFromForwardedHeaders};
-	 * to be removed in 6.2
+	 * to be removed in 7.0
 	 */
 	@Deprecated(since = "6.1", forRemoval = true)
 	public static UriComponentsBuilder fromHttpRequest(HttpRequest request) {
