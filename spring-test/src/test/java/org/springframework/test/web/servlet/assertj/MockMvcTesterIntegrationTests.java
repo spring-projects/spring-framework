@@ -233,6 +233,13 @@ public class MockMvcTesterIntegrationTests {
 				}""".getBytes(StandardCharsets.UTF_8));
 
 		@Test
+		void multipartSetsContentType() {
+			assertThat(mvc.put().uri("/multipart-put").multipart().file(file).file(JSON_PART_FILE))
+					.request().satisfies(request -> assertThat(request.getContentType())
+							.isEqualTo(MediaType.MULTIPART_FORM_DATA_VALUE));
+		}
+
+		@Test
 		void multipartWithPut() {
 			assertThat(mvc.put().uri("/multipart-put").multipart().file(file).file(JSON_PART_FILE))
 					.hasStatusOk()

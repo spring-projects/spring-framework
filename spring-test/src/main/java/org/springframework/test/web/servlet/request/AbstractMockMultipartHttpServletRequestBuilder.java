@@ -58,6 +58,7 @@ public abstract class AbstractMockMultipartHttpServletRequestBuilder<B extends A
 
 	protected AbstractMockMultipartHttpServletRequestBuilder(HttpMethod httpMethod) {
 		super(httpMethod);
+		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
 	/**
