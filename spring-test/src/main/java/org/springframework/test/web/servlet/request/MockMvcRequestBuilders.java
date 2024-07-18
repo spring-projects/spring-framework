@@ -214,7 +214,9 @@ public abstract class MockMvcRequestBuilders {
 	 * @since 5.0
 	 */
 	public static MockMultipartHttpServletRequestBuilder multipart(String uriTemplate, Object... uriVariables) {
-		return new MockMultipartHttpServletRequestBuilder().uri(uriTemplate, uriVariables);
+		MockMultipartHttpServletRequestBuilder builder = new MockMultipartHttpServletRequestBuilder();
+		builder.uri(uriTemplate, uriVariables);
+		return builder;
 	}
 
 	/**
@@ -226,7 +228,9 @@ public abstract class MockMvcRequestBuilders {
 	 * @since 5.3.22
 	 */
 	public static MockMultipartHttpServletRequestBuilder multipart(HttpMethod httpMethod, String uriTemplate, Object... uriVariables) {
-		return new MockMultipartHttpServletRequestBuilder(httpMethod).uri(uriTemplate, uriVariables);
+		MockMultipartHttpServletRequestBuilder builder = new MockMultipartHttpServletRequestBuilder(httpMethod);
+		builder.uri(uriTemplate, uriVariables);
+		return builder;
 	}
 
 	/**
@@ -235,7 +239,9 @@ public abstract class MockMvcRequestBuilders {
 	 * @since 5.0
 	 */
 	public static MockMultipartHttpServletRequestBuilder multipart(URI uri) {
-		return new MockMultipartHttpServletRequestBuilder().uri(uri);
+		MockMultipartHttpServletRequestBuilder builder = new MockMultipartHttpServletRequestBuilder();
+		builder.uri(uri);
+		return builder;
 	}
 
 	/**
@@ -246,7 +252,9 @@ public abstract class MockMvcRequestBuilders {
 	 * @since 5.3.21
 	 */
 	public static MockMultipartHttpServletRequestBuilder multipart(HttpMethod httpMethod, URI uri) {
-		return new MockMultipartHttpServletRequestBuilder(httpMethod).uri(uri);
+		MockMultipartHttpServletRequestBuilder builder = new MockMultipartHttpServletRequestBuilder(httpMethod);
+		builder.uri(uri);
+		return builder;
 	}
 
 	/**
