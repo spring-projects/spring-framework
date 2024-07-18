@@ -21,14 +21,17 @@ import java.util.List;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
+import freemarker.ext.jakarta.jsp.TaglibFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
 import org.springframework.util.Assert;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * Bean to configure FreeMarker for web usage, via the "configLocation",
@@ -62,7 +65,7 @@ import org.springframework.util.Assert;
  * &lt;@spring.bind "person.age"/&gt;
  * age is ${spring.status.value}</pre>
  *
- * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.26 or higher.
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.33 or higher.
  *
  * @author Darren Davison
  * @author Rob Harrop
@@ -75,10 +78,13 @@ import org.springframework.util.Assert;
  * @see FreeMarkerView
  */
 public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
-		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware {
+		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware, ServletContextAware {
 
 	@Nullable
 	private Configuration configuration;
+
+	@Nullable
+	private TaglibFactory taglibFactory;
 
 
 	/**
@@ -90,6 +96,14 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 */
 	public void setConfiguration(Configuration configuration) {
 		this.configuration = configuration;
+	}
+
+	/**
+	 * Initialize the {@link TaglibFactory} for the given ServletContext.
+	 */
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		this.taglibFactory = new TaglibFactory(servletContext);
 	}
 
 
@@ -126,6 +140,15 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	public Configuration getConfiguration() {
 		Assert.state(this.configuration != null, "No Configuration available");
 		return this.configuration;
+	}
+
+	/**
+	 * Return the TaglibFactory object wrapped by this bean.
+	 */
+	@Override
+	public TaglibFactory getTaglibFactory() {
+		Assert.state(this.taglibFactory != null, "No TaglibFactory available");
+		return this.taglibFactory;
 	}
 
 }

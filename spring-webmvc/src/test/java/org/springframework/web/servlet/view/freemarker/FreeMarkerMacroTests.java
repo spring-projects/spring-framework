@@ -81,6 +81,7 @@ public class FreeMarkerMacroTests {
 		this.templateLoaderPath = Files.createTempDirectory("servlet-").toAbsolutePath();
 
 		fc.setTemplateLoaderPaths("classpath:/", "file://" + this.templateLoaderPath);
+		fc.setServletContext(servletContext);
 		fc.afterPropertiesSet();
 
 		wac.setServletContext(servletContext);

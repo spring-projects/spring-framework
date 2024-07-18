@@ -47,7 +47,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * check for the existence of the specified template resources and only return
  * a non-null {@code View} object if the template was actually found.
  *
- * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.26 or higher.
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.33 or higher.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen

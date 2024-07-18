@@ -90,7 +90,7 @@ import org.springframework.web.server.ServerWebExchange;
  * sets the supported media type to {@code "text/html;charset=UTF-8"} by default.
  * Thus, those default values are likely suitable for most applications.
  *
- * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.26 or higher.
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.33 or higher.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
