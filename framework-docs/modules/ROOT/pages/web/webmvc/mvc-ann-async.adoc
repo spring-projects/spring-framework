@@ -446,7 +446,7 @@ directly. For example:
 ----
 
 For more details, see the
-https://micrometer.io/docs/contextPropagation[documentation] of the Micrometer Context
+https://docs.micrometer.io/context-propagation/reference/[documentation] of the Micrometer Context
 Propagation library.
 
 
