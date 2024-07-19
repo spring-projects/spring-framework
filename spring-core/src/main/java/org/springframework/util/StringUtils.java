@@ -945,14 +945,14 @@ public abstract class StringUtils {
 	 * @throws IllegalArgumentException in case of an invalid time zone specification
 	 */
 	public static TimeZone parseTimeZoneString(String timeZoneString) {
-		TimeZone timeZone = TimeZone.getTimeZone(timeZoneString);
-		if ("GMT".equals(timeZone.getID()) && !timeZoneString.startsWith("GMT")) {
-			// We don't want that GMT fallback...
+		ZoneId zoneId;
+		try {
+			zoneId = ZoneId.of(timeZoneString);
+		} catch (ZoneRulesException ze) {
 			throw new IllegalArgumentException("Invalid time zone specification '" + timeZoneString + "'");
 		}
-		return timeZone;
+		return TimeZone.getTimeZone(zoneId);
 	}
-
 
 	//---------------------------------------------------------------------
 	// Convenience methods for working with String arrays
