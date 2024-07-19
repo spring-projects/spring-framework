@@ -23,9 +23,12 @@ import java.util.stream.Stream;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.tck.TestObservationRegistry;
+import jakarta.jms.Message;
 import jakarta.jms.MessageListener;
+import jakarta.jms.TextMessage;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.junit.EmbeddedActiveMQExtension;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -77,6 +80,33 @@ class MessageListenerContainerObservationTests {
 				.that()
 				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation");
 		assertThat(registry).hasNumberOfObservationsEqualTo(1);
+		listenerContainer.stop();
+		listenerContainer.shutdown();
+	}
+
+	@ParameterizedTest(name = "[{index}] {0}")
+	@MethodSource("listenerContainers")
+	void shouldRecordJmsPublishObservations(AbstractMessageListenerContainer listenerContainer) throws Exception {
+		CountDownLatch latch = new CountDownLatch(1);
+		listenerContainer.setConnectionFactory(connectionFactory);
+		listenerContainer.setObservationRegistry(registry);
+		listenerContainer.setDestinationName("spring.test.observation");
+		listenerContainer.setMessageListener((SessionAwareMessageListener) (message, session) -> {
+			Message response = session.createTextMessage("test response");
+			session.createProducer(message.getJMSReplyTo()).send(response);
+		});
+		listenerContainer.afterPropertiesSet();
+		listenerContainer.start();
+		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+		TextMessage response = (TextMessage) jmsTemplate.sendAndReceive("spring.test.observation",
+							session -> session.createTextMessage("test request"));
+
+		// request received by listener and response received by template
+		assertThat(registry).hasNumberOfObservationsWithNameEqualTo("jms.message.process", 2);
+		// response sent to the template
+		assertThat(registry).hasNumberOfObservationsWithNameEqualTo("jms.message.publish", 1);
+
+		Assertions.assertThat(response.getText()).isEqualTo("test response");
 		listenerContainer.stop();
 		listenerContainer.shutdown();
 	}
