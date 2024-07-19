@@ -17,6 +17,7 @@
 package org.springframework.jms.listener;
 
 import io.micrometer.jakarta9.instrument.jms.DefaultJmsProcessObservationConvention;
+import io.micrometer.jakarta9.instrument.jms.JmsInstrumentation;
 import io.micrometer.jakarta9.instrument.jms.JmsObservationDocumentation;
 import io.micrometer.jakarta9.instrument.jms.JmsProcessObservationContext;
 import io.micrometer.jakarta9.instrument.jms.JmsProcessObservationConvention;
@@ -772,6 +773,9 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		Observation observation = createObservation(message);
 		try {
 			Session sessionToUse = session;
+			if (micrometerJakartaPresent && this.observationRegistry != null) {
+				sessionToUse = MicrometerInstrumentation.instrumentSession(sessionToUse, this.observationRegistry);
+			}
 			if (!isExposeListenerSession()) {
 				// We need to expose a separate Session.
 				conToClose = createConnection();
@@ -990,6 +994,14 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	@SuppressWarnings("serial")
 	private static class MessageRejectedWhileStoppingException extends RuntimeException {
+	}
+
+	private abstract static class MicrometerInstrumentation {
+
+		static Session instrumentSession(Session session, ObservationRegistry registry) {
+			return JmsInstrumentation.instrumentSession(session, registry);
+		}
+
 	}
 
 	private abstract static class ObservationFactory {

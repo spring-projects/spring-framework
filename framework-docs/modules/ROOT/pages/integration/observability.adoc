@@ -162,6 +162,8 @@ include-code::./JmsTemplatePublish[]
 
 It uses the `io.micrometer.jakarta9.instrument.jms.DefaultJmsPublishObservationConvention` by default, backed by the `io.micrometer.jakarta9.instrument.jms.JmsPublishObservationContext`.
 
+Similar observations are recorded with `@JmsListener` annotated methods when response messages are returned from the listener method.
+
 [[observability.jms.process]]
 === JMS message Processing instrumentation
 
