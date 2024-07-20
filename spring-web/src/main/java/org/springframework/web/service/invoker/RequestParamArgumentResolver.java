@@ -55,11 +55,11 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public class RequestParamArgumentResolver extends AbstractNamedValueArgumentResolver {
 
-	private boolean formatAsSingleValue;
+	private boolean formatAsSingleValue = true;
+
 
 	public RequestParamArgumentResolver(ConversionService conversionService) {
 		super(conversionService);
-		this.formatAsSingleValue = true;
 	}
 
 	public RequestParamArgumentResolver(ConversionService conversionService, boolean formatAsSingleValue) {
@@ -67,13 +67,6 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 		this.formatAsSingleValue = formatAsSingleValue;
 	}
 
-	protected boolean isFormatAsSingleValue() {
-		return this.formatAsSingleValue;
-	}
-
-	protected void setFormatAsSingleValue(boolean formatAsSingleValue) {
-		this.formatAsSingleValue = formatAsSingleValue;
-	}
 
 	@Override
 	@Nullable
@@ -104,6 +97,14 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 			String name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
 		requestValues.addRequestParameter(name, (String) value);
+	}
+
+	protected boolean isFormatAsSingleValue() {
+		return this.formatAsSingleValue;
+	}
+
+	protected void setFormatAsSingleValue(boolean formatAsSingleValue) {
+		this.formatAsSingleValue = formatAsSingleValue;
 	}
 
 	protected boolean isMultiValueFormContentType(MediaType contentType) {

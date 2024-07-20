@@ -47,6 +47,7 @@ class RequestParamArgumentResolverTests {
 
 	private final HttpServiceProxyFactory.Builder builder = HttpServiceProxyFactory.builderFor(this.client);
 
+
 	@Test
 	@SuppressWarnings("unchecked")
 	void requestParam() {
