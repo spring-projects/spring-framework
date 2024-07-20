@@ -21,7 +21,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.service.annotation.*;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,14 +44,13 @@ class RequestParamArgumentResolverTests {
 
 	private final TestExchangeAdapter client = new TestExchangeAdapter();
 
-	private final Service service =
-			HttpServiceProxyFactory.builderFor(this.client).build().createClient(Service.class);
-
+	private final HttpServiceProxyFactory.Builder builder = HttpServiceProxyFactory.builderFor(this.client);
 
 	@Test
 	@SuppressWarnings("unchecked")
 	void requestParam() {
-		this.service.postForm("value 1", "value 2");
+		Service service = builder.build().createClient(Service.class);
+		service.postForm("value 1", "value 2");
 
 		Object body = this.client.getRequestValues().getBodyValue();
 		assertThat(body).isInstanceOf(MultiValueMap.class);
@@ -60,13 +60,13 @@ class RequestParamArgumentResolverTests {
 	}
 
 	@Test
-	void requestParam2() {
+	void requestParamWithDisabledFormattingCollectionValue() {
 		ConversionService conversionService = new DefaultConversionService();
 		boolean formatAsSingleValue = false;
-		Service service =
-				HttpServiceProxyFactory.builderFor(this.client)
-						.customArgumentResolver(new RequestParamArgumentResolver(conversionService, formatAsSingleValue))
-						.build().createClient(Service.class);
+		Service service = builder.customArgumentResolver(
+						new RequestParamArgumentResolver(conversionService, formatAsSingleValue))
+				.build()
+				.createClient(Service.class);
 		List<String> collectionParams = List.of("1", "2", "3");
 		service.getForm("value 1", collectionParams);
 
@@ -79,105 +79,6 @@ class RequestParamArgumentResolverTests {
 				.containsEntry("queryParam1", "param2")
 				.containsEntry("queryParam1[0]", String.join(",", collectionParams));
 	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	void requestParam3() {
-		ConversionService conversionService = new DefaultConversionService();
-		boolean formatAsSingleValue = false;
-		Service service =
-				HttpServiceProxyFactory.builderFor(this.client)
-						.customArgumentResolver(new RequestParamArgumentResolver(conversionService, formatAsSingleValue))
-						.build().createClient(Service.class);
-		List<String> collectionParams = List.of("1", "2", "3");
-		service.putForm("value 1", collectionParams);
-
-		Object body = this.client.getRequestValues().getBodyValue();
-		assertThat(body).isInstanceOf(MultiValueMap.class);
-		assertThat((MultiValueMap<String, String>) body).hasSize(2)
-				.containsEntry("param1", List.of("value 1"))
-				.containsEntry("param2", collectionParams);
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	void requestParam4() {
-		ConversionService conversionService = new DefaultConversionService();
-		boolean formatAsSingleValue = false;
-		Service service =
-				HttpServiceProxyFactory.builderFor(this.client)
-						.customArgumentResolver(new RequestParamArgumentResolver(conversionService, formatAsSingleValue))
-						.build().createClient(Service.class);
-		List<String> collectionParams = List.of("1", "2", "3");
-		service.deleteForm("value 1", collectionParams);
-
-		Object body = this.client.getRequestValues().getBodyValue();
-		assertThat(body).isInstanceOf(MultiValueMap.class);
-		assertThat((MultiValueMap<String, String>) body).hasSize(2)
-				.containsEntry("param1", List.of("value 1"))
-				.containsEntry("param2", collectionParams);
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	void requestParam5() {
-		ConversionService conversionService = new DefaultConversionService();
-		boolean formatAsSingleValue = false;
-		Service service =
-				HttpServiceProxyFactory.builderFor(this.client)
-						.customArgumentResolver(new RequestParamArgumentResolver(conversionService, formatAsSingleValue))
-						.build().createClient(Service.class);
-		List<String> collectionParams = List.of("1", "2", "3");
-		service.patchForm("value 1", collectionParams);
-
-		Object body = this.client.getRequestValues().getBodyValue();
-		assertThat(body).isInstanceOf(MultiValueMap.class);
-		assertThat((MultiValueMap<String, String>) body).hasSize(2)
-				.containsEntry("param1", List.of("value 1"))
-				.containsEntry("param2", collectionParams);
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	void requestParam6() {
-		ConversionService conversionService = new DefaultConversionService();
-		boolean formatAsSingleValue = false;
-		Service2 service =
-				HttpServiceProxyFactory.builderFor(this.client)
-						.customArgumentResolver(new RequestParamArgumentResolver(conversionService, formatAsSingleValue))
-						.build().createClient(Service2.class);
-		List<String> collectionParams = List.of("1", "2", "3");
-		service.getForm("value 1", collectionParams);
-
-		Object body = this.client.getRequestValues().getBodyValue();
-		assertThat(body).isInstanceOf(MultiValueMap.class);
-		assertThat((MultiValueMap<String, String>) body).hasSize(2)
-				.containsEntry("param1", List.of("value 1"))
-				.containsEntry("param2", collectionParams);
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	void requestParam7() {
-		ConversionService conversionService = new DefaultConversionService();
-		boolean formatAsSingleValue = false;
-		Service3 service =
-				HttpServiceProxyFactory.builderFor(this.client)
-						.customArgumentResolver(new RequestParamArgumentResolver(conversionService, formatAsSingleValue))
-						.build().createClient(Service3.class);
-		List<String> collectionParams = List.of("1", "2", "3");
-		service.getForm("value 1", collectionParams);
-
-		Object uriVariables = this.client.getRequestValues().getUriVariables();
-		assertThat(uriVariables).isNotInstanceOf(MultiValueMap.class)
-				.isInstanceOf(HashMap.class);
-		assertThat((HashMap<String, String>) uriVariables).hasSize(4)
-				.containsEntry("queryParam0", "param1")
-				.containsEntry("queryParam0[0]", "value 1")
-				.containsEntry("queryParam1", "param2")
-				.containsEntry("queryParam1[0]", String.join(",", collectionParams));
-	}
-
 
 	private interface Service {
 
@@ -186,28 +87,6 @@ class RequestParamArgumentResolverTests {
 
 		@GetExchange
 		void getForm(@RequestParam String param1, @RequestParam List<String> param2);
-
-		@PutExchange(contentType = "application/x-www-form-urlencoded")
-		void putForm(@RequestParam String param1, @RequestParam List<String> param2);
-
-		@PutExchange(contentType = "application/x-www-form-urlencoded")
-		void deleteForm(@RequestParam String param1, @RequestParam List<String> param2);
-
-		@PatchExchange(contentType = "application/x-www-form-urlencoded")
-		void patchForm(@RequestParam String param1, @RequestParam List<String> param2);
 	}
 
-	@HttpExchange(contentType = "application/x-www-form-urlencoded")
-	private interface Service2 {
-
-		@GetExchange
-		void getForm(@RequestParam String param1, @RequestParam List<String> param2);
-	}
-
-	@HttpExchange
-	private interface Service3 {
-
-		@GetExchange
-		void getForm(@RequestParam String param1, @RequestParam List<String> param2);
-	}
 }

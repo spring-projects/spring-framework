@@ -21,9 +21,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.service.annotation.*;
-
-import java.util.List;
 
 /**
  * {@link HttpServiceArgumentResolver} for {@link RequestParam @RequestParam}
@@ -70,46 +67,31 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 		this.formatAsSingleValue = formatAsSingleValue;
 	}
 
+	protected boolean isFormatAsSingleValue() {
+		return formatAsSingleValue;
+	}
+
+	protected void setFormatAsSingleValue(boolean formatAsSingleValue) {
+		this.formatAsSingleValue = formatAsSingleValue;
+	}
+
+	@Override
+	@Nullable
+	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter, HttpRequestValues.Metadata requestValues) {
+		MediaType contentType = requestValues.getContentType();
+		if (contentType != null && isMultiValueFormContentType(contentType)) {
+			formatAsSingleValue = true;
+		}
+
+		return createNamedValueInfo(parameter);
+	}
 
 	@Override
 	@Nullable
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		RequestParam annot = parameter.getParameterAnnotation(RequestParam.class);
-		boolean formatAsSingleValue = this.formatAsSingleValue;
 		if (annot == null) {
 			return null;
-		}
-
-		List<String> invalidContentType = List.of(
-				MediaType.APPLICATION_FORM_URLENCODED_VALUE.toLowerCase(),
-				MediaType.MULTIPART_FORM_DATA_VALUE.toLowerCase(),
-				MediaType.MULTIPART_FORM_DATA_VALUE.toLowerCase(),
-				MediaType.MULTIPART_MIXED_VALUE.toLowerCase(),
-				MediaType.MULTIPART_RELATED_VALUE.toLowerCase());
-
-		PostExchange annot1 = parameter.getMethodAnnotation(PostExchange.class);
-		if (annot1 != null && invalidContentType.contains(annot1.contentType().toLowerCase())) {
-			formatAsSingleValue = true;
-		}
-
-		PutExchange annot2 = parameter.getMethodAnnotation(PutExchange.class);
-		if (annot2 != null && invalidContentType.contains(annot2.contentType().toLowerCase())) {
-			formatAsSingleValue = true;
-		}
-
-		DeleteExchange annot3 = parameter.getMethodAnnotation(DeleteExchange.class);
-		if (annot3 != null && invalidContentType.contains(annot3.contentType().toLowerCase())) {
-			formatAsSingleValue = true;
-		}
-
-		PatchExchange annot4 = parameter.getMethodAnnotation(PatchExchange.class);
-		if (annot4 != null && invalidContentType.contains(annot4.contentType().toLowerCase())) {
-			formatAsSingleValue = true;
-		}
-
-		HttpExchange annot5 = parameter.getDeclaringClass().getAnnotation(HttpExchange.class);
-		if (annot5 != null && invalidContentType.contains(annot5.contentType().toLowerCase())) {
-			formatAsSingleValue = true;
 		}
 
 		return (annot == null ? null :
@@ -121,6 +103,11 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 			String name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
 		requestValues.addRequestParameter(name, (String) value);
+	}
+
+	protected boolean isMultiValueFormContentType(MediaType contentType) {
+		return contentType.equals(MediaType.APPLICATION_FORM_URLENCODED)
+				|| contentType.getType().equals("multipart");
 	}
 
 }
