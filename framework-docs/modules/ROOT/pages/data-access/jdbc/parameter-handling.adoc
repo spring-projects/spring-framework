@@ -341,5 +341,8 @@ Kotlin::
 ----
 ======
 
-
+[NOTE]
+====
+Use `unwrap(OracleConnection.class)` method if connection is not an OracleConnection's instance
+====
 
