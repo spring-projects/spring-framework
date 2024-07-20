@@ -16,16 +16,17 @@
 
 package org.springframework.web.service.invoker;
 
+import java.util.HashMap;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
-
-import java.util.HashMap;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,6 +61,7 @@ class RequestParamArgumentResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void requestParamWithDisabledFormattingCollectionValue() {
 		ConversionService conversionService = new DefaultConversionService();
 		boolean formatAsSingleValue = false;
@@ -71,8 +73,7 @@ class RequestParamArgumentResolverTests {
 		service.getForm("value 1", collectionParams);
 
 		Object uriVariables = this.client.getRequestValues().getUriVariables();
-		assertThat(uriVariables).isNotInstanceOf(MultiValueMap.class)
-				.isInstanceOf(HashMap.class);
+		assertThat(uriVariables).isNotInstanceOf(MultiValueMap.class).isInstanceOf(HashMap.class);
 		assertThat((HashMap<String, String>) uriVariables).hasSize(4)
 				.containsEntry("queryParam0", "param1")
 				.containsEntry("queryParam0[0]", "value 1")

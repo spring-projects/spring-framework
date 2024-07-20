@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 	}
 
 	protected boolean isFormatAsSingleValue() {
-		return formatAsSingleValue;
+		return this.formatAsSingleValue;
 	}
 
 	protected void setFormatAsSingleValue(boolean formatAsSingleValue) {
@@ -80,7 +80,7 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter, HttpRequestValues.Metadata requestValues) {
 		MediaType contentType = requestValues.getContentType();
 		if (contentType != null && isMultiValueFormContentType(contentType)) {
-			formatAsSingleValue = true;
+			this.formatAsSingleValue = true;
 		}
 
 		return createNamedValueInfo(parameter);
@@ -95,7 +95,8 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 		}
 
 		return (annot == null ? null :
-				new NamedValueInfo(annot.name(), annot.required(), annot.defaultValue(), "request parameter", formatAsSingleValue));
+				new NamedValueInfo(annot.name(), annot.required(), annot.defaultValue(),
+						"request parameter", this.formatAsSingleValue));
 	}
 
 	@Override
