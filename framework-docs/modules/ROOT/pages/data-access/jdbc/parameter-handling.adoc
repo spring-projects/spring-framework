@@ -209,7 +209,7 @@ are passed in as a parameter to the stored procedure.
 
 The `SqlReturnType` interface has a single method (named `getTypeValue`) that must be
 implemented. This interface is used as part of the declaration of an `SqlOutParameter`.
-The following example shows returning the value of a `java.sql.Struct` object of the user
+The following example shows returning the value of an Oracle `STRUCT` object of the user
 declared type `ITEM_TYPE`:
 
 [tabs]
