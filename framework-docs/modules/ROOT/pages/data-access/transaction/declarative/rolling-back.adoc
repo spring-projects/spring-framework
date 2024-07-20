@@ -23,7 +23,7 @@ The default configuration also provides support for Vavr's `Try` method to trigg
 transaction rollbacks when it returns a 'Failure'.
 This allows you to handle functional-style errors using Try and have the transaction
 automatically rolled back in case of a failure. For more information on Vavr's Try,
-refer to the https://docs.vavr.io/#_try[official Vavr documentation].
+refer to the {vavr-docs}/#_try[official Vavr documentation].
 Here's an example of how to use Vavr's Try with a transactional method:
 
 [tabs]

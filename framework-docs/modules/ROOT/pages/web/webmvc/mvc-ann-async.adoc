@@ -452,9 +452,8 @@ The following `ThreadLocalAccessor` implementations are provided out of the box:
 
 The above are not registered automatically. You need to register them via `ContextRegistry.getInstance()` on startup.
 
-For more details, see the
-https://micrometer.io/docs/contextPropagation[documentation] of the Micrometer Context
-Propagation library.
+For more details, see the {micrometer-context-propagation-docs}/[documentation] of the
+Micrometer Context Propagation library.
 
 
 

@@ -72,6 +72,8 @@ asciidoc:
     kotlin-coroutines-api: '{kotlin-site}/api/kotlinx.coroutines'
     kotlin-github-org: 'https://github.com/Kotlin'
     kotlin-issues: 'https://youtrack.jetbrains.com/issue'
+    micrometer-docs: 'https://docs.micrometer.io/micrometer/reference'
+    micrometer-context-propagation-docs: 'https://docs.micrometer.io/context-propagation/reference'
     reactive-streams-site: 'https://www.reactive-streams.org'
     reactive-streams-spec: 'https://github.com/reactive-streams/reactive-streams-jvm/blob/master/README.md#specification'
     reactor-github-org: 'https://github.com/reactor'
@@ -90,3 +92,4 @@ asciidoc:
     stackoverflow-spring-tag: "{stackoverflow-questions}/tagged/spring"
     stackoverflow-spring-kotlin-tags: "{stackoverflow-spring-tag}+kotlin"
     testcontainers-site: 'https://www.testcontainers.org'
+    vavr-docs: 'https://vavr-io.github.io/vavr-docs'
