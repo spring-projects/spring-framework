@@ -16,7 +16,7 @@ First off, thank you for taking the time to contribute! :+1: :tada:
 
 ### Code of Conduct
 
-This project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc).
+This is a project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc).
 By participating you are expected to uphold this code.
 Please report unacceptable behavior to spring-code-of-conduct@spring.io.
 
