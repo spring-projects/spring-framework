@@ -209,7 +209,7 @@ are passed in as a parameter to the stored procedure.
 
 The `SqlReturnType` interface has a single method (named `getTypeValue`) that must be
 implemented. This interface is used as part of the declaration of an `SqlOutParameter`.
-The following example shows returning the value of an Oracle `STRUCT` object of the user
+The following example shows returning the value of a `java.sql.Struct` object of the user
 declared type `ITEM_TYPE`:
 
 [tabs]
@@ -222,9 +222,9 @@ Java::
 
 		public TestItemStoredProcedure(DataSource dataSource) {
 			// ...
-			declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
+			declareParameter(new SqlOutParameter("item", Types.STRUCT, "ITEM_TYPE",
 				(CallableStatement cs, int colIndx, int sqlType, String typeName) -> {
-					STRUCT struct = (STRUCT) cs.getObject(colIndx);
+					Struct struct = (Struct) cs.getObject(colIndx);
 					Object[] attr = struct.getAttributes();
 					TestItem item = new TestItem();
 					item.setId(((Number) attr[0]).longValue());
@@ -258,8 +258,8 @@ Kotlin::
 You can use `SqlTypeValue` to pass the value of a Java object (such as `TestItem`) to a
 stored procedure. The `SqlTypeValue` interface has a single method (named
 `createTypeValue`) that you must implement. The active connection is passed in, and you
-can use it to create database-specific objects, such as `StructDescriptor` instances
-or `ArrayDescriptor` instances. The following example creates a `StructDescriptor` instance:
+can use it to create database-specific objects, such as `java.sql.Struct` instances
+or `java.sql.Array` instances. The following example creates a `java.sql.Struct` instance:
 
 [tabs]
 ======
@@ -272,14 +272,12 @@ Java::
 
 	SqlTypeValue value = new AbstractSqlTypeValue() {
 		protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
-			StructDescriptor itemDescriptor = new StructDescriptor(typeName, conn);
-			Struct item = new STRUCT(itemDescriptor, conn,
-			new Object[] {
+			var item = new Object[] {
 				testItem.getId(),
 				testItem.getDescription(),
 				new java.sql.Date(testItem.getExpirationDate().getTime())
-			});
-			return item;
+			};
+			return connection.createStruct(typeName, objects);
 		}
 	};
 ----
@@ -307,7 +305,7 @@ You can now add this `SqlTypeValue` to the `Map` that contains the input paramet
 Another use for the `SqlTypeValue` is passing in an array of values to an Oracle stored
 procedure. Oracle has its own internal `ARRAY` class that must be used in this case, and
 you can use the `SqlTypeValue` to create an instance of the Oracle `ARRAY` and populate
-it with values from the Java `ARRAY`, as the following example shows:
+it with values from the Java `java.sql.Array`, as the following example shows:
 
 [tabs]
 ======
@@ -319,9 +317,7 @@ Java::
 
 	SqlTypeValue value = new AbstractSqlTypeValue() {
 		protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
-			ArrayDescriptor arrayDescriptor = new ArrayDescriptor(typeName, conn);
-			ARRAY idArray = new ARRAY(arrayDescriptor, conn, ids);
-			return idArray;
+			return conn.unwrap(OracleConnection.class).createOracleArray(typeName, ids);
 		}
 	};
 ----
