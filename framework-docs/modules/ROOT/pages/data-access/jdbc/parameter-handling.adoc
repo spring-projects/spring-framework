@@ -277,7 +277,7 @@ Java::
 				testItem.getDescription(),
 				new java.sql.Date(testItem.getExpirationDate().getTime())
 			};
-			return connection.createStruct(typeName, objects);
+			return connection.createStruct(typeName, item);
 		}
 	};
 ----
