@@ -208,6 +208,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	/**
 	 * Remove the mapping for the handler registered for the given URL path.
 	 * @param urlPath the mapping to remove
+	 * @since 6.2
 	 */
 	public void unregisterHandler(String urlPath) {
 		Assert.notNull(urlPath, "URL path must not be null");
