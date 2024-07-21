@@ -34,6 +34,7 @@ dependencies {
 		api("com.google.protobuf:protobuf-java-util:4.27.1")
 		api("com.h2database:h2:2.2.224")
 		api("com.jayway.jsonpath:json-path:2.9.0")
+		api("com.oracle.database.jdbc:ojdbc11:21.9.0.0")
 		api("com.rometools:rome:1.19.0")
 		api("com.squareup.okhttp3:mockwebserver:3.14.9")
 		api("com.squareup.okhttp3:okhttp:3.14.9")

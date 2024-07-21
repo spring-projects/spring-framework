@@ -323,12 +323,12 @@ use these alternative input classes.
 
 The `SimpleJdbcCall` class uses metadata in the database to look up names of `in`
 and `out` parameters so that you do not have to explicitly declare them. You can
-declare parameters if you prefer to do that or if you have parameters (such as `ARRAY`
-or `STRUCT`) that do not have an automatic mapping to a Java class. The first example
-shows a simple procedure that returns only scalar values in `VARCHAR` and `DATE` format
-from a MySQL database. The example procedure reads a specified actor entry and returns
-`first_name`, `last_name`, and `birth_date` columns in the form of `out` parameters.
-The following listing shows the first example:
+declare parameters if you prefer to do that or if you have parameters that do not
+have an automatic mapping to a Java class. The first example shows a simple procedure
+that returns only scalar values in `VARCHAR` and `DATE` format from a MySQL database.
+The example procedure reads a specified actor entry and returns `first_name`,
+`last_name`, and `birth_date` columns in the form of `out` parameters. The following
+listing shows the first example:
 
 [source,sql,indent=0,subs="verbatim,quotes"]
 ----

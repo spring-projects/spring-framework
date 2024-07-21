@@ -53,6 +53,7 @@ dependencies {
 	api(project(":spring-websocket"))
 
 	api("org.jetbrains.kotlin:kotlin-stdlib")
+	api("com.oracle.database.jdbc:ojdbc11")
 	api("jakarta.jms:jakarta.jms-api")
 	api("jakarta.servlet:jakarta.servlet-api")
 	api("org.apache.commons:commons-dbcp2:2.11.0")
