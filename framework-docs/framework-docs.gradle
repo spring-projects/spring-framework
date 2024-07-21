@@ -47,10 +47,10 @@ dependencies {
 	api(project(":spring-jms"))
 	api(project(":spring-web"))
 
-	api("org.jetbrains.kotlin:kotlin-stdlib")
 	api("com.oracle.database.jdbc:ojdbc11")
 	api("jakarta.jms:jakarta.jms-api")
 	api("jakarta.servlet:jakarta.servlet-api")
+	api("org.jetbrains.kotlin:kotlin-stdlib")
 
 	implementation(project(":spring-core-test"))
 	implementation("org.assertj:assertj-core")
