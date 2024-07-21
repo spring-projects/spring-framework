@@ -143,6 +143,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @param beanName the name of the handler bean
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
+	 * @since 6.2
 	 */
 	public void registerHandler(String[] urlPaths, String beanName) throws BeansException, IllegalStateException {
 		Assert.notNull(urlPaths, "URL path array must not be null");
@@ -158,6 +159,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * (a bean name will automatically be resolved into the corresponding handler bean)
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
+	 * @since 6.2
 	 */
 	public void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
 		Assert.notNull(urlPath, "URL path must not be null");
@@ -208,6 +210,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	/**
 	 * Remove the mapping for the handler registered for the given URL path.
 	 * @param urlPath the mapping to remove
+	 * @since 6.2
 	 */
 	public void unregisterHandler(String urlPath) {
 		Assert.notNull(urlPath, "URL path must not be null");
