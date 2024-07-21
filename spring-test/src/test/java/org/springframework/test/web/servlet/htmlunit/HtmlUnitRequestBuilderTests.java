@@ -21,6 +21,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ import org.htmlunit.FormEncodingType;
 import org.htmlunit.HttpMethod;
 import org.htmlunit.WebClient;
 import org.htmlunit.WebRequest;
+import org.htmlunit.util.NameValuePair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -149,6 +151,23 @@ public class HtmlUnitRequestBuilderTests {
 
 		assertThat(actualRequest.getContentType()).isEqualTo(contentType);
 		assertThat(actualRequest.getHeader("Content-Type")).isEqualTo(contentType);
+	}
+
+	@Test
+	void buildRequestParameterMapFromMultipleQueryParamsAndRequestParameters() throws Exception {
+		webRequest.setHttpMethod(HttpMethod.POST);
+		webRequest.setUrl(new URL("https://example.com/example/?param1=value1&param2=value2"));
+		webRequest.setRequestParameters(List.of(
+				new NameValuePair("param3", "value3"),
+				new NameValuePair("param4", "value4")));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getParameterMap()).hasSize(4);
+		assertThat(actualRequest.getParameter("param1")).isEqualTo("value1");
+		assertThat(actualRequest.getParameter("param2")).isEqualTo("value2");
+		assertThat(actualRequest.getParameter("param3")).isEqualTo("value3");
+		assertThat(actualRequest.getParameter("param4")).isEqualTo("value4");
 	}
 
 	@Test  // SPR-14916

@@ -37,6 +37,7 @@ import jakarta.servlet.http.HttpSession;
 import org.htmlunit.FormEncodingType;
 import org.htmlunit.WebClient;
 import org.htmlunit.WebRequest;
+import org.htmlunit.http.HttpUtils;
 import org.htmlunit.util.KeyDataPair;
 import org.htmlunit.util.NameValuePair;
 
@@ -364,6 +365,13 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private void params(MockHttpServletRequest request) {
+		if (this.webRequest.getEncodingType() == FormEncodingType.URL_ENCODED && "POST".equals(request.getMethod())) {
+			List<NameValuePair> params = HttpUtils.parseUrlQuery(
+					this.webRequest.getUrl().getQuery(), this.webRequest.getCharset());
+			for (NameValuePair param : params) {
+				request.addParameter(param.getName(), (param.getValue() != null ? param.getValue() : ""));
+			}
+		}
 		for (NameValuePair param : this.webRequest.getParameters()) {
 			addRequestParameter(request, param);
 		}
