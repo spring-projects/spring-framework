@@ -133,6 +133,10 @@ class BeanDefinitionMethodGeneratorFactory {
 	}
 
 	private boolean isImplicitlyExcluded(RegisteredBean registeredBean) {
+		if (Boolean.TRUE.equals(registeredBean.getMergedBeanDefinition()
+				.getAttribute(BeanRegistrationAotProcessor.IGNORE_REGISTRATION_ATTRIBUTE))) {
+			return true;
+		}
 		Class<?> beanClass = registeredBean.getBeanClass();
 		if (BeanFactoryInitializationAotProcessor.class.isAssignableFrom(beanClass)) {
 			return true;

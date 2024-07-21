@@ -36,6 +36,7 @@ import static org.mockito.Mockito.mock;
  * Tests for {@link BeanDefinitionMethodGeneratorFactory}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class BeanDefinitionMethodGeneratorFactoryTests {
 
@@ -56,6 +57,40 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 		loader.addInstance(BeanRegistrationExcludeFilter.class, filter);
 		assertThatNoException().isThrownBy(() -> new BeanDefinitionMethodGeneratorFactory(
 				AotServices.factories(loader)));
+	}
+
+	@Test
+	void getBeanDefinitionMethodGeneratorWhenExcludedByBeanDefinitionAttributeReturnsNull() {
+		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		RegisteredBean registeredBean = registerTestBean(beanFactory);
+		registeredBean.getMergedBeanDefinition().setAttribute(
+				BeanRegistrationAotProcessor.IGNORE_REGISTRATION_ATTRIBUTE, true);
+		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
+				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean)).isNull();
+	}
+
+	@Test
+	void getBeanDefinitionMethodGeneratorWhenBeanDefinitionAttributeSetToFalseDoesNotFilterBean() {
+		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		RegisteredBean registeredBean = registerTestBean(beanFactory);
+		registeredBean.getMergedBeanDefinition().setAttribute(
+				BeanRegistrationAotProcessor.IGNORE_REGISTRATION_ATTRIBUTE, false);
+		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
+				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean)).isNotNull();
+	}
+
+	@Test
+	void getBeanDefinitionMethodGeneratorWhenBeanDefinitionAttributeIsNotSetDoesNotFilterBean() {
+		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		RegisteredBean registeredBean = registerTestBean(beanFactory);
+		BeanDefinitionMethodGeneratorFactory methodGeneratorFactory = new BeanDefinitionMethodGeneratorFactory(
+				AotServices.factoriesAndBeans(springFactoriesLoader, beanFactory));
+		assertThat(methodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean)).isNotNull();
 	}
 
 	@Test
