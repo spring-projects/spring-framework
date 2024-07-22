@@ -301,6 +301,31 @@ class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
+	void resolveNestedPlaceholdersIfValueIsCharSequence() {
+		MutablePropertySources ps = new MutablePropertySources();
+		ps.addFirst(new MockPropertySource()
+				.withProperty("p1", "v1")
+				.withProperty("p2", "v2")
+				.withProperty("p3", new StringBuilder("${p1}:${p2}")));
+		ConfigurablePropertyResolver pr = new PropertySourcesPropertyResolver(ps);
+		assertThat(pr.getProperty("p1")).isEqualTo("v1");
+		assertThat(pr.getProperty("p2")).isEqualTo("v2");
+		assertThat(pr.getProperty("p3")).isEqualTo("v1:v2");
+	}
+
+	@Test
+	void resolveNestedPlaceholdersIfValueIsCharSequenceAndStringBuilderIsRequested() {
+		MutablePropertySources ps = new MutablePropertySources();
+		ps.addFirst(new MockPropertySource()
+				.withProperty("p1", "v1")
+				.withProperty("p2", "v2")
+				.withProperty("p3", new StringBuilder("${p1}:${p2}")));
+		ConfigurablePropertyResolver pr = new PropertySourcesPropertyResolver(ps);
+		assertThat(pr.getProperty("p3", StringBuilder.class)).isInstanceOf(StringBuilder.class)
+				.hasToString("${p1}:${p2}");
+	}
+
+	@Test
 	void ignoreUnresolvableNestedPlaceholdersIsConfigurable() {
 		MutablePropertySources ps = new MutablePropertySources();
 		ps.addFirst(new MockPropertySource()
