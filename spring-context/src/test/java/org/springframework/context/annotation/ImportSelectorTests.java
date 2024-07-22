@@ -99,7 +99,7 @@ public class ImportSelectorTests {
 		String[] beanNames = context.getBeanFactory().getBeanDefinitionNames();
 		assertThat(beanNames).endsWith("importSelectorTests.FilteredConfig",
 				ImportedSelector2.class.getName(), "b");
-		assertThat(beanNames).doesNotContain(Object.class.getName());
+		assertThat(beanNames).doesNotContain("a", Object.class.getName(), "c");
 	}
 
 	@Test
