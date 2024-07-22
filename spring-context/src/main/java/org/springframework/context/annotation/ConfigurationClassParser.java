@@ -670,7 +670,10 @@ class ConfigurationClassParser {
 	private Collection<SourceClass> asSourceClasses(String[] classNames, Predicate<String> filter) throws IOException {
 		List<SourceClass> annotatedClasses = new ArrayList<>(classNames.length);
 		for (String className : classNames) {
-			annotatedClasses.add(asSourceClass(className, filter));
+			SourceClass sourceClass = asSourceClass(className, filter);
+			if (this.objectSourceClass != sourceClass) {
+				annotatedClasses.add(sourceClass);
+			}
 		}
 		return annotatedClasses;
 	}
