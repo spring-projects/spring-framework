@@ -496,8 +496,10 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	@CsvSource(textBlock = """
 		PropertyPlaceholderWithFixedDelay, 5000, 1000, 5_000, 1_000
 		PropertyPlaceholderWithFixedDelay, PT5S, PT1S, 5_000, 1_000
+		PropertyPlaceholderWithFixedDelay, 5400ms, 1s, 5_400, 1_000
 		PropertyPlaceholderWithFixedDelayInSeconds, 5000, 1000, 5_000_000, 1_000_000
 		PropertyPlaceholderWithFixedDelayInSeconds, PT5S, PT1S, 5_000, 1_000
+		PropertyPlaceholderWithFixedDelayInSeconds, 5400ms, 500ms, 5_400, 500
 	""")
 	void propertyPlaceholderWithFixedDelay(@NameToClass Class<?> beanClass, String fixedDelay, String initialDelay,
 			long expectedInterval, long expectedInitialDelay) {
@@ -536,8 +538,10 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	@CsvSource(textBlock = """
 		PropertyPlaceholderWithFixedRate, 3000, 1000, 3_000, 1_000
 		PropertyPlaceholderWithFixedRate, PT3S, PT1S, 3_000, 1_000
+		PropertyPlaceholderWithFixedRate, 3200ms, 1s, 3_200, 1_000
 		PropertyPlaceholderWithFixedRateInSeconds, 3000, 1000, 3_000_000, 1_000_000
 		PropertyPlaceholderWithFixedRateInSeconds, PT3S, PT1S, 3_000, 1_000
+		PropertyPlaceholderWithFixedRateInSeconds, 3200ms, 500ms, 3_200, 500
 	""")
 	void propertyPlaceholderWithFixedRate(@NameToClass Class<?> beanClass, String fixedRate, String initialDelay,
 			long expectedInterval, long expectedInitialDelay) {

@@ -4,7 +4,7 @@
 [.small]#xref:web/webflux/config.adoc#webflux-config-conversion[See equivalent in the Reactive stack]#
 
 By default, formatters for various number and date types are installed, along with support
-for customization via `@NumberFormat` and `@DateTimeFormat` on fields.
+for customization via `@NumberFormat`, `@DurationFormat` and `@DateTimeFormat` on fields.
 
 To register custom formatters and converters, use the following:
 

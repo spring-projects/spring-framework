@@ -198,6 +198,7 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 		registry.addFormatterForFieldType(MonthDay.class, new MonthDayFormatter());
 
 		registry.addFormatterForFieldAnnotation(new Jsr310DateTimeFormatAnnotationFormatterFactory());
+		registry.addFormatterForFieldAnnotation(new DurationFormatAnnotationFormatterFactory());
 	}
 
 	private DateTimeFormatter getFormatter(Type type) {
