@@ -1,17 +1,12 @@
 plugins {
-	id "org.unbroken-dome.xjc"
+	id "com.github.bjornvester.xjc" version "1.8.2"
 }
 
 description = "Spring Object/XML Marshalling"
 
 xjc {
-	xjcVersion = '3.0'
-}
-
-sourceSets {
-	test {
-		xjcTargetPackage = 'org.springframework.oxm.jaxb.test'
-	}
+	xsdDir.set(layout.projectDirectory.dir("src/test/schema"))
+	defaultPackage.set('org.springframework.oxm.jaxb.test')
 }
 
 dependencies {
@@ -30,4 +25,17 @@ dependencies {
 	testImplementation("org.xmlunit:xmlunit-matchers")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
+}
+
+tasks.named("xjc").configure { xjc ->
+	// XJC plugin only works against main sources
+	def javaSrcDirs = sourceSets.main.java.srcDirs
+	javaSrcDirs.remove(file(xjc.outputJavaDir))
+	sourceSets.main.java.srcDirs = javaSrcDirs
+	def resourcesSrcDirs = sourceSets.main.resources.srcDirs
+	resourcesSrcDirs.remove(file(xjc.outputResourcesDir))
+	sourceSets.main.resources.srcDirs = resourcesSrcDirs
+
+	sourceSets.test.java.srcDir(xjc.outputJavaDir)
+	sourceSets.test.resources.srcDir(xjc.outputResourcesDir)
 }
