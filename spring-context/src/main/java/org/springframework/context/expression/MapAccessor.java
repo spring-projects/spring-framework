@@ -89,7 +89,7 @@ public class MapAccessor implements CompilablePropertyAccessor {
 	public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue)
 			throws AccessException {
 
-		Assert.state(target instanceof Map, "Target must be a Map");
+		Assert.state(target instanceof Map, "Target must be of type Map");
 		Map<Object, Object> map = (Map<Object, Object>) target;
 		map.put(name, newValue);
 	}
@@ -114,7 +114,7 @@ public class MapAccessor implements CompilablePropertyAccessor {
 			CodeFlow.insertCheckCast(mv, "Ljava/util/Map");
 		}
 		mv.visitLdcInsn(propertyName);
-		mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get","(Ljava/lang/Object;)Ljava/lang/Object;",true);
+		mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
 	}
 
 
