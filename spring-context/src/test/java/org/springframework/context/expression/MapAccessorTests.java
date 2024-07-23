@@ -82,6 +82,22 @@ class MapAccessorTests {
 	}
 
 	@Test
+	void canWrite() throws Exception {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		Map<String, Object> testMap = getSimpleTestMap();
+
+		MapAccessor mapAccessor = new MapAccessor();
+		assertThat(mapAccessor.canWrite(context, new Object(), "foo")).isFalse();
+		assertThat(mapAccessor.canWrite(context, testMap, "foo")).isTrue();
+		// Cannot actually write to an immutable Map, but MapAccessor cannot easily check for that.
+		assertThat(mapAccessor.canWrite(context, Map.of(), "x")).isTrue();
+
+		mapAccessor = new MapAccessor(false);
+		assertThat(mapAccessor.canWrite(context, new Object(), "foo")).isFalse();
+		assertThat(mapAccessor.canWrite(context, testMap, "foo")).isFalse();
+	}
+
+	@Test
 	void isWritable() {
 		Map<String, Object> testMap = getSimpleTestMap();
 		StandardEvaluationContext sec = new StandardEvaluationContext();

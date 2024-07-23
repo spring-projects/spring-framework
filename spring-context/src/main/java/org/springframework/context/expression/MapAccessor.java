@@ -81,7 +81,7 @@ public class MapAccessor implements CompilablePropertyAccessor {
 
 	@Override
 	public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
-		return this.allowWrite;
+		return (this.allowWrite && target instanceof Map);
 	}
 
 	@Override
