@@ -27,11 +27,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.SmartView;
 
 /**
- * Public API for HTML rendering a collection fragments each with its own view
- * and model. For use with view technologies such as
+ * Public API for HTML rendering of a collection of fragments each with a view
+ * and independent model. For use with frontends technologies such as
  * <a href="https://htmx.org/">htmx</a> where multiple page fragments may be
- * rendered in a single response. Supported as a return value from a Spring MVC
- * controller method.
+ * rendered in one response. Supported as a return value from Spring MVC
+ * controller methods.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
@@ -51,8 +51,7 @@ public interface FragmentsRendering extends SmartView {
 
 
 	/**
-	 * Create a builder for {@link FragmentsRendering}, adding a fragment with
-	 * the given view name and model.
+	 * Create a builder and add a fragment with a view name and a model.
 	 * @param viewName the name of the view for the fragment
 	 * @param model attributes for the fragment in addition to model
 	 * attributes inherited from the shared model for the request
@@ -96,7 +95,7 @@ public interface FragmentsRendering extends SmartView {
 		Builder status(HttpStatusCode status);
 
 		/**
-		 * Add the given, single header value under the given name.
+		 * Add one or more header values under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
@@ -121,15 +120,15 @@ public interface FragmentsRendering extends SmartView {
 		Builder fragment(String viewName, Map<String, Object> model);
 
 		/**
-		 * Add a fragment with a view name only, inheriting model attributes from
-		 * the model for the request.
+		 * Variant of {@link #fragment(String, Map)} with a view name only, but
+		 * also inheriting model attributes from the shared model for the request.
 		 * @param viewName the name of the view for the fragment
 		 * @return this builder
 		 */
 		Builder fragment(String viewName);
 
 		/**
-		 * Add a fragment.
+		 * Variant of {@link #fragment(String, Map)} with a {@link ModelAndView}.
 		 * @param fragment the fragment to add; the fragment also inherits model
 		 * attributes from the shared model for the request
 		 * @return this builder
@@ -137,7 +136,7 @@ public interface FragmentsRendering extends SmartView {
 		Builder fragment(ModelAndView fragment);
 
 		/**
-		 * Add a collection of fragments.
+		 * Variant of {@link #fragment(String, Map)} with a collection of {@link ModelAndView}s.
 		 * @param fragments the fragments to add; each fragment also inherits model
 		 * attributes from the shared model for the request
 		 * @return this builder

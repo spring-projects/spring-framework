@@ -32,11 +32,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Public API for HTML rendering from a collection or from a stream of
- * {@link Fragment}s each with its own view and model. For use with
- * view technologies such as <a href="https://htmx.org/">htmx</a> where multiple
- * page fragments may be rendered in a single response. Supported as a return
- * value from a WebFlux controller method.
+ * Public API for HTML rendering of a collection of fragments each with a view
+ * and independent model. For use with frontends technologies such as
+ * <a href="https://htmx.org/">htmx</a> where multiple page fragments may be
+ * rendered in one response. Supported as a return value from Spring WebFlux
+ * controller methods.
  *
  * <p>For full page rendering with a single model and view, use {@link Rendering}.
  *
@@ -74,8 +74,8 @@ public interface FragmentsRendering {
 	}
 
 	/**
-	 * Create a builder and add a fragment with a view name only, also
-	 * inheriting model attributes from the model for the request.
+	 * Variant of {@link #with(String, Map)} with a view name only, but also
+	 * inheriting model attributes from the shared model for the request.
 	 * @param viewName the name of the view for the fragment
 	 * @return this builder
 	 */
@@ -84,14 +84,20 @@ public interface FragmentsRendering {
 	}
 
 	/**
-	 * Create a builder to render with a collection of Fragments.
+	 * Variant of {@link #with(String, Map)} with a collection of fragments.
+	 * @param fragments the fragments to add; each fragment also inherits model
+	 * attributes from the shared model for the request
+	 * @return the created builder
 	 */
 	static Builder withCollection(Collection<Fragment> fragments) {
 		return new DefaultFragmentsRenderingBuilder(fragments);
 	}
 
 	/**
-	 * Create a builder to render with a {@link Publisher} of Fragments.
+	 * Variant of {@link #with(String, Map)} with a {@link Publisher} of fragments.
+	 * @param fragmentsPublisher the fragments to add; each fragment also
+	 * inherits model attributes from the shared model for the request
+	 * @return the created builder
 	 */
 	static <P extends Publisher<Fragment>> Builder withPublisher(P fragmentsPublisher) {
 		return new DefaultFragmentsRenderingBuilder(fragmentsPublisher);
@@ -126,7 +132,7 @@ public interface FragmentsRendering {
 		Builder status(HttpStatusCode status);
 
 		/**
-		 * Add the given, single header value under the given name.
+		 * Add one or more header values under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
@@ -151,15 +157,16 @@ public interface FragmentsRendering {
 		Builder fragment(String viewName, Map<String, Object> model);
 
 		/**
-		 * Add a fragment with a view name only, inheriting model attributes from
-		 * the model for the request.
+		 * Variant of {@link #fragment(String, Map)} with a view name only, where
+		 * the fragment model also inherits model attributes from the shared
+		 * model for the request.
 		 * @param viewName the name of the view for the fragment
 		 * @return this builder
 		 */
 		Builder fragment(String viewName);
 
 		/**
-		 * Add a fragment.
+		 * Variant of {@link #fragment(String, Map)} with a {@link Fragment}.
 		 * @param fragment the fragment to add
 		 * @return this builder
 		 */

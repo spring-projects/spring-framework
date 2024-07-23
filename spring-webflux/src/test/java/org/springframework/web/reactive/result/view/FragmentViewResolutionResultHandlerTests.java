@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -54,25 +55,21 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  */
 public class FragmentViewResolutionResultHandlerTests {
 
+	private static final Fragment fragment1 = Fragment.create("fragment1", Map.of("foo", "Foo"));
+
+	private static final Fragment fragment2 = Fragment.create("fragment2", Map.of("bar", "Bar"));
+
+
 	static Stream<Arguments> arguments() {
-		Fragment f1 = Fragment.create("fragment1", Map.of("foo", "Foo"));
-		Fragment f2 = Fragment.create("fragment2", Map.of("bar", "Bar"));
+		Flux<Fragment> fragmentFlux = Flux.just(fragment1, fragment2).subscribeOn(Schedulers.boundedElastic());
 		return Stream.of(
-				Arguments.of(
-						FragmentsRendering.withPublisher(Flux.just(f1, f2).subscribeOn(Schedulers.boundedElastic()))
-								.headers(headers -> headers.setContentType(MediaType.TEXT_HTML))
-								.build(),
+				Arguments.of(FragmentsRendering.withPublisher(fragmentFlux).build(),
 						on(Handler.class).resolveReturnType(FragmentsRendering.class)),
-				Arguments.of(
-						FragmentsRendering.withCollection(List.of(f1, f2))
-								.headers(headers -> headers.setContentType(MediaType.TEXT_HTML))
-								.build(),
+				Arguments.of(FragmentsRendering.withCollection(List.of(fragment1, fragment2)).build(),
 						on(Handler.class).resolveReturnType(FragmentsRendering.class)),
-				Arguments.of(
-						Flux.just(f1, f2).subscribeOn(Schedulers.boundedElastic()),
+				Arguments.of(fragmentFlux,
 						on(Handler.class).resolveReturnType(Flux.class, Fragment.class)),
-				Arguments.of(
-						List.of(f1, f2),
+				Arguments.of(List.of(fragment1, fragment2),
 						on(Handler.class).resolveReturnType(List.class, Fragment.class)));
 	}
 
@@ -107,14 +104,14 @@ public class FragmentViewResolutionResultHandlerTests {
 	}
 
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "DataFlowIssue"})
 	private static class Handler {
 
-		FragmentsRendering rendering() { return null; }
+		FragmentsRendering render() { return null; }
 
-		Flux<Fragment> fragmentFlux() { return null; }
+		Flux<Fragment> renderFlux() { return null; }
 
-		List<Fragment> fragmentList() { return null; }
+		List<Fragment> renderList() { return null; }
 
 	}
 
