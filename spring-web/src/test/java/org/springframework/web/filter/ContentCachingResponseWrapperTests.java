@@ -31,6 +31,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Named.named;
 import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -232,6 +233,43 @@ class ContentCachingResponseWrapperTests {
 		assertHeader(response, CONTENT_LENGTH, null);
 		assertThat(response.getContentAsByteArray()).isEqualTo(responseBody);
 	}
+
+	@Test
+	void setContentLengthAbove2GbViaSetContentLengthLong() {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+		long overflow = (long) Integer.MAX_VALUE + 1;
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> responseWrapper.setContentLengthLong(overflow))
+				.withMessageContaining("Content-Length exceeds ContentCachingResponseWrapper's maximum")
+				.withMessageContaining(String.valueOf(overflow));
+	}
+
+	@Test
+	void setContentLengthAbove2GbViaAddHeader() {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+		String overflow = String.valueOf((long) Integer.MAX_VALUE + 1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> responseWrapper.addHeader(CONTENT_LENGTH, overflow))
+				.withMessageContaining("Content-Length exceeds ContentCachingResponseWrapper's maximum")
+				.withMessageContaining(overflow);
+	}
+
+	@Test
+	void setContentLengthAbove2GbViaSetHeader() {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+		String overflow = String.valueOf((long) Integer.MAX_VALUE + 1);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> responseWrapper.setHeader(CONTENT_LENGTH, overflow))
+				.withMessageContaining("Content-Length exceeds ContentCachingResponseWrapper's maximum")
+				.withMessageContaining(overflow);
+	}
+
 
 	private void assertHeader(HttpServletResponse response, String header, int value) {
 		assertHeader(response, header, Integer.toString(value));
