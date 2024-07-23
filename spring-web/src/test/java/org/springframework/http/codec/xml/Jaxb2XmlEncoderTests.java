@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.xml;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -43,6 +44,7 @@ import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
+ * Tests for {@link Jaxb2XmlEncoder}.
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  */
@@ -64,6 +66,7 @@ class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> {
 		assertThat(this.encoder.canEncode(forClass(getClass()), MediaType.APPLICATION_XML)).isFalse();
 
 		assertThat(this.encoder.canEncode(forClass(JAXBElement.class), MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(JAXBElementSubclass.class), MediaType.APPLICATION_XML)).isTrue();
 
 		// SPR-15464
 		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isFalse();
@@ -120,6 +123,17 @@ class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> {
 			String actual = new String(resultBytes, UTF_8);
 			assertThat(XmlContent.from(actual)).isSimilarTo(expected);
 		};
+	}
+
+	public static class JAXBElementSubclass extends JAXBElement<Pojo> {
+		@Serial
+		private static final long serialVersionUID = 1L;
+
+		protected static final QName NAME = new QName("http://foo/schema/common/1.0", "Pojo");
+
+		public JAXBElementSubclass() {
+			super(NAME, Pojo.class, null, null);
+		}
 	}
 
 	public static class Model {}
