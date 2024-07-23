@@ -121,7 +121,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 
 	@Override
 	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
-		boolean supportedType = (JAXBElement.class.isAssignableFrom(clazz) ||
+		boolean supportedType = (clazz.isAssignableFrom(JAXBElement.class) ||
 				AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) != null);
 		return (supportedType && canWrite(mediaType));
 	}
