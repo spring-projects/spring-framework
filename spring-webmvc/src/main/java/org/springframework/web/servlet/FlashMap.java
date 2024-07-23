@@ -119,6 +119,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	/**
 	 * Set the expiration time for the FlashMap. This is provided for serialization
 	 * purposes but can also be used instead {@link #startExpirationPeriod(int)}.
+	 * @param expirationTime the number of seconds for expiration
 	 * @since 4.2
 	 */
 	public void setExpirationTime(long expirationTime) {
