@@ -1,5 +1,5 @@
 plugins {
-	id "com.github.bjornvester.xjc" version "1.8.2"
+	id "com.github.bjornvester.xjc"
 }
 
 description = "Spring Object/XML Marshalling"

@@ -3,7 +3,7 @@ apply plugin: 'org.springframework.build.conventions'
 apply plugin: 'org.springframework.build.optional-dependencies'
 // Uncomment the following for Shadow support in the jmhJar block.
 // Currently commented out due to ZipException: archive is not a ZIP archive
-// apply plugin: 'com.github.johnrengelman.shadow'
+// apply plugin: 'io.github.goooler.shadow'
 apply plugin: 'me.champeau.jmh'
 apply from: "$rootDir/gradle/publications.gradle"
 apply plugin: 'net.ltgt.errorprone'
