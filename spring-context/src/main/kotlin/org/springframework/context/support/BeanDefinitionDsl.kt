@@ -194,7 +194,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			bd.setAttribute(BeanRegistrationAotProcessor.IGNORE_REGISTRATION_ATTRIBUTE, true)
 		}
 
-		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context);
+		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context)
 		context.registerBean(beanName, T::class.java, customizer)
 	}
 
@@ -242,7 +242,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 		}
 
 
-		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context);
+		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context)
 		context.registerBean(beanName, T::class.java, Supplier { function.invoke(BeanSupplierContext(context)) }, customizer)
 	}
 
