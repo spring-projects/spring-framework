@@ -90,6 +90,35 @@ public class FragmentViewResolutionResultHandlerTests {
 		assertThat(body).isEqualTo("<p>Hello Foo</p><p>Hello Bar</p>");
 	}
 
+	@Test
+	void renderSse() {
+		MockServerHttpRequest request = MockServerHttpRequest.get("/")
+				.accept(MediaType.TEXT_EVENT_STREAM)
+				.acceptLanguageAsLocales(Locale.ENGLISH)
+				.build();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		HandlerResult result = new HandlerResult(
+				new Handler(),
+				Flux.just(fragment1, fragment2).subscribeOn(Schedulers.boundedElastic()),
+				on(Handler.class).resolveReturnType(Flux.class, Fragment.class),
+				new BindingContext());
+
+		String body = initHandler().handleResult(exchange, result)
+				.then(Mono.defer(() -> exchange.getResponse().getBodyAsString()))
+				.block(Duration.ofSeconds(60));
+
+		assertThat(body).isEqualTo("""
+				event:fragment1
+				data:<p>Hello Foo</p>
+
+				event:fragment2
+				data:<p>Hello Bar</p>
+
+				""");
+	}
+
 	private ViewResolutionResultHandler initHandler() {
 
 		AnnotationConfigApplicationContext context =
@@ -98,6 +127,7 @@ public class FragmentViewResolutionResultHandlerTests {
 		String prefix = "org/springframework/web/reactive/result/view/script/kotlin/";
 		ScriptTemplateViewResolver viewResolver = new ScriptTemplateViewResolver(prefix, ".kts");
 		viewResolver.setApplicationContext(context);
+		viewResolver.setSupportedMediaTypes(List.of(MediaType.TEXT_HTML, MediaType.TEXT_EVENT_STREAM));
 
 		RequestedContentTypeResolver contentTypeResolver = new HeaderContentTypeResolver();
 		return new ViewResolutionResultHandler(List.of(viewResolver), contentTypeResolver);

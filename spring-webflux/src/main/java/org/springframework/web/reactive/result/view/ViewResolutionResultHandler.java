@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.result.view;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,9 +40,11 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.lang.Nullable;
@@ -95,6 +99,8 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
 
 	private final List<View> defaultViews = new ArrayList<>(4);
+
+	private final List<FragmentFormatter> fragmentFormatters = List.of(new SseFragmentFormatter());
 
 
 	/**
@@ -337,8 +343,22 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 				Mono.just(List.of(fragment.view())) :
 				resolveViews(fragment.viewName() != null ? fragment.viewName() : getDefaultViewName(exchange), locale));
 
+		FragmentFormatter fragmentFormatter = getFragmentFormatter(exchange);
+
 		return selectedViews.flatMap(views -> render(views, fragment.model(), bindingContext, mutatedExchange))
-				.then(Mono.fromSupplier(response::getBodyFlux));
+				.then(Mono.fromSupplier(() -> (fragmentFormatter != null ?
+						fragmentFormatter.format(response.getBodyFlux(), fragment, exchange) :
+						response.getBodyFlux())));
+	}
+
+	@Nullable
+	private FragmentFormatter getFragmentFormatter(ServerWebExchange exchange) {
+		for (FragmentFormatter formatter : this.fragmentFormatters) {
+			if (formatter.supports(exchange.getRequest())) {
+				return formatter;
+			}
+		}
+		return null;
 	}
 
 	private String getNameForReturnValue(MethodParameter returnType) {
@@ -433,6 +453,73 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 		public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 			this.bodyFlux = Flux.from(body).flatMap(Flux::from);
 			return Mono.empty();
+		}
+	}
+
+
+	/**
+	 * Strategy to render fragment with stream formatting.
+	 */
+	private interface FragmentFormatter {
+
+		/**
+		 * Whether the formatter supports the given request.
+		 */
+		boolean supports(ServerHttpRequest request);
+
+		/**
+		 * Format the given fragment.
+		 * @param fragmentBuffers the fragment serialized to data buffers
+		 * @param fragment the fragment being rendered
+		 * @param exchange the current exchange
+		 * @return the formatted fragment
+		 */
+		Flux<DataBuffer> format(Flux<DataBuffer> fragmentBuffers, Fragment fragment, ServerWebExchange exchange);
+
+	}
+
+
+	/**
+	 * Formatter for Server-Sent Events formatting.
+	 */
+	private static class SseFragmentFormatter implements FragmentFormatter {
+
+		@Override
+		public boolean supports(ServerHttpRequest request) {
+			String header = request.getHeaders().getFirst(HttpHeaders.ACCEPT);
+			return (header != null && header.contains(MediaType.TEXT_EVENT_STREAM_VALUE));
+		}
+
+		@Override
+		public Flux<DataBuffer> format(
+				Flux<DataBuffer> fragmentBuffers, Fragment fragment, ServerWebExchange exchange) {
+
+			Charset charset = getCharset(exchange.getRequest());
+			DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
+
+			String eventLine = fragment.viewName() != null ? "event:" + fragment.viewName() + "\n" : "";
+
+			return Flux.concat(
+					Flux.just(encodeText(eventLine + "data:", charset, bufferFactory)),
+					fragmentBuffers,
+					Flux.just(encodeText("\n\n", charset, bufferFactory)));
+		}
+
+		private Charset getCharset(ServerHttpRequest request) {
+			for (MediaType mediaType : request.getHeaders().getAccept()) {
+				if (mediaType.isCompatibleWith(MediaType.TEXT_EVENT_STREAM)) {
+					if (mediaType.getCharset() != null) {
+						return mediaType.getCharset();
+					}
+					break;
+				}
+			}
+			return StandardCharsets.UTF_8;
+		}
+
+		private DataBuffer encodeText(String text, Charset charset, DataBufferFactory bufferFactory) {
+			byte[] bytes = text.getBytes(charset);
+			return bufferFactory.wrap(bytes);
 		}
 	}
 
