@@ -145,6 +145,8 @@ public class MockServletContext implements ServletContext {
 	@Nullable
 	private String responseCharacterEncoding;
 
+	private final Map<String, FilterRegistration> filterRegistrations = new LinkedHashMap<>();
+
 	private final Map<String, MediaType> mimeTypes = new LinkedHashMap<>();
 
 
@@ -224,6 +226,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public ServletContext getContext(String contextPath) {
 		if (this.contextPath.equals(contextPath)) {
 			return this;
@@ -376,6 +379,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public RequestDispatcher getNamedDispatcher(String path) {
 		return this.namedRequestDispatchers.get(path);
 	}
@@ -465,6 +469,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	@Override
+	@Nullable
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
@@ -601,6 +606,25 @@ public class MockServletContext implements ServletContext {
 		return this.responseCharacterEncoding;
 	}
 
+	/**
+	 * Add a {@link FilterRegistration}.
+	 * @since 6.2
+	 */
+	public void addFilterRegistration(FilterRegistration registration) {
+		this.filterRegistrations.put(registration.getName(), registration);
+	}
+
+	@Override
+	@Nullable
+	public FilterRegistration getFilterRegistration(String filterName) {
+		return this.filterRegistrations.get(filterName);
+	}
+
+	@Override
+	public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
+		return Collections.unmodifiableMap(this.filterRegistrations);
+	}
+
 
 	//---------------------------------------------------------------------
 	// Unsupported Servlet 3.0 registration methods
@@ -673,25 +697,6 @@ public class MockServletContext implements ServletContext {
 	@Override
 	public <T extends Filter> T createFilter(Class<T> c) throws ServletException {
 		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * This method always returns {@code null}.
-	 * @see jakarta.servlet.ServletContext#getFilterRegistration(java.lang.String)
-	 */
-	@Override
-	@Nullable
-	public FilterRegistration getFilterRegistration(String filterName) {
-		return null;
-	}
-
-	/**
-	 * This method always returns an {@linkplain Collections#emptyMap empty map}.
-	 * @see jakarta.servlet.ServletContext#getFilterRegistrations()
-	 */
-	@Override
-	public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
-		return Collections.emptyMap();
 	}
 
 	@Override
