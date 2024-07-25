@@ -92,10 +92,24 @@ class CodeWarningsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
+	void detectDeprecationOnAnnotatedElementWhoseEnclosingElementIsDeprecated() {
+		this.codeWarnings.detectDeprecation(DeprecatedBean.Nested.class);
+		assertThat(this.codeWarnings.getWarnings()).containsExactly("deprecation");
+	}
+
+	@Test
 	@SuppressWarnings("removal")
 	void detectDeprecationOnAnnotatedElementWithDeprecatedForRemoval() {
 		this.codeWarnings.detectDeprecation(DeprecatedForRemovalBean.class);
 		assertThat(this.codeWarnings.getWarnings()).containsOnly("removal");
+	}
+
+	@Test
+	@SuppressWarnings("removal")
+	void detectDeprecationOnAnnotatedElementWhoseEnclosingElementIsDeprecatedForRemoval() {
+		this.codeWarnings.detectDeprecation(DeprecatedForRemovalBean.Nested.class);
+		assertThat(this.codeWarnings.getWarnings()).containsExactly("removal");
 	}
 
 	@ParameterizedTest
@@ -107,11 +121,17 @@ class CodeWarningsTests {
 
 	@SuppressWarnings("deprecation")
 	static Stream<Arguments> resolvableTypesWithDeprecated() {
+		Class<?> deprecatedBean = DeprecatedBean.class;
+		Class<?> nested = DeprecatedBean.Nested.class;
 		return Stream.of(
-				Arguments.of(ResolvableType.forClass(DeprecatedBean.class)),
-				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class, DeprecatedBean.class)),
+				Arguments.of(ResolvableType.forClass(deprecatedBean)),
+				Arguments.of(ResolvableType.forClass(nested)),
+				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class, deprecatedBean)),
+				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class, nested)),
 				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class,
-						ResolvableType.forClassWithGenerics(GenericBean.class, DeprecatedBean.class)))
+						ResolvableType.forClassWithGenerics(GenericBean.class, deprecatedBean))),
+				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class,
+						ResolvableType.forClassWithGenerics(GenericBean.class, nested)))
 		);
 	}
 
@@ -124,11 +144,17 @@ class CodeWarningsTests {
 
 	@SuppressWarnings("removal")
 	static Stream<Arguments> resolvableTypesWithDeprecatedForRemoval() {
+		Class<?> deprecatedBean = DeprecatedForRemovalBean.class;
+		Class<?> nested = DeprecatedForRemovalBean.Nested.class;
 		return Stream.of(
-				Arguments.of(ResolvableType.forClass(DeprecatedForRemovalBean.class)),
-				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class, DeprecatedForRemovalBean.class)),
+				Arguments.of(ResolvableType.forClass(deprecatedBean)),
+				Arguments.of(ResolvableType.forClass(nested)),
+				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class, deprecatedBean)),
+				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class, nested)),
 				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class,
-						ResolvableType.forClassWithGenerics(GenericBean.class, DeprecatedForRemovalBean.class)))
+						ResolvableType.forClassWithGenerics(GenericBean.class, deprecatedBean))),
+				Arguments.of(ResolvableType.forClassWithGenerics(GenericBean.class,
+						ResolvableType.forClassWithGenerics(GenericBean.class, nested)))
 		);
 	}
 

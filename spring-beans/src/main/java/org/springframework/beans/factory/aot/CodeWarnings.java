@@ -58,7 +58,7 @@ class CodeWarnings {
 	 */
 	public CodeWarnings detectDeprecation(AnnotatedElement... elements) {
 		for (AnnotatedElement element : elements) {
-			register(element.getAnnotation(Deprecated.class));
+			registerDeprecationIfNecessary(element);
 		}
 		return this;
 	}
@@ -110,6 +110,16 @@ class CodeWarnings {
 	 */
 	protected Set<String> getWarnings() {
 		return Collections.unmodifiableSet(this.warnings);
+	}
+
+	private void registerDeprecationIfNecessary(@Nullable AnnotatedElement element) {
+		if (element == null) {
+			return;
+		}
+		register(element.getAnnotation(Deprecated.class));
+		if (element instanceof Class<?> type) {
+			registerDeprecationIfNecessary(type.getEnclosingClass());
+		}
 	}
 
 	private void register(@Nullable Deprecated annotation) {
