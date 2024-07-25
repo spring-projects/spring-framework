@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ class CodeWarnings {
 	 */
 	public CodeWarnings detectDeprecation(AnnotatedElement... elements) {
 		for (AnnotatedElement element : elements) {
-			register(element.getAnnotation(Deprecated.class));
+			registerDeprecationIfNecessary(element);
 		}
 		return this;
 	}
@@ -111,6 +111,16 @@ class CodeWarnings {
 	 */
 	protected Set<String> getWarnings() {
 		return Collections.unmodifiableSet(this.warnings);
+	}
+
+	private void registerDeprecationIfNecessary(@Nullable AnnotatedElement element) {
+		if (element == null) {
+			return;
+		}
+		register(element.getAnnotation(Deprecated.class));
+		if (element instanceof Class<?> type) {
+			registerDeprecationIfNecessary(type.getEnclosingClass());
+		}
 	}
 
 	private void register(@Nullable Deprecated annotation) {
