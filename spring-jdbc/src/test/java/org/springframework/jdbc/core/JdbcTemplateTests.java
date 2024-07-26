@@ -32,13 +32,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.sql.DataSource;
 
+import org.assertj.core.data.Index;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -795,6 +798,55 @@ class JdbcTemplateTests {
 		verify(this.preparedStatement).setInt(1, ids.get(0));
 		verify(this.preparedStatement).setInt(1, ids.get(1));
 		verify(this.preparedStatement).setInt(1, ids.get(2));
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
+	}
+
+	@Test
+	void testBatchUpdateWithBatchFailingHasUpdateCounts() throws Exception {
+		test3BatchesOf2ItemsFailing(exception -> assertThat(exception).cause()
+				.isInstanceOfSatisfying(AggregatedBatchUpdateException.class, ex -> {
+					assertThat(ex.getSuccessfulUpdateCounts()).hasDimensions(1, 2)
+							.contains(new int[] { 1, 1 }, Index.atIndex(0));
+					assertThat(ex.getUpdateCounts()).contains(-3, -3);
+				}));
+	}
+
+	@Test
+	void testBatchUpdateWithBatchFailingMatchesOriginalException() throws Exception {
+		test3BatchesOf2ItemsFailing(exception -> assertThat(exception).cause()
+				.isInstanceOfSatisfying(AggregatedBatchUpdateException.class, ex -> {
+					BatchUpdateException originalException = ex.getOriginalException();
+					assertThat(ex.getMessage()).isEqualTo(originalException.getMessage());
+					assertThat(ex.getCause()).isEqualTo(originalException.getCause());
+					assertThat(ex.getSQLState()).isEqualTo(originalException.getSQLState());
+					assertThat(ex.getErrorCode()).isEqualTo(originalException.getErrorCode());
+					assertThat((Exception) ex.getNextException()).isSameAs(originalException.getNextException());
+					assertThat(ex.getSuppressed()).isEqualTo(originalException.getSuppressed());
+				}));
+	}
+
+	void test3BatchesOf2ItemsFailing(Consumer<Exception> exception) throws Exception {
+		String sql = "INSERT INTO NOSUCHTABLE values (?)";
+		List<Integer> ids = Arrays.asList(1, 2, 3, 2, 4, 5);
+		int[] rowsAffected = new int[] {1, 1};
+
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected).willThrow(new BatchUpdateException(
+				"duplicate key value violates unique constraint \"NOSUCHTABLE_pkey\" Detail: Key (id)=(2) already exists.",
+				"23505", 0, new int[] { -3, -3 }));
+		mockDatabaseMetaData(true);
+
+		ParameterizedPreparedStatementSetter<Integer> setter = (ps, argument) -> ps.setInt(1, argument);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
+
+		assertThatExceptionOfType(DuplicateKeyException.class)
+				.isThrownBy(() -> template.batchUpdate(sql, ids, 2, setter))
+				.satisfies(exception);
+		verify(this.preparedStatement, times(4)).addBatch();
+		verify(this.preparedStatement).setInt(1, 1);
+		verify(this.preparedStatement, times(2)).setInt(1, 2);
+		verify(this.preparedStatement).setInt(1, 3);
+		verify(this.preparedStatement, times(2)).executeBatch();
 		verify(this.preparedStatement).close();
 		verify(this.connection, atLeastOnce()).close();
 	}
