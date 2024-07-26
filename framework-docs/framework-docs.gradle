@@ -46,6 +46,7 @@ dependencies {
 	api(project(":spring-jdbc"))
 	api(project(":spring-jms"))
 	api(project(":spring-web"))
+	api(project(":spring-webflux"))
 
 	api("com.oracle.database.jdbc:ojdbc11")
 	api("jakarta.jms:jakarta.jms-api")
