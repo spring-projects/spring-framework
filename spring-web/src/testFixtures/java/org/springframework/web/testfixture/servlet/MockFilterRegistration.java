@@ -38,7 +38,7 @@ import org.springframework.lang.Nullable;
  * @author Rossen Stoyanchev
  * @since 6.2
  */
-public class MockFilterRegistration implements FilterRegistration {
+public class MockFilterRegistration implements FilterRegistration.Dynamic {
 
 	private final String name;
 
@@ -49,6 +49,8 @@ public class MockFilterRegistration implements FilterRegistration {
 	private final List<String> servletNames = new ArrayList<>();
 
 	private final List<String> urlPatterns = new ArrayList<>();
+
+	private boolean asyncSupported;
 
 
 	public MockFilterRegistration(String className) {
@@ -124,6 +126,15 @@ public class MockFilterRegistration implements FilterRegistration {
 	@Override
 	public Collection<String> getUrlPatternMappings() {
 		return Collections.unmodifiableCollection(this.urlPatterns);
+	}
+
+	@Override
+	public void setAsyncSupported(boolean asyncSupported) {
+		this.asyncSupported = asyncSupported;
+	}
+
+	public boolean isAsyncSupported() {
+		return this.asyncSupported;
 	}
 
 }
