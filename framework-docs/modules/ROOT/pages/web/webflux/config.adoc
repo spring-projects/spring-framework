@@ -699,7 +699,7 @@ Java::
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
-		public void configurePathMatch(PathMatchConfigurer configurer) {
+		public void configurePathMatching(PathMatchConfigurer configurer) {
 			configurer.addPathPrefix(
 					"/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
@@ -715,7 +715,7 @@ Kotlin::
 	class WebConfig : WebFluxConfigurer {
 
 		@Override
-		fun configurePathMatch(configurer: PathMatchConfigurer) {
+		fun configurePathMatching(configurer: PathMatchConfigurer) {
 			configurer.addPathPrefix(
 					"/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
 		}
