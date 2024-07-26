@@ -669,38 +669,7 @@ You can customize options related to path matching. For details on the individua
 {spring-framework-api}/web/reactive/config/PathMatchConfigurer.html[`PathMatchConfigurer`] javadoc.
 The following example shows how to use `PathMatchConfigurer`:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	@Configuration
-	public class WebConfig implements WebFluxConfigurer {
-
-		@Override
-		public void configurePathMatch(PathMatchConfigurer configurer) {
-			configurer.addPathPrefix(
-					"/api", HandlerTypePredicate.forAnnotation(RestController.class));
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	@Configuration
-	class WebConfig : WebFluxConfigurer {
-
-		@Override
-		fun configurePathMatch(configurer: PathMatchConfigurer) {
-			configurer.addPathPrefix(
-					"/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
-		}
-	}
-----
-======
+include-code::./WebConfig[]
 
 [TIP]
 ====

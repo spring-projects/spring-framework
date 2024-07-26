@@ -49,6 +49,7 @@ dependencies {
 	api(project(":spring-jms"))
 	api(project(":spring-test"))
 	api(project(":spring-web"))
+	api(project(":spring-webflux"))
 	api(project(":spring-webmvc"))
 	api(project(":spring-websocket"))
 
