@@ -20,7 +20,6 @@ dependencies {
 	testImplementation("org.codehaus.jettison:jettison") {
 		exclude group: "stax", module: "stax-api"
 	}
-	//testImplementation(files(genJaxb.classesDir).builtBy(genJaxb))
 	testImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("org.xmlunit:xmlunit-matchers")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
@@ -28,14 +27,13 @@ dependencies {
 }
 
 tasks.named("xjc").configure { xjc ->
-	// XJC plugin only works against main sources
-	def javaSrcDirs = sourceSets.main.java.srcDirs
-	javaSrcDirs.remove(file(xjc.outputJavaDir))
-	sourceSets.main.java.srcDirs = javaSrcDirs
-	def resourcesSrcDirs = sourceSets.main.resources.srcDirs
-	resourcesSrcDirs.remove(file(xjc.outputResourcesDir))
-	sourceSets.main.resources.srcDirs = resourcesSrcDirs
-
+	// XJC plugin only works against main sources, so we have to "move" them to test sources.
+	sourceSets.main.java.exclude {
+		it.file.absolutePath.startsWith(outputJavaDir.get().asFile.absolutePath)
+	}
+	sourceSets.main.resources.exclude {
+		it.file.absolutePath.startsWith(outputResourcesDir.get().asFile.absolutePath)
+	}
 	sourceSets.test.java.srcDir(xjc.outputJavaDir)
 	sourceSets.test.resources.srcDir(xjc.outputResourcesDir)
 }
