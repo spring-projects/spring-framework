@@ -270,6 +270,22 @@ class ContentCachingResponseWrapperTests {
 				.withMessageContaining(overflow);
 	}
 
+	@Test
+	void copyBodyToResponseWithTextEventStream() throws Exception{
+		byte[] responseBody = "3\r\nSse 4\r\nMessage0\r\n\r\n".getBytes(UTF_8);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+		responseWrapper.setStatus(HttpServletResponse.SC_CREATED);
+		responseWrapper.setContentType("text/event-stream");
+		FileCopyUtils.copy(responseBody, responseWrapper.getOutputStream());
+		responseWrapper.copyBodyToResponse();
+
+		assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_CREATED);
+		assertHeader(response, CONTENT_LENGTH, null);
+		assertThat(response.getContentAsByteArray()).isEqualTo(responseBody);
+	}
+
 
 	private void assertHeader(HttpServletResponse response, String header, int value) {
 		assertHeader(response, header, Integer.toString(value));

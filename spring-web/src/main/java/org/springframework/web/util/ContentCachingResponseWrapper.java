@@ -32,6 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.FastByteArrayOutputStream;
 
@@ -295,7 +296,9 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 			HttpServletResponse rawResponse = (HttpServletResponse) getResponse();
 			if (!rawResponse.isCommitted()) {
 				if (complete || this.contentLength != null) {
-					if (rawResponse.getHeader(HttpHeaders.TRANSFER_ENCODING) == null) {
+					String contentType = rawResponse.getContentType();
+					boolean isTextEventStreamType = MediaType.TEXT_EVENT_STREAM_VALUE.equals(contentType);
+					if (rawResponse.getHeader(HttpHeaders.TRANSFER_ENCODING) == null && !isTextEventStreamType) {
 						rawResponse.setContentLength(complete ? this.content.size() : this.contentLength);
 					}
 					this.contentLength = null;
