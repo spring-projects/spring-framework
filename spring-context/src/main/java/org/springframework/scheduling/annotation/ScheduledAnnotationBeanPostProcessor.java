@@ -310,8 +310,9 @@ public class ScheduledAnnotationBeanPostProcessor
 					logger.trace(annotatedMethods.size() + " @Scheduled methods processed on bean '" + beanName +
 							"': " + annotatedMethods);
 				}
-				if ((this.beanFactory != null && !this.beanFactory.isSingleton(beanName)) ||
-						(this.beanFactory instanceof SingletonBeanRegistry sbr && sbr.containsSingleton(beanName))) {
+				if ((this.beanFactory != null &&
+						(!this.beanFactory.containsBean(beanName) || !this.beanFactory.isSingleton(beanName)) ||
+						(this.beanFactory instanceof SingletonBeanRegistry sbr && sbr.containsSingleton(beanName)))) {
 					// Either a prototype/scoped bean or a FactoryBean with a pre-existing managed singleton
 					// -> trigger manual cancellation when ContextClosedEvent comes in
 					this.manualCancellationOnContextClose.add(bean);
