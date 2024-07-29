@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.r2dbc.core;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -56,6 +57,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 5.3
  */
 public interface DatabaseClient extends ConnectionAccessor {
@@ -190,6 +192,18 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * @param type the parameter type
 		 */
 		GenericExecuteSpec bindNull(String name, Class<?> type);
+
+		/**
+		 * Bind the parameter values from the given source list,
+		 * registering each as a positional parameter using their order
+		 * in the given list as their index.
+		 * @param source the source list of parameters, with their order
+		 * as position and each value either a scalar value
+		 * or a {@link io.r2dbc.spi.Parameter}
+		 * @since 6.2
+		 * @see #bind(int, Object)
+		 */
+		GenericExecuteSpec bindValues(List<?> source);
 
 		/**
 		 * Bind the parameter values from the given source map,

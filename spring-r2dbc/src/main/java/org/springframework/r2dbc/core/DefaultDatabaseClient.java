@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
@@ -306,6 +307,18 @@ final class DefaultDatabaseClient implements DatabaseClient {
 			byName.put(name, Parameters.in(type));
 
 			return new DefaultGenericExecuteSpec(this.byIndex, byName, this.sqlSupplier, this.filterFunction);
+		}
+
+		@Override
+		public GenericExecuteSpec bindValues(List<?> source) {
+			assertNotPreparedOperation();
+			Assert.notNull(source, "Source list must not be null");
+			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
+			ListIterator<?> listIterator = source.listIterator();
+			while (listIterator.hasNext()) {
+				byIndex.put(listIterator.nextIndex(), resolveParameter(listIterator.next()));
+			}
+			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
 		}
 
 		@Override
