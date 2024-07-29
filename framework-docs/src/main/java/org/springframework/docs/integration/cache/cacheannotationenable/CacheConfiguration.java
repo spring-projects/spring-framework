@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 // tag::snippet[]
 @Configuration
 @EnableCaching
-public class CacheConfiguration {
+class CacheConfiguration {
 
 	@Bean
 	CacheManager cacheManager() {
