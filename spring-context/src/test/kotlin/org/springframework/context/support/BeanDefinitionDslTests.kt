@@ -220,9 +220,9 @@ class BeanDefinitionDslTests {
 	}
 
 	@Test
-	fun `Declare beans with the functional Kotlin DSL flag them as to be ignored by AOT`() {
+	fun `Declare beans flag them as to be ignored by AOT if needed`() {
 		val beans = beans {
-			bean<Foo>("one")
+			bean("one") { foo() }
 			bean<Bar>("two")
 		}
 
@@ -234,7 +234,7 @@ class BeanDefinitionDslTests {
 		assertThat(context.getBeanDefinition("one").getAttribute(
 			BeanRegistrationAotProcessor.IGNORE_REGISTRATION_ATTRIBUTE)).isEqualTo(true)
 		assertThat(context.getBeanDefinition("two").getAttribute(
-			BeanRegistrationAotProcessor.IGNORE_REGISTRATION_ATTRIBUTE)).isEqualTo(true)
+			BeanRegistrationAotProcessor.IGNORE_REGISTRATION_ATTRIBUTE)).isNull()
 	}
 
 }

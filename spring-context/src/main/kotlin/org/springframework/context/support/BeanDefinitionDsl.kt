@@ -16,6 +16,7 @@
 
 package org.springframework.context.support
 
+import org.springframework.aot.AotDetector
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor
 import org.springframework.beans.factory.config.BeanDefinition
@@ -181,6 +182,10 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 									  role: Role? = null,
 									  order: Int? = null) {
 
+		// This version registers a regular bean definition that has been processed by AOT.
+		if (AotDetector.useGeneratedArtifacts()) {
+			return
+		}
 		val customizer = BeanDefinitionCustomizer { bd ->
 			scope?.let { bd.scope = scope.name.lowercase() }
 			isLazyInit?.let { bd.isLazyInit = isLazyInit }
@@ -191,7 +196,6 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 			description?.let { bd.description = description }
 			role?.let { bd.role = role.ordinal }
 			order?.let { bd.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, order) }
-			bd.setAttribute(BeanRegistrationAotProcessor.IGNORE_REGISTRATION_ATTRIBUTE, true)
 		}
 
 		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context)
