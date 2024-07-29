@@ -78,10 +78,12 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 				new DefaultDynamicPropertyRegistry(environment, this.methods.isEmpty());
 		beanFactory.registerSingleton(DYNAMIC_PROPERTY_REGISTRY_BEAN_NAME, dynamicPropertyRegistry);
 
-		BeanDefinition beanDefinition = new RootBeanDefinition(DynamicPropertySourceBeanInitializer.class);
-		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		beanDefinitionRegistry.registerBeanDefinition(
-				DYNAMIC_PROPERTY_SOURCE_BEAN_INITIALIZER_BEAN_NAME, beanDefinition);
+		if (!beanDefinitionRegistry.containsBeanDefinition(DYNAMIC_PROPERTY_SOURCE_BEAN_INITIALIZER_BEAN_NAME)) {
+			BeanDefinition beanDefinition = new RootBeanDefinition(DynamicPropertySourceBeanInitializer.class);
+			beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			beanDefinitionRegistry.registerBeanDefinition(
+					DYNAMIC_PROPERTY_SOURCE_BEAN_INITIALIZER_BEAN_NAME, beanDefinition);
+		}
 
 		if (!this.methods.isEmpty()) {
 			MutablePropertySources propertySources = environment.getPropertySources();
