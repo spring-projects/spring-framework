@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
@@ -292,6 +293,24 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("oneTimeTask");
 		assertThat(task.getInitialDelayDuration()).isEqualTo(Duration.ofMillis(2_000L));
+	}
+
+	@Test
+	void oneTimeTaskOnNonRegisteredBean() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.refresh();
+
+		ScheduledTaskHolder postProcessor = context.getBean("postProcessor", ScheduledTaskHolder.class);
+		assertThat(postProcessor.getScheduledTasks()).hasSize(0);
+
+		Object target = context.getAutowireCapableBeanFactory().createBean(OneTimeTaskBean.class);
+		assertThat(postProcessor.getScheduledTasks()).hasSize(1);
+		@SuppressWarnings("unchecked")
+		Set<Object> manualTasks = (Set<Object>)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("manualCancellationOnContextClose");
+		assertThat(manualTasks).hasSize(1);
+		assertThat(manualTasks).contains(target);
 	}
 
 	@Test
