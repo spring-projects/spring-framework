@@ -57,6 +57,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
@@ -107,10 +108,6 @@ class ResponseEntityExceptionHandlerTests {
 				.filter(method -> method.getName().startsWith("handle") && (method.getParameterCount() == 4))
 				.filter(method -> !method.getName().equals("handleErrorResponse"))
 				.map(method -> method.getParameterTypes()[0])
-				.filter(exceptionType -> {
-					String name = exceptionType.getSimpleName();
-					return !name.equals("AsyncRequestNotUsableException");
-				})
 				.forEach(exceptionType -> assertThat(annotation.value())
 						.as("@ExceptionHandler is missing declaration for " + exceptionType.getName())
 						.contains((Class<Exception>) exceptionType));
@@ -314,6 +311,13 @@ class ResponseEntityExceptionHandlerTests {
 	@Test
 	void asyncRequestTimeoutException() {
 		testException(new AsyncRequestTimeoutException());
+	}
+
+	@Test
+	void asyncRequestNotUsableException() throws Exception {
+		AsyncRequestNotUsableException ex = new AsyncRequestNotUsableException("simulated failure");
+		ResponseEntity<Object> entity = this.exceptionHandler.handleException(ex, this.request);
+		assertThat(entity).isNull();
 	}
 
 	@Test
