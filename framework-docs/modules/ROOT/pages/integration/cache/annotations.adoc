@@ -524,7 +524,7 @@ To enable caching annotations add the annotation `@EnableCaching` to one of your
 ----
 	@Configuration
 	@EnableCaching
-	public class AppConfig {
+	class AppConfig {
 
 		@Bean
 		CacheManager cacheManager() {
