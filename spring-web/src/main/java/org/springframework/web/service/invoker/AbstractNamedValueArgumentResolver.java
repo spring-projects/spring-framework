@@ -129,7 +129,7 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 	 */
 	@Nullable
 	protected NamedValueInfo createNamedValueInfo(
-			MethodParameter parameter, HttpRequestValues.Metadata requestValues) {
+			MethodParameter parameter, HttpRequestValues.Metadata metadata) {
 
 		return createNamedValueInfo(parameter);
 	}
@@ -246,6 +246,8 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 		 * @param required whether it is marked as required
 		 * @param defaultValue fallback value, possibly {@link ValueConstants#DEFAULT_NONE}
 		 * @param label how it should appear in error messages, e.g. "path variable", "request header"
+		 * @param multiValued whether this argument resolver supports sending multiple values;
+		 * if not, then multiple values are formatted as a String value
 		 */
 		public NamedValueInfo(
 				String name, boolean required, @Nullable String defaultValue, String label, boolean multiValued) {

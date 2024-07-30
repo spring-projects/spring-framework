@@ -55,41 +55,72 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public class RequestParamArgumentResolver extends AbstractNamedValueArgumentResolver {
 
-	private boolean formatAsSingleValue = true;
+	private boolean favorSingleValue;
 
 
 	public RequestParamArgumentResolver(ConversionService conversionService) {
 		super(conversionService);
 	}
 
-	public RequestParamArgumentResolver(ConversionService conversionService, boolean formatAsSingleValue) {
-		super(conversionService);
-		this.formatAsSingleValue = formatAsSingleValue;
+
+	/**
+	 * Whether to format multiple values (e.g. collection, array) as a single
+	 * String value through the configured {@link ConversionService} unless the
+	 * content type is form data, or it is a multipart request.
+	 * <p>By default, this is {@code false} in which case formatting is not applied,
+	 * and a separate parameter with the same name is created for each value.
+	 * @since 6.2
+	 */
+	public void setFavorSingleValue(boolean favorSingleValue) {
+		this.favorSingleValue = favorSingleValue;
+	}
+
+	/**
+	 * Return the setting for {@link #setFavorSingleValue favorSingleValue}.
+	 * @since 6.2
+	 */
+	public boolean isFavorSingleValue() {
+		return this.favorSingleValue;
 	}
 
 
 	@Override
 	@Nullable
-	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter, HttpRequestValues.Metadata requestValues) {
-		MediaType contentType = requestValues.getContentType();
-		if (contentType != null && isMultiValueFormContentType(contentType)) {
-			this.formatAsSingleValue = true;
-		}
-
-		return createNamedValueInfo(parameter);
-	}
-
-	@Override
-	@Nullable
-	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
+	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter, HttpRequestValues.Metadata metadata) {
 		RequestParam annot = parameter.getParameterAnnotation(RequestParam.class);
 		if (annot == null) {
 			return null;
 		}
+		return new NamedValueInfo(
+				annot.name(), annot.required(), annot.defaultValue(), "request parameter",
+				supportsMultipleValues(parameter, metadata));
+	}
 
-		return (annot == null ? null :
-				new NamedValueInfo(annot.name(), annot.required(), annot.defaultValue(),
-						"request parameter", this.formatAsSingleValue));
+	@Override
+	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
+		// Shouldn't be called since we override createNamedValueInfo with HttpRequestValues.Metadata
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * Determine whether the resolver should send multi-value request parameters
+	 * as individual values. If not, they are formatted to a single String value.
+	 * The default implementation uses {@link #isFavorSingleValue()} to decide
+	 * unless the content type is form data, or it is a multipart request.
+	 * @since 6.2
+	 */
+	protected boolean supportsMultipleValues(MethodParameter parameter, HttpRequestValues.Metadata metadata) {
+		return (!isFavorSingleValue() || isFormOrMultipartContent(metadata));
+	}
+
+	/**
+	 * Whether the content type is form data, or it is a multipart request.
+	 * @since 6.2
+	 */
+	protected boolean isFormOrMultipartContent(HttpRequestValues.Metadata metadata) {
+		MediaType mediaType = metadata.getContentType();
+		return (mediaType != null && (mediaType.getType().equals("multipart") ||
+				mediaType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)));
 	}
 
 	@Override
@@ -97,19 +128,6 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 			String name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
 
 		requestValues.addRequestParameter(name, (String) value);
-	}
-
-	protected boolean isFormatAsSingleValue() {
-		return this.formatAsSingleValue;
-	}
-
-	protected void setFormatAsSingleValue(boolean formatAsSingleValue) {
-		this.formatAsSingleValue = formatAsSingleValue;
-	}
-
-	protected boolean isMultiValueFormContentType(MediaType contentType) {
-		return contentType.equals(MediaType.APPLICATION_FORM_URLENCODED)
-				|| contentType.getType().equals("multipart");
 	}
 
 }

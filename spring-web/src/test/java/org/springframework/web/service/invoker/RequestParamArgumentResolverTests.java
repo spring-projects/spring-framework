@@ -16,17 +16,18 @@
 
 package org.springframework.web.service.invoker;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.PostExchange;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,24 +63,18 @@ class RequestParamArgumentResolverTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void requestParamWithDisabledFormattingCollectionValue() {
-		ConversionService conversionService = new DefaultConversionService();
-		boolean formatAsSingleValue = false;
-		Service service = builder.customArgumentResolver(
-						new RequestParamArgumentResolver(conversionService, formatAsSingleValue))
-				.build()
-				.createClient(Service.class);
-		List<String> collectionParams = List.of("1", "2", "3");
-		service.getForm("value 1", collectionParams);
+		RequestParamArgumentResolver resolver = new RequestParamArgumentResolver(new DefaultConversionService());
+		resolver.setFavorSingleValue(true);
 
-		Object uriVariables = this.client.getRequestValues().getUriVariables();
-		assertThat(uriVariables).isNotInstanceOf(MultiValueMap.class).isInstanceOf(HashMap.class);
-		assertThat((HashMap<String, String>) uriVariables).hasSize(4)
-				.containsEntry("queryParam0", "param1")
-				.containsEntry("queryParam0[0]", "value 1")
-				.containsEntry("queryParam1", "param2")
-				.containsEntry("queryParam1[0]", String.join(",", collectionParams));
+		Service service = builder.customArgumentResolver(resolver).build().createClient(Service.class);
+		service.getWithParams("value 1", List.of("1", "2", "3"));
+
+		HttpRequestValues values = this.client.getRequestValues();
+		String uriTemplate = values.getUriTemplate();
+		Map<String, String> uriVariables = values.getUriVariables();
+		UriComponents uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode();
+		assertThat(uri.getQuery()).isEqualTo("param1=value%201&param2=1,2,3");
 	}
 
 	private interface Service {
@@ -88,7 +83,7 @@ class RequestParamArgumentResolverTests {
 		void postForm(@RequestParam String param1, @RequestParam String param2);
 
 		@GetExchange
-		void getForm(@RequestParam String param1, @RequestParam List<String> param2);
+		void getWithParams(@RequestParam String param1, @RequestParam List<String> param2);
 	}
 
 }
