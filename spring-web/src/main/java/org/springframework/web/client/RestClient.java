@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,6 +305,10 @@ public interface RestClient {
 		 * to apply to every response. Such default handlers are applied in the
 		 * order in which they are registered, and after any others that are
 		 * registered for a specific response.
+		 * <p>The first status handler who claims that a response has an
+		 * error is invoked. If you want to disable other defaults, consider
+		 * using {@link #defaultStatusHandler(Predicate, ResponseSpec.ErrorHandler)}
+		 * with a predicate that matches all status codes.
 		 * @param errorHandler handler that typically, though not necessarily,
 		 * throws an exception
 		 * @return this builder
