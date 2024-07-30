@@ -65,6 +65,7 @@ public abstract class DurationFormatterUtils {
 		return switch (style) {
 			case ISO8601 -> parseIso8601(value);
 			case SIMPLE -> parseSimple(value, unit);
+			case COMPOSITE -> parseComposite(value);
 		};
 	}
 
@@ -90,6 +91,7 @@ public abstract class DurationFormatterUtils {
 		return switch (style) {
 			case ISO8601 -> value.toString();
 			case SIMPLE -> printSimple(value, unit);
+			case COMPOSITE -> printComposite(value);
 		};
 	}
 
@@ -132,11 +134,16 @@ public abstract class DurationFormatterUtils {
 		if (SIMPLE_PATTERN.matcher(value).matches()) {
 			return DurationFormat.Style.SIMPLE;
 		}
+		if (COMPOSITE_PATTERN.matcher(value).matches()) {
+			return DurationFormat.Style.COMPOSITE;
+		}
 		throw new IllegalArgumentException("'" + value + "' is not a valid duration, cannot detect any known style");
 	}
 
 	private static final Pattern ISO_8601_PATTERN = Pattern.compile("^[+-]?[pP].*$");
 	private static final Pattern SIMPLE_PATTERN = Pattern.compile("^([+-]?\\d+)([a-zA-Z]{0,2})$");
+	private static final Pattern COMPOSITE_PATTERN = Pattern.compile("^([+-]?)\\(?\\s?(\\d+d)?\\s?(\\d+h)?\\s?(\\d+m)?"
+			+ "\\s?(\\d+s)?\\s?(\\d+ms)?\\s?(\\d+us)?\\s?(\\d+ns)?\\)?$");
 
 	private static Duration parseIso8601(String value) {
 		try {
@@ -166,6 +173,73 @@ public abstract class DurationFormatterUtils {
 	private static String printSimple(Duration duration, @Nullable DurationFormat.Unit unit) {
 		unit = (unit == null ? DurationFormat.Unit.MILLIS : unit);
 		return unit.print(duration);
+	}
+
+	private static Duration parseComposite(String text) {
+		try {
+			Matcher matcher = COMPOSITE_PATTERN.matcher(text);
+			Assert.state(matcher.matches() && matcher.groupCount() > 1, "Does not match composite duration pattern");
+			String sign = matcher.group(1);
+			boolean negative = sign != null && sign.equals("-");
+
+			Duration result = Duration.ZERO;
+			DurationFormat.Unit[] units = DurationFormat.Unit.values();
+			for (int i = 2; i < matcher.groupCount() + 1; i++) {
+				String segment = matcher.group(i);
+				if (StringUtils.hasText(segment)) {
+					DurationFormat.Unit unit = units[units.length - i + 1];
+					result = result.plus(unit.parse(segment.replace(unit.asSuffix(), "")));
+				}
+			}
+			return negative ? result.negated() : result;
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException("'" + text + "' is not a valid composite duration", ex);
+		}
+	}
+
+	private static String printComposite(Duration duration) {
+		if (duration.isZero()) {
+			return DurationFormat.Unit.SECONDS.print(duration);
+		}
+		StringBuilder result = new StringBuilder();
+		if (duration.isNegative()) {
+			result.append('-');
+			duration = duration.negated();
+		}
+		long days = duration.toDaysPart();
+		if (days != 0) {
+			result.append(days).append(DurationFormat.Unit.DAYS.asSuffix());
+		}
+		int hours = duration.toHoursPart();
+		if (hours != 0) {
+			result.append(hours).append(DurationFormat.Unit.HOURS.asSuffix());
+		}
+		int minutes = duration.toMinutesPart();
+		if (minutes != 0) {
+			result.append(minutes).append(DurationFormat.Unit.MINUTES.asSuffix());
+		}
+		int seconds = duration.toSecondsPart();
+		if (seconds != 0) {
+			result.append(seconds).append(DurationFormat.Unit.SECONDS.asSuffix());
+		}
+		int millis = duration.toMillisPart();
+		if (millis != 0) {
+			result.append(millis).append(DurationFormat.Unit.MILLIS.asSuffix());
+		}
+		//special handling of nanos: remove the millis part and then divide into microseconds and nanoseconds
+		long nanos = duration.toNanosPart() - Duration.ofMillis(millis).toNanos();
+		if (nanos != 0) {
+			long micros = nanos / 1000;
+			long remainder = nanos - (micros * 1000);
+			if (micros > 0) {
+				result.append(micros).append(DurationFormat.Unit.MICROS.asSuffix());
+			}
+			if (remainder > 0) {
+				result.append(remainder).append(DurationFormat.Unit.NANOS.asSuffix());
+			}
+		}
+		return result.toString();
 	}
 
 }

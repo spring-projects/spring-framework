@@ -27,7 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.format.annotation.DurationFormat.Unit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.springframework.format.annotation.DurationFormat.Style.COMPOSITE;
 import static org.springframework.format.annotation.DurationFormat.Style.ISO8601;
 import static org.springframework.format.annotation.DurationFormat.Style.SIMPLE;
 
@@ -133,6 +135,60 @@ class DurationFormatterUtilsTests {
 	}
 
 	@Test
+	void parseComposite() {
+		assertThat(DurationFormatterUtils.parse("1d2h34m57s28ms3us2ns", COMPOSITE))
+				.isEqualTo(Duration.ofDays(1).plusHours(2)
+						.plusMinutes(34).plusSeconds(57)
+						.plusMillis(28).plusNanos(3002));
+	}
+
+	@Test
+	void parseCompositeWithExplicitPlusSign() {
+		assertThat(DurationFormatterUtils.parse("+1d2h34m57s28ms3us2ns", COMPOSITE))
+				.isEqualTo(Duration.ofDays(1).plusHours(2)
+						.plusMinutes(34).plusSeconds(57)
+						.plusMillis(28).plusNanos(3002));
+	}
+
+	@Test
+	void parseCompositeWithExplicitMinusSign() {
+		assertThat(DurationFormatterUtils.parse("-1d2h34m57s28ms3us2ns", COMPOSITE))
+				.isEqualTo(Duration.ofDays(-1).plusHours(-2)
+						.plusMinutes(-34).plusSeconds(-57)
+						.plusMillis(-28).plusNanos(-3002));
+	}
+
+	@Test
+	void parseCompositePartial() {
+		assertThat(DurationFormatterUtils.parse("34m57s", COMPOSITE))
+				.isEqualTo(Duration.ofMinutes(34).plusSeconds(57));
+	}
+
+	@Test
+	void parseCompositePartialWithSpaces() {
+		assertThat(DurationFormatterUtils.parse("34m 57s", COMPOSITE))
+				.isEqualTo(Duration.ofMinutes(34).plusSeconds(57));
+	}
+
+	@Test //Kotlin style compatibility
+	void parseCompositeNegativeWithSpacesAndParenthesis() {
+		assertThat(DurationFormatterUtils.parse("-(34m 57s)", COMPOSITE))
+				.isEqualTo(Duration.ofMinutes(-34).plusSeconds(-57));
+	}
+
+	@Test
+	void parseCompositeBadSign() {
+		assertThatException().isThrownBy(() -> DurationFormatterUtils.parse("+-34m57s", COMPOSITE))
+				.havingCause().withMessage("Does not match composite duration pattern");
+	}
+
+	@Test
+	void parseCompositeBadUnit() {
+		assertThatException().isThrownBy(() -> DurationFormatterUtils.parse("34mo57s", COMPOSITE))
+				.havingCause().withMessage("Does not match composite duration pattern");
+	}
+
+	@Test
 	void printSimple() {
 		assertThat(DurationFormatterUtils.print(Duration.ofNanos(12345), SIMPLE, Unit.NANOS))
 				.isEqualTo("12345ns");
@@ -165,6 +221,26 @@ class DurationFormatterUtilsTests {
 	}
 
 	@Test
+	void printCompositePositive() {
+		Duration composite = DurationFormatterUtils.parse("+1d2h34m57s28ms3us2ns", COMPOSITE);
+		assertThat(DurationFormatterUtils.print(composite, COMPOSITE))
+				.isEqualTo("1d2h34m57s28ms3us2ns");
+	}
+
+	@Test
+	void printCompositeZero() {
+		assertThat(DurationFormatterUtils.print(Duration.ZERO, COMPOSITE))
+				.isEqualTo("0s");
+	}
+
+	@Test
+	void printCompositeNegative() {
+		Duration composite = DurationFormatterUtils.parse("-1d2h34m57s28ms3us2ns", COMPOSITE);
+		assertThat(DurationFormatterUtils.print(composite, COMPOSITE))
+				.isEqualTo("-1d2h34m57s28ms3us2ns");
+	}
+
+	@Test
 	void detectAndParse() {
 		assertThat(DurationFormatterUtils.detectAndParse("PT1.234S", Unit.NANOS))
 				.as("iso")
@@ -177,6 +253,10 @@ class DurationFormatterUtilsTests {
 		assertThat(DurationFormatterUtils.detectAndParse("1234", Unit.NANOS))
 				.as("simple without suffix")
 				.isEqualTo(Duration.ofNanos(1234));
+
+		assertThat(DurationFormatterUtils.detectAndParse("3s45ms", Unit.NANOS))
+				.as("composite")
+				.isEqualTo(Duration.ofMillis(3045));
 	}
 
 	@Test
@@ -192,6 +272,10 @@ class DurationFormatterUtilsTests {
 		assertThat(DurationFormatterUtils.detectAndParse("1234"))
 				.as("simple without suffix")
 				.isEqualTo(Duration.ofMillis(1234));
+
+		assertThat(DurationFormatterUtils.detectAndParse("3s45ms"))
+				.as("composite")
+				.isEqualTo(Duration.ofMillis(3045));
 	}
 
 	@Test
@@ -209,6 +293,10 @@ class DurationFormatterUtilsTests {
 		assertThat(DurationFormatterUtils.detect("P2DWV3H-4M"))
 				.as("invalid yet matching ISO8601 pattern")
 				.isEqualTo(ISO8601);
+
+		assertThat(DurationFormatterUtils.detect("-(1d 2h 34m 2ns)"))
+				.as("COMPOSITE")
+						.isEqualTo(COMPOSITE);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> DurationFormatterUtils.detect("WPT2H-4M"))
 				.withMessage("'WPT2H-4M' is not a valid duration, cannot detect any known style")
