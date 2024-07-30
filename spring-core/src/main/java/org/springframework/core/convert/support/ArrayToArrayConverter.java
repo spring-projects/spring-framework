@@ -64,13 +64,27 @@ final class ArrayToArrayConverter implements ConditionalGenericConverter {
 	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (this.conversionService instanceof GenericConversionService genericConversionService) {
 			TypeDescriptor targetElement = targetType.getElementTypeDescriptor();
-			if (targetElement != null && genericConversionService.canBypassConvert(
-					sourceType.getElementTypeDescriptor(), targetElement)) {
-				return source;
+			if (targetElement != null) {
+				TypeDescriptor sourceElement = sourceType.getElementTypeDescriptor();
+				if (genericConversionService.canBypassConvert(sourceElement, targetElement) && canBypassArrayConvert(sourceElement, targetElement)) {
+					return source;
+				}
 			}
 		}
 		List<Object> sourceList = Arrays.asList(ObjectUtils.toObjectArray(source));
 		return this.helperConverter.convert(sourceList, sourceType, targetType);
+	}
+
+	private static boolean canBypassArrayConvert(@Nullable TypeDescriptor sourceElement, TypeDescriptor targetElement) {
+		if (sourceElement == null) {
+			return true;
+		}
+
+		if(sourceElement.isPrimitive() && targetElement.isPrimitive()) {
+			return sourceElement.getObjectType() == targetElement.getObjectType();
+		}
+
+		return !sourceElement.isPrimitive() && !targetElement.isPrimitive();
 	}
 
 }
