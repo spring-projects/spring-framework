@@ -21,12 +21,16 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.AnnotationSpec;
+import org.springframework.javapoet.AnnotationSpec.Builder;
 import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.FieldSpec;
 import org.springframework.javapoet.MethodSpec;
+import org.springframework.javapoet.TypeSpec;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
@@ -38,7 +42,7 @@ import org.springframework.util.ClassUtils;
  * @since 6.1
  * @see SuppressWarnings
  */
-class CodeWarnings {
+public class CodeWarnings {
 
 	private final Set<String> warnings = new LinkedHashSet<>();
 
@@ -99,10 +103,31 @@ class CodeWarnings {
 	 * @param method the method to update
 	 */
 	public void suppress(MethodSpec.Builder method) {
-		if (this.warnings.isEmpty()) {
-			return;
+		suppress(annotationBuilder -> method.addAnnotation(annotationBuilder.build()));
+	}
+
+	/**
+	 * Include {@link SuppressWarnings} on the specified type if necessary.
+	 * @param type the type to update
+	 */
+	public void suppress(TypeSpec.Builder type) {
+		suppress(annotationBuilder -> type.addAnnotation(annotationBuilder.build()));
+	}
+
+	/**
+	 * Consume the builder for {@link SuppressWarnings} if necessary. If this
+	 * instance has no warnings registered, the consumer is not invoked.
+	 * @param annotationSpec a consumer of the {@link AnnotationSpec.Builder}
+	 * @see MethodSpec.Builder#addAnnotation(AnnotationSpec)
+	 * @see TypeSpec.Builder#addAnnotation(AnnotationSpec)
+	 * @see FieldSpec.Builder#addAnnotation(AnnotationSpec)
+	 */
+	protected void suppress(Consumer<AnnotationSpec.Builder> annotationSpec) {
+		if (!this.warnings.isEmpty()) {
+			Builder annotation = AnnotationSpec.builder(SuppressWarnings.class)
+					.addMember("value", generateValueCode());
+			annotationSpec.accept(annotation);
 		}
-		method.addAnnotation(buildAnnotationSpec());
 	}
 
 	/**
@@ -132,11 +157,6 @@ class CodeWarnings {
 				register("deprecation");
 			}
 		}
-	}
-
-	private AnnotationSpec buildAnnotationSpec() {
-		return AnnotationSpec.builder(SuppressWarnings.class)
-				.addMember("value", generateValueCode()).build();
 	}
 
 	private CodeBlock generateValueCode() {
