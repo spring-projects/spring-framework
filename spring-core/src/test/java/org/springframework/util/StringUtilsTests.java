@@ -783,4 +783,15 @@ class StringUtilsTests {
 		assertThat(StringUtils.truncate(text, 10)).isEqualTo(truncated);
 	}
 
+	@Test
+	void trimArrayElements() {
+		assertThat(StringUtils.trimArrayElements(null)).isNull();
+		assertThat(StringUtils.trimArrayElements(new String[]{})).isEmpty();
+		assertThat(StringUtils.trimArrayElements(new String[]{"", " ", "  ", "   "})).containsExactly("", "", "", "");
+		assertThat(StringUtils.trimArrayElements(new String[]{"\n", "\t ", "\n\t"})).containsExactly("", "", "");
+		assertThat(StringUtils.trimArrayElements(new String[]{"a", "b", "c"})).containsExactly("a", "b", "c");
+		assertThat(StringUtils.trimArrayElements(new String[]{"  a  ", "  b b ", "  cc  "})).containsExactly("a", "b b", "cc");
+		assertThat(StringUtils.trimArrayElements(new String[]{"  a  ", "b", "  c  "})).containsExactly("a", "b", "c");
+		assertThat(StringUtils.trimArrayElements(new String[]{null, "  a  ", null})).containsExactly(null, "a", null);
+	}
 }
