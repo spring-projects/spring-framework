@@ -111,19 +111,18 @@ final class MockMvcFilterDecorator implements Filter {
 		String className = delegate.getClass().getName();
 
 		return servletContext -> {
-			MockServletContext mockServletContext = (MockServletContext) servletContext;
-			MockFilterConfig filterConfig;
-			if (filterName != null) {
-				filterConfig = new MockFilterConfig(servletContext, filterName);
-				mockServletContext.addFilterRegistration(new MockFilterRegistration(className, filterName));
-			}
-			else {
-				filterConfig = new MockFilterConfig(servletContext);
-				mockServletContext.addFilterRegistration(new MockFilterRegistration(className));
-			}
+			MockFilterConfig filterConfig = (filterName != null ?
+					new MockFilterConfig(servletContext, filterName) : new MockFilterConfig(servletContext));
+
 			if (initParams != null) {
 				initParams.forEach(filterConfig::addInitParameter);
 			}
+
+			if (servletContext instanceof MockServletContext mockServletContext) {
+				mockServletContext.addFilterRegistration(filterName != null ?
+						new MockFilterRegistration(className, filterName) : new MockFilterRegistration(className));
+			}
+
 			return filterConfig;
 		};
 	}
