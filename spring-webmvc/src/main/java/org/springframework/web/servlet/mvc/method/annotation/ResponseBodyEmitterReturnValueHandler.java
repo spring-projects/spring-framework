@@ -49,12 +49,25 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Handler for return values of type {@link ResponseBodyEmitter} and subclasses
- * such as {@link SseEmitter} including the same types wrapped with
- * {@link ResponseEntity}.
+ * Handler for return values of type:
+ * <ul>
+ * <li>{@link ResponseBodyEmitter} including sub-class {@link SseEmitter} and others.
+ * <li>Reactive return types known to {@link ReactiveAdapterRegistry}.
+ * <li>Any of the above wrapped with {@link ResponseEntity}.
+ * </ul>
  *
- * <p>As of 5.0 also supports reactive return value types for any reactive
- * library with registered adapters in {@link ReactiveAdapterRegistry}.
+ * <p>Single-value reactive types are adapted to {@link DeferredResult}.
+ * Multi-value reactive types are adapted to {@link ResponseBodyEmitter} or
+ * {@link SseEmitter} as follows:
+ * <ul>
+ * <li>SSE stream, if the element type is
+ * {@link org.springframework.http.codec.ServerSentEvent} or if negotiated by
+ * content type.
+ * <li>Text stream for a {@link org.reactivestreams.Publisher} of
+ * {@link CharSequence}.
+ * <li>A JSON stream if negotiated by content type to
+ * {@link MediaType#APPLICATION_NDJSON}.
+ * </ul>
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -153,7 +166,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		else {
 			emitter = this.reactiveHandler.handleValue(returnValue, returnType, mavContainer, webRequest);
 			if (emitter == null) {
-				// Not streaming: write headers without committing response..
+				// We're not streaming; write headers without committing response
 				outputMessage.getHeaders().forEach((headerName, headerValues) -> {
 					for (String headerValue : headerValues) {
 						response.addHeader(headerName, headerValue);
@@ -164,18 +177,17 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		}
 		emitter.extendResponse(outputMessage);
 
-		// At this point we know we're streaming..
+		// We are streaming
 		ShallowEtagHeaderFilter.disableContentCaching(request);
 
-		// Wrap the response to ignore further header changes
-		// Headers will be flushed at the first write
+		// Ignore further header changes; response is committed after first event
 		outputMessage = new StreamingServletServerHttpResponse(outputMessage);
 
 		HttpMessageConvertingHandler handler;
 		try {
-			DeferredResult<?> deferredResult = new DeferredResult<>(emitter.getTimeout());
-			WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
-			handler = new HttpMessageConvertingHandler(outputMessage, deferredResult);
+			DeferredResult<?> result = new DeferredResult<>(emitter.getTimeout());
+			WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(result, mavContainer);
+			handler = new HttpMessageConvertingHandler(outputMessage, result);
 		}
 		catch (Throwable ex) {
 			emitter.initializeWithError(ex);
@@ -183,6 +195,26 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		}
 
 		emitter.initialize(handler);
+	}
+
+
+	/**
+	 * Wrap to silently ignore header changes HttpMessageConverter's that would
+	 * otherwise cause HttpHeaders to raise exceptions.
+	 */
+	private static class StreamingServletServerHttpResponse extends DelegatingServerHttpResponse {
+
+		private final HttpHeaders mutableHeaders = new HttpHeaders();
+
+		public StreamingServletServerHttpResponse(ServerHttpResponse delegate) {
+			super(delegate);
+			this.mutableHeaders.putAll(delegate.getHeaders());
+		}
+
+		@Override
+		public HttpHeaders getHeaders() {
+			return this.mutableHeaders;
+		}
 	}
 
 
@@ -255,27 +287,6 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		public void onCompletion(Runnable callback) {
 			this.deferredResult.onCompletion(callback);
 		}
-	}
-
-
-	/**
-	 * Wrap to silently ignore header changes HttpMessageConverter's that would
-	 * otherwise cause HttpHeaders to raise exceptions.
-	 */
-	private static class StreamingServletServerHttpResponse extends DelegatingServerHttpResponse {
-
-		private final HttpHeaders mutableHeaders = new HttpHeaders();
-
-		public StreamingServletServerHttpResponse(ServerHttpResponse delegate) {
-			super(delegate);
-			this.mutableHeaders.putAll(delegate.getHeaders());
-		}
-
-		@Override
-		public HttpHeaders getHeaders() {
-			return this.mutableHeaders;
-		}
-
 	}
 
 }

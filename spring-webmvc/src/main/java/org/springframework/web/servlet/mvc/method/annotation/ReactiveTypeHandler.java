@@ -172,7 +172,7 @@ class ReactiveTypeHandler {
 				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
-			MediaType streamingResponseType = findConcreteStreamingMediaType(mediaTypes);
+			MediaType streamingResponseType = findConcreteJsonStreamMediaType(mediaTypes);
 			if (streamingResponseType != null) {
 				ResponseBodyEmitter emitter = getEmitter(streamingResponseType);
 				new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
@@ -203,7 +203,7 @@ class ReactiveTypeHandler {
 	 */
 	@SuppressWarnings("deprecation")
 	@Nullable
-	static MediaType findConcreteStreamingMediaType(Collection<MediaType> acceptedMediaTypes) {
+	static MediaType findConcreteJsonStreamMediaType(Collection<MediaType> acceptedMediaTypes) {
 		for (MediaType acceptedType : acceptedMediaTypes) {
 			if (WILDCARD_SUBTYPE_SUFFIXED_BY_NDJSON.includes(acceptedType)) {
 				if (acceptedType.isConcrete()) {

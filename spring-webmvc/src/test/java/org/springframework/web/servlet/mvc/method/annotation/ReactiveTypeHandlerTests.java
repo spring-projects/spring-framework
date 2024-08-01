@@ -130,7 +130,7 @@ class ReactiveTypeHandlerTests {
 				MediaType.parseMediaType("application/*+x-ndjson"),
 				MediaType.parseMediaType("application/vnd.myapp.v1+x-ndjson"));
 
-		assertThat(ReactiveTypeHandler.findConcreteStreamingMediaType(accept))
+		assertThat(ReactiveTypeHandler.findConcreteJsonStreamMediaType(accept))
 				.isEqualTo(MediaType.APPLICATION_NDJSON);
 	}
 
@@ -142,7 +142,7 @@ class ReactiveTypeHandlerTests {
 				MediaType.parseMediaType("application/*+x-ndjson"),
 				MediaType.APPLICATION_NDJSON);
 
-		assertThat(ReactiveTypeHandler.findConcreteStreamingMediaType(accept))
+		assertThat(ReactiveTypeHandler.findConcreteJsonStreamMediaType(accept))
 				.hasToString("application/vnd.myapp.v1+x-ndjson");
 	}
 
@@ -154,7 +154,7 @@ class ReactiveTypeHandlerTests {
 				MediaType.parseMediaType("application/*+x-ndjson"),
 				MediaType.parseMediaType("application/vnd.myapp.v1+x-ndjson"));
 
-		assertThat(ReactiveTypeHandler.findConcreteStreamingMediaType(accept))
+		assertThat(ReactiveTypeHandler.findConcreteJsonStreamMediaType(accept))
 				.isEqualTo(MediaType.APPLICATION_NDJSON);
 	}
 
@@ -167,7 +167,7 @@ class ReactiveTypeHandlerTests {
 				MediaType.parseMediaType("application/*+x-ndjson"),
 				MediaType.parseMediaType("application/vnd.myapp.v1+x-ndjson"));
 
-		assertThat(ReactiveTypeHandler.findConcreteStreamingMediaType(accept))
+		assertThat(ReactiveTypeHandler.findConcreteJsonStreamMediaType(accept))
 				.isEqualTo(MediaType.APPLICATION_STREAM_JSON);
 	}
 
