@@ -173,7 +173,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * is expected in the current web application context, with any bean name.
 	 * <strong>Note:</strong> using this method will cause a new instance of {@link TaglibFactory}
 	 * to created for every single {@link FreeMarkerView} instance. This can be quite expensive
-	 * in terms of memory and initial CPU usage. In production it is recommended that you use
+	 * in terms of memory and initial CPU usage. In production, it is recommended that you use
 	 * a {@link FreeMarkerConfig} which exposes a single shared {@link TaglibFactory}.
 	 */
 	public void setConfiguration(@Nullable Configuration configuration) {
@@ -251,8 +251,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 	}
 
 	/**
-	 * Return the configured FreeMarker {@link ObjectWrapper}, or the
-	 * {@linkplain ObjectWrapper#DEFAULT_WRAPPER default wrapper} if none specified.
+	 * Return the configured FreeMarker {@link ObjectWrapper}, or a default
+	 * wrapper if none specified.
 	 * @see freemarker.template.Configuration#getObjectWrapper()
 	 */
 	protected ObjectWrapper getObjectWrapper() {
