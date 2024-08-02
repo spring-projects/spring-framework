@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
  * multiple matching candidates have been found when only one matching bean was expected.
  *
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.2.1
  * @see BeanFactory#getBean(Class)
  */
@@ -40,6 +41,19 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	@Nullable
 	private final Collection<String> beanNamesFound;
 
+
+	/**
+	 * Create a new {@code NoUniqueBeanDefinitionException}.
+	 * @param type required type of the non-unique bean
+	 * @param beanNamesFound the names of all matching beans (as a Collection)
+	 * @param message detailed message describing the problem
+	 * @since 6.2
+	 */
+	public NoUniqueBeanDefinitionException(Class<?> type, Collection<String> beanNamesFound, String message) {
+		super(type, message);
+		this.numberOfBeansFound = beanNamesFound.size();
+		this.beanNamesFound = new ArrayList<>(beanNamesFound);
+	}
 
 	/**
 	 * Create a new {@code NoUniqueBeanDefinitionException}.
@@ -59,10 +73,8 @@ public class NoUniqueBeanDefinitionException extends NoSuchBeanDefinitionExcepti
 	 * @param beanNamesFound the names of all matching beans (as a Collection)
 	 */
 	public NoUniqueBeanDefinitionException(Class<?> type, Collection<String> beanNamesFound) {
-		super(type, "expected single matching bean but found " + beanNamesFound.size() + ": " +
+		this(type, beanNamesFound, "expected single matching bean but found " + beanNamesFound.size() + ": " +
 				StringUtils.collectionToCommaDelimitedString(beanNamesFound));
-		this.numberOfBeansFound = beanNamesFound.size();
-		this.beanNamesFound = new ArrayList<>(beanNamesFound);
 	}
 
 	/**

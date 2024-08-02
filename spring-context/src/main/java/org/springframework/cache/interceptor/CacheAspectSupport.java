@@ -270,13 +270,22 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				setCacheManager(this.beanFactory.getBean(CacheManager.class));
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
-				StringBuilder message = new StringBuilder("no CacheResolver specified and expected a single CacheManager bean, but found ");
-				message.append(ex.getNumberOfBeansFound());
-				if (ex.getBeanNamesFound() != null) {
-					message.append(": [").append(StringUtils.collectionToCommaDelimitedString(ex.getBeanNamesFound())).append("]");
+				int numberOfBeansFound = ex.getNumberOfBeansFound();
+				Collection<String> beanNamesFound = ex.getBeanNamesFound();
+
+				StringBuilder message = new StringBuilder("no CacheResolver specified and expected single matching CacheManager but found ");
+				message.append(numberOfBeansFound);
+				if (beanNamesFound != null) {
+					message.append(": ").append(StringUtils.collectionToCommaDelimitedString(beanNamesFound));
 				}
-				message.append(" - mark one as primary or declare a specific CacheManager to use.");
-				throw new NoUniqueBeanDefinitionException(CacheManager.class, ex.getNumberOfBeansFound(), message.toString());
+				String exceptionMessage = message.toString();
+
+				if (beanNamesFound != null) {
+					throw new NoUniqueBeanDefinitionException(CacheManager.class, beanNamesFound, exceptionMessage);
+				}
+				else {
+					throw new NoUniqueBeanDefinitionException(CacheManager.class, numberOfBeansFound, exceptionMessage);
+				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				throw new NoSuchBeanDefinitionException(CacheManager.class, "no CacheResolver specified - "

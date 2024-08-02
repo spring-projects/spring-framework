@@ -92,9 +92,12 @@ class EnableCachingTests extends AbstractCacheAnnotationTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MultiCacheManagerConfig.class);
 		assertThatThrownBy(ctx::refresh)
-				.isInstanceOf(NoUniqueBeanDefinitionException.class)
-				.hasMessageContaining("no CacheResolver specified and expected a single CacheManager bean, but found 2: [cm1,cm2]")
-				.hasNoCause();
+				.isInstanceOfSatisfying(NoUniqueBeanDefinitionException.class, ex -> {
+					assertThat(ex.getMessage()).contains(
+							"no CacheResolver specified and expected single matching CacheManager but found 2: cm1,cm2");
+					assertThat(ex.getNumberOfBeansFound()).isEqualTo(2);
+					assertThat(ex.getBeanNamesFound()).containsExactly("cm1", "cm2");
+				}).hasNoCause();
 	}
 
 	@Test
