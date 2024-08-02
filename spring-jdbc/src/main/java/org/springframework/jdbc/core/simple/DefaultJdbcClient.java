@@ -83,6 +83,25 @@ final class DefaultJdbcClient implements JdbcClient {
 		this.namedParamOps = jdbcTemplate;
 	}
 
+	/**
+	 * Expose the classic Spring JdbcTemplate to allow invocation of
+	 * classic JDBC operations.
+	 */
+	@Override
+	public JdbcOperations getJdbcOperations() {
+		return this.classicOps;
+	}
+
+	/**
+	 * Expose the classic Spring {@link JdbcTemplate} itself, if available,
+	 * in particular for passing it on to other {@code JdbcTemplate} consumers.
+	 * <p>If sufficient for the purposes at hand, {@link #getJdbcOperations()}
+	 * is recommended over this variant.
+	 */
+	public JdbcTemplate getJdbcTemplate() {
+		Assert.state(this.classicOps instanceof JdbcTemplate, "No JdbcTemplate available");
+		return (JdbcTemplate) this.classicOps;
+	}
 
 	@Override
 	public StatementSpec sql(String sql) {

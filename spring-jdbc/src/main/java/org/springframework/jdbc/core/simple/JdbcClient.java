@@ -28,6 +28,7 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
@@ -76,6 +77,19 @@ public interface JdbcClient {
 	 */
 	StatementSpec sql(String sql);
 
+	/**
+	 * Expose the classic Spring JdbcTemplate to allow invocation of
+	 * classic JDBC operations.
+	 */
+	JdbcOperations getJdbcOperations();
+
+	/**
+	 * Expose the classic Spring {@link JdbcTemplate} itself, if available,
+	 * in particular for passing it on to other {@code JdbcTemplate} consumers.
+	 * <p>If sufficient for the purposes at hand, {@link #getJdbcOperations()}
+	 * is recommended over this variant.
+	 */
+	JdbcTemplate getJdbcTemplate();
 
 	// Static factory methods
 
