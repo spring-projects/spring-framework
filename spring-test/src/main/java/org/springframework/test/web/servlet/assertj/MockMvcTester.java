@@ -108,7 +108,7 @@ import org.springframework.web.context.WebApplicationContext;
  * Both resolved and unresolved exceptions are considered a failure that can
  * be asserted as follows:
  * <pre><code class="java">
- * // perform a GET on /boom and assert the message for the the exception
+ * // perform a GET on /boom and assert the message for the exception
  * assertThat(mvc.get().uri("/boom")).hasFailed()
  *         .failure().hasMessage("Test exception");
  * </code></pre>
