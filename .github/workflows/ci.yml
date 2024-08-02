@@ -8,6 +8,7 @@ jobs:
   ci:
     name: '${{ matrix.os.name}} | Java ${{ matrix.java.version}}'
     runs-on: ${{ matrix.os.id }}
+    timeout-minutes: 60
     if: ${{ github.repository == 'spring-projects/spring-framework' }}
     strategy:
       matrix:
