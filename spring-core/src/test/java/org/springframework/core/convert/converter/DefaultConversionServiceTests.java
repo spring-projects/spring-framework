@@ -43,7 +43,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -640,8 +639,7 @@ class DefaultConversionServiceTests {
 		assertThat(result).containsExactly(1, 2, 3);
 	}
 
-	@Disabled("Primitive array to Object[] conversion is not currently supported")
-	@Test
+	@Test  // gh-33212
 	void convertIntArrayToObjectArray() {
 		Object[] result = conversionService.convert(new int[] {1, 2}, Object[].class);
 		assertThat(result).containsExactly(1, 2);
