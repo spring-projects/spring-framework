@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -626,9 +626,27 @@ class DefaultConversionServiceTests {
 		assertThat(result[2]).isEqualTo(3);
 	}
 
+	@Test  // gh-33212
+	void convertIntArrayToObjectArray() {
+		Object[] result = conversionService.convert(new int[] {1, 2}, Object[].class);
+		assertThat(result).containsExactly(1, 2);
+	}
+
 	@Test
-	void convertByteArrayToWrapperArray() {
-		byte[] byteArray = new byte[] {1, 2, 3};
+	void convertIntArrayToFloatArray() {
+		Float[] result = conversionService.convert(new int[] {1, 2}, Float[].class);
+		assertThat(result).containsExactly(1.0F, 2.0F);
+	}
+
+	@Test
+	void convertIntArrayToPrimitiveFloatArray() {
+		float[] result = conversionService.convert(new int[] {1, 2}, float[].class);
+		assertThat(result).containsExactly(1.0F, 2.0F);
+	}
+
+	@Test
+	void convertPrimitiveByteArrayToByteWrapperArray() {
+		byte[] byteArray = {1, 2, 3};
 		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
 		assertThat(converted).isEqualTo(new Byte[]{1, 2, 3});
 	}

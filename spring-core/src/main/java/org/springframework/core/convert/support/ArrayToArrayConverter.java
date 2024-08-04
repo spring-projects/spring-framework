@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Keith Donald
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  */
 final class ArrayToArrayConverter implements ConditionalGenericConverter {
@@ -64,7 +65,7 @@ final class ArrayToArrayConverter implements ConditionalGenericConverter {
 	public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (this.conversionService instanceof GenericConversionService) {
 			TypeDescriptor targetElement = targetType.getElementTypeDescriptor();
-			if (targetElement != null &&
+			if (targetElement != null && targetType.getType().isInstance(source) &&
 					((GenericConversionService) this.conversionService).canBypassConvert(
 							sourceType.getElementTypeDescriptor(), targetElement)) {
 				return source;
