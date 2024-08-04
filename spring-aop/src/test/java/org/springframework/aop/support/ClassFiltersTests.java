@@ -54,7 +54,7 @@ class ClassFiltersTests {
 		assertThat(union.matches(RuntimeException.class)).isTrue();
 		assertThat(union.matches(TestBean.class)).isTrue();
 		assertThat(union.toString())
-			.matches("^.+UnionClassFilter: \\[.+RootClassFilter: .+Exception, .+RootClassFilter: .+TestBean\\]$");
+			.matches("^.+UnionClassFilter: \\[.+RootClassFilter: .+Exception, .+RootClassFilter: .+TestBean]$");
 	}
 
 	@Test
