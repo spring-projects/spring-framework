@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,11 +298,11 @@ public abstract class ReflectionHelper {
 						conversionOccurred = true;
 					}
 				}
-				// If the argument type is assignable to the varargs component type, there is no need to
+				// If the argument type is equal to the varargs element type, there is no need to
 				// convert it or wrap it in an array. For example, using StringToArrayConverter to
 				// convert a String containing a comma would result in the String being split and
 				// repackaged in an array when it should be used as-is.
-				else if (!sourceType.isAssignableTo(targetType.getElementTypeDescriptor())) {
+				else if (!sourceType.equals(targetType.getElementTypeDescriptor())) {
 					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
 				}
 				// Possible outcomes of the above if-else block:
