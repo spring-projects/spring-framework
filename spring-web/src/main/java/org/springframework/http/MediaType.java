@@ -447,7 +447,7 @@ public class MediaType extends MimeType implements Serializable {
 
 
 	static {
-		// Not using "valueOf' to avoid static init cost
+		// Not using "valueOf" to avoid static init cost
 		ALL = new MediaType(MimeType.WILDCARD_TYPE, MimeType.WILDCARD_TYPE);
 		APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
 		APPLICATION_CBOR = new MediaType("application", "cbor");
@@ -732,7 +732,7 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * Parse the given String value into a {@code MediaType} object,
 	 * with this method name following the 'valueOf' naming convention
-	 * (as supported by {@link org.springframework.core.convert.ConversionService}.
+	 * (as supported by {@link org.springframework.core.convert.ConversionService}).
 	 * @param value the string to parse
 	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
 	 * @see #parseMediaType(String)
