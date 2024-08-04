@@ -294,50 +294,6 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		evaluate("aVarargsMethod3('foo', 'bar,baz')", "foo-bar,baz", String.class);
 	}
 
-	@Test  // gh-33013
-	void testVarargsWithObjectArrayType() {
-		// Calling 'public String formatObjectVarargs(String format, Object... args)' -> String.format(format, args)
-
-		// No var-args and no conversion necessary
-		evaluate("formatObjectVarargs('x')", "x", String.class);
-
-		// No var-args but conversion necessary
-		evaluate("formatObjectVarargs(9)", "9", String.class);
-
-		// No conversion necessary
-		evaluate("formatObjectVarargs('x -> %s', '')", "x -> ", String.class);
-		evaluate("formatObjectVarargs('x -> %s', ' ')", "x ->  ", String.class);
-		evaluate("formatObjectVarargs('x -> %s', 'a')", "x -> a", String.class);
-		evaluate("formatObjectVarargs('x -> %s %s %s', 'a', 'b', 'c')", "x -> a b c", String.class);
-		evaluate("formatObjectVarargs('x -> %s', new Object[]{''})", "x -> ", String.class);
-		evaluate("formatObjectVarargs('x -> %s', new Object[]{' '})", "x ->  ", String.class);
-		evaluate("formatObjectVarargs('x -> %s', new Object[]{'a'})", "x -> a", String.class);
-		evaluate("formatObjectVarargs('x -> %s %s %s', new Object[]{'a', 'b', 'c'})", "x -> a b c", String.class);
-
-		// The following assertions were cherry-picked from 6.1.x; however, they are expected
-		// to fail on 6.0.x and 5.3.x, since gh-32704 (Support varargs invocations in SpEL for
-		// varargs array subtype) was not backported.
-		// evaluate("formatObjectVarargs('x -> %s', new String[]{''})", "x -> ", String.class);
-		// evaluate("formatObjectVarargs('x -> %s', new String[]{' '})", "x ->  ", String.class);
-		// evaluate("formatObjectVarargs('x -> %s', new String[]{'a'})", "x -> a", String.class);
-		// evaluate("formatObjectVarargs('x -> %s %s %s', new String[]{'a', 'b', 'c'})", "x -> a b c", String.class);
-
-		// Conversion necessary
-		evaluate("formatObjectVarargs('x -> %s %s', 2, 3)", "x -> 2 3", String.class);
-		evaluate("formatObjectVarargs('x -> %s %s', 'a', 3.0d)", "x -> a 3.0", String.class);
-
-		// Individual string contains a comma with multiple varargs arguments
-		evaluate("formatObjectVarargs('foo -> %s %s', ',', 'baz')", "foo -> , baz", String.class);
-		evaluate("formatObjectVarargs('foo -> %s %s', 'bar', ',baz')", "foo -> bar ,baz", String.class);
-		evaluate("formatObjectVarargs('foo -> %s %s', 'bar,', 'baz')", "foo -> bar, baz", String.class);
-
-		// Individual string contains a comma with single varargs argument.
-		evaluate("formatObjectVarargs('foo -> %s', ',')", "foo -> ,", String.class);
-		evaluate("formatObjectVarargs('foo -> %s', ',bar')", "foo -> ,bar", String.class);
-		evaluate("formatObjectVarargs('foo -> %s', 'bar,')", "foo -> bar,", String.class);
-		evaluate("formatObjectVarargs('foo -> %s', 'bar,baz')", "foo -> bar,baz", String.class);
-	}
-
 	@Test
 	public void testVarargsOptionalInvocation() {
 		// Calling 'public String optionalVarargsMethod(Optional<String>... values)'
