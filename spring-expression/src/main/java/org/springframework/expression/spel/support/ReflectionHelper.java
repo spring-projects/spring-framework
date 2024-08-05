@@ -313,11 +313,14 @@ public abstract class ReflectionHelper {
 				// convert it or wrap it in an array. For example, using StringToArrayConverter to convert
 				// a String containing a comma would result in the String being split and repackaged in an
 				// array when it should be used as-is. Similarly, if the argument is an array that is
-				// assignable to the varargs array type, there is no need to convert it.
+				// assignable to the varargs array type, there is no need to convert it. However, if the
+				// argument is a java.util.List, we let the TypeConverter convert the list to an array.
 				else if (!sourceType.isAssignableTo(componentTypeDesc) ||
-						(sourceType.isArray() && !sourceType.isAssignableTo(targetType))) {
+						(sourceType.isArray() && !sourceType.isAssignableTo(targetType)) ||
+						(argument instanceof List)) {
 
-					TypeDescriptor targetTypeToUse = (sourceType.isArray() ? targetType : componentTypeDesc);
+					TypeDescriptor targetTypeToUse =
+							(sourceType.isArray() || argument instanceof List ? targetType : componentTypeDesc);
 					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetTypeToUse);
 				}
 				// Possible outcomes of the above if-else block:
@@ -411,11 +414,14 @@ public abstract class ReflectionHelper {
 				// convert it. For example, using StringToArrayConverter to convert a String containing a
 				// comma would result in the String being split and repackaged in an array when it should
 				// be used as-is. Similarly, if the argument is an array that is assignable to the varargs
-				// array type, there is no need to convert it.
+				// array type, there is no need to convert it. However, if the argument is a java.util.List,
+				// we let the TypeConverter convert the list to an array.
 				else if (!sourceType.isAssignableTo(varargsComponentType) ||
-						(sourceType.isArray() && !sourceType.isAssignableTo(varargsArrayType))) {
+						(sourceType.isArray() && !sourceType.isAssignableTo(varargsArrayType)) ||
+						(argument instanceof List)) {
 
-					TypeDescriptor targetTypeToUse = (sourceType.isArray() ? varargsArrayType : varargsComponentType);
+					TypeDescriptor targetTypeToUse =
+							(sourceType.isArray() || argument instanceof List ? varargsArrayType : varargsComponentType);
 					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetTypeToUse);
 				}
 				// Possible outcomes of the above if-else block:

@@ -32,6 +32,8 @@ import org.springframework.expression.MethodResolver;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardTypeLocator;
+import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,12 +50,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class MethodInvocationTests extends AbstractExpressionTests {
 
 	@Test
-	void testSimpleAccess01() {
+	void simpleAccess() {
 		evaluate("getPlaceOfBirth().getCity()", "Smiljan", String.class);
 	}
 
 	@Test
-	void testStringClass() {
+	void stringClass() {
 		evaluate("new java.lang.String('hello').charAt(2)", 'l', Character.class);
 		evaluate("new java.lang.String('hello').charAt(2).equals('l'.charAt(0))", true, Boolean.class);
 		evaluate("'HELLO'.toLowerCase()", "hello", String.class);
@@ -61,13 +63,13 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testNonExistentMethods() {
+	void nonExistentMethods() {
 		// name is ok but madeup() does not exist
 		evaluateAndCheckError("name.madeup()", SpelMessage.METHOD_NOT_FOUND, 5);
 	}
 
 	@Test
-	void testWidening01() {
+	void widening() {
 		// widening of int 3 to double 3 is OK
 		evaluate("new Double(3.0d).compareTo(8)", -1, Integer.class);
 		evaluate("new Double(3.0d).compareTo(3)", 0, Integer.class);
@@ -75,18 +77,19 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testArgumentConversion01() {
+	void argumentConversion() {
 		// Rely on Double>String conversion for calling startsWith()
 		evaluate("new String('hello 2.0 to you').startsWith(7.0d)", false, Boolean.class);
 		evaluate("new String('7.0 foobar').startsWith(7.0d)", true, Boolean.class);
 	}
 
-	@Test
-	void testMethodThrowingException_SPR6760() {
+	@Test  // SPR-6760
+	void methodThrowingException() {
 		// Test method on inventor: throwException()
-		// On 1 it will throw an IllegalArgumentException
-		// On 2 it will throw a RuntimeException
-		// On 3 it will exit normally
+		// On 1 it will throw an IllegalArgumentException.
+		// On 2 it will throw a RuntimeException.
+		// On 4 it will throw a TestException.
+		// Otherwise, it will exit normally.
 		// In each case it increments the Inventor field 'counter' when invoked
 
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -115,7 +118,6 @@ class MethodInvocationTests extends AbstractExpressionTests {
 		assertThat(o).isEqualTo(3);
 		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(2);
 
-
 		// Now cause it to throw an exception:
 		eContext.setVariable("bar", 1);
 		assertThatException()
@@ -135,12 +137,13 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	/**
 	 * Check on first usage (when the cachedExecutor in MethodReference is null) that the exception is not wrapped.
 	 */
-	@Test
-	void testMethodThrowingException_SPR6941() {
+	@Test  // SPR-6941
+	void methodThrowingRuntimeException() {
 		// Test method on inventor: throwException()
-		// On 1 it will throw an IllegalArgumentException
-		// On 2 it will throw a RuntimeException
-		// On 3 it will exit normally
+		// On 1 it will throw an IllegalArgumentException.
+		// On 2 it will throw a RuntimeException.
+		// On 4 it will throw a TestException.
+		// Otherwise, it will exit normally.
 		// In each case it increments the Inventor field 'counter' when invoked
 
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -152,12 +155,13 @@ class MethodInvocationTests extends AbstractExpressionTests {
 			.isNotInstanceOf(SpelEvaluationException.class);
 	}
 
-	@Test
-	void testMethodThrowingException_SPR6941_2() {
+	@Test  // SPR-6941
+	void methodThrowingCustomException() {
 		// Test method on inventor: throwException()
-		// On 1 it will throw an IllegalArgumentException
-		// On 2 it will throw a RuntimeException
-		// On 3 it will exit normally
+		// On 1 it will throw an IllegalArgumentException.
+		// On 2 it will throw a RuntimeException.
+		// On 4 it will throw a TestException.
+		// Otherwise, it will exit normally.
 		// In each case it increments the Inventor field 'counter' when invoked
 
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -166,12 +170,11 @@ class MethodInvocationTests extends AbstractExpressionTests {
 		context.setVariable("bar", 4);
 		assertThatExceptionOfType(ExpressionInvocationTargetException.class)
 			.isThrownBy(() -> expr.getValue(context))
-			.satisfies(ex -> assertThat(ex.getCause().getClass().getName()).isEqualTo(
-					"org.springframework.expression.spel.testresources.Inventor$TestException"));
+			.withCauseExactlyInstanceOf(Inventor.TestException.class);
 	}
 
-	@Test
-	void testMethodFiltering_SPR6764() {
+	@Test  // SPR-6764
+	void methodFiltering() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setRootObject(new TestObject());
@@ -211,7 +214,7 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testAddingMethodResolvers() {
+	void addingMethodResolvers() {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		// reflective method accessor is the only one by default
@@ -235,7 +238,7 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testVarargsInvocation01() {
+	void varargsInvocation01() {
 		// Calling 'public String aVarargsMethod(String... strings)'
 		evaluate("aVarargsMethod('a','b','c')", "[a, b, c]", String.class);
 		evaluate("aVarargsMethod('a')", "[a]", String.class);
@@ -252,7 +255,7 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testVarargsInvocation02() {
+	void varargsInvocation02() {
 		// Calling 'public String aVarargsMethod2(int i, String... strings)'
 		evaluate("aVarargsMethod2(5,'a','b','c')", "5-[a, b, c]", String.class);
 		evaluate("aVarargsMethod2(2,'a')", "2-[a]", String.class);
@@ -267,7 +270,7 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testVarargsInvocation03() {
+	void varargsInvocation03() {
 		// Calling 'public int aVarargsMethod3(String str1, String... strings)' - returns all strings concatenated with "-"
 
 		// No conversion necessary
@@ -295,7 +298,7 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test  // gh-33013
-	void testVarargsWithObjectArrayType() {
+	void varargsWithObjectArrayType() {
 		// Calling 'public String formatObjectVarargs(String format, Object... args)' -> String.format(format, args)
 
 		// No var-args and no conversion necessary
@@ -336,7 +339,7 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testVarargsWithPrimitiveArrayType() {
+	void varargsWithPrimitiveArrayType() {
 		// Calling 'public String formatPrimitiveVarargs(String format, int... nums)' -> effectively String.format(format, args)
 
 		// No var-args and no conversion necessary
@@ -357,13 +360,28 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testVarargsWithPrimitiveArrayToObjectArrayConversion() {
+	void varargsWithPrimitiveArrayToObjectArrayConversion() {
 		evaluate("formatObjectVarargs('x -> %s %s %s', new short[]{1, 2, 3})", "x -> 1 2 3", String.class); // short[] to Object[]
 		evaluate("formatObjectVarargs('x -> %s %s %s', new int[]{1, 2, 3})", "x -> 1 2 3", String.class); // int[] to Object[]
 	}
 
+	@Test  // gh-33315
+	void varargsWithListConvertedToVarargsArray() {
+		((StandardTypeLocator) context.getTypeLocator()).registerImport("java.util");
+
+		// Calling 'public String aVarargsMethod(String... strings)' -> Arrays.toString(strings)
+		String expected = "[a, b, c]";
+		evaluate("aVarargsMethod(T(List).of('a', 'b', 'c'))", expected, String.class);
+		evaluate("aVarargsMethod({'a', 'b', 'c'})", expected, String.class);
+
+		// Calling 'public String formatObjectVarargs(String format, Object... args)' -> String.format(format, args)
+		expected = "x -> a b c";
+		evaluate("formatObjectVarargs('x -> %s %s %s', T(List).of('a', 'b', 'c'))", expected, String.class);
+		evaluate("formatObjectVarargs('x -> %s %s %s', {'a', 'b', 'c'})", expected, String.class);
+	}
+
 	@Test
-	void testVarargsOptionalInvocation() {
+	void varargsOptionalInvocation() {
 		// Calling 'public String optionalVarargsMethod(Optional<String>... values)'
 		evaluate("optionalVarargsMethod()", "[]", String.class);
 		evaluate("optionalVarargsMethod(new String[0])", "[]", String.class);
@@ -379,12 +397,12 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testInvocationOnNullContextObject() {
+	void invocationOnNullContextObject() {
 		evaluateAndCheckError("null.toString()",SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED);
 	}
 
 	@Test
-	void testMethodOfClass() {
+	void methodOfClass() {
 		Expression expression = parser.parseExpression("getName()");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
 		assertThat(value).isEqualTo("java.lang.String");
