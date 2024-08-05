@@ -810,6 +810,8 @@ public class Indexer extends SpelNodeImpl {
 				throw new SpelEvaluationException(getStartPosition(), ex,
 						SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE, this.name, ex.getMessage());
 			}
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, this.targetObjectTypeDescriptor.toString());
 		}
 
 		@Override
