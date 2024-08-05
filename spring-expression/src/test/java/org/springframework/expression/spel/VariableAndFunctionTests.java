@@ -206,7 +206,6 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		evaluate("#varargsObjectFunction(new int[]{1, 2, 3})", "[1, 2, 3]", String.class); // int[] to Object[]
 	}
 
-	@Disabled("Primitive array to Object[] conversion is not currently supported")
 	@Test
 	void functionFromMethodHandleWithVarargsAndPrimitiveArrayToObjectArrayConversion() {
 		evaluate("#message('x -> %s %s %s', new short[]{1, 2, 3})", "x -> 1 2 3", String.class);  // short[] to Object[]
