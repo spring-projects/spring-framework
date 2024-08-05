@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.ValueConstants;
  * request header, path variable, cookie, and others.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  * @since 6.0
  */
 public abstract class AbstractNamedValueArgumentResolver implements HttpServiceArgumentResolver {
@@ -145,7 +146,7 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 							.formatted(parameter.getNestedParameterType().getName()));
 			}
 		}
-		boolean required = (info.required && !parameter.getParameterType().equals(Optional.class));
+		boolean required = (info.required && !parameter.isOptional());
 		String defaultValue = (ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue);
 		return info.update(name, required, defaultValue);
 	}

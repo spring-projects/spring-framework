@@ -48,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * {@link TestValue @TestValue} annotation and {@link TestNamedValueArgumentResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  */
 class NamedValueArgumentResolverTests {
 
@@ -134,7 +135,7 @@ class NamedValueArgumentResolverTests {
 	}
 
 	@Test
-	void optionalEmpthyWithDefaultValue() {
+	void optionalEmptyWithDefaultValue() {
 		this.service.executeOptionalWithDefaultValue(Optional.empty());
 		assertTestValue("value", "default");
 	}
@@ -155,6 +156,12 @@ class NamedValueArgumentResolverTests {
 	void mapOfTestValuesHasOptionalValue() {
 		this.service.executeMapWithOptionalValue(Map.of("value", Optional.of("test")));
 		assertTestValue("value", "test");
+	}
+
+	@Test
+	void nullTestValueWithNullable() {
+		this.service.executeNullable(null);
+		assertTestValue("value");
 	}
 
 	private void assertTestValue(String key, String... values) {
@@ -206,6 +213,9 @@ class NamedValueArgumentResolverTests {
 
 		@GetExchange
 		void executeMapWithOptionalValue(@TestValue Map<String, Optional<String>> values);
+
+		@GetExchange
+		void executeNullable(@Nullable @TestValue String value);
 
 	}
 

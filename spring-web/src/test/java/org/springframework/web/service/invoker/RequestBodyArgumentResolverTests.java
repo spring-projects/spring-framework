@@ -16,6 +16,8 @@
 
 package org.springframework.web.service.invoker;
 
+import java.util.Optional;
+
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import org.junit.jupiter.api.Test;
@@ -35,7 +37,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Tests for {@link RequestBodyArgumentResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  */
+@SuppressWarnings({"DataFlowIssue", "OptionalAssignedToNull"})
 class RequestBodyArgumentResolverTests {
 
 	private final TestReactorExchangeAdapter client = new TestReactorExchangeAdapter();
@@ -102,17 +106,67 @@ class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
-	void ignoreNull() {
-		this.service.execute(null);
+	void nullRequestBody() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.service.execute(null))
+				.withMessage("RequestBody is required");
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.service.executeMono(null))
+				.withMessage("RequestBody is required");
+	}
+
+	@Test
+	void nullRequestBodyWithNullable() {
+		this.service.executeNullable(null);
 
 		assertThat(getBodyValue()).isNull();
 		assertThat(getPublisherBody()).isNull();
 
-		this.service.executeMono(null);
+		this.service.executeNullableMono(null);
 
 		assertThat(getBodyValue()).isNull();
 		assertThat(getPublisherBody()).isNull();
 	}
+
+	@Test
+	void nullRequestBodyWithNotRequired() {
+		this.service.executeNotRequired(null);
+
+		assertThat(getBodyValue()).isNull();
+		assertThat(getPublisherBody()).isNull();
+
+		this.service.executeNotRequiredMono(null);
+
+		assertThat(getBodyValue()).isNull();
+		assertThat(getPublisherBody()).isNull();
+	}
+
+	@Test
+	void nullRequestBodyWithOptional() {
+		this.service.executeOptional(null);
+
+		assertThat(getBodyValue()).isNull();
+		assertThat(getPublisherBody()).isNull();
+	}
+
+	@Test
+	void emptyOptionalRequestBody() {
+		this.service.executeOptional(Optional.empty());
+
+		assertThat(getBodyValue()).isNull();
+		assertThat(getPublisherBody()).isNull();
+	}
+
+	@Test
+	void optionalStringBody() {
+		String body = "bodyValue";
+		this.service.executeOptional(Optional.of(body));
+
+		assertThat(getBodyValue()).isEqualTo(body);
+		assertThat(getPublisherBody()).isNull();
+	}
+
 
 	@Nullable
 	private Object getBodyValue() {
@@ -134,13 +188,29 @@ class RequestBodyArgumentResolverTests {
 	}
 
 
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private interface Service {
 
 		@GetExchange
 		void execute(@RequestBody String body);
 
 		@GetExchange
+		void executeNullable(@Nullable @RequestBody String body);
+
+		@GetExchange
+		void executeNotRequired(@RequestBody(required = false) String body);
+
+		@GetExchange
+		void executeOptional(@RequestBody Optional<String> body);
+
+		@GetExchange
 		void executeMono(@RequestBody Mono<String> body);
+
+		@GetExchange
+		void executeNullableMono(@Nullable @RequestBody Mono<String> body);
+
+		@GetExchange
+		void executeNotRequiredMono(@RequestBody(required = false) Mono<String> body);
 
 		@GetExchange
 		void executeSingle(@RequestBody Single<String> body);
