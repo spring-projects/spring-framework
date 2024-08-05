@@ -189,6 +189,10 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		assertThatSpelEvaluationException()
 				.isThrownBy(() -> parser.parseExpression("name='p3'").getValue(context, target))
 				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE);
+
+		assertThatSpelEvaluationException()
+				.isThrownBy(() -> parser.parseExpression("['name']='p4'").getValue(context, target))
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE);
 	}
 
 	@Test
