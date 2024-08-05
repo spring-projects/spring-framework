@@ -32,6 +32,7 @@ import org.springframework.expression.MethodResolver;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
@@ -362,6 +363,21 @@ class MethodInvocationTests extends AbstractExpressionTests {
 	void varargsWithPrimitiveArrayToObjectArrayConversion() {
 		evaluate("formatObjectVarargs('x -> %s %s %s', new short[]{1, 2, 3})", "x -> 1 2 3", String.class); // short[] to Object[]
 		evaluate("formatObjectVarargs('x -> %s %s %s', new int[]{1, 2, 3})", "x -> 1 2 3", String.class); // int[] to Object[]
+	}
+
+	@Test  // gh-33315
+	void varargsWithListConvertedToVarargsArray() {
+		((StandardTypeLocator) context.getTypeLocator()).registerImport("java.util");
+
+		// Calling 'public String aVarargsMethod(String... strings)' -> Arrays.toString(strings)
+		String expected = "[a, b, c]";
+		evaluate("aVarargsMethod(T(List).of('a', 'b', 'c'))", expected, String.class);
+		evaluate("aVarargsMethod({'a', 'b', 'c'})", expected, String.class);
+
+		// Calling 'public String formatObjectVarargs(String format, Object... args)' -> String.format(format, args)
+		expected = "x -> a b c";
+		evaluate("formatObjectVarargs('x -> %s %s %s', T(List).of('a', 'b', 'c'))", expected, String.class);
+		evaluate("formatObjectVarargs('x -> %s %s %s', {'a', 'b', 'c'})", expected, String.class);
 	}
 
 	@Test
