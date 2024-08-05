@@ -8,6 +8,7 @@ jobs:
   build:
     name: Build Pull Request
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     if: ${{ github.repository == 'spring-projects/spring-framework' }}
     steps:
       - name: Set up JDK 17
