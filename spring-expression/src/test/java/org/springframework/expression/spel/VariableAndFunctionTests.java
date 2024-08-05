@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -199,7 +198,6 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 		evaluate("#formatPrimitiveVarargs('x -> %s %s %s', new String[]{'1', '2', '3'})", "x -> 1 2 3", String.class); // String[] to int[]
 	}
 
-	@Disabled("Primitive array to Object[] conversion is not currently supported")
 	@Test
 	void functionFromMethodWithVarargsAndPrimitiveArrayToObjectArrayConversion() {
 		evaluate("#varargsObjectFunction(new short[]{1, 2, 3})", "[1, 2, 3]", String.class); // short[] to Object[]

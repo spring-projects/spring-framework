@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.Expression;
@@ -357,7 +356,6 @@ class MethodInvocationTests extends AbstractExpressionTests {
 		evaluate("formatPrimitiveVarargs('x -> %s %s', '2', 3.0d)", "x -> 2 3", String.class);
 	}
 
-	@Disabled("Primitive array to Object[] conversion is not currently supported")
 	@Test
 	void testVarargsWithPrimitiveArrayToObjectArrayConversion() {
 		evaluate("formatObjectVarargs('x -> %s %s %s', new short[]{1, 2, 3})", "x -> 1 2 3", String.class); // short[] to Object[]
