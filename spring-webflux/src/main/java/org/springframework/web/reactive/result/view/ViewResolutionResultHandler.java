@@ -100,7 +100,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 	private final List<View> defaultViews = new ArrayList<>(4);
 
-	private final List<FragmentFormatter> fragmentFormatters = List.of(new SseFragmentFormatter());
+	private final List<StreamHandler> streamHandlers = List.of(new SseStreamHandler());
 
 
 	/**
@@ -273,10 +273,12 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 							exchange.getResponse().setStatusCode(status);
 						}
 						exchange.getResponse().getHeaders().putAll(render.headers());
-
 						bindingContext.updateModel(exchange);
-						Flux<Flux<DataBuffer>> renderFlux = render.fragments()
-								.concatMap(fragment -> renderFragment(fragment, locale, bindingContext, exchange));
+
+						StreamHandler streamHandler = getStreamHandler(exchange);
+
+						Flux<Flux<DataBuffer>> renderFlux = render.fragments().concatMap(fragment ->
+								renderFragment(fragment, streamHandler, locale, bindingContext, exchange));
 
 						return exchange.getResponse().writeAndFlushWith(renderFlux);
 					}
@@ -331,7 +333,8 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 	}
 
 	private Mono<Flux<DataBuffer>> renderFragment(
-			Fragment fragment, Locale locale, BindingContext bindingContext, ServerWebExchange exchange) {
+			Fragment fragment, @Nullable StreamHandler streamHandler, Locale locale,
+			BindingContext bindingContext, ServerWebExchange exchange) {
 
 		// Merge attributes from top-level model
 		fragment.mergeAttributes(bindingContext.getModel());
@@ -343,19 +346,17 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 				Mono.just(List.of(fragment.view())) :
 				resolveViews(fragment.viewName() != null ? fragment.viewName() : getDefaultViewName(exchange), locale));
 
-		FragmentFormatter fragmentFormatter = getFragmentFormatter(exchange);
-
 		return selectedViews.flatMap(views -> render(views, fragment.model(), bindingContext, mutatedExchange))
-				.then(Mono.fromSupplier(() -> (fragmentFormatter != null ?
-						fragmentFormatter.format(response.getBodyFlux(), fragment, exchange) :
+				.then(Mono.fromSupplier(() -> (streamHandler != null ?
+						streamHandler.format(response.getBodyFlux(), fragment, exchange) :
 						response.getBodyFlux())));
 	}
 
 	@Nullable
-	private FragmentFormatter getFragmentFormatter(ServerWebExchange exchange) {
-		for (FragmentFormatter formatter : this.fragmentFormatters) {
-			if (formatter.supports(exchange.getRequest())) {
-				return formatter;
+	private StreamHandler getStreamHandler(ServerWebExchange exchange) {
+		for (StreamHandler handler : this.streamHandlers) {
+			if (handler.supports(exchange.getRequest())) {
+				return handler;
 			}
 		}
 		return null;
@@ -460,7 +461,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 	/**
 	 * Strategy to render fragment with stream formatting.
 	 */
-	private interface FragmentFormatter {
+	private interface StreamHandler {
 
 		/**
 		 * Whether the formatter supports the given request.
@@ -469,12 +470,12 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 		/**
 		 * Format the given fragment.
-		 * @param fragmentBuffers the fragment serialized to data buffers
+		 * @param fragmentContent the fragment serialized to data buffers
 		 * @param fragment the fragment being rendered
 		 * @param exchange the current exchange
 		 * @return the formatted fragment
 		 */
-		Flux<DataBuffer> format(Flux<DataBuffer> fragmentBuffers, Fragment fragment, ServerWebExchange exchange);
+		Flux<DataBuffer> format(Flux<DataBuffer> fragmentContent, Fragment fragment, ServerWebExchange exchange);
 
 	}
 
@@ -482,7 +483,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 	/**
 	 * Formatter for Server-Sent Events formatting.
 	 */
-	private static class SseFragmentFormatter implements FragmentFormatter {
+	private static class SseStreamHandler implements StreamHandler {
 
 		@Override
 		public boolean supports(ServerHttpRequest request) {
@@ -492,7 +493,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 		@Override
 		public Flux<DataBuffer> format(
-				Flux<DataBuffer> fragmentBuffers, Fragment fragment, ServerWebExchange exchange) {
+				Flux<DataBuffer> fragmentContent, Fragment fragment, ServerWebExchange exchange) {
 
 			Charset charset = getCharset(exchange.getRequest());
 			DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
@@ -501,7 +502,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 			return Flux.concat(
 					Flux.just(encodeText(eventLine + "data:", charset, bufferFactory)),
-					fragmentBuffers,
+					fragmentContent,
 					Flux.just(encodeText("\n\n", charset, bufferFactory)));
 		}
 
