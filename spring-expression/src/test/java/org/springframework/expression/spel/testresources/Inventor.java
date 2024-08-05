@@ -119,20 +119,16 @@ public class Inventor {
 
 	public int throwException(int valueIn) throws Exception {
 		counter++;
-		if (valueIn==1) {
-			throw new IllegalArgumentException("IllegalArgumentException for 1");
-		}
-		if (valueIn==2) {
-			throw new RuntimeException("RuntimeException for 2");
-		}
-		if (valueIn==4) {
-			throw new TestException();
+		switch (valueIn) {
+			case 1 -> throw new IllegalArgumentException("IllegalArgumentException for 1");
+			case 2 -> throw new RuntimeException("RuntimeException for 2");
+			case 4 -> throw new TestException();
 		}
 		return valueIn;
 	}
 
 	@SuppressWarnings("serial")
-	static class TestException extends Exception {}
+	public static class TestException extends Exception {}
 
 	public String throwException(PlaceOfBirth pob) {
 		return pob.getCity();
