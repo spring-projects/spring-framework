@@ -977,6 +977,9 @@ method parameters:
   `MultiValueMap<String, ?>` with multiple cookies, a `Collection<?>` of values, or an
   individual value. Type conversion is supported for non-String values.
 
+The parameters can't be null unless they are set as not required through the annotation,
+annotated with `@Nullable` or they are `Optional`.
+
 |===
 
 

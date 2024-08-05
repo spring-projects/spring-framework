@@ -17,6 +17,7 @@
 package org.springframework.web.service.invoker;
 
 import java.net.URI;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,13 +25,16 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.service.annotation.GetExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link UrlArgumentResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  */
+@SuppressWarnings({"DataFlowIssue", "OptionalAssignedToNull"})
 class UrlArgumentResolverTests {
 
 	private final TestExchangeAdapter client = new TestExchangeAdapter();
@@ -59,22 +63,62 @@ class UrlArgumentResolverTests {
 	}
 
 	@Test
-	void ignoreNull() {
-		this.service.execute(null);
+	void nullUrl() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.service.execute(null))
+				.withMessage("URI is required");
+	}
+
+	@Test
+	void nullUrlWithNullable() {
+		this.service.executeNullable(null);
 
 		assertThat(getRequestValues().getUri()).isNull();
 		assertThat(getRequestValues().getUriTemplate()).isEqualTo("/path");
 	}
+
+	@Test
+	void nullUrlWithOptional() {
+		this.service.executeOptional(null);
+
+		assertThat(getRequestValues().getUri()).isNull();
+		assertThat(getRequestValues().getUriTemplate()).isEqualTo("/path");
+	}
+
+	@Test
+	void emptyOptionalUrl() {
+		this.service.executeOptional(Optional.empty());
+
+		assertThat(getRequestValues().getUri()).isNull();
+		assertThat(getRequestValues().getUriTemplate()).isEqualTo("/path");
+	}
+
+	@Test
+	void optionalUrl() {
+		URI dynamicUrl = URI.create("dynamic-path");
+		this.service.executeOptional(Optional.of(dynamicUrl));
+
+		assertThat(getRequestValues().getUri()).isEqualTo(dynamicUrl);
+		assertThat(getRequestValues().getUriTemplate()).isEqualTo("/path");
+	}
+
 
 	private HttpRequestValues getRequestValues() {
 		return this.client.getRequestValues();
 	}
 
 
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private interface Service {
 
 		@GetExchange("/path")
-		void execute(@Nullable URI uri);
+		void execute(URI uri);
+
+		@GetExchange("/path")
+		void executeNullable(@Nullable URI uri);
+
+		@GetExchange("/path")
+		void executeOptional(Optional<URI> uri);
 
 		@GetExchange
 		void executeNotUri(String other);
