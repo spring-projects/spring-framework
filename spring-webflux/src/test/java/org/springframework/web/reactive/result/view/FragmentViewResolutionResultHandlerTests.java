@@ -43,6 +43,7 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.reactive.result.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -87,7 +88,14 @@ public class FragmentViewResolutionResultHandlerTests {
 				.then(Mono.defer(() -> exchange.getResponse().getBodyAsString()))
 				.block(Duration.ofSeconds(60));
 
-		assertThat(body).isEqualTo("<p>Hello Foo</p><p>Hello Bar</p>");
+		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.TEXT_HTML);
+		assertThat(body).isEqualTo("""
+				<p>
+					Hello Foo
+				</p>\
+				<p>
+					Hello Bar
+				</p>""");
 	}
 
 	@Test
@@ -98,6 +106,7 @@ public class FragmentViewResolutionResultHandlerTests {
 				.build();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		MockServerHttpResponse response = exchange.getResponse();
 
 		HandlerResult result = new HandlerResult(
 				new Handler(),
@@ -106,15 +115,20 @@ public class FragmentViewResolutionResultHandlerTests {
 				new BindingContext());
 
 		String body = initHandler().handleResult(exchange, result)
-				.then(Mono.defer(() -> exchange.getResponse().getBodyAsString()))
+				.then(Mono.defer(response::getBodyAsString))
 				.block(Duration.ofSeconds(60));
 
+		assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_EVENT_STREAM);
 		assertThat(body).isEqualTo("""
 				event:fragment1
-				data:<p>Hello Foo</p>
+				data:<p>
+				data:	Hello Foo
+				data:</p>
 
 				event:fragment2
-				data:<p>Hello Bar</p>
+				data:<p>
+				data:	Hello Bar
+				data:</p>
 
 				""");
 	}

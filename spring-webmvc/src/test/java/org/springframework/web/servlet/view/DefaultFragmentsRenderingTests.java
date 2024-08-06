@@ -64,7 +64,13 @@ public class DefaultFragmentsRenderingTests {
 		view.resolveNestedViews(viewResolver, Locale.ENGLISH);
 		view.render(Collections.emptyMap(), request, response);
 
-		assertThat(response.getContentAsString()).isEqualTo("<p>Hello Foo</p><p>Hello Bar</p>");
+		assertThat(response.getContentAsString()).isEqualTo("""
+				<p>
+					Hello Foo
+				</p>\
+				<p>
+					Hello Bar
+				</p>""");
 	}
 
 

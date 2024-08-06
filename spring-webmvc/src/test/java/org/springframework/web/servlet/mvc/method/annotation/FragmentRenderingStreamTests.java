@@ -19,7 +19,9 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +30,8 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -51,8 +54,20 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  */
 public class FragmentRenderingStreamTests {
 
-	@Test
-	void streamFragments() throws Exception {
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
+
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
+
+	private final NativeWebRequest webRequest = new ServletWebRequest(request, response);
+
+	private ResponseBodyEmitterReturnValueHandler handler;
+
+
+	@BeforeEach
+	void setUp() {
+		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
+		WebAsyncUtils.getAsyncManager(this.webRequest).setAsyncWebRequest(asyncWebRequest);
+		this.request.setAsyncSupported(true);
 
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(ScriptTemplatingConfiguration.class);
@@ -61,44 +76,84 @@ public class FragmentRenderingStreamTests {
 		ScriptTemplateViewResolver viewResolver = new ScriptTemplateViewResolver(prefix, ".kts");
 		viewResolver.setApplicationContext(context);
 
-		ResponseBodyEmitterReturnValueHandler handler = new ResponseBodyEmitterReturnValueHandler(
-				List.of(new MappingJackson2HttpMessageConverter()),
+		this.handler = new ResponseBodyEmitterReturnValueHandler(
+				List.of(new StringHttpMessageConverter()),
 				ReactiveAdapterRegistry.getSharedInstance(), new SyncTaskExecutor(),
 				new ContentNegotiationManager(),
 				List.of(viewResolver), null);
+	}
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		NativeWebRequest webRequest = new ServletWebRequest(request, response);
 
-		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(request, response);
-		WebAsyncUtils.getAsyncManager(webRequest).setAsyncWebRequest(asyncWebRequest);
-		request.setAsyncSupported(true);
-
+	@Test
+	void streamWithSseEmitter() throws Exception {
 		MethodParameter type = on(TestController.class).resolveReturnType(SseEmitter.class);
-		SseEmitter emitter = new SseEmitter();
-		handler.handleReturnValue(emitter, type, new ModelAndViewContainer(), webRequest);
 
-		assertThat(request.isAsyncStarted()).isTrue();
-		assertThat(response.getStatus()).isEqualTo(200);
+		SseEmitter emitter = new SseEmitter();
+		this.handler.handleReturnValue(emitter, type, new ModelAndViewContainer(), webRequest);
+
+		assertThat(this.request.isAsyncStarted()).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(200);
 
 		ModelAndView mav1 = new ModelAndView("fragment1", Map.of("foo", "Foo"));
 		ModelAndView mav2 = new ModelAndView("fragment2", Map.of("bar", "Bar"));
 
-		emitter.send(SseEmitter.event().data(mav1).data(mav2));
+		emitter.send(SseEmitter.event().data(mav1));
+		emitter.send(SseEmitter.event().data(mav2));
 
-		assertThat(response.getContentType()).isEqualTo("text/event-stream");
-		assertThat(response.getContentAsString()).isEqualTo(("""
-				data:<p>Hello Foo</p>
-				data:<p>Hello Bar</p>
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
+		assertThat(this.response.getContentAsString()).isEqualTo(("""
+				event:fragment1
+				data:<p>
+				data:	Hello Foo
+				data:</p>
+
+				event:fragment2
+				data:<p>
+				data:	Hello Bar
+				data:</p>
+
+				"""));
+	}
+
+	@Test
+	void streamWithFlux() throws Exception {
+		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, ModelAndView.class);
+
+		this.request.addHeader(HttpHeaders.ACCEPT, "text/event-stream");
+
+		Flux<ModelAndView> flux = Flux.just(
+				new ModelAndView("fragment1", Map.of("foo", "Foo")),
+				new ModelAndView("fragment2", Map.of("bar", "Bar")));
+
+		this.handler.handleReturnValue(flux, type, new ModelAndViewContainer(), webRequest);
+
+		assertThat(this.request.isAsyncStarted()).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(200);
+
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
+		assertThat(this.response.getContentAsString()).isEqualTo(("""
+				event:fragment1
+				data:<p>
+				data:	Hello Foo
+				data:</p>
+
+				event:fragment2
+				data:<p>
+				data:	Hello Bar
+				data:</p>
 
 				"""));
 	}
 
 
+	@SuppressWarnings({"unused", "DataFlowIssue"})
 	private static class TestController {
 
-		SseEmitter handle() {
+		SseEmitter handleWithSseEmitter() {
+			return null;
+		}
+
+		Flux<ModelAndView> handleWithFlux() {
 			return null;
 		}
 	}

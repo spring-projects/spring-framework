@@ -41,6 +41,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -538,21 +539,25 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 
 		@Override
 		public Flux<DataBuffer> format(
-				Flux<DataBuffer> fragmentContent, Fragment fragment, ServerWebExchange exchange) {
+				Flux<DataBuffer> fragmentFlux, Fragment fragment, ServerWebExchange exchange) {
 
-			Charset charset = StandardCharsets.UTF_8;
-			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
-			if (contentType != null && contentType.getCharset() != null) {
-				charset = contentType.getCharset();
-			}
+			MediaType mediaType = exchange.getResponse().getHeaders().getContentType();
+			Charset charset = (mediaType != null && mediaType.getCharset() != null ?
+					mediaType.getCharset() : StandardCharsets.UTF_8);
 
 			DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
 
-			String eventLine = fragment.viewName() != null ? "event:" + fragment.viewName() + "\n" : "";
+			String eventLine = (fragment.viewName() != null ? "event:" + fragment.viewName() + "\n" : "");
 			DataBuffer prefix = encodeText(eventLine + "data:", charset, bufferFactory);
 			DataBuffer suffix = encodeText("\n\n", charset, bufferFactory);
 
-			return Flux.concat(Flux.just(prefix), fragmentContent, Flux.just(suffix));
+			Mono<DataBuffer> content = DataBufferUtils.join(fragmentFlux)
+					.map(dataBuffer -> {
+						String s = dataBuffer.toString(charset).replace("\n", "\ndata:");
+						return bufferFactory.wrap(s.getBytes(charset));
+					});
+
+			return Flux.concat(Flux.just(prefix), content, Flux.just(suffix));
 		}
 
 		private DataBuffer encodeText(String text, Charset charset, DataBufferFactory bufferFactory) {
