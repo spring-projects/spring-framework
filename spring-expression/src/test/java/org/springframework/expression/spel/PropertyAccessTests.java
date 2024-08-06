@@ -188,11 +188,11 @@ class PropertyAccessTests extends AbstractExpressionTests {
 
 		assertThatSpelEvaluationException()
 				.isThrownBy(() -> parser.parseExpression("name='p3'").getValue(context, target))
-				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE);
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.NOT_ASSIGNABLE);
 
 		assertThatSpelEvaluationException()
 				.isThrownBy(() -> parser.parseExpression("['name']='p4'").getValue(context, target))
-				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE);
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.NOT_ASSIGNABLE);
 	}
 
 	@Test
@@ -207,7 +207,7 @@ class PropertyAccessTests extends AbstractExpressionTests {
 
 		assertThatSpelEvaluationException()
 				.isThrownBy(() -> parser.parseExpression("name='p3'").getValue(context, target2))
-				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE);
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.NOT_ASSIGNABLE);
 	}
 
 	@Test
