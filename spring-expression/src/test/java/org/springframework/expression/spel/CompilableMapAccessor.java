@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * @author Andy Clement
  * @since 4.1
  */
-class CompilableMapAccessor implements CompilablePropertyAccessor {
+public class CompilableMapAccessor implements CompilablePropertyAccessor {
 
 	private final boolean allowWrite;
 
