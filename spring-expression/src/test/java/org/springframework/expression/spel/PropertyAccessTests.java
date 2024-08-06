@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,11 +188,11 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 
 		assertThatSpelEvaluationException()
 				.isThrownBy(() -> parser.parseExpression("name='p3'").getValue(context, target))
-				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE);
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.NOT_ASSIGNABLE);
 
 		assertThatSpelEvaluationException()
 				.isThrownBy(() -> parser.parseExpression("['name']='p4'").getValue(context, target))
-				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE);
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.NOT_ASSIGNABLE);
 	}
 
 	@Test
@@ -207,7 +207,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 
 		assertThatSpelEvaluationException()
 				.isThrownBy(() -> parser.parseExpression("name='p3'").getValue(context, target2))
-				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE);
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.NOT_ASSIGNABLE);
 	}
 
 	@Test
