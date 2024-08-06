@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
+ * @author Sam Brannen
  * @since 3.2
  */
 public class OpInc extends Operator {
@@ -50,6 +51,10 @@ public class OpInc extends Operator {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		if (!state.getEvaluationContext().isAssignmentEnabled()) {
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.OPERAND_NOT_INCREMENTABLE, toStringAST());
+		}
+
 		SpelNodeImpl operand = getLeftOperand();
 		ValueRef valueRef = operand.getValueRef(state);
 
@@ -104,7 +109,7 @@ public class OpInc extends Operator {
 			}
 		}
 
-		// set the name value
+		// set the new value
 		try {
 			valueRef.setValue(newValue.getValue());
 		}
