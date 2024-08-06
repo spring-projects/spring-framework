@@ -282,8 +282,9 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 							streamHandler.updateResponse(exchange);
 						}
 
-						Flux<Flux<DataBuffer>> renderFlux = render.fragments().concatMap(fragment ->
-								renderFragment(fragment, streamHandler, locale, bindingContext, exchange));
+						Flux<Flux<DataBuffer>> renderFlux = render.fragments()
+								.concatMap(fragment -> renderFragment(fragment, streamHandler, locale, bindingContext, exchange))
+								.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
 
 						return response.writeAndFlushWith(renderFlux);
 					}
@@ -552,9 +553,16 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 			DataBuffer suffix = encodeText("\n\n", charset, bufferFactory);
 
 			Mono<DataBuffer> content = DataBufferUtils.join(fragmentFlux)
-					.map(dataBuffer -> {
-						String s = dataBuffer.toString(charset).replace("\n", "\ndata:");
-						return bufferFactory.wrap(s.getBytes(charset));
+					.map(buffer -> {
+						String text;
+						try {
+							text = buffer.toString(charset);
+						}
+						finally {
+							DataBufferUtils.release(buffer);
+						}
+						text = text.replace("\n", "\ndata:");
+						return bufferFactory.wrap(text.getBytes(charset));
 					});
 
 			return Flux.concat(Flux.just(prefix), content, Flux.just(suffix));
