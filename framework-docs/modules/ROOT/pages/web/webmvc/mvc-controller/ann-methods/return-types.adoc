@@ -58,6 +58,7 @@ supported for all return values.
 
 | `FragmentsRendering`, `Collection<ModelAndView>`
 | For rendering one or more fragments each with its own view and model.
+  See xref:web/webmvc-view/mvc-fragments.adoc[HTML Fragments] for more details.
 
 | `void`
 | A method with a `void` return type (or `null` return value) is considered to have fully

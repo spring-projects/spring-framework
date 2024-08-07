@@ -205,6 +205,7 @@
 **** xref:web/webmvc-view/mvc-freemarker.adoc[]
 **** xref:web/webmvc-view/mvc-groovymarkup.adoc[]
 **** xref:web/webmvc-view/mvc-script.adoc[]
+**** xref:web/webmvc-view/mvc-fragments.adoc[]
 **** xref:web/webmvc-view/mvc-jsp.adoc[]
 **** xref:web/webmvc-view/mvc-feeds.adoc[]
 **** xref:web/webmvc-view/mvc-document.adoc[]
