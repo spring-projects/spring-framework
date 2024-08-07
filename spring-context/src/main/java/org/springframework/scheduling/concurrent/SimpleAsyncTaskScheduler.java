@@ -201,7 +201,7 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 	}
 
 	private void shutdownAwareErrorHandler(Throwable ex) {
-		if (this.scheduledExecutor.isTerminated()) {
+		if (this.scheduledExecutor.isShutdown()) {
 			LogFactory.getLog(getClass()).debug("Ignoring scheduled task exception after shutdown", ex);
 		}
 		else {
