@@ -1,11 +1,18 @@
 [[webflux-view]]
-= View Technologies
+= View Rendering
 [.small]#xref:web/webmvc-view.adoc[See equivalent in the Servlet stack]#
 
-The use of view technologies in Spring WebFlux is pluggable. Whether you decide to
+The rendering of views in Spring WebFlux is pluggable. Whether you decide to
 use Thymeleaf, FreeMarker, or some other view technology is primarily a matter of a
 configuration change. This chapter covers the view technologies integrated with Spring
-WebFlux. We assume you are already familiar with xref:web/webflux/dispatcher-handler.adoc#webflux-viewresolution[View Resolution].
+WebFlux.
+
+For more context on view rendering, please see xref:web/webflux/dispatcher-handler.adoc#webflux-viewresolution[View Resolution].
+
+WARNING: The views of a Spring WebFlux application live within internal trust boundaries
+of the application. Views have access to beans in the application context, and as
+such, we do not recommend use the Spring WebFlux template support in applications where
+the templates are editable by external sources, since this can have security implications.
 
 
 
