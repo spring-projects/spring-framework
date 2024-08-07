@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -23,17 +24,18 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -92,28 +94,46 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	@Override
 	@SuppressWarnings("NullAway")
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
+		HttpRequest request = buildRequest(headers, body);
+		CompletableFuture<HttpResponse<InputStream>> responsefuture =
+				this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
 		try {
-			HttpRequest request = buildRequest(headers, body);
-			HttpResponse<InputStream> response;
 			if (this.timeout != null) {
-				response = this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
-						.get(this.timeout.toMillis(), TimeUnit.MILLISECONDS);
+				CompletableFuture<Void> timeoutFuture = new CompletableFuture<Void>()
+						.completeOnTimeout(null, this.timeout.toMillis(), TimeUnit.MILLISECONDS);
+				timeoutFuture.thenRun(() -> {
+					if (!responsefuture.cancel(true) && !responsefuture.isCompletedExceptionally()) {
+						try {
+							responsefuture.resultNow().body().close();
+						} catch (IOException ignored) {}
+					}
+				});
+				var response = responsefuture.get();
+				return new JdkClientHttpResponse(response.statusCode(), response.headers(), new FilterInputStream(response.body()) {
+
+					@Override
+					public void close() throws IOException {
+						timeoutFuture.cancel(false);
+						super.close();
+					}
+				});
+
+			} else {
+				var response = responsefuture.get();
+				return new JdkClientHttpResponse(response.statusCode(), response.headers(), response.body());
 			}
-			else {
-				response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-			}
-			return new JdkClientHttpResponse(response);
-		}
-		catch (UncheckedIOException ex) {
-			throw ex.getCause();
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
+			responsefuture.cancel(true);
 			throw new IOException("Request was interrupted: " + ex.getMessage(), ex);
 		}
 		catch (ExecutionException ex) {
 			Throwable cause = ex.getCause();
 
+			if (cause instanceof CancellationException caEx) {
+				throw new HttpTimeoutException("Request timed out");
+			}
 			if (cause instanceof UncheckedIOException uioEx) {
 				throw uioEx.getCause();
 			}
@@ -127,17 +147,11 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 				throw new IOException(cause.getMessage(), cause);
 			}
 		}
-		catch (TimeoutException ex) {
-			throw new IOException("Request timed out: " + ex.getMessage(), ex);
-		}
 	}
 
 
 	private HttpRequest buildRequest(HttpHeaders headers, @Nullable Body body) {
 		HttpRequest.Builder builder = HttpRequest.newBuilder().uri(this.uri);
-		if (this.timeout != null) {
-			builder.timeout(this.timeout);
-		}
 
 		headers.forEach((headerName, headerValues) -> {
 			if (!DISALLOWED_HEADERS.contains(headerName.toLowerCase())) {
