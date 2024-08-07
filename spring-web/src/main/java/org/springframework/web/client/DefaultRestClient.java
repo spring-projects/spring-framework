@@ -196,7 +196,7 @@ final class DefaultRestClient implements RestClient {
 
 		MediaType contentType = getContentType(clientResponse);
 
-		try (clientResponse) {
+		try {
 			callback.run();
 
 			IntrospectingClientHttpResponse responseWrapper = new IntrospectingClientHttpResponse(clientResponse);
@@ -240,16 +240,17 @@ final class DefaultRestClient implements RestClient {
 					ResolvableType.forType(bodyType) + "] and content type [" + contentType + "]", cause);
 			if (observation != null) {
 				observation.error(restClientException);
-				observation.stop();
 			}
 			throw restClientException;
 		}
 		catch (RestClientException restClientException) {
 			if (observation != null) {
 				observation.error(restClientException);
-				observation.stop();
 			}
 			throw restClientException;
+		}
+		finally {
+			clientResponse.close();
 		}
 	}
 
