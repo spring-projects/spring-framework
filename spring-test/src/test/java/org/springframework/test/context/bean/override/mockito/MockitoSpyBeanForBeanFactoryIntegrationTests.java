@@ -16,43 +16,48 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.bean.override.mockito.MockitoBeanForBeanFactoryIntegrationTests.TestBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.when;
 
 /**
- * Test {@link MockitoBean @MockitoBean} for a factory bean configuration.
+ * Test {@link MockitoSpyBean @MockitoSpyBean} for a factory bean configuration.
  *
  * @author Simon Baslé
  */
 @SpringJUnitConfig
-class MockitoBeanForBeanFactoryIntegrationTests {
+class MockitoSpyBeanForBeanFactoryIntegrationTests {
 
-	@MockitoBean
+	@MockitoSpyBean
 	private TestBean testBean;
+
+	@Autowired
+	private TestFactoryBean testFactoryBean;
 
 	@Autowired
 	private ApplicationContext applicationContext;
 
 	@Test
-	void beanReturnedByFactoryIsMocked() {
+	void beanReturnedByFactoryIsSpied() {
 		TestBean bean = this.applicationContext.getBean(TestBean.class);
-		assertThat(bean).isSameAs(this.testBean);
+		assertThat(this.testBean).as("injected same").isSameAs(bean);
+		assertThat(bean.hello()).isEqualTo("hi");
 
-		when(testBean.hello()).thenReturn("amock");
-		assertThat(bean.hello()).isEqualTo("amock");
+		Mockito.verify(bean).hello();
+	}
 
-		assertThat(TestFactoryBean.USED).isFalse();
+	@Test
+	void factoryItselfIsNotSpied() {
+		assertThat(this.testFactoryBean.getObject()).isNotSameAs(this.testBean);
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -65,31 +70,24 @@ class MockitoBeanForBeanFactoryIntegrationTests {
 
 	}
 
-	static class TestFactoryBean implements FactoryBean<TestBean> {
+	static class TestBeanImpl implements TestBean {
+		@Override
+		public String hello() {
+			return "hi";
+		}
+	}
 
-		static final AtomicBoolean USED = new AtomicBoolean(false);
+	static class TestFactoryBean implements FactoryBean<TestBean> {
 
 		@Override
 		public TestBean getObject() {
-			USED.set(true);
-			return () -> "normal";
+			return new TestBeanImpl();
 		}
 
 		@Override
 		public Class<?> getObjectType() {
 			return TestBean.class;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return false;
-		}
-
-	}
-
-	interface TestBean {
-
-		String hello();
 
 	}
 
