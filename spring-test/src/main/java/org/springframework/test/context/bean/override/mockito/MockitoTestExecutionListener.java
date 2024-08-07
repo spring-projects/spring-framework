@@ -21,7 +21,6 @@ import java.lang.reflect.Field;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -36,8 +35,8 @@ import org.springframework.util.ReflectionUtils.FieldCallback;
 
 /**
  * {@code TestExecutionListener} that enables {@link MockitoBean @MockitoBean}
- * and {@link MockitoSpyBean @MockitoSpyBean} support. Also triggers Mockito set
- * up of a {@link Mockito#mockitoSession() session} for each test class that
+ * and {@link MockitoSpyBean @MockitoSpyBean} support. Also triggers Mockito
+ * setup of a {@link Mockito#mockitoSession() session} for each test class that
  * uses these annotations (or any annotation in that package).
  *
  * <p>The {@link MockitoSession#setStrictness(Strictness) strictness} of the
@@ -107,12 +106,12 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 			MockitoBeanSettings annotation = AnnotationUtils.findAnnotation(testInstance.getClass(),
 					MockitoBeanSettings.class);
 			testContext.setAttribute(MOCKS_ATTRIBUTE_NAME, initMockitoSession(testInstance,
-					annotation == null ? Strictness.STRICT_STUBS: annotation.value()));
+					annotation != null ? annotation.value() : Strictness.STRICT_STUBS));
 		}
 	}
 
 	private MockitoSession initMockitoSession(Object testInstance, Strictness strictness) {
-		return BDDMockito.mockitoSession()
+		return Mockito.mockitoSession()
 				.initMocks(testInstance)
 				.strictness(strictness)
 				.startMocking();
