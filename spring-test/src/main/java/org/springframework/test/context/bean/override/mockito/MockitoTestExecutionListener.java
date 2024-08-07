@@ -122,9 +122,6 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 		if (mocks instanceof MockitoSession session) {
 			session.finishMocking();
 		}
-		else if (mocks instanceof AutoCloseable closeable) {
-			closeable.close();
-		}
 	}
 
 	private boolean hasMockitoAnnotations(TestContext testContext) {
