@@ -69,6 +69,13 @@ eclipse.classpath.file.whenMerged {
 	}
 }
 
+// Remove Java 21 classpath entries, since we currently use Java 17
+// within Eclipse. Consequently, Java 21 features managed via the
+// me.champeau.mrjar plugin cannot be built or tested within Eclipse.
+eclipse.classpath.file.whenMerged { classpath ->
+	classpath.entries.removeAll { it.path =~ /src\/(main|test)\/java21/ }
+}
+
 // Remove classpath entries for non-existent libraries added by the me.champeau.mrjar
 // plugin, such as "spring-core/build/classes/kotlin/java21".
 eclipse.classpath.file.whenMerged {
