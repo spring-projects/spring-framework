@@ -25,6 +25,7 @@ import org.assertj.core.api.ThrowableTypeAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.Expression;
+import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.spel.CompilableMapAccessor;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
@@ -45,6 +46,9 @@ import static org.assertj.core.api.Assertions.entry;
  */
 class SimpleEvaluationContextTests {
 
+	private static final IndexAccessor colorsIndexAccessor =
+			new ReflectiveIndexAccessor(Colors.class, int.class, "get", "set");
+
 	private final SpelExpressionParser parser = new SpelExpressionParser();
 
 	private final Model model = new Model();
@@ -52,14 +56,18 @@ class SimpleEvaluationContextTests {
 
 	@Test
 	void forReadWriteDataBinding() {
-		SimpleEvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+		SimpleEvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding()
+				.withIndexAccessors(colorsIndexAccessor)
+				.build();
 
 		assertReadWriteMode(context);
 	}
 
 	@Test
 	void forReadOnlyDataBinding() {
-		SimpleEvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+		SimpleEvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding()
+				.withIndexAccessors(colorsIndexAccessor)
+				.build();
 
 		assertCommonReadOnlyModeBehavior(context);
 
@@ -96,12 +104,16 @@ class SimpleEvaluationContextTests {
 
 		// Object Index
 		assertAssignmentDisabled(context, "['name'] = 'rejected'");
+
+		// Custom Index
+		assertAssignmentDisabled(context, "colors[4] = 'rejected'");
 	}
 
 	@Test
 	void forPropertyAccessorsInReadWriteMode() {
 		SimpleEvaluationContext context = SimpleEvaluationContext
 				.forPropertyAccessors(new CompilableMapAccessor(), DataBindingPropertyAccessor.forReadWriteAccess())
+				.withIndexAccessors(colorsIndexAccessor)
 				.build();
 
 		assertReadWriteMode(context);
@@ -126,12 +138,13 @@ class SimpleEvaluationContextTests {
 	@Test
 	void forPropertyAccessorsInMixedReadOnlyMode() {
 		SimpleEvaluationContext context = SimpleEvaluationContext
-				.forPropertyAccessors(new CompilableMapAccessor(), DataBindingPropertyAccessor.forReadOnlyAccess())
+				.forPropertyAccessors(new CompilableMapAccessor(true), DataBindingPropertyAccessor.forReadOnlyAccess())
+				.withIndexAccessors(colorsIndexAccessor)
 				.build();
 
 		assertCommonReadOnlyModeBehavior(context);
 
-		// Map -- with key as property name supported by CompilableMapAccessor
+		// Map -- with key as property name supported by CompilableMapAccessor with allowWrite = true.
 
 		Expression expression;
 		expression = parser.parseExpression("map.yellow");
@@ -156,20 +169,24 @@ class SimpleEvaluationContextTests {
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE));
 
 		// Array Index
-		parser.parseExpression("array[0]").setValue(context, model, "foo");
-		assertThat(model.array).containsExactly("foo");
+		expression = parser.parseExpression("array[0] = 'quux'");
+		assertThat(expression.getValue(context, model, String.class)).isEqualTo("quux");
+		assertThat(model.array).containsExactly("quux");
 
 		// List Index
-		parser.parseExpression("list[0]").setValue(context, model, "cat");
-		assertThat(model.list).containsExactly("cat");
+		expression = parser.parseExpression("list[0] = 'elephant'");
+		assertThat(expression.getValue(context, model, String.class)).isEqualTo("elephant");
+		assertThat(model.list).containsExactly("elephant");
 
 		// Map Index -- key as String
-		parser.parseExpression("map['red']").setValue(context, model, "cherry");
-		assertThat(model.map).containsOnly(entry("red", "cherry"), entry("yellow", "banana"));
+		expression = parser.parseExpression("map['red'] = 'strawberry'");
+		assertThat(expression.getValue(context, model, String.class)).isEqualTo("strawberry");
+		assertThat(model.map).containsOnly(entry("red", "strawberry"), entry("yellow", "banana"));
 
 		// Map Index -- key as pseudo property name
-		parser.parseExpression("map[yellow]").setValue(context, model, "lemon");
-		assertThat(model.map).containsOnly(entry("red", "cherry"), entry("yellow", "lemon"));
+		expression = parser.parseExpression("map[yellow] = 'star fruit'");
+		assertThat(expression.getValue(context, model, String.class)).isEqualTo("star fruit");
+		assertThat(model.map).containsOnly(entry("red", "strawberry"), entry("yellow", "star fruit"));
 
 		// String Index
 		// The Indexer does not support writes when indexing into a String.
@@ -178,9 +195,16 @@ class SimpleEvaluationContextTests {
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE));
 
 		// Object Index
+		// Although this goes through the Indexer, the PropertyAccessorValueRef actually uses
+		// registered PropertyAccessors to perform the write access, and that is disabled here.
 		assertThatSpelEvaluationException()
 				.isThrownBy(() -> parser.parseExpression("['name'] = 'rejected'").getValue(context, model))
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE));
+
+		// Custom Index
+		expression = parser.parseExpression("colors[5] = 'indigo'");
+		assertThat(expression.getValue(context, model, String.class)).isEqualTo("indigo");
+		assertThat(model.colors.get(5)).isEqualTo("indigo");
 
 		// WRITE -- via increment and decrement operators
 
@@ -215,6 +239,10 @@ class SimpleEvaluationContextTests {
 		// Map Index -- key as pseudo property name
 		parser.parseExpression("map[yellow]").setValue(context, model, "lemon");
 		assertThat(model.map).containsOnly(entry("red", "cherry"), entry("yellow", "lemon"));
+
+		// Custom Index
+		parser.parseExpression("colors[4]").setValue(context, model, "purple");
+		assertThat(model.colors.get(4)).isEqualTo("purple");
 
 		// READ
 		assertReadAccess(context);
@@ -270,6 +298,12 @@ class SimpleEvaluationContextTests {
 		expression = parser.parseExpression("['name']");
 		assertThat(expression.getValue(context, model, String.class)).isEqualTo("new name");
 
+		// Custom Index
+		expression = parser.parseExpression("colors[5] = 'indigo'");
+		assertThat(expression.getValue(context, model, String.class)).isEqualTo("indigo");
+		expression = parser.parseExpression("colors[5]");
+		assertThat(expression.getValue(context, model, String.class)).isEqualTo("indigo");
+
 		// WRITE -- via increment and decrement operators
 
 		assertIncrementAndDecrementWritesForProperties(context);
@@ -308,6 +342,10 @@ class SimpleEvaluationContextTests {
 		// Map Index -- key as pseudo property name
 		parser.parseExpression("map[yellow]").setValue(context, model, "lemon");
 		assertThat(model.map).containsOnly(entry("red", "cherry"), entry("yellow", "lemon"));
+
+		// Custom Index
+		parser.parseExpression("colors[4]").setValue(context, model, "purple");
+		assertThat(model.colors.get(4)).isEqualTo("purple");
 
 		// Since the setValue() attempts for "name" and "count" failed above, we have to set
 		// them directly for assertReadAccess().
@@ -354,6 +392,10 @@ class SimpleEvaluationContextTests {
 		// Object Index
 		expression = parser.parseExpression("['name']");
 		assertThat(expression.getValue(context, model, String.class)).isEqualTo("test");
+
+		// Custom Index
+		expression = parser.parseExpression("colors[4]");
+		assertThat(expression.getValue(context, model, String.class)).isEqualTo("purple");
 	}
 
 	private void assertIncrementAndDecrementWritesForProperties(SimpleEvaluationContext context) {
@@ -433,6 +475,7 @@ class SimpleEvaluationContextTests {
 		private final int[] numbers = {99};
 		private final List<String> list = new ArrayList<>();
 		private final Map<String, String> map = new HashMap<>();
+		private final Colors colors = new Colors();
 
 		Model() {
 			this.list.add("replace me");
@@ -470,6 +513,32 @@ class SimpleEvaluationContextTests {
 
 		public Map<String, String> getMap() {
 			return this.map;
+		}
+
+		public Colors getColors() {
+			return this.colors;
+		}
+	}
+
+	static class Colors {
+
+		private final Map<Integer, String> map = new HashMap<>();
+
+		{
+			this.map.put(1, "red");
+			this.map.put(2, "green");
+			this.map.put(3, "blue");
+		}
+
+		public String get(int index) {
+			if (!this.map.containsKey(index)) {
+				throw new IndexOutOfBoundsException("No color for index " + index);
+			}
+			return this.map.get(index);
+		}
+
+		public void set(int index, String color) {
+			this.map.put(index, color);
 		}
 
 	}
