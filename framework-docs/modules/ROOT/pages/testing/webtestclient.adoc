@@ -339,6 +339,19 @@ Java::
 			spec -> spec.expectHeader().contentType(MediaType.APPLICATION_JSON)
 		);
 ----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	client.get().uri("/persons/1")
+		.accept(MediaType.APPLICATION_JSON)
+		.exchange()
+		.expectAll(
+			{ spec -> spec.expectStatus().isOk() },
+			{ spec -> spec.expectHeader().contentType(MediaType.APPLICATION_JSON) }
+		)
+----
 ======
 
 You can then choose to decode the response body through one of the following:
@@ -704,4 +717,3 @@ Kotlin::
 			.andExpect(model().attribute("string", "a string value"));
 ----
 ======
-
