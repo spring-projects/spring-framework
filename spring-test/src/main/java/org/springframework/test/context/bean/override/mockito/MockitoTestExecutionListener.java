@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,7 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 	private static final class MockitoAnnotationCollector implements FieldCallback {
 
 		private static final String MOCKITO_BEAN_PACKAGE = MockitoBean.class.getPackageName();
+
 		private static final String ORG_MOCKITO_PACKAGE = "org.mockito";
 
 		private final Set<Annotation> annotations = new LinkedHashSet<>();

@@ -33,11 +33,12 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
  */
 @SpringJUnitConfig(MockitoBeanForByNameLookupIntegrationTests.Config.class)
 @MockitoBeanSettings(Strictness.LENIENT)
-public class MockitoBeanSettingsLenientIntegrationTests {
+class MockitoBeanSettingsLenientIntegrationTests {
 
 	@Test
-	public void unusedStubbingNotReported() {
-		var list = Mockito.mock(List.class);
+	@SuppressWarnings("rawtypes")
+	void unusedStubbingNotReported() {
+		List list = Mockito.mock(List.class);
 		Mockito.when(list.get(Mockito.anyInt())).thenReturn(new Object());
 	}
 

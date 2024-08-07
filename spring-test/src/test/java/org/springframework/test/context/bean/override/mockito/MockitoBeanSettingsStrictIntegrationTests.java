@@ -47,18 +47,11 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.me
  * @author Simon Baslé
  * @since 6.2
  */
-public final class MockitoBeanSettingsStrictIntegrationTests {
-
-	private static Stream<Named<Class<?>>> strictCases() {
-		return Stream.of(
-				Named.of("explicit strictness", ExplicitStrictness.class),
-				Named.of("implicit strictness with @MockitoBean on field", ImplicitStrictnessWithMockitoBean.class)
-		);
-	}
+class MockitoBeanSettingsStrictIntegrationTests {
 
 	@ParameterizedTest
 	@MethodSource("strictCases")
-	public void unusedStubbingIsReported(Class<?> forCase) {
+	void unusedStubbingIsReported(Class<?> forCase) {
 		Events events = EngineTestKit.engine("junit-jupiter")
 				.selectors(selectClass(forCase))
 				.execute()
@@ -72,10 +65,19 @@ public final class MockitoBeanSettingsStrictIntegrationTests {
 								message(msg -> msg.contains("Unnecessary stubbings detected.")))));
 	}
 
+	private static Stream<Named<Class<?>>> strictCases() {
+		return Stream.of(
+				Named.of("explicit strictness", ExplicitStrictness.class),
+				Named.of("implicit strictness with @MockitoBean on field", ImplicitStrictnessWithMockitoBean.class)
+		);
+	}
+
 	abstract static class BaseCase {
+
 		@Test
+		@SuppressWarnings("rawtypes")
 		void unnecessaryStub() {
-			var list = Mockito.mock(List.class);
+			List list = Mockito.mock(List.class);
 			Mockito.when(list.get(Mockito.anyInt())).thenReturn(new Object());
 		}
 	}

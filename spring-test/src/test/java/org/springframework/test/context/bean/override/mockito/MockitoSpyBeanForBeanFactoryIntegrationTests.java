@@ -60,6 +60,7 @@ class MockitoSpyBeanForBeanFactoryIntegrationTests {
 		assertThat(this.testFactoryBean.getObject()).isNotSameAs(this.testBean);
 	}
 
+
 	@Configuration(proxyBeanMethods = false)
 	static class Config {
 
@@ -67,10 +68,10 @@ class MockitoSpyBeanForBeanFactoryIntegrationTests {
 		TestFactoryBean testFactoryBean() {
 			return new TestFactoryBean();
 		}
-
 	}
 
 	static class TestBeanImpl implements TestBean {
+
 		@Override
 		public String hello() {
 			return "hi";
@@ -88,7 +89,6 @@ class MockitoSpyBeanForBeanFactoryIntegrationTests {
 		public Class<?> getObjectType() {
 			return TestBean.class;
 		}
-
 	}
 
 }
