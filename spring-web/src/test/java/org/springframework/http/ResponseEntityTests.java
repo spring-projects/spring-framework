@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  * @author Marcel Overdijk
+ * @author Ricardo Figueroa
  * @author Kazuki Shimizu
  * @author Sebastien Deleuze
  */
@@ -188,6 +189,10 @@ class ResponseEntityTests {
 		URI location = URI.create("location");
 		long contentLength = 67890;
 		MediaType contentType = MediaType.TEXT_PLAIN;
+		ContentDisposition contentDisposition = ContentDisposition.
+				attachment().
+				filename("filename.jpg").
+				build();
 
 		ResponseEntity<Void> responseEntity = ResponseEntity.ok().
 				allow(HttpMethod.GET).
@@ -195,7 +200,8 @@ class ResponseEntityTests {
 				location(location).
 				contentLength(contentLength).
 				contentType(contentType).
-				headers(headers -> assertThat(headers).hasSize(5)).
+				contentDisposition(contentDisposition).
+				headers(headers -> assertThat(headers).hasSize(6)).
 				build();
 
 		assertThat(responseEntity).isNotNull();
@@ -207,6 +213,7 @@ class ResponseEntityTests {
 		assertThat(responseHeaders.getFirst(HttpHeaders.LOCATION)).isEqualTo(location.toASCIIString());
 		assertThat(responseHeaders.getFirst(HttpHeaders.CONTENT_LENGTH)).isEqualTo(String.valueOf(contentLength));
 		assertThat(responseHeaders.getFirst(HttpHeaders.CONTENT_TYPE)).isEqualTo(contentType.toString());
+		assertThat(responseHeaders.getFirst(HttpHeaders.CONTENT_DISPOSITION)).isEqualTo("attachment; filename=\"filename.jpg\"");
 
 		assertThat(responseEntity.getBody()).isNull();
 	}
