@@ -289,7 +289,7 @@ String result = restClient.get() <1>
   .uri("https://example.com/this-url-does-not-exist") <1>
   .retrieve()
   .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> { <2>
-      throw new MyCustomRuntimeException(response.getStatusCode(), response.getHeaders()) <3>
+      throw new MyCustomRuntimeException(response.getStatusCode(), response.getHeaders()); <3>
   })
   .body(String.class);
 ----
