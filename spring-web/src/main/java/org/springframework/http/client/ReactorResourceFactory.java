@@ -122,8 +122,9 @@ public class ReactorResourceFactory
 	 * Use this when you don't want to participate in global resources and
 	 * you want to customize the creation of the managed {@code ConnectionProvider}.
 	 * <p>By default, {@code ConnectionProvider.elastic("http")} is used.
-	 * <p>Note that this option is ignored if {@code userGlobalResources=false} or
-	 * {@link #setConnectionProvider(ConnectionProvider)} is set.
+	 * <p>Note that this supplier is ignored if {@link #isUseGlobalResources()}
+	 * is {@code true} or once the {@link #setConnectionProvider(ConnectionProvider) ConnectionProvider}
+	 * is set.
 	 * @param supplier the supplier to use
 	 */
 	public void setConnectionProviderSupplier(Supplier<ConnectionProvider> supplier) {
@@ -157,8 +158,9 @@ public class ReactorResourceFactory
 	 * Use this when you don't want to participate in global resources and
 	 * you want to customize the creation of the managed {@code LoopResources}.
 	 * <p>By default, {@code LoopResources.create("webflux-http")} is used.
-	 * <p>Note that this option is ignored if {@code userGlobalResources=false} or
-	 * {@link #setLoopResources(LoopResources)} is set.
+	 * <p>Note that this supplier is ignored if {@link #isUseGlobalResources()}
+	 * is {@code true} or once the {@link #setLoopResources(LoopResources) LoopResources}
+	 * is set.
 	 * @param supplier the supplier to use
 	 */
 	public void setLoopResourcesSupplier(Supplier<LoopResources> supplier) {
