@@ -82,8 +82,8 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	}
 
 	/**
-	 * Create a new QualifierAnnotationAutowireCandidateResolver
-	 * for the given qualifier annotation type.
+	 * Create a new {@code QualifierAnnotationAutowireCandidateResolver} for the given
+	 * qualifier annotation type.
 	 * @param qualifierType the qualifier annotation to look for
 	 */
 	public QualifierAnnotationAutowireCandidateResolver(Class<? extends Annotation> qualifierType) {
@@ -92,8 +92,8 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	}
 
 	/**
-	 * Create a new QualifierAnnotationAutowireCandidateResolver
-	 * for the given qualifier annotation types.
+	 * Create a new {@code QualifierAnnotationAutowireCandidateResolver} for the given
+	 * qualifier annotation types.
 	 * @param qualifierTypes the qualifier annotations to look for
 	 */
 	public QualifierAnnotationAutowireCandidateResolver(Set<Class<? extends Annotation>> qualifierTypes) {
