@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link JakartaAnnotationsRuntimeHints}.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 class JakartaAnnotationsRuntimeHintsTests {
 
@@ -60,6 +61,16 @@ class JakartaAnnotationsRuntimeHintsTests {
 	@Test
 	void jakartaQualifierAnnotationHasHints() {
 		assertThat(RuntimeHintsPredicates.reflection().onType(Qualifier.class)).accepts(this.hints);
+	}
+
+	@Test  // gh-33345
+	void javaxInjectAnnotationHasHints() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(javax.inject.Inject.class)).accepts(this.hints);
+	}
+
+	@Test  // gh-33345
+	void javaxQualifierAnnotationHasHints() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(javax.inject.Qualifier.class)).accepts(this.hints);
 	}
 
 }

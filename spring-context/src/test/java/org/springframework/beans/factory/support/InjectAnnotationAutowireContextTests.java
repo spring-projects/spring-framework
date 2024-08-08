@@ -32,6 +32,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 
@@ -39,9 +40,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Integration tests for handling JSR-303 {@link jakarta.inject.Qualifier} annotations.
+ * Integration tests for handling JSR-330 {@link jakarta.inject.Qualifier} and
+ * {@link javax.inject.Qualifier} annotations.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 class InjectAnnotationAutowireContextTests {
@@ -304,6 +307,26 @@ class InjectAnnotationAutowireContextTests {
 		assertThat(bean.getPerson().getName()).isEqualTo(JUERGEN);
 	}
 
+	@Test  // gh-33345
+	void autowiredConstructorArgumentResolvesJakartaNamedCandidate() {
+		Class<JakartaNamedConstructorArgumentTestBean> testBeanClass = JakartaNamedConstructorArgumentTestBean.class;
+		AnnotationConfigApplicationContext context =
+				new AnnotationConfigApplicationContext(testBeanClass, JakartaCat.class, JakartaDog.class);
+		JakartaNamedConstructorArgumentTestBean bean = context.getBean(testBeanClass);
+		assertThat(bean.getAnimal1().getName()).isEqualTo("Jakarta Tiger");
+		assertThat(bean.getAnimal2().getName()).isEqualTo("Jakarta Fido");
+	}
+
+	@Test  // gh-33345
+	void autowiredConstructorArgumentResolvesJavaxNamedCandidate() {
+		Class<JavaxNamedConstructorArgumentTestBean> testBeanClass = JavaxNamedConstructorArgumentTestBean.class;
+		AnnotationConfigApplicationContext context =
+				new AnnotationConfigApplicationContext(testBeanClass, JavaxCat.class, JavaxDog.class);
+		JavaxNamedConstructorArgumentTestBean bean = context.getBean(testBeanClass);
+		assertThat(bean.getAnimal1().getName()).isEqualTo("Javax Tiger");
+		assertThat(bean.getAnimal2().getName()).isEqualTo("Javax Fido");
+	}
+
 	@Test
 	void autowiredFieldResolvesQualifiedCandidateWithDefaultValueAndNoValueOnBeanDefinition() {
 		GenericApplicationContext context = new GenericApplicationContext();
@@ -541,6 +564,52 @@ class InjectAnnotationAutowireContextTests {
 	}
 
 
+	static class JakartaNamedConstructorArgumentTestBean {
+
+		private final Animal animal1;
+		private final Animal animal2;
+
+		@jakarta.inject.Inject
+		public JakartaNamedConstructorArgumentTestBean(@jakarta.inject.Named("Cat") Animal animal1,
+				@jakarta.inject.Named("Dog") Animal animal2) {
+
+			this.animal1 = animal1;
+			this.animal2 = animal2;
+		}
+
+		public Animal getAnimal1() {
+			return this.animal1;
+		}
+
+		public Animal getAnimal2() {
+			return this.animal2;
+		}
+	}
+
+
+	static class JavaxNamedConstructorArgumentTestBean {
+
+		private final Animal animal1;
+		private final Animal animal2;
+
+		@javax.inject.Inject
+		public JavaxNamedConstructorArgumentTestBean(@javax.inject.Named("Cat") Animal animal1,
+				@javax.inject.Named("Dog") Animal animal2) {
+
+			this.animal1 = animal1;
+			this.animal2 = animal2;
+		}
+
+		public Animal getAnimal1() {
+			return this.animal1;
+		}
+
+		public Animal getAnimal2() {
+			return this.animal2;
+		}
+	}
+
+
 	public static class QualifiedFieldWithDefaultValueTestBean {
 
 		@Inject
@@ -616,6 +685,52 @@ class InjectAnnotationAutowireContextTests {
 
 		public QualifiedPerson(String name) {
 			super(name);
+		}
+	}
+
+
+	interface Animal {
+
+		String getName();
+	}
+
+
+	@jakarta.inject.Named("Cat")
+	static class JakartaCat implements Animal {
+
+		@Override
+		public String getName() {
+			return "Jakarta Tiger";
+		}
+	}
+
+
+	@javax.inject.Named("Cat")
+	static class JavaxCat implements Animal {
+
+		@Override
+		public String getName() {
+			return "Javax Tiger";
+		}
+	}
+
+
+	@jakarta.inject.Named("Dog")
+	static class JakartaDog implements Animal {
+
+		@Override
+		public String getName() {
+			return "Jakarta Fido";
+		}
+	}
+
+
+	@javax.inject.Named("Dog")
+	static class JavaxDog implements Animal {
+
+		@Override
+		public String getName() {
+			return "Javax Fido";
 		}
 	}
 

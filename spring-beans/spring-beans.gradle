@@ -16,4 +16,5 @@ dependencies {
 	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
+	testImplementation("javax.inject:javax.inject")
 }
