@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -51,6 +52,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
+import org.springframework.web.server.PayloadTooLargeException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -218,7 +220,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		if (contentType == null && SUPPORTED_METHODS.contains(method)) {
 			Flux<DataBuffer> body = request.getBody().doOnNext(buffer -> {
 				DataBufferUtils.release(buffer);
-				// Body not empty, back toy 415..
+				// Body not empty, back to HTTP 415
 				throw new UnsupportedMediaTypeStatusException(
 						mediaType, getSupportedMediaTypes(elementType), elementType);
 			});
@@ -233,8 +235,13 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	}
 
 	private Throwable handleReadError(MethodParameter parameter, Throwable ex) {
-		return (ex instanceof DecodingException ?
-				new ServerWebInputException("Failed to read HTTP message", parameter, ex) : ex);
+		if (ex instanceof DataBufferLimitException) {
+			return new PayloadTooLargeException(ex);
+		}
+		if (ex instanceof DecodingException) {
+			return new ServerWebInputException("Failed to read HTTP message", parameter, ex);
+		}
+		return ex;
 	}
 
 	private ServerWebInputException handleMissingBody(MethodParameter parameter) {

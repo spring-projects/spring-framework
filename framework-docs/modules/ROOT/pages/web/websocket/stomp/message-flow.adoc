@@ -60,33 +60,9 @@ to broadcast to subscribed clients.
 
 We can trace the flow through a simple example. Consider the following example, which sets up a server:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebSocketMessageBroker
-	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]
 
-		@Override
-		public void registerStompEndpoints(StompEndpointRegistry registry) {
-			registry.addEndpoint("/portfolio");
-		}
-
-		@Override
-		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.setApplicationDestinationPrefixes("/app");
-			registry.enableSimpleBroker("/topic");
-		}
-	}
-
-	@Controller
-	public class GreetingController {
-
-		@MessageMapping("/greeting")
-		public String handle(String greeting) {
-			return "[" + getTimestamp() + ": " + greeting;
-		}
-	}
-----
+include-code::./GreetingController[tag=snippet,indent=0]
 
 The preceding example supports the following flow:
 

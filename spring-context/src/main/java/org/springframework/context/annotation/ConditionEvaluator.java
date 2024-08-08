@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,16 +90,7 @@ class ConditionEvaluator {
 			return shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN);
 		}
 
-		List<Condition> conditions = new ArrayList<>();
-		for (String[] conditionClasses : getConditionClasses(metadata)) {
-			for (String conditionClass : conditionClasses) {
-				Condition condition = getCondition(conditionClass, this.context.getClassLoader());
-				conditions.add(condition);
-			}
-		}
-
-		AnnotationAwareOrderComparator.sort(conditions);
-
+		List<Condition> conditions = collectConditions(metadata);
 		for (Condition condition : conditions) {
 			ConfigurationPhase requiredPhase = null;
 			if (condition instanceof ConfigurationCondition configurationCondition) {
@@ -111,6 +102,28 @@ class ConditionEvaluator {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Return the {@linkplain Condition conditions} that should be applied when
+	 * considering the given annotated type.
+	 * @param metadata the metadata of the annotated type
+	 * @return the ordered list of conditions for that type
+	 */
+	List<Condition> collectConditions(@Nullable AnnotatedTypeMetadata metadata) {
+		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
+			return Collections.emptyList();
+		}
+
+		List<Condition> conditions = new ArrayList<>();
+		for (String[] conditionClasses : getConditionClasses(metadata)) {
+			for (String conditionClass : conditionClasses) {
+				Condition condition = getCondition(conditionClass, this.context.getClassLoader());
+				conditions.add(condition);
+			}
+		}
+		AnnotationAwareOrderComparator.sort(conditions);
+		return conditions;
 	}
 
 	@SuppressWarnings("unchecked")

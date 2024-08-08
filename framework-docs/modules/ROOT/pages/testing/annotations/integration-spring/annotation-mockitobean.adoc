@@ -1,0 +1,124 @@
+[[spring-testing-annotation-beanoverriding-mockitobean]]
+= `@MockitoBean` and `@MockitoSpyBean`
+
+`@MockitoBean` and `@MockitoSpyBean` are used on fields in test classes to override beans
+in the test's `ApplicationContext` with a Mockito mock or spy, respectively. In the
+latter case, the original bean definition is not replaced, but instead an early instance
+of the bean is captured and wrapped by the spy.
+
+By default, the annotated field's type is used to search for candidate bean definitions
+to override. If multiple candidates match, `@Qualifier` can be provided to narrow the
+candidate to override. Alternatively, a candidate whose bean definition name matches the
+name of the field will match.
+
+To use a by-name override rather than a by-type override, specify the `name` attribute
+of the annotation.
+
+[WARNING]
+====
+Qualifiers, including the name of the field, are used to determine if a separate
+`ApplicationContext` needs to be created. If you are using this feature to mock or spy
+the same bean in several tests, make sure to name the field consistently to avoid
+creating unnecessary contexts.
+====
+
+Each annotation also defines Mockito-specific attributes to fine-tune the mocking details.
+During the test class lifecycle, Mockito is set up via the `Mockito#mockitoSession()`
+mechanism. Notably, it enables `STRICT_STUBS` mode by default. This can be changed on
+individual test classes with the `@MockitoBeanSettings` annotation.
+
+The `@MockitoBean` annotation uses the `REPLACE_OR_CREATE_DEFINITION`
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy for test bean overriding].
+If no existing bean definition matches, a new bean definition is created on the fly.
+
+The `@MockitoSpyBean` annotation uses the `WRAP_BEAN`
+xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy],
+and the original instance is wrapped in a Mockito spy. This strategy requires that
+exactly one candidate bean definition exists.
+
+The following example shows how to use the default behavior of the `@MockitoBean` annotation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class OverrideBeanTests {
+		@MockitoBean // <1>
+		private CustomService customService;
+
+		// test case body...
+	}
+----
+<1> Replace the bean with type `CustomService` with a Mockito `mock`.
+======
+
+In the example above, we are creating a mock for `CustomService`. If more than one bean
+of that type exists, the bean named `customService` is considered. Otherwise, the test
+will fail, and you will need to provide a qualifier of some sort to identify which of the
+`CustomService` beans you want to override. If no such bean exists, a bean definition
+will be created with an auto-generated bean name.
+
+The following example uses a by-name lookup, rather than a by-type lookup:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class OverrideBeanTests {
+		@MockitoBean(name = "service") // <1>
+		private CustomService customService;
+
+		// test case body...
+
+	}
+----
+<1> Replace the bean named `service` with a Mockito `mock`.
+======
+
+If no bean definition named `service` exists, one is created.
+
+The following example shows how to use the default behavior of the `@MockitoSpyBean` annotation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class OverrideBeanTests {
+		@MockitoSpyBean // <1>
+		private CustomService customService;
+
+		// test case body...
+	}
+----
+<1> Wrap the bean with type `CustomService` with a Mockito `spy`.
+======
+
+In the example above, we are wrapping the bean with type `CustomService`. If more than
+one bean of that type exists, the bean named `customService` is considered. Otherwise,
+the test will fail, and you will need to provide a qualifier of some sort to identify
+which of the `CustomService` beans you want to spy.
+
+The following example uses a by-name lookup, rather than a by-type lookup:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class OverrideBeanTests {
+		@MockitoSpyBean(name = "service") // <1>
+		private CustomService customService;
+
+		// test case body...
+
+	}
+----
+<1> Wrap the bean named `service` with a Mockito `spy`.
+======

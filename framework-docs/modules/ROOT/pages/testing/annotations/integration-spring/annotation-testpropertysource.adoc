@@ -1,8 +1,8 @@
 [[spring-testing-annotation-testpropertysource]]
 = `@TestPropertySource`
 
-`@TestPropertySource` is a class-level annotation that you can use to configure the
-locations of properties files and inlined properties to be added to the set of
+`@TestPropertySource` is an annotation that can be applied to a test class to configure
+the locations of properties files and inlined properties to be added to the set of
 `PropertySources` in the `Environment` for an `ApplicationContext` loaded for an
 integration test.
 

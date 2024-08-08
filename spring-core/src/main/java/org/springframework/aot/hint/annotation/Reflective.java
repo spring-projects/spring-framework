@@ -35,8 +35,8 @@ import org.springframework.core.annotation.AliasFor;
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 6.0
- * @see SimpleReflectiveProcessor
  * @see ReflectiveRuntimeHintsRegistrar
+ * @see RegisterReflection @RegisterReflection
  * @see RegisterReflectionForBinding @RegisterReflectionForBinding
  */
 @Target({ElementType.ANNOTATION_TYPE, ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD})

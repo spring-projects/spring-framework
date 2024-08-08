@@ -179,6 +179,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @see #registerDefaultEditors
 	 */
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public PropertyEditor getDefaultEditor(Class<?> requiredType) {
 		if (!this.defaultEditorsActive) {
 			return null;

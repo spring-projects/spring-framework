@@ -17,6 +17,7 @@
 package org.springframework.web.client;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -88,6 +89,18 @@ public class RestClientBuilderTests {
 		DefaultRestClientBuilder defaultBuilder = (DefaultRestClientBuilder) builder;
 
 		assertThat(fieldValue("uriBuilderFactory", defaultBuilder)).isNull();
+	}
+
+	@Test
+	void defaultUri() {
+		URI baseUrl = URI.create("https://example.org");
+		RestClient.Builder builder = RestClient.builder();
+		builder.baseUrl(baseUrl);
+
+		assertThat(builder).isInstanceOf(DefaultRestClientBuilder.class);
+		DefaultRestClientBuilder defaultBuilder = (DefaultRestClientBuilder) builder;
+
+		assertThat(fieldValue("baseUrl", defaultBuilder)).isEqualTo(baseUrl.toString());
 	}
 
 	@Nullable

@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.TimeZone;
 
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 
 /**
@@ -100,6 +101,7 @@ public abstract class ObjectUtils {
 	 * either an Object array or a primitive array.
 	 * @param obj the object to check
 	 */
+	@Contract("null -> false")
 	public static boolean isArray(@Nullable Object obj) {
 		return (obj != null && obj.getClass().isArray());
 	}
@@ -110,6 +112,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to check
 	 * @see #isEmpty(Object)
 	 */
+	@Contract("null -> true")
 	public static boolean isEmpty(@Nullable Object[] array) {
 		return (array == null || array.length == 0);
 	}
@@ -331,6 +334,7 @@ public abstract class ObjectUtils {
 	 * @see Object#equals(Object)
 	 * @see java.util.Arrays#equals
 	 */
+	@Contract("null, null -> true; null, _ -> false; _, null -> false")
 	public static boolean nullSafeEquals(@Nullable Object o1, @Nullable Object o2) {
 		if (o1 == o2) {
 			return true;

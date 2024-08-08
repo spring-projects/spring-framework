@@ -41,14 +41,7 @@ JavaMail features, such as MIME message support to the `MailSender` interface
 
 Assume that we have a business interface called `OrderManager`, as the following example shows:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	public interface OrderManager {
-
-		void placeOrder(Order order);
-
-	}
-----
+include-code::./OrderManager[tag=snippet,indent=0]
 
 Further assume that we have a requirement stating that an email message with an
 order number needs to be generated and sent to a customer who placed the relevant order.
@@ -60,70 +53,11 @@ order number needs to be generated and sent to a customer who placed the relevan
 The following example shows how to use `MailSender` and `SimpleMailMessage` to send an
 email when someone places an order:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	import org.springframework.mail.MailException;
-	import org.springframework.mail.MailSender;
-	import org.springframework.mail.SimpleMailMessage;
-
-	public class SimpleOrderManager implements OrderManager {
-
-		private MailSender mailSender;
-		private SimpleMailMessage templateMessage;
-
-		public void setMailSender(MailSender mailSender) {
-			this.mailSender = mailSender;
-		}
-
-		public void setTemplateMessage(SimpleMailMessage templateMessage) {
-			this.templateMessage = templateMessage;
-		}
-
-		public void placeOrder(Order order) {
-
-			// Do the business calculations...
-
-			// Call the collaborators to persist the order...
-
-			// Create a thread-safe "copy" of the template message and customize it
-			SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
-			msg.setTo(order.getCustomer().getEmailAddress());
-			msg.setText(
-				"Dear " + order.getCustomer().getFirstName()
-					+ order.getCustomer().getLastName()
-					+ ", thank you for placing order. Your order number is "
-					+ order.getOrderNumber());
-			try {
-				this.mailSender.send(msg);
-			}
-			catch (MailException ex) {
-				// simply log it and go on...
-				System.err.println(ex.getMessage());
-			}
-		}
-
-	}
-----
+include-code::./SimpleOrderManager[tag=snippet,indent=0]
 
 The following example shows the bean definitions for the preceding code:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-		<property name="host" value="mail.mycompany.example"/>
-	</bean>
-
-	<!-- this is a template message that we can pre-load with default state -->
-	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
-		<property name="from" value="customerservice@mycompany.example"/>
-		<property name="subject" value="Your order"/>
-	</bean>
-
-	<bean id="orderManager" class="com.mycompany.businessapp.support.SimpleOrderManager">
-		<property name="mailSender" ref="mailSender"/>
-		<property name="templateMessage" ref="templateMessage"/>
-	</bean>
-----
+include-code::./MailConfiguration[tag=snippet,indent=0]
 
 
 [[mail-usage-mime]]

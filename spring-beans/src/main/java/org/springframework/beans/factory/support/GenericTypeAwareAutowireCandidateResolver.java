@@ -73,6 +73,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 	 * Match the given dependency type with its generic type information against the given
 	 * candidate bean definition.
 	 */
+	@SuppressWarnings("NullAway")
 	protected boolean checkGenericTypeMatch(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		ResolvableType dependencyType = descriptor.getResolvableType();
 		if (dependencyType.getType() instanceof Class) {
@@ -145,12 +146,16 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 			}
 		}
 
-		if (descriptor.fallbackMatchAllowed() &&
-				(targetType.hasUnresolvableGenerics() || targetType.resolve() == Properties.class)) {
+		if (descriptor.fallbackMatchAllowed()) {
 			// Fallback matches allow unresolvable generics, e.g. plain HashMap to Map<String,String>;
 			// and pragmatically also java.util.Properties to any Map (since despite formally being a
 			// Map<Object,Object>, java.util.Properties is usually perceived as a Map<String,String>).
-			return true;
+			if (targetType.hasUnresolvableGenerics()) {
+				return dependencyType.isAssignableFromResolvedPart(targetType);
+			}
+			else if (targetType.resolve() == Properties.class) {
+				return true;
+			}
 		}
 		// Full check for complex generic type match...
 		return dependencyType.isAssignableFrom(targetType);

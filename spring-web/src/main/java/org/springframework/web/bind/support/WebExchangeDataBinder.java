@@ -148,11 +148,17 @@ public class WebExchangeDataBinder extends WebDataBinder {
 
 	protected static void addBindValue(Map<String, Object> params, String key, List<?> values) {
 		if (!CollectionUtils.isEmpty(values)) {
-			values = values.stream()
-					.map(value -> value instanceof FormFieldPart formFieldPart ? formFieldPart.value() : value)
-					.toList();
-			params.put(key, values.size() == 1 ? values.get(0) : values);
+			if (values.size() == 1) {
+				params.put(key, adaptBindValue(values.get(0)));
+			}
+			else {
+				params.put(key, values.stream().map(WebExchangeDataBinder::adaptBindValue).toList());
+			}
 		}
+	}
+
+	private static Object adaptBindValue(Object value) {
+		return (value instanceof FormFieldPart part ? part.value() : value);
 	}
 
 

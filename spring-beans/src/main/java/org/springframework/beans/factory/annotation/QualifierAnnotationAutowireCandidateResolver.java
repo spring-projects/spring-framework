@@ -19,7 +19,6 @@ package org.springframework.beans.factory.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,6 +39,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -47,11 +47,13 @@ import org.springframework.util.ObjectUtils;
  * against {@link Qualifier qualifier annotations} on the field or parameter to be autowired.
  * Also supports suggested expression values through a {@link Value value} annotation.
  *
- * <p>Also supports JSR-330's {@link jakarta.inject.Qualifier} annotation, if available.
+ * <p>Also supports JSR-330's {@link jakarta.inject.Qualifier} annotation (as well as its
+ * pre-Jakarta {@code javax.inject.Qualifier} equivalent), if available.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 2.5
  * @see AutowireCandidateQualifier
  * @see Qualifier
@@ -59,15 +61,16 @@ import org.springframework.util.ObjectUtils;
  */
 public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwareAutowireCandidateResolver {
 
-	private final Set<Class<? extends Annotation>> qualifierTypes = new LinkedHashSet<>(2);
+	private final Set<Class<? extends Annotation>> qualifierTypes = CollectionUtils.newLinkedHashSet(2);
 
 	private Class<? extends Annotation> valueAnnotationType = Value.class;
 
 
 	/**
-	 * Create a new QualifierAnnotationAutowireCandidateResolver
-	 * for Spring's standard {@link Qualifier} annotation.
-	 * <p>Also supports JSR-330's {@link jakarta.inject.Qualifier} annotation, if available.
+	 * Create a new {@code QualifierAnnotationAutowireCandidateResolver} for Spring's
+	 * standard {@link Qualifier} annotation.
+	 * <p>Also supports JSR-330's {@link jakarta.inject.Qualifier} annotation (as well as
+	 * its pre-Jakarta {@code javax.inject.Qualifier} equivalent), if available.
 	 */
 	@SuppressWarnings("unchecked")
 	public QualifierAnnotationAutowireCandidateResolver() {
@@ -77,13 +80,20 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 							QualifierAnnotationAutowireCandidateResolver.class.getClassLoader()));
 		}
 		catch (ClassNotFoundException ex) {
+			// JSR-330 API (as included in Jakarta EE) not available - simply skip.
+		}
+		try {
+			this.qualifierTypes.add((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Qualifier",
+							QualifierAnnotationAutowireCandidateResolver.class.getClassLoader()));
+		}
+		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.
 		}
 	}
 
 	/**
-	 * Create a new QualifierAnnotationAutowireCandidateResolver
-	 * for the given qualifier annotation type.
+	 * Create a new {@code QualifierAnnotationAutowireCandidateResolver} for the given
+	 * qualifier annotation type.
 	 * @param qualifierType the qualifier annotation to look for
 	 */
 	public QualifierAnnotationAutowireCandidateResolver(Class<? extends Annotation> qualifierType) {
@@ -92,8 +102,8 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	}
 
 	/**
-	 * Create a new QualifierAnnotationAutowireCandidateResolver
-	 * for the given qualifier annotation types.
+	 * Create a new {@code QualifierAnnotationAutowireCandidateResolver} for the given
+	 * qualifier annotation types.
 	 * @param qualifierTypes the qualifier annotations to look for
 	 */
 	public QualifierAnnotationAutowireCandidateResolver(Set<Class<? extends Annotation>> qualifierTypes) {
@@ -164,42 +174,44 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * Match the given qualifier annotations against the candidate bean definition.
 	 */
 	protected boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch) {
-		if (ObjectUtils.isEmpty(annotationsToSearch)) {
-			return true;
-		}
-		SimpleTypeConverter typeConverter = new SimpleTypeConverter();
-		for (Annotation annotation : annotationsToSearch) {
-			Class<? extends Annotation> type = annotation.annotationType();
-			boolean checkMeta = true;
-			boolean fallbackToMeta = false;
-			if (isQualifier(type)) {
-				if (!checkQualifier(bdHolder, annotation, typeConverter)) {
-					fallbackToMeta = true;
-				}
-				else {
-					checkMeta = false;
-				}
-			}
-			if (checkMeta) {
-				boolean foundMeta = false;
-				for (Annotation metaAnn : type.getAnnotations()) {
-					Class<? extends Annotation> metaType = metaAnn.annotationType();
-					if (isQualifier(metaType)) {
-						foundMeta = true;
-						// Only accept fallback match if @Qualifier annotation has a value...
-						// Otherwise, it is just a marker for a custom qualifier annotation.
-						if ((fallbackToMeta && ObjectUtils.isEmpty(AnnotationUtils.getValue(metaAnn))) ||
-								!checkQualifier(bdHolder, metaAnn, typeConverter)) {
-							return false;
-						}
+		boolean qualifierFound = false;
+		if (!ObjectUtils.isEmpty(annotationsToSearch)) {
+			SimpleTypeConverter typeConverter = new SimpleTypeConverter();
+			for (Annotation annotation : annotationsToSearch) {
+				Class<? extends Annotation> type = annotation.annotationType();
+				boolean checkMeta = true;
+				boolean fallbackToMeta = false;
+				if (isQualifier(type)) {
+					qualifierFound = true;
+					if (!checkQualifier(bdHolder, annotation, typeConverter)) {
+						fallbackToMeta = true;
+					}
+					else {
+						checkMeta = false;
 					}
 				}
-				if (fallbackToMeta && !foundMeta) {
-					return false;
+				if (checkMeta) {
+					boolean foundMeta = false;
+					for (Annotation metaAnn : type.getAnnotations()) {
+						Class<? extends Annotation> metaType = metaAnn.annotationType();
+						if (isQualifier(metaType)) {
+							qualifierFound = true;
+							foundMeta = true;
+							// Only accept fallback match if @Qualifier annotation has a value...
+							// Otherwise, it is just a marker for a custom qualifier annotation.
+							if ((fallbackToMeta && ObjectUtils.isEmpty(AnnotationUtils.getValue(metaAnn))) ||
+									!checkQualifier(bdHolder, metaAnn, typeConverter)) {
+								return false;
+							}
+						}
+					}
+					if (fallbackToMeta && !foundMeta) {
+						return false;
+					}
 				}
 			}
 		}
-		return true;
+		return (qualifierFound || ((RootBeanDefinition) bdHolder.getBeanDefinition()).isDefaultCandidate());
 	}
 
 	/**
@@ -339,6 +351,20 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 			}
 		}
 		return false;
+	}
+
+	@Override
+	@Nullable
+	public String getSuggestedName(DependencyDescriptor descriptor) {
+		for (Annotation annotation : descriptor.getAnnotations()) {
+			if (isQualifier(annotation.annotationType())) {
+				Object value = AnnotationUtils.getValue(annotation);
+				if (value instanceof String str) {
+					return str;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

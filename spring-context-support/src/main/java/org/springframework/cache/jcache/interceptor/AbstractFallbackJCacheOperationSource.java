@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.MethodClassKey;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Abstract implementation of {@link JCacheOperationSource} that caches operations
@@ -53,8 +54,22 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 
 
 	@Override
+	public boolean hasCacheOperation(Method method, @Nullable Class<?> targetClass) {
+		return (getCacheOperation(method, targetClass, false) != null);
+	}
+
+	@Override
 	@Nullable
 	public JCacheOperation<?> getCacheOperation(Method method, @Nullable Class<?> targetClass) {
+		return getCacheOperation(method, targetClass, true);
+	}
+
+	@Nullable
+	private JCacheOperation<?> getCacheOperation(Method method, @Nullable Class<?> targetClass, boolean cacheNull) {
+		if (ReflectionUtils.isObjectMethod(method)) {
+			return null;
+		}
+
 		MethodClassKey cacheKey = new MethodClassKey(method, targetClass);
 		Object cached = this.operationCache.get(cacheKey);
 
@@ -69,7 +84,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 				}
 				this.operationCache.put(cacheKey, operation);
 			}
-			else {
+			else if (cacheNull) {
 				this.operationCache.put(cacheKey, NULL_CACHING_MARKER);
 			}
 			return operation;

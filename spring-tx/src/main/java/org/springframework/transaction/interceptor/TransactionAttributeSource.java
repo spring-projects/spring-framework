@@ -48,9 +48,22 @@ public interface TransactionAttributeSource {
 	 * attributes at class or method level; {@code true} otherwise. The default
 	 * implementation returns {@code true}, leading to regular introspection.
 	 * @since 5.2
+	 * @see #hasTransactionAttribute
 	 */
 	default boolean isCandidateClass(Class<?> targetClass) {
 		return true;
+	}
+
+	/**
+	 * Determine whether there is a transaction attribute for the given method.
+	 * @param method the method to introspect
+	 * @param targetClass the target class (can be {@code null},
+	 * in which case the declaring class of the method must be used)
+	 * @since 6.2
+	 * @see #getTransactionAttribute
+	 */
+	default boolean hasTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
+		return (getTransactionAttribute(method, targetClass) != null);
 	}
 
 	/**

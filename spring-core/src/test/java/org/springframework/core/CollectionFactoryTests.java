@@ -154,7 +154,7 @@ class CollectionFactoryTests {
 
 	@Test
 	void createApproximateCollectionFromEmptyHashSet() {
-		Collection<String> set = createApproximateCollection(new HashSet<String>(), 2);
+		Collection<String> set = createApproximateCollection(new HashSet<>(), 2);
 		assertThat(set).isEmpty();
 	}
 
@@ -180,7 +180,7 @@ class CollectionFactoryTests {
 
 	@Test
 	void createApproximateMapFromEmptyHashMap() {
-		Map<String, String> map = createApproximateMap(new HashMap<String, String>(), 2);
+		Map<String, String> map = createApproximateMap(new HashMap<>(), 2);
 		assertThat(map).isEmpty();
 	}
 
@@ -194,7 +194,7 @@ class CollectionFactoryTests {
 
 	@Test
 	void createApproximateMapFromEmptyEnumMap() {
-		Map<Color, String> colors = createApproximateMap(new EnumMap<Color, String>(Color.class), 2);
+		Map<Color, String> colors = createApproximateMap(new EnumMap<>(Color.class), 2);
 		assertThat(colors).isEmpty();
 	}
 

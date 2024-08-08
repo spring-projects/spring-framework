@@ -16,6 +16,8 @@ by default, exactly in the following order:
   Micrometer's `ObservationRegistry`.
 * `DirtiesContextTestExecutionListener`: Handles the `@DirtiesContext` annotation for
   "`after`" modes.
+* `CommonCachesTestExecutionListener`: Clears resource caches in the test's
+  `ApplicationContext` if necessary.
 * `TransactionalTestExecutionListener`: Provides transactional test execution with
   default rollback semantics.
 * `SqlScriptsTestExecutionListener`: Runs SQL scripts configured by using the `@Sql`

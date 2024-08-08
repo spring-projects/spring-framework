@@ -18,9 +18,9 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebClient;
+import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.Page;
+import org.htmlunit.WebClient;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.servlet.MockMvc;

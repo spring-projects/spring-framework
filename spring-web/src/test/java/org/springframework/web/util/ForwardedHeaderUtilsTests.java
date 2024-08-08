@@ -17,6 +17,8 @@
 package org.springframework.web.util;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -361,6 +363,11 @@ class ForwardedHeaderUtilsTests {
 			@Override
 			public URI getURI() {
 				return UriComponentsBuilder.fromUriString("/").build().toUri();
+			}
+
+			@Override
+			public Map<String, Object> getAttributes() {
+				return Collections.emptyMap();
 			}
 
 			@Override

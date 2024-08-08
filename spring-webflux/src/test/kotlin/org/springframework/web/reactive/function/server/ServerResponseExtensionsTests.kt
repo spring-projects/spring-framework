@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,19 @@ class ServerResponseExtensionsTests {
 		}
 		verify {
 			bodyBuilder.bodyValue(ofType<String>())
+		}
+	}
+
+	@Test
+	fun `BodyBuilder#bodyValueWithTypeAndAwait with object parameter and reified type parameters`() {
+		val response = mockk<ServerResponse>()
+		val body = listOf("foo", "bar")
+		every { bodyBuilder.bodyValue(ofType<List<String>>(), object : ParameterizedTypeReference<List<String>>() {}) } returns Mono.just(response)
+		runBlocking {
+			bodyBuilder.bodyValueWithTypeAndAwait<List<String>>(body)
+		}
+		verify {
+			bodyBuilder.bodyValue(body, object : ParameterizedTypeReference<List<String>>() {})
 		}
 	}
 

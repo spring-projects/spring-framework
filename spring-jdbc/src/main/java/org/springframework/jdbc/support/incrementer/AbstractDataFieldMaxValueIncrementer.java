@@ -77,6 +77,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/**
 	 * Return the data source to retrieve the value from.
 	 */
+	@SuppressWarnings("NullAway")
 	public DataSource getDataSource() {
 		return this.dataSource;
 	}
@@ -91,6 +92,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	/**
 	 * Return the name of the sequence/table.
 	 */
+	@SuppressWarnings("NullAway")
 	public String getIncrementerName() {
 		return this.incrementerName;
 	}

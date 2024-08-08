@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,8 +136,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
         testService.postForm(map)
 
         val request = server.takeRequest()
-        assertThat(request.headers["Content-Type"])
-                .isEqualTo("application/x-www-form-urlencoded;charset=UTF-8")
+        assertThat(request.headers["Content-Type"]).isEqualTo("application/x-www-form-urlencoded")
         assertThat(request.body.readUtf8()).isEqualTo("param1=value+1&param2=value+2")
     }
 

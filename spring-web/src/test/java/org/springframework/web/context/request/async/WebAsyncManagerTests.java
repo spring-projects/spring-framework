@@ -72,7 +72,7 @@ class WebAsyncManagerTests {
 			.withMessage("AsyncWebRequest must not be null");
 
 		assertThatIllegalStateException()
-			.isThrownBy(() -> manager.startDeferredResultProcessing(new DeferredResult<String>()))
+			.isThrownBy(() -> manager.startDeferredResultProcessing(new DeferredResult<>()))
 			.withMessage("AsyncWebRequest must not be null");
 	}
 

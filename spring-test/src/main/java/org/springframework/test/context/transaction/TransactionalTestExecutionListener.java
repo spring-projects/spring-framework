@@ -196,6 +196,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @see #getTransactionManager(TestContext, String)
 	 */
 	@Override
+	@SuppressWarnings("NullAway")
 	public void beforeTestMethod(final TestContext testContext) throws Exception {
 		Method testMethod = testContext.getTestMethod();
 		Class<?> testClass = testContext.getTestClass();
@@ -414,6 +415,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @return the <em>default rollback</em> flag for the supplied test context
 	 * @throws Exception if an error occurs while determining the default rollback flag
 	 */
+	@SuppressWarnings("NullAway")
 	protected final boolean isDefaultRollback(TestContext testContext) throws Exception {
 		Class<?> testClass = testContext.getTestClass();
 		Rollback rollback = TestContextAnnotationUtils.findMergedAnnotation(testClass, Rollback.class);

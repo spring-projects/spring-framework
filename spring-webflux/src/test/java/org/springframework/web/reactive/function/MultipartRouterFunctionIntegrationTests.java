@@ -206,7 +206,7 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 			return request
 					.body(BodyExtractors.toMultipartData())
 					.flatMap(map -> {
-						Map<String, Part> parts = map.toSingleValueMap();
+						Map<String, Part> parts = map.asSingleValueMap();
 						try {
 							assertThat(parts).hasSize(2);
 							assertThat(((FilePart) parts.get("fooPart")).filename()).isEqualTo("foo.txt");

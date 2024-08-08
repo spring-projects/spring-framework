@@ -158,6 +158,14 @@ class CookieResultMatchersDsl internal constructor (private val actions: ResultA
 	}
 
 	/**
+	 * @see CookieResultMatchers.partitioned
+	 * @since 6.2
+	 */
+	fun partitioned(name: String, partitioned: Boolean) {
+		actions.andExpect(matchers.partitioned(name, partitioned))
+	}
+
+	/**
 	 * @see CookieResultMatchers.attribute
 	 * @since 6.0.8
 	 */

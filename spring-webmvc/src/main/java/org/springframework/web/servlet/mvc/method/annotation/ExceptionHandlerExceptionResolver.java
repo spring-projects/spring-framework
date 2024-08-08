@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,18 +31,24 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.ExceptionHandlerMappingInfo;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.method.annotation.MapMethodProcessor;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
@@ -52,6 +57,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolverCompo
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
@@ -72,6 +78,7 @@ import org.springframework.web.util.DisconnectedClientHelper;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 3.1
  */
 public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver
@@ -105,6 +112,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
 	private final List<Object> responseBodyAdvice = new ArrayList<>();
+
+	private final List<ErrorResponse.Interceptor> errorResponseInterceptors = new ArrayList<>();
 
 	@Nullable
 	private ApplicationContext applicationContext;
@@ -239,6 +248,27 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 	}
 
+	/**
+	 * Configure a list of {@link ErrorResponse.Interceptor}'s to apply when
+	 * rendering an RFC 7807 {@link org.springframework.http.ProblemDetail}
+	 * error response.
+	 * @param interceptors the handlers to use
+	 * @since 6.2
+	 */
+	public void setErrorResponseInterceptors(List<ErrorResponse.Interceptor> interceptors) {
+		this.errorResponseInterceptors.clear();
+		this.errorResponseInterceptors.addAll(interceptors);
+	}
+
+	/**
+	 * Return the {@link #setErrorResponseInterceptors(List) configured}
+	 * {@link ErrorResponse.Interceptor}'s.
+	 * @since 6.2
+	 */
+	public List<ErrorResponse.Interceptor> getErrorResponseInterceptors() {
+		return this.errorResponseInterceptors;
+	}
+
 	@Override
 	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -358,12 +388,14 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
 		handlers.add(new HttpEntityMethodProcessor(
-				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
+				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice,
+				this.errorResponseInterceptors));
 
 		// Annotation-based return value types
 		handlers.add(new ServletModelAttributeMethodProcessor(false));
 		handlers.add(new RequestResponseBodyMethodProcessor(
-				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
+				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice,
+				this.errorResponseInterceptors));
 
 		// Multi-purpose return value types
 		handlers.add(new ViewNameMethodReturnValueHandler());
@@ -399,7 +431,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request,
 			HttpServletResponse response, @Nullable HandlerMethod handlerMethod, Exception exception) {
 
-		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);
+		ServletWebRequest webRequest = new ServletWebRequest(request, response);
+		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception, webRequest);
+
 		if (exceptionHandlerMethod == null) {
 			return null;
 		}
@@ -411,7 +445,6 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			exceptionHandlerMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 		}
 
-		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
 		ArrayList<Throwable> exceptions = new ArrayList<>();
@@ -471,11 +504,22 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * Spring-managed beans were detected.
 	 * @param handlerMethod the method where the exception was raised (may be {@code null})
 	 * @param exception the raised exception
+	 * @param webRequest the original web request that resulted in a handler error
 	 * @return a method to handle the exception, or {@code null} if none
 	 */
 	@Nullable
 	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(
-			@Nullable HandlerMethod handlerMethod, Exception exception) {
+			@Nullable HandlerMethod handlerMethod, Exception exception, ServletWebRequest webRequest) {
+
+		List<MediaType> acceptedMediaTypes = List.of(MediaType.ALL);
+		try {
+			acceptedMediaTypes = this.contentNegotiationManager.resolveMediaTypes(webRequest);
+		}
+		catch (HttpMediaTypeNotAcceptableException mediaTypeExc) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not resolve accepted media types for @ExceptionHandler [" + webRequest.getHeader(HttpHeaders.ACCEPT) + "]", mediaTypeExc);
+			}
+		}
 
 		Class<?> handlerType = null;
 
@@ -485,9 +529,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			handlerType = handlerMethod.getBeanType();
 			ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.computeIfAbsent(
 					handlerType, ExceptionHandlerMethodResolver::new);
-			Method method = resolver.resolveMethod(exception);
-			if (method != null) {
-				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method, this.applicationContext);
+
+			for (MediaType mediaType : acceptedMediaTypes) {
+				ExceptionHandlerMappingInfo mappingInfo = resolver.resolveExceptionMapping(exception, mediaType);
+				if (mappingInfo != null) {
+					if (!mappingInfo.getProducibleTypes().isEmpty()) {
+						webRequest.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mappingInfo.getProducibleTypes(), RequestAttributes.SCOPE_REQUEST);
+					}
+					return new ServletInvocableHandlerMethod(handlerMethod.getBean(), mappingInfo.getHandlerMethod(), this.applicationContext);
+				}
 			}
 			// For advice applicability check below (involving base packages, assignable types
 			// and annotation presence), use target class instead of interface-based proxy.
@@ -500,9 +550,14 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			ControllerAdviceBean advice = entry.getKey();
 			if (advice.isApplicableToBeanType(handlerType)) {
 				ExceptionHandlerMethodResolver resolver = entry.getValue();
-				Method method = resolver.resolveMethod(exception);
-				if (method != null) {
-					return new ServletInvocableHandlerMethod(advice.resolveBean(), method, this.applicationContext);
+				for (MediaType mediaType : acceptedMediaTypes) {
+					ExceptionHandlerMappingInfo mappingInfo = resolver.resolveExceptionMapping(exception, mediaType);
+					if (mappingInfo != null) {
+						if (!mappingInfo.getProducibleTypes().isEmpty()) {
+							webRequest.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mappingInfo.getProducibleTypes(), RequestAttributes.SCOPE_REQUEST);
+						}
+						return new ServletInvocableHandlerMethod(advice.resolveBean(), mappingInfo.getHandlerMethod(), this.applicationContext);
+					}
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.annotation;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -136,6 +137,19 @@ public abstract class BeanFactoryAnnotationUtils {
 			throw new NoSuchBeanDefinitionException(qualifier, "No matching " + beanType.getSimpleName() +
 					" bean found for qualifier '" + qualifier + "' - neither qualifier match nor bean name match!");
 		}
+	}
+
+	/**
+	 * Determine the {@link Qualifier#value() qualifier value} for the given
+	 * annotated element.
+	 * @param annotatedElement the class, method or parameter to introspect
+	 * @return the associated qualifier value, or {@code null} if none
+	 * @since 6.2
+	 */
+	@Nullable
+	public static String getQualifierValue(AnnotatedElement annotatedElement) {
+		Qualifier qualifier = AnnotationUtils.getAnnotation(annotatedElement, Qualifier.class);
+		return (qualifier != null ? qualifier.value() : null);
 	}
 
 	/**

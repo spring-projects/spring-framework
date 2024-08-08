@@ -85,6 +85,7 @@ public abstract class SharedEntityManagerCreator {
 			"execute",  // jakarta.persistence.StoredProcedureQuery.execute()
 			"executeUpdate", // jakarta.persistence.Query.executeUpdate()
 			"getSingleResult",  // jakarta.persistence.Query.getSingleResult()
+			"getSingleResultOrNull",  // jakarta.persistence.Query.getSingleResultOrNull()
 			"getResultStream",  // jakarta.persistence.Query.getResultStream()
 			"getResultList",  // jakarta.persistence.Query.getResultList()
 			"list",  // org.hibernate.query.Query.list()

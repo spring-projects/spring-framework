@@ -106,6 +106,17 @@ class HeaderAssertionTests {
 	}
 
 	@Test
+	void valueMatchesWithNonexistentHeader() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.parseMediaType("application/json;charset=UTF-8"));
+		HeaderAssertions assertions = headerAssertions(headers);
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertions.valueMatches("Content-XYZ", ".*ISO-8859-1.*"))
+				.withMessage("Response header 'Content-XYZ' not found");
+	}
+
+	@Test
 	void valuesMatch() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "value1");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,13 @@ import java.util.Map;
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.function.ThrowingConsumer;
 
 /**
  * {@link GeneratedFiles} implementation that keeps generated files in-memory.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  */
 public class InMemoryGeneratedFiles implements GeneratedFiles {
@@ -39,14 +41,10 @@ public class InMemoryGeneratedFiles implements GeneratedFiles {
 
 
 	@Override
-	public void addFile(Kind kind, String path, InputStreamSource content) {
-		Assert.notNull(kind, "'kind' must not be null");
-		Assert.hasLength(path, "'path' must not be empty");
-		Assert.notNull(content, "'content' must not be null");
+	public void handleFile(Kind kind, String path, ThrowingConsumer<FileHandler> handler) {
 		Map<String, InputStreamSource> paths = this.files.computeIfAbsent(kind,
 				key -> new LinkedHashMap<>());
-		Assert.state(!paths.containsKey(path), () -> "Path '" + path + "' already in use");
-		paths.put(path, content);
+		handler.accept(new InMemoryFileHandler(paths, path));
 	}
 
 	/**
@@ -87,6 +85,29 @@ public class InMemoryGeneratedFiles implements GeneratedFiles {
 		Assert.hasLength(path, "'path' must not be empty");
 		Map<String, InputStreamSource> paths = this.files.get(kind);
 		return (paths != null ? paths.get(path) : null);
+	}
+
+	private static class InMemoryFileHandler extends FileHandler {
+
+		private final Map<String, InputStreamSource> paths;
+
+		private final String key;
+
+		InMemoryFileHandler(Map<String, InputStreamSource> paths, String key) {
+			super(paths.containsKey(key), () -> paths.get(key));
+			this.paths = paths;
+			this.key = key;
+		}
+
+		@Override
+		protected void copy(InputStreamSource content, boolean override) {
+			this.paths.put(this.key, content);
+		}
+
+		@Override
+		public String toString() {
+			return this.key;
+		}
 	}
 
 }

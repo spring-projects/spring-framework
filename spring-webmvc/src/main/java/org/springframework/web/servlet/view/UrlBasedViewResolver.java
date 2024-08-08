@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,9 +196,10 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
-	 * Set the content type for all views.
+	 * Set the content type for all views &mdash; for example,
+	 * {@code "text/html;charset=UTF-8"}.
 	 * <p>May be ignored by view classes if the view itself is assumed
-	 * to set the content type, e.g. in case of JSPs.
+	 * to set the content type &mdash; for example, in case of JSPs.
 	 */
 	public void setContentType(@Nullable String contentType) {
 		this.contentType = contentType;

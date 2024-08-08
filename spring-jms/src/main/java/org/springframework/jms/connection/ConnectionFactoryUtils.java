@@ -285,6 +285,7 @@ public abstract class ConnectionFactoryUtils {
 	 * @throws JMSException in case of JMS failure
 	 */
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public static Session doGetTransactionalSession(
 			ConnectionFactory connectionFactory, ResourceFactory resourceFactory, boolean startConnection)
 			throws JMSException {

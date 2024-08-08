@@ -45,6 +45,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -80,7 +81,8 @@ class ModelInitializerTests {
 
 		ControllerMethodResolver methodResolver = new ControllerMethodResolver(
 				resolverConfigurer, adapterRegistry, new StaticApplicationContext(),
-				Collections.emptyList(), null, null, null);
+				new RequestedContentTypeResolverBuilder().build(), Collections.emptyList(),
+				null, null, null);
 
 		this.modelInitializer = new ModelInitializer(methodResolver, adapterRegistry);
 	}

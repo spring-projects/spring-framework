@@ -40,6 +40,8 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.InstanceOfAssertFactories.array;
+import static org.assertj.core.api.InstanceOfAssertFactories.optional;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestParam;
 
@@ -90,7 +92,6 @@ class RequestParamMethodArgumentResolverTests {
 
 		param = this.testMethod.annot(requestParam().notRequired()).arg(String.class);
 		assertThat(this.resolver.supportsParameter(param)).isTrue();
-
 	}
 
 	@Test
@@ -124,7 +125,7 @@ class RequestParamMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?name=foo&name=bar").build();
 		Object result = resolve(param, MockServerWebExchange.from(request));
-		assertThat(result).isEqualTo(new String[] {"foo", "bar"});
+		assertThat(result).asInstanceOf(array(String[].class)).containsExactly("foo", "bar");
 	}
 
 	@Test  // gh-32577
@@ -132,7 +133,7 @@ class RequestParamMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?name[]=foo&name[]=bar").build();
 		Object result = resolve(param, MockServerWebExchange.from(request));
-		assertThat(result).isEqualTo(new String[] {"foo", "bar"});
+		assertThat(result).asInstanceOf(array(String[].class)).containsExactly("foo", "bar");
 	}
 
 	@Test
@@ -208,10 +209,7 @@ class RequestParamMethodArgumentResolverTests {
 		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name=123"));
 		result = resolve(param, exchange);
 
-		assertThat(result.getClass()).isEqualTo(Optional.class);
-		Optional<?> value = (Optional<?>) result;
-		assertThat(value).isPresent();
-		assertThat(value.get()).isEqualTo(123);
+		assertThat(result).asInstanceOf(optional(Integer.class)).contains(123);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class MappingJackson2XmlHttpMessageConverter extends AbstractJackson2Http
 
 	/**
 	 * {@inheritDoc}
-	 * The {@code ObjectMapper} parameter must be a {@link XmlMapper} instance.
+	 * <p>The {@code ObjectMapper} parameter must be an {@link XmlMapper} instance.
 	 */
 	@Override
 	public void setObjectMapper(ObjectMapper objectMapper) {

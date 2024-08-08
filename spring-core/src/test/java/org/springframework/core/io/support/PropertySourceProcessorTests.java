@@ -32,10 +32,12 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PlaceholderResolutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link PropertySourceProcessor}.
@@ -73,8 +75,8 @@ class PropertySourceProcessorTests {
 	class FailOnErrorTests {
 
 		@Test
-		void processorFailsOnIllegalArgumentException() {
-			assertProcessorFailsOnError(IllegalArgumentExceptionPropertySourceFactory.class, IllegalArgumentException.class);
+		void processorFailsOnPlaceholderResolutionException() {
+			assertProcessorFailsOnError(PlaceholderResolutionExceptionPropertySourceFactory.class, PlaceholderResolutionException.class);
 		}
 
 		@Test
@@ -98,7 +100,7 @@ class PropertySourceProcessorTests {
 
 		@Test
 		void processorIgnoresIllegalArgumentException() {
-			assertProcessorIgnoresFailure(IllegalArgumentExceptionPropertySourceFactory.class);
+			assertProcessorIgnoresFailure(PlaceholderResolutionExceptionPropertySourceFactory.class);
 		}
 
 		@Test
@@ -134,11 +136,11 @@ class PropertySourceProcessorTests {
 	}
 
 
-	private static class IllegalArgumentExceptionPropertySourceFactory implements PropertySourceFactory {
+	private static class PlaceholderResolutionExceptionPropertySourceFactory implements PropertySourceFactory {
 
 		@Override
 		public PropertySource<?> createPropertySource(String name, EncodedResource resource) {
-			throw new IllegalArgumentException("bogus");
+			throw mock(PlaceholderResolutionException.class);
 		}
 	}
 

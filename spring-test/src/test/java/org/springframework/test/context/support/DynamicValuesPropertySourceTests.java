@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DynamicValuesPropertySourceTests {
 
-	private final DynamicValuesPropertySource source = new DynamicValuesPropertySource("test",
+	private final DynamicValuesPropertySource source = new DynamicValuesPropertySource(
 			Map.of("a", () -> "A", "b", () -> "B"));
 
 

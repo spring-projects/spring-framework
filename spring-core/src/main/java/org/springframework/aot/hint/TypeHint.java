@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -123,9 +122,7 @@ public final class TypeHint implements ConditionalHint {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", TypeHint.class.getSimpleName() + "[", "]")
-				.add("type=" + this.type)
-				.toString();
+		return TypeHint.class.getSimpleName() + "[type=" + this.type + "]";
 	}
 
 	/**

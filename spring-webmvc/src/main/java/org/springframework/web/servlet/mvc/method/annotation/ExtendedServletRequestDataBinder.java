@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
@@ -81,24 +85,56 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	protected void addBindValues(MutablePropertyValues mpvs, ServletRequest request) {
 		Map<String, String> uriVars = getUriVars(request);
 		if (uriVars != null) {
-			uriVars.forEach((name, value) -> {
-				if (mpvs.contains(name)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("URI variable '" + name + "' overridden by request bind value.");
-					}
+			uriVars.forEach((name, value) -> addValueIfNotPresent(mpvs, "URI variable", name, value));
+		}
+		if (request instanceof HttpServletRequest httpRequest) {
+			Enumeration<String> names = httpRequest.getHeaderNames();
+			while (names.hasMoreElements()) {
+				String name = names.nextElement();
+				Object value = getHeaderValue(httpRequest, name);
+				if (value != null) {
+					name = name.replace("-", "");
+					addValueIfNotPresent(mpvs, "Header", name, value);
 				}
-				else {
-					mpvs.addPropertyValue(name, value);
-				}
-			});
+			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Nullable
 	private static Map<String, String> getUriVars(ServletRequest request) {
-		String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		return (Map<String, String>) request.getAttribute(attr);
+		return (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+	}
+
+	private static void addValueIfNotPresent(MutablePropertyValues mpvs, String label, String name, Object value) {
+		if (mpvs.contains(name)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(label + " '" + name + "' overridden by request bind value.");
+			}
+		}
+		else {
+			mpvs.addPropertyValue(name, value);
+		}
+	}
+
+	@Nullable
+	private static Object getHeaderValue(HttpServletRequest request, String name) {
+		Enumeration<String> valuesEnum = request.getHeaders(name);
+		if (!valuesEnum.hasMoreElements()) {
+			return null;
+		}
+
+		String value = valuesEnum.nextElement();
+		if (!valuesEnum.hasMoreElements()) {
+			return value;
+		}
+
+		List<Object> values = new ArrayList<>();
+		values.add(value);
+		while (valuesEnum.hasMoreElements()) {
+			values.add(valuesEnum.nextElement());
+		}
+		return values;
 	}
 
 

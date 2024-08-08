@@ -81,8 +81,6 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  */
 class ResponseEntityResultHandlerTests {
 
-	private static final String NEWLINE_SYSTEM_PROPERTY = System.lineSeparator();
-
 	private final ResponseEntityResultHandler resultHandler = createHandler();
 
 
@@ -458,10 +456,10 @@ class ResponseEntityResultHandlerTests {
 		handler.handleResult(exchange, result).block();
 
 		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(halMediaType);
-		assertThat(exchange.getResponse().getBodyAsString().block()).isEqualTo(
-				"{" + NEWLINE_SYSTEM_PROPERTY +
-						"  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY +
-						"}");
+		assertThat(exchange.getResponse().getBodyAsString().block()).isEqualToNormalizingNewlines("""
+				{
+				\s "name" : "Jason"
+				}""");
 	}
 
 	@Test  // gh-24539

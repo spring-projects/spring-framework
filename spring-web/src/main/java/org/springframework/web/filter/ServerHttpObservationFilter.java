@@ -110,6 +110,7 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 
 		Observation observation = createOrFetchObservation(request, response);
 		try (Observation.Scope scope = observation.openScope()) {
+			onScopeOpened(scope, request, response);
 			filterChain.doFilter(request, response);
 		}
 		catch (Exception ex) {
@@ -132,6 +133,17 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 				observation.stop();
 			}
 		}
+	}
+
+	/**
+	 * Notify this filter that a new {@link Observation.Scope} is opened for the
+	 * observation that was just created.
+	 * @param scope the newly opened observation scope
+	 * @param request the HTTP client request
+	 * @param response the filter's response
+	 * @since 6.2
+	 */
+	protected void onScopeOpened(Observation.Scope scope, HttpServletRequest request, HttpServletResponse response) {
 	}
 
 	private Observation createOrFetchObservation(HttpServletRequest request, HttpServletResponse response) {

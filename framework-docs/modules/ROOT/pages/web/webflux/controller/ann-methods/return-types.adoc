@@ -68,6 +68,10 @@ Controllers can then return a `Flux<List<B>>`; Reactor provides a dedicated oper
 | `Rendering`
 | An API for model and view rendering scenarios.
 
+| `FragmentsRendering`, `Flux<Fragment>`, `Collection<Fragment>`
+| For rendering one or more fragments each with its own view and model.
+  See xref:web/webflux-view.adoc#webflux-view-fragments[HTML Fragments] for more details.
+
 | `void`
 | A method with a `void`, possibly asynchronous (for example, `Mono<Void>`), return type (or a `null` return
   value) is considered to have fully handled the response if it also has a `ServerHttpResponse`,

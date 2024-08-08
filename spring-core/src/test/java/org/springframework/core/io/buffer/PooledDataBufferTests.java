@@ -69,6 +69,15 @@ class PooledDataBufferTests {
 		}
 	}
 
+	@Nested
+	class Jetty implements PooledDataBufferTestingTrait {
+
+		@Override
+		public DataBufferFactory createDataBufferFactory() {
+			return new JettyDataBufferFactory();
+		}
+	}
+
 
 	interface PooledDataBufferTestingTrait {
 
@@ -82,10 +91,14 @@ class PooledDataBufferTests {
 		default void retainAndRelease() {
 			PooledDataBuffer buffer = createDataBuffer(1);
 			buffer.write((byte) 'a');
+			assertThat(buffer.isAllocated()).isTrue();
 
 			buffer.retain();
+			assertThat(buffer.isAllocated()).isTrue();
 			assertThat(buffer.release()).isFalse();
+			assertThat(buffer.isAllocated()).isTrue();
 			assertThat(buffer.release()).isTrue();
+			assertThat(buffer.isAllocated()).isFalse();
 		}
 
 		@Test

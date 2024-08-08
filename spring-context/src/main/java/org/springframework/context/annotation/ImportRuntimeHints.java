@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 
 /**
@@ -61,9 +62,8 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
  * @author Brian Clozel
  * @author Stephane Nicoll
  * @since 6.0
- * @see org.springframework.aot.hint.RuntimeHints
- * @see org.springframework.aot.hint.annotation.Reflective
- * @see org.springframework.aot.hint.annotation.RegisterReflectionForBinding
+ * @see RuntimeHints
+ * @see ReflectiveScan @ReflectiveScan
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

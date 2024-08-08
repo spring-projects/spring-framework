@@ -272,6 +272,13 @@ is being accessed by other components (for example, calling `createEntityManager
 calls block until the background bootstrapping has completed. In particular, when you use
 Spring Data JPA, make sure to set up deferred bootstrapping for its repositories as well.
 
+As of 6.2, JPA initialization is enforced before context refresh completion, waiting for
+asynchronous bootstrapping to complete by then. This makes the availability of the fully
+initialized database infrastructure predictable and allows for custom post-initialization
+logic in `ContextRefreshedEvent` listeners etc. Putting such application-level database
+initialization into `@PostConstruct` methods or the like is not recommended; this is
+better placed in `Lifecycle.start` (if applicable) or a `ContextRefreshedEvent` listener.
+
 
 [[orm-jpa-dao]]
 == Implementing DAOs Based on JPA: `EntityManagerFactory` and `EntityManager`

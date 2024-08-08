@@ -17,7 +17,6 @@
 package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -25,6 +24,7 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -34,12 +34,17 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class ReflectiveMethodExecutor implements MethodExecutor {
 
 	private final Method originalMethod;
 
+	/**
+	 * The method to invoke via reflection, which is not necessarily the method
+	 * to invoke in a compiled expression.
+	 */
 	private final Method methodToInvoke;
 
 	@Nullable
@@ -87,41 +92,20 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	}
 
 	/**
-	 * Find the first public class in the method's declaring class hierarchy that
-	 * declares this method.
-	 * <p>Sometimes the reflective method discovery logic finds a suitable method
-	 * that can easily be called via reflection but cannot be called from generated
-	 * code when compiling the expression because of visibility restrictions. For
-	 * example, if a non-public class overrides {@code toString()}, this helper
-	 * method will traverse up the type hierarchy to find the first public type that
-	 * declares the method (if there is one). For {@code toString()}, it may traverse
-	 * as far as Object.
+	 * Find a public class or interface in the method's class hierarchy that
+	 * declares the {@linkplain #getMethod() original method}.
+	 * <p>See {@link CodeFlow#findPublicDeclaringClass(Method)} for
+	 * details.
+	 * @return the public class or interface that declares the method, or
+	 * {@code null} if no such public type could be found
 	 */
 	@Nullable
 	public Class<?> getPublicDeclaringClass() {
 		if (!this.computedPublicDeclaringClass) {
-			this.publicDeclaringClass =
-					discoverPublicDeclaringClass(this.originalMethod, this.originalMethod.getDeclaringClass());
+			this.publicDeclaringClass = CodeFlow.findPublicDeclaringClass(this.originalMethod);
 			this.computedPublicDeclaringClass = true;
 		}
 		return this.publicDeclaringClass;
-	}
-
-	@Nullable
-	private Class<?> discoverPublicDeclaringClass(Method method, Class<?> clazz) {
-		if (Modifier.isPublic(clazz.getModifiers())) {
-			try {
-				clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
-				return clazz;
-			}
-			catch (NoSuchMethodException ex) {
-				// Continue below...
-			}
-		}
-		if (clazz.getSuperclass() != null) {
-			return discoverPublicDeclaringClass(method, clazz.getSuperclass());
-		}
-		return null;
 	}
 
 	public boolean didArgumentConversionOccur() {

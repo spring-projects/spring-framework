@@ -46,6 +46,7 @@ class MockCookieTests {
 		assertThat(cookie.getMaxAge()).isEqualTo(-1);
 		assertThat(cookie.getPath()).isNull();
 		assertThat(cookie.isHttpOnly()).isFalse();
+		assertThat(cookie.isPartitioned()).isFalse();
 		assertThat(cookie.getSecure()).isFalse();
 		assertThat(cookie.getSameSite()).isNull();
 	}
@@ -71,7 +72,7 @@ class MockCookieTests {
 	@Test
 	void parseHeaderWithAttributes() {
 		MockCookie cookie = MockCookie.parse("SESSION=123; Domain=example.com; Max-Age=60; " +
-				"Expires=Tue, 8 Oct 2019 19:50:00 GMT; Path=/; Secure; HttpOnly; SameSite=Lax");
+				"Expires=Tue, 8 Oct 2019 19:50:00 GMT; Path=/; Secure; HttpOnly; Partitioned; SameSite=Lax");
 
 		assertCookie(cookie, "SESSION", "123");
 		assertThat(cookie.getDomain()).isEqualTo("example.com");
@@ -79,6 +80,7 @@ class MockCookieTests {
 		assertThat(cookie.getPath()).isEqualTo("/");
 		assertThat(cookie.getSecure()).isTrue();
 		assertThat(cookie.isHttpOnly()).isTrue();
+		assertThat(cookie.isPartitioned()).isTrue();
 		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
 				DateTimeFormatter.RFC_1123_DATE_TIME));
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
@@ -201,6 +203,16 @@ class MockCookieTests {
 	void setInvalidAttributeExpiresShouldThrow() {
 		MockCookie cookie = new MockCookie("SESSION", "123");
 		assertThatThrownBy(() -> cookie.setAttribute("expires", "12345")).isInstanceOf(DateTimeParseException.class);
+	}
+
+	@Test
+	void setPartitioned() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		assertThat(cookie.isPartitioned()).isFalse();
+		cookie.setPartitioned(true);
+		assertThat(cookie.isPartitioned()).isTrue();
+		cookie.setPartitioned(false);
+		assertThat(cookie.isPartitioned()).isFalse();
 	}
 
 }

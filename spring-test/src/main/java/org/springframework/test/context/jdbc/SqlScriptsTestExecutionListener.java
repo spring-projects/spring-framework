@@ -308,8 +308,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		Method testMethod = (methodLevel ? testContext.getTestMethod() : null);
 
 		String[] scripts = getScripts(sql, testContext.getTestClass(), testMethod, classLevel);
+		ApplicationContext applicationContext = testContext.getApplicationContext();
 		List<Resource> scriptResources = TestContextResourceUtils.convertToResourceList(
-				testContext.getApplicationContext(), scripts);
+				applicationContext, applicationContext.getEnvironment(), scripts);
 		for (String stmt : sql.statements()) {
 			if (StringUtils.hasText(stmt)) {
 				stmt = stmt.trim();
@@ -412,6 +413,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * Detect a default SQL script by implementing the algorithm defined in
 	 * {@link Sql#scripts}.
 	 */
+	@SuppressWarnings("NullAway")
 	private String detectDefaultScript(Class<?> testClass, @Nullable Method testMethod, boolean classLevel) {
 		Assert.state(classLevel || testMethod != null, "Method-level @Sql requires a testMethod");
 

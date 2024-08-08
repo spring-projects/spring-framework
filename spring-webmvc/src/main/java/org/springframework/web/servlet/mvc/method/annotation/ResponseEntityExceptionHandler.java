@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -135,7 +136,8 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 			HttpMessageNotReadableException.class,
 			HttpMessageNotWritableException.class,
 			MethodValidationException.class,
-			BindException.class
+			BindException.class,
+			AsyncRequestNotUsableException.class
 		})
 	@Nullable
 	public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) throws Exception {
@@ -197,11 +199,11 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		else if (ex instanceof HttpMessageNotWritableException theEx) {
 			return handleHttpMessageNotWritable(theEx, headers, HttpStatus.INTERNAL_SERVER_ERROR, request);
 		}
-		else if (ex instanceof MethodValidationException subEx) {
-			return handleMethodValidationException(subEx, headers, HttpStatus.INTERNAL_SERVER_ERROR, request);
+		else if (ex instanceof MethodValidationException theEx) {
+			return handleMethodValidationException(theEx, headers, HttpStatus.INTERNAL_SERVER_ERROR, request);
 		}
-		else if (ex instanceof BindException theEx) {
-			return handleBindException(theEx, headers, HttpStatus.BAD_REQUEST, request);
+		else if (ex instanceof AsyncRequestNotUsableException theEx) {
+			return handleAsyncRequestNotUsableException(theEx, request);
 		}
 		else {
 			// Unknown exception, typically a wrapper with a common MVC exception as cause
@@ -550,30 +552,6 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	}
 
 	/**
-	 * Customize the handling of {@link BindException}.
-	 * <p>By default this method creates a {@link ProblemDetail} with the status
-	 * and a short detail message, and then delegates to
-	 * {@link #handleExceptionInternal}.
-	 * @param ex the exception to handle
-	 * @param headers the headers to use for the response
-	 * @param status the status code to use for the response
-	 * @param request the current request
-	 * @return a {@code ResponseEntity} for the response to use, possibly
-	 * {@code null} when the response is already committed
-	 * @deprecated as of 6.0 since {@link org.springframework.web.method.annotation.ModelAttributeMethodProcessor}
-	 * now raises the {@link MethodArgumentNotValidException} subclass instead.
-	 */
-	@Nullable
-	@Deprecated(since = "6.0", forRemoval = true)
-	protected ResponseEntity<Object> handleBindException(
-			BindException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-
-		ProblemDetail body = ProblemDetail.forStatusAndDetail(status, "Failed to bind request");
-		return handleExceptionInternal(ex, body, headers, status, request);
-	}
-
-
-	/**
 	 * Customize the handling of {@link MethodValidationException}.
 	 * <p>By default this method creates a {@link ProblemDetail} with the status
 	 * and a short detail message, and also looks up an override for the detail
@@ -593,6 +571,22 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 
 		ProblemDetail body = createProblemDetail(ex, status, "Validation failed", null, null, request);
 		return handleExceptionInternal(ex, body, headers, status, request);
+	}
+
+	/**
+	 * Customize the handling of {@link AsyncRequestNotUsableException}.
+	 * <p>By default, return {@code null} since the response is not usable.
+	 * @param ex the exception to handle
+	 * @param request the current request
+	 * @return a {@code ResponseEntity} for the response to use, possibly
+	 * {@code null} when the response is already committed
+	 * @since 6.2
+	 */
+	@Nullable
+	protected ResponseEntity<Object> handleAsyncRequestNotUsableException(
+			AsyncRequestNotUsableException ex, WebRequest request) {
+
+		return null;
 	}
 
 	/**

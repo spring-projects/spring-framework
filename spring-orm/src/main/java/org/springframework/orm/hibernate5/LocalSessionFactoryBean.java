@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,10 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.InfrastructureProxy;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -79,7 +81,8 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
  */
 public class LocalSessionFactoryBean extends HibernateExceptionTranslator
-		implements FactoryBean<SessionFactory>, ResourceLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
+		implements FactoryBean<SessionFactory>, ResourceLoaderAware, BeanFactoryAware,
+		InitializingBean, SmartInitializingSingleton, DisposableBean {
 
 	@Nullable
 	private DataSource dataSource;
@@ -390,6 +393,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * then block until Hibernate's bootstrapping completed, if not ready by then.
 	 * For maximum benefit, make sure to avoid early {@code SessionFactory} calls
 	 * in init methods of related beans, even for metadata introspection purposes.
+	 * <p>As of 6.2, Hibernate initialization is enforced before context refresh
+	 * completion, waiting for asynchronous bootstrapping to complete by then.
 	 * @since 4.3
 	 * @see LocalSessionFactoryBuilder#buildSessionFactory(AsyncTaskExecutor)
 	 */
@@ -598,6 +603,14 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		// Build SessionFactory instance.
 		this.configuration = sfb;
 		this.sessionFactory = buildSessionFactory(sfb);
+	}
+
+	@Override
+	public void afterSingletonsInstantiated() {
+		// Enforce completion of asynchronous Hibernate initialization before context refresh completion.
+		if (this.sessionFactory instanceof InfrastructureProxy proxy) {
+			proxy.getWrappedObject();
+		}
 	}
 
 	/**

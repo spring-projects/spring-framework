@@ -65,6 +65,7 @@ public class ImportAnnotationDetectionTests {
 	@Test
 	void localImportIsProcessedLast() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setAllowBeanDefinitionOverriding(true);
 		ctx.register(MultiMetaImportConfigWithLocalImportWithBeanOverride.class);
 		ctx.refresh();
 		assertThat(ctx.containsBean("testBean1")).isTrue();

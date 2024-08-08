@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.view.freemarker;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import freemarker.cache.ClassTemplateLoader;
@@ -55,7 +56,7 @@ import org.springframework.util.Assert;
  * &lt;@spring.bind "person.age"/&gt;
  * age is ${spring.status.value}</pre>
  *
- * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.21 or higher.
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.33 or higher.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -68,7 +69,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 
 
 	public FreeMarkerConfigurer() {
-		setDefaultEncoding("UTF-8");
+		setDefaultCharset(StandardCharsets.UTF_8);
 	}
 
 

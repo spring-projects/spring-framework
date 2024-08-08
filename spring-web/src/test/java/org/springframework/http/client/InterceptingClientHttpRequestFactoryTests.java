@@ -116,6 +116,32 @@ class InterceptingClientHttpRequestFactoryTests {
 	}
 
 	@Test
+	void changeAttribute() throws Exception {
+		final String attrName = "Foo";
+		final String attrValue = "Bar";
+
+		ClientHttpRequestInterceptor interceptor = (request, body, execution) -> {
+			System.out.println("interceptor");
+			request.getAttributes().put(attrName, attrValue);
+			return execution.execute(request, body);
+		};
+
+		requestMock = new MockClientHttpRequest() {
+			@Override
+			protected ClientHttpResponse executeInternal() {
+				System.out.println("execute");
+				assertThat(getAttributes()).containsEntry(attrName, attrValue);
+				return responseMock;
+			}
+		};
+
+		requestFactory = new InterceptingClientHttpRequestFactory(requestFactoryMock, Collections.singletonList(interceptor));
+
+		ClientHttpRequest request = requestFactory.createRequest(URI.create("https://example.com"), HttpMethod.GET);
+		request.execute();
+	}
+
+	@Test
 	void changeURI() throws Exception {
 		final URI changedUri = URI.create("https://example.com/2");
 

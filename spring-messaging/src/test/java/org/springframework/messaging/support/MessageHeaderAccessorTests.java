@@ -48,6 +48,30 @@ class MessageHeaderAccessorTests {
 	}
 
 	@Test
+	void fromEmptyMap() {
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMap(Collections.emptyMap());
+		assertThat(accessor.toMap()).isEmpty();
+	}
+
+	@Test
+	void fromNullMap() {
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMap(null);
+		assertThat(accessor.toMap()).isEmpty();
+	}
+
+	@Test
+	void fromEmptyMessageHeaders() {
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMessageHeaders(new MessageHeaders(Collections.emptyMap()));
+		assertThat(accessor.toMap()).isEmpty();
+	}
+
+	@Test
+	void fromNullMessageHeaders() {
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMessageHeaders(null);
+		assertThat(accessor.toMap()).isEmpty();
+	}
+
+	@Test
 	void existingHeaders() {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
@@ -55,6 +79,32 @@ class MessageHeaderAccessorTests {
 		GenericMessage<String> message = new GenericMessage<>("payload", map);
 
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor(message);
+		MessageHeaders actual = accessor.getMessageHeaders();
+
+		assertThat(actual).hasSize(3);
+		assertThat(actual.get("foo")).isEqualTo("bar");
+		assertThat(actual.get("bar")).isEqualTo("baz");
+	}
+
+	@Test
+	void fromMapWithExistingHeaders() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("foo", "bar");
+		map.put("bar", "baz");
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMap(map);
+		MessageHeaders actual = accessor.getMessageHeaders();
+
+		assertThat(actual).hasSize(3);
+		assertThat(actual.get("foo")).isEqualTo("bar");
+		assertThat(actual.get("bar")).isEqualTo("baz");
+	}
+
+	@Test
+	void fromMessageHeaderWithExistingHeaders() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("foo", "bar");
+		map.put("bar", "baz");
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.fromMessageHeaders(new MessageHeaders(map));
 		MessageHeaders actual = accessor.getMessageHeaders();
 
 		assertThat(actual).hasSize(3);

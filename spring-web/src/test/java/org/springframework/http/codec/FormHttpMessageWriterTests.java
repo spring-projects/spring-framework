@@ -52,7 +52,7 @@ class FormHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 		// No generic information
 		assertThat(this.writer.canWrite(
-				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
+				ResolvableType.forInstance(new LinkedMultiValueMap<>()),
 				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
 		assertThat(this.writer.canWrite(
@@ -88,7 +88,7 @@ class FormHttpMessageWriterTests extends AbstractLeakCheckingTests {
 				.expectComplete()
 				.verify();
 		HttpHeaders headers = response.getHeaders();
-		assertThat(headers.getContentType().toString()).isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
+		assertThat(headers.getContentType()).isEqualTo(MediaType.APPLICATION_FORM_URLENCODED);
 		assertThat(headers.getContentLength()).isEqualTo(expected.length());
 	}
 

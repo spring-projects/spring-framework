@@ -42,11 +42,32 @@ repositories {
 }
 
 dependencies {
+	api(project(":spring-aspects"))
 	api(project(":spring-context"))
+	api(project(":spring-context-support"))
+	api(project(":spring-jdbc"))
 	api(project(":spring-jms"))
+	api(project(":spring-test"))
 	api(project(":spring-web"))
+	api(project(":spring-webflux"))
+	api(project(":spring-webmvc"))
+	api(project(":spring-websocket"))
+
+	api("com.fasterxml.jackson.core:jackson-databind")
+	api("com.fasterxml.jackson.module:jackson-module-parameter-names")
+	api("com.mchange:c3p0:0.9.5.5")
+	api("com.oracle.database.jdbc:ojdbc11")
+	api("io.projectreactor.netty:reactor-netty-http")
 	api("jakarta.jms:jakarta.jms-api")
 	api("jakarta.servlet:jakarta.servlet-api")
+	api("jakarta.resource:jakarta.resource-api")
+	api("jakarta.validation:jakarta.validation-api")
+	api("javax.cache:cache-api")
+	api("org.apache.activemq:activemq-ra:6.1.2")
+	api("org.apache.commons:commons-dbcp2:2.11.0")
+	api("org.aspectj:aspectjweaver")
+	api("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
+	api("org.jetbrains.kotlin:kotlin-stdlib")
 
 	implementation(project(":spring-core-test"))
 	implementation("org.assertj:assertj-core")

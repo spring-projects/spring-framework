@@ -77,7 +77,7 @@ class DestinationResolvingMessagingTemplateTests {
 	void sendNoDestinationResolver() {
 		TestDestinationResolvingMessagingTemplate template = new TestDestinationResolvingMessagingTemplate();
 		assertThatIllegalStateException().isThrownBy(() ->
-				template.send("myChannel", new GenericMessage<Object>("payload")));
+				template.send("myChannel", new GenericMessage<>("payload")));
 	}
 
 	@Test

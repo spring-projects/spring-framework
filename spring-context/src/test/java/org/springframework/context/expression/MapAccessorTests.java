@@ -17,6 +17,7 @@
 package org.springframework.context.expression;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MapAccessorTests {
 
 	@Test
-	void mapAccessorCompilable() {
+	void compilationSupport() {
 		Map<String, Object> testMap = getSimpleTestMap();
 		StandardEvaluationContext sec = new StandardEvaluationContext();
 		sec.addPropertyAccessor(new MapAccessor());
@@ -44,62 +45,95 @@ class MapAccessorTests {
 
 		// basic
 		Expression ex = sep.parseExpression("foo");
-		assertThat(ex.getValue(sec,testMap)).isEqualTo("bar");
+		assertThat(ex.getValue(sec, testMap)).isEqualTo("bar");
 		assertThat(SpelCompiler.compile(ex)).isTrue();
-		assertThat(ex.getValue(sec,testMap)).isEqualTo("bar");
+		assertThat(ex.getValue(sec, testMap)).isEqualTo("bar");
 
 		// compound expression
 		ex = sep.parseExpression("foo.toUpperCase()");
-		assertThat(ex.getValue(sec,testMap)).isEqualTo("BAR");
+		assertThat(ex.getValue(sec, testMap)).isEqualTo("BAR");
 		assertThat(SpelCompiler.compile(ex)).isTrue();
-		assertThat(ex.getValue(sec,testMap)).isEqualTo("BAR");
+		assertThat(ex.getValue(sec, testMap)).isEqualTo("BAR");
 
 		// nested map
-		Map<String,Map<String,Object>> nestedMap = getNestedTestMap();
+		Map<String, Map<String, Object>> nestedMap = getNestedTestMap();
 		ex = sep.parseExpression("aaa.foo.toUpperCase()");
-		assertThat(ex.getValue(sec,nestedMap)).isEqualTo("BAR");
+		assertThat(ex.getValue(sec, nestedMap)).isEqualTo("BAR");
 		assertThat(SpelCompiler.compile(ex)).isTrue();
-		assertThat(ex.getValue(sec,nestedMap)).isEqualTo("BAR");
+		assertThat(ex.getValue(sec, nestedMap)).isEqualTo("BAR");
 
 		// avoiding inserting checkcast because first part of expression returns a Map
 		ex = sep.parseExpression("getMap().foo");
 		MapGetter mapGetter = new MapGetter();
-		assertThat(ex.getValue(sec,mapGetter)).isEqualTo("bar");
+		assertThat(ex.getValue(sec, mapGetter)).isEqualTo("bar");
 		assertThat(SpelCompiler.compile(ex)).isTrue();
-		assertThat(ex.getValue(sec,mapGetter)).isEqualTo("bar");
+		assertThat(ex.getValue(sec, mapGetter)).isEqualTo("bar");
 
 		// basic isWritable
 		ex = sep.parseExpression("foo");
-		assertThat(ex.isWritable(sec,testMap)).isTrue();
+		assertThat(ex.isWritable(sec, testMap)).isTrue();
 
 		// basic write
 		ex = sep.parseExpression("foo2");
 		ex.setValue(sec, testMap, "bar2");
-		assertThat(ex.getValue(sec,testMap)).isEqualTo("bar2");
+		assertThat(ex.getValue(sec, testMap)).isEqualTo("bar2");
 		assertThat(SpelCompiler.compile(ex)).isTrue();
-		assertThat(ex.getValue(sec,testMap)).isEqualTo("bar2");
+		assertThat(ex.getValue(sec, testMap)).isEqualTo("bar2");
 	}
 
+	@Test
+	void canWrite() throws Exception {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		Map<String, Object> testMap = getSimpleTestMap();
+
+		MapAccessor mapAccessor = new MapAccessor();
+		assertThat(mapAccessor.canWrite(context, new Object(), "foo")).isFalse();
+		assertThat(mapAccessor.canWrite(context, testMap, "foo")).isTrue();
+		// Cannot actually write to an immutable Map, but MapAccessor cannot easily check for that.
+		assertThat(mapAccessor.canWrite(context, Map.of(), "x")).isTrue();
+
+		mapAccessor = new MapAccessor(false);
+		assertThat(mapAccessor.canWrite(context, new Object(), "foo")).isFalse();
+		assertThat(mapAccessor.canWrite(context, testMap, "foo")).isFalse();
+	}
+
+	@Test
+	void isWritable() {
+		Map<String, Object> testMap = getSimpleTestMap();
+		StandardEvaluationContext sec = new StandardEvaluationContext();
+		SpelExpressionParser sep = new SpelExpressionParser();
+		Expression ex = sep.parseExpression("foo");
+
+		assertThat(ex.isWritable(sec, testMap)).isFalse();
+
+		sec.setPropertyAccessors(List.of(new MapAccessor(true)));
+		assertThat(ex.isWritable(sec, testMap)).isTrue();
+
+		sec.setPropertyAccessors(List.of(new MapAccessor(false)));
+		assertThat(ex.isWritable(sec, testMap)).isFalse();
+	}
+
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static class MapGetter {
-		Map<String,Object> map = new HashMap<>();
+		Map map = new HashMap<>();
 
 		public MapGetter() {
-			map.put("foo", "bar");
+			this.map.put("foo", "bar");
 		}
 
-		@SuppressWarnings("rawtypes")
 		public Map getMap() {
-			return map;
+			return this.map;
 		}
 	}
 
-	public Map<String,Object> getSimpleTestMap() {
+	private static Map<String,Object> getSimpleTestMap() {
 		Map<String,Object> map = new HashMap<>();
 		map.put("foo","bar");
 		return map;
 	}
 
-	public Map<String,Map<String,Object>> getNestedTestMap() {
+	private static Map<String,Map<String,Object>> getNestedTestMap() {
 		Map<String,Object> map = new HashMap<>();
 		map.put("foo","bar");
 		Map<String,Map<String,Object>> map2 = new HashMap<>();

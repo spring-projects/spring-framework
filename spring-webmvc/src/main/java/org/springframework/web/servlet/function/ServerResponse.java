@@ -246,7 +246,7 @@ public interface ServerResponse {
 	 * @since 5.3
 	 */
 	static ServerResponse async(Object asyncResponse) {
-		return DefaultAsyncServerResponse.create(asyncResponse, null);
+		return AsyncServerResponse.create(asyncResponse);
 	}
 
 	/**
@@ -267,7 +267,7 @@ public interface ServerResponse {
 	 * @since 5.3.2
 	 */
 	static ServerResponse async(Object asyncResponse, Duration timeout) {
-		return DefaultAsyncServerResponse.create(asyncResponse, timeout);
+		return AsyncServerResponse.create(asyncResponse, timeout);
 	}
 
 	/**

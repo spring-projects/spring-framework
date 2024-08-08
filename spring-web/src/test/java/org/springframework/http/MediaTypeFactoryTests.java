@@ -30,7 +30,7 @@ class MediaTypeFactoryTests {
 	@Test
 	void getMediaType() {
 		assertThat(MediaTypeFactory.getMediaType("file.xml")).contains(MediaType.APPLICATION_XML);
-		assertThat(MediaTypeFactory.getMediaType("file.js")).contains(MediaType.parseMediaType("application/javascript"));
+		assertThat(MediaTypeFactory.getMediaType("file.js")).contains(MediaType.parseMediaType("text/javascript"));
 		assertThat(MediaTypeFactory.getMediaType("file.css")).contains(MediaType.parseMediaType("text/css"));
 		assertThat(MediaTypeFactory.getMediaType("file.foobar")).isNotPresent();
 	}

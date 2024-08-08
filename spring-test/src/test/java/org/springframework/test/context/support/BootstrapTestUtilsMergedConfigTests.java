@@ -36,7 +36,6 @@ import org.springframework.test.context.web.WebDelegatingSmartContextLoader;
 import org.springframework.test.context.web.WebMergedContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link BootstrapTestUtils} involving {@link MergedContextConfiguration}.
@@ -59,10 +58,14 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	 */
 	@Test
 	void buildMergedConfigWithContextConfigurationWithoutLocationsClassesOrInitializers() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				buildMergedContextConfiguration(MissingContextAttributesTestCase.class))
-			.withMessageStartingWith("DelegatingSmartContextLoader was unable to detect defaults, "
-					+ "and no ApplicationContextInitializers or ContextCustomizers were declared for context configuration attributes");
+		Class<?> testClass = MissingContextAttributesTestCase.class;
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+
+		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, DelegatingSmartContextLoader.class);
+		assertThat(mergedConfig.getContextCustomizers())
+				.map(Object::getClass)
+				.map(Class::getSimpleName)
+				.containsOnly("DynamicPropertiesContextCustomizer");
 	}
 
 	@Test

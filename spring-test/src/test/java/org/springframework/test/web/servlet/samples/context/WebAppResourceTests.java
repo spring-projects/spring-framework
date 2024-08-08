@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class WebAppResourceTests {
 	@Test
 	public void resourceRequest() throws Exception {
 		this.mockMvc.perform(get("/resources/Spring.js"))
-			.andExpect(content().contentType("application/javascript"))
+			.andExpect(content().contentType("text/javascript"))
 			.andExpect(content().string(containsString("Spring={};")));
 	}
 

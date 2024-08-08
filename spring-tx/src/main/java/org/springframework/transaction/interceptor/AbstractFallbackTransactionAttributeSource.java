@@ -29,6 +29,7 @@ import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.MethodClassKey;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -86,18 +87,31 @@ public abstract class AbstractFallbackTransactionAttributeSource
 	}
 
 
+	@Override
+	public boolean hasTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
+		return (getTransactionAttribute(method, targetClass, false) != null);
+	}
+
+	@Override
+	@Nullable
+	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
+		return getTransactionAttribute(method, targetClass, true);
+	}
+
 	/**
 	 * Determine the transaction attribute for this method invocation.
 	 * <p>Defaults to the class's transaction attribute if no method attribute is found.
 	 * @param method the method for the current invocation (never {@code null})
 	 * @param targetClass the target class for this invocation (can be {@code null})
+	 * @param cacheNull whether {@code null} results should be cached as well
 	 * @return a TransactionAttribute for this method, or {@code null} if the method
 	 * is not transactional
 	 */
-	@Override
 	@Nullable
-	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
-		if (method.getDeclaringClass() == Object.class) {
+	private TransactionAttribute getTransactionAttribute(
+			Method method, @Nullable Class<?> targetClass, boolean cacheNull) {
+
+		if (ReflectionUtils.isObjectMethod(method)) {
 			return null;
 		}
 
@@ -120,7 +134,7 @@ public abstract class AbstractFallbackTransactionAttributeSource
 				}
 				this.attributeCache.put(cacheKey, txAttr);
 			}
-			else {
+			else if (cacheNull) {
 				this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
 			}
 			return txAttr;

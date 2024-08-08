@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,6 +155,18 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 					clientCookie.setPath(getURI().getPath());
 					cookieStore.addCookie(clientCookie);
 				});
+	}
+
+	/**
+	 * Applies the attributes to the {@link HttpClientContext}.
+	 */
+	@Override
+	protected void applyAttributes() {
+		getAttributes().forEach((key, value) -> {
+			if (this.context.getAttribute(key) == null) {
+				this.context.setAttribute(key, value);
+			}
+		});
 	}
 
 	@Override

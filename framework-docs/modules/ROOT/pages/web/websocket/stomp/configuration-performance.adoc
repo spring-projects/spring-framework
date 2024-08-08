@@ -62,42 +62,7 @@ documentation of the XML schema for important additional details.
 
 The following example shows a possible configuration:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebSocketMessageBroker
-	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-		@Override
-		public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-			registration.setSendTimeLimit(15 * 1000).setSendBufferSizeLimit(512 * 1024);
-		}
-
-		// ...
-
-	}
-----
-
-The following example shows the XML configuration equivalent of the preceding example:
-
-[source,xml,indent=0,subs="verbatim,quotes,attributes"]
-----
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:websocket="http://www.springframework.org/schema/websocket"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/websocket
-			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
-
-		<websocket:message-broker>
-			<websocket:transport send-timeout="15000" send-buffer-size="524288" />
-			<!-- ... -->
-		</websocket:message-broker>
-
-	</beans>
-----
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]
 
 You can also use the WebSocket transport configuration shown earlier to configure the
 maximum allowed size for incoming STOMP messages. In theory, a WebSocket
@@ -115,42 +80,7 @@ minimum.
 
 The following example shows one possible configuration:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebSocketMessageBroker
-	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-		@Override
-		public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-			registration.setMessageSizeLimit(128 * 1024);
-		}
-
-		// ...
-
-	}
-----
-
-The following example shows the XML configuration equivalent of the preceding example:
-
-[source,xml,indent=0,subs="verbatim,quotes,attributes"]
-----
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:websocket="http://www.springframework.org/schema/websocket"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/websocket
-			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
-
-		<websocket:message-broker>
-			<websocket:transport message-size="131072" />
-			<!-- ... -->
-		</websocket:message-broker>
-
-	</beans>
-----
+include-code::./MessageSizeLimitWebSocketConfiguration[tag=snippet,indent=0]
 
 An important point about scaling involves using multiple application instances.
 Currently, you cannot do that with the simple broker.

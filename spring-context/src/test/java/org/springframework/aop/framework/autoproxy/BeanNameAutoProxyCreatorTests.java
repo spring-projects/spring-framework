@@ -76,8 +76,7 @@ class BeanNameAutoProxyCreatorTests {
 		int age = 5;
 		tb.setAge(age);
 		assertThat(tb.getAge()).isEqualTo(age);
-		boolean condition = tb instanceof TimeStamped;
-		assertThat(condition).as("Introduction was made").isTrue();
+		assertThat(tb).as("Introduction was made").isInstanceOf(TimeStamped.class);
 		assertThat(((TimeStamped) tb).getTimeStamp()).isEqualTo(0);
 		assertThat(nop.getCount()).isEqualTo(3);
 		assertThat(tb.getName()).isEqualTo("introductionUsingJdk");
@@ -98,8 +97,9 @@ class BeanNameAutoProxyCreatorTests {
 		// Can still mod second object
 		tb2.setAge(12);
 		// But can't mod first
-		assertThatExceptionOfType(LockedException.class).as("mixin should have locked this object").isThrownBy(() ->
-				tb.setAge(6));
+		assertThatExceptionOfType(LockedException.class)
+				.as("mixin should have locked this object")
+				.isThrownBy(() -> tb.setAge(6));
 	}
 
 	@Test
@@ -131,8 +131,9 @@ class BeanNameAutoProxyCreatorTests {
 		// Can still mod second object
 		tb2.setAge(12);
 		// But can't mod first
-		assertThatExceptionOfType(LockedException.class).as("mixin should have locked this object").isThrownBy(() ->
-				tb.setAge(6));
+		assertThatExceptionOfType(LockedException.class)
+				.as("mixin should have locked this object")
+				.isThrownBy(() -> tb.setAge(6));
 	}
 
 	@Test

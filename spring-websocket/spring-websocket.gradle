@@ -19,6 +19,7 @@ dependencies {
 	optional("org.eclipse.jetty.ee10:jetty-ee10-webapp") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
+	optional("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
 	optional("org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jakarta-server")
 	optional("org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jetty-server") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"

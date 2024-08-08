@@ -53,12 +53,12 @@ class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
 
 	@Test
-	void testNullConfig() {
+	void nullConfig() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new JdkDynamicAopProxy(null));
 	}
 
 	@Test
-	void testProxyIsJustInterface() {
+	void proxyIsJustInterface() {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
@@ -66,12 +66,11 @@ class JdkDynamicProxyTests extends AbstractAopProxyTests {
 		JdkDynamicAopProxy aop = new JdkDynamicAopProxy(pc);
 
 		Object proxy = aop.getProxy();
-		assertThat(proxy instanceof ITestBean).isTrue();
-		assertThat(proxy instanceof TestBean).isFalse();
+		assertThat(proxy).isInstanceOf(ITestBean.class).isNotInstanceOf(TestBean.class);
 	}
 
 	@Test
-	void testInterceptorIsInvokedWithNoTarget() {
+	void interceptorIsInvokedWithNoTarget() {
 		// Test return value
 		final int age = 25;
 		MethodInterceptor mi = (invocation -> age);
@@ -85,12 +84,14 @@ class JdkDynamicProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testTargetCanGetInvocationWithPrivateClass() {
+	void targetCanGetInvocationWithPrivateClass() {
 		final ExposedInvocationTestBean expectedTarget = new ExposedInvocationTestBean() {
 			@Override
 			protected void assertions(MethodInvocation invocation) {
 				assertThat(invocation.getThis()).isEqualTo(this);
-				assertThat(invocation.getMethod().getDeclaringClass()).as("Invocation should be on ITestBean: " + invocation.getMethod()).isEqualTo(ITestBean.class);
+				assertThat(invocation.getMethod().getDeclaringClass())
+						.as("Invocation should be on ITestBean: " + invocation.getMethod())
+						.isEqualTo(ITestBean.class);
 			}
 		};
 
@@ -113,7 +114,7 @@ class JdkDynamicProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testProxyNotWrappedIfIncompatible() {
+	void proxyNotWrappedIfIncompatible() {
 		FooBar bean = new FooBar();
 		ProxyCreatorSupport as = new ProxyCreatorSupport();
 		as.setInterfaces(Foo.class);
@@ -125,22 +126,22 @@ class JdkDynamicProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testEqualsAndHashCodeDefined() {
+	void equalsAndHashCodeDefined() {
 		Named named = new Person();
 		AdvisedSupport as = new AdvisedSupport(Named.class);
 		as.setTarget(named);
 
 		Named proxy = (Named) new JdkDynamicAopProxy(as).getProxy();
 		assertThat(proxy).isEqualTo(named);
-		assertThat(named.hashCode()).isEqualTo(proxy.hashCode());
+		assertThat(named).hasSameHashCodeAs(proxy);
 
 		proxy = (Named) new JdkDynamicAopProxy(as).getProxy();
 		assertThat(proxy).isEqualTo(named);
-		assertThat(named.hashCode()).isEqualTo(proxy.hashCode());
+		assertThat(named).hasSameHashCodeAs(proxy);
 	}
 
 	@Test  // SPR-13328
-	void testVarargsWithEnumArray() {
+	void varargsWithEnumArray() {
 		ProxyFactory proxyFactory = new ProxyFactory(new VarargTestBean());
 		VarargTestInterface proxy = (VarargTestInterface) proxyFactory.getProxy();
 		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.core;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -383,8 +382,8 @@ public class ReactiveAdapterRegistry {
 				Method multiPublisher = ClassUtils.getMethod(
 						io.smallrye.mutiny.groups.MultiCreate.class, "publisher", Flow.Publisher.class);
 				registry.registerReactiveType(uniDesc,
-						uni -> FlowAdapters.toPublisher((Flow.Publisher<Object>) Objects.requireNonNull(
-								ReflectionUtils.invokeMethod(uniToPublisher, ((io.smallrye.mutiny.Uni<?>) uni).convert()))),
+						uni -> FlowAdapters.toPublisher((Flow.Publisher<Object>)
+								ReflectionUtils.invokeMethod(uniToPublisher, ((io.smallrye.mutiny.Uni<?>) uni).convert())),
 						publisher -> ReflectionUtils.invokeMethod(uniPublisher, io.smallrye.mutiny.Uni.createFrom(),
 								FlowAdapters.toFlowPublisher(publisher)));
 				registry.registerReactiveType(multiDesc,

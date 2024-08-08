@@ -1,0 +1,18 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- tag::snippet[] -->
+	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="5"/>
+		<property name="maxPoolSize" value="10"/>
+		<property name="queueCapacity" value="25"/>
+	</bean>
+
+	<bean id="taskExecutorExample" class="TaskExecutorExample">
+		<constructor-arg ref="taskExecutor"/>
+	</bean>
+	<!-- end::snippet[] -->
+
+</beans>

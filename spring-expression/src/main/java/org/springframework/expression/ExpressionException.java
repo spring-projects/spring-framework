@@ -155,6 +155,7 @@ public class ExpressionException extends RuntimeException {
 	 * that caused the failure.
 	 * @since 4.0
 	 */
+	@SuppressWarnings("NullAway")
 	public String getSimpleMessage() {
 		return super.getMessage();
 	}

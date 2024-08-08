@@ -92,6 +92,17 @@ public class ImportSelectorTests {
 	}
 
 	@Test
+	void filteredImportSelector() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(FilteredConfig.class);
+		context.refresh();
+		String[] beanNames = context.getBeanFactory().getBeanDefinitionNames();
+		assertThat(beanNames).endsWith("importSelectorTests.FilteredConfig",
+				ImportedSelector2.class.getName(), "b");
+		assertThat(beanNames).doesNotContain("a", Object.class.getName(), "c");
+	}
+
+	@Test
 	void invokeAwareMethodsInImportSelector() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AwareConfig.class);
 		assertThat(SampleImportSelector.beanFactory).isEqualTo(context.getBeanFactory());
@@ -274,6 +285,25 @@ public class ImportSelectorTests {
 		}
 	}
 
+	@Configuration
+	@Import(FilteredImportSelector.class)
+	public static class FilteredConfig {
+	}
+
+	public static class FilteredImportSelector implements ImportSelector {
+
+		@Override
+		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			return new String[] { ImportedSelector1.class.getName(), ImportedSelector2.class.getName(), ImportedSelector3.class.getName() };
+		}
+
+		@Override
+		public Predicate<String> getExclusionFilter() {
+			return (className -> className.equals(ImportedSelector1.class.getName()) ||
+					className.equals(ImportedSelector3.class.getName()));
+		}
+	}
+
 
 	public static class DeferredImportSelector1 implements DeferredImportSelector, Ordered {
 
@@ -317,6 +347,15 @@ public class ImportSelectorTests {
 		@Bean
 		public String b() {
 			return "b";
+		}
+	}
+
+	@Configuration
+	public static class ImportedSelector3 {
+
+		@Bean
+		public String c() {
+			return "c";
 		}
 	}
 

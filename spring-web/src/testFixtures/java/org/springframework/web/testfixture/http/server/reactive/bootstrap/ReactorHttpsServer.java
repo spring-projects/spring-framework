@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.web.testfixture.http.server.reactive.bootstrap;
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.Http11SslContextSpec;
+import reactor.netty.tcp.SslProvider.GenericSslContextSpec;
 
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 
@@ -40,7 +42,8 @@ public class ReactorHttpsServer extends AbstractHttpServer {
 	@Override
 	protected void initServer() throws Exception {
 		SelfSignedCertificate cert = new SelfSignedCertificate();
-		Http11SslContextSpec http11SslContextSpec = Http11SslContextSpec.forServer(cert.certificate(), cert.privateKey());
+		GenericSslContextSpec<SslContextBuilder> http11SslContextSpec =
+				Http11SslContextSpec.forServer(cert.certificate(), cert.privateKey());
 
 		this.reactorHandler = createHttpHandlerAdapter();
 		this.reactorServer = reactor.netty.http.server.HttpServer.create()

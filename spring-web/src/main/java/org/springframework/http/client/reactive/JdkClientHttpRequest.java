@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Flow;
@@ -36,6 +37,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -57,7 +59,8 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 	private final HttpRequest.Builder builder;
 
 
-	public JdkClientHttpRequest(HttpMethod httpMethod, URI uri, DataBufferFactory bufferFactory) {
+	public JdkClientHttpRequest(HttpMethod httpMethod, URI uri, DataBufferFactory bufferFactory,
+								@Nullable Duration readTimeout) {
 		Assert.notNull(httpMethod, "HttpMethod is required");
 		Assert.notNull(uri, "URI is required");
 		Assert.notNull(bufferFactory, "DataBufferFactory is required");
@@ -66,6 +69,9 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 		this.uri = uri;
 		this.bufferFactory = bufferFactory;
 		this.builder = HttpRequest.newBuilder(uri);
+		if (readTimeout != null) {
+			this.builder.timeout(readTimeout);
+		}
 	}
 
 

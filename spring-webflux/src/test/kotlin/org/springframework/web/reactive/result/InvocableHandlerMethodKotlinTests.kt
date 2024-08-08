@@ -112,9 +112,16 @@ class InvocableHandlerMethodKotlinTests {
 	@Test
 	fun privateController() {
 		this.resolvers.add(stubResolver("foo"))
-		val method = PrivateCoroutinesController::singleArg.javaMethod!!
-		val result = invoke(PrivateCoroutinesController(), method,"foo")
+		val method = PrivateController::singleArg.javaMethod!!
+		val result = invoke(PrivateController(), method,"foo")
 		assertHandlerResultValue(result, "success:foo")
+	}
+
+	@Test
+	fun privateFunction() {
+		val method = PrivateController::class.java.getDeclaredMethod("private")
+		val result = invoke(PrivateController(), method)
+		assertHandlerResultValue(result, "private")
 	}
 
 	@Test
@@ -196,6 +203,13 @@ class InvocableHandlerMethodKotlinTests {
 		val method = ValueClassController::valueClass.javaMethod!!
 		val result = invoke(ValueClassController(), method,1L)
 		assertHandlerResultValue(result, "1")
+	}
+
+	@Test
+	fun valueClassReturnValue() {
+		val method = ValueClassController::valueClassReturnValue.javaMethod!!
+		val result = invoke(ValueClassController(), method,)
+		assertHandlerResultValue(result, "foo")
 	}
 
 	@Test
@@ -330,12 +344,14 @@ class InvocableHandlerMethodKotlinTests {
 		}
 	}
 
-	private class PrivateCoroutinesController {
+	private class PrivateController {
 
 		suspend fun singleArg(q: String?): String {
 			delay(1)
 			return "success:$q"
 		}
+
+		private fun private() = "private"
 	}
 
 	class DefaultValueController {
@@ -366,6 +382,9 @@ class InvocableHandlerMethodKotlinTests {
 
 		fun valueClass(limit: LongValueClass) =
 			"${limit.value}"
+
+		fun valueClassReturnValue() =
+			StringValueClass("foo")
 
 		fun valueClassWithDefault(limit: DoubleValueClass = DoubleValueClass(3.1)) =
 			"${limit.value}"
@@ -410,6 +429,9 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	data class Animal(override val name: String) : Named
+
+	@JvmInline
+	value class StringValueClass(val value: String)
 
 	@JvmInline
 	value class LongValueClass(val value: Long)

@@ -923,7 +923,7 @@ Each of the distinct advice types of a particular aspect is conceptually meant t
 to the join point directly. As a consequence, an `@AfterThrowing` advice method is not
 supposed to receive an exception from an accompanying `@After`/`@AfterReturning` method.
 
-As of Spring Framework 5.2.7, advice methods defined in the same `@Aspect` class that
+Advice methods defined in the same `@Aspect` class that
 need to run at the same join point are assigned precedence based on their advice type in
 the following order, from highest to lowest precedence: `@Around`, `@Before`, `@After`,
 `@AfterReturning`, `@AfterThrowing`. Note, however, that an `@After` advice method will

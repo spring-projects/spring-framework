@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * {@code @WebAppConfiguration} is a class-level annotation that is used to
- * declare that the {@code ApplicationContext} loaded for an integration test
- * should be a {@link org.springframework.web.context.WebApplicationContext
+ * {@code @WebAppConfiguration} is an annotation that can be applied to a test
+ * class to declare that the {@code ApplicationContext} loaded for an integration
+ * test should be a {@link org.springframework.web.context.WebApplicationContext
  * WebApplicationContext}.
  *
  * <p>The presence of {@code @WebAppConfiguration} on a test class indicates that

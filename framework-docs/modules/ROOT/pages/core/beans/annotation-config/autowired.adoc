@@ -421,9 +421,9 @@ through Java 8's `java.util.Optional`, as the following example shows:
 	}
 ----
 
-As of Spring Framework 5.0, you can also use a `@Nullable` annotation (of any kind
-in any package -- for example, `javax.annotation.Nullable` from JSR-305) or just leverage
-Kotlin built-in null-safety support:
+You can also use a `@Nullable` annotation (of any kind in any package -- for example,
+`javax.annotation.Nullable` from JSR-305) or just leverage Kotlin built-in null-safety
+support:
 
 [tabs]
 ======

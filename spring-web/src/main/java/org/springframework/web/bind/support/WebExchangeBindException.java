@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,19 +76,6 @@ public class WebExchangeBindException extends ServerWebInputException implements
 		return new Object[] {
 				BindErrorUtils.resolveAndJoin(getGlobalErrors(), source, locale),
 				BindErrorUtils.resolveAndJoin(getFieldErrors(), source, locale)};
-	}
-
-	/**
-	 * Resolve global and field errors to messages with the given
-	 * {@link MessageSource} and {@link Locale}.
-	 * @return a Map with errors as key and resolves messages as value
-	 * @since 6.0.3
-	 * @deprecated in favor of using {@link BindErrorUtils} and
-	 * {@link #getAllErrors()}, to be removed in 6.2
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {
-		return BindErrorUtils.resolve(getAllErrors(), messageSource, locale);
 	}
 
 

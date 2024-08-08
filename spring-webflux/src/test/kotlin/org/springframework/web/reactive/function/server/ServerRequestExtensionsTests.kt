@@ -222,5 +222,19 @@ class ServerRequestExtensionsTests {
 		verify { headers.contentType() }
 	}
 
+	@Test
+	fun `pathVariableOrNull with value`() {
+		every { request.pathVariables() } returns hashMapOf("name" to "123")
+		assert(request.pathVariableOrNull("name") == "123")
+		verify { request.pathVariables() }
+	}
+
+	@Test
+	fun `pathVariableOrNull with null`() {
+		every { request.pathVariables() } returns emptyMap()
+		assert(request.pathVariableOrNull("name") == null)
+		verify { request.pathVariables() }
+	}
+
 	class Foo
 }

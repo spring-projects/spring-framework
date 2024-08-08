@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.security.ProtectionDomain;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -87,8 +86,7 @@ public final class CachedIntrospectionResults {
 	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
 	 * accept classes from, even if the classes do not qualify as cache-safe.
 	 */
-	static final Set<ClassLoader> acceptedClassLoaders =
-			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+	static final Set<ClassLoader> acceptedClassLoaders = ConcurrentHashMap.newKeySet(16);
 
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, strongly held.

@@ -19,6 +19,7 @@ package org.springframework.http.codec.json
 import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.core.MethodParameter
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
 import org.springframework.core.io.buffer.DataBuffer
@@ -31,6 +32,7 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier.FirstStep
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * Tests for the JSON encoding using kotlinx.serialization.
@@ -110,6 +112,17 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 	}
 
 	@Test
+	fun encodeMonoWithNullableWithNull() {
+		val input = Mono.just(mapOf("value" to null))
+		val methodParameter = MethodParameter.forExecutable(::handleMapWithNullable::javaMethod.get()!!, -1)
+		testEncode(input, ResolvableType.forMethodParameter(methodParameter), null, null) {
+			it.consumeNextWith(expectString("{\"value\":null}")
+				.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
+				.verifyComplete()
+		}
+	}
+
+	@Test
 	fun canNotEncode() {
 		assertThat(encoder.canEncode(ResolvableType.forClass(String::class.java), null)).isFalse()
 		assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
@@ -122,5 +135,7 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 
 	@Serializable
 	data class Pojo(val foo: String, val bar: String, val pojo: Pojo? = null)
+
+	fun handleMapWithNullable(map: Map<String, String?>) = map
 
 }

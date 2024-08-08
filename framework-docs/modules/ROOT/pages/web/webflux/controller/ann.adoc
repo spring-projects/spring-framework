@@ -20,7 +20,7 @@ Java::
 ----
 	@Configuration
 	@ComponentScan("org.example.web") // <1>
-	public class WebConfig {
+	public class WebConfiguration {
 
 		// ...
 	}
@@ -33,7 +33,7 @@ Kotlin::
 ----
 	@Configuration
 	@ComponentScan("org.example.web") // <1>
-	class WebConfig {
+	class WebConfiguration {
 
 		// ...
 	}

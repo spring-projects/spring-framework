@@ -274,6 +274,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			return null;
 		}
 
+		@Deprecated
 		@Override
 		public long getLastModified(HttpServletRequest request, Object delegate) {
 			return ((MyHandler) delegate).lastModified();
@@ -294,6 +295,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			throw new ServletException("dummy");
 		}
 
+		@Deprecated
 		@Override
 		public long getLastModified(HttpServletRequest request, Object delegate) {
 			return -1;

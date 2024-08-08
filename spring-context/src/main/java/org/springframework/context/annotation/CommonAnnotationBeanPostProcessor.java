@@ -71,6 +71,7 @@ import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -148,7 +149,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private static final boolean jndiPresent = ClassUtils.isPresent(
 			"javax.naming.InitialContext", CommonAnnotationBeanPostProcessor.class.getClassLoader());
 
-	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = new LinkedHashSet<>(4);
+	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = CollectionUtils.newLinkedHashSet(3);
 
 	@Nullable
 	private static final Class<? extends Annotation> jakartaResourceType;

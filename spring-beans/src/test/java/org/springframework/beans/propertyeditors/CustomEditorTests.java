@@ -1318,6 +1318,7 @@ class CustomEditorTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void indexedPropertiesWithListPropertyEditor() {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -1353,6 +1354,7 @@ class CustomEditorTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void uninitializedArrayPropertyWithCustomEditor() {
 		IndexedTestBean bean = new IndexedTestBean(false);
 		BeanWrapper bw = new BeanWrapperImpl(bean);

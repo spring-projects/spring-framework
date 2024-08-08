@@ -7,43 +7,8 @@
 `@ExceptionHandler` methods to handle exceptions from controller methods. The following
 example includes such a handler method:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	@Controller
-	public class SimpleController {
 
-		// ...
-
-		@ExceptionHandler // <1>
-		public ResponseEntity<String> handle(IOException ex) {
-			// ...
-		}
-	}
-----
-<1> Declaring an `@ExceptionHandler`.
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	@Controller
-	class SimpleController {
-
-		// ...
-
-		@ExceptionHandler // <1>
-		fun handle(ex: IOException): ResponseEntity<String> {
-			// ...
-		}
-	}
-----
-<1> Declaring an `@ExceptionHandler`.
-======
-
+include-code::./SimpleController[indent=0]
 
 
 The exception can match against a top-level exception being propagated (that is, a direct
@@ -65,6 +30,22 @@ Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
 `HandlerAdapter` for `@RequestMapping` methods. See xref:web/webflux/dispatcher-handler.adoc[`DispatcherHandler`]
 for more detail.
 
+[[webflux-ann-exceptionhandler-media]]
+== Media Type Mapping
+[.small]#xref:web/webmvc/mvc-controller/ann-exceptionhandler.adoc#mvc-ann-exceptionhandler-media[See equivalent in the Servlet stack]#
+
+In addition to exception types, `@ExceptionHandler` methods can also declare producible media types.
+This allows to refine error responses depending on the media types requested by HTTP clients, typically in the "Accept" HTTP request header.
+
+Applications can declare producible media types directly on annotations, for the same exception type:
+
+
+include-code::./MediaTypeController[tag=mediatype,indent=0]
+
+Here, methods handle the same exception type but will not be rejected as duplicates.
+Instead, API clients requesting "application/json" will receive a JSON error, and browsers will get an HTML error view.
+Each `@ExceptionHandler` annotation can declare several producible media types,
+the content negotiation during the error handling phase will decide which content type will be used.
 
 
 [[webflux-ann-exceptionhandler-args]]

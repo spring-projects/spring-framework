@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.Nullable;
 
 /**
- * {@code @NestedTestConfiguration} is a type-level annotation that is used to
- * configure how Spring test configuration annotations are processed within
- * enclosing class hierarchies (i.e., for <em>inner</em> test classes).
+ * {@code @NestedTestConfiguration} is an annotation that can be applied to a test
+ * class to configure how Spring test configuration annotations are processed
+ * within enclosing class hierarchies (i.e., for <em>inner</em> test classes).
  *
  * <p>If {@code @NestedTestConfiguration} is not <em>present</em> or
  * <em>meta-present</em> on a test class, in its supertype hierarchy, or in its

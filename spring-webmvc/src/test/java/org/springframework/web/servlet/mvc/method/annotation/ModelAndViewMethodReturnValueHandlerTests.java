@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,9 +28,12 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
+import org.springframework.web.servlet.view.FragmentsRendering;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,7 +57,7 @@ class ModelAndViewMethodReturnValueHandlerTests {
 	void setup() throws Exception {
 		this.handler = new ModelAndViewMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
-		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
+		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 		this.returnParamModelAndView = getReturnValueParam("modelAndView");
 	}
 
@@ -60,6 +65,9 @@ class ModelAndViewMethodReturnValueHandlerTests {
 	@Test
 	void supportsReturnType() throws Exception {
 		assertThat(handler.supportsReturnType(returnParamModelAndView)).isTrue();
+		assertThat(handler.supportsReturnType(getReturnValueParam("fragmentsRendering"))).isTrue();
+		assertThat(handler.supportsReturnType(getReturnValueParam("fragmentsCollection"))).isTrue();
+
 		assertThat(handler.supportsReturnType(getReturnValueParam("viewName"))).isFalse();
 	}
 
@@ -79,6 +87,25 @@ class ModelAndViewMethodReturnValueHandlerTests {
 
 		assertThat(mavContainer.getView().getClass()).isEqualTo(RedirectView.class);
 		assertThat(mavContainer.getModel().get("attrName")).isEqualTo("attrValue");
+	}
+
+	@Test
+	void handleFragmentsRendering() throws Exception {
+		FragmentsRendering rendering = FragmentsRendering.with("viewName")
+				.header("headerName", "headerValue")
+				.build();
+
+		handler.handleReturnValue(rendering, returnParamModelAndView, mavContainer, webRequest);
+		assertThat(mavContainer.getView()).isInstanceOf(SmartView.class);
+		assertThat(this.webRequest.getResponse().getHeader("headerName")).isEqualTo("headerValue");
+	}
+
+	@Test
+	void handleFragmentsCollection() throws Exception {
+		Collection<ModelAndView> fragments = List.of(new ModelAndView("viewName"));
+
+		handler.handleReturnValue(fragments, returnParamModelAndView, mavContainer, webRequest);
+		assertThat(mavContainer.getView()).isInstanceOf(SmartView.class);
 	}
 
 	@Test
@@ -170,6 +197,16 @@ class ModelAndViewMethodReturnValueHandlerTests {
 
 	@SuppressWarnings("unused")
 	String viewName() {
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	FragmentsRendering fragmentsRendering() {
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	Collection<ModelAndView> fragmentsCollection() {
 		return null;
 	}
 

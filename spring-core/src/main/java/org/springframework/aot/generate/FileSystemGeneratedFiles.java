@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,26 @@ package org.springframework.aot.generate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.CopyOption;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
 
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.util.Assert;
+import org.springframework.util.function.ThrowingConsumer;
 
 /**
  * {@link GeneratedFiles} implementation that stores generated files using a
  * {@link FileSystem}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  */
 public class FileSystemGeneratedFiles implements GeneratedFiles {
@@ -80,21 +85,54 @@ public class FileSystemGeneratedFiles implements GeneratedFiles {
 	}
 
 	@Override
-	public void addFile(Kind kind, String path, InputStreamSource content) {
+	public void handleFile(Kind kind, String path, ThrowingConsumer<FileHandler> handler) {
+		FileSystemFileHandler fileHandler = new FileSystemFileHandler(toPath(kind, path));
+		handler.accept(fileHandler);
+	}
+
+	private Path toPath(Kind kind, String path) {
 		Assert.notNull(kind, "'kind' must not be null");
 		Assert.hasLength(path, "'path' must not be empty");
-		Assert.notNull(content, "'content' must not be null");
 		Path root = this.roots.apply(kind).toAbsolutePath().normalize();
 		Path relativePath = root.resolve(path).toAbsolutePath().normalize();
 		Assert.isTrue(relativePath.startsWith(root), "'path' must be relative");
-		try {
-			try (InputStream inputStream = content.getInputStream()) {
-				Files.createDirectories(relativePath.getParent());
-				Files.copy(inputStream, relativePath);
+		return relativePath;
+	}
+
+	static final class FileSystemFileHandler extends FileHandler {
+
+		private final Path path;
+
+		FileSystemFileHandler(Path path) {
+			super(Files.exists(path), () -> new FileSystemResource(path));
+			this.path = path;
+		}
+
+		@Override
+		protected void copy(InputStreamSource content, boolean override) {
+			if (override) {
+				copy(content, StandardCopyOption.REPLACE_EXISTING);
+			}
+			else {
+				copy(content);
 			}
 		}
-		catch (IOException ex) {
-			throw new IllegalStateException(ex);
+
+		private void copy(InputStreamSource content, CopyOption... copyOptions) {
+			try {
+				try (InputStream inputStream = content.getInputStream()) {
+					Files.createDirectories(this.path.getParent());
+					Files.copy(inputStream, this.path, copyOptions);
+				}
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException(ex);
+			}
+		}
+
+		@Override
+		public String toString() {
+			return this.path.toString();
 		}
 	}
 

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer
 import org.springframework.web.method.HandlerMethod
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest
 import org.springframework.web.testfixture.method.ResolvableMethod
@@ -52,8 +53,10 @@ class ModelInitializerKotlinTests {
 		val adapterRegistry = ReactiveAdapterRegistry.getSharedInstance()
 		val resolverConfigurer = ArgumentResolverConfigurer()
 		resolverConfigurer.addCustomResolver(ModelMethodArgumentResolver(adapterRegistry))
-		val methodResolver = ControllerMethodResolver(resolverConfigurer, adapterRegistry, StaticApplicationContext(),
-			emptyList(), null, null, null)
+		val methodResolver = ControllerMethodResolver(
+            resolverConfigurer, adapterRegistry, StaticApplicationContext(),
+			RequestedContentTypeResolverBuilder().build(), emptyList(), null, null, null
+        )
 		modelInitializer = ModelInitializer(methodResolver, adapterRegistry)
 	}
 

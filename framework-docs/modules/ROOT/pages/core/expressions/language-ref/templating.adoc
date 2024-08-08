@@ -3,7 +3,7 @@
 
 Expression templates allow mixing literal text with one or more evaluation blocks.
 Each evaluation block is delimited with prefix and suffix characters that you can
-define. A common choice is to use `#{ }` as the delimiters, as the following example
+define. A common choice is to use `+#{ }+` as the delimiters, as the following example
 shows:
 
 [tabs]
@@ -32,7 +32,7 @@ Kotlin::
 ======
 
 The string is evaluated by concatenating the literal text `'random number is '` with the
-result of evaluating the expression inside the `#{ }` delimiters (in this case, the
+result of evaluating the expression inside the `+#{ }+` delimiters (in this case, the
 result of calling that `random()` method). The second argument to the `parseExpression()`
 method is of the type `ParserContext`. The `ParserContext` interface is used to influence
 how the expression is parsed in order to support the expression templating functionality.

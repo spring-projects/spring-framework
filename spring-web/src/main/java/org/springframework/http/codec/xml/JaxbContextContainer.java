@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,13 +51,29 @@ final class JaxbContextContainer {
 	private JAXBContext getJaxbContext(Class<?> clazz) throws CodecException {
 		return this.jaxbContexts.computeIfAbsent(clazz, key -> {
 			try {
-				return JAXBContext.newInstance(clazz);
+				return createJaxbContext(clazz);
 			}
 			catch (JAXBException ex) {
 				throw new CodecException(
 						"Could not create JAXBContext for class [" + clazz + "]: " + ex.getMessage(), ex);
 			}
 		});
+	}
+
+	/**
+	 * Create a {@link JAXBContext} for the given type, exposing the class
+	 * ClassLoader as current thread context ClassLoader for the time of
+	 * creating the context.
+	 */
+	private JAXBContext createJaxbContext(Class<?> clazz) throws JAXBException {
+		ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
+			return JAXBContext.newInstance(clazz);
+		}
+		finally {
+			Thread.currentThread().setContextClassLoader(currentClassLoader);
+		}
 	}
 
 }

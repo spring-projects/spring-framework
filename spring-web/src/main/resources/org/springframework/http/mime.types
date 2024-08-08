@@ -146,7 +146,7 @@ application/ipfix				ipfix
 application/java-archive			jar
 application/java-serialized-object		ser
 application/java-vm				class
-application/javascript				js
+# application/javascript				js
 # application/jose
 # application/jose+json
 # application/jrd+json
@@ -1686,7 +1686,7 @@ text/csv					csv
 # text/fwdred
 # text/grammar-ref-list
 text/html					html htm
-# text/javascript
+text/javascript				js
 # text/jcr-cnd
 # text/markdown
 # text/mizar

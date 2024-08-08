@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.aot;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +33,7 @@ import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.function.ThrowingConsumer;
 
@@ -165,7 +165,7 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 		AutowireCapableBeanFactory autowireCapableBeanFactory = (AutowireCapableBeanFactory) beanFactory;
 		int argumentCount = method.getParameterCount();
 		Object[] arguments = new Object[argumentCount];
-		Set<String> autowiredBeanNames = new LinkedHashSet<>(argumentCount);
+		Set<String> autowiredBeanNames = CollectionUtils.newLinkedHashSet(argumentCount);
 		TypeConverter typeConverter = beanFactory.getTypeConverter();
 		for (int i = 0; i < argumentCount; i++) {
 			MethodParameter parameter = new MethodParameter(method, i);

@@ -16,6 +16,7 @@
 
 package org.springframework.aot.hint.annotation;
 
+import java.io.Closeable;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -24,7 +25,10 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.aot.hint.FieldHint;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -48,6 +52,20 @@ class ReflectiveRuntimeHintsRegistrarTests {
 	private final ReflectiveRuntimeHintsRegistrar registrar = new ReflectiveRuntimeHintsRegistrar();
 
 	private final RuntimeHints runtimeHints = new RuntimeHints();
+
+	@ParameterizedTest
+	@ValueSource(classes = { SampleTypeAnnotatedBean.class, SampleFieldAnnotatedBean.class,
+			SampleConstructorAnnotatedBean.class, SampleMethodAnnotatedBean.class, SampleInterface.class,
+			SampleMethodMetaAnnotatedBeanWithAlias.class, SampleMethodAnnotatedBeanWithInterface.class })
+	void isCandidateWithMatchingAnnotatedElement(Class<?> candidate) {
+		assertThat(this.registrar.isCandidate(candidate)).isTrue();
+	}
+
+	@ParameterizedTest
+	@ValueSource(classes = { String.class, Closeable.class })
+	void isCandidateWithNonMatchingAnnotatedElement(Class<?> candidate) {
+		assertThat(this.registrar.isCandidate(candidate)).isFalse();
+	}
 
 	@Test
 	void shouldIgnoreNonAnnotatedType() {
@@ -119,6 +137,18 @@ class ReflectiveRuntimeHintsRegistrarTests {
 	}
 
 	@Test
+	void shouldProcessDifferentAnnotationsOnTypeAndField() {
+		process(SampleTypeAndFieldAnnotatedBean.class);
+		assertThat(this.runtimeHints.reflection().getTypeHint(SampleTypeAndFieldAnnotatedBean.class))
+				.satisfies(typeHint -> {
+					assertThat(typeHint.fields().map(FieldHint::getName)).containsOnly("MESSAGE");
+					assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+					assertThat(typeHint.methods()).isEmpty();
+					assertThat(typeHint.constructors()).isEmpty();
+				});
+	}
+
+	@Test
 	void shouldInvokeCustomProcessor() {
 		process(SampleCustomProcessor.class);
 		assertThat(RuntimeHintsPredicates.reflection()
@@ -173,6 +203,14 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 		void notManaged() {
 		}
+	}
+
+	@RegisterReflection(memberCategories = MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
+	static class SampleTypeAndFieldAnnotatedBean {
+
+		@Reflective
+		private static final String MESSAGE = "Hello";
+
 	}
 
 	@SuppressWarnings("unused")

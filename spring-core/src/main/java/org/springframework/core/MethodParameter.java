@@ -720,7 +720,7 @@ public class MethodParameter {
 			else if (this.executable instanceof Constructor<?> constructor) {
 				parameterNames = discoverer.getParameterNames(constructor);
 			}
-			if (parameterNames != null) {
+			if (parameterNames != null && this.parameterIndex < parameterNames.length) {
 				this.parameterName = parameterNames[this.parameterIndex];
 			}
 			this.parameterNameDiscoverer = null;

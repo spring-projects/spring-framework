@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/mvc
+			https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<!-- tag::snippet[] -->
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="objectMapper" ref="objectMapper"/>
+			</bean>
+			<bean class="org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter">
+				<property name="objectMapper" ref="xmlMapper"/>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
+		  p:indentOutput="true"
+		  p:simpleDateFormat="yyyy-MM-dd"
+		  p:modulesToInstall="com.fasterxml.jackson.module.paramnames.ParameterNamesModule"/>
+
+	<bean id="xmlMapper" parent="objectMapper" p:createXmlMapper="true"/>
+	<!-- end::snippet[] -->
+</beans>

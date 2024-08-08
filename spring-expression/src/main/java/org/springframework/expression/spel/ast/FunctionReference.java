@@ -18,6 +18,7 @@ package org.springframework.expression.spel.ast;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.StringJoiner;
@@ -145,8 +146,10 @@ public class FunctionReference extends SpelNodeImpl {
 			return new TypedValue(result, new TypeDescriptor(new MethodParameter(method, -1)).narrow(result));
 		}
 		catch (Exception ex) {
-			throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_FUNCTION_CALL,
-					this.name, ex.getMessage());
+			Throwable cause = ((ex instanceof InvocationTargetException ite && ite.getCause() != null) ?
+					ite.getCause() : ex);
+			throw new SpelEvaluationException(getStartPosition(), cause, SpelMessage.EXCEPTION_DURING_FUNCTION_CALL,
+					this.name, cause.getMessage());
 		}
 		finally {
 			if (compilable) {
@@ -240,8 +243,7 @@ public class FunctionReference extends SpelNodeImpl {
 				// to be packaged in an array, in contrast to how method invocation works with
 				// reflection.
 				int actualVarargsIndex = functionArgs.length - 1;
-				if (actualVarargsIndex >= 0 && functionArgs[actualVarargsIndex].getClass().isArray()) {
-					Object[] argsToUnpack = (Object[]) functionArgs[actualVarargsIndex];
+				if (actualVarargsIndex >= 0 && functionArgs[actualVarargsIndex] instanceof Object[] argsToUnpack) {
 					Object[] newArgs = new Object[actualVarargsIndex + argsToUnpack.length];
 					System.arraycopy(functionArgs, 0, newArgs, 0, actualVarargsIndex);
 					System.arraycopy(argsToUnpack, 0, newArgs, actualVarargsIndex, argsToUnpack.length);

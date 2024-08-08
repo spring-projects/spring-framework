@@ -142,11 +142,10 @@ public class InstanceSupplierCodeGenerator {
 		if (constructorOrFactoryMethod instanceof Constructor<?> constructor) {
 			return generateCodeForConstructor(registeredBean, constructor);
 		}
-		if (constructorOrFactoryMethod instanceof Method method) {
+		if (constructorOrFactoryMethod instanceof Method method && !KotlinDetector.isSuspendingFunction(method)) {
 			return generateCodeForFactoryMethod(registeredBean, method, instantiationDescriptor.targetClass());
 		}
-		throw new IllegalStateException(
-				"No suitable executor found for " + registeredBean.getBeanName());
+		throw new AotBeanProcessingException(registeredBean, "no suitable constructor or factory method found");
 	}
 
 	private void registerRuntimeHintsIfNecessary(RegisteredBean registeredBean, Executable constructorOrFactoryMethod) {

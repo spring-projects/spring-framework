@@ -16,11 +16,22 @@
 
 package org.springframework.test.util;
 
+import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.core.ParameterizedTypeReference;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -28,9 +39,13 @@ import static org.hamcrest.core.Is.is;
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 3.2
  */
 class JsonPathExpectationsHelperTests {
+
+	private static final Configuration JACKSON_MAPPING_CONFIGURATION = Configuration.defaultConfiguration()
+			.mappingProvider(new JacksonMappingProvider(new ObjectMapper()));
 
 	private static final String CONTENT = """
 			{
@@ -323,5 +338,42 @@ class JsonPathExpectationsHelperTests {
 						new JsonPathExpectationsHelper(expression).assertValueIsMap(CONTENT))
 				.withMessageContaining("Expected a map at JSON path \"" + expression + "\" but found: 'foo'");
 	}
+
+	@Test
+	void assertValueWithComplexTypeFallbacksOnValueType() {
+		new JsonPathExpectationsHelper("$.familyMembers[0]", JACKSON_MAPPING_CONFIGURATION)
+				.assertValue(SIMPSONS, new Member("Homer"));
+	}
+
+	@Test
+	void assertValueWithComplexTypeAndMatcher() {
+		new JsonPathExpectationsHelper("$.familyMembers[0]", JACKSON_MAPPING_CONFIGURATION)
+				.assertValue(SIMPSONS, CoreMatchers.instanceOf(Member.class), Member.class);
+	}
+
+	@Test
+	void assertValueWithComplexGenericTypeAndMatcher() {
+		JsonPathExpectationsHelper helper = new JsonPathExpectationsHelper("$.familyMembers", JACKSON_MAPPING_CONFIGURATION);
+		helper.assertValue(SIMPSONS, hasSize(5), new ParameterizedTypeReference<List<Member>>() {});
+		helper.assertValue(SIMPSONS, hasItem(new Member("Lisa")), new ParameterizedTypeReference<List<Member>>() {});
+	}
+
+	@Test
+	void evaluateJsonPathWithClassType() {
+		Member firstMember = new JsonPathExpectationsHelper("$.familyMembers[0]", JACKSON_MAPPING_CONFIGURATION)
+				.evaluateJsonPath(SIMPSONS, Member.class);
+		assertThat(firstMember).isEqualTo(new Member("Homer"));
+	}
+
+	@Test
+	void evaluateJsonPathWithGenericType() {
+		List<Member> family = new JsonPathExpectationsHelper("$.familyMembers", JACKSON_MAPPING_CONFIGURATION)
+				.evaluateJsonPath(SIMPSONS, new ParameterizedTypeReference<List<Member>>() {});
+		assertThat(family).containsExactly(new Member("Homer"), new Member("Marge"),
+				new Member("Bart"), new Member("Lisa"), new Member("Maggie"));
+	}
+
+
+	public record Member(String name) {}
 
 }

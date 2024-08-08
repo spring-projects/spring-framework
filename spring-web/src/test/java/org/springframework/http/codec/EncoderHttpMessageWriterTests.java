@@ -33,7 +33,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
@@ -197,6 +199,30 @@ class EncoderHttpMessageWriterTests {
 		assertThat((Boolean) method.invoke(writer, streamingMediaType)).isTrue();
 		assertThat((Boolean) method.invoke(writer, new MediaType(TEXT_PLAIN, Collections.singletonMap("streaming", "false")))).isFalse();
 		assertThat((Boolean) method.invoke(writer, TEXT_HTML)).isFalse();
+	}
+
+	@Test
+	public void noContentTypeWithEmptyBody() {
+		Encoder<CharSequence> encoder = CharSequenceEncoder.textPlainOnly();
+		HttpMessageWriter<CharSequence> writer = new EncoderHttpMessageWriter<>(encoder);
+		Mono<Void> writerMono = writer.write(Mono.empty(), ResolvableType.forClass(String.class),
+				null, this.response, NO_HINTS);
+
+		StepVerifier.create(writerMono)
+				.verifyComplete();
+		assertThat(response.getHeaders().getContentType()).isNull();
+	}
+
+	@Test
+	public void zeroContentLengthWithEmptyBody() {
+		Encoder<CharSequence> encoder = CharSequenceEncoder.textPlainOnly();
+		HttpMessageWriter<CharSequence> writer = new EncoderHttpMessageWriter<>(encoder);
+		Mono<Void> writerMono = writer.write(Mono.empty(), ResolvableType.forClass(String.class),
+				null, this.response, NO_HINTS);
+
+		StepVerifier.create(writerMono)
+				.verifyComplete();
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(0);
 	}
 
 	private void configureEncoder(MimeType... mimeTypes) {

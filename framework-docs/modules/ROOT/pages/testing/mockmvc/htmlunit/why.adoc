@@ -1,0 +1,203 @@
+[[mockmvc-server-htmlunit-why]]
+= Why HtmlUnit Integration?
+
+The most obvious question that comes to mind is "`Why do I need this?`" The answer is
+best found by exploring a very basic sample application. Assume you have a Spring MVC web
+application that supports CRUD operations on a `Message` object. The application also
+supports paging through all messages. How would you go about testing it?
+
+With Spring MVC Test, we can easily test if we are able to create a `Message`, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	MockHttpServletRequestBuilder createMessage = post("/messages/")
+			.param("summary", "Spring Rocks")
+			.param("text", "In case you didn't know, Spring Rocks!");
+
+	mockMvc.perform(createMessage)
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/messages/123"));
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Test
+	fun test() {
+		mockMvc.post("/messages/") {
+			param("summary", "Spring Rocks")
+			param("text", "In case you didn't know, Spring Rocks!")
+		}.andExpect {
+			status().is3xxRedirection()
+			redirectedUrl("/messages/123")
+		}
+	}
+----
+======
+
+What if we want to test the form view that lets us create the message? For example,
+assume our form looks like the following snippet:
+
+[source,xml,indent=0]
+----
+	<form id="messageForm" action="/messages/" method="post">
+		<div class="pull-right"><a href="/messages/">Messages</a></div>
+
+		<label for="summary">Summary</label>
+		<input type="text" class="required" id="summary" name="summary" value="" />
+
+		<label for="text">Message</label>
+		<textarea id="text" name="text"></textarea>
+
+		<div class="form-actions">
+			<input type="submit" value="Create" />
+		</div>
+	</form>
+----
+
+How do we ensure that our form produce the correct request to create a new message? A
+naive attempt might resemble the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	mockMvc.perform(get("/messages/form"))
+			.andExpect(xpath("//input[@name='summary']").exists())
+			.andExpect(xpath("//textarea[@name='text']").exists());
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	mockMvc.get("/messages/form").andExpect {
+		xpath("//input[@name='summary']") { exists() }
+		xpath("//textarea[@name='text']") { exists() }
+	}
+----
+======
+
+This test has some obvious drawbacks. If we update our controller to use the parameter
+`message` instead of `text`, our form test continues to pass, even though the HTML form
+is out of sync with the controller. To resolve this we can combine our two tests, as
+follows:
+
+[tabs]
+======
+Java::
++
+[[mockmvc-server-htmlunit-mock-mvc-test]]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	String summaryParamName = "summary";
+	String textParamName = "text";
+	mockMvc.perform(get("/messages/form"))
+			.andExpect(xpath("//input[@name='" + summaryParamName + "']").exists())
+			.andExpect(xpath("//textarea[@name='" + textParamName + "']").exists());
+
+	MockHttpServletRequestBuilder createMessage = post("/messages/")
+			.param(summaryParamName, "Spring Rocks")
+			.param(textParamName, "In case you didn't know, Spring Rocks!");
+
+	mockMvc.perform(createMessage)
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/messages/123"));
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val summaryParamName = "summary";
+	val textParamName = "text";
+	mockMvc.get("/messages/form").andExpect {
+		xpath("//input[@name='$summaryParamName']") { exists() }
+		xpath("//textarea[@name='$textParamName']") { exists() }
+	}
+	mockMvc.post("/messages/") {
+		param(summaryParamName, "Spring Rocks")
+		param(textParamName, "In case you didn't know, Spring Rocks!")
+	}.andExpect {
+		status().is3xxRedirection()
+		redirectedUrl("/messages/123")
+	}
+----
+======
+
+This would reduce the risk of our test incorrectly passing, but there are still some
+problems:
+
+* What if we have multiple forms on our page? Admittedly, we could update our XPath
+  expressions, but they get more complicated as we take more factors into account: Are
+  the fields the correct type? Are the fields enabled? And so on.
+* Another issue is that we are doing double the work we would expect. We must first
+  verify the view, and then we submit the view with the same parameters we just verified.
+  Ideally, this could be done all at once.
+* Finally, we still cannot account for some things. For example, what if the form has
+  JavaScript validation that we wish to test as well?
+
+The overall problem is that testing a web page does not involve a single interaction.
+Instead, it is a combination of how the user interacts with a web page and how that web
+page interacts with other resources. For example, the result of a form view is used as
+the input to a user for creating a message. In addition, our form view can potentially
+use additional resources that impact the behavior of the page, such as JavaScript
+validation.
+
+[[mockmvc-server-htmlunit-why-integration]]
+== Integration Testing to the Rescue?
+
+To resolve the issues mentioned earlier, we could perform end-to-end integration testing,
+but this has some drawbacks. Consider testing the view that lets us page through the
+messages. We might need the following tests:
+
+* Does our page display a notification to the user to indicate that no results are
+  available when the messages are empty?
+* Does our page properly display a single message?
+* Does our page properly support paging?
+
+To set up these tests, we need to ensure our database contains the proper messages. This
+leads to a number of additional challenges:
+
+* Ensuring the proper messages are in the database can be tedious. (Consider foreign key
+  constraints.)
+* Testing can become slow, since each test would need to ensure that the database is in
+  the correct state.
+* Since our database needs to be in a specific state, we cannot run tests in parallel.
+* Performing assertions on such items as auto-generated IDs, timestamps, and others can
+  be difficult.
+
+These challenges do not mean that we should abandon end-to-end integration testing
+altogether. Instead, we can reduce the number of end-to-end integration tests by
+refactoring our detailed tests to use mock services that run much faster, more reliably,
+and without side effects. We can then implement a small number of true end-to-end
+integration tests that validate simple workflows to ensure that everything works together
+properly.
+
+[[mockmvc-server-htmlunit-why-mockmvc]]
+== Enter HtmlUnit Integration
+
+So how can we achieve a balance between testing the interactions of our pages and still
+retain good performance within our test suite? The answer is: "`By integrating MockMvc
+with HtmlUnit.`"
+
+[[mockmvc-server-htmlunit-options]]
+== HtmlUnit Integration Options
+
+You have a number of options when you want to integrate MockMvc with HtmlUnit:
+
+* xref:testing/mockmvc/htmlunit/mah.adoc[MockMvc and HtmlUnit]: Use this option if you
+  want to use the raw HtmlUnit libraries.
+* xref:testing/mockmvc/htmlunit/webdriver.adoc[MockMvc and WebDriver]: Use this option to
+  ease development and reuse code between integration and end-to-end testing.
+* xref:testing/mockmvc/htmlunit/geb.adoc[MockMvc and Geb]: Use this option if you want to
+  use Groovy for testing, ease development, and reuse code between integration and
+  end-to-end testing.
+

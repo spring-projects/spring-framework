@@ -68,7 +68,9 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.jdbc.core.JdbcTemplate#update(String, Object[], int[])
  * @see org.springframework.jdbc.object.SqlUpdate#update(Object[])
  * @see org.springframework.jdbc.object.StoredProcedure#execute(java.util.Map)
+ * @deprecated as of 6.2, in favor of {@link SqlBinaryValue} and {@link SqlCharacterValue}
  */
+@Deprecated(since = "6.2")
 public class SqlLobValue implements DisposableSqlTypeValue {
 
 	@Nullable

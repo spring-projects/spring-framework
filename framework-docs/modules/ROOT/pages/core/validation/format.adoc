@@ -74,7 +74,8 @@ The `format` subpackages provide several `Formatter` implementations as a conven
 The `number` package provides `NumberStyleFormatter`, `CurrencyStyleFormatter`, and
 `PercentStyleFormatter` to format `Number` objects that use a `java.text.NumberFormat`.
 The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
-a `java.text.DateFormat`.
+a `java.text.DateFormat`, as well as a `DurationFormatter` to format `Duration` objects
+in different styles defined in the `@DurationFormat.Style` enum (see <<format-annotations-api>>).
 
 The following `DateFormatter` is an example `Formatter` implementation:
 
@@ -280,7 +281,8 @@ Kotlin::
 
 A portable format annotation API exists in the `org.springframework.format.annotation`
 package. You can use `@NumberFormat` to format `Number` fields such as `Double` and
-`Long`, and `@DateTimeFormat` to format `java.util.Date`, `java.util.Calendar`, `Long`
+`Long`, `@DurationFormat` to format `Duration` fields in ISO8601 and simplified styles,
+and `@DateTimeFormat` to format `java.util.Date`, `java.util.Calendar`, `Long`
 (for millisecond timestamps) as well as JSR-310 `java.time`.
 
 The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date

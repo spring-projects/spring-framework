@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -201,7 +202,7 @@ class MockHttpServletResponseTests {
 		response.setCharacterEncoding("UTF-8");
 		assertThat(response.getContentType()).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain;charset=UTF-8");
-		response.setCharacterEncoding(null);
+		response.setCharacterEncoding((String) null);
 		assertThat(response.getContentType()).isEqualTo("test/plain");
 		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain");
 		assertThat(response.getCharacterEncoding()).isEqualTo(WebUtils.DEFAULT_CHARACTER_ENCODING);
@@ -274,12 +275,13 @@ class MockHttpServletResponseTests {
 		cookie.setMaxAge(0);
 		cookie.setSecure(true);
 		cookie.setHttpOnly(true);
+		cookie.setAttribute("Partitioned", "");
 
 		response.addCookie(cookie);
 
 		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(("foo=bar; Path=/path; Domain=example.com; " +
 				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
-				"Secure; HttpOnly"));
+				"Secure; HttpOnly; Partitioned"));
 	}
 
 	@Test
@@ -617,6 +619,14 @@ class MockHttpServletResponseTests {
 		assertThat(response.getContentType()).isEqualTo("text/plain");
 		contentTypeHeader = response.getHeader(CONTENT_TYPE);
 		assertThat(contentTypeHeader).isEqualTo("text/plain");
+	}
+
+	@Test  // gh-33019
+	void contentAsStringEncodingWithJson() throws IOException {
+		String content = "{\"name\": \"Jürgen\"}";
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		response.getWriter().write(content);
+		assertThat(response.getContentAsString()).isEqualTo(content);
 	}
 
 }

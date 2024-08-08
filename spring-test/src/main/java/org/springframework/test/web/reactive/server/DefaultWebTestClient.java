@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.reactivestreams.Publisher;
@@ -43,9 +45,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.test.json.JsonAssert;
+import org.springframework.test.json.JsonComparator;
+import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.util.ExceptionCollector;
-import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -57,6 +61,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -71,6 +76,9 @@ import org.springframework.web.util.UriBuilderFactory;
 class DefaultWebTestClient implements WebTestClient {
 
 	private final WiretapConnector wiretapConnector;
+
+	@Nullable
+	private final JsonEncoderDecoder jsonEncoderDecoder;
 
 	private final ExchangeFunction exchangeFunction;
 
@@ -91,13 +99,15 @@ class DefaultWebTestClient implements WebTestClient {
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
-	DefaultWebTestClient(ClientHttpConnector connector,
+	DefaultWebTestClient(ClientHttpConnector connector, ExchangeStrategies exchangeStrategies,
 			Function<ClientHttpConnector, ExchangeFunction> exchangeFactory, UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders headers, @Nullable MultiValueMap<String, String> cookies,
 			Consumer<EntityExchangeResult<?>> entityResultConsumer,
 			@Nullable Duration responseTimeout, DefaultWebTestClientBuilder clientBuilder) {
 
 		this.wiretapConnector = new WiretapConnector(connector);
+		this.jsonEncoderDecoder = JsonEncoderDecoder.from(
+				exchangeStrategies.messageWriters(), exchangeStrategies.messageReaders());
 		this.exchangeFunction = exchangeFactory.apply(this.wiretapConnector);
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = headers;
@@ -362,6 +372,7 @@ class DefaultWebTestClient implements WebTestClient {
 					this.requestId, this.uriTemplate, getResponseTimeout());
 
 			return new DefaultResponseSpec(result, response,
+					DefaultWebTestClient.this.jsonEncoderDecoder,
 					DefaultWebTestClient.this.entityResultConsumer, getResponseTimeout());
 		}
 
@@ -399,6 +410,9 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final ClientResponse response;
 
+		@Nullable
+		private final JsonEncoderDecoder jsonEncoderDecoder;
+
 		private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
 
 		private final Duration timeout;
@@ -406,11 +420,13 @@ class DefaultWebTestClient implements WebTestClient {
 
 		DefaultResponseSpec(
 				ExchangeResult exchangeResult, ClientResponse response,
+				@Nullable JsonEncoderDecoder jsonEncoderDecoder,
 				Consumer<EntityExchangeResult<?>> entityResultConsumer,
 				Duration timeout) {
 
 			this.exchangeResult = exchangeResult;
 			this.response = response;
+			this.jsonEncoderDecoder = jsonEncoderDecoder;
 			this.entityResultConsumer = entityResultConsumer;
 			this.timeout = timeout;
 		}
@@ -466,7 +482,7 @@ class DefaultWebTestClient implements WebTestClient {
 			ByteArrayResource resource = this.response.bodyToMono(ByteArrayResource.class).block(this.timeout);
 			byte[] body = (resource != null ? resource.getByteArray() : null);
 			EntityExchangeResult<byte[]> entityResult = initEntityExchangeResult(body);
-			return new DefaultBodyContentSpec(entityResult);
+			return new DefaultBodyContentSpec(entityResult, this.jsonEncoderDecoder);
 		}
 
 		private <B> EntityExchangeResult<B> initEntityExchangeResult(@Nullable B body) {
@@ -625,10 +641,14 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final EntityExchangeResult<byte[]> result;
 
+		@Nullable
+		private final JsonEncoderDecoder jsonEncoderDecoder;
+
 		private final boolean isEmpty;
 
-		DefaultBodyContentSpec(EntityExchangeResult<byte[]> result) {
+		DefaultBodyContentSpec(EntityExchangeResult<byte[]> result, @Nullable JsonEncoderDecoder jsonEncoderDecoder) {
 			this.result = result;
+			this.jsonEncoderDecoder = jsonEncoderDecoder;
 			this.isEmpty = (result.getResponseBody() == null || result.getResponseBody().length == 0);
 		}
 
@@ -640,10 +660,22 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
+		@Deprecated(since = "6.2")
 		public BodyContentSpec json(String json, boolean strict) {
+			JsonCompareMode compareMode = (strict ? JsonCompareMode.STRICT : JsonCompareMode.LENIENT);
+			return json(json, compareMode);
+		}
+
+		@Override
+		public BodyContentSpec json(String expectedJson, JsonCompareMode compareMode) {
+			return json(expectedJson, JsonAssert.comparator(compareMode));
+		}
+
+		@Override
+		public BodyContentSpec json(String expectedJson, JsonComparator comparator) {
 			this.result.assertWithDiagnostics(() -> {
 				try {
-					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString(), strict);
+					comparator.assertIsMatch(expectedJson, getBodyAsString());
 				}
 				catch (Exception ex) {
 					throw new AssertionError("JSON parsing error", ex);
@@ -666,8 +698,16 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
+		public JsonPathAssertions jsonPath(String expression) {
+			return new JsonPathAssertions(this, getBodyAsString(), expression,
+					JsonPathConfigurationProvider.getConfiguration(this.jsonEncoderDecoder));
+		}
+
+		@Override
+		@SuppressWarnings("removal")
 		public JsonPathAssertions jsonPath(String expression, Object... args) {
-			return new JsonPathAssertions(this, getBodyAsString(), expression, args);
+			Assert.hasText(expression, "expression must not be null or empty");
+			return jsonPath(expression.formatted(args));
 		}
 
 		@Override
@@ -694,6 +734,20 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public EntityExchangeResult<byte[]> returnResult() {
 			return this.result;
+		}
+	}
+
+
+	private static class JsonPathConfigurationProvider {
+
+		static Configuration getConfiguration(@Nullable JsonEncoderDecoder jsonEncoderDecoder) {
+			Configuration jsonPathConfiguration = Configuration.defaultConfiguration();
+			if (jsonEncoderDecoder != null) {
+				MappingProvider mappingProvider = new EncoderDecoderMappingProvider(
+						jsonEncoderDecoder.encoder(), jsonEncoderDecoder.decoder());
+				return jsonPathConfiguration.mappingProvider(mappingProvider);
+			}
+			return jsonPathConfiguration;
 		}
 	}
 

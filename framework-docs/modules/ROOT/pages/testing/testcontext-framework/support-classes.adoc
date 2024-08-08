@@ -531,12 +531,8 @@ to the `RepetitionInfo`.
 [[testcontext-junit-jupiter-nested-test-configuration]]
 === `@Nested` test class configuration
 
-The _Spring TestContext Framework_ has supported the use of test-related annotations on
-`@Nested` test classes in JUnit Jupiter since Spring Framework 5.0; however, until Spring
-Framework 5.3 class-level test configuration annotations were not _inherited_ from
-enclosing classes like they are from superclasses.
-
-Spring Framework 5.3 introduced first-class support for inheriting test class
+The _Spring TestContext Framework_ supports the use of test-related annotations on `@Nested`
+test classes in JUnit Jupiter, including first-class support for inheriting test class
 configuration from enclosing classes, and such configuration will be inherited by
 default. To change from the default `INHERIT` mode to `OVERRIDE` mode, you may annotate
 an individual `@Nested` test class with

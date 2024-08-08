@@ -1,0 +1,28 @@
+[[mockmvc-server-filters]]
+= Filter Registrations
+:page-section-summary-toc: 1
+
+When setting up a `MockMvc` instance, you can register one or more Servlet `Filter`
+instances, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	mockMvc = standaloneSetup(new PersonController()).addFilters(new CharacterEncodingFilter()).build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+----
+======
+
+Registered filters are invoked through the `MockFilterChain` from `spring-test`, and the
+last filter delegates to the `DispatcherServlet`.
+
+

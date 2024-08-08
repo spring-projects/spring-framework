@@ -100,7 +100,8 @@ class MethodValidationProxyTests {
 	}
 
 	@Test  // gh-29782
-	void testMethodValidationPostProcessorForInterfaceOnlyProxy() {
+	@SuppressWarnings("unchecked")
+	public void testMethodValidationPostProcessorForInterfaceOnlyProxy() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(MethodValidationPostProcessor.class);
 		context.registerBean(MyValidInterface.class, () ->

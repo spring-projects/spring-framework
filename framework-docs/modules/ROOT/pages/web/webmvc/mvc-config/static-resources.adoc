@@ -13,52 +13,9 @@ expiration to ensure maximum use of the browser cache and a reduction in HTTP re
 made by the browser. The `Last-Modified` information is deduced from `Resource#lastModified`
 so that HTTP conditional requests are supported with `"Last-Modified"` headers.
 
-The following listing shows how to do so with Java configuration:
+The following listing shows how to do so:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim",role="primary"]
-----
-	@Configuration
-	@EnableWebMvc
-	public class WebConfig implements WebMvcConfigurer {
-
-		@Override
-		public void addResourceHandlers(ResourceHandlerRegistry registry) {
-			registry.addResourceHandler("/resources/**")
-					.addResourceLocations("/public", "classpath:/static/")
-					.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
-----
-	@Configuration
-	@EnableWebMvc
-	class WebConfig : WebMvcConfigurer {
-
-		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-			registry.addResourceHandler("/resources/**")
-					.addResourceLocations("/public", "classpath:/static/")
-					.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)))
-		}
-	}
-----
-======
-
-The following example shows how to achieve the same configuration in XML:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<mvc:resources mapping="/resources/**"
-		location="/public, classpath:/static/"
-		cache-period="31556926" />
-----
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
 See also
 xref:web/webmvc/mvc-caching.adoc#mvc-caching-static-resources[HTTP caching support for static resources].
@@ -73,60 +30,9 @@ computed from the content, a fixed application version, or other. A
 `ContentVersionStrategy` (MD5 hash) is a good choice -- with some notable exceptions, such as
 JavaScript resources used with a module loader.
 
-The following example shows how to use `VersionResourceResolver` in Java configuration:
+The following example shows how to use `VersionResourceResolver`:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim",role="primary"]
-----
-	@Configuration
-	@EnableWebMvc
-	public class WebConfig implements WebMvcConfigurer {
-
-		@Override
-		public void addResourceHandlers(ResourceHandlerRegistry registry) {
-			registry.addResourceHandler("/resources/**")
-					.addResourceLocations("/public/")
-					.resourceChain(true)
-					.addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
-----
-	@Configuration
-	@EnableWebMvc
-	class WebConfig : WebMvcConfigurer {
-
-		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-			registry.addResourceHandler("/resources/**")
-					.addResourceLocations("/public/")
-					.resourceChain(true)
-					.addResolver(VersionResourceResolver().addContentVersionStrategy("/**"))
-		}
-	}
-----
-======
-
-The following example shows how to achieve the same configuration in XML:
-
-[source,xml,indent=0,subs="verbatim"]
-----
-<mvc:resources mapping="/resources/**" location="/public/">
-	<mvc:resource-chain resource-cache="true">
-		<mvc:resolvers>
-			<mvc:version-resolver>
-				<mvc:content-version-strategy patterns="/**"/>
-			</mvc:version-resolver>
-		</mvc:resolvers>
-	</mvc:resource-chain>
-</mvc:resources>
-----
+include-code::./VersionedConfiguration[tag=snippet,indent=0]
 
 You can then use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
 transformers -- for example, to insert versions. The MVC configuration provides a `ResourceUrlProvider`

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.Nullable;
 
 /**
- * {@code @TestConstructor} is a type-level annotation that is used to configure
- * how the parameters of a test class constructor are autowired from components
- * in the test's {@link org.springframework.context.ApplicationContext
+ * {@code @TestConstructor} is an annotation that can be applied to a test class
+ * to configure how the parameters of a test class constructor are autowired from
+ * components in the test's {@link org.springframework.context.ApplicationContext
  * ApplicationContext}.
  *
  * <p>If {@code @TestConstructor} is not <em>present</em> or <em>meta-present</em>
@@ -46,8 +46,8 @@ import org.springframework.lang.Nullable;
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>.
  *
- * <p>As of Spring Framework 5.2, this annotation is only supported in conjunction
- * with the {@link org.springframework.test.context.junit.jupiter.SpringExtension
+ * <p>This annotation is only supported in conjunction with the
+ * {@link org.springframework.test.context.junit.jupiter.SpringExtension
  * SpringExtension} for use with JUnit Jupiter. Note that the {@code SpringExtension} is
  * often automatically registered for you &mdash; for example, when using annotations such as
  * {@link org.springframework.test.context.junit.jupiter.SpringJUnitConfig @SpringJUnitConfig} and

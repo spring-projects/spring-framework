@@ -94,6 +94,17 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokePrivateSuspendingFunction() {
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("privateSuspendingFunction", String::class.java, Continuation::class.java)
+		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo")
+		Assertions.assertThat(publisher).isInstanceOf(Mono::class.java)
+		StepVerifier.create(publisher)
+			.expectNext("foo")
+			.expectComplete()
+			.verify()
+	}
+
+	@Test
 	fun invokeNonSuspendingFunction() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("nonSuspendingFunction", String::class.java)
 		Assertions.assertThatIllegalArgumentException().isThrownBy { CoroutinesUtils.invokeSuspendingFunction(method, this, "foo") }
@@ -189,6 +200,15 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithValueClassReturnValue() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassReturnValue") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
+		}
+	}
+
+	@Test
 	fun invokeSuspendingFunctionWithValueClassWithInitParameter() {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassWithInit") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "", null) as Mono
@@ -252,6 +272,11 @@ class CoroutinesUtilsTests {
 		return value
 	}
 
+	private suspend fun privateSuspendingFunction(value: String): String {
+		delay(1)
+		return value
+	}
+
 	suspend fun suspendingFunctionWithNullable(value: String?): String? {
 		delay(1)
 		return value
@@ -292,6 +317,11 @@ class CoroutinesUtilsTests {
 	suspend fun suspendingFunctionWithValueClass(value: ValueClass): String {
 		delay(1)
 		return value.value
+	}
+
+	suspend fun suspendingFunctionWithValueClassReturnValue(): ValueClass {
+		delay(1)
+		return ValueClass("foo")
 	}
 
 	suspend fun suspendingFunctionWithValueClassWithInit(value: ValueClassWithInit): String {

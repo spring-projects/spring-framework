@@ -42,6 +42,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.server.reactive.AbstractServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -137,6 +138,10 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.formDataMono = initFormData(request, codecConfigurer, getLogPrefix());
 		this.multipartDataMono = initMultipartData(codecConfigurer, getLogPrefix());
 		this.applicationContext = applicationContext;
+
+		if (request instanceof AbstractServerHttpRequest abstractServerHttpRequest) {
+			abstractServerHttpRequest.setAttributesSupplier(() -> this.attributes);
+		}
 	}
 
 	private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request,

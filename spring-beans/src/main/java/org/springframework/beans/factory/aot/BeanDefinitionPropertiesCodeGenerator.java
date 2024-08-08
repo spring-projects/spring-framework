@@ -115,6 +115,8 @@ class BeanDefinitionPropertiesCodeGenerator {
 		CodeBlock.Builder code = CodeBlock.builder();
 		addStatementForValue(code, beanDefinition, BeanDefinition::isPrimary,
 				"$L.setPrimary($L)");
+		addStatementForValue(code, beanDefinition, BeanDefinition::isFallback,
+				"$L.setFallback($L)");
 		addStatementForValue(code, beanDefinition, BeanDefinition::getScope,
 				this::hasScope, "$L.setScope($S)");
 		addStatementForValue(code, beanDefinition, BeanDefinition::getDependsOn,

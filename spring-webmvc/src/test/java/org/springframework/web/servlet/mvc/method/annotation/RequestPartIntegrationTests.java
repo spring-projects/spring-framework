@@ -245,7 +245,6 @@ class RequestPartIntegrationTests {
 		private String name;
 
 		public TestData() {
-			super();
 		}
 
 		public TestData(String name) {

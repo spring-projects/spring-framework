@@ -103,7 +103,7 @@ class SimpAttributesContextHolderTests {
 	@Test
 	void setAttributesFromMessageWithMissingSessionId() {
 		assertThatIllegalStateException().isThrownBy(() ->
-				SimpAttributesContextHolder.setAttributesFromMessage(new GenericMessage<Object>("")))
+				SimpAttributesContextHolder.setAttributesFromMessage(new GenericMessage<>("")))
 			.withMessageStartingWith("No session id in");
 	}
 

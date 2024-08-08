@@ -1,9 +1,9 @@
 [[testcontext-test-execution-events]]
 = Test Execution Events
 
-The `EventPublishingTestExecutionListener` introduced in Spring Framework 5.2 offers an
-alternative approach to implementing a custom `TestExecutionListener`. Components in the
-test's `ApplicationContext` can listen to the following events published by the
+The `EventPublishingTestExecutionListener` offers an alternative approach to implementing
+a custom `TestExecutionListener`. Components in the test's `ApplicationContext` can
+listen to the following events published by the
 `EventPublishingTestExecutionListener`, each of which corresponds to a method in the
 `TestExecutionListener` API.
 

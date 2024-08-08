@@ -1,10 +1,10 @@
 [[spring-testing-annotation-webappconfiguration]]
 = `@WebAppConfiguration`
 
-`@WebAppConfiguration` is a class-level annotation that you can use to declare that the
-`ApplicationContext` loaded for an integration test should be a `WebApplicationContext`.
-The mere presence of `@WebAppConfiguration` on a test class ensures that a
-`WebApplicationContext` is loaded for the test, using the default value of
+`@WebAppConfiguration` is an annotation that can be applied to a test class to declare
+that the `ApplicationContext` loaded for an integration test should be a
+`WebApplicationContext`. The mere presence of `@WebAppConfiguration` on a test class
+ensures that a `WebApplicationContext` is loaded for the test, using the default value of
 `"file:src/main/webapp"` for the path to the root of the web application (that is, the
 resource base path). The resource base path is used behind the scenes to create a
 `MockServletContext`, which serves as the `ServletContext` for the test's

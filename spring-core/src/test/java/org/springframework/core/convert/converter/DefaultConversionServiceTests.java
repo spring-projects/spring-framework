@@ -604,6 +604,12 @@ class DefaultConversionServiceTests {
 	}
 
 	@Test
+	void convertIntArrayToStringArray() {
+		String[] result = conversionService.convert(new int[] {1, 2, 3}, String[].class);
+		assertThat(result).containsExactly("1", "2", "3");
+	}
+
+	@Test
 	void convertIntegerArrayToIntegerArray() {
 		Integer[] result = conversionService.convert(new Integer[] {1, 2, 3}, Integer[].class);
 		assertThat(result).containsExactly(1, 2, 3);
@@ -613,6 +619,12 @@ class DefaultConversionServiceTests {
 	void convertIntegerArrayToIntArray() {
 		int[] result = conversionService.convert(new Integer[] {1, 2, 3}, int[].class);
 		assertThat(result).containsExactly(1, 2, 3);
+	}
+
+	@Test
+	void convertIntArrayToIntegerArray() {
+		Integer[] result = conversionService.convert(new int[] {1, 2}, Integer[].class);
+		assertThat(result).containsExactly(1, 2);
 	}
 
 	@Test
@@ -627,16 +639,44 @@ class DefaultConversionServiceTests {
 		assertThat(result).containsExactly(1, 2, 3);
 	}
 
+	@Test  // gh-33212
+	void convertIntArrayToObjectArray() {
+		Object[] result = conversionService.convert(new int[] {1, 2}, Object[].class);
+		assertThat(result).containsExactly(1, 2);
+	}
+
 	@Test
-	void convertByteArrayToWrapperArray() {
+	void convertIntArrayToFloatArray() {
+		Float[] result = conversionService.convert(new int[] {1, 2}, Float[].class);
+		assertThat(result).containsExactly(1.0F, 2.0F);
+	}
+
+	@Test
+	void convertIntArrayToPrimitiveFloatArray() {
+		float[] result = conversionService.convert(new int[] {1, 2}, float[].class);
+		assertThat(result).containsExactly(1.0F, 2.0F);
+	}
+
+	@Test
+	void convertPrimitiveByteArrayToByteWrapperArray() {
 		byte[] byteArray = {1, 2, 3};
 		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
 		assertThat(converted).isEqualTo(new Byte[]{1, 2, 3});
 	}
 
-	@Test
-	void convertArrayToArrayAssignable() {
-		int[] result = conversionService.convert(new int[] {1, 2, 3}, int[].class);
+	@Test  // gh-14200, SPR-9566
+	void convertPrimitiveByteArrayToPrimitiveByteArray() {
+		byte[] byteArray = new byte[] {1, 2, 3};
+		byte[] result = conversionService.convert(byteArray, byte[].class);
+		assertThat(result).isSameAs(byteArray);
+		assertThat(result).containsExactly(1, 2, 3);
+	}
+
+	@Test  // gh-14200, SPR-9566
+	void convertIntArrayToIntArray() {
+		int[] intArray = new int[] {1, 2, 3};
+		int[] result = conversionService.convert(intArray, int[].class);
+		assertThat(result).isSameAs(intArray);
 		assertThat(result).containsExactly(1, 2, 3);
 	}
 

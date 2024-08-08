@@ -140,11 +140,15 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public void setContentLengthLong(long len) {
-		if (len > Integer.MAX_VALUE) {
+		setContentLength(toContentLengthInt(len));
+	}
+
+	private int toContentLengthInt(long contentLength) {
+		if (contentLength > Integer.MAX_VALUE) {
 			throw new IllegalArgumentException("Content-Length exceeds ContentCachingResponseWrapper's maximum (" +
-					Integer.MAX_VALUE + "): " + len);
+					Integer.MAX_VALUE + "): " + contentLength);
 		}
-		setContentLength((int) len);
+		return (int) contentLength;
 	}
 
 	@Override
@@ -160,7 +164,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	public void setHeader(String name, String value) {
 		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			this.contentLength = Integer.valueOf(value);
+			this.contentLength = toContentLengthInt(Long.parseLong(value));
 		}
 		else {
 			super.setHeader(name, value);
@@ -170,7 +174,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	public void addHeader(String name, String value) {
 		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			this.contentLength = Integer.valueOf(value);
+			this.contentLength = toContentLengthInt(Long.parseLong(value));
 		}
 		else {
 			super.addHeader(name, value);
@@ -180,7 +184,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	public void setIntHeader(String name, int value) {
 		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			this.contentLength = Integer.valueOf(value);
+			this.contentLength = value;
 		}
 		else {
 			super.setIntHeader(name, value);
@@ -190,7 +194,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	public void addIntHeader(String name, int value) {
 		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			this.contentLength = Integer.valueOf(value);
+			this.contentLength = value;
 		}
 		else {
 			super.addIntHeader(name, value);

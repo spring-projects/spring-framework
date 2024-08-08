@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -545,7 +546,7 @@ public class TypeDescriptor implements Serializable {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (Annotation ann : getAnnotations()) {
-			builder.append('@').append(ann.annotationType().getName()).append(' ');
+			builder.append('@').append(getName(ann.annotationType())).append(' ');
 		}
 		builder.append(getResolvableType());
 		return builder.toString();
@@ -562,6 +563,7 @@ public class TypeDescriptor implements Serializable {
 	 * @return the type descriptor
 	 */
 	@Nullable
+	@Contract("!null -> !null; null -> null")
 	public static TypeDescriptor forObject(@Nullable Object source) {
 		return (source != null ? valueOf(source.getClass()) : null);
 	}
@@ -642,6 +644,7 @@ public class TypeDescriptor implements Serializable {
 	 * @since 3.2.1
 	 */
 	@Nullable
+	@Contract("!null -> !null; null -> null")
 	public static TypeDescriptor array(@Nullable TypeDescriptor elementTypeDescriptor) {
 		if (elementTypeDescriptor == null) {
 			return null;
@@ -731,6 +734,11 @@ public class TypeDescriptor implements Serializable {
 	@Nullable
 	public static TypeDescriptor nested(Property property, int nestingLevel) {
 		return new TypeDescriptor(property).nested(nestingLevel);
+	}
+
+	private static String getName(Class<?> clazz) {
+		String canonicalName = clazz.getCanonicalName();
+		return (canonicalName != null ? canonicalName : clazz.getName());
 	}
 
 

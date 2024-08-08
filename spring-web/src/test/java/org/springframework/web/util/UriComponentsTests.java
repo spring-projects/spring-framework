@@ -27,9 +27,9 @@ import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 /**
@@ -159,10 +159,9 @@ class UriComponentsTests {
 
 	@Test  // gh-28521
 	void invalidPort() {
-		assertExceptionsForInvalidPort(fromUriString("https://example.com:XXX/bar").build());
+		assertThatExceptionOfType(InvalidUrlException.class)
+				.isThrownBy(() -> fromUriString("https://example.com:XXX/bar"));
 		assertExceptionsForInvalidPort(fromUriString("https://example.com/bar").port("XXX").build());
-		assertExceptionsForInvalidPort(fromHttpUrl("https://example.com:XXX/bar").build());
-		assertExceptionsForInvalidPort(fromHttpUrl("https://example.com/bar").port("XXX").build());
 	}
 
 	private void assertExceptionsForInvalidPort(UriComponents uriComponents) {
@@ -243,7 +242,6 @@ class UriComponentsTests {
 		UriComponents uric2 = UriComponentsBuilder.fromUriString(baseUrl + "/foo/bar").build();
 		UriComponents uric3 = UriComponentsBuilder.fromUriString(baseUrl + "/foo/bin").build();
 
-		assertThat(uric1).isInstanceOf(OpaqueUriComponents.class);
 		assertThat(uric1).isEqualTo(uric1);
 		assertThat(uric1).isEqualTo(uric2);
 		assertThat(uric1).isNotEqualTo(uric3);

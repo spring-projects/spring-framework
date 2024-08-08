@@ -37,23 +37,7 @@ declarations to it.
 To enable support for `@JmsListener` annotations, you can add `@EnableJms` to one of
 your `@Configuration` classes, as the following example shows:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableJms
-	public class AppConfig {
-
-		@Bean
-		public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
-			DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-			factory.setConnectionFactory(connectionFactory());
-			factory.setDestinationResolver(destinationResolver());
-			factory.setSessionTransacted(true);
-			factory.setConcurrency("3-10");
-			return factory;
-		}
-	}
-----
+include-code::./JmsConfiguration[tag=snippet,indent=0]
 
 By default, the infrastructure looks for a bean named `jmsListenerContainerFactory`
 as the source for the factory to use to create message listener containers. In this
@@ -66,22 +50,6 @@ The default is required only if at least one endpoint is registered without a sp
 container factory. See the javadoc of classes that implement
 {spring-framework-api}/jms/annotation/JmsListenerConfigurer.html[`JmsListenerConfigurer`]
 for details and examples.
-
-If you prefer xref:integration/jms/namespace.adoc[XML configuration], you can use the `<jms:annotation-driven>`
-element, as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<jms:annotation-driven/>
-
-	<bean id="jmsListenerContainerFactory"
-			class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
-		<property name="connectionFactory" ref="connectionFactory"/>
-		<property name="destinationResolver" ref="destinationResolver"/>
-		<property name="sessionTransacted" value="true"/>
-		<property name="concurrency" value="3-10"/>
-	</bean>
-----
 
 
 [[jms-annotated-programmatic-registration]]

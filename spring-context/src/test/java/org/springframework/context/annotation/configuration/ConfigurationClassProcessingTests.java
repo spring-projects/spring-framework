@@ -143,6 +143,11 @@ class ConfigurationClassProcessingTests {
 				initBeanFactory(ConfigWithFinalBean.class));
 	}
 
+	@Test
+	void finalBeanMethodWithoutProxy() {
+		initBeanFactory(ConfigWithFinalBeanWithoutProxy.class);
+	}
+
 	@Test  // gh-31007
 	void voidBeanMethod() {
 		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
@@ -431,6 +436,15 @@ class ConfigurationClassProcessingTests {
 
 	@Configuration
 	static class ConfigWithFinalBean {
+
+		@Bean public final TestBean testBean() {
+			return new TestBean();
+		}
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	static class ConfigWithFinalBeanWithoutProxy {
 
 		@Bean public final TestBean testBean() {
 			return new TestBean();

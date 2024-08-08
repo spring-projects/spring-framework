@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.aopalliance.aop.Advice;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -52,7 +51,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 	@Nullable
 	private transient volatile Advice advice;
 
-	private transient volatile Object adviceMonitor = new Object();
+	private transient Object adviceMonitor = new Object();
 
 
 	/**
@@ -78,16 +77,6 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		resetAdviceMonitor();
-	}
-
-	private void resetAdviceMonitor() {
-		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
-			this.adviceMonitor = cbf.getSingletonMutex();
-		}
-		else {
-			this.adviceMonitor = new Object();
-		}
 	}
 
 	/**
@@ -118,9 +107,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 			return advice;
 		}
 		else {
-			// No singleton guarantees from the factory -> let's lock locally but
-			// reuse the factory's singleton lock, just in case a lazy dependency
-			// of our advice bean happens to trigger the singleton lock implicitly...
+			// No singleton guarantees from the factory -> let's lock locally.
 			synchronized (this.adviceMonitor) {
 				advice = this.advice;
 				if (advice == null) {
@@ -155,7 +142,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 		ois.defaultReadObject();
 
 		// Initialize transient fields.
-		resetAdviceMonitor();
+		this.adviceMonitor = new Object();
 	}
 
 }

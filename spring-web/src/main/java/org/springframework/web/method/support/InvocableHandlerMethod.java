@@ -299,13 +299,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 		@Nullable
 		@SuppressWarnings({"deprecation", "DataFlowIssue"})
-		public static Object invokeFunction(Method method, Object target, Object[] args) throws InvocationTargetException, IllegalAccessException {
+		public static Object invokeFunction(Method method, Object target, Object[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			// For property accessors
 			if (function == null) {
 				return method.invoke(target, args);
 			}
-			if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
+			if (!KCallablesJvm.isAccessible(function)) {
 				KCallablesJvm.setAccessible(function, true);
 			}
 			Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
@@ -332,6 +332,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 			}
 			Object result = function.callBy(argMap);
+			if (result != null && KotlinDetector.isInlineClass(result.getClass())) {
+				return result.getClass().getDeclaredMethod("unbox-impl").invoke(result);
+			}
 			return (result == Unit.INSTANCE ? null : result);
 		}
 	}

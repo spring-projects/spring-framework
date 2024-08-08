@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.beans.PropertyEditor;
+import java.util.concurrent.Executor;
 
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
@@ -145,6 +146,22 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 */
 	@Nullable
 	BeanExpressionResolver getBeanExpressionResolver();
+
+	/**
+	 * Set the {@link Executor} (possibly a {@link org.springframework.core.task.TaskExecutor})
+	 * for background bootstrapping.
+	 * @since 6.2
+	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#setBackgroundInit
+	 */
+	void setBootstrapExecutor(@Nullable Executor executor);
+
+	/**
+	 * Return the {@link Executor} (possibly a {@link org.springframework.core.task.TaskExecutor})
+	 * for background bootstrapping, if any.
+	 * @since 6.2
+	 */
+	@Nullable
+	Executor getBootstrapExecutor();
 
 	/**
 	 * Specify a {@link ConversionService} to use for converting

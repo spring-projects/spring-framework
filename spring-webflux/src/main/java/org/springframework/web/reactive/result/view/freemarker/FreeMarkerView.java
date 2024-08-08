@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import freemarker.core.Environment;
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
@@ -89,7 +90,7 @@ import org.springframework.web.server.ServerWebExchange;
  * sets the supported media type to {@code "text/html;charset=UTF-8"} by default.
  * Thus, those default values are likely suitable for most applications.
  *
- * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.21 or higher.
+ * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.33 or higher.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -157,7 +158,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * <p>If the encoding is not explicitly set here or in the FreeMarker
 	 * {@code Configuration}, FreeMarker will read template files using the platform
 	 * file encoding (defined by the JVM system property {@code file.encoding})
-	 * or {@code "utf-8"} if the platform file encoding is undefined. Note,
+	 * or UTF-8 if the platform file encoding is undefined. Note,
 	 * however, that {@link FreeMarkerConfigurer} sets the default encoding in the
 	 * FreeMarker {@code Configuration} to "UTF-8".
 	 * <p>It's recommended to specify the encoding in the FreeMarker {@code Configuration}
@@ -167,10 +168,22 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * process. See the note in the {@linkplain FreeMarkerView class-level
 	 * documentation} for details.
 	 * @see freemarker.template.Configuration#setDefaultEncoding
+	 * @see #setCharset(Charset)
 	 * @see #getEncoding()
 	 */
 	public void setEncoding(@Nullable String encoding) {
 		this.encoding = encoding;
+	}
+
+	/**
+	 * Set the {@link Charset} used to decode byte sequences to character sequences
+	 * when reading the FreeMarker template file for this view.
+	 * <p>See {@link #setEncoding(String)} for details.
+	 * @since 6.2
+	 * @see java.nio.charset.StandardCharsets
+	 */
+	public void setCharset(@Nullable Charset charset) {
+		this.encoding = (charset != null ? charset.name() : null);
 	}
 
 	/**
@@ -235,24 +248,9 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * multiple templates to be rendered into a single view.
 	 */
 	@Override
-	public boolean checkResourceExists(Locale locale) throws Exception {
-		try {
-			// Check that we can get the template, even if we might subsequently get it again.
-			getTemplate(locale);
-			return true;
-		}
-		catch (FileNotFoundException ex) {
-			// Allow for ViewResolver chaining...
-			return false;
-		}
-		catch (ParseException ex) {
-			throw new ApplicationContextException(
-					"Failed to parse FreeMarker template for URL [" + getUrl() + "]", ex);
-		}
-		catch (IOException ex) {
-			throw new ApplicationContextException(
-					"Could not load FreeMarker template for URL [" + getUrl() + "]", ex);
-		}
+	public boolean checkResourceExists(Locale locale) {
+		throw new UnsupportedOperationException(
+				"This should never be called as we override resourceExists returning Mono<Boolean>");
 	}
 
 	/**
@@ -321,7 +319,9 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 									FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
 									Charset charset = getCharset(contentType);
 									Writer writer = new OutputStreamWriter(bos, charset);
-									template.process(freeMarkerModel, writer);
+									Environment env = template.createProcessingEnvironment(freeMarkerModel, writer);
+									env.setOutputEncoding(charset.name());
+									env.process();
 									byte[] bytes = bos.toByteArrayUnsafe();
 									DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
 									return Mono.just(buffer);
@@ -364,22 +364,9 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Get the FreeMarker template for the given locale, to be rendered by this view.
-	 * <p>By default, the template specified by the "url" bean property will be retrieved.
-	 * @param locale the current locale
-	 * @return the FreeMarker template to render
-	 * @deprecated since 6.1, in favor of {@link #lookupTemplate(Locale)}, to be
-	 * removed in 6.2
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	protected Template getTemplate(Locale locale) throws IOException {
-		return (getEncoding() != null ?
-				obtainConfiguration().getTemplate(getUrl(), locale, getEncoding()) :
-				obtainConfiguration().getTemplate(getUrl(), locale));
-	}
-
-	/**
-	 * Retrieve the FreeMarker template for the given locale, to be rendered by this view.
+	 * Retrieve the FreeMarker {@link Template} to be rendered by this view, for
+	 * the specified locale and using the {@linkplain #setEncoding(String) configured
+	 * encoding} if set.
 	 * <p>By default, the template specified by the "url" bean property will be retrieved,
 	 * and the returned mono will subscribe on the
 	 * {@linkplain Schedulers#boundedElastic() bounded elastic scheduler} as template

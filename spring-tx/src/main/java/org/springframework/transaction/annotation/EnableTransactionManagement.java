@@ -195,4 +195,25 @@ public @interface EnableTransactionManagement {
 	 */
 	int order() default Ordered.LOWEST_PRECEDENCE;
 
+	/**
+	 * Indicate the rollback behavior for rule-based transactions without
+	 * custom rollback rules: default is rollback on unchecked exception,
+	 * this can be switched to rollback on any exception (including checked).
+	 * <p>Note that transaction-specific rollback rules override the default
+	 * behavior but retain the chosen default for unspecified exceptions.
+	 * This is the case for Spring's {@link Transactional} as well as JTA's
+	 * {@link jakarta.transaction.Transactional} when used with Spring here.
+	 * <p>Unless you rely on EJB-style business exceptions with commit behavior,
+	 * it is advisable to switch to {@link RollbackOn#ALL_EXCEPTIONS} for a
+	 * consistent rollback even in case of a (potentially accidental) checked
+	 * exception. Also, it is advisable to make that switch for Kotlin-based
+	 * applications where there is no enforcement of checked exceptions at all.
+	 * @since 6.2
+	 * @see Transactional#rollbackFor()
+	 * @see Transactional#noRollbackFor()
+	 * @see jakarta.transaction.Transactional#rollbackOn()
+	 * @see jakarta.transaction.Transactional#dontRollbackOn()
+	 */
+	RollbackOn rollbackOn() default RollbackOn.RUNTIME_EXCEPTIONS;
+
 }

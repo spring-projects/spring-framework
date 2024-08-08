@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,41 +37,45 @@ class ExtendedServletRequestDataBinderTests {
 
 	private MockHttpServletRequest request;
 
+
 	@BeforeEach
 	void setup() {
 		this.request = new MockHttpServletRequest();
 	}
 
+
 	@Test
 	void createBinder() {
-		Map<String, String> uriTemplateVars = new HashMap<>();
-		uriTemplateVars.put("name", "nameValue");
-		uriTemplateVars.put("age", "25");
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+		request.setAttribute(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+				Map.of("name", "John", "age", "25"));
+
+		request.addHeader("Some-Int-Array", "1");
+		request.addHeader("Some-Int-Array", "2");
 
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
 		binder.bind(request);
 
-		assertThat(target.getName()).isEqualTo("nameValue");
+		assertThat(target.getName()).isEqualTo("John");
 		assertThat(target.getAge()).isEqualTo(25);
+		assertThat(target.getSomeIntArray()).containsExactly(1, 2);
 	}
 
 	@Test
-	void uriTemplateVarAndRequestParam() {
-		request.addParameter("age", "35");
+	void uriVarsAndHeadersAddedConditionally() {
+		request.addParameter("name", "John");
+		request.addParameter("age", "25");
 
-		Map<String, String> uriTemplateVars = new HashMap<>();
-		uriTemplateVars.put("name", "nameValue");
-		uriTemplateVars.put("age", "25");
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+		request.addHeader("name", "Johnny");
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("age", "26"));
 
 		TestBean target = new TestBean();
 		ServletRequestDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
 		binder.bind(request);
 
-		assertThat(target.getName()).isEqualTo("nameValue");
-		assertThat(target.getAge()).isEqualTo(35);
+		assertThat(target.getName()).isEqualTo("John");
+		assertThat(target.getAge()).isEqualTo(25);
 	}
 
 	@Test

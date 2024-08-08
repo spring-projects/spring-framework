@@ -128,7 +128,8 @@ class HandlerMethodValidationExceptionTests {
 							}
 							else {
 								MessageSourceResolvable error = new DefaultMessageSourceResolvable("Size");
-								return new ParameterValidationResult(param, "123", List.of(error), null, null, null);
+								return new ParameterValidationResult(
+										param, "123", List.of(error), null, null, null, (e, t) -> null);
 							}
 						})
 						.toList());

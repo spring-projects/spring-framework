@@ -544,6 +544,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @return the original class, or a primitive wrapper for the original primitive type
 	 */
+	@SuppressWarnings("NullAway")
 	public static Class<?> resolvePrimitiveIfNecessary(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isPrimitive() && clazz != void.class ? primitiveTypeToWrapperMap.get(clazz) : clazz);
@@ -1019,10 +1020,10 @@ public abstract class ClassUtils {
 		}
 		Class<?> clazz = value.getClass();
 		if (Proxy.isProxyClass(clazz)) {
-			String prefix = clazz.getName() + " implementing ";
+			String prefix = clazz.getTypeName() + " implementing ";
 			StringJoiner result = new StringJoiner(",", prefix, "");
 			for (Class<?> ifc : clazz.getInterfaces()) {
-				result.add(ifc.getName());
+				result.add(ifc.getTypeName());
 			}
 			return result.toString();
 		}
@@ -1415,25 +1416,23 @@ public abstract class ClassUtils {
 		}
 		// Try cached version of method in its declaring class
 		Method result = interfaceMethodCache.computeIfAbsent(method,
-				key -> findInterfaceMethodIfPossible(key, key.getDeclaringClass(), Object.class));
+				key -> findInterfaceMethodIfPossible(key, key.getParameterTypes(), key.getDeclaringClass(),
+						Object.class));
 		if (result == method && targetClass != null) {
 			// No interface method found yet -> try given target class (possibly a subclass of the
 			// declaring class, late-binding a base class method to a subclass-declared interface:
 			// see e.g. HashMap.HashIterator.hasNext)
-			result = findInterfaceMethodIfPossible(method, targetClass, method.getDeclaringClass());
+			result = findInterfaceMethodIfPossible(method, method.getParameterTypes(), targetClass,
+					method.getDeclaringClass());
 		}
 		return result;
 	}
 
-	private static Method findInterfaceMethodIfPossible(Method method, Class<?> startClass, Class<?> endClass) {
-		Class<?>[] parameterTypes = null;
+	private static Method findInterfaceMethodIfPossible(Method method, Class<?>[] parameterTypes,
+			Class<?> startClass, Class<?> endClass) {
+
 		Class<?> current = startClass;
 		while (current != null && current != endClass) {
-			if (parameterTypes == null) {
-				// Since Method#getParameterTypes() clones the array, we lazily retrieve
-				// and cache parameter types to avoid cloning the array multiple times.
-				parameterTypes = method.getParameterTypes();
-			}
 			for (Class<?> ifc : current.getInterfaces()) {
 				try {
 					return ifc.getMethod(method.getName(), parameterTypes);

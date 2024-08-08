@@ -36,7 +36,6 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -194,15 +193,6 @@ class DefaultHandlerExceptionResolverTests {
 		assertThat(response.getErrorMessage()).contains("part");
 		assertThat(response.getErrorMessage()).contains("name");
 		assertThat(response.getErrorMessage()).contains("not present");
-	}
-
-	@Test
-	void handleBindException() {
-		BindException ex = new BindException(new Object(), "name");
-		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertThat(mav).as("No ModelAndView returned").isNotNull();
-		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
-		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(400);
 	}
 
 	@Test

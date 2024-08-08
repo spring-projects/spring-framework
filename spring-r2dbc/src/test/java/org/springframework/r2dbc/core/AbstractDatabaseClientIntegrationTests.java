@@ -16,6 +16,7 @@
 
 package org.springframework.r2dbc.core;
 
+import java.util.List;
 import java.util.Map;
 
 import io.r2dbc.spi.ConnectionFactory;
@@ -93,6 +94,25 @@ abstract class AbstractDatabaseClientIntegrationTests {
 				.first()
 				.as(StepVerifier::create)
 				.assertNext(actual -> assertThat(actual).isInstanceOf(Number.class).isEqualTo(42055))
+				.verifyComplete();
+	}
+
+	@Test
+	void executeInsertWithList() {
+		DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
+
+		databaseClient.sql("INSERT INTO legoset (id, name, manual) VALUES(:id, :name, :manual)")
+				.bindValues(List.of(42055, Parameters.in("SCHAUFELRADBAGGER"), Parameters.in(Integer.class)))
+				.fetch().rowsUpdated()
+				.as(StepVerifier::create)
+				.expectNext(1L)
+				.verifyComplete();
+
+		databaseClient.sql("SELECT id FROM legoset")
+				.mapValue(Integer.class)
+				.first()
+				.as(StepVerifier::create)
+				.assertNext(actual -> assertThat(actual).isEqualTo(42055))
 				.verifyComplete();
 	}
 

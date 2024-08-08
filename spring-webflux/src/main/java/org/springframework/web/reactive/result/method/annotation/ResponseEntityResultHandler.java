@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -78,7 +79,20 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> writers,
 			RequestedContentTypeResolver resolver, ReactiveAdapterRegistry registry) {
 
-		super(writers, resolver, registry);
+		this(writers, resolver, registry, Collections.emptyList());
+	}
+
+	/**
+	 * Constructor with an {@link ReactiveAdapterRegistry} instance.
+	 * @param writers the writers for serializing to the response body
+	 * @param resolver to determine the requested content type
+	 * @param registry for adaptation to reactive types
+	 */
+	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> writers,
+			RequestedContentTypeResolver resolver, ReactiveAdapterRegistry registry,
+			List<ErrorResponse.Interceptor> interceptors) {
+
+		super(writers, resolver, registry, interceptors);
 		setOrder(0);
 	}
 
@@ -114,7 +128,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 
 	@Override
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
 		Mono<?> returnValueMono;
@@ -165,6 +179,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 								" doesn't match the ProblemDetail status: " + detail.getStatus());
 					}
 				}
+				invokeErrorResponseInterceptors(
+						detail, (returnValue instanceof ErrorResponse response ? response : null));
 			}
 
 			if (httpEntity instanceof ResponseEntity<?> responseEntity) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class ParameterizableViewController extends AbstractController {
 	 * Configure the HTTP status code that this controller should set on the
 	 * response.
 	 * <p>When a "redirect:" prefixed view name is configured, there is no need
-	 * to set this property since RedirectView will do that. However this property
+	 * to set this property since RedirectView will do that. However, this property
 	 * may still be used to override the 3xx status code of {@code RedirectView}.
 	 * For full control over redirecting provide a {@code RedirectView} instance.
 	 * <p>If the status code is 204 and no view is configured, the request is

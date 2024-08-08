@@ -41,23 +41,25 @@ import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * Resolves servlet backed request-related method arguments. Supports values of the
- * following types:
+ * Resolves servlet backed request-related method arguments.
+ *
+ * <p>Supports values of the following types:
+ *
  * <ul>
  * <li>{@link WebRequest}
  * <li>{@link ServletRequest}
  * <li>{@link MultipartRequest}
  * <li>{@link HttpSession}
- * <li>{@link PushBuilder} (as of Spring 5.0 on Servlet 4.0)
+ * <li>{@link PushBuilder}
  * <li>{@link Principal} but only if not annotated in order to allow custom
- * resolvers to resolve it, and the falling back on
- * {@link PrincipalMethodArgumentResolver}.
+ * resolvers to resolve it, and then falling back on
+ * {@link PrincipalMethodArgumentResolver}
  * <li>{@link InputStream}
  * <li>{@link Reader}
- * <li>{@link HttpMethod} (as of Spring 4.0)
+ * <li>{@link HttpMethod}
  * <li>{@link Locale}
- * <li>{@link TimeZone} (as of Spring 4.0)
- * <li>{@link java.time.ZoneId} (as of Spring 4.0 and Java 8)
+ * <li>{@link TimeZone}
+ * <li>{@link ZoneId}
  * </ul>
  *
  * @author Arjen Poutsma

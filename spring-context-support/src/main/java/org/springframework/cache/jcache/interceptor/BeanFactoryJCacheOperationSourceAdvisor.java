@@ -16,15 +16,9 @@
 
 package org.springframework.cache.jcache.interceptor;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
-import org.springframework.aop.support.StaticMethodMatcherPointcut;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Advisor driven by a {@link JCacheOperationSource}, used to include a
@@ -63,39 +57,6 @@ public class BeanFactoryJCacheOperationSourceAdvisor extends AbstractBeanFactory
 	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
-	}
-
-
-	private static class JCacheOperationSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
-
-		@Nullable
-		private JCacheOperationSource cacheOperationSource;
-
-		public void setCacheOperationSource(@Nullable JCacheOperationSource cacheOperationSource) {
-			this.cacheOperationSource = cacheOperationSource;
-		}
-
-		@Override
-		public boolean matches(Method method, Class<?> targetClass) {
-			return (this.cacheOperationSource == null ||
-					this.cacheOperationSource.getCacheOperation(method, targetClass) != null);
-		}
-
-		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof JCacheOperationSourcePointcut that &&
-					ObjectUtils.nullSafeEquals(this.cacheOperationSource, that.cacheOperationSource)));
-		}
-
-		@Override
-		public int hashCode() {
-			return JCacheOperationSourcePointcut.class.hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return getClass().getName() + ": " + this.cacheOperationSource;
-		}
 	}
 
 }

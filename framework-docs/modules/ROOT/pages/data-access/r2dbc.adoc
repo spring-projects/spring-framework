@@ -364,6 +364,28 @@ Or you may pass in a parameter object with bean properties or record components:
 			.bindProperties(new Person("joe", "Joe", 34);
 ----
 
+Alternatively, you can use positional parameters for binding values to statements.
+Indices are zero based.
+
+[source,java]
+----
+    db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
+	    	.bind(0, "joe")
+	    	.bind(1, "Joe")
+			.bind(2, 34);
+----
+
+In case your application is binding to many parameters, the same can be achieved with a single call:
+
+[source,java]
+----
+    List<?> values = List.of("joe", "Joe", 34);
+    db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
+	    	.bindValues(values);
+----
+
+
+
 .R2DBC Native Bind Markers
 ****
 R2DBC uses database-native bind markers that depend on the actual database vendor.

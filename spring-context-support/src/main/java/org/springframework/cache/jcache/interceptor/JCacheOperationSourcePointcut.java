@@ -19,7 +19,9 @@ package org.springframework.cache.jcache.interceptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.springframework.aop.ClassFilter;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.cache.CacheManager;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
@@ -27,32 +29,35 @@ import org.springframework.util.ObjectUtils;
  * A {@code Pointcut} that matches if the underlying {@link JCacheOperationSource}
  * has an operation for a given method.
  *
- * @author Stephane Nicoll
- * @since 4.1
- * @deprecated since 6.0.10, as it is not used by the framework anymore
+ * @author Juergen Hoeller
+ * @since 6.2
  */
-@Deprecated(since = "6.0.10", forRemoval = true)
 @SuppressWarnings("serial")
-public abstract class JCacheOperationSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
+final class JCacheOperationSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
+
+	@Nullable
+	private JCacheOperationSource cacheOperationSource;
+
+
+	public JCacheOperationSourcePointcut() {
+		setClassFilter(new JCacheOperationSourceClassFilter());
+	}
+
+
+	public void setCacheOperationSource(@Nullable JCacheOperationSource cacheOperationSource) {
+		this.cacheOperationSource = cacheOperationSource;
+	}
 
 	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
-		JCacheOperationSource cas = getCacheOperationSource();
-		return (cas != null && cas.getCacheOperation(method, targetClass) != null);
+		return (this.cacheOperationSource == null ||
+				this.cacheOperationSource.hasCacheOperation(method, targetClass));
 	}
-
-	/**
-	 * Obtain the underlying {@link JCacheOperationSource} (may be {@code null}).
-	 * To be implemented by subclasses.
-	 */
-	@Nullable
-	protected abstract JCacheOperationSource getCacheOperationSource();
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof JCacheOperationSourcePointcut that &&
-				ObjectUtils.nullSafeEquals(getCacheOperationSource(), that.getCacheOperationSource())));
+				ObjectUtils.nullSafeEquals(this.cacheOperationSource, that.cacheOperationSource)));
 	}
 
 	@Override
@@ -62,7 +67,44 @@ public abstract class JCacheOperationSourcePointcut extends StaticMethodMatcherP
 
 	@Override
 	public String toString() {
-		return getClass().getName() + ": " + getCacheOperationSource();
+		return getClass().getName() + ": " + this.cacheOperationSource;
+	}
+
+
+	/**
+	 * {@link ClassFilter} that delegates to {@link JCacheOperationSource#isCandidateClass}
+	 * for filtering classes whose methods are not worth searching to begin with.
+	 */
+	private final class JCacheOperationSourceClassFilter implements ClassFilter {
+
+		@Override
+		public boolean matches(Class<?> clazz) {
+			if (CacheManager.class.isAssignableFrom(clazz)) {
+				return false;
+			}
+			return (cacheOperationSource == null || cacheOperationSource.isCandidateClass(clazz));
+		}
+
+		@Nullable
+		private JCacheOperationSource getCacheOperationSource() {
+			return cacheOperationSource;
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof JCacheOperationSourceClassFilter that &&
+					ObjectUtils.nullSafeEquals(getCacheOperationSource(), that.getCacheOperationSource())));
+		}
+
+		@Override
+		public int hashCode() {
+			return JCacheOperationSourceClassFilter.class.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return JCacheOperationSourceClassFilter.class.getName() + ": " + getCacheOperationSource();
+		}
 	}
 
 }

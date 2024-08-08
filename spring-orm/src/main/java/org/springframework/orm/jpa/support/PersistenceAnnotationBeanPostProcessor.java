@@ -359,6 +359,7 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 	}
 
 	@Override
+	@Nullable
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		String beanName = registeredBean.getBeanName();
@@ -857,6 +858,7 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 			return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);
 		}
 
+		@SuppressWarnings("NullAway")
 		private void generateGetEntityManagerMethod(MethodSpec.Builder method, PersistenceElement injectedElement) {
 			String unitName = injectedElement.unitName;
 			Properties properties = injectedElement.properties;

@@ -115,6 +115,10 @@ public @interface Sql {
 	 * {@link org.springframework.util.ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link org.springframework.util.ResourceUtils#FILE_URL_PREFIX file:},
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
+	 * <p>As of Spring Framework 6.2, paths may contain property placeholders
+	 * (<code>${...}</code>) that will be replaced by properties stored in the
+	 * {@link org.springframework.core.env.Environment Environment} of the test's
+	 * {@code ApplicationContext}.
 	 * <h4>Default Script Detection</h4>
 	 * <p>If no SQL scripts or {@link #statements} are specified, an attempt will
 	 * be made to detect a <em>default</em> script depending on where this
@@ -131,6 +135,7 @@ public @interface Sql {
 	 * </ul>
 	 * @see #value
 	 * @see #statements
+	 * @see org.springframework.core.env.Environment#resolveRequiredPlaceholders(String)
 	 */
 	@AliasFor("value")
 	String[] scripts() default {};

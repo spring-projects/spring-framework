@@ -23,6 +23,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheInterceptor;
@@ -40,6 +43,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
+ * Tests that use a custom {@link CacheInterceptor}.
+ *
  * @author Stephane Nicoll
  */
 class CustomInterceptorTests {
@@ -50,7 +55,12 @@ class CustomInterceptorTests {
 
 	@BeforeEach
 	void setup() {
-		this.ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.getBeanFactory().addBeanPostProcessor(
+				new CacheInterceptorBeanPostProcessor(context.getBeanFactory()));
+		context.register(EnableCachingConfig.class);
+		context.refresh();
+		this.ctx = context;
 		this.cs = ctx.getBean("service", CacheableService.class);
 	}
 
@@ -58,6 +68,7 @@ class CustomInterceptorTests {
 	void tearDown() {
 		this.ctx.close();
 	}
+
 
 	@Test
 	void onlyOneInterceptorIsAvailable() {
@@ -96,18 +107,28 @@ class CustomInterceptorTests {
 			return new DefaultCacheableService();
 		}
 
-		@Bean
-		public CacheInterceptor cacheInterceptor(CacheOperationSource cacheOperationSource) {
-			CacheInterceptor cacheInterceptor = new TestCacheInterceptor();
-			cacheInterceptor.setCacheManager(cacheManager());
-			cacheInterceptor.setCacheOperationSources(cacheOperationSource);
-			return cacheInterceptor;
+	}
+
+	static class CacheInterceptorBeanPostProcessor implements BeanPostProcessor {
+
+		private final BeanFactory beanFactory;
+
+		CacheInterceptorBeanPostProcessor(BeanFactory beanFactory) {this.beanFactory = beanFactory;}
+
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			if (beanName.equals("cacheInterceptor")) {
+				CacheInterceptor cacheInterceptor = new TestCacheInterceptor();
+				cacheInterceptor.setCacheManager(beanFactory.getBean(CacheManager.class));
+				cacheInterceptor.setCacheOperationSource(beanFactory.getBean(CacheOperationSource.class));
+				return cacheInterceptor;
+			}
+			return bean;
 		}
+
 	}
 
 	/**
-	 * A test {@link CacheInterceptor} that handles special exception
-	 * types.
+	 * A test {@link CacheInterceptor} that handles special exception types.
 	 */
 	@SuppressWarnings("serial")
 	static class TestCacheInterceptor extends CacheInterceptor {

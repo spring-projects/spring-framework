@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -288,6 +288,34 @@ class ValueCodeGeneratorTests {
 					.hasImport(ResolvableType.class, List.class, Map.class).hasValueCode(
 							"ResolvableType.forClassWithGenerics(Map.class, ResolvableType.forClass(Integer.class), "
 									+ "ResolvableType.forClassWithGenerics(List.class, String.class))");
+		}
+
+		@Test
+		void generateWhenUnresolvedGenericType() throws NoSuchFieldException {
+			ResolvableType resolvableType = ResolvableType
+					.forField(SampleTypes.class.getField("genericList"));
+			assertThat(resolve(generateCode(resolvableType)))
+					.hasImport(ResolvableType.class, List.class)
+					.hasValueCode("ResolvableType.forClass(List.class)");
+		}
+
+		@Test
+		void generateWhenUnresolvedNestedGenericType() throws NoSuchFieldException {
+			ResolvableType resolvableType = ResolvableType
+					.forField(SampleTypes.class.getField("mapWithNestedGenericInValueType"));
+			assertThat(resolve(generateCode(resolvableType)))
+					.hasImport(ResolvableType.class, List.class)
+					.hasValueCode("""
+							ResolvableType.forClassWithGenerics(Map.class, ResolvableType.forClass(String.class), \
+							ResolvableType.forClass(List.class))""");
+		}
+
+		static class SampleTypes<A> {
+
+			public List<A> genericList;
+
+			public Map<String, List<A>> mapWithNestedGenericInValueType;
+
 		}
 
 	}

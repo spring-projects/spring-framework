@@ -42,6 +42,7 @@ public class HibernateJdbcException extends UncategorizedDataAccessException {
 	/**
 	 * Return the underlying SQLException.
 	 */
+	@SuppressWarnings("NullAway")
 	public SQLException getSQLException() {
 		return ((JDBCException) getCause()).getSQLException();
 	}
@@ -50,6 +51,7 @@ public class HibernateJdbcException extends UncategorizedDataAccessException {
 	 * Return the SQL that led to the problem.
 	 */
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public String getSql() {
 		return ((JDBCException) getCause()).getSQL();
 	}

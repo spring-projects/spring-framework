@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.util.Assert;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
@@ -105,7 +106,9 @@ public class StatusResultMatchers {
 	}
 
 	private HttpStatus.Series getHttpStatusSeries(MvcResult result) {
-		return HttpStatus.Series.resolve(result.getResponse().getStatus());
+		HttpStatus.Series series = HttpStatus.Series.resolve(result.getResponse().getStatus());
+		Assert.state(series != null, "HTTP status series must not be null");
+		return series;
 	}
 
 	/**

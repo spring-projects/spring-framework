@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Brian Clozel
  */
 class SimpleCommandLineArgsParserTests {
 
@@ -64,11 +65,6 @@ class SimpleCommandLineArgsParserTests {
 		assertThat(args.getOptionValues("o1")).containsExactly("v1");
 		assertThat(args.getOptionValues("o2")).isEqualTo(Collections.EMPTY_LIST);
 		assertThat(args.getOptionValues("o3")).isNull();
-	}
-
-	@Test
-	void withEmptyOptionText() {
-		assertThatIllegalArgumentException().isThrownBy(() -> parser.parse("--"));
 	}
 
 	@Test
@@ -110,6 +106,15 @@ class SimpleCommandLineArgsParserTests {
 		CommandLineArgs args = new SimpleCommandLineArgsParser().parse();
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				args.getNonOptionArgs().add("foo"));
+	}
+
+	@Test
+	void supportsEndOfOptionsDelimiter() {
+		CommandLineArgs args = parser.parse("--o1=v1", "--", "--o2=v2");
+		assertThat(args.containsOption("o1")).isTrue();
+		assertThat(args.containsOption("o2")).isFalse();
+		assertThat(args.getOptionValues("o1")).containsExactly("v1");
+		assertThat(args.getNonOptionArgs()).contains("--o2=v2");
 	}
 
 }

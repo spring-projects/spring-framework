@@ -19,7 +19,6 @@ package org.springframework.web.cors;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -172,6 +171,7 @@ public class CorsConfiguration {
 	/**
 	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
 	 */
+	@SuppressWarnings("NullAway")
 	public void addAllowedOrigin(@Nullable String origin) {
 		if (origin == null) {
 			return;
@@ -245,6 +245,7 @@ public class CorsConfiguration {
 	 * Variant of {@link #setAllowedOriginPatterns} for adding one origin at a time.
 	 * @since 5.3
 	 */
+	@SuppressWarnings("NullAway")
 	public void addAllowedOriginPattern(@Nullable String originPattern) {
 		if (originPattern == null) {
 			return;
@@ -274,14 +275,16 @@ public class CorsConfiguration {
 				case ']' -> withinPortRange = false;
 				case ',' -> {
 					if (!withinPortRange) {
-						valueConsumer.accept(rawValue.substring(start, current).trim());
+						String originValue = rawValue.substring(start, current).trim();
+						valueConsumer.accept(originValue);
 						start = current + 1;
 					}
 				}
 			}
 		}
 		if (start < rawValue.length()) {
-			valueConsumer.accept(rawValue.substring(start));
+			String originValue = rawValue.substring(start).trim();
+			valueConsumer.accept(originValue);
 		}
 	}
 
@@ -657,7 +660,7 @@ public class CorsConfiguration {
 		if (source.contains(ALL) || other.contains(ALL)) {
 			return ALL_LIST;
 		}
-		Set<String> combined = new LinkedHashSet<>(source.size() + other.size());
+		Set<String> combined = CollectionUtils.newLinkedHashSet(source.size() + other.size());
 		combined.addAll(source);
 		combined.addAll(other);
 		return new ArrayList<>(combined);
@@ -675,7 +678,7 @@ public class CorsConfiguration {
 		if (source.contains(ALL_PATTERN) || other.contains(ALL_PATTERN)) {
 			return ALL_PATTERN_LIST;
 		}
-		Set<OriginPattern> combined = new LinkedHashSet<>(source.size() + other.size());
+		Set<OriginPattern> combined = CollectionUtils.newLinkedHashSet(source.size() + other.size());
 		combined.addAll(source);
 		combined.addAll(other);
 		return new ArrayList<>(combined);

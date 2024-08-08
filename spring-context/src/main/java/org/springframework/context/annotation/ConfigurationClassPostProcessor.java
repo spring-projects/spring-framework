@@ -326,6 +326,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	@Override
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		boolean hasPropertySourceDescriptors = !CollectionUtils.isEmpty(this.propertySourceDescriptors);
 		boolean hasImportRegistry = beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME);
@@ -411,7 +412,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
 
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
-		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
+		Set<ConfigurationClass> alreadyParsed = CollectionUtils.newHashSet(configCandidates.size());
 		do {
 			StartupStep processConfig = this.applicationStartup.start("spring.context.config-classes.parse");
 			parser.parse(candidates);
@@ -434,7 +435,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			if (registry.getBeanDefinitionCount() > candidateNames.length) {
 				String[] newCandidateNames = registry.getBeanDefinitionNames();
 				Set<String> oldCandidateNames = Set.of(candidateNames);
-				Set<String> alreadyParsedClasses = new HashSet<>();
+				Set<String> alreadyParsedClasses = CollectionUtils.newHashSet(alreadyParsed.size());
 				for (ConfigurationClass configurationClass : alreadyParsed) {
 					alreadyParsedClasses.add(configurationClass.getMetadata().getClassName());
 				}
@@ -508,14 +509,18 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" +
 							beanName + "' since it is not stored in an AbstractBeanDefinition subclass");
 				}
-				else if (logger.isWarnEnabled() && beanFactory.containsSingleton(beanName)) {
-					logger.warn("Cannot enhance @Configuration bean definition '" + beanName +
-							"' since its singleton instance has been created too early. The typical cause " +
-							"is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor " +
-							"return type: Consider declaring such methods as 'static' and/or marking the " +
-							"containing configuration class as 'proxyBeanMethods=false'.");
+				else if (beanFactory.containsSingleton(beanName)) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Cannot enhance @Configuration bean definition '" + beanName +
+								"' since its singleton instance has been created too early. The typical cause " +
+								"is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor " +
+								"return type: Consider declaring such methods as 'static' and/or marking the " +
+								"containing configuration class as 'proxyBeanMethods=false'.");
+					}
 				}
-				configBeanDefs.put(beanName, abd);
+				else {
+					configBeanDefs.put(beanName, abd);
+				}
 			}
 		}
 		if (configBeanDefs.isEmpty()) {

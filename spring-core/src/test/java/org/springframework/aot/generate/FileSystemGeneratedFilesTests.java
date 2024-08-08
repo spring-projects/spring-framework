@@ -23,16 +23,20 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import org.springframework.aot.generate.GeneratedFiles.FileHandler;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.util.function.ThrowingConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link FileSystemGeneratedFiles}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class FileSystemGeneratedFilesTests {
 
@@ -82,7 +86,7 @@ class FileSystemGeneratedFilesTests {
 	void createWhenRootsResultsInNullThrowsException() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> new FileSystemGeneratedFiles(kind -> (kind != Kind.CLASS) ?
-								this.root.resolve(kind.toString()) : null))
+						this.root.resolve(kind.toString()) : null))
 				.withMessage("'roots' must return a value for all file kinds");
 	}
 
@@ -92,6 +96,47 @@ class FileSystemGeneratedFilesTests {
 		assertPathMustBeRelative(generatedFiles, "/test");
 		assertPathMustBeRelative(generatedFiles, "../test");
 		assertPathMustBeRelative(generatedFiles, "test/../../test");
+	}
+
+	@Test
+	void addFileWhenFileAlreadyAddedThrowsException() {
+		FileSystemGeneratedFiles generatedFiles = new FileSystemGeneratedFiles(this.root);
+		generatedFiles.addResourceFile("META-INF/mydir", "test");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> generatedFiles.addResourceFile("META-INF/mydir", "test"))
+				.withMessageContainingAll("META-INF", "mydir", "already exists");
+	}
+
+	@Test
+	void handleFileWhenFileExistsProvidesFileHandler() {
+		FileSystemGeneratedFiles generatedFiles = new FileSystemGeneratedFiles(this.root);
+		generatedFiles.addResourceFile("META-INF/test", "test");
+		generatedFiles.handleFile(Kind.RESOURCE, "META-INF/test", handler -> {
+			assertThat(handler.exists()).isTrue();
+			assertThat(handler.getContent()).isNotNull();
+			assertThat(handler.getContent().getInputStream()).hasContent("test");
+		});
+		assertThat(this.root.resolve("resources/META-INF/test")).content().isEqualTo("test");
+	}
+
+	@Test
+	void handleFileWhenFileExistsFailsToCreate() {
+		FileSystemGeneratedFiles generatedFiles = new FileSystemGeneratedFiles(this.root);
+		generatedFiles.addResourceFile("META-INF/mydir", "test");
+		ThrowingConsumer<FileHandler> consumer = handler ->
+				handler.create(new ByteArrayResource("should fail".getBytes(StandardCharsets.UTF_8)));
+		assertThatIllegalStateException()
+				.isThrownBy(() -> generatedFiles.handleFile(Kind.RESOURCE, "META-INF/mydir", consumer))
+				.withMessageContainingAll("META-INF", "mydir", "already exists");
+	}
+
+	@Test
+	void handleFileWhenFileExistsCanOverrideContent() {
+		FileSystemGeneratedFiles generatedFiles = new FileSystemGeneratedFiles(this.root);
+		generatedFiles.addResourceFile("META-INF/mydir", "test");
+		generatedFiles.handleFile(Kind.RESOURCE, "META-INF/mydir", handler ->
+				handler.override(new ByteArrayResource("overridden".getBytes(StandardCharsets.UTF_8))));
+		assertThat(this.root.resolve("resources/META-INF/mydir")).content().isEqualTo("overridden");
 	}
 
 	private void assertPathMustBeRelative(FileSystemGeneratedFiles generatedFiles, String path) {

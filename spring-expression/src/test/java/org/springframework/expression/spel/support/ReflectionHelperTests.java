@@ -450,22 +450,22 @@ class ReflectionHelperTests extends AbstractExpressionTests {
 	 * Used to validate the match returned from a compareArguments call.
 	 */
 	private void checkMatch(Class<?>[] inputTypes, Class<?>[] expectedTypes, StandardTypeConverter typeConverter, ArgumentsMatchKind expectedMatchKind) {
-		ReflectionHelper.ArgumentsMatchInfo matchInfo = ReflectionHelper.compareArguments(typeDescriptors(expectedTypes), typeDescriptors(inputTypes), typeConverter);
+		ArgumentsMatchKind matchKind = ReflectionHelper.compareArguments(typeDescriptors(expectedTypes), typeDescriptors(inputTypes), typeConverter);
 		if (expectedMatchKind == null) {
-			assertThat(matchInfo).as("Did not expect them to match in any way").isNull();
+			assertThat(matchKind).as("Did not expect them to match in any way").isNull();
 		}
 		else {
-			assertThat(matchInfo).as("Should not be a null match").isNotNull();
+			assertThat(matchKind).as("Should not be a null match").isNotNull();
 		}
 
 		if (expectedMatchKind == EXACT) {
-			assertThat(matchInfo.isExactMatch()).isTrue();
+			assertThat(matchKind.isExactMatch()).isTrue();
 		}
 		else if (expectedMatchKind == CLOSE) {
-			assertThat(matchInfo.isCloseMatch()).isTrue();
+			assertThat(matchKind.isCloseMatch()).isTrue();
 		}
 		else if (expectedMatchKind == REQUIRES_CONVERSION) {
-			assertThat(matchInfo.isMatchRequiringConversion()).as("expected to be a match requiring conversion, but was " + matchInfo).isTrue();
+			assertThat(matchKind.isMatchRequiringConversion()).as("expected to be a match requiring conversion, but was " + matchKind).isTrue();
 		}
 	}
 
@@ -475,18 +475,18 @@ class ReflectionHelperTests extends AbstractExpressionTests {
 	private static void checkMatchVarargs(Class<?>[] inputTypes, Class<?>[] expectedTypes,
 			StandardTypeConverter typeConverter, ArgumentsMatchKind expectedMatchKind) {
 
-		ReflectionHelper.ArgumentsMatchInfo matchInfo =
+		ArgumentsMatchKind matchKind =
 				ReflectionHelper.compareArgumentsVarargs(typeDescriptors(expectedTypes), typeDescriptors(inputTypes), typeConverter);
 		if (expectedMatchKind == null) {
-			assertThat(matchInfo).as("Did not expect them to match in any way: " + matchInfo).isNull();
+			assertThat(matchKind).as("Did not expect them to match in any way: " + matchKind).isNull();
 		}
 		else {
-			assertThat(matchInfo).as("Should not be a null match").isNotNull();
+			assertThat(matchKind).as("Should not be a null match").isNotNull();
 			switch (expectedMatchKind) {
-				case EXACT -> assertThat(matchInfo.isExactMatch()).isTrue();
-				case CLOSE -> assertThat(matchInfo.isCloseMatch()).isTrue();
-				case REQUIRES_CONVERSION -> assertThat(matchInfo.isMatchRequiringConversion())
-						.as("expected to be a match requiring conversion, but was " + matchInfo).isTrue();
+				case EXACT -> assertThat(matchKind.isExactMatch()).isTrue();
+				case CLOSE -> assertThat(matchKind.isCloseMatch()).isTrue();
+				case REQUIRES_CONVERSION -> assertThat(matchKind.isMatchRequiringConversion())
+						.as("expected to be a match requiring conversion, but was " + matchKind).isTrue();
 			}
 		}
 	}

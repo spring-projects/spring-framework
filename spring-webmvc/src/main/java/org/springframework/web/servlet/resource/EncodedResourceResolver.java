@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 	 * given request, and that has a file present with the associated extension,
 	 * is used.
 	 * <p><strong>Note:</strong> Each coding must be associated with a file
-	 * extension via {@link #registerExtension} or {@link #setExtensions}. Also
+	 * extension via {@link #registerExtension} or {@link #setExtensions}. Also,
 	 * customizations to the list of codings here should be matched by
 	 * customizations to the same list in {@link CachingResourceResolver} to
 	 * ensure encoded variants of a resource are cached under separate keys.

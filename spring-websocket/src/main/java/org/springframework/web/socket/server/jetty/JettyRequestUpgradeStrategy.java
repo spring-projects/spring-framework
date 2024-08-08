@@ -45,7 +45,7 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * A {@link RequestUpgradeStrategy} for Jetty 11.
+ * A {@link RequestUpgradeStrategy} for Jetty 12 EE10.
  *
  * @author Rossen Stoyanchev
  * @since 5.3.4

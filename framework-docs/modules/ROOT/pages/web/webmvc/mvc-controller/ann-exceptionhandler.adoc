@@ -6,40 +6,12 @@
 `@Controller` and xref:web/webmvc/mvc-controller/ann-advice.adoc[@ControllerAdvice] classes can have
 `@ExceptionHandler` methods to handle exceptions from controller methods, as the following example shows:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	@Controller
-	public class SimpleController {
 
-		// ...
+include-code::./SimpleController[indent=0]
 
-		@ExceptionHandler
-		public ResponseEntity<String> handle(IOException ex) {
-			// ...
-		}
-	}
-----
 
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	@Controller
-	class SimpleController {
-
-		// ...
-
-		@ExceptionHandler
-		fun handle(ex: IOException): ResponseEntity<String> {
-			// ...
-		}
-	}
-----
-======
+[[mvc-ann-exceptionhandler-exc]]
+== Exception Mapping
 
 The exception may match against a top-level exception being propagated (e.g. a direct
 `IOException` being thrown) or against a nested cause within a wrapper exception (e.g.
@@ -54,54 +26,13 @@ is used to sort exceptions based on their depth from the thrown exception type.
 Alternatively, the annotation declaration may narrow the exception types to match,
 as the following example shows:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	@ExceptionHandler({FileSystemException.class, RemoteException.class})
-	public ResponseEntity<String> handle(IOException ex) {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	@ExceptionHandler(FileSystemException::class, RemoteException::class)
-	fun handle(ex: IOException): ResponseEntity<String> {
-		// ...
-	}
-----
-======
+include-code::./ExceptionController[tag=narrow,indent=0]
 
 You can even use a list of specific exception types with a very generic argument signature,
 as the following example shows:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	@ExceptionHandler({FileSystemException.class, RemoteException.class})
-	public ResponseEntity<String> handle(Exception ex) {
-		// ...
-	}
-----
+include-code::./ExceptionController[tag=general,indent=0]
 
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	@ExceptionHandler(FileSystemException::class, RemoteException::class)
-	fun handle(ex: Exception): ResponseEntity<String> {
-		// ...
-	}
-----
-======
 
 [NOTE]
 ====
@@ -141,6 +72,25 @@ the given `@ExceptionHandler` method would not have matched in the first place.
 
 Support for `@ExceptionHandler` methods in Spring MVC is built on the `DispatcherServlet`
 level, xref:web/webmvc/mvc-servlet/exceptionhandlers.adoc[HandlerExceptionResolver] mechanism.
+
+
+
+[[mvc-ann-exceptionhandler-media]]
+== Media Type Mapping
+[.small]#xref:web/webflux/controller/ann-exceptions.adoc#webflux-ann-exceptionhandler-media[See equivalent in the Reactive stack]#
+
+In addition to exception types, `@ExceptionHandler` methods can also declare producible media types.
+This allows to refine error responses depending on the media types requested by HTTP clients, typically in the "Accept" HTTP request header.
+
+Applications can declare producible media types directly on annotations, for the same exception type:
+
+
+include-code::./MediaTypeController[tag=mediatype,indent=0]
+
+Here, methods handle the same exception type but will not be rejected as duplicates.
+Instead, API clients requesting "application/json" will receive a JSON error, and browsers will get an HTML error view.
+Each `@ExceptionHandler` annotation can declare several producible media types,
+the content negotiation during the error handling phase will decide which content type will be used.
 
 
 [[mvc-ann-exceptionhandler-args]]

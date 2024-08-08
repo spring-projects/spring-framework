@@ -19,9 +19,8 @@ package org.springframework.scheduling.support;
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 
+import org.springframework.scheduling.support.ScheduledTaskObservationDocumentation.LowCardinalityKeyNames;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.scheduling.support.ScheduledTaskObservationDocumentation.LowCardinalityKeyNames;
 
 /**
  * Default implementation for {@link ScheduledTaskObservationConvention}.

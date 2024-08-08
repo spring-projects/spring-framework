@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
@@ -95,6 +96,7 @@ import org.springframework.util.xml.StaxUtils;
  * @author Juergen Hoeller
  * @author Tadaya Tsuyukubo
  * @author Eddú Meléndez
+ * @author Hyoungjune Kim
  * @since 4.1.1
  * @see #build()
  * @see #configure(ObjectMapper)
@@ -936,6 +938,15 @@ public class Jackson2ObjectMapperBuilder {
 		return new Jackson2ObjectMapperBuilder().factory(new CborFactoryInitializer().create());
 	}
 
+	/**
+	 * Obtain a {@link Jackson2ObjectMapperBuilder} instance in order to
+	 * build a YAML data format {@link ObjectMapper} instance.
+	 * @since 6.2
+	 */
+	public static Jackson2ObjectMapperBuilder yaml() {
+		return new Jackson2ObjectMapperBuilder().factory(new YamlFactoryInitializer().create());
+	}
+
 
 	private static class XmlObjectMapperInitializer {
 
@@ -973,6 +984,13 @@ public class Jackson2ObjectMapperBuilder {
 
 		public JsonFactory create() {
 			return new CBORFactory();
+		}
+	}
+
+	private static class YamlFactoryInitializer {
+
+		public JsonFactory create() {
+			return new YAMLFactory();
 		}
 	}
 

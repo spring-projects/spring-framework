@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -36,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryInitializer;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -932,7 +934,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Finish the initialization of this context's bean factory,
 	 * initializing all remaining singleton beans.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+		// Initialize bootstrap executor for this context.
+		if (beanFactory.containsBean(BOOTSTRAP_EXECUTOR_BEAN_NAME) &&
+				beanFactory.isTypeMatch(BOOTSTRAP_EXECUTOR_BEAN_NAME, Executor.class)) {
+			beanFactory.setBootstrapExecutor(
+					beanFactory.getBean(BOOTSTRAP_EXECUTOR_BEAN_NAME, Executor.class));
+		}
+
 		// Initialize conversion service for this context.
 		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) &&
 				beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)) {
@@ -945,6 +955,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// at this point, primarily for resolution in annotation attribute values.
 		if (!beanFactory.hasEmbeddedValueResolver()) {
 			beanFactory.addEmbeddedValueResolver(strVal -> getEnvironment().resolvePlaceholders(strVal));
+		}
+
+		// Call BeanFactoryInitializer beans early to allow for initializing specific other beans early.
+		String[] initializerNames = beanFactory.getBeanNamesForType(BeanFactoryInitializer.class, false, false);
+		for (String initializerName : initializerNames) {
+			beanFactory.getBean(initializerName, BeanFactoryInitializer.class).initialize(beanFactory);
 		}
 
 		// Initialize LoadTimeWeaverAware beans early to allow for registering their transformers early.
@@ -1020,6 +1036,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		AnnotationUtils.clearCache();
 		ResolvableType.clearCache();
 		CachedIntrospectionResults.clearClassLoader(getClassLoader());
+	}
+
+	@Override
+	public void clearResourceCaches() {
+		super.clearResourceCaches();
+		if (this.resourcePatternResolver instanceof PathMatchingResourcePatternResolver pmrpr) {
+			pmrpr.clearCache();
+		}
 	}
 
 
@@ -1205,6 +1229,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void onClose() {
 		// For subclasses: do nothing by default.
+	}
+
+	@Override
+	public boolean isClosed() {
+		return this.closed.get();
 	}
 
 	@Override

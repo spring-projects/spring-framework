@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class AntPathMatcherTests {
 
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
+	private final AntPathMatcher dotSeparatedPathMatcher = new AntPathMatcher(".");
 
 
 	@Test
@@ -357,6 +358,24 @@ class AntPathMatcherTests {
 		assertThat(result).isEqualTo(expected);
 	}
 
+	@Test // gh-26264
+	void extractUriTemplateVariablesFromDotSeparatedPath() {
+		Map<String, String> result = dotSeparatedPathMatcher.extractUriTemplateVariables("price.stock.{tickerSymbol}", "price.stock.aaa");
+		assertThat(result).isEqualTo(Collections.singletonMap("tickerSymbol", "aaa"));
+
+		result = dotSeparatedPathMatcher.extractUriTemplateVariables("price.stock.{ticker/symbol}", "price.stock.aaa");
+		assertThat(result).isEqualTo(Collections.singletonMap("ticker/symbol", "aaa"));
+
+		result = dotSeparatedPathMatcher.extractUriTemplateVariables("notification.**.{operation}", "notification.foo.update");
+		assertThat(result).isEqualTo(Collections.singletonMap("operation", "update"));
+
+		result = dotSeparatedPathMatcher.extractUriTemplateVariables("news.sports.feed/{type}", "news.sports.feed/xml");
+		assertThat(result).isEqualTo(Collections.singletonMap("type", "xml"));
+
+		result = dotSeparatedPathMatcher.extractUriTemplateVariables("news.sports.{operation}/*", "news.sports.feed/xml");
+		assertThat(result).isEqualTo(Collections.singletonMap("operation", "feed"));
+	}
+
 	@Test
 	void extractUriTemplateVariablesRegex() {
 		Map<String, String> result = pathMatcher
@@ -504,6 +523,16 @@ class AntPathMatcherTests {
 		assertThat(comparator.compare("*", "*/**")).isEqualTo(-1);
 		assertThat(comparator.compare("*/**", "*")).isEqualTo(1);
 	}
+
+	@Test
+	void patternComparatorWithDotSeparator() {
+		Comparator<String> comparator = dotSeparatedPathMatcher.getPatternComparator("price.stock.spring");
+
+		assertThat(comparator.compare(null, null)).isEqualTo(0);
+		assertThat(comparator.compare("price.stock.ticker/symbol", "price.stock.ticker/symbol")).isEqualTo(0);
+		assertThat(comparator.compare("price.stock.**", "price.stock.ticker")).isEqualTo(1);
+	}
+
 
 	@Test
 	void patternComparatorSort() {

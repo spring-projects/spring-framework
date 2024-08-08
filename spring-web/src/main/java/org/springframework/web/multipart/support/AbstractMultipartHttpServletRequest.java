@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 
 	@Override
 	public Map<String, MultipartFile> getFileMap() {
-		return getMultipartFiles().toSingleValueMap();
+		return getMultipartFiles().asSingleValueMap();
 	}
 
 	@Override
@@ -137,6 +137,7 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	 * lazily initializing it if necessary.
 	 * @see #initializeMultipart()
 	 */
+	@SuppressWarnings("NullAway")
 	protected MultiValueMap<String, MultipartFile> getMultipartFiles() {
 		if (this.multipartFiles == null) {
 			initializeMultipart();

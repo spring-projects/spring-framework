@@ -29,11 +29,16 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.AbstractCollection;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -66,6 +71,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	@Nullable
 	private HttpHeaders headers;
+
+	@Nullable
+	private Map<String, Object> attributes;
+
 
 	@Nullable
 	private ServerHttpAsyncRequestControl asyncRequestControl;
@@ -208,6 +217,16 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
+	public Map<String, Object> getAttributes() {
+		Map<String, Object> attributes = this.attributes;
+		if (attributes == null) {
+			attributes = new AttributesMap();
+			this.attributes = attributes;
+		}
+		return attributes;
+	}
+
+	@Override
 	public InputStream getBody() throws IOException {
 		if (isFormPost(this.servletRequest) && this.servletRequest.getQueryString() == null) {
 			return getBodyFromServletRequestParameters(this.servletRequest);
@@ -276,4 +295,151 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return new ByteArrayInputStream(bytes);
 	}
 
+
+	private final class AttributesMap extends AbstractMap<String, Object> {
+
+		@Nullable
+		private transient Set<String> keySet;
+
+		@Nullable
+		private transient Collection<Object> values;
+
+		@Nullable
+		private transient Set<Entry<String, Object>> entrySet;
+
+
+		@Override
+		public int size() {
+			int size = 0;
+			for (Enumeration<?> names = servletRequest.getAttributeNames(); names.hasMoreElements(); names.nextElement()) {
+				size++;
+			}
+			return size;
+		}
+
+		@Override
+		@Nullable
+		public Object get(Object key) {
+			if (key instanceof String name) {
+				return servletRequest.getAttribute(name);
+			}
+			else {
+				return null;
+			}
+		}
+
+		@Override
+		@Nullable
+		public Object put(String key, Object value) {
+			Object old = get(key);
+			servletRequest.setAttribute(key, value);
+			return old;
+		}
+
+		@Override
+		@Nullable
+		public Object remove(Object key) {
+			if (key instanceof String name) {
+				Object old = get(key);
+				servletRequest.removeAttribute(name);
+				return old;
+			}
+			else {
+				return null;
+			}
+		}
+
+		@Override
+		public void clear() {
+			for (Enumeration<String> names = servletRequest.getAttributeNames(); names.hasMoreElements(); ) {
+				String name = names.nextElement();
+				servletRequest.removeAttribute(name);
+			}
+		}
+
+		@Override
+		public Set<String> keySet() {
+			Set<String> keySet = this.keySet;
+			if (keySet == null) {
+				keySet = new AbstractSet<>() {
+					@Override
+					public Iterator<String> iterator() {
+						return servletRequest.getAttributeNames().asIterator();
+					}
+
+					@Override
+					public int size() {
+						return AttributesMap.this.size();
+					}
+				};
+				this.keySet = keySet;
+			}
+			return keySet;
+		}
+
+		@Override
+		public Collection<Object> values() {
+			Collection<Object> values = this.values;
+			if (values == null) {
+				values = new AbstractCollection<>() {
+					@Override
+					public Iterator<Object> iterator() {
+						Enumeration<String> e = servletRequest.getAttributeNames();
+						return new Iterator<>() {
+							@Override
+							public boolean hasNext() {
+								return e.hasMoreElements();
+							}
+
+							@Override
+							public Object next() {
+								String name = e.nextElement();
+								return servletRequest.getAttribute(name);
+							}
+						};
+					}
+
+					@Override
+					public int size() {
+						return AttributesMap.this.size();
+					}
+				};
+				this.values = values;
+			}
+			return values;
+		}
+
+		@Override
+		public Set<Entry<String, Object>> entrySet() {
+			Set<Entry<String, Object>> entrySet = this.entrySet;
+			if (entrySet == null) {
+				entrySet = new AbstractSet<>() {
+					@Override
+					public Iterator<Entry<String, Object>> iterator() {
+						Enumeration<String> e = servletRequest.getAttributeNames();
+						return new Iterator<>() {
+							@Override
+							public boolean hasNext() {
+								return e.hasMoreElements();
+							}
+
+							@Override
+							public Entry<String, Object> next() {
+								String name = e.nextElement();
+								Object value = servletRequest.getAttribute(name);
+								return new SimpleImmutableEntry<>(name, value);
+							}
+						};
+					}
+
+					@Override
+					public int size() {
+						return AttributesMap.this.size();
+					}
+				};
+				this.entrySet = entrySet;
+			}
+			return entrySet;
+		}
+	}
 }

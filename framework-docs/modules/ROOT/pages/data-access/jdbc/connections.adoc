@@ -46,47 +46,9 @@ To configure a `DriverManagerDataSource`:
   for the correct value.)
 . Provide a username and a password to connect to the database.
 
-The following example shows how to configure a `DriverManagerDataSource` in Java:
+The following example shows how to configure a `DriverManagerDataSource`:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	DriverManagerDataSource dataSource = new DriverManagerDataSource();
-	dataSource.setDriverClassName("org.hsqldb.jdbcDriver");
-	dataSource.setUrl("jdbc:hsqldb:hsql://localhost:");
-	dataSource.setUsername("sa");
-	dataSource.setPassword("");
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	val dataSource = DriverManagerDataSource().apply {
-		setDriverClassName("org.hsqldb.jdbcDriver")
-		url = "jdbc:hsqldb:hsql://localhost:"
-		username = "sa"
-		password = ""
-	}
-----
-======
-
-The following example shows the corresponding XML configuration:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="${jdbc.driverClassName}"/>
-		<property name="url" value="${jdbc.url}"/>
-		<property name="username" value="${jdbc.username}"/>
-		<property name="password" value="${jdbc.password}"/>
-	</bean>
-
-	<context:property-placeholder location="jdbc.properties"/>
-----
+include-code::./DriverManagerDataSourceConfiguration[tag=snippet,indent=0]
 
 The next two examples show the basic connectivity and configuration for DBCP and C3P0.
 To learn about more options that help control the pooling features, see the product
@@ -94,32 +56,11 @@ documentation for the respective connection pooling implementations.
 
 The following example shows DBCP configuration:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-		<property name="driverClassName" value="${jdbc.driverClassName}"/>
-		<property name="url" value="${jdbc.url}"/>
-		<property name="username" value="${jdbc.username}"/>
-		<property name="password" value="${jdbc.password}"/>
-	</bean>
-
-	<context:property-placeholder location="jdbc.properties"/>
-----
+include-code::./BasicDataSourceConfiguration[tag=snippet,indent=0]
 
 The following example shows C3P0 configuration:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
-		<property name="driverClass" value="${jdbc.driverClassName}"/>
-		<property name="jdbcUrl" value="${jdbc.url}"/>
-		<property name="user" value="${jdbc.username}"/>
-		<property name="password" value="${jdbc.password}"/>
-	</bean>
-
-	<context:property-placeholder location="jdbc.properties"/>
-----
-
+include-code::./ComboPooledDataSourceConfiguration[tag=snippet,indent=0]
 
 [[jdbc-DataSourceUtils]]
 == Using `DataSourceUtils`

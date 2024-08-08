@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 2.0
  */
 public final class BeanDefinitionBuilder {
@@ -345,6 +346,15 @@ public final class BeanDefinitionBuilder {
 	 */
 	public BeanDefinitionBuilder setPrimary(boolean primary) {
 		this.beanDefinition.setPrimary(primary);
+		return this;
+	}
+
+	/**
+	 * Set whether this bean is a fallback autowire candidate.
+	 * @since 6.2
+	 */
+	public BeanDefinitionBuilder setFallback(boolean fallback) {
+		this.beanDefinition.setFallback(fallback);
 		return this;
 	}
 

@@ -1,0 +1,100 @@
+[[mockmvc-setup]]
+= Configuring MockMvc
+
+MockMvc can be setup in one of two ways. One is to point directly to the controllers you
+want to test and programmatically configure Spring MVC infrastructure. The second is to
+point to Spring configuration with Spring MVC and controller infrastructure in it.
+
+TIP: For a comparison of those two modes, check xref:testing/mockmvc/setup-options.adoc[Setup Options].
+
+To set up MockMvc for testing a specific controller, use the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	class MyWebTests {
+
+		MockMvc mockMvc;
+
+		@BeforeEach
+		void setup() {
+			this.mockMvc = MockMvcBuilders.standaloneSetup(new AccountController()).build();
+		}
+
+		// ...
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyWebTests {
+
+		lateinit var mockMvc : MockMvc
+
+		@BeforeEach
+		fun setup() {
+			mockMvc = MockMvcBuilders.standaloneSetup(AccountController()).build()
+		}
+
+		// ...
+
+	}
+----
+======
+
+Or you can also use this setup when testing through the
+xref:testing/webtestclient.adoc#webtestclient-controller-config[WebTestClient] which delegates to the same builder
+as shown above.
+
+To set up MockMvc through Spring configuration, use the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitWebConfig(locations = "my-servlet-context.xml")
+	class MyWebTests {
+
+		MockMvc mockMvc;
+
+		@BeforeEach
+		void setup(WebApplicationContext wac) {
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+		}
+
+		// ...
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitWebConfig(locations = ["my-servlet-context.xml"])
+	class MyWebTests {
+
+		lateinit var mockMvc: MockMvc
+
+		@BeforeEach
+		fun setup(wac: WebApplicationContext) {
+			mockMvc = MockMvcBuilders.webAppContextSetup(wac).build()
+		}
+
+		// ...
+
+	}
+----
+======
+
+Or you can also use this setup when testing through the
+xref:testing/webtestclient.adoc#webtestclient-context-config[WebTestClient] which delegates to the same builder
+as shown above.

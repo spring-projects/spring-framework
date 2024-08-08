@@ -51,6 +51,7 @@ class NestedBeansElementTests {
 		env.setActiveProfiles("dev");
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAllowBeanDefinitionOverriding(true);
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		reader.setEnvironment(env);
 		reader.loadBeanDefinitions(XML);

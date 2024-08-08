@@ -25,10 +25,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotationConfigurationException;
+import org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener;
+import org.springframework.test.context.bean.override.mockito.MockitoResetTestExecutionListener;
+import org.springframework.test.context.bean.override.mockito.MockitoTestExecutionListener;
 import org.springframework.test.context.event.ApplicationEventsTestExecutionListener;
 import org.springframework.test.context.event.EventPublishingTestExecutionListener;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.test.context.support.CommonCachesTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -65,12 +69,16 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
+				MockitoTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
+				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
-				EventPublishingTestExecutionListener.class
+				EventPublishingTestExecutionListener.class,//
+				MockitoResetTestExecutionListener.class,//
+				BeanOverrideTestExecutionListener.class
 			);
 		assertRegisteredListeners(DefaultListenersTestCase.class, expected);
 	}
@@ -84,12 +92,16 @@ class TestExecutionListenersTests {
 				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
+				MockitoTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
+				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
-				EventPublishingTestExecutionListener.class
+				EventPublishingTestExecutionListener.class,//
+				MockitoResetTestExecutionListener.class,//
+				BeanOverrideTestExecutionListener.class
 			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerPrependedTestCase.class, expected);
 	}
@@ -102,12 +114,16 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
+				MockitoTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
+				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
+				MockitoResetTestExecutionListener.class,//
+				BeanOverrideTestExecutionListener.class,//
 				BazTestExecutionListener.class
 			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerAppendedTestCase.class, expected);
@@ -121,13 +137,17 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
+				MockitoTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				BarTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
+				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
-				EventPublishingTestExecutionListener.class
+				EventPublishingTestExecutionListener.class,//
+				MockitoResetTestExecutionListener.class,//
+				BeanOverrideTestExecutionListener.class
 			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerInsertedTestCase.class, expected);
 	}

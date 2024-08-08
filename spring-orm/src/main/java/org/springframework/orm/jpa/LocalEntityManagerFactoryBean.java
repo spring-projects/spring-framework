@@ -16,10 +16,14 @@
 
 package org.springframework.orm.jpa;
 
+import javax.sql.DataSource;
+
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.spi.PersistenceProvider;
+
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a JPA
@@ -56,6 +60,42 @@ import jakarta.persistence.spi.PersistenceProvider;
  */
 @SuppressWarnings("serial")
 public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
+
+	private static final String DATASOURCE_PROPERTY = "jakarta.persistence.dataSource";
+
+
+	/**
+	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
+	 * to use for accessing the database. This is an alternative to keeping the
+	 * JDBC configuration in {@code persistence.xml}, passing in a Spring-managed
+	 * DataSource through the "jakarta.persistence.dataSource" property instead.
+	 * <p>When configured here, the JDBC DataSource will also get autodetected by
+	 * {@link JpaTransactionManager} for exposing JPA transactions to JDBC accessors.
+	 * @since 6.2
+	 * @see #getJpaPropertyMap()
+	 * @see JpaTransactionManager#setDataSource
+	 */
+	public void setDataSource(@Nullable DataSource dataSource) {
+		if (dataSource != null) {
+			getJpaPropertyMap().put(DATASOURCE_PROPERTY, dataSource);
+		}
+		else {
+			getJpaPropertyMap().remove(DATASOURCE_PROPERTY);
+		}
+	}
+
+	/**
+	 * Expose the JDBC DataSource from the "jakarta.persistence.dataSource"
+	 * property, if any.
+	 * @since 6.2
+	 * @see #getJpaPropertyMap()
+	 */
+	@Override
+	@Nullable
+	public DataSource getDataSource() {
+		return (DataSource) getJpaPropertyMap().get(DATASOURCE_PROPERTY);
+	}
+
 
 	/**
 	 * Initialize the EntityManagerFactory for the given configuration.

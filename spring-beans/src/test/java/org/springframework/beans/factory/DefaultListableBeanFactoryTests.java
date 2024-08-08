@@ -18,9 +18,7 @@ package org.springframework.beans.factory;
 
 import java.io.Closeable;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -81,7 +79,6 @@ import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
@@ -120,20 +117,6 @@ import static org.mockito.Mockito.verify;
 class DefaultListableBeanFactoryTests {
 
 	private final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-
-	{
-		// No parameter name discovery expected unless named arguments are used
-		lbf.setParameterNameDiscoverer(new ParameterNameDiscoverer() {
-			@Override
-			public String[] getParameterNames(Method method) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public String[] getParameterNames(Constructor<?> ctor) {
-				throw new UnsupportedOperationException();
-			}
-		});
-	}
 
 
 	@Test
@@ -857,6 +840,7 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void aliasCircle() {
+		lbf.setAllowBeanDefinitionOverriding(true);
 		lbf.registerAlias("test", "test2");
 		lbf.registerAlias("test2", "test3");
 
@@ -884,6 +868,7 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void beanDefinitionOverriding() {
+		lbf.setAllowBeanDefinitionOverriding(true);
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
 		lbf.registerAlias("otherTest", "test2");
@@ -923,6 +908,7 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void beanDefinitionOverridingWithAlias() {
+		lbf.setAllowBeanDefinitionOverriding(true);
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
 		lbf.registerAlias("test", "testAlias");
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
@@ -934,6 +920,7 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void beanDefinitionOverridingWithConstructorArgumentMismatch() {
+		lbf.setAllowBeanDefinitionOverriding(true);
 		RootBeanDefinition bd1 = new RootBeanDefinition(NestedTestBean.class);
 		bd1.getConstructorArgumentValues().addIndexedArgumentValue(1, "value1");
 		lbf.registerBeanDefinition("test", bd1);
@@ -1213,6 +1200,7 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void reregisterBeanDefinition() {
+		lbf.setAllowBeanDefinitionOverriding(true);
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
 		bd1.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		lbf.registerBeanDefinition("testBean", bd1);
@@ -1323,6 +1311,7 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void withOverloadedSetters() {
+		lbf.setAllowBeanDefinitionOverriding(true);
 		RootBeanDefinition rbd = new RootBeanDefinition(SetterOverload.class);
 		rbd.getPropertyValues().add("object", "a String");
 		lbf.registerBeanDefinition("overloaded", rbd);
@@ -2221,9 +2210,39 @@ class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("test", bd);
 		lbf.registerBeanDefinition("spouse", bd2);
 
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
-				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true))
-			.withCauseExactlyInstanceOf(NoUniqueBeanDefinitionException.class);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(() -> lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true))
+				.withCauseExactlyInstanceOf(NoUniqueBeanDefinitionException.class);
+	}
+
+	@Test
+	void autowireBeanByTypeWithTwoPrimaryCandidatesInOneAncestor() {
+		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPrimary(true);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPrimary(true);
+		parent.registerBeanDefinition("test", bd);
+		parent.registerBeanDefinition("spouse", bd2);
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory(parent);
+
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(() -> lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true))
+				.withCauseExactlyInstanceOf(NoUniqueBeanDefinitionException.class);
+	}
+
+	@Test
+	void autowireBeanByTypeWithTwoPrimaryFactoryBeans(){
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(LazyInitFactory.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(LazyInitFactory.class);
+		bd1.setPrimary(true);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(() -> lbf.autowire(FactoryBeanDependentBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true))
+				.withCauseExactlyInstanceOf(NoUniqueBeanDefinitionException.class);
 	}
 
 	@Test

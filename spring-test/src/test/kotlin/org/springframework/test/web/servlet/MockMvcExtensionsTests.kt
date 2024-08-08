@@ -27,6 +27,7 @@ import org.springframework.http.MediaType.APPLICATION_ATOM_XML
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_XML
 import org.springframework.http.MediaType.TEXT_PLAIN
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.Person
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
@@ -64,7 +65,7 @@ class MockMvcExtensionsTests {
 			status { isOk() }
 			content { contentType(APPLICATION_JSON) }
 			jsonPath("$.name") { value("Lee") }
-			content { json("""{"someBoolean": false}""", false) }
+			content { json("""{"someBoolean": false}""", JsonCompareMode.LENIENT) }
 		}.andDo {
 			print()
 		}
@@ -130,7 +131,7 @@ class MockMvcExtensionsTests {
 			status { isOk() }
 			content { contentType(APPLICATION_JSON) }
 			jsonPath("$.name") { value("Lee") }
-			content { json("""{"someBoolean": false}""", false) }
+			content { json("""{"someBoolean": false}""", JsonCompareMode.LENIENT) }
 		}.andDo {
 			print()
 		}

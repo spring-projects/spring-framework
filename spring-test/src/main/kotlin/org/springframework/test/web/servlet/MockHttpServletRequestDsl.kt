@@ -25,6 +25,7 @@ import org.springframework.util.MultiValueMap
 import java.security.Principal
 import java.util.*
 import jakarta.servlet.http.Cookie
+import org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder
 
 /**
  * Provide a [MockHttpServletRequestBuilder] Kotlin DSL in order to be able to write idiomatic Kotlin code.
@@ -40,7 +41,7 @@ import jakarta.servlet.http.Cookie
  * @author Sebastien Deleuze
  * @since 5.2
  */
-open class MockHttpServletRequestDsl internal constructor (private val builder: MockHttpServletRequestBuilder) {
+open class MockHttpServletRequestDsl internal constructor (private val builder: AbstractMockHttpServletRequestBuilder<*>) {
 
 	/**
 	 * @see [MockHttpServletRequestBuilder.contextPath]

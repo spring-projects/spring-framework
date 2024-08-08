@@ -2,15 +2,14 @@ name: Build and Deploy Snapshot
 on:
   push:
     branches:
-      - 6.1.x
-permissions:
-  actions: write
+      - main
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   build-and-deploy-snapshot:
     name: Build and Deploy Snapshot
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     if: ${{ github.repository == 'spring-projects/spring-framework' }}
     steps:
       - name: Check Out Code
@@ -27,7 +26,7 @@ jobs:
           uri: 'https://repo.spring.io'
           username: ${{ secrets.ARTIFACTORY_USERNAME }}
           password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-          build-name: 'spring-framework-6.1.x'
+          build-name: 'spring-framework-6.2.x'
           repository: 'libs-snapshot-local'
           folder: 'deployment-repository'
           signing-key: ${{ secrets.GPG_PRIVATE_KEY }}

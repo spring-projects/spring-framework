@@ -66,6 +66,8 @@ class TestScenarioCreator {
 					TestScenarioCreator.class.getDeclaredMethod("varargsFunction", String[].class));
 			testContext.registerFunction("varargsFunction2",
 					TestScenarioCreator.class.getDeclaredMethod("varargsFunction2", int.class, String[].class));
+			testContext.registerFunction("varargsObjectFunction",
+					TestScenarioCreator.class.getDeclaredMethod("varargsObjectFunction", Object[].class));
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);
@@ -105,6 +107,11 @@ class TestScenarioCreator {
 		MethodHandle formatObjectVarargs = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
 				"formatObjectVarargs", MethodType.methodType(String.class, String.class, Object[].class));
 		testContext.registerFunction("formatObjectVarargs", formatObjectVarargs);
+
+		// #formatObjectVarargs(format, args...)
+		MethodHandle formatPrimitiveVarargs = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
+				"formatPrimitiveVarargs", MethodType.methodType(String.class, String.class, int[].class));
+		testContext.registerFunction("formatPrimitiveVarargs", formatPrimitiveVarargs);
 
 		// #add(int, int)
 		MethodHandle add = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
@@ -160,11 +167,23 @@ class TestScenarioCreator {
 		return i + "-" + Arrays.toString(strings);
 	}
 
+	public static String varargsObjectFunction(Object... args) {
+		return Arrays.toString(args);
+	}
+
 	public static String message(String template, String... args) {
 		return template.formatted((Object[]) args);
 	}
 
 	public static String formatObjectVarargs(String format, Object... args) {
+		return String.format(format, args);
+	}
+
+	public static String formatPrimitiveVarargs(String format, int... nums) {
+		Object[] args = new Object[nums.length];
+		for (int i = 0; i < nums.length; i++) {
+			args[i] = nums[i];
+		}
 		return String.format(format, args);
 	}
 

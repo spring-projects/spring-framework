@@ -35,6 +35,7 @@ import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.messaging.handler.annotation.MessagingPredicates.header;
 import static org.springframework.messaging.handler.annotation.MessagingPredicates.headerPlain;
 
@@ -111,8 +112,8 @@ class HeaderMethodArgumentResolverTests {
 
 	@Test
 	void resolveDefaultValueSystemProperty() throws Exception {
-		System.setProperty("systemProperty", "sysbar");
 		try {
+			System.setProperty("systemProperty", "sysbar");
 			Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
 			MethodParameter param = this.resolvable.annot(header("name", "#{systemProperties.systemProperty}")).arg();
 			Object result = resolver.resolveArgument(param, message);
@@ -125,12 +126,46 @@ class HeaderMethodArgumentResolverTests {
 
 	@Test
 	void resolveNameFromSystemProperty() throws Exception {
-		System.setProperty("systemProperty", "sysbar");
 		try {
+			System.setProperty("systemProperty", "sysbar");
 			Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeader("sysbar", "foo").build();
 			MethodParameter param = this.resolvable.annot(header("#{systemProperties.systemProperty}")).arg();
 			Object result = resolver.resolveArgument(param, message);
 			assertThat(result).isEqualTo("foo");
+		}
+		finally {
+			System.clearProperty("systemProperty");
+		}
+	}
+
+	@Test
+	void missingParameterFromSystemPropertyThroughPlaceholder() {
+		try {
+			String expected = "sysbar";
+			System.setProperty("systemProperty", expected);
+			Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
+			MethodParameter param = this.resolvable.annot(header("#{systemProperties.systemProperty}")).arg();
+
+			assertThatExceptionOfType(MessageHandlingException.class)
+					.isThrownBy(() -> resolver.resolveArgument(param, message))
+					.withMessageContaining(expected);
+		}
+		finally {
+			System.clearProperty("systemProperty");
+		}
+	}
+
+	@Test
+	void notNullablePrimitiveParameterFromSystemPropertyThroughPlaceholder() {
+		try {
+			String expected = "sysbar";
+			System.setProperty("systemProperty", expected);
+			Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
+			MethodParameter param = this.resolvable.annot(header("${systemProperty}").required(false)).arg();
+
+			assertThatIllegalStateException()
+					.isThrownBy(() -> resolver.resolveArgument(param, message))
+					.withMessageContaining(expected);
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -162,7 +197,8 @@ class HeaderMethodArgumentResolverTests {
 			@Header(name = "#{systemProperties.systemProperty}") String param4,
 			String param5,
 			@Header("foo") Optional<String> param6,
-			@Header("nativeHeaders.param1") String nativeHeaderParam1) {
+			@Header("nativeHeaders.param1") String nativeHeaderParam1,
+			@Header(name = "${systemProperty}", required = false) int primitivePlaceholderParam) {
 	}
 
 

@@ -46,7 +46,9 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Brian Clozel
  * @since 5.0
  * @see <a href="https://www.webjars.org">webjars.org</a>
+ * @deprecated as of Spring Framework 6.2 in favor of {@link LiteWebJarsResourceResolver}
  */
+@Deprecated(forRemoval = true)
 public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 	private static final String WEBJARS_LOCATION = "META-INF/resources/webjars/";

@@ -13,10 +13,10 @@ xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-runne
 [[integration-testing-annotations-junit4-ifprofilevalue]]
 == `@IfProfileValue`
 
-`@IfProfileValue` indicates that the annotated test is enabled for a specific testing
-environment. If the configured `ProfileValueSource` returns a matching `value` for the
-provided `name`, the test is enabled. Otherwise, the test is disabled and, effectively,
-ignored.
+`@IfProfileValue` indicates that the annotated test class or test method is enabled for a
+specific testing environment. If the configured `ProfileValueSource` returns a matching
+`value` for the provided `name`, the test is enabled. Otherwise, the test is disabled
+and, effectively, ignored.
 
 You can apply `@IfProfileValue` at the class level, the method level, or both.
 Class-level usage of `@IfProfileValue` takes precedence over method-level usage for any
@@ -90,11 +90,12 @@ Kotlin::
 [[integration-testing-annotations-junit4-profilevaluesourceconfiguration]]
 == `@ProfileValueSourceConfiguration`
 
-`@ProfileValueSourceConfiguration` is a class-level annotation that specifies what type
-of `ProfileValueSource` to use when retrieving profile values configured through the
-`@IfProfileValue` annotation. If `@ProfileValueSourceConfiguration` is not declared for a
-test, `SystemProfileValueSource` is used by default. The following example shows how to
-use `@ProfileValueSourceConfiguration`:
+`@ProfileValueSourceConfiguration` is an annotation that can be applied to a test class
+to specify what type of `ProfileValueSource` to use when retrieving profile values
+configured through the `@IfProfileValue` annotation. If
+`@ProfileValueSourceConfiguration` is not declared for a test, `SystemProfileValueSource`
+is used by default. The following example shows how to use
+`@ProfileValueSourceConfiguration`:
 
 [tabs]
 ======

@@ -136,7 +136,7 @@ final class AttributeMethods {
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException("Could not obtain annotation attribute value for " +
-							get(i).getName() + " declared on " + annotation.annotationType(), ex);
+							get(i).getName() + " declared on @" + getName(annotation.annotationType()), ex);
 				}
 			}
 		}
@@ -298,6 +298,11 @@ final class AttributeMethods {
 		}
 		String in = (annotationType != null ? " in annotation [" + annotationType.getName() + "]" : "");
 		return "attribute '" + attributeName + "'" + in;
+	}
+
+	private static String getName(Class<?> clazz) {
+		String canonicalName = clazz.getCanonicalName();
+		return (canonicalName != null ? canonicalName : clazz.getName());
 	}
 
 }

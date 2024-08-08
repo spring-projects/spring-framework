@@ -66,6 +66,8 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 
 	@Override
 	public void subscribe(Subscriber<? super DataBuffer> subscriber) {
+		// We don't use Assert.notNull(), because a NullPointerException is required
+		// for Reactive Streams compliance.
 		Objects.requireNonNull(subscriber, "Subscriber must not be null");
 
 		OutputStreamSubscription subscription = new OutputStreamSubscription(

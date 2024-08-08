@@ -472,6 +472,6 @@ class SelectionAndProjectionTests {
 
 
 	record NumberWrapper(Number value) {
-	};
+	}
 
 }

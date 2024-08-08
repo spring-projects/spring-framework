@@ -10,9 +10,9 @@ rebuilt for any subsequent test that requires a context with the same configurat
 metadata.
 
 You can use `@DirtiesContext` as both a class-level and a method-level annotation within
-the same class or class hierarchy. In such scenarios, the `ApplicationContext` is marked
-as dirty before or after any such annotated method as well as before or after the current
-test class, depending on the configured `methodMode` and `classMode`. When
+the same test class or test class hierarchy. In such scenarios, the `ApplicationContext`
+is marked as dirty before or after any such annotated method as well as before or after
+the current test class, depending on the configured `methodMode` and `classMode`. When
 `@DirtiesContext` is declared at both the class level and the method level, the
 configured modes from both annotations will be honored. For example, if the class mode is
 set to `BEFORE_EACH_TEST_METHOD` and the method mode is set to `AFTER_METHOD`, the

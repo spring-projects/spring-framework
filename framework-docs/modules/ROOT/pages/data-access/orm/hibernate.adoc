@@ -87,8 +87,8 @@ On `LocalSessionFactoryBean`, this is available through the `bootstrapExecutor`
 property. On the programmatic `LocalSessionFactoryBuilder`, there is an overloaded
 `buildSessionFactory` method that takes a bootstrap executor argument.
 
-As of Spring Framework 5.1, such a native Hibernate setup can also expose a JPA
-`EntityManagerFactory` for standard JPA interaction next to native Hibernate access.
+Such a native Hibernate setup can also expose a JPA `EntityManagerFactory` for standard
+JPA interaction next to native Hibernate access.
 See xref:data-access/orm/jpa.adoc#orm-jpa-hibernate[Native Hibernate Setup for JPA] for details.
 ====
 

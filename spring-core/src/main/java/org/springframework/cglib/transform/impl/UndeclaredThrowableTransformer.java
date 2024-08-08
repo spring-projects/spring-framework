@@ -27,7 +27,7 @@ import org.springframework.cglib.core.Signature;
 import org.springframework.cglib.core.TypeUtils;
 import org.springframework.cglib.transform.ClassEmitterTransformer;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings("rawtypes")
 public class UndeclaredThrowableTransformer extends ClassEmitterTransformer {
 
     private final Type wrapper;
@@ -55,10 +55,18 @@ public class UndeclaredThrowableTransformer extends ClassEmitterTransformer {
             return e;
         }
         return new CodeEmitter(e) {
-            private Block handler;
-            /* init */ {
-                handler = begin_block();
-            }
+	        private final boolean isConstructor = Constants.CONSTRUCTOR_NAME.equals(sig.getName());
+            private Block handler = begin_block();
+	        private boolean callToSuperSeen;
+	        @Override
+	        public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+		        super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+		        if (isConstructor && !callToSuperSeen && Constants.CONSTRUCTOR_NAME.equals(name)) {
+			        // we start the entry in the exception table after the call to super
+			        handler = begin_block();
+			        callToSuperSeen = true;
+		        }
+	        }
             @Override
             public void visitMaxs(int maxStack, int maxLocals) {
                 handler.end();

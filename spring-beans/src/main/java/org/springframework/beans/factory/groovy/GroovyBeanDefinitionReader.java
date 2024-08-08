@@ -701,6 +701,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		}
 	}
 
+	@SuppressWarnings("NullAway")
 	private GroovyDynamicElementReader createDynamicElementReader(String namespace) {
 		XmlReaderContext readerContext = this.groovyDslXmlBeanDefinitionReader.createReaderContext(
 				new DescriptiveResource("Groovy"));

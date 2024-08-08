@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 
 /**
@@ -196,6 +197,7 @@ public abstract class StreamUtils {
 	 * @throws IOException in case of I/O errors
 	 * @since 4.3
 	 */
+	@Contract("null -> fail")
 	public static int drain(@Nullable InputStream in) throws IOException {
 		if (in == null) {
 			return 0;

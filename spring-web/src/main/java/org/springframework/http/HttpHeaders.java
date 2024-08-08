@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -442,7 +441,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public HttpHeaders(MultiValueMap<String, String> headers) {
 		Assert.notNull(headers, "MultiValueMap must not be null");
-		this.headers = headers;
+		if (headers == EMPTY) {
+			this.headers = CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+		}
+		else if (headers instanceof ReadOnlyHttpHeaders readOnlyHttpHeaders) {
+			this.headers = readOnlyHttpHeaders.headers;
+		}
+		else {
+			this.headers = headers;
+		}
 	}
 
 
@@ -502,7 +509,20 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<Locale.LanguageRange> getAcceptLanguage() {
 		String value = getFirst(ACCEPT_LANGUAGE);
-		return (StringUtils.hasText(value) ? Locale.LanguageRange.parse(value) : Collections.emptyList());
+		if (StringUtils.hasText(value)) {
+			try {
+				return Locale.LanguageRange.parse(value);
+			}
+			catch (IllegalArgumentException ignored) {
+				String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+				for (int i = 0; i < tokens.length; i++) {
+					tokens[i] = StringUtils.trimTrailingCharacter(tokens[i], ';');
+				}
+				value = StringUtils.arrayToCommaDelimitedString(tokens);
+				return Locale.LanguageRange.parse(value);
+			}
+		}
+		return Collections.emptyList();
 	}
 
 	/**
@@ -756,7 +776,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String value = getFirst(ALLOW);
 		if (StringUtils.hasLength(value)) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-			Set<HttpMethod> result = new LinkedHashSet<>(tokens.length);
+			Set<HttpMethod> result = CollectionUtils.newLinkedHashSet(tokens.length);
 			for (String token : tokens) {
 				HttpMethod method = HttpMethod.valueOf(token);
 				result.add(method);
@@ -962,8 +982,13 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the length of the body in bytes, as specified by the
 	 * {@code Content-Length} header.
+	 * @param contentLength content length (greater than or equal to zero)
+	 * @throws IllegalArgumentException if the content length is negative
 	 */
 	public void setContentLength(long contentLength) {
+		if (contentLength < 0) {
+			throw new IllegalArgumentException("Content-Length must be a non-negative number");
+		}
 		set(CONTENT_LENGTH, Long.toString(contentLength));
 	}
 
@@ -1762,6 +1787,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return this.headers.toSingleValueMap();
 	}
 
+	@Override
+	public Map<String, String> asSingleValueMap() {
+		return this.headers.asSingleValueMap();
+	}
 
 	// Map implementation
 
@@ -1870,7 +1899,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers, if necessary.
 	 * <p>Also caches the parsed representations of the "Accept" and "Content-Type" headers.
 	 * @param headers the headers to expose
-	 * @return a read-only variant of the headers, or the original headers as-is
+	 * @return a read-only variant of the headers, or the original headers as-is if already read-only
 	 */
 	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
 		Assert.notNull(headers, "HttpHeaders must not be null");
@@ -1880,16 +1909,16 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Remove any read-only wrapper that may have been previously applied around
 	 * the given headers via {@link #readOnlyHttpHeaders(HttpHeaders)}.
+	 * <p>Once the writable instance is mutated, the read-only instance is likely
+	 * to be out of sync and should be discarded.
 	 * @param headers the headers to expose
 	 * @return a writable variant of the headers, or the original headers as-is
 	 * @since 5.1.1
+	 * @deprecated as of 6.2 in favor of {@link #HttpHeaders(MultiValueMap)}.
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public static HttpHeaders writableHttpHeaders(HttpHeaders headers) {
-		Assert.notNull(headers, "HttpHeaders must not be null");
-		if (headers == EMPTY) {
-			return new HttpHeaders();
-		}
-		return (headers instanceof ReadOnlyHttpHeaders ? new HttpHeaders(headers.headers) : headers);
+		return new HttpHeaders(headers);
 	}
 
 	/**

@@ -115,6 +115,27 @@ class MethodParameterKotlinTests {
 	}
 
 	@Test
+	fun `Parameter name for regular function`() {
+		val methodParameter = returnMethodParameter("nullable", 0)
+		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
+		assertThat(methodParameter.getParameterName()).isEqualTo("nullable")
+	}
+
+	@Test
+	fun `Parameter name for suspending function`() {
+		val methodParameter = returnMethodParameter("suspendFun", 0)
+		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
+		assertThat(methodParameter.getParameterName()).isEqualTo("p1")
+	}
+
+	@Test
+	fun `Continuation parameter name for suspending function`() {
+		val methodParameter = returnMethodParameter("suspendFun", 1)
+		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
+		assertThat(methodParameter.getParameterName()).isNull()
+	}
+
+	@Test
 	fun `Continuation parameter is optional`() {
 		val method = this::class.java.getDeclaredMethod("suspendFun", String::class.java, Continuation::class.java)
 		assertThat(MethodParameter(method, 0).isOptional).isFalse()
@@ -126,8 +147,8 @@ class MethodParameterKotlinTests {
 	private fun returnGenericParameterTypeName(funName: String) = returnGenericParameterType(funName).typeName
 	private fun returnGenericParameterTypeBoundName(funName: String) = (returnGenericParameterType(funName) as TypeVariable<*>).bounds[0].typeName
 
-	private fun returnMethodParameter(funName: String) =
-		MethodParameter(this::class.declaredFunctions.first { it.name == funName }.javaMethod!!, -1)
+	private fun returnMethodParameter(funName: String, parameterIndex: Int = -1) =
+		MethodParameter(this::class.declaredFunctions.first { it.name == funName }.javaMethod!!, parameterIndex)
 
 	@Suppress("unused_parameter")
 	fun nullable(nullable: String?): Int? = 42

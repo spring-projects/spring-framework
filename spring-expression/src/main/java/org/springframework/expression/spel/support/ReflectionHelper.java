@@ -38,7 +38,7 @@ import org.springframework.util.MethodInvoker;
 
 /**
  * Utility methods used by the reflection resolver code to discover the appropriate
- * methods/constructors and fields that should be used in expressions.
+ * methods, constructors, and fields that should be used in expressions.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -58,7 +58,7 @@ public abstract class ReflectionHelper {
 	 * or {@code null} if it was not a match
 	 */
 	@Nullable
-	static ArgumentsMatchInfo compareArguments(
+	static ArgumentsMatchKind compareArguments(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
 		Assert.isTrue(expectedArgTypes.size() == suppliedArgTypes.size(),
@@ -68,7 +68,7 @@ public abstract class ReflectionHelper {
 		for (int i = 0; i < expectedArgTypes.size() && match != null; i++) {
 			TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
 			TypeDescriptor expectedArg = expectedArgTypes.get(i);
-			// The user may supply null - and that will be ok unless a primitive is expected
+			// The user may supply null, and that will be OK unless a primitive is expected.
 			if (suppliedArg == null) {
 				if (expectedArg.isPrimitive()) {
 					match = null;
@@ -88,7 +88,7 @@ public abstract class ReflectionHelper {
 				}
 			}
 		}
-		return (match != null ? new ArgumentsMatchInfo(match) : null);
+		return match;
 	}
 
 	/**
@@ -143,11 +143,11 @@ public abstract class ReflectionHelper {
 	 * @param expectedArgTypes the types the method/constructor is expecting
 	 * @param suppliedArgTypes the types that are being supplied at the point of invocation
 	 * @param typeConverter a registered type converter
-	 * @return an {@code ArgumentsMatchInfo} object indicating what kind of match it was,
+	 * @return an {@code ArgumentsMatchKind} object indicating what kind of match it was,
 	 * or {@code null} if it was not a match
 	 */
 	@Nullable
-	static ArgumentsMatchInfo compareArgumentsVarargs(
+	static ArgumentsMatchKind compareArgumentsVarargs(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
 		Assert.isTrue(!CollectionUtils.isEmpty(expectedArgTypes),
@@ -231,9 +231,8 @@ public abstract class ReflectionHelper {
 			}
 		}
 
-		return (match != null ? new ArgumentsMatchInfo(match) : null);
+		return match;
 	}
-
 
 	/**
 	 * Convert the supplied set of arguments into the parameter types of the supplied
@@ -279,7 +278,8 @@ public abstract class ReflectionHelper {
 			for (int i = 0; i < arguments.length; i++) {
 				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forExecutable(executable, i));
 				Object argument = arguments[i];
-				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				arguments[i] = converter.convertValue(argument, sourceType, targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
 		}
@@ -288,7 +288,8 @@ public abstract class ReflectionHelper {
 			for (int i = 0; i < varargsPosition; i++) {
 				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forExecutable(executable, i));
 				Object argument = arguments[i];
-				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				arguments[i] = converter.convertValue(argument, sourceType, targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
 
@@ -309,16 +310,23 @@ public abstract class ReflectionHelper {
 					}
 				}
 				// If the argument type is assignable to the varargs component type, there is no need to
-				// convert it or wrap it in an array. For example, using StringToArrayConverter to
-				// convert a String containing a comma would result in the String being split and
-				// repackaged in an array when it should be used as-is.
-				else if (!sourceType.isAssignableTo(componentTypeDesc)) {
-					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
+				// convert it or wrap it in an array. For example, using StringToArrayConverter to convert
+				// a String containing a comma would result in the String being split and repackaged in an
+				// array when it should be used as-is. Similarly, if the argument is an array that is
+				// assignable to the varargs array type, there is no need to convert it. However, if the
+				// argument is a java.util.List, we let the TypeConverter convert the list to an array.
+				else if (!sourceType.isAssignableTo(componentTypeDesc) ||
+						(sourceType.isArray() && !sourceType.isAssignableTo(targetType)) ||
+						(argument instanceof List)) {
+
+					TypeDescriptor targetTypeToUse =
+							(sourceType.isArray() || argument instanceof List ? targetType : componentTypeDesc);
+					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetTypeToUse);
 				}
 				// Possible outcomes of the above if-else block:
 				// 1) the input argument was null, and nothing was done.
 				// 2) the input argument was null; the varargs component type is Optional; and the argument was converted to Optional.empty().
-				// 3) the input argument was correct type but not wrapped in an array, and nothing was done.
+				// 3) the input argument was the correct type but not wrapped in an array, and nothing was done.
 				// 4) the input argument was already compatible (i.e., array of valid type), and nothing was done.
 				// 5) the input argument was the wrong type and got converted and wrapped in an array.
 				if (argument != arguments[varargsPosition] &&
@@ -364,7 +372,8 @@ public abstract class ReflectionHelper {
 				TypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);
 
 				Object argument = arguments[i];
-				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				arguments[i] = converter.convertValue(argument, sourceType, targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
 		}
@@ -376,15 +385,19 @@ public abstract class ReflectionHelper {
 				TypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);
 
 				Object argument = arguments[i];
-				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				arguments[i] = converter.convertValue(argument, sourceType, targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
 
-			Class<?> varArgClass = methodHandleType.lastParameterType();
-			ResolvableType varArgResolvableType = ResolvableType.forClass(varArgClass);
-			TypeDescriptor targetType = new TypeDescriptor(varArgResolvableType, varArgClass.componentType(), null);
-			TypeDescriptor componentTypeDesc = targetType.getElementTypeDescriptor();
-			Assert.state(componentTypeDesc != null, "Component type must not be null for a varargs array");
+			Class<?> varargsArrayClass = methodHandleType.lastParameterType();
+			// We use the wrapper type for a primitive varargs array, since we eventually
+			// need an Object array in order to invoke the MethodHandle in
+			// FunctionReference#executeFunctionViaMethodHandle().
+			Class<?> varargsComponentClass = ClassUtils.resolvePrimitiveIfNecessary(varargsArrayClass.componentType());
+			TypeDescriptor varargsArrayType = TypeDescriptor.array(TypeDescriptor.valueOf(varargsComponentClass));
+			TypeDescriptor varargsComponentType = varargsArrayType.getElementTypeDescriptor();
+			Assert.state(varargsComponentType != null, "Component type must not be null for a varargs array");
 
 			// If the target is varargs and there is just one more argument, then convert it here.
 			if (varargsPosition == arguments.length - 1) {
@@ -392,24 +405,31 @@ public abstract class ReflectionHelper {
 				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
 				if (argument == null) {
 					// Perform the equivalent of GenericConversionService.convertNullSource() for a single argument.
-					if (componentTypeDesc.getObjectType() == Optional.class) {
+					if (varargsComponentType.getObjectType() == Optional.class) {
 						arguments[varargsPosition] = Optional.empty();
 						conversionOccurred = true;
 					}
 				}
 				// If the argument type is assignable to the varargs component type, there is no need to
-				// convert it or wrap it in an array. For example, using StringToArrayConverter to
-				// convert a String containing a comma would result in the String being split and
-				// repackaged in an array when it should be used as-is.
-				else if (!sourceType.isAssignableTo(componentTypeDesc)) {
-					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);
+				// convert it. For example, using StringToArrayConverter to convert a String containing a
+				// comma would result in the String being split and repackaged in an array when it should
+				// be used as-is. Similarly, if the argument is an array that is assignable to the varargs
+				// array type, there is no need to convert it. However, if the argument is a java.util.List,
+				// we let the TypeConverter convert the list to an array.
+				else if (!sourceType.isAssignableTo(varargsComponentType) ||
+						(sourceType.isArray() && !sourceType.isAssignableTo(varargsArrayType)) ||
+						(argument instanceof List)) {
+
+					TypeDescriptor targetTypeToUse =
+							(sourceType.isArray() || argument instanceof List ? varargsArrayType : varargsComponentType);
+					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetTypeToUse);
 				}
 				// Possible outcomes of the above if-else block:
 				// 1) the input argument was null, and nothing was done.
 				// 2) the input argument was null; the varargs component type is Optional; and the argument was converted to Optional.empty().
-				// 3) the input argument was correct type but not wrapped in an array, and nothing was done.
-				// 4) the input argument was already compatible (i.e., array of valid type), and nothing was done.
-				// 5) the input argument was the wrong type and got converted and wrapped in an array.
+				// 3) the input argument was the correct type but not wrapped in an array, and nothing was done.
+				// 4) the input argument was already compatible (i.e., an Object array of valid type), and nothing was done.
+				// 5) the input argument was the wrong type and got converted as explained in the comments above.
 				if (argument != arguments[varargsPosition] &&
 						!isFirstEntryInArray(argument, arguments[varargsPosition])) {
 					conversionOccurred = true; // case 5
@@ -419,7 +439,8 @@ public abstract class ReflectionHelper {
 			else {
 				for (int i = varargsPosition; i < arguments.length; i++) {
 					Object argument = arguments[i];
-					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), componentTypeDesc);
+					TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+					arguments[i] = converter.convertValue(argument, sourceType, varargsComponentType);
 					conversionOccurred |= (argument != arguments[i]);
 				}
 			}
@@ -496,45 +517,37 @@ public abstract class ReflectionHelper {
 
 
 	/**
-	 * Arguments match kinds.
+	 * {@code ArgumentsMatchKind} describes what kind of match was achieved between two sets
+	 * of arguments: the set that a method/constructor is expecting and the set that is being
+	 * supplied at the point of invocation.
 	 */
 	enum ArgumentsMatchKind {
 
-		/** An exact match is where the parameter types exactly match what the method/constructor is expecting. */
+		/**
+		 * An exact match is where the parameter types exactly match what the method/constructor is expecting.
+		 */
 		EXACT,
 
-		/** A close match is where the parameter types either exactly match or are assignment-compatible. */
+		/**
+		 * A close match is where the parameter types either exactly match or are assignment-compatible.
+		 */
 		CLOSE,
 
-		/** A conversion match is where the type converter must be used to transform some of the parameter types. */
-		REQUIRES_CONVERSION
-	}
-
-
-	/**
-	 * An instance of {@code ArgumentsMatchInfo} describes what kind of match was achieved
-	 * between two sets of arguments - the set that a method/constructor is expecting
-	 * and the set that is being supplied at the point of invocation.
-	 *
-	 * @param kind the kind of match that was achieved
-	 */
-	record ArgumentsMatchInfo(ArgumentsMatchKind kind) {
+		/**
+		 * A conversion match is where the type converter must be used to transform some of the parameter types.
+		 */
+		REQUIRES_CONVERSION;
 
 		public boolean isExactMatch() {
-			return (this.kind == ArgumentsMatchKind.EXACT);
+			return (this == EXACT);
 		}
 
 		public boolean isCloseMatch() {
-			return (this.kind == ArgumentsMatchKind.CLOSE);
+			return (this == CLOSE);
 		}
 
 		public boolean isMatchRequiringConversion() {
-			return (this.kind == ArgumentsMatchKind.REQUIRES_CONVERSION);
-		}
-
-		@Override
-		public String toString() {
-			return "ArgumentsMatchInfo: " + this.kind;
+			return (this == REQUIRES_CONVERSION);
 		}
 	}
 

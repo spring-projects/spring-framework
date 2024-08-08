@@ -172,6 +172,7 @@ public abstract class ReflectionTestUtils {
 	 * @see ReflectionUtils#setField(Field, Object, Object)
 	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
+	@SuppressWarnings("NullAway")
 	public static void setField(@Nullable Object targetObject, @Nullable Class<?> targetClass,
 			@Nullable String name, @Nullable Object value, @Nullable Class<?> type) {
 
@@ -259,6 +260,7 @@ public abstract class ReflectionTestUtils {
 	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public static Object getField(@Nullable Object targetObject, @Nullable Class<?> targetClass, String name) {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");

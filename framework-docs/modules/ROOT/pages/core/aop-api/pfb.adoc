@@ -205,7 +205,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-	val person = factory.getBean("person") as Person;
+	val person = factory.getBean("person") as Person
 ----
 ======
 

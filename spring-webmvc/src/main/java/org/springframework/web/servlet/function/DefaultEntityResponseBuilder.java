@@ -41,6 +41,7 @@ import org.reactivestreams.Subscription;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
@@ -54,6 +55,7 @@ import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -309,7 +311,14 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 						return;
 					}
 				}
-				if (messageConverter.canWrite(entityClass, contentType)) {
+				else if (messageConverter instanceof SmartHttpMessageConverter smartMessageConverter) {
+					ResolvableType resolvableType = ResolvableType.forType(entityType);
+					if (smartMessageConverter.canWrite(resolvableType, entityClass, contentType)) {
+						smartMessageConverter.write(entity, resolvableType, contentType, serverResponse, null);
+						return;
+					}
+				}
+				else if (messageConverter.canWrite(entityClass, contentType)) {
 					((HttpMessageConverter<Object>) messageConverter).write(entity, contentType, serverResponse);
 					return;
 				}

@@ -18,6 +18,7 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 
+import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.observation.ServerRequestObservationContext;
+import org.springframework.util.Assert;
 import org.springframework.web.testfixture.servlet.MockAsyncContext;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -85,7 +87,7 @@ class ServerHttpObservationFilterTests {
 
 	@Test
 	void filterShouldAcceptNoOpObservationContext() throws Exception {
-		ServerHttpObservationFilter filter = new ServerHttpObservationFilter(ObservationRegistry.NOOP);
+		this.filter = new ServerHttpObservationFilter(ObservationRegistry.NOOP);
 		filter.doFilter(this.request, this.response, this.mockFilterChain);
 
 		ServerRequestObservationContext context = (ServerRequestObservationContext) this.request
@@ -127,6 +129,14 @@ class ServerHttpObservationFilterTests {
 		})).isInstanceOf(ServletException.class);
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR")
 				.hasLowCardinalityKeyValue("status", "500");
+	}
+
+	@Test
+	void customFilterShouldCallScopeOpened() throws Exception {
+		this.filter = new CustomObservationFilter(this.observationRegistry);
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+
+		assertThat(this.response.getHeader("X-Trace-Id")).isEqualTo("badc0ff33");
 	}
 
 	@Test
@@ -184,6 +194,21 @@ class ServerHttpObservationFilterTests {
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			assertThat(this.observationRegistry.getCurrentObservation()).isNotNull();
+		}
+	}
+
+	static class CustomObservationFilter extends ServerHttpObservationFilter {
+
+		public CustomObservationFilter(ObservationRegistry observationRegistry) {
+			super(observationRegistry);
+		}
+
+		@Override
+		protected void onScopeOpened(Observation.Scope scope, HttpServletRequest request, HttpServletResponse response) {
+			Assert.notNull(scope, "scope must not be null");
+			Assert.notNull(request, "request must not be null");
+			Assert.notNull(response, "response must not be null");
+			response.setHeader("X-Trace-Id", "badc0ff33");
 		}
 	}
 

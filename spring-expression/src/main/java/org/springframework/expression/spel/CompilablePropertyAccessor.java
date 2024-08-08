@@ -41,7 +41,7 @@ public interface CompilablePropertyAccessor extends PropertyAccessor, Opcodes {
 	Class<?> getPropertyType();
 
 	/**
-	 * Generate the bytecode the performs the access operation into the specified
+	 * Generate the bytecode that performs the access operation into the specified
 	 * {@link MethodVisitor} using context information from the {@link CodeFlow}
 	 * where necessary.
 	 * @param propertyName the name of the property

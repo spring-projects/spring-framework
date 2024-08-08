@@ -45,7 +45,7 @@ import org.springframework.lang.Nullable;
  * @param <V> the type of the cached values, does not allow null values
  * @see #get(Object)
  */
-@SuppressWarnings({"unchecked"})
+@SuppressWarnings({"unchecked", "NullAway"})
 public final class ConcurrentLruCache<K, V> {
 
 	private final int capacity;

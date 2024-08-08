@@ -111,7 +111,7 @@ class SimpMessagingTemplateTests {
 	void convertAndSendWithCustomHeaderNonNative() {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("key", "value");
-		headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, new LinkedMultiValueMap<String, String>());
+		headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS, new LinkedMultiValueMap<>());
 		this.messagingTemplate.convertAndSend("/foo", "data", headers);
 
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();

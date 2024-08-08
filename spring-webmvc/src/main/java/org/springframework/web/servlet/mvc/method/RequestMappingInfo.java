@@ -490,7 +490,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		return this.hashCode;
 	}
 
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	private static int calculateHashCode(
 			@Nullable PathPatternsRequestCondition pathPatterns, @Nullable PatternsRequestCondition patterns,
 			RequestMethodsRequestCondition methods, ParamsRequestCondition params, HeadersRequestCondition headers,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.request;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -45,6 +44,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Stephane Nicoll
  * @since 3.2
  */
 public class MockMultipartHttpServletRequestBuilder extends MockHttpServletRequestBuilder {
@@ -60,40 +60,19 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 * <p>For other ways to initialize a {@code MockMultipartHttpServletRequest},
 	 * see {@link #with(RequestPostProcessor)} and the
 	 * {@link RequestPostProcessor} extension point.
-	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param uriVariables zero or more URI variables
+	 * @param httpMethod the HTTP method (GET, POST, etc.)
 	 */
-	MockMultipartHttpServletRequestBuilder(String urlTemplate, Object... uriVariables) {
-		this(HttpMethod.POST, urlTemplate, uriVariables);
-	}
-
-	/**
-	 * Variant of {@link #MockMultipartHttpServletRequestBuilder(String, Object...)}
-	 * that also accepts an {@link HttpMethod}.
-	 * @since 5.3.22
-	 */
-	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod, String urlTemplate, Object... uriVariables) {
-		super(httpMethod, urlTemplate, uriVariables);
+	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod) {
+		super(httpMethod);
 		super.contentType(MediaType.MULTIPART_FORM_DATA);
 	}
 
 	/**
-	 * Variant of {@link #MockMultipartHttpServletRequestBuilder(String, Object...)}
-	 * with a {@link URI}.
-	 * @since 4.0.3
+	 * Variant of {@link #MockMultipartHttpServletRequestBuilder(HttpMethod)}
+	 * that defaults to {@link HttpMethod#POST}.
 	 */
-	MockMultipartHttpServletRequestBuilder(URI uri) {
-		this(HttpMethod.POST, uri);
-	}
-
-	/**
-	 * Variant of {@link #MockMultipartHttpServletRequestBuilder(String, Object...)}
-	 * with a {@link URI} and an {@link HttpMethod}.
-	 * @since 5.3.21
-	 */
-	MockMultipartHttpServletRequestBuilder(HttpMethod httpMethod, URI uri) {
-		super(httpMethod, uri);
-		super.contentType(MediaType.MULTIPART_FORM_DATA);
+	MockMultipartHttpServletRequestBuilder() {
+		this(HttpMethod.POST);
 	}
 
 

@@ -36,13 +36,16 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.InstanceOfAssertFactories.ARRAY;
 
 /**
  * Tests for {@link RequestHeaderMethodArgumentResolver}.
@@ -64,6 +67,7 @@ class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramDate;
 	private MethodParameter paramInstant;
 	private MethodParameter paramMono;
+	private MethodParameter primitivePlaceholderParam;
 
 
 	@BeforeEach
@@ -87,6 +91,7 @@ class RequestHeaderMethodArgumentResolverTests {
 		this.paramDate = new SynthesizingMethodParameter(method, 6);
 		this.paramInstant = new SynthesizingMethodParameter(method, 7);
 		this.paramMono = new SynthesizingMethodParameter(method, 8);
+		this.primitivePlaceholderParam = new SynthesizingMethodParameter(method, 9);
 	}
 
 
@@ -95,9 +100,9 @@ class RequestHeaderMethodArgumentResolverTests {
 		assertThat(resolver.supportsParameter(paramNamedDefaultValueStringHeader)).as("String parameter not supported").isTrue();
 		assertThat(resolver.supportsParameter(paramNamedValueStringArray)).as("String array parameter not supported").isTrue();
 		assertThat(resolver.supportsParameter(paramNamedValueMap)).as("non-@RequestParam parameter supported").isFalse();
-		assertThatIllegalStateException().isThrownBy(() ->
-				this.resolver.supportsParameter(this.paramMono))
-			.withMessageStartingWith("RequestHeaderMethodArgumentResolver does not support reactive type wrapper");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.resolver.supportsParameter(this.paramMono))
+				.withMessageStartingWith("RequestHeaderMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test
@@ -108,10 +113,7 @@ class RequestHeaderMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.paramNamedDefaultValueStringHeader, this.bindingContext, exchange);
 
-		Object result = mono.block();
-		boolean condition = result instanceof String;
-		assertThat(condition).isTrue();
-		assertThat(result).isEqualTo(expected);
+		assertThat(mono.block()).isEqualTo(expected);
 	}
 
 	@Test
@@ -123,9 +125,7 @@ class RequestHeaderMethodArgumentResolverTests {
 				this.paramNamedValueStringArray, this.bindingContext, exchange);
 
 		Object result = mono.block();
-		boolean condition = result instanceof String[];
-		assertThat(condition).isTrue();
-		assertThat((String[]) result).isEqualTo(new String[] {"foo", "bar"});
+		assertThat(result).asInstanceOf(ARRAY).containsExactly("foo", "bar");
 	}
 
 	@Test
@@ -134,24 +134,18 @@ class RequestHeaderMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.paramNamedDefaultValueStringHeader, this.bindingContext, exchange);
 
-		Object result = mono.block();
-		boolean condition = result instanceof String;
-		assertThat(condition).isTrue();
-		assertThat(result).isEqualTo("bar");
+		assertThat(mono.block()).isEqualTo("bar");
 	}
 
 	@Test
 	void resolveDefaultValueFromSystemProperty() {
-		System.setProperty("systemProperty", "bar");
 		try {
+			System.setProperty("systemProperty", "bar");
 			Mono<Object> mono = this.resolver.resolveArgument(
 					this.paramSystemProperty, this.bindingContext,
 					MockServerWebExchange.from(MockServerHttpRequest.get("/")));
 
-			Object result = mono.block();
-			boolean condition = result instanceof String;
-			assertThat(condition).isTrue();
-			assertThat(result).isEqualTo("bar");
+			assertThat(mono.block()).isEqualTo("bar");
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -164,15 +158,12 @@ class RequestHeaderMethodArgumentResolverTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").header("bar", expected).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
-		System.setProperty("systemProperty", "bar");
 		try {
+			System.setProperty("systemProperty", "bar");
 			Mono<Object> mono = this.resolver.resolveArgument(
 					this.paramResolvedNameWithExpression, this.bindingContext, exchange);
 
-			Object result = mono.block();
-			boolean condition = result instanceof String;
-			assertThat(condition).isTrue();
-			assertThat(result).isEqualTo(expected);
+			assertThat(mono.block()).isEqualTo(expected);
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -185,15 +176,52 @@ class RequestHeaderMethodArgumentResolverTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").header("bar", expected).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
-		System.setProperty("systemProperty", "bar");
 		try {
+			System.setProperty("systemProperty", "bar");
 			Mono<Object> mono = this.resolver.resolveArgument(
 					this.paramResolvedNameWithPlaceholder, this.bindingContext, exchange);
 
-			Object result = mono.block();
-			boolean condition = result instanceof String;
-			assertThat(condition).isTrue();
-			assertThat(result).isEqualTo(expected);
+			assertThat(mono.block()).isEqualTo(expected);
+		}
+		finally {
+			System.clearProperty("systemProperty");
+		}
+	}
+
+	@Test
+	void missingParameterFromSystemPropertyThroughPlaceholder() {
+		String expected = "sysbar";
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		try {
+			System.setProperty("systemProperty", expected);
+			Mono<Object> mono = this.resolver.resolveArgument(
+					this.paramResolvedNameWithExpression, this.bindingContext, exchange);
+
+			assertThatExceptionOfType(MissingRequestValueException.class)
+					.isThrownBy(() -> mono.block())
+					.extracting("name").isEqualTo(expected);
+		}
+		finally {
+			System.clearProperty("systemProperty");
+		}
+	}
+
+	@Test
+	void notNullablePrimitiveParameterFromSystemPropertyThroughPlaceholder() {
+		String expected = "sysbar";
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+
+		try {
+			System.setProperty("systemProperty", expected);
+			Mono<Object> mono = this.resolver.resolveArgument(
+					this.primitivePlaceholderParam, this.bindingContext, exchange);
+
+			assertThatIllegalStateException()
+					.isThrownBy(() -> mono.block())
+					.withMessageContaining(expected);
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -222,8 +250,6 @@ class RequestHeaderMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramDate, this.bindingContext, exchange);
 		Object result = mono.block();
 
-		boolean condition = result instanceof Date;
-		assertThat(condition).isTrue();
 		assertThat(result).isEqualTo(new Date(rfc1123val));
 	}
 
@@ -236,8 +262,6 @@ class RequestHeaderMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramInstant, this.bindingContext, exchange);
 		Object result = mono.block();
 
-		boolean condition = result instanceof Instant;
-		assertThat(condition).isTrue();
 		assertThat(result).isEqualTo(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(rfc1123val)));
 	}
 
@@ -252,7 +276,8 @@ class RequestHeaderMethodArgumentResolverTests {
 			@RequestHeader("name") Map<?, ?> unsupported,
 			@RequestHeader("name") Date dateParam,
 			@RequestHeader("name") Instant instantParam,
-			@RequestHeader Mono<String> alsoNotSupported) {
+			@RequestHeader Mono<String> alsoNotSupported,
+			@RequestHeader(value = "${systemProperty}", required = false) int primitivePlaceholderParam) {
 	}
 
 }

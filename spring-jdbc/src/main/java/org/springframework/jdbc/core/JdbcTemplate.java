@@ -907,11 +907,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Deprecated
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, @Nullable Object[] args, Class<T> requiredType) throws DataAccessException {
 		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
 	}
 
 	@Override
+	@Nullable
 	public <T> T queryForObject(String sql, Class<T> requiredType, @Nullable Object... args) throws DataAccessException {
 		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
 	}
@@ -1114,7 +1116,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 								int items = n - ((n % batchSize == 0) ? n / batchSize - 1 : (n / batchSize)) * batchSize;
 								logger.trace("Sending SQL batch update #" + batchIdx + " with " + items + " items");
 							}
-							rowsAffected.add(ps.executeBatch());
+							try {
+								int[] updateCounts = ps.executeBatch();
+								rowsAffected.add(updateCounts);
+							}
+							catch (BatchUpdateException ex) {
+								throw new AggregatedBatchUpdateException(rowsAffected.toArray(int[][]::new), ex);
+							}
 						}
 					}
 					else {

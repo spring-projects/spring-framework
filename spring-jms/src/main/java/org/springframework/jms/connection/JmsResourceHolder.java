@@ -222,6 +222,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * for the given connection, or {@code null} if none.
 	 */
 	@Nullable
+	@SuppressWarnings("NullAway")
 	public <S extends Session> S getSession(Class<S> sessionType, @Nullable Connection connection) {
 		Deque<Session> sessions =
 				(connection != null ? this.sessionsPerConnection.get(connection) : this.sessions);

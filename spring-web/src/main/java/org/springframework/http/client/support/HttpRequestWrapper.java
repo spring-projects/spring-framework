@@ -17,6 +17,7 @@
 package org.springframework.http.client.support;
 
 import java.net.URI;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -68,6 +69,14 @@ public class HttpRequestWrapper implements HttpRequest {
 	@Override
 	public URI getURI() {
 		return this.request.getURI();
+	}
+
+	/**
+	 * Return the attributes of the wrapped request.
+	 */
+	@Override
+	public Map<String, Object> getAttributes() {
+		return this.request.getAttributes();
 	}
 
 	/**

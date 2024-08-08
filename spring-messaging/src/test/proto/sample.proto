@@ -1,4 +1,4 @@
-option java_package = "org.springframework.protobuf.messaging";
+option java_package = "org.springframework.messaging.protobuf";
 option java_outer_classname = "OuterSample";
 option java_multiple_files = true;
 

@@ -3,8 +3,8 @@
 
 [.small]#xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[See equivalent in the Servlet stack]#
 
-The `@ModelAttribute` method parameter annotation binds request parameters onto a model
-object. For example:
+The `@ModelAttribute` method parameter annotation binds form data, query parameters,
+URI path variables, and request headers onto a model object. For example:
 
 [tabs]
 ======
@@ -26,6 +26,10 @@ Kotlin::
 ----
 <1> Bind to an instance of `Pet`.
 ======
+
+Form data and query parameters take precedence over URI variables and headers, which are
+included only if they don't override request parameters with the same name. Dashes are
+stripped from header names.
 
 The `Pet` instance may be:
 
@@ -76,6 +80,10 @@ Kotlin::
 NOTE: The `@BindParam` may also be placed on the fields that correspond to constructor
 parameters. While `@BindParam` is supported out of the box, you can also use a
 different annotation by setting a `DataBinder.NameResolver` on `DataBinder`
+
+Constructor binding supports `List`, `Map`, and array arguments either converted from
+a single string, e.g. comma-separated list, or based on indexed keys such as
+`accounts[2].name` or `account[KEY].name`.
 
 WebFlux, unlike Spring MVC, supports reactive types in the model, e.g. `Mono<Account>`.
 You can declare a `@ModelAttribute` argument with or without a reactive type wrapper, and

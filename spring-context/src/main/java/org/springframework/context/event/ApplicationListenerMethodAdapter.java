@@ -67,6 +67,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 4.2
  */
 public class ApplicationListenerMethodAdapter implements GenericApplicationListener {
@@ -89,6 +90,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	@Nullable
 	private final String condition;
+
+	private final boolean defaultExecution;
 
 	private final int order;
 
@@ -118,6 +121,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		EventListener ann = AnnotatedElementUtils.findMergedAnnotation(this.targetMethod, EventListener.class);
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);
+		this.defaultExecution = (ann == null || ann.defaultExecution());
 		this.order = resolveOrder(this.targetMethod);
 		String id = (ann != null ? ann.id() : "");
 		this.listenerId = (!id.isEmpty() ? id : null);
@@ -165,7 +169,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		processEvent(event);
+		if (isDefaultExecution()) {
+			processEvent(event);
+		}
 	}
 
 	@Override
@@ -177,11 +183,12 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 				return true;
 			}
 			if (PayloadApplicationEvent.class.isAssignableFrom(eventType.toClass())) {
-				if (eventType.hasUnresolvableGenerics()) {
-					return true;
-				}
 				ResolvableType payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();
 				if (declaredEventType.isAssignableFrom(payloadType)) {
+					return true;
+				}
+				if (payloadType.resolve() == null) {
+					// Always accept such event when the type is erased
 					return true;
 				}
 			}
@@ -223,6 +230,16 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 			sj.add(paramType.getName());
 		}
 		return ClassUtils.getQualifiedMethodName(method) + sj;
+	}
+
+	/**
+	 * Return whether default execution is applicable for the target listener.
+	 * @since 6.2
+	 * @see #onApplicationEvent
+	 * @see EventListener#defaultExecution()
+	 */
+	protected boolean isDefaultExecution() {
+		return this.defaultExecution;
 	}
 
 
@@ -443,6 +460,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 	}
 
+	@SuppressWarnings("NullAway")
 	private String getInvocationErrorMessage(Object bean, @Nullable String message, @Nullable Object[] resolvedArgs) {
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(bean, message));
 		sb.append("Resolved arguments: \n");

@@ -366,8 +366,8 @@ automatically inherit the `@ActiveProfiles` configuration from the base class. I
 following example, the declaration of `@ActiveProfiles` (as well as other annotations)
 has been moved to an abstract superclass, `AbstractIntegrationTest`:
 
-NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
-classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
+NOTE: Test configuration may also be inherited from enclosing classes. See
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
 
 [tabs]
 ======

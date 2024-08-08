@@ -70,11 +70,30 @@ class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		List<String> cookie0 = splitCookie(headerValues.get(0));
 		assertThat(cookie0.remove("SID=31d4d96e407aad42")).as("SID").isTrue();
 		assertThat(cookie0.stream().map(String::toLowerCase))
-				.containsExactlyInAnyOrder("path=/", "secure", "httponly");
+				.contains("path=/", "secure", "httponly");
 		List<String> cookie1 = splitCookie(headerValues.get(1));
 		assertThat(cookie1.remove("lang=en-US")).as("lang").isTrue();
 		assertThat(cookie1.stream().map(String::toLowerCase))
 				.containsExactlyInAnyOrder("path=/", "domain=example.com");
+	}
+
+	@ParameterizedHttpServerTest
+	public void partitionedAttributeTest(HttpServer httpServer) throws Exception {
+		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow does not support Partitioned cookies");
+		startServer(httpServer);
+
+		URI url = URI.create("http://localhost:" + port);
+		String header = "SID=31d4d96e407aad42; lang=en-US";
+		ResponseEntity<Void> response = new RestTemplate().exchange(
+				RequestEntity.get(url).header("Cookie", header).build(), Void.class);
+
+		List<String> headerValues = response.getHeaders().get("Set-Cookie");
+		assertThat(headerValues).hasSize(2);
+
+		List<String> cookie0 = splitCookie(headerValues.get(0));
+		assertThat(cookie0.remove("SID=31d4d96e407aad42")).as("SID").isTrue();
+		assertThat(cookie0.stream().map(String::toLowerCase))
+				.contains("partitioned");
 	}
 
 	@ParameterizedHttpServerTest
@@ -116,7 +135,7 @@ class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 			this.requestCookies.size(); // Cause lazy loading
 
 			response.getCookies().add("SID", ResponseCookie.from("SID", "31d4d96e407aad42")
-					.path("/").secure(true).httpOnly(true).build());
+					.path("/").secure(true).httpOnly(true).partitioned(true).build());
 			response.getCookies().add("lang", ResponseCookie.from("lang", "en-US")
 					.domain("example.com").path("/").build());
 

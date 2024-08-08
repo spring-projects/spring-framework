@@ -39,7 +39,7 @@ public class MockMultipartHttpServletRequestBuilderTests {
 	@Test // gh-26166
 	void addFileAndParts() throws Exception {
 		MockMultipartHttpServletRequest mockRequest =
-				(MockMultipartHttpServletRequest) new MockMultipartHttpServletRequestBuilder("/upload")
+				(MockMultipartHttpServletRequest) createBuilder("/upload")
 						.file(new MockMultipartFile("file", "test.txt", "text/plain", "Test".getBytes(UTF_8)))
 						.part(new MockPart("name", "value".getBytes(UTF_8)))
 						.buildRequest(new MockServletContext());
@@ -55,7 +55,7 @@ public class MockMultipartHttpServletRequestBuilderTests {
 		jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		MockMultipartHttpServletRequest mockRequest =
-				(MockMultipartHttpServletRequest) new MockMultipartHttpServletRequestBuilder("/upload")
+				(MockMultipartHttpServletRequest) createBuilder("/upload")
 						.file(new MockMultipartFile("file", "Test".getBytes(UTF_8)))
 						.part(jsonPart)
 						.buildRequest(new MockServletContext());
@@ -68,9 +68,9 @@ public class MockMultipartHttpServletRequestBuilderTests {
 
 	@Test
 	void mergeAndBuild() {
-		MockHttpServletRequestBuilder parent = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
+		MockHttpServletRequestBuilder parent = new MockHttpServletRequestBuilder(HttpMethod.GET).uri("/");
 		parent.characterEncoding("UTF-8");
-		Object result = new MockMultipartHttpServletRequestBuilder("/fileUpload").merge(parent);
+		Object result = createBuilder("/fileUpload").merge(parent);
 
 		assertThat(result).isNotNull();
 		assertThat(result.getClass()).isEqualTo(MockMultipartHttpServletRequestBuilder.class);
@@ -78,6 +78,12 @@ public class MockMultipartHttpServletRequestBuilderTests {
 		MockMultipartHttpServletRequestBuilder builder = (MockMultipartHttpServletRequestBuilder) result;
 		MockHttpServletRequest request = builder.buildRequest(new MockServletContext());
 		assertThat(request.getCharacterEncoding()).isEqualTo("UTF-8");
+	}
+
+	private MockMultipartHttpServletRequestBuilder createBuilder(String uri) {
+		MockMultipartHttpServletRequestBuilder builder = new MockMultipartHttpServletRequestBuilder();
+		builder.uri(uri);
+		return builder;
 	}
 
 }

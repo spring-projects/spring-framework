@@ -45,6 +45,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.DispatcherHandler;
+import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.TomcatWebSocketClient;
 import org.springframework.web.reactive.socket.client.UndertowWebSocketClient;
@@ -53,6 +54,7 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.WebSocketService;
 import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
 import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
+import org.springframework.web.reactive.socket.server.upgrade.JettyCoreRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNetty2RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
@@ -61,6 +63,7 @@ import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpg
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyCoreHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
@@ -90,6 +93,7 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 
 		WebSocketClient[] clients = new WebSocketClient[] {
 				new TomcatWebSocketClient(),
+				new JettyWebSocketClient(),
 				new ReactorNettyWebSocketClient(),
 				new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))
 		};
@@ -97,6 +101,7 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 		Map<HttpServer, Class<?>> servers = new LinkedHashMap<>();
 		servers.put(new TomcatHttpServer(TMP_DIR.getAbsolutePath(), WsContextListener.class), TomcatConfig.class);
 		servers.put(new JettyHttpServer(), JettyConfig.class);
+		servers.put(new JettyCoreHttpServer(), JettyCoreConfig.class);
 		servers.put(new ReactorHttpServer(), ReactorNettyConfig.class);
 		servers.put(new UndertowHttpServer(), UndertowConfig.class);
 
@@ -241,4 +246,12 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 		}
 	}
 
+	@Configuration
+	static class JettyCoreConfig extends AbstractHandlerAdapterConfig {
+
+		@Override
+		protected RequestUpgradeStrategy getUpgradeStrategy() {
+			return new JettyCoreRequestUpgradeStrategy();
+		}
+	}
 }

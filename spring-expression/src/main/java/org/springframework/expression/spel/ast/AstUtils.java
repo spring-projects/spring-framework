@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,59 +17,98 @@
 package org.springframework.expression.spel.ast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TargetedAccessor;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 
 /**
- * Utilities methods for use in the Ast classes.
+ * Utility methods for use in the AST classes.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 3.0.2
  */
-public abstract class AstUtils {
+abstract class AstUtils {
 
 	/**
-	 * Determines the set of property resolvers that should be used to try and access a
-	 * property on the specified target type. The resolvers are considered to be in an
-	 * ordered list, however in the returned list any that are exact matches for the input
-	 * target type (as opposed to 'general' resolvers that could work for any type) are
-	 * placed at the start of the list. In addition, there are specific resolvers that
-	 * exactly name the class in question and resolvers that name a specific class but it
-	 * is a supertype of the class we have. These are put at the end of the specific resolvers
-	 * set and will be tried after exactly matching accessors but before generic accessors.
-	 * @param targetType the type upon which property access is being attempted
-	 * @return a list of resolvers that should be tried in order to access the property
+	 * Determine the set of accessors that should be used to try to access an
+	 * element on the specified target object.
+	 * <p>Delegates to {@link #getAccessorsToTry(Class, List)} with the type of
+	 * the supplied target object.
+	 * @param targetObject the object upon which element access is being attempted
+	 * @param accessors the list of element accessors to process
+	 * @return a list of accessors that should be tried in order to access the
+	 * element on the specified target type, or an empty list if no suitable
+	 * accessor could be found
+	 * @since 6.2
 	 */
-	public static List<PropertyAccessor> getPropertyAccessorsToTry(
-			@Nullable Class<?> targetType, List<PropertyAccessor> propertyAccessors) {
+	static <T extends TargetedAccessor> List<T> getAccessorsToTry(
+			@Nullable Object targetObject, List<T> accessors) {
 
-		List<PropertyAccessor> specificAccessors = new ArrayList<>();
-		List<PropertyAccessor> generalAccessors = new ArrayList<>();
-		for (PropertyAccessor resolver : propertyAccessors) {
-			Class<?>[] targets = resolver.getSpecificTargetClasses();
-			if (targets == null) {  // generic resolver that says it can be used for any type
-				generalAccessors.add(resolver);
+		Class<?> targetType = (targetObject != null ? targetObject.getClass() : null);
+		return getAccessorsToTry(targetType, accessors);
+	}
+
+	/**
+	 * Determine the set of accessors that should be used to try to access an
+	 * element on the specified target type.
+	 * <p>The accessors are considered to be in an ordered list; however, in the
+	 * returned list any accessors that are exact matches for the input target
+	 * type (as opposed to 'generic' accessors that could work for any type) are
+	 * placed at the start of the list. In addition, if there are specific
+	 * accessors that exactly name the class in question and accessors that name
+	 * a specific class which is a supertype of the class in question, the latter
+	 * are put at the end of the specific accessors set and will be tried after
+	 * exactly matching accessors but before generic accessors.
+	 * @param targetType the type upon which element access is being attempted
+	 * @param accessors the list of element accessors to process
+	 * @return a list of accessors that should be tried in order to access the
+	 * element on the specified target type, or an empty list if no suitable
+	 * accessor could be found
+	 * @since 6.2
+	 */
+	static <T extends TargetedAccessor> List<T> getAccessorsToTry(
+			@Nullable Class<?> targetType, List<T> accessors) {
+
+		if (accessors.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<T> exactMatches = new ArrayList<>();
+		List<T> inexactMatches = new ArrayList<>();
+		List<T> genericMatches = new ArrayList<>();
+		for (T accessor : accessors) {
+			Class<?>[] targets = accessor.getSpecificTargetClasses();
+			if (ObjectUtils.isEmpty(targets)) {
+				// generic accessor that says it can be used for any type
+				genericMatches.add(accessor);
 			}
-			else {
-				if (targetType != null) {
-					for (Class<?> clazz : targets) {
-						if (clazz == targetType) {  // put exact matches on the front to be tried first?
-							specificAccessors.add(resolver);
-						}
-						else if (clazz.isAssignableFrom(targetType)) {  // put supertype matches at the end of the
-							// specificAccessor list
-							generalAccessors.add(resolver);
-						}
+			else if (targetType != null) {
+				for (Class<?> clazz : targets) {
+					if (clazz == targetType) {
+						exactMatches.add(accessor);
+					}
+					else if (clazz.isAssignableFrom(targetType)) {
+						inexactMatches.add(accessor);
 					}
 				}
 			}
 		}
-		List<PropertyAccessor> resolvers = new ArrayList<>(specificAccessors.size() + generalAccessors.size());
-		resolvers.addAll(specificAccessors);
-		resolvers.addAll(generalAccessors);
-		return resolvers;
+
+		int size = exactMatches.size() + inexactMatches.size() + genericMatches.size();
+		if (size == 0) {
+			return Collections.emptyList();
+		}
+		else {
+			List<T> result = new ArrayList<>(size);
+			result.addAll(exactMatches);
+			result.addAll(inexactMatches);
+			result.addAll(genericMatches);
+			return result;
+		}
 	}
 
 }

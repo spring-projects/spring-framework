@@ -1,0 +1,49 @@
+[[mockmvc-tester-assertions]]
+= Defining Expectations
+
+Assertions work the same way as any AssertJ assertions. The support provides dedicated
+assert objects for the various pieces of the `MvcTestResult`, as shown in the following
+example:
+
+include-code::./HotelControllerTests[tag=get,indent=0]
+
+If a request fails, the exchange does not throw the exception. Rather, you can assert
+that the result of the exchange has failed:
+
+include-code::./HotelControllerTests[tag=failure,indent=0]
+
+The request could also fail unexpectedly, that is the exception thrown by the handler
+has not been handled and is thrown as is. You can still use `.hasFailed()` and
+`.failure()` but any attempt to access part of the result will throw an exception as
+the exchange hasn't completed.
+
+[[mockmvc-tester-assertions-json]]
+== JSON Support
+
+The AssertJ support for `MvcTestResult` provides JSON support via `bodyJson()`.
+
+If https://github.com/jayway/JsonPath[JSONPath] is available, you can apply an expression
+on the JSON document. The returned value provides convenient methods to return a dedicated
+assert object for the various supported JSON data types:
+
+include-code::./FamilyControllerTests[tag=extract-asmap,indent=0]
+
+You can also convert the raw content to any of your data types as long as the message
+converter is configured properly:
+
+include-code::./FamilyControllerTests[tag=extract-convert,indent=0]
+
+Converting to a target `Class` provides a generic assert object. For more complex types,
+you may want to use `AssertFactory` instead that returns a dedicated assert type, if
+possible:
+
+include-code::./FamilyControllerTests[tag=extract-convert-assert-factory,indent=0]
+
+https://jsonassert.skyscreamer.org[JSONAssert] is also supported. The body of the
+response can be matched against a `Resource` or a content. If the content ends with
+`.json ` we look for a file matching that name on the classpath:
+
+include-code::./FamilyControllerTests[tag=assert-file,indent=0]
+
+If you prefer to use another library, you can provide an implementation of
+{spring-framework-api}/test/json/JsonComparator.html[`JsonComparator`].

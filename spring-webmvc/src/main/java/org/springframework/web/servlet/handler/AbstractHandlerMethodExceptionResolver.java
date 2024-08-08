@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.function.HandlerFunction;
 
 /**
  * Abstract base class for
@@ -34,9 +35,9 @@ import org.springframework.web.servlet.ModelAndView;
 public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	/**
-	 * Checks if the handler is a {@link HandlerMethod} and then delegates to the
-	 * base class implementation of {@code #shouldApplyTo(HttpServletRequest, Object)}
-	 * passing the bean of the {@code HandlerMethod}. Otherwise returns {@code false}.
+	 * Checks if the handler is a {@link HandlerMethod} or a {@link HandlerFunction}
+	 * and then delegates to the base class implementation of {@code #shouldApplyTo(HttpServletRequest, Object)}
+	 * passing the bean of the {@code HandlerMethod}. Otherwise, returns {@code false}.
 	 */
 	@Override
 	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
@@ -46,6 +47,9 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 		else if (handler instanceof HandlerMethod handlerMethod) {
 			handler = handlerMethod.getBean();
 			return super.shouldApplyTo(request, handler);
+		}
+		else if (handler instanceof HandlerFunction<?> handlerFunction) {
+			return super.shouldApplyTo(request, handlerFunction);
 		}
 		else if (hasGlobalExceptionHandlers() && hasHandlerMappings()) {
 			return super.shouldApplyTo(request, handler);

@@ -142,11 +142,11 @@ public final class CronExpression {
 	 *
 	 * <p>Example expressions:
 	 * <ul>
-	 * <li>{@code "0 0 * * * *"} = the top of every hour of every day.</li>
-	 * <li><code>"*&#47;10 * * * * *"</code> = every ten seconds.</li>
-	 * <li>{@code "0 0 8-10 * * *"} = 8, 9 and 10 o'clock of every day.</li>
-	 * <li>{@code "0 0 6,19 * * *"} = 6:00 AM and 7:00 PM every day.</li>
-	 * <li>{@code "0 0/30 8-10 * * *"} = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day.</li>
+	 * <li>{@code "0 0 * * * *"} = the top of every hour of every day</li>
+	 * <li><code>"*&#47;10 * * * * *"</code> = every ten seconds</li>
+	 * <li>{@code "0 0 8-10 * * *"} = 8, 9 and 10 o'clock of every day</li>
+	 * <li>{@code "0 0 6,19 * * *"} = 6:00 AM and 7:00 PM every day</li>
+	 * <li>{@code "0 0/30 8-10 * * *"} = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day</li>
 	 * <li>{@code "0 0 9-17 * * MON-FRI"} = on the hour nine-to-five weekdays</li>
 	 * <li>{@code "0 0 0 25 12 ?"} = every Christmas Day at midnight</li>
 	 * <li>{@code "0 0 0 L * *"} = last day of the month at midnight</li>
@@ -159,13 +159,13 @@ public final class CronExpression {
 	 * <li>{@code "0 0 0 ? * MON#1"} = the first Monday in the month at midnight</li>
 	 * </ul>
 	 *
-	 * <p>The following macros are also supported:
+	 * <p>The following macros are also supported.
 	 * <ul>
-	 * <li>{@code "@yearly"} (or {@code "@annually"}) to run un once a year, i.e. {@code "0 0 0 1 1 *"},</li>
-	 * <li>{@code "@monthly"} to run once a month, i.e. {@code "0 0 0 1 * *"},</li>
-	 * <li>{@code "@weekly"} to run once a week, i.e. {@code "0 0 0 * * 0"},</li>
-	 * <li>{@code "@daily"} (or {@code "@midnight"}) to run once a day, i.e. {@code "0 0 0 * * *"},</li>
-	 * <li>{@code "@hourly"} to run once an hour, i.e. {@code "0 0 * * * *"}.</li>
+	 * <li>{@code "@yearly"} (or {@code "@annually"}) to run un once a year, i.e. {@code "0 0 0 1 1 *"}</li>
+	 * <li>{@code "@monthly"} to run once a month, i.e. {@code "0 0 0 1 * *"}</li>
+	 * <li>{@code "@weekly"} to run once a week, i.e. {@code "0 0 0 * * 0"}</li>
+	 * <li>{@code "@daily"} (or {@code "@midnight"}) to run once a day, i.e. {@code "0 0 0 * * *"}</li>
+	 * <li>{@code "@hourly"} to run once an hour, i.e. {@code "0 0 * * * *"}</li>
 	 * </ul>
 	 * @param expression the expression string to parse
 	 * @return the parsed {@code CronExpression} object

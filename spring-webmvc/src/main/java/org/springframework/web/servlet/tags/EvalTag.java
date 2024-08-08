@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 
+import jakarta.el.ELContext;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
 
@@ -96,6 +97,7 @@ import org.springframework.web.util.TagUtils;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0.1
  */
 @SuppressWarnings("serial")
@@ -212,11 +214,12 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		private final PageContext pageContext;
 
 		@Nullable
-		private final jakarta.servlet.jsp.el.VariableResolver variableResolver;
+		private final ELContext elContext;
+
 
 		public JspPropertyAccessor(PageContext pageContext) {
 			this.pageContext = pageContext;
-			this.variableResolver = pageContext.getVariableResolver();
+			this.elContext = pageContext.getELContext();
 		}
 
 		@Override
@@ -252,11 +255,11 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 		@Nullable
 		private Object resolveImplicitVariable(String name) throws AccessException {
-			if (this.variableResolver == null) {
+			if (this.elContext == null) {
 				return null;
 			}
 			try {
-				return this.variableResolver.resolveVariable(name);
+				return this.elContext.getELResolver().getValue(this.elContext, name, null);
 			}
 			catch (Exception ex) {
 				throw new AccessException(

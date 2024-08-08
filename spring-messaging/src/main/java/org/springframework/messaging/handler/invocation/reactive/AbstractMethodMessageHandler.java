@@ -505,6 +505,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	@Nullable
 	protected abstract RouteMatcher.Route getDestination(Message<?> message);
 
+	@SuppressWarnings("NullAway")
 	private void addMatchesToCollection(
 			Collection<T> mappingsToCheck, Message<?> message, List<Match<T>> matches) {
 

@@ -91,6 +91,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 				HttpMethod method = request.getMethod();
 				ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), method);
 				request.getHeaders().forEach((key, value) -> delegate.getHeaders().addAll(key, value));
+				request.getAttributes().forEach((key, value) -> delegate.getAttributes().put(key, value));
 				if (body.length > 0) {
 					if (delegate instanceof StreamingHttpOutputMessage streamingOutputMessage) {
 						streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {

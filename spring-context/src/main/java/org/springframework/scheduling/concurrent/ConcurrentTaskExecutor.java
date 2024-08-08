@@ -193,6 +193,10 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 		return adapter;
 	}
 
+	Runnable decorateTaskIfNecessary(Runnable task) {
+		return (this.taskDecorator != null ? this.taskDecorator.decorate(task) : task);
+	}
+
 
 	/**
 	 * TaskExecutorAdapter subclass that wraps all provided Runnables and Callables

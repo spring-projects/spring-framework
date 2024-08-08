@@ -67,7 +67,7 @@ class MessageRequestReplyTemplateTests {
 	@Test
 	void sendAndReceiveMissingDestination() {
 		assertThatIllegalStateException().isThrownBy(() ->
-				this.template.sendAndReceive(new GenericMessage<Object>("request")));
+				this.template.sendAndReceive(new GenericMessage<>("request")));
 	}
 
 	@Test

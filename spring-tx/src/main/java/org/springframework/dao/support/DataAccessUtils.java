@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,11 @@ public abstract class DataAccessUtils {
 		if (results.size() > 1) {
 			throw new IncorrectResultSizeDataAccessException(1, results.size());
 		}
-		return results.iterator().next();
+		T result = results.iterator().next();
+		if (result == null) {
+			throw new TypeMismatchDataAccessException("Result value is null but no null value expected");
+		}
+		return result;
 	}
 
 	/**
@@ -235,7 +239,11 @@ public abstract class DataAccessUtils {
 		if (!CollectionUtils.hasUniqueObject(results)) {
 			throw new IncorrectResultSizeDataAccessException(1, results.size());
 		}
-		return results.iterator().next();
+		T result = results.iterator().next();
+		if (result == null) {
+			throw new TypeMismatchDataAccessException("Result value is null but no null value expected");
+		}
+		return result;
 	}
 
 	/**

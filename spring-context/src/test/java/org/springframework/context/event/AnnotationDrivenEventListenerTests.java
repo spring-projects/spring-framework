@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -657,14 +656,6 @@ class AnnotationDrivenEventListenerTests {
 		this.context.publishEvent("test");
 		this.eventCollector.assertEvent(listener, "test");
 		this.eventCollector.assertTotalEventsCount(1);
-	}
-
-	@Test @Disabled  // SPR-15122
-	void listenersReceiveEarlyEvents() {
-		load(EventOnPostConstruct.class, OrderedTestListener.class);
-		OrderedTestListener listener = this.context.getBean(OrderedTestListener.class);
-
-		assertThat(listener.order).contains("first", "second", "third");
 	}
 
 	@Test

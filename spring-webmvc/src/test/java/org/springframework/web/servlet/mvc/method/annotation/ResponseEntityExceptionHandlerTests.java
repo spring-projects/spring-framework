@@ -41,7 +41,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindException;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.method.MethodValidationException;
 import org.springframework.validation.method.MethodValidationResult;
@@ -58,6 +57,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
@@ -108,10 +108,6 @@ class ResponseEntityExceptionHandlerTests {
 				.filter(method -> method.getName().startsWith("handle") && (method.getParameterCount() == 4))
 				.filter(method -> !method.getName().equals("handleErrorResponse"))
 				.map(method -> method.getParameterTypes()[0])
-				.filter(exceptionType -> {
-					String name = exceptionType.getSimpleName();
-					return !name.equals("AsyncRequestNotUsableException");
-				})
 				.forEach(exceptionType -> assertThat(annotation.value())
 						.as("@ExceptionHandler is missing declaration for " + exceptionType.getName())
 						.contains((Class<Exception>) exceptionType));
@@ -297,11 +293,6 @@ class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	void bindException() {
-		testException(new BindException(new Object(), "name"));
-	}
-
-	@Test
 	void noHandlerFoundException() {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED); // gh-29626
@@ -320,6 +311,13 @@ class ResponseEntityExceptionHandlerTests {
 	@Test
 	void asyncRequestTimeoutException() {
 		testException(new AsyncRequestTimeoutException());
+	}
+
+	@Test
+	void asyncRequestNotUsableException() throws Exception {
+		AsyncRequestNotUsableException ex = new AsyncRequestNotUsableException("simulated failure");
+		ResponseEntity<Object> entity = this.exceptionHandler.handleException(ex, this.request);
+		assertThat(entity).isNull();
 	}
 
 	@Test

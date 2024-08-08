@@ -16,11 +16,11 @@
 
 package org.springframework.scheduling.config;
 
-import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+import org.assertj.core.api.ObjectAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +32,7 @@ import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 
 /**
  * @author Mark Fisher
@@ -68,11 +69,13 @@ public class ScheduledTasksBeanDefinitionParserTests {
 		List<IntervalTask> tasks = (List<IntervalTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedRateTasks");
 		Runnable runnable = tasks.get(0).getRunnable();
-		assertThat(runnable.getClass()).isEqualTo(ScheduledMethodRunnable.class);
-		Object targetObject = ((ScheduledMethodRunnable) runnable).getTarget();
-		Method targetMethod = ((ScheduledMethodRunnable) runnable).getMethod();
-		assertThat(targetObject).isEqualTo(this.testBean);
-		assertThat(targetMethod.getName()).isEqualTo("test");
+
+		ObjectAssert<ScheduledMethodRunnable> runnableAssert = assertThat(runnable)
+				.extracting("runnable")
+				.isInstanceOf(ScheduledMethodRunnable.class)
+				.asInstanceOf(type(ScheduledMethodRunnable.class));
+		runnableAssert.extracting("target").isEqualTo(testBean);
+		runnableAssert.extracting("method.name").isEqualTo("test");
 	}
 
 	@Test

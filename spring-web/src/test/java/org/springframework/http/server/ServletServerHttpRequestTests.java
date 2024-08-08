@@ -217,4 +217,10 @@ class ServletServerHttpRequestTests {
 		assertThat(request.getHeaders().getContentLength()).isEqualTo(result.length);
 	}
 
+	@Test
+	void attributes() {
+		request.getAttributes().put("foo", "bar");
+		assertThat(mockRequest.getAttribute("foo")).isEqualTo("bar");
+	}
+
 }

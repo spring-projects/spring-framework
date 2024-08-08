@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.EncodingException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -97,7 +97,7 @@ public class ProtobufHttpMessageWriter extends EncoderHttpMessageWriter<Message>
 			return super.write(inputStream, elementType, mediaType, message, hints);
 		}
 		catch (Exception ex) {
-			return Mono.error(new DecodingException("Could not read Protobuf message: " + ex.getMessage(), ex));
+			return Mono.error(new EncodingException("Could not write Protobuf message: " + ex.getMessage(), ex));
 		}
 	}
 

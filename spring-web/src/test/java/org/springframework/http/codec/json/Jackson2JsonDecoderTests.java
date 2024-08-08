@@ -46,6 +46,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
 import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -172,6 +173,22 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 				.verify(), null, null);
 	}
 
+	@Test
+	protected void decodeToFluxWithListElements() {
+		Flux<DataBuffer> input = Flux.concat(
+				stringBuffer("[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"),
+				stringBuffer("[{\"bar\":\"b3\",\"foo\":\"f3\"},{\"bar\":\"b4\",\"foo\":\"f4\"}]"));
+
+		ResolvableType elementType = ResolvableType.forClassWithGenerics(List.class, Pojo.class);
+
+		testDecodeAll(input, elementType,
+				step -> step
+						.expectNext(List.of(pojo1, pojo2))
+						.expectNext(List.of(new Pojo("f3", "b3"), new Pojo("f4", "b4")))
+						.verifyComplete(),
+				MimeTypeUtils.APPLICATION_JSON,
+				Collections.emptyMap());
+	}
 
 	@Test
 	void decodeEmptyArrayToFlux() {

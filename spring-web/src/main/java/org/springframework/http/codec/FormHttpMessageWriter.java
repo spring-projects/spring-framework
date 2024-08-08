@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,13 +60,8 @@ import org.springframework.util.MultiValueMap;
 public class FormHttpMessageWriter extends LoggingCodecSupport
 		implements HttpMessageWriter<MultiValueMap<String, String>> {
 
-	/**
-	 * The default charset used by the writer.
-	 */
+	/** The default charset used by the writer. */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
-	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
-			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
 
 	private static final List<MediaType> MEDIA_TYPES =
 			Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED);
@@ -126,7 +121,7 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 		mediaType = getMediaType(mediaType);
 		message.getHeaders().setContentType(mediaType);
 
-		Charset charset = mediaType.getCharset() != null ? mediaType.getCharset() : getDefaultCharset();
+		Charset charset = (mediaType.getCharset() != null ? mediaType.getCharset() : getDefaultCharset());
 
 		return Mono.from(inputStream).flatMap(form -> {
 			logFormData(form, hints);
@@ -138,16 +133,22 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 		});
 	}
 
+	/**
+	 * Return the content type used to write forms, either the given media type
+	 * or otherwise {@code application/x-www-form-urlencoded}.
+	 * @param mediaType the media type passed to {@link #write}, or {@code null}
+	 * @return the content type to use
+	 */
 	protected MediaType getMediaType(@Nullable MediaType mediaType) {
 		if (mediaType == null) {
-			return DEFAULT_FORM_DATA_MEDIA_TYPE;
+			return MediaType.APPLICATION_FORM_URLENCODED;
 		}
-		else if (mediaType.getCharset() == null) {
-			return new MediaType(mediaType, getDefaultCharset());
+		// Some servers don't handle charset parameter and spec is unclear,
+		// Add it only if it is not DEFAULT_CHARSET.
+		if (mediaType.getCharset() == null && this.defaultCharset != DEFAULT_CHARSET) {
+			return new MediaType(mediaType, this.defaultCharset);
 		}
-		else {
-			return mediaType;
-		}
+		return mediaType;
 	}
 
 	private void logFormData(MultiValueMap<String, String> form, Map<String, Object> hints) {

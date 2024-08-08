@@ -78,13 +78,13 @@ class CglibProxyTests extends AbstractAopProxyTests {
 
 
 	@Test
-	void testNullConfig() {
+	void nullConfig() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new CglibAopProxy(null));
 	}
 
 	@Test
-	void testNoTarget() {
+	void noTarget() {
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.addAdvice(new NopInterceptor());
 		AopProxy aop = createAopProxy(pc);
@@ -92,7 +92,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testProtectedMethodInvocation() {
+	void protectedMethodInvocation() {
 		ProtectedMethodTestBean bean = new ProtectedMethodTestBean();
 		bean.value = "foo";
 		mockTargetSource.setTarget(bean);
@@ -109,7 +109,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testPackageMethodInvocation() {
+	void packageMethodInvocation() {
 		PackageMethodTestBean bean = new PackageMethodTestBean();
 		bean.value = "foo";
 		mockTargetSource.setTarget(bean);
@@ -126,7 +126,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testProxyCanBeClassNotInterface() {
+	void proxyCanBeClassNotInterface() {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
 		mockTargetSource.setTarget(raw);
@@ -144,7 +144,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testMethodInvocationDuringConstructor() {
+	void methodInvocationDuringConstructor() {
 		CglibTestBean bean = new CglibTestBean();
 		bean.setName("Rob Harrop");
 
@@ -158,7 +158,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testToStringInvocation() {
+	void toStringInvocation() {
 		PrivateCglibTestBean bean = new PrivateCglibTestBean();
 		bean.setName("Rob Harrop");
 
@@ -172,7 +172,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testUnadvisedProxyCreationWithCallDuringConstructor() {
+	void unadvisedProxyCreationWithCallDuringConstructor() {
 		CglibTestBean target = new CglibTestBean();
 		target.setName("Rob Harrop");
 
@@ -187,7 +187,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testMultipleProxies() {
+	void multipleProxies() {
 		TestBean target = new TestBean();
 		target.setAge(20);
 		TestBean target2 = new TestBean();
@@ -233,7 +233,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testMultipleProxiesForIntroductionAdvisor() {
+	void multipleProxiesForIntroductionAdvisor() {
 		TestBean target1 = new TestBean();
 		target1.setAge(20);
 		TestBean target2 = new TestBean();
@@ -257,7 +257,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testWithNoArgConstructor() {
+	void withNoArgConstructor() {
 		NoArgCtorTestBean target = new NoArgCtorTestBean("b", 1);
 		target.reset();
 
@@ -272,7 +272,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testProxyAProxy() {
+	void proxyAProxy() {
 		ITestBean target = new TestBean();
 
 		mockTargetSource.setTarget(target);
@@ -293,7 +293,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testProxyAProxyWithAdditionalInterface() {
+	void proxyAProxyWithAdditionalInterface() {
 		ITestBean target = new TestBean();
 		mockTargetSource.setTarget(target);
 
@@ -351,7 +351,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testExceptionHandling() {
+	void exceptionHandling() {
 		ExceptionThrower bean = new ExceptionThrower();
 		mockTargetSource.setTarget(bean);
 
@@ -374,14 +374,14 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testWithDependencyChecking() {
+	void withDependencyChecking() {
 		try (ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(DEPENDENCY_CHECK_CONTEXT, getClass())) {
 			ctx.getBean("testBean");
 		}
 	}
 
 	@Test
-	void testAddAdviceAtRuntime() {
+	void addAdviceAtRuntime() {
 		TestBean bean = new TestBean();
 		CountingBeforeAdvice cba = new CountingBeforeAdvice();
 
@@ -403,7 +403,7 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testProxyProtectedMethod() {
+	void proxyProtectedMethod() {
 		CountingBeforeAdvice advice = new CountingBeforeAdvice();
 		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
 		proxyFactory.addAdvice(advice);
@@ -415,14 +415,14 @@ class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 	@Test
-	void testProxyTargetClassInCaseOfNoInterfaces() {
+	void proxyTargetClassInCaseOfNoInterfaces() {
 		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
 		MyBean proxy = (MyBean) proxyFactory.getProxy();
 		assertThat(proxy.add(1, 3)).isEqualTo(4);
 	}
 
 	@Test  // SPR-13328
-	void testVarargsWithEnumArray() {
+	void varargsWithEnumArray() {
 		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
 		MyBean proxy = (MyBean) proxyFactory.getProxy();
 		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();

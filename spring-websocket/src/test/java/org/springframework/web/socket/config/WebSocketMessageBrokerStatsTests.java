@@ -65,8 +65,8 @@ class WebSocketMessageBrokerStatsTests {
 		stats.setInboundChannelExecutor(executor);
 		stats.setOutboundChannelExecutor(executor);
 
-		assertThat(stats.getClientInboundExecutorStatsInfo()).as("inbound channel stats").isEqualTo("unknown");
-		assertThat(stats.getClientOutboundExecutorStatsInfo()).as("outbound channel stats").isEqualTo("unknown");
+		assertThat(stats.getClientInboundExecutorStatsInfo()).as("inbound channel stats").isEqualTo("thread-per-task");
+		assertThat(stats.getClientOutboundExecutorStatsInfo()).as("outbound channel stats").isEqualTo("thread-per-task");
 	}
 
 	@Test
@@ -86,7 +86,7 @@ class WebSocketMessageBrokerStatsTests {
 
 		stats.setSockJsTaskScheduler(scheduler);
 
-		assertThat(stats.getSockJsTaskSchedulerStatsInfo()).isEqualTo("unknown");
+		assertThat(stats.getSockJsTaskSchedulerStatsInfo()).isEqualTo("thread-per-task");
 	}
 
 }

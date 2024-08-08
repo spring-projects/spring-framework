@@ -56,6 +56,8 @@ final class ConfigurationClass {
 	@Nullable
 	private String beanName;
 
+	private boolean scanned = false;
+
 	private final Set<ConfigurationClass> importedBy = new LinkedHashSet<>(1);
 
 	private final Set<BeanMethod> beanMethods = new LinkedHashSet<>();
@@ -125,12 +127,14 @@ final class ConfigurationClass {
 	 * Create a new {@link ConfigurationClass} with the given name.
 	 * @param metadata the metadata for the underlying class to represent
 	 * @param beanName name of the {@code @Configuration} class bean
+	 * @param scanned whether the underlying class has been registered through a scan
 	 */
-	ConfigurationClass(AnnotationMetadata metadata, String beanName) {
+	ConfigurationClass(AnnotationMetadata metadata, String beanName, boolean scanned) {
 		Assert.notNull(beanName, "Bean name must not be null");
 		this.metadata = metadata;
 		this.resource = new DescriptiveResource(metadata.getClassName());
 		this.beanName = beanName;
+		this.scanned = scanned;
 	}
 
 
@@ -153,6 +157,14 @@ final class ConfigurationClass {
 	@Nullable
 	String getBeanName() {
 		return this.beanName;
+	}
+
+	/**
+	 * Return whether this configuration class has been registered through a scan.
+	 * @since 6.2
+	 */
+	boolean isScanned() {
+		return this.scanned;
 	}
 
 	/**
@@ -207,17 +219,17 @@ final class ConfigurationClass {
 		return this.importBeanDefinitionRegistrars;
 	}
 
+	@SuppressWarnings("NullAway")
 	void validate(ProblemReporter problemReporter) {
 		Map<String, Object> attributes = this.metadata.getAnnotationAttributes(Configuration.class.getName());
 
 		// A configuration class may not be final (CGLIB limitation) unless it declares proxyBeanMethods=false
-		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods")) {
-			if (this.metadata.isFinal()) {
-				problemReporter.error(new FinalConfigurationProblem());
-			}
-			for (BeanMethod beanMethod : this.beanMethods) {
-				beanMethod.validate(problemReporter);
-			}
+		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods") && this.metadata.isFinal()) {
+			problemReporter.error(new FinalConfigurationProblem());
+		}
+
+		for (BeanMethod beanMethod : this.beanMethods) {
+			beanMethod.validate(problemReporter);
 		}
 
 		// A configuration class may not contain overloaded bean methods unless it declares enforceUniqueMethods=false

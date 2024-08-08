@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,16 +155,28 @@ public interface RestClient {
 	}
 
 	/**
-	 * Create a new {@code RestClient} based on the configuration of the
-	 * given {@code RestTemplate}. The returned builder is configured with the
-	 * template's
+	 * Variant of {@link #create()} that accepts a default base {@code URI}. For more
+	 * details see {@link Builder#baseUrl(URI) Builder.baseUrl(URI)}.
+	 * @param baseUrl the base URI for all requests
+	 * @since 6.2
+	 * @see #builder()
+	 */
+	static RestClient create(URI baseUrl) {
+		return new DefaultRestClientBuilder().baseUrl(baseUrl).build();
+	}
+
+	/**
+	 * Create a new {@code RestClient} based on the configuration of the given
+	 * {@code RestTemplate}.
+	 * <p>The returned builder is configured with the following attributes of
+	 * the template.
 	 * <ul>
-	 * <li>{@link RestTemplate#getRequestFactory() ClientHttpRequestFactory},</li>
-	 * <li>{@link RestTemplate#getMessageConverters() HttpMessageConverters},</li>
-	 * <li>{@link RestTemplate#getInterceptors() ClientHttpRequestInterceptors},</li>
-	 * <li>{@link RestTemplate#getClientHttpRequestInitializers() ClientHttpRequestInitializers},</li>
-	 * <li>{@link RestTemplate#getUriTemplateHandler() UriBuilderFactory}, and</li>
-	 * <li>{@linkplain RestTemplate#getErrorHandler() error handler}.</li>
+	 * <li>{@link RestTemplate#getRequestFactory() ClientHttpRequestFactory}</li>
+	 * <li>{@link RestTemplate#getMessageConverters() HttpMessageConverters}</li>
+	 * <li>{@link RestTemplate#getInterceptors() ClientHttpRequestInterceptors}</li>
+	 * <li>{@link RestTemplate#getClientHttpRequestInitializers() ClientHttpRequestInitializers}</li>
+	 * <li>{@link RestTemplate#getUriTemplateHandler() UriBuilderFactory}</li>
+	 * <li>{@linkplain RestTemplate#getErrorHandler() error handler}</li>
 	 * </ul>
 	 * @param restTemplate the rest template to base the returned client's
 	 * configuration on
@@ -184,15 +196,16 @@ public interface RestClient {
 
 	/**
 	 * Obtain a {@code RestClient} builder based on the configuration of the
-	 * given {@code RestTemplate}. The returned builder is configured with the
-	 * template's
+	 * given {@code RestTemplate}.
+	 * <p>The returned builder is configured with the following attributes of
+	 * the template.
 	 * <ul>
-	 * <li>{@link RestTemplate#getRequestFactory() ClientHttpRequestFactory},</li>
-	 * <li>{@link RestTemplate#getMessageConverters() HttpMessageConverters},</li>
-	 * <li>{@link RestTemplate#getInterceptors() ClientHttpRequestInterceptors},</li>
-	 * <li>{@link RestTemplate#getClientHttpRequestInitializers() ClientHttpRequestInitializers},</li>
-	 * <li>{@link RestTemplate#getUriTemplateHandler() UriBuilderFactory}, and</li>
-	 * <li>{@linkplain RestTemplate#getErrorHandler() error handler}.</li>
+	 * <li>{@link RestTemplate#getRequestFactory() ClientHttpRequestFactory}</li>
+	 * <li>{@link RestTemplate#getMessageConverters() HttpMessageConverters}</li>
+	 * <li>{@link RestTemplate#getInterceptors() ClientHttpRequestInterceptors}</li>
+	 * <li>{@link RestTemplate#getClientHttpRequestInitializers() ClientHttpRequestInitializers}</li>
+	 * <li>{@link RestTemplate#getUriTemplateHandler() UriBuilderFactory}</li>
+	 * <li>{@linkplain RestTemplate#getErrorHandler() error handler}</li>
 	 * </ul>
 	 * @param restTemplate the rest template to base the returned builder's
 	 * configuration on
@@ -227,6 +240,26 @@ public interface RestClient {
 		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
 		Builder baseUrl(String baseUrl);
+
+		/**
+		 * Configure a base {@code URI} for requests. Effectively a shortcut for:
+		 * <pre class="code">
+		 * URI baseUrl = URI.create("https://abc.go.com/v1");
+		 * DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl.toString());
+		 * RestClient client = RestClient.builder().uriBuilderFactory(factory).build();
+		 * </pre>
+		 * <p>The {@code DefaultUriBuilderFactory} is used to prepare the URL
+		 * for every request with the given base URL, unless the URL request
+		 * for a given URL is absolute in which case the base URL is ignored.
+		 * <p><strong>Note:</strong> this method is mutually exclusive with
+		 * {@link #uriBuilderFactory(UriBuilderFactory)}. If both are used, the
+		 * {@code baseUrl} value provided here will be ignored.
+		 * @return this builder
+		 * @since 6.2
+		 * @see DefaultUriBuilderFactory#DefaultUriBuilderFactory(String)
+		 * @see #uriBuilderFactory(UriBuilderFactory)
+		 */
+		Builder baseUrl(URI baseUrl);
 
 		/**
 		 * Configure default URL variable values to use when expanding URI
@@ -305,6 +338,10 @@ public interface RestClient {
 		 * to apply to every response. Such default handlers are applied in the
 		 * order in which they are registered, and after any others that are
 		 * registered for a specific response.
+		 * <p>The first status handler who claims that a response has an
+		 * error is invoked. If you want to disable other defaults, consider
+		 * using {@link #defaultStatusHandler(Predicate, ResponseSpec.ErrorHandler)}
+		 * with a predicate that matches all status codes.
 		 * @param errorHandler handler that typically, though not necessarily,
 		 * throws an exception
 		 * @return this builder
@@ -412,7 +449,11 @@ public interface RestClient {
 	interface UriSpec<S extends RequestHeadersSpec<?>> {
 
 		/**
-		 * Specify the URI using an absolute, fully constructed {@link URI}.
+		 * Specify the URI using a fully constructed {@link URI}.
+		 * <p>If the given URI is absolute, it is used as given. If it is
+		 * a relative URI, the {@link UriBuilderFactory} configured for
+		 * the client (e.g. with a base URI) will be used to
+		 * {@linkplain URI#resolve(URI) resolve} the given URI against.
 		 */
 		S uri(URI uri);
 
@@ -495,6 +536,24 @@ public interface RestClient {
 		 * @return this builder
 		 */
 		S headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Set the attribute with the given name to the given value.
+		 * @param name the name of the attribute to add
+		 * @param value the value of the attribute to add
+		 * @return this builder
+		 * @since 6.2
+		 */
+		S attribute(String name, Object value);
+
+		/**
+		 * Provides access to every attribute declared so far with the
+		 * possibility to add, replace, or remove values.
+		 * @param attributesConsumer the consumer to provide access to
+		 * @return this builder
+		 * @since 6.2
+		 */
+		S attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
 		 * Callback for access to the {@link ClientHttpRequest} that in turn

@@ -51,9 +51,6 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.body(producer: Any): Mon
 /**
  * Coroutines variant of [ServerResponse.BodyBuilder.bodyValue].
  *
- * Set the body of the response to the given {@code Object} and return it.
- * This convenience method combines [body] and
- * [org.springframework.web.reactive.function.BodyInserters.fromValue].
  * @param body the body of the response
  * @return the built response
  * @throws IllegalArgumentException if `body` is a [Publisher] or an
@@ -61,6 +58,21 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.body(producer: Any): Mon
  */
 suspend fun ServerResponse.BodyBuilder.bodyValueAndAwait(body: Any): ServerResponse =
 		bodyValue(body).awaitSingle()
+
+/**
+ * Coroutines variant of [ServerResponse.BodyBuilder.bodyValue] providing a `bodyValueWithTypeAndAwait<T>(Any)` variant
+ * leveraging Kotlin reified type parameters. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
+ *
+ * @param body the body of the response
+ * @param T the type of the body
+ * @return the built response
+ * @throws IllegalArgumentException if `body` is a [Publisher] or an
+ * instance of a type supported by [org.springframework.core.ReactiveAdapterRegistry.getSharedInstance],
+ * @since 6.2
+ */
+suspend inline fun <reified T: Any> ServerResponse.BodyBuilder.bodyValueWithTypeAndAwait(body: T): ServerResponse =
+	bodyValue(body, object : ParameterizedTypeReference<T>() {}).awaitSingle()
 
 /**
  * Coroutines variant of [ServerResponse.BodyBuilder.body] with [Any] and

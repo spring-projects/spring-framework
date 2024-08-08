@@ -27,13 +27,13 @@ import jakarta.jms.MessageConsumer;
 import jakarta.jms.Session;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.junit.EmbeddedActiveMQExtension;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static io.micrometer.observation.tck.TestObservationRegistryAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for Observability related {@link JmsTemplate}.
@@ -127,7 +127,7 @@ class JmsTemplateObservationTests {
 		});
 
 		String responseBody = response.getBody(String.class);
-		Assertions.assertThat(responseBody).isEqualTo("response content");
+		assertThat(responseBody).isEqualTo("response content");
 
 		assertThat(registry).hasNumberOfObservationsWithNameEqualTo("jms.message.publish", 2);
 		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process").that()

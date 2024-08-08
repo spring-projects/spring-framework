@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ import org.springframework.lang.Nullable;
 /**
  * Interface to discover parameter names for methods and constructors.
  *
- * <p>Parameter name discovery is not always possible, but various strategies are
- * available to try, such as looking for debug information that may have been
- * emitted at compile time, and looking for argname annotation values optionally
- * accompanying AspectJ annotated methods.
+ * <p>Parameter name discovery is not always possible, but various strategies exist
+ * &mdash; for example, using the JDK's reflection facilities for introspecting
+ * parameter names (based on the "-parameters" compiler flag), looking for
+ * {@code argNames} annotation attributes optionally configured for AspectJ
+ * annotated methods, etc.
  *
  * @author Rod Johnson
  * @author Adrian Colyer

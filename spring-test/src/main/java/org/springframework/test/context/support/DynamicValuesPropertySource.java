@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.support;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -33,10 +34,13 @@ import org.springframework.util.function.SupplierUtils;
  */
 class DynamicValuesPropertySource extends MapPropertySource {
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	DynamicValuesPropertySource(String name, Map<String, Supplier<Object>> valueSuppliers) {
-		super(name, (Map) valueSuppliers);
+	static final String PROPERTY_SOURCE_NAME = "Dynamic Test Properties";
+
+
+	DynamicValuesPropertySource(Map<String, Supplier<Object>> valueSuppliers) {
+		super(PROPERTY_SOURCE_NAME, Collections.unmodifiableMap(valueSuppliers));
 	}
+
 
 	@Override
 	@Nullable

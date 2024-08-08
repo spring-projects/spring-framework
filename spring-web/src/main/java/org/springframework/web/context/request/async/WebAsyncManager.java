@@ -79,6 +79,8 @@ public final class WebAsyncManager {
 
 	private AsyncTaskExecutor taskExecutor = DEFAULT_TASK_EXECUTOR;
 
+	private boolean isMultipartRequestParsed;
+
 	@Nullable
 	private volatile Object concurrentResult = RESULT_NONE;
 
@@ -243,6 +245,24 @@ public final class WebAsyncManager {
 	}
 
 	/**
+	 * Mark the {@link WebAsyncManager} as wrapping a
+	 * multipart async request.
+	 * @since 6.1.12
+	 */
+	public void setMultipartRequestParsed(boolean isMultipart) {
+		this.isMultipartRequestParsed = isMultipart;
+	}
+
+	/**
+	 * Return {@code true} if this {@link WebAsyncManager} was previously marked
+	 * as wrapping a multipart async request, {@code false} otherwise.
+	 * @since 6.1.12
+	 */
+	public boolean isMultipartRequestParsed() {
+		return this.isMultipartRequestParsed;
+	}
+
+	/**
 	 * Clear {@linkplain #getConcurrentResult() concurrentResult} and
 	 * {@linkplain #getConcurrentResultContext() concurrentResultContext}.
 	 */
@@ -287,6 +307,7 @@ public final class WebAsyncManager {
 	 * via {@link #getConcurrentResultContext()}
 	 * @throws Exception if concurrent processing failed to start
 	 */
+	@SuppressWarnings("NullAway")
 	public void startCallableProcessing(final WebAsyncTask<?> webAsyncTask, Object... processingContext)
 			throws Exception {
 
@@ -408,6 +429,7 @@ public final class WebAsyncManager {
 	 * @see #getConcurrentResult()
 	 * @see #getConcurrentResultContext()
 	 */
+	@SuppressWarnings("NullAway")
 	public void startDeferredResultProcessing(
 			final DeferredResult<?> deferredResult, Object... processingContext) throws Exception {
 

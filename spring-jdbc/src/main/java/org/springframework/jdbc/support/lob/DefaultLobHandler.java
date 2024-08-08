@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,10 @@ import org.springframework.lang.Nullable;
  * @see java.sql.PreparedStatement#setString
  * @see java.sql.PreparedStatement#setAsciiStream
  * @see java.sql.PreparedStatement#setCharacterStream
+ * @deprecated as of 6.2, in favor of {@link org.springframework.jdbc.core.support.SqlBinaryValue}
+ * and {@link org.springframework.jdbc.core.support.SqlCharacterValue}
  */
+@Deprecated(since = "6.2")
 public class DefaultLobHandler extends AbstractLobHandler {
 
 	protected final Log logger = LogFactory.getLog(getClass());

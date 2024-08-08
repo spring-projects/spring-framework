@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Interface used by {@link CacheInterceptor}. Implementations know how to source
@@ -45,9 +46,22 @@ public interface CacheOperationSource {
 	 * metadata at class or method level; {@code true} otherwise. The default
 	 * implementation returns {@code true}, leading to regular introspection.
 	 * @since 5.2
+	 * @see #hasCacheOperations
 	 */
 	default boolean isCandidateClass(Class<?> targetClass) {
 		return true;
+	}
+
+	/**
+	 * Determine whether there are cache operations for the given method.
+	 * @param method the method to introspect
+	 * @param targetClass the target class (can be {@code null},
+	 * in which case the declaring class of the method must be used)
+	 * @since 6.2
+	 * @see #getCacheOperations
+	 */
+	default boolean hasCacheOperations(Method method, @Nullable Class<?> targetClass) {
+		return !CollectionUtils.isEmpty(getCacheOperations(method, targetClass));
 	}
 
 	/**

@@ -60,6 +60,8 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.function.HandlerFunction;
+import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -71,7 +73,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Test fixture with {@link ExceptionHandlerExceptionResolver}.
+ * Tests for {@link ExceptionHandlerExceptionResolver}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -81,6 +83,8 @@ import static org.mockito.Mockito.mock;
  */
 @SuppressWarnings("unused")
 class ExceptionHandlerExceptionResolverTests {
+
+	//TODO
 
 	private static int DEFAULT_RESOLVER_COUNT;
 
@@ -256,6 +260,19 @@ class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
+	void resolveExceptionGlobalHandlerForHandlerFunction() throws Exception {
+		loadConfiguration(MyConfig.class);
+
+		IllegalAccessException ex = new IllegalAccessException();
+		HandlerFunction<ServerResponse> handlerFunction = req -> {
+			throw new IllegalAccessException();
+		};
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerFunction, ex);
+
+		assertExceptionHandledAsBody(mav, "AnotherTestExceptionResolver: IllegalAccessException");
+	}
+
+	@Test
 	void resolveExceptionGlobalHandlerOrdered() throws Exception {
 		loadConfiguration(MyConfig.class);
 
@@ -417,6 +434,41 @@ class ExceptionHandlerExceptionResolverTests {
 
 		assertThat(mav).isNotNull();
 		assertThat(mav.isEmpty()).isTrue();
+	}
+
+	@Test
+	void resolveExceptionJsonMediaType() throws UnsupportedEncodingException, NoSuchMethodException {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new MediaTypeController(), "handle");
+		this.resolver.afterPropertiesSet();
+		this.request.addHeader("Accept", "application/json");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertExceptionHandledAsBody(mav, "jsonBody");
+	}
+
+	@Test
+	void resolveExceptionHtmlMediaType() throws NoSuchMethodException {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new MediaTypeController(), "handle");
+		this.resolver.afterPropertiesSet();
+		this.request.addHeader("Accept", "text/html");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).isNotNull();
+		assertThat(mav.getViewName()).isEqualTo("htmlView");
+	}
+
+	@Test
+	void resolveExceptionDefaultMediaType() throws NoSuchMethodException {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new MediaTypeController(), "handle");
+		this.resolver.afterPropertiesSet();
+		this.request.addHeader("Accept", "*/*");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).isNotNull();
+		assertThat(mav.getViewName()).isEqualTo("htmlView");
 	}
 
 
@@ -647,6 +699,23 @@ class ExceptionHandlerExceptionResolverTests {
 		public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
 				Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
 			return null;
+		}
+	}
+
+	@Controller
+	static class MediaTypeController {
+
+		public void handle() {}
+
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "application/json")
+		@ResponseBody
+		public String handleExceptionJson() {
+			return "jsonBody";
+		}
+
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = {"text/html", "*/*"})
+		public String handleExceptionHtml() {
+			return "htmlView";
 		}
 	}
 

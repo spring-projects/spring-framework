@@ -66,6 +66,7 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public synchronized Class<?> getTargetClass() {
 		if (this.targetObject == null) {
 			refresh();

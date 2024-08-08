@@ -54,7 +54,10 @@ import org.springframework.lang.Nullable;
  * @param <T> the result type
  * @see org.springframework.jdbc.support.lob.LobHandler
  * @see org.springframework.jdbc.LobRetrievalFailureException
+ * @deprecated as of 6.2 along with {@link org.springframework.jdbc.support.lob.LobHandler},
+ * in favor of {@link ResultSet#getBinaryStream}/{@link ResultSet#getCharacterStream} usage
  */
+@Deprecated(since = "6.2")
 public abstract class AbstractLobStreamingResultSetExtractor<T> implements ResultSetExtractor<T> {
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,8 +89,57 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 
 	/**
 	 * Return a {@code Map} with the first values contained in this {@code MultiValueMap}.
+	 * The difference between this method and {@link #asSingleValueMap()} is
+	 * that this method returns a copy of the entries of this map, whereas
+	 * the latter returns a view.
 	 * @return a single value representation of this map
 	 */
 	Map<K, V> toSingleValueMap();
+
+	/**
+	 * Return this map as a {@code Map} with the first values contained in this {@code MultiValueMap}.
+	 * The difference between this method and {@link #toSingleValueMap()} is
+	 * that this method returns a view of the entries of this map, whereas
+	 * the latter returns a copy.
+	 * @return a single value representation of this map
+	 * @since 6.2
+	 */
+	default Map<K, V> asSingleValueMap() {
+		return new MultiToSingleValueMapAdapter<>(this);
+	}
+
+
+	/**
+	 * Return a {@code MultiValueMap<K, V>} that adapts the given single-value
+	 * {@code Map<K, V>}.
+	 * The returned map cannot map multiple values to the same key, and doing so
+	 * results in an {@link UnsupportedOperationException}. Use
+	 * {@link #fromMultiValue(Map)} to support multiple values.
+	 * @param map the map to be adapted
+	 * @param <K> the key type
+	 * @param <V> the value element type
+	 * @return a multi-value-map that delegates to {@code map}
+	 * @since 6.2
+	 * @see #fromMultiValue(Map)
+	 */
+	static <K, V> MultiValueMap<K, V> fromSingleValue(Map<K, V> map) {
+		Assert.notNull(map, "Map must not be null");
+		return new SingleToMultiValueMapAdapter<>(map);
+	}
+
+	/**
+	 * Return a {@code MultiValueMap<K, V>} that adapts the given multi-value
+	 * {@code Map<K, List<V>>}.
+	 * @param map the map to be adapted
+	 * @param <K> the key type
+	 * @param <V> the value element type
+	 * @return a multi-value-map that delegates to {@code map}
+	 * @since 6.2
+	 * @see #fromSingleValue(Map)
+	 */
+	static <K, V> MultiValueMap<K, V> fromMultiValue(Map<K, List<V>> map) {
+		Assert.notNull(map, "Map must not be null");
+		return new MultiValueMapAdapter<>(map);
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -368,7 +368,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see #DispatcherServlet(WebApplicationContext)
 	 */
 	public DispatcherServlet() {
-		super();
 		setDispatchOptionsRequest(true);
 	}
 
@@ -1118,10 +1117,11 @@ public class DispatcherServlet extends FrameworkServlet {
 				if (mappedHandler != null) {
 					mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
 				}
+				asyncManager.setMultipartRequestParsed(multipartRequestParsed);
 			}
 			else {
 				// Clean up any resources used by a multipart request.
-				if (multipartRequestParsed) {
+				if (multipartRequestParsed || asyncManager.isMultipartRequestParsed()) {
 					cleanupMultipart(processedRequest);
 				}
 			}
@@ -1419,6 +1419,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
+		if (view instanceof SmartView smartView) {
+			smartView.resolveNestedViews(this::resolveViewNameInternal, locale);
+		}
+
 		// Delegate to the View object for rendering.
 		if (logger.isTraceEnabled()) {
 			logger.trace("Rendering view [" + view + "] ");
@@ -1467,6 +1471,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected View resolveViewName(String viewName, @Nullable Map<String, Object> model,
 			Locale locale, HttpServletRequest request) throws Exception {
 
+		return resolveViewNameInternal(viewName, locale);
+	}
+
+	@Nullable
+	private View resolveViewNameInternal(String viewName, Locale locale) throws Exception {
 		if (this.viewResolvers != null) {
 			for (ViewResolver viewResolver : this.viewResolvers) {
 				View view = viewResolver.resolveViewName(viewName, locale);

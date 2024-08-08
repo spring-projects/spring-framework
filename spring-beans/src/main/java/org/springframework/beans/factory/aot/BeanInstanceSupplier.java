@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +48,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.function.ThrowingBiFunction;
@@ -213,14 +213,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 		if (!(executable instanceof Method method)) {
 			return beanSupplier.get();
 		}
-		Method priorInvokedFactoryMethod = SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod();
-		try {
-			SimpleInstantiationStrategy.setCurrentlyInvokedFactoryMethod(method);
-			return beanSupplier.get();
-		}
-		finally {
-			SimpleInstantiationStrategy.setCurrentlyInvokedFactoryMethod(priorInvokedFactoryMethod);
-		}
+		return SimpleInstantiationStrategy.instantiateWithFactoryMethod(method, beanSupplier::get);
 	}
 
 	@Nullable
@@ -290,7 +283,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 					beanFactory, registeredBean.getBeanName(), beanDefinition, beanFactory.getTypeConverter());
 			ConstructorArgumentValues values = resolveConstructorArguments(
 					valueResolver, beanDefinition.getConstructorArgumentValues());
-			Set<ValueHolder> usedValueHolders = new HashSet<>(parameters.length);
+			Set<ValueHolder> usedValueHolders = CollectionUtils.newHashSet(parameters.length);
 			for (int i = 0; i < parameters.length; i++) {
 				Class<?> parameterType = parameters[i].getType();
 				String parameterName = (parameters[i].isNamePresent() ? parameters[i].getName() : null);

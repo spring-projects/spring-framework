@@ -1,8 +1,8 @@
 [[spring-testing-annotation-activeprofiles]]
 = `@ActiveProfiles`
 
-`@ActiveProfiles` is a class-level annotation that is used to declare which bean
-definition profiles should be active when loading an `ApplicationContext` for an
+`@ActiveProfiles` is an annotation that can be applied to a test class to declare which
+bean definition profiles should be active when loading an `ApplicationContext` for an
 integration test.
 
 The following example indicates that the `dev` profile should be active:

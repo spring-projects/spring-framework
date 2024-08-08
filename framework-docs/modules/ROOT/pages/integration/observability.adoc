@@ -1,7 +1,7 @@
 [[observability]]
 = Observability Support
 
-Micrometer defines an https://micrometer.io/docs/observation[Observation concept that enables both Metrics and Traces] in applications.
+Micrometer defines an {micrometer-docs}/observation.html[Observation concept that enables both Metrics and Traces] in applications.
 Metrics support offers a way to create timers, gauges, or counters for collecting statistics about the runtime behavior of your application.
 Metrics can help you to track error rates, usage patterns, performance, and more.
 Traces provide a holistic view of an entire system, crossing application boundaries; you can zoom in on particular user requests and follow their entire completion across applications.
@@ -38,7 +38,7 @@ As outlined xref:integration/observability.adoc[at the beginning of this section
 |===
 
 NOTE: Observations are using Micrometer's official naming convention, but Metrics names will be automatically converted
-https://micrometer.io/docs/concepts#_naming_meters[to the format preferred by the monitoring system backend]
+{micrometer-docs}/concepts/naming.html[to the format preferred by the monitoring system backend]
 (Prometheus, Atlas, Graphite, InfluxDB...).
 
 
@@ -161,6 +161,8 @@ You will need to configure the `ObservationRegistry` on the `JmsTemplate` to ena
 include-code::./JmsTemplatePublish[]
 
 It uses the `io.micrometer.jakarta9.instrument.jms.DefaultJmsPublishObservationConvention` by default, backed by the `io.micrometer.jakarta9.instrument.jms.JmsPublishObservationContext`.
+
+Similar observations are recorded with `@JmsListener` annotated methods when response messages are returned from the listener method.
 
 [[observability.jms.process]]
 === JMS message Processing instrumentation
@@ -366,7 +368,7 @@ This means that during the execution of that task, the ThreadLocals and logging 
 
 If the application globally configures a custom `ApplicationEventMulticaster` with a strategy that schedules event processing on different threads, this is no longer true.
 All `@EventListener` methods will be processed on a different thread, outside the main event publication thread.
-In these cases, the https://micrometer.io/docs/contextPropagation[Micrometer Context Propagation library] can help propagate such values and better correlate the processing of the events.
+In these cases, the {micrometer-context-propagation-docs}/[Micrometer Context Propagation library] can help propagate such values and better correlate the processing of the events.
 The application can configure the chosen `TaskExecutor` to use a `ContextPropagatingTaskDecorator` that decorates tasks and propagates context.
 For this to work, the `io.micrometer:context-propagation` library must be present on the classpath:
 

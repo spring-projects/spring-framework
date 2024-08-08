@@ -63,8 +63,6 @@ import static org.assertj.core.api.Assertions.within;
  */
 class MappingJackson2HttpMessageConverterTests {
 
-	protected static final String NEWLINE_SYSTEM_PROPERTY = System.lineSeparator();
-
 	private final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 
 
@@ -369,8 +367,10 @@ class MappingJackson2HttpMessageConverterTests {
 		this.converter.writeInternal(bean, null, outputMessage);
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 
-		assertThat(result).isEqualTo(("{" + NEWLINE_SYSTEM_PROPERTY +
-				"  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}"));
+		assertThat(result).isEqualToNormalizingNewlines("""
+			{
+			\s "name" : "Jason"
+			}""");
 	}
 
 	@Test

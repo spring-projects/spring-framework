@@ -30,6 +30,8 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.MethodClassKey;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Abstract implementation of {@link CacheOperationSource} that caches operations
@@ -70,18 +72,31 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	private final Map<Object, Collection<CacheOperation>> operationCache = new ConcurrentHashMap<>(1024);
 
 
+	@Override
+	public boolean hasCacheOperations(Method method, @Nullable Class<?> targetClass) {
+		return !CollectionUtils.isEmpty(getCacheOperations(method, targetClass, false));
+	}
+
+	@Override
+	@Nullable
+	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
+		return getCacheOperations(method, targetClass, true);
+	}
+
 	/**
 	 * Determine the cache operations for this method invocation.
 	 * <p>Defaults to class-declared metadata if no method-level metadata is found.
 	 * @param method the method for the current invocation (never {@code null})
 	 * @param targetClass the target class for this invocation (can be {@code null})
+	 * @param cacheNull whether {@code null} results should be cached as well
 	 * @return {@link CacheOperation} for this method, or {@code null} if the method
 	 * is not cacheable
 	 */
-	@Override
 	@Nullable
-	public Collection<CacheOperation> getCacheOperations(Method method, @Nullable Class<?> targetClass) {
-		if (method.getDeclaringClass() == Object.class) {
+	private Collection<CacheOperation> getCacheOperations(
+			Method method, @Nullable Class<?> targetClass, boolean cacheNull) {
+
+		if (ReflectionUtils.isObjectMethod(method)) {
 			return null;
 		}
 
@@ -99,7 +114,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 				}
 				this.operationCache.put(cacheKey, cacheOps);
 			}
-			else {
+			else if (cacheNull) {
 				this.operationCache.put(cacheKey, NULL_CACHING_MARKER);
 			}
 			return cacheOps;

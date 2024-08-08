@@ -194,6 +194,7 @@ class ClassPathBeanDefinitionScannerTests {
 	@Test
 	void testSimpleScanWithDefaultFiltersAndOverridingBean() {
 		GenericApplicationContext context = new GenericApplicationContext();
+		context.setAllowBeanDefinitionOverriding(true);
 		context.registerBeanDefinition("stubFooDao", new RootBeanDefinition(TestBean.class));
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);

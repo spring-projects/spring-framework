@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.context.support;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,12 +27,15 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizerFactory;
+import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestContextAnnotationUtils;
 
 /**
- * {@link ContextCustomizerFactory} to support
- * {@link DynamicPropertySource @DynamicPropertySource} methods.
+ * {@link ContextCustomizerFactory} which supports
+ * {@link DynamicPropertySource @DynamicPropertySource} methods and the
+ * registration of a {@link DynamicPropertyRegistry} as a singleton bean in the
+ * container for use in {@code @Configuration} classes and {@code @Bean} methods.
  *
  * @author Phillip Webb
  * @author Sam Brannen
@@ -49,7 +53,7 @@ class DynamicPropertiesContextCustomizerFactory implements ContextCustomizerFact
 		Set<Method> methods = new LinkedHashSet<>();
 		findMethods(testClass, methods);
 		if (methods.isEmpty()) {
-			return null;
+			methods = Collections.emptySet();
 		}
 		return new DynamicPropertiesContextCustomizer(methods);
 	}

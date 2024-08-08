@@ -1,5 +1,5 @@
 [[beans-autowired-annotation-primary]]
-= Fine-tuning Annotation-based Autowiring with `@Primary`
+= Fine-tuning Annotation-based Autowiring with `@Primary` or `@Fallback`
 
 Because autowiring by type may lead to multiple candidates, it is often necessary to have
 more control over the selection process. One way to accomplish this is with Spring's
@@ -50,8 +50,51 @@ Kotlin::
 ----
 ======
 
-With the preceding configuration, the following `MovieRecommender` is autowired with the
-`firstMovieCatalog`:
+Alternatively, as of 6.2, there is a `@Fallback` annotation for demarcating
+any beans other than the regular ones to be injected. If only one regular
+bean is left, it is effectively primary as well:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class MovieConfiguration {
+
+		@Bean
+		public MovieCatalog firstMovieCatalog() { ... }
+
+		@Bean
+		@Fallback
+		public MovieCatalog secondMovieCatalog() { ... }
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class MovieConfiguration {
+
+		@Bean
+		fun firstMovieCatalog(): MovieCatalog { ... }
+
+		@Bean
+		@Fallback
+		fun secondMovieCatalog(): MovieCatalog { ... }
+
+		// ...
+	}
+----
+======
+
+With both variants of the preceding configuration, the following
+`MovieRecommender` is autowired with the `firstMovieCatalog`:
 
 [tabs]
 ======

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -35,6 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.BufferingStompDecoder;
 import org.springframework.messaging.simp.stomp.ConnectionHandlingStompSession;
+import org.springframework.messaging.simp.stomp.SplittingStompEncoder;
 import org.springframework.messaging.simp.stomp.StompClientSupport;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
@@ -67,15 +69,20 @@ import org.springframework.web.util.UriComponentsBuilder;
  * SockJsClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Injae Kim
  * @since 4.2
  */
 public class WebSocketStompClient extends StompClientSupport implements SmartLifecycle {
 
 	private static final Log logger = LogFactory.getLog(WebSocketStompClient.class);
 
+
 	private final WebSocketClient webSocketClient;
 
 	private int inboundMessageSizeLimit = 64 * 1024;
+
+	@Nullable
+	private Integer outboundMessageSizeLimit;
 
 	private boolean autoStartup = true;
 
@@ -133,6 +140,26 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 */
 	public int getInboundMessageSizeLimit() {
 		return this.inboundMessageSizeLimit;
+	}
+
+	/**
+	 * Configure the maximum size allowed for outbound STOMP message.
+	 * If STOMP message's size exceeds {@link WebSocketStompClient#outboundMessageSizeLimit},
+	 * STOMP message is split into multiple frames.
+	 * <p>By default this is not set in which case each STOMP message are not split.
+	 * @since 6.2
+	 */
+	public void setOutboundMessageSizeLimit(Integer outboundMessageSizeLimit) {
+		this.outboundMessageSizeLimit = outboundMessageSizeLimit;
+	}
+
+	/**
+	 * Get the configured outbound message buffer size in bytes.
+	 * @since 6.2
+	 */
+	@Nullable
+	public Integer getOutboundMessageSizeLimit() {
+		return this.outboundMessageSizeLimit;
 	}
 
 	/**
@@ -373,7 +400,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final TcpConnectionHandler<byte[]> stompSession;
 
-		private final StompWebSocketMessageCodec codec = new StompWebSocketMessageCodec(getInboundMessageSizeLimit());
+		private final StompWebSocketMessageCodec codec =
+				new StompWebSocketMessageCodec(getInboundMessageSizeLimit(),getOutboundMessageSizeLimit());
 
 		@Nullable
 		private volatile WebSocketSession session;
@@ -450,7 +478,14 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			try {
 				WebSocketSession session = this.session;
 				Assert.state(session != null, "No WebSocketSession available");
-				session.sendMessage(this.codec.encode(message, session.getClass()));
+				if (this.codec.hasSplittingEncoder()) {
+					for (WebSocketMessage<?> outMessage : this.codec.encodeAndSplit(message, session.getClass())) {
+						session.sendMessage(outMessage);
+					}
+				}
+				else {
+					session.sendMessage(this.codec.encode(message, session.getClass()));
+				}
 				future.complete(null);
 			}
 			catch (Throwable ex) {
@@ -561,8 +596,13 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final BufferingStompDecoder bufferingDecoder;
 
-		public StompWebSocketMessageCodec(int messageSizeLimit) {
-			this.bufferingDecoder = new BufferingStompDecoder(DECODER, messageSizeLimit);
+		@Nullable
+		private final SplittingStompEncoder splittingEncoder;
+
+		public StompWebSocketMessageCodec(int inboundMessageSizeLimit, @Nullable Integer outboundMessageSizeLimit) {
+			this.bufferingDecoder = new BufferingStompDecoder(DECODER, inboundMessageSizeLimit);
+			this.splittingEncoder = (outboundMessageSizeLimit != null ?
+					new SplittingStompEncoder(ENCODER, outboundMessageSizeLimit) : null);
 		}
 
 		public List<Message<byte[]>> decode(WebSocketMessage<?> webSocketMessage) {
@@ -588,17 +628,41 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 			return result;
 		}
 
+		public boolean hasSplittingEncoder() {
+			return (this.splittingEncoder != null);
+		}
+
 		public WebSocketMessage<?> encode(Message<byte[]> message, Class<? extends WebSocketSession> sessionType) {
+			StompHeaderAccessor accessor = getStompHeaderAccessor(message);
+			byte[] payload = message.getPayload();
+			byte[] frame = ENCODER.encode(accessor.getMessageHeaders(), payload);
+			return (useBinary(accessor, payload, sessionType) ? new BinaryMessage(frame) : new TextMessage(frame));
+		}
+
+		public List<WebSocketMessage<?>> encodeAndSplit(Message<byte[]> message, Class<? extends WebSocketSession> sessionType) {
+			Assert.state(this.splittingEncoder != null, "No SplittingEncoder");
+			StompHeaderAccessor accessor = getStompHeaderAccessor(message);
+			byte[] payload = message.getPayload();
+			List<byte[]> frames = this.splittingEncoder.encode(accessor.getMessageHeaders(), payload);
+			boolean useBinary = useBinary(accessor, payload, sessionType);
+
+			List<WebSocketMessage<?>> messages = new ArrayList<>(frames.size());
+			frames.forEach(frame -> messages.add(useBinary ? new BinaryMessage(frame) : new TextMessage(frame)));
+			return messages;
+		}
+
+		private static StompHeaderAccessor getStompHeaderAccessor(Message<byte[]> message) {
 			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 			Assert.notNull(accessor, "No StompHeaderAccessor available");
-			byte[] payload = message.getPayload();
-			byte[] bytes = ENCODER.encode(accessor.getMessageHeaders(), payload);
+			return accessor;
+		}
 
-			boolean useBinary = (payload.length > 0 &&
+		private static boolean useBinary(
+				StompHeaderAccessor accessor, byte[] payload, Class<? extends WebSocketSession> sessionType) {
+
+			return (payload.length > 0 &&
 					!(SockJsSession.class.isAssignableFrom(sessionType)) &&
 					MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(accessor.getContentType()));
-
-			return (useBinary ? new BinaryMessage(bytes) : new TextMessage(bytes));
 		}
 	}
 

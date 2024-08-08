@@ -78,10 +78,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	@Override
 	public ClassName getTarget(RegisteredBean registeredBean) {
 		if (hasInstanceSupplier()) {
-			String resourceDescription = registeredBean.getMergedBeanDefinition().getResourceDescription();
-			throw new IllegalStateException("Error processing bean with name '" + registeredBean.getBeanName() + "'" +
-					(resourceDescription != null ? " defined in " + resourceDescription : "") +
-					": instance supplier is not supported");
+			throw new AotBeanProcessingException(registeredBean, "instance supplier is not supported");
 		}
 		Class<?> target = extractDeclaringClass(registeredBean, this.instantiationDescriptor.get());
 		while (target.getName().startsWith("java.") && registeredBean.isInnerBean()) {
@@ -232,8 +229,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 			boolean allowDirectSupplierShortcut) {
 
 		if (hasInstanceSupplier()) {
-			throw new IllegalStateException("Default code generation is not supported for bean definitions " +
-					"declaring an instance supplier callback: " + this.registeredBean.getMergedBeanDefinition());
+			throw new AotBeanProcessingException(this.registeredBean, "instance supplier is not supported");
 		}
 		return new InstanceSupplierCodeGenerator(generationContext,
 				beanRegistrationCode.getClassName(), beanRegistrationCode.getMethods(), allowDirectSupplierShortcut)

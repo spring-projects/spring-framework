@@ -37,7 +37,7 @@ import org.springframework.aot.hint.RuntimeHints;
  * <p>As an alternative to implementing and registering a {@code TestRuntimeHintsRegistrar},
  * you may choose to annotate a test class with
  * {@link org.springframework.aot.hint.annotation.Reflective @Reflective},
- * {@link org.springframework.aot.hint.annotation.RegisterReflectionForBinding @RegisterReflectionForBinding},
+ * {@link org.springframework.aot.hint.annotation.RegisterReflection @RegisterReflection},
  * or {@link org.springframework.context.annotation.ImportRuntimeHints @ImportRuntimeHints}.
  *
  * @author Sam Brannen

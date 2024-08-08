@@ -306,6 +306,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
+	@SuppressWarnings("removal")
 	private void parseResourceResolversTransformers(boolean isAutoRegistration,
 			ManagedList<Object> resourceResolvers, ManagedList<Object> resourceTransformers,
 			ParserContext context, Element element, @Nullable Object source) {

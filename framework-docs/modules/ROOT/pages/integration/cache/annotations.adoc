@@ -518,41 +518,9 @@ disable it by removing only one configuration line rather than all the annotatio
 your code).
 
 To enable caching annotations add the annotation `@EnableCaching` to one of your
-`@Configuration` classes:
+`@Configuration` classes or use the `cache:annotation-driven` element with XML:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableCaching
-	public class AppConfig {
-
-		@Bean
-		CacheManager cacheManager() {
-			CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-			cacheManager.setCacheSpecification(...);
-			return cacheManager;
-		}
-	}
-----
-
-Alternatively, for XML configuration you can use the `cache:annotation-driven` element:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:cache="http://www.springframework.org/schema/cache"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
-
-		<cache:annotation-driven/>
-
-		<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
-			<property name="cacheSpecification" value="..."/>
-		</bean>
-	</beans>
-----
+include-code::./CacheConfiguration[tag=snippet,indent=0]
 
 Both the `cache:annotation-driven` element and the `@EnableCaching` annotation let you
 specify various options that influence the way the caching behavior is added to the

@@ -60,8 +60,8 @@ class ParsingTests {
 			parseCheck("property1?.property2?.methodOne()");
 			parseCheck("property1?.methodOne('enigma')?.methodTwo(42)");
 			parseCheck("property1?.methodOne()?.property2?.methodTwo()");
-			parseCheck("property1[0]?.property2['key']?.methodTwo()");
-			parseCheck("property1[0][1]?.property2['key'][42]?.methodTwo()");
+			parseCheck("property1?.[0]?.property2?.['key']?.methodTwo()");
+			parseCheck("property1?.[0]?.[1]?.property2?.['key']?.[42]?.methodTwo()");
 		}
 
 		@Test

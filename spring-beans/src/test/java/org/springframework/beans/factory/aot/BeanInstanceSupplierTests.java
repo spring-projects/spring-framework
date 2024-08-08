@@ -66,6 +66,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -404,7 +405,7 @@ class BeanInstanceSupplierTests {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
 		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
-		assertThat(arguments.getObject(0)).isInstanceOf(List.class).asList()
+		assertThat(arguments.getObject(0)).isInstanceOf(List.class).asInstanceOf(LIST)
 				.containsExactly("1", "2");
 	}
 

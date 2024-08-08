@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,7 +211,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 			Class<?> type = ClassUtils.resolvePrimitiveIfNecessary(method.getReturnType());
 			return this.annotation.getValue(attributeName, type).orElseThrow(
 					() -> new NoSuchElementException("No value found for attribute named '" + attributeName +
-							"' in merged annotation " + this.annotation.getType().getName()));
+							"' in merged annotation " + getName(this.annotation.getType())));
 		});
 
 		// Clone non-empty arrays so that users cannot alter the contents of values in our cache.

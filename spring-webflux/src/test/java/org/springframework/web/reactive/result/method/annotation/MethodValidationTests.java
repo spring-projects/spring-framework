@@ -220,7 +220,7 @@ class MethodValidationTests {
 
 					assertValueResult(ex.getValueResults().get(0), 2, "123", Collections.singletonList(
 							"""
-						org.springframework.context.support.DefaultMessageSourceResolvable: \
+						org.springframework.validation.beanvalidation.MethodValidationAdapter$ViolationMessageSourceResolvable: \
 						codes [Size.validController#handle.myHeader,Size.myHeader,Size.java.lang.String,Size]; \
 						arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
 						codes [validController#handle.myHeader,myHeader]; arguments []; default message [myHeader],10,5]; \
@@ -360,9 +360,15 @@ class MethodValidationTests {
 
 		assertThat(result.getMethodParameter().getParameterIndex()).isEqualTo(parameterIndex);
 		assertThat(result.getArgument()).isEqualTo(argument);
-		assertThat(result.getResolvableErrors())
+
+		List<MessageSourceResolvable> resolvableErrors = result.getResolvableErrors();
+		assertThat(resolvableErrors)
 				.extracting(MessageSourceResolvable::toString)
 				.containsExactlyInAnyOrderElementsOf(errors);
+
+		resolvableErrors.forEach(error ->
+				assertThat(result.unwrap(error, ConstraintViolation.class)).isNotNull());
+
 	}
 
 

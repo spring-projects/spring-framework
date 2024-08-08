@@ -26,7 +26,6 @@ are described in this chapter.
 Spring includes a number of packages dedicated to mocking:
 
 * xref:testing/unit.adoc#mock-objects-env[Environment]
-* xref:testing/unit.adoc#mock-objects-jndi[JNDI]
 * xref:testing/unit.adoc#mock-objects-servlet[Servlet API]
 * xref:testing/unit.adoc#mock-objects-web-reactive[Spring Web Reactive]
 
@@ -42,20 +41,6 @@ and xref:core/beans/environment.adoc#beans-property-source-abstraction[`Property
 out-of-container tests for code that depends on environment-specific properties.
 
 
-[[mock-objects-jndi]]
-=== JNDI
-
-The `org.springframework.mock.jndi` package contains a partial implementation of the JNDI
-SPI, which you can use to set up a simple JNDI environment for test suites or stand-alone
-applications. If, for example, JDBC `DataSource` instances get bound to the same JNDI
-names in test code as they do in a Jakarta EE container, you can reuse both application code
-and configuration in testing scenarios without modification.
-
-WARNING: The mock JNDI support in the `org.springframework.mock.jndi` package is
-officially deprecated as of Spring Framework 5.2 in favor of complete solutions from third
-parties such as https://github.com/h-thurow/Simple-JNDI[Simple-JNDI].
-
-
 [[mock-objects-servlet]]
 === Servlet API
 
@@ -68,8 +53,8 @@ or alternative Servlet API mock objects (such as http://www.mockobjects.com[Mock
 TIP: Since Spring Framework 6.0, the mock objects in `org.springframework.mock.web` are
 based on the Servlet 6.0 API.
 
-The Spring MVC Test framework builds on the mock Servlet API objects to provide an
-integration testing framework for Spring MVC. See xref:testing/spring-mvc-test-framework.adoc[MockMvc].
+MockMvc builds on the mock Servlet API objects to provide an integration testing
+framework for Spring MVC. See xref:testing/mockmvc.adoc[MockMvc].
 
 
 [[mock-objects-web-reactive]]
@@ -165,4 +150,4 @@ combined with `MockHttpServletRequest`, `MockHttpSession`, and so on from Spring
 xref:testing/unit.adoc#mock-objects-servlet[Servlet API mocks]. For thorough integration testing of your
 Spring MVC and REST `Controller` classes in conjunction with your `WebApplicationContext`
 configuration for Spring MVC, use the
-xref:testing/spring-mvc-test-framework.adoc[Spring MVC Test Framework] instead.
+xref:testing/mockmvc.adoc[MockMvc] instead.

@@ -81,8 +81,38 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#flush()
 	 */
 	public static void triggerFlush() {
-		for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
-			synchronization.flush();
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
+				synchronization.flush();
+			}
+		}
+	}
+
+	/**
+	 * Trigger {@code flush} callbacks on all currently registered synchronizations.
+	 * @throws RuntimeException if thrown by a {@code savepoint} callback
+	 * @since 6.2
+	 * @see TransactionSynchronization#savepoint
+	 */
+	static void triggerSavepoint(Object savepoint) {
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
+				synchronization.savepoint(savepoint);
+			}
+		}
+	}
+
+	/**
+	 * Trigger {@code flush} callbacks on all currently registered synchronizations.
+	 * @throws RuntimeException if thrown by a {@code savepointRollback} callback
+	 * @since 6.2
+	 * @see TransactionSynchronization#savepointRollback
+	 */
+	static void triggerSavepointRollback(Object savepoint) {
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
+				synchronization.savepointRollback(savepoint);
+			}
 		}
 	}
 

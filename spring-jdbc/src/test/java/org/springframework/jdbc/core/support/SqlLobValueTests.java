@@ -60,6 +60,7 @@ import static org.mockito.Mockito.verify;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@SuppressWarnings("deprecation")
 class SqlLobValueTests {
 
 	@Mock

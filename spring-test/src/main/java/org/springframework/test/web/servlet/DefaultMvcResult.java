@@ -137,6 +137,7 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Object getAsyncResult(long timeToWait) {
 		if (this.mockRequest.getAsyncContext() != null && timeToWait == -1) {
 			long requestTimeout = this.mockRequest.getAsyncContext().getTimeout();

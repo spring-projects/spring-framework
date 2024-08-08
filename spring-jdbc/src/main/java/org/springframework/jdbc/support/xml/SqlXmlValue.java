@@ -25,7 +25,9 @@ import org.springframework.jdbc.support.SqlValue;
  * @author Thomas Risberg
  * @since 2.5.5
  * @see org.springframework.jdbc.support.SqlValue
+ * @deprecated as of 6.2, in favor of a direct {@link SqlValue} implementation
  */
+@Deprecated(since = "6.2")
 public interface SqlXmlValue extends SqlValue {
 
 }

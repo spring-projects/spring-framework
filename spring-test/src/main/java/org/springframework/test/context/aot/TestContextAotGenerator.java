@@ -352,6 +352,7 @@ public class TestContextAotGenerator {
 			}
 			catch (Exception ex) {
 				Throwable cause = (ex instanceof ContextLoadException cle ? cle.getCause() : ex);
+				Assert.state(cause != null, "Cause must not be null");
 				throw new TestContextAotException(
 						"Failed to load ApplicationContext for AOT processing for test class [%s]"
 							.formatted(testClass.getName()), cause);

@@ -30,6 +30,7 @@ import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyCoreHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
@@ -54,8 +55,8 @@ class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@ParameterizedHttpServerTest
 	void zeroCopy(HttpServer httpServer) throws Exception {
-		assumeTrue(httpServer instanceof ReactorHttpServer || httpServer instanceof UndertowHttpServer,
-			"Zero-copy does not support Servlet");
+		assumeTrue(httpServer instanceof ReactorHttpServer || httpServer instanceof UndertowHttpServer
+						|| httpServer instanceof JettyCoreHttpServer, "Zero-copy does not support Servlet");
 
 		startServer(httpServer);
 

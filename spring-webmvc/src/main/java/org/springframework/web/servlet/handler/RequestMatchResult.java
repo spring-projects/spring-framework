@@ -94,7 +94,7 @@ public class RequestMatchResult {
 	 * {@link PathMatcher#extractUriTemplateVariables}.
 	 * @return a map with URI template variables
 	 */
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "NullAway"})
 	public Map<String, String> extractUriTemplateVariables() {
 		return (this.pathPattern != null ?
 				this.pathPattern.matchAndExtract(this.lookupPathContainer).getUriVariables() :

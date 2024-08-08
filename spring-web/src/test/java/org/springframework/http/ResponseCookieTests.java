@@ -37,12 +37,12 @@ class ResponseCookieTests {
 		assertThat(ResponseCookie.from("id", "1fWa").build().toString()).isEqualTo("id=1fWa");
 
 		ResponseCookie cookie = ResponseCookie.from("id", "1fWa")
-				.domain("abc").path("/path").maxAge(0).httpOnly(true).secure(true).sameSite("None")
+				.domain("abc").path("/path").maxAge(0).httpOnly(true).partitioned(true).secure(true).sameSite("None")
 				.build();
 
 		assertThat(cookie.toString()).isEqualTo("id=1fWa; Path=/path; Domain=abc; " +
 				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
-				"Secure; HttpOnly; SameSite=None");
+				"Secure; HttpOnly; Partitioned; SameSite=None");
 	}
 
 	@Test

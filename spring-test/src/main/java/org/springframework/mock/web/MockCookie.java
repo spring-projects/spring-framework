@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,29 @@ public class MockCookie extends Cookie {
 	}
 
 	/**
+	 * Set the "Partitioned" attribute for this cookie.
+	 * @since 6.2
+	 * @see <a href="https://datatracker.ietf.org/doc/html/draft-cutler-httpbis-partitioned-cookies#section-2.1">The Partitioned attribute spec</a>
+	 */
+	public void setPartitioned(boolean partitioned) {
+		if (partitioned) {
+			setAttribute("Partitioned", "");
+		}
+		else {
+			setAttribute("Partitioned", null);
+		}
+	}
+
+	/**
+	 * Return whether the "Partitioned" attribute is set for this cookie.
+	 * @since 6.2
+	 * @see <a href="https://datatracker.ietf.org/doc/html/draft-cutler-httpbis-partitioned-cookies#section-2.1">The Partitioned attribute spec</a>
+	 */
+	public boolean isPartitioned() {
+		return getAttribute("Partitioned") != null;
+	}
+
+	/**
 	 * Factory method that parses the value of the supplied "Set-Cookie" header.
 	 * @param setCookieHeader the "Set-Cookie" value; never {@code null} or empty
 	 * @return the created cookie
@@ -146,6 +169,9 @@ public class MockCookie extends Cookie {
 			else if (StringUtils.startsWithIgnoreCase(attribute, "Comment")) {
 				cookie.setComment(extractAttributeValue(attribute, setCookieHeader));
 			}
+			else if (!attribute.isEmpty()) {
+				cookie.setAttribute(attribute, extractOptionalAttributeValue(attribute, setCookieHeader));
+			}
 		}
 		return cookie;
 	}
@@ -155,6 +181,11 @@ public class MockCookie extends Cookie {
 		Assert.isTrue(nameAndValue.length == 2,
 				() -> "No value in attribute '" + nameAndValue[0] + "' for Set-Cookie header '" + header + "'");
 		return nameAndValue[1];
+	}
+
+	private static String extractOptionalAttributeValue(String attribute, String header) {
+		String[] nameAndValue = attribute.split("=");
+		return nameAndValue.length == 2 ? nameAndValue[1] : "";
 	}
 
 	@Override
@@ -176,6 +207,7 @@ public class MockCookie extends Cookie {
 				.append("Comment", getComment())
 				.append("Secure", getSecure())
 				.append("HttpOnly", isHttpOnly())
+				.append("Partitioned", isPartitioned())
 				.append(SAME_SITE, getSameSite())
 				.append("Max-Age", getMaxAge())
 				.append(EXPIRES, getAttribute(EXPIRES))

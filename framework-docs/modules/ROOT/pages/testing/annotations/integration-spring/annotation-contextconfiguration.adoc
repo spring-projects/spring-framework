@@ -1,10 +1,10 @@
 [[spring-testing-annotation-contextconfiguration]]
 = `@ContextConfiguration`
 
-`@ContextConfiguration` defines class-level metadata that is used to determine how to
-load and configure an `ApplicationContext` for integration tests. Specifically,
-`@ContextConfiguration` declares the application context resource `locations` or the
-component `classes` used to load the context.
+`@ContextConfiguration` is an annotation that can be applied to a test class to configure
+metadata that is used to determine how to load and configure an `ApplicationContext` for
+integration tests. Specifically, `@ContextConfiguration` declares the application context
+resource `locations` or the component `classes` used to load the context.
 
 Resource locations are typically XML configuration files or Groovy scripts located in the
 classpath, while component classes are typically `@Configuration` classes. However,

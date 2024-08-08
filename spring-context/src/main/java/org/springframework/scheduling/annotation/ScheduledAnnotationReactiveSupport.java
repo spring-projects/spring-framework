@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,6 +244,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 		private void subscribe(TrackingSubscriber subscriber, Observation observation) {
 			this.subscriptionTrackerRegistry.add(subscriber);
 			if (reactorPresent) {
+				observation.start();
 				Flux.from(this.publisher)
 						.contextWrite(context -> context.put(ObservationThreadLocalAccessor.KEY, observation))
 						.subscribe(subscriber);
@@ -300,7 +301,6 @@ abstract class ScheduledAnnotationReactiveSupport {
 		@Override
 		public void onSubscribe(Subscription subscription) {
 			this.subscription = subscription;
-			this.observation.start();
 			subscription.request(Integer.MAX_VALUE);
 		}
 

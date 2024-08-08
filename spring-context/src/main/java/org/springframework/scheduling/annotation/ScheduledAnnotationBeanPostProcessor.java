@@ -59,6 +59,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.format.annotation.DurationFormat;
+import org.springframework.format.datetime.standard.DurationFormatterUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -150,7 +152,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Nullable
 	private TaskSchedulerRouter localScheduler;
 
-	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
+	private final Set<Class<?>> nonAnnotatedClasses = ConcurrentHashMap.newKeySet(64);
 
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks = new IdentityHashMap<>(16);
 
@@ -308,8 +310,9 @@ public class ScheduledAnnotationBeanPostProcessor
 					logger.trace(annotatedMethods.size() + " @Scheduled methods processed on bean '" + beanName +
 							"': " + annotatedMethods);
 				}
-				if ((this.beanFactory != null && !this.beanFactory.isSingleton(beanName)) ||
-						(this.beanFactory instanceof SingletonBeanRegistry sbr && sbr.containsSingleton(beanName))) {
+				if ((this.beanFactory != null &&
+						(!this.beanFactory.containsBean(beanName) || !this.beanFactory.isSingleton(beanName)) ||
+						(this.beanFactory instanceof SingletonBeanRegistry sbr && sbr.containsSingleton(beanName)))) {
 					// Either a prototype/scoped bean or a FactoryBean with a pre-existing managed singleton
 					// -> trigger manual cancellation when ContextClosedEvent comes in
 					this.manualCancellationOnContextClose.add(bean);
@@ -567,20 +570,9 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	private static Duration toDuration(String value, TimeUnit timeUnit) {
-		if (isDurationString(value)) {
-			return Duration.parse(value);
-		}
-		return toDuration(Long.parseLong(value), timeUnit);
+		DurationFormat.Unit unit = DurationFormat.Unit.fromChronoUnit(timeUnit.toChronoUnit());
+		return DurationFormatterUtils.detectAndParse(value, unit); // interpreting as long as fallback already
 	}
-
-	private static boolean isDurationString(String value) {
-		return (value.length() > 1 && (isP(value.charAt(0)) || isP(value.charAt(1))));
-	}
-
-	private static boolean isP(char ch) {
-		return (ch == 'P' || ch == 'p');
-	}
-
 
 	/**
 	 * Return all currently scheduled tasks, from {@link Scheduled} methods

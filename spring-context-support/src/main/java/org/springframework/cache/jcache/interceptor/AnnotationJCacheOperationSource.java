@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKeyGenerator;
@@ -32,6 +33,7 @@ import javax.cache.annotation.CacheResult;
 
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
@@ -41,9 +43,19 @@ import org.springframework.util.StringUtils;
  * {@link CacheRemoveAll} annotations.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJCacheOperationSource {
+
+	private static final Set<Class<? extends Annotation>> JCACHE_OPERATION_ANNOTATIONS =
+			Set.of(CacheResult.class, CachePut.class, CacheRemove.class, CacheRemoveAll.class);
+
+
+	@Override
+	public boolean isCandidateClass(Class<?> targetClass) {
+		return AnnotationUtils.isCandidateClass(targetClass, JCACHE_OPERATION_ANNOTATIONS);
+	}
 
 	@Override
 	@Nullable

@@ -306,6 +306,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 	 * Resolve the specified message into a concrete message String.
 	 * The returned message String should be unescaped.
 	 */
+	@SuppressWarnings("NullAway")
 	protected String resolveMessage() throws JspException, NoSuchMessageException {
 		MessageSource messageSource = getMessageSource();
 

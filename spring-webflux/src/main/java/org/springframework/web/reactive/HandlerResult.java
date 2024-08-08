@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
  */
 
 package org.springframework.web.reactive;
-
-import java.util.function.Function;
-
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -45,9 +41,6 @@ public class HandlerResult {
 
 	@Nullable
 	private DispatchExceptionHandler exceptionHandler;
-
-	@Nullable
-	private Function<Throwable, Mono<HandlerResult>> exceptionHandlerFunction;
 
 
 	/**
@@ -147,42 +140,6 @@ public class HandlerResult {
 	@Nullable
 	public DispatchExceptionHandler getExceptionHandler() {
 		return this.exceptionHandler;
-	}
-
-	/**
-	 * {@link HandlerAdapter} classes can set this to have their exception
-	 * handling mechanism applied to response rendering and to deferred
-	 * exceptions when invoking a handler with an asynchronous return value.
-	 * @param function the error handler
-	 * @return the current instance
-	 * @deprecated in favor of {@link #setExceptionHandler(DispatchExceptionHandler)}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	public HandlerResult setExceptionHandler(Function<Throwable, Mono<HandlerResult>> function) {
-		this.exceptionHandler = (exchange, ex) -> function.apply(ex);
-		this.exceptionHandlerFunction = function;
-		return this;
-	}
-
-	/**
-	 * Whether there is an exception handler.
-	 * @deprecated in favor of checking via {@link #getExceptionHandler()}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	public boolean hasExceptionHandler() {
-		return (this.exceptionHandler != null);
-	}
-
-	/**
-	 * Apply the exception handler and return the alternative result.
-	 * @param failure the exception
-	 * @return the new result or the same error if there is no exception handler
-	 * @deprecated without a replacement; for internal invocation only, not used as of 6.0
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	public Mono<HandlerResult> applyExceptionHandler(Throwable failure) {
-		return (this.exceptionHandlerFunction != null ?
-				this.exceptionHandlerFunction.apply(failure) : Mono.error(failure));
 	}
 
 }
