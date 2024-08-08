@@ -59,7 +59,7 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
-		if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
+		if (config.isOptimize() || config.isProxyTargetClass() || hashNoInterfaceImplement(config) || hasNoUserSuppliedProxyInterfaces(config)) {
 			Class<?> targetClass = config.getTargetClass();
 			if (targetClass == null) {
 				throw new AopConfigException("TargetSource cannot determine target class: " +
@@ -73,6 +73,12 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 		else {
 			return new JdkDynamicAopProxy(config);
 		}
+	}
+
+	private boolean hashNoInterfaceImplement(org.springframework.aop.framework.AdvisedSupport config) {
+		Class<?> targetClass = config.getTargetClass();
+		if (targetClass == null) return false;
+		return targetClass.getInterfaces().length == 0;
 	}
 
 	/**
