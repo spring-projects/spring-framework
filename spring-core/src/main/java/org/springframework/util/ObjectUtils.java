@@ -288,9 +288,9 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Convert the given array (which may be a primitive array) to an
-	 * object array (if necessary of primitive wrapper objects).
-	 * <p>A {@code null} source value will be converted to an
+	 * Convert the given array (which may be a primitive array) to an object array (if
+	 * necessary, to an array of primitive wrapper objects).
+	 * <p>A {@code null} source value or empty primitive array will be converted to an
 	 * empty Object array.
 	 * @param source the (potentially primitive) array
 	 * @return the corresponding object array (never {@code null})

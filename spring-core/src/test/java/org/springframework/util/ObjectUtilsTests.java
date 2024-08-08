@@ -188,19 +188,20 @@ class ObjectUtilsTests {
 
 	@Test
 	void toObjectArrayWithNonArrayType() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				ObjectUtils.toObjectArray("Not an []"));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> ObjectUtils.toObjectArray("Not an []"))
+				.withMessageStartingWith("Source is not an array");
 	}
 
 	@Test
 	void toObjectArrayWithNonPrimitiveArray() {
-		String[] source = new String[] {"Bingo"};
-		assertThat(ObjectUtils.toObjectArray(source)).isEqualTo(source);
+		String[] source = {"Bingo"};
+		assertThat(ObjectUtils.toObjectArray(source)).isSameAs(source);
 	}
 
 	@Test
 	void addObjectToArraySunnyDay() {
-		String[] array = new String[] {"foo", "bar"};
+		String[] array = {"foo", "bar"};
 		String newElement = "baz";
 		Object[] newArray = ObjectUtils.addObjectToArray(array, newElement);
 		assertThat(newArray).hasSize(3);
@@ -209,7 +210,7 @@ class ObjectUtilsTests {
 
 	@Test
 	void addObjectToArraysAtPosition() {
-		String[] array = new String[] {"foo", "bar", "baz"};
+		String[] array = {"foo", "bar", "baz"};
 		assertThat(ObjectUtils.addObjectToArray(array, "bat", 3)).containsExactly("foo", "bar", "baz", "bat");
 		assertThat(ObjectUtils.addObjectToArray(array, "bat", 2)).containsExactly("foo", "bar", "bat", "baz");
 		assertThat(ObjectUtils.addObjectToArray(array, "bat", 1)).containsExactly("foo", "bat", "bar", "baz");
@@ -228,7 +229,7 @@ class ObjectUtilsTests {
 	@Test
 	void addObjectToSingleNonNullElementArray() {
 		String existingElement = "foo";
-		String[] array = new String[] {existingElement};
+		String[] array = {existingElement};
 		String newElement = "bar";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
 		assertThat(newArray).hasSize(2);
@@ -238,7 +239,7 @@ class ObjectUtilsTests {
 
 	@Test
 	void addObjectToSingleNullElementArray() {
-		String[] array = new String[] {null};
+		String[] array = {null};
 		String newElement = "bar";
 		String[] newArray = ObjectUtils.addObjectToArray(array, newElement);
 		assertThat(newArray).hasSize(2);
