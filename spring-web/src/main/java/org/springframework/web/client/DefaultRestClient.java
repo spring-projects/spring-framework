@@ -237,13 +237,10 @@ final class DefaultRestClient implements RestClient {
 					return (T) messageConverter.read((Class)bodyClass, responseWrapper);
 				}
 			}
-			UnknownContentTypeException unknownContentTypeException = new UnknownContentTypeException(bodyType, contentType,
+
+			throw new UnknownContentTypeException(bodyType, contentType,
 					responseWrapper.getStatusCode(), responseWrapper.getStatusText(),
 					responseWrapper.getHeaders(), RestClientUtils.getBody(responseWrapper));
-			if (observation != null) {
-				observation.error(unknownContentTypeException);
-			}
-			throw unknownContentTypeException;
 		}
 		catch (UncheckedIOException | IOException | HttpMessageNotReadableException exc) {
 			Throwable cause;
