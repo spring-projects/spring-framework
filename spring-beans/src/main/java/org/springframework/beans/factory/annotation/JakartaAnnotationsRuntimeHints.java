@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,24 @@ import org.springframework.aot.hint.TypeReference;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link RuntimeHintsRegistrar} for Jakarta annotations.
+ * {@link RuntimeHintsRegistrar} for Jakarta annotations and their pre-Jakarta equivalents.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 class JakartaAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		Stream.of("jakarta.inject.Inject", "jakarta.inject.Provider", "jakarta.inject.Qualifier").forEach(typeName ->
-				hints.reflection().registerType(TypeReference.of(typeName)));
+		// javax.inject.Provider is omitted from the list, since we do not currently load
+		// it via reflection.
+		Stream.of(
+				"jakarta.inject.Inject",
+				"jakarta.inject.Provider",
+				"jakarta.inject.Qualifier",
+				"javax.inject.Inject",
+				"javax.inject.Qualifier"
+			).forEach(typeName -> hints.reflection().registerType(TypeReference.of(typeName)));
 	}
 
 }
