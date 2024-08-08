@@ -51,7 +51,7 @@ public class MediaTypeAssert extends AbstractObjectAssert<MediaTypeAssert, Media
 	 * representation.
 	 * @param mediaType the expected media type, as a String to be parsed
 	 * into a MediaType
-*/
+	 */
 	public MediaTypeAssert isEqualTo(String mediaType) {
 		return isEqualTo(parseMediaType(mediaType));
 	}
@@ -61,6 +61,7 @@ public class MediaTypeAssert extends AbstractObjectAssert<MediaTypeAssert, Media
 	 * representation.
 	 * @param mediaType the given media type, as a String to be parsed
 	 * into a MediaType
+	 * @since 6.2
 	 */
 	public MediaTypeAssert isNotEqualTo(String mediaType) {
 		return isNotEqualTo(parseMediaType(mediaType));
