@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.rsocket.service;
 
+import java.util.Optional;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
@@ -29,6 +31,7 @@ import org.springframework.util.Assert;
  * annotated arguments.
  *
  * @author Rossen Stoyanchev
+ * @author Olga Maciaszek-Sharma
  * @since 6.0
  */
 public class PayloadArgumentResolver implements RSocketServiceArgumentResolver {
@@ -54,8 +57,15 @@ public class PayloadArgumentResolver implements RSocketServiceArgumentResolver {
 			return false;
 		}
 
+		parameter = parameter.nestedIfOptional();
+
+		if (argument instanceof Optional<?> optionalValue) {
+			argument = optionalValue.orElse(null);
+		}
+
 		if (argument != null) {
-			ReactiveAdapter reactiveAdapter = this.reactiveAdapterRegistry.getAdapter(parameter.getParameterType());
+			ReactiveAdapter reactiveAdapter = this.reactiveAdapterRegistry
+					.getAdapter(parameter.getNestedParameterType());
 			if (reactiveAdapter == null) {
 				requestValues.setPayloadValue(argument);
 			}
@@ -70,7 +80,10 @@ public class PayloadArgumentResolver implements RSocketServiceArgumentResolver {
 						reactiveAdapter.toPublisher(argument),
 						ParameterizedTypeReference.forType(nestedParameter.getNestedGenericParameterType()));
 			}
+			return true;
 		}
+		boolean required = (annot == null || annot.required()) && !parameter.isOptional();
+		Assert.isTrue(!required, () -> "Missing payload");
 
 		return true;
 	}

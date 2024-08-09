@@ -1115,7 +1115,8 @@ method parameters:
 | `@Payload`
 | Set the input payload(s) for the request. This can be a concrete value, or any producer
   of values that can be adapted to a Reactive Streams `Publisher` via
-  `ReactiveAdapterRegistry`
+  `ReactiveAdapterRegistry`. The payload can't be null unless it's set as not required
+through the annotation, annotated with `@Nullable` or it is `Optional`.
 
 | `Object`, if followed by `MimeType`
 | The value for a metadata entry in the input payload. This can be any `Object` as long
