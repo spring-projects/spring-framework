@@ -24,7 +24,7 @@ runs:
       with:
         distribution: ${{ inputs.java-early-access == 'true' && 'temurin' || 'liberica' }}
         java-version: |
-          ${{ inputs.java-version }}
+          ${{ inputs.java-early-access == 'true' && format('{0}-ea', inputs.java-version) || inputs.java-version }}
           ${{ inputs.java-toolchain == 'true' && '17' || '' }}
     - name: Set Up Gradle
       uses: gradle/actions/setup-gradle@d9c87d481d55275bb5441eef3fe0e46805f9ef70 # v3.5.0
