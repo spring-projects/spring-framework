@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Ricardo Figueroa
  * @author Sebastien Deleuze
  * @since 3.0.2
  * @param <T> the body type
@@ -502,6 +503,15 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		BodyBuilder contentType(MediaType contentType);
 
 		/**
+		 * Set the {@linkplain ContentDisposition content disposition} of the body, as specified by the
+		 * {@code Content-Disposition} header.
+		 * @param contentDisposition the content disposition
+		 * @return this builder
+		 * @see HttpHeaders#setContentDisposition(ContentDisposition)
+		 */
+		BodyBuilder contentDisposition(ContentDisposition contentDisposition);
+
+		/**
 		 * Set the body of the response entity and returns it.
 		 * @param <T> the type of the body
 		 * @param body the body of the response entity
@@ -564,6 +574,12 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		@Override
 		public BodyBuilder contentType(MediaType contentType) {
 			this.headers.setContentType(contentType);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder contentDisposition(ContentDisposition contentDisposition) {
+			this.headers.setContentDisposition(contentDisposition);
 			return this;
 		}
 
