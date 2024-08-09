@@ -377,7 +377,7 @@ Kotlin::
 
 A `ConstraintViolation` on `Person.name()` is adapted to a `FieldError` with the following:
 
-- Error codes `"Size.student.name"`, `"Size.name"`, `"Size.java.lang.String"`, and `"Size"`
+- Error codes `"Size.person.name"`, `"Size.name"`, `"Size.java.lang.String"`, and `"Size"`
 - Message arguments `"name"`, `10`, and `1` (the field name and the constraint attributes)
 - Default message "size must be between 1 and 10"
 
@@ -385,14 +385,14 @@ To customize the default message, you can add properties to
 xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
 resource bundles using any of the above errors codes and message arguments. Note also that the
 message argument `"name"` is itself a `MessageSourceResolvable` with error codes
-`"student.name"` and `"name"` and can customized too. For example:
+`"person.name"` and `"name"` and can customized too. For example:
 
 Properties::
 +
 [source,properties,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-Size.student.name=Please, provide a {0} that is between {2} and {1} characters long
-student.name=username
+Size.peron.name=Please, provide a {0} that is between {2} and {1} characters long
+person.name=username
 ----
 
 A `ConstraintViolation` on the `degrees` method parameter is adapted to a
