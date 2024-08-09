@@ -2,13 +2,13 @@ name: Create GitHub Release
 description: Create the release on GitHub with a changelog
 inputs:
   milestone:
-    description: 'Name of the GitHub milestone for which a release will be created'
+    description: Name of the GitHub milestone for which a release will be created
     required: true
   token:
-    description: 'Token to use for authentication with GitHub'
+    description: Token to use for authentication with GitHub
     required: true
   pre-release:
-    description: 'Whether the release is a pre-release (a milestone or release candidate)'
+    description: Whether the release is a pre-release (a milestone or release candidate)
     required: false
     default: 'false'
 runs:
