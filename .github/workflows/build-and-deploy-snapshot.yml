@@ -9,6 +9,7 @@ jobs:
   build-and-deploy-snapshot:
     name: Build and Deploy Snapshot
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     if: ${{ github.repository == 'spring-projects/spring-framework' }}
     steps:
       - name: Check Out Code

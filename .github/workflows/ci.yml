@@ -9,6 +9,7 @@ jobs:
   ci:
     name: '${{ matrix.os.name}} | Java ${{ matrix.java.version}}'
     runs-on: ${{ matrix.os.id }}
+    timeout-minutes: 60
     if: ${{ github.repository == 'spring-projects/spring-framework' }}
     strategy:
       matrix:
@@ -41,7 +42,7 @@ jobs:
         uses: ./.github/actions/build
         with:
           java-version: ${{ matrix.java.version }}
-          java-distribution: ${{ matrix.java.distribution || 'liberica' }}
+          java-early-access: ${{ matrix.java.early-access || 'false' }}
           java-toolchain: ${{ matrix.java.toolchain }}
           develocity-access-key: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
       - name: Send Notification
