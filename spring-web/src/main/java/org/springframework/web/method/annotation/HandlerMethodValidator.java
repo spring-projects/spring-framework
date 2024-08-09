@@ -98,7 +98,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 					}
 				}
 			}
-			if (result.getAllValidationResults().size() == bindingResultCount) {
+			if (result.getParameterValidationResults().size() == bindingResultCount) {
 				return;
 			}
 		}

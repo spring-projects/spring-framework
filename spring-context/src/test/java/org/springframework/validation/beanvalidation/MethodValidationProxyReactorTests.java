@@ -81,7 +81,7 @@ class MethodValidationProxyReactorTests {
 		StepVerifier.create(myService.addPerson(personMono))
 				.expectErrorSatisfies(t -> {
 					MethodValidationException ex = (MethodValidationException) t;
-					assertThat(ex.getAllValidationResults()).hasSize(1);
+					assertThat(ex.getParameterValidationResults()).hasSize(1);
 
 					ParameterErrors errors = ex.getBeanResults().get(0);
 					assertThat(errors.getErrorCount()).isEqualTo(1);

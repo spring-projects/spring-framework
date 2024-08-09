@@ -17,6 +17,7 @@
 package org.springframework.validation.method;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.context.MessageSourceResolvable;
@@ -55,19 +56,30 @@ public interface MethodValidationResult {
 	 * Whether the result contains any validation errors.
 	 */
 	default boolean hasErrors() {
-		return !getAllValidationResults().isEmpty();
+		return !getParameterValidationResults().isEmpty();
 	}
 
 	/**
 	 * Return a single list with all errors from all validation results.
-	 * @see #getAllValidationResults()
+	 * @see #getParameterValidationResults()
 	 * @see ParameterValidationResult#getResolvableErrors()
 	 */
 	default List<? extends MessageSourceResolvable> getAllErrors() {
-		return getAllValidationResults().stream()
+		return getParameterValidationResults().stream()
 				.flatMap(result -> result.getResolvableErrors().stream())
 				.toList();
 	}
+
+	/**
+	 * Return all validation results per method parameter, including both
+	 * {@link #getValueResults()} and {@link #getBeanResults()}.
+	 * <p>Use {@link #getCrossParameterValidationResults()} for access to errors
+	 * from cross-parameter validation.
+	 * @since 6.2
+	 * @see #getValueResults()
+	 * @see #getBeanResults()
+	 */
+	List<ParameterValidationResult> getParameterValidationResults();
 
 	/**
 	 * Return all validation results. This includes both method parameters with
@@ -75,33 +87,43 @@ public interface MethodValidationResult {
 	 * on their fields and properties.
 	 * @see #getValueResults()
 	 * @see #getBeanResults()
+	 * @deprecated deprecated in favor of {@link #getParameterValidationResults()}
 	 */
-	List<ParameterValidationResult> getAllValidationResults();
+	@Deprecated(since = "6.2", forRemoval = true)
+	default List<ParameterValidationResult> getAllValidationResults() {
+		return getParameterValidationResults();
+	}
 
 	/**
-	 * Return the subset of {@link #getAllValidationResults() allValidationResults}
+	 * Return the subset of {@link #getParameterValidationResults() allValidationResults}
 	 * that includes method parameters with validation errors directly on method
 	 * argument values. This excludes {@link #getBeanResults() beanResults} with
 	 * nested errors on their fields and properties.
 	 */
 	default List<ParameterValidationResult> getValueResults() {
-		return getAllValidationResults().stream()
+		return getParameterValidationResults().stream()
 				.filter(result -> !(result instanceof ParameterErrors))
 				.toList();
 	}
 
 	/**
-	 * Return the subset of {@link #getAllValidationResults() allValidationResults}
+	 * Return the subset of {@link #getParameterValidationResults() allValidationResults}
 	 * that includes Object method parameters with nested errors on their fields
 	 * and properties. This excludes {@link #getValueResults() valueResults} with
 	 * validation errors directly on method arguments.
 	 */
 	default List<ParameterErrors> getBeanResults() {
-		return getAllValidationResults().stream()
+		return getParameterValidationResults().stream()
 				.filter(ParameterErrors.class::isInstance)
 				.map(result -> (ParameterErrors) result)
 				.toList();
 	}
+
+	/**
+	 * Return errors from cross-parameter validation.
+	 * @since 6.2
+	 */
+	List<MessageSourceResolvable> getCrossParameterValidationResults();
 
 
 	/**
@@ -112,7 +134,23 @@ public interface MethodValidationResult {
 	 * @return the created instance
 	 */
 	static MethodValidationResult create(Object target, Method method, List<ParameterValidationResult> results) {
-		return new DefaultMethodValidationResult(target, method, results);
+		return create(target, method, results, Collections.emptyList());
+	}
+
+	/**
+	 * Factory method to create a {@link MethodValidationResult} instance.
+	 * @param target the target Object
+	 * @param method the target method
+	 * @param results method validation results, expected to be non-empty
+	 * @param crossParameterErrors cross-parameter validation errors
+	 * @return the created instance
+	 * @since 6.2
+	 */
+	static MethodValidationResult create(
+			Object target, Method method, List<ParameterValidationResult> results,
+			List<MessageSourceResolvable> crossParameterErrors) {
+
+		return new DefaultMethodValidationResult(target, method, results, crossParameterErrors);
 	}
 
 	/**

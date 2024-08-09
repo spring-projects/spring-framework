@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -301,6 +302,7 @@ public class MethodValidationAdapter implements MethodValidator {
 
 		Map<Path.Node, ParamValidationResultBuilder> paramViolations = new LinkedHashMap<>();
 		Map<Path.Node, ParamErrorsBuilder> nestedViolations = new LinkedHashMap<>();
+		List<MessageSourceResolvable> crossParamErrors = null;
 
 		for (ConstraintViolation<Object> violation : violations) {
 			Iterator<Path.Node> nodes = violation.getPropertyPath().iterator();
@@ -314,6 +316,11 @@ public class MethodValidationAdapter implements MethodValidator {
 				}
 				else if (node.getKind().equals(ElementKind.RETURN_VALUE)) {
 					parameter = parameterFunction.apply(-1);
+				}
+				else if (node.getKind().equals(ElementKind.CROSS_PARAMETER)) {
+					crossParamErrors = (crossParamErrors != null ? crossParamErrors : new ArrayList<>());
+					crossParamErrors.add(createCrossParamError(target, method, violation));
+					break;
 				}
 				else {
 					continue;
@@ -382,7 +389,8 @@ public class MethodValidationAdapter implements MethodValidator {
 		nestedViolations.forEach((key, builder) -> resultList.add(builder.build()));
 		resultList.sort(resultComparator);
 
-		return MethodValidationResult.create(target, method, resultList);
+		return MethodValidationResult.create(target, method, resultList,
+				(crossParamErrors != null ? crossParamErrors : Collections.emptyList()));
 	}
 
 	private MethodParameter initMethodParameter(Method method, int index) {
@@ -411,6 +419,19 @@ public class MethodValidationAdapter implements MethodValidator {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(argument, objectName);
 		result.setMessageCodesResolver(this.messageCodesResolver);
 		return result;
+	}
+
+	private MessageSourceResolvable createCrossParamError(
+			Object target, Method method, ConstraintViolation<Object> violation) {
+
+		String objectName = Conventions.getVariableName(target) + "#" + method.getName();
+
+		ConstraintDescriptor<?> descriptor = violation.getConstraintDescriptor();
+		String code = descriptor.getAnnotation().annotationType().getSimpleName();
+		String[] codes = this.messageCodesResolver.resolveMessageCodes(code, objectName);
+		Object[] arguments = this.validatorAdapter.get().getArgumentsForConstraint(objectName, "", descriptor);
+
+		return new ViolationMessageSourceResolvable(codes, arguments, violation.getMessage(), violation);
 	}
 
 

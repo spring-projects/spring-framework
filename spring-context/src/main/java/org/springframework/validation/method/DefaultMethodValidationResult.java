@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.validation.method;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.util.Assert;
 
 /**
@@ -33,19 +34,26 @@ final class DefaultMethodValidationResult implements MethodValidationResult {
 
 	private final Method method;
 
-	private final List<ParameterValidationResult> allValidationResults;
+	private final List<ParameterValidationResult> parameterValidationResults;
+
+	private final List<MessageSourceResolvable> crossParamResults;
 
 	private final boolean forReturnValue;
 
 
-	DefaultMethodValidationResult(Object target, Method method, List<ParameterValidationResult> results) {
-		Assert.notEmpty(results, "'results' is required and must not be empty");
+	DefaultMethodValidationResult(
+			Object target, Method method, List<ParameterValidationResult> results,
+			List<MessageSourceResolvable> crossParamResults) {
+
+		Assert.isTrue(!results.isEmpty() || !crossParamResults.isEmpty(), "Expected validation results");
 		Assert.notNull(target, "'target' is required");
 		Assert.notNull(method, "Method is required");
+
 		this.target = target;
 		this.method = method;
-		this.allValidationResults = results;
-		this.forReturnValue = (results.get(0).getMethodParameter().getParameterIndex() == -1);
+		this.parameterValidationResults = results;
+		this.crossParamResults = crossParamResults;
+		this.forReturnValue = (!results.isEmpty() && results.get(0).getMethodParameter().getParameterIndex() == -1);
 	}
 
 
@@ -65,10 +73,14 @@ final class DefaultMethodValidationResult implements MethodValidationResult {
 	}
 
 	@Override
-	public List<ParameterValidationResult> getAllValidationResults() {
-		return this.allValidationResults;
+	public List<ParameterValidationResult> getParameterValidationResults() {
+		return this.parameterValidationResults;
 	}
 
+	@Override
+	public List<MessageSourceResolvable> getCrossParameterValidationResults() {
+		return this.crossParamResults;
+	}
 
 	@Override
 	public String toString() {

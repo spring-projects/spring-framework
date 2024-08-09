@@ -172,7 +172,7 @@ class MethodValidationTests {
 		assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
 		assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
 
-		assertThat(ex.getAllValidationResults()).hasSize(2);
+		assertThat(ex.getParameterValidationResults()).hasSize(2);
 
 		assertBeanResult(ex.getBeanResults().get(0), "student", List.of("""
 			Field error in object 'student' on field 'name': rejected value [name=Faustino1234]; \
@@ -227,7 +227,7 @@ class MethodValidationTests {
 		assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
 		assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
 
-		assertThat(ex.getAllValidationResults()).hasSize(2);
+		assertThat(ex.getParameterValidationResults()).hasSize(2);
 
 		assertBeanResult(ex.getBeanResults().get(0), "personList", List.of("""
 			Field error in object 'personList' on field 'name': rejected value [Faustino1234]; \
