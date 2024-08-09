@@ -5,10 +5,10 @@ inputs:
     required: false
     default: '17'
     description: 'The Java version to use for the build'
-  java-distribution:
+  java-early-access:
     required: false
-    default: 'liberica'
-    description: 'The Java distribution to use for the build'
+    default: 'false'
+    description: 'Whether the Java version is in early access'
   java-toolchain:
     required: false
     default: 'false'
@@ -22,7 +22,7 @@ runs:
     - name: Set Up Java
       uses: actions/setup-java@v4
       with:
-        distribution: ${{ inputs.java-distribution }}
+        distribution: ${{ inputs.java-early-access == 'true' && 'temurin' || 'liberica' }}
         java-version: |
           ${{ inputs.java-version }}
           ${{ inputs.java-toolchain == 'true' && '17' || '' }}
