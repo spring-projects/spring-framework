@@ -445,7 +445,7 @@ Properties::
 +
 [source,properties,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-Size.peron.name=Please, provide a {0} that is between {2} and {1} characters long
+Size.person.name=Please, provide a {0} that is between {2} and {1} characters long
 person.name=username
 ----
 
