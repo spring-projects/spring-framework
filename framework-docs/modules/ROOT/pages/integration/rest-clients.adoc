@@ -938,7 +938,8 @@ method parameters:
 | `@RequestHeader`
 | Add a request header or multiple headers. The argument may be a `Map<String, ?>` or
   `MultiValueMap<String, ?>` with multiple headers, a `Collection<?>` of values, or an
-  individual value. Type conversion is supported for non-String values.
+  individual value. Type conversion is supported for non-String values. This overrides
+  the annotation's `headers` attribute.
 
 | `@PathVariable`
 | Add a variable for expand a placeholder in the request URL. The argument may be a

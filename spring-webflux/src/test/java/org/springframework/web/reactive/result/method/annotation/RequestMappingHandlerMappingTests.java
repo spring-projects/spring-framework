@@ -303,6 +303,26 @@ class RequestMappingHandlerMappingTests {
 				.containsOnly(MediaType.valueOf("text/plain;charset=UTF-8"));
 	}
 
+	@SuppressWarnings("DataFlowIssue")
+	@Test
+	void httpExchangeWithCustomHeaders() {
+		this.handlerMapping.afterPropertiesSet();
+
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+		mapping.setApplicationContext(new StaticWebApplicationContext());
+		mapping.afterPropertiesSet();
+
+		Class<HttpExchangeController> clazz = HttpExchangeController.class;
+		Method method = ReflectionUtils.findMethod(clazz, "customHeadersExchange");
+		RequestMappingInfo mappingInfo = mapping.getMappingForMethod(method, clazz);
+
+		assertThat(mappingInfo.getMethodsCondition().getMethods()).containsOnly(RequestMethod.GET);
+		assertThat(mappingInfo.getParamsCondition().getExpressions()).isEmpty();
+
+		assertThat(mappingInfo.getHeadersCondition().getExpressions().stream().map(Object::toString))
+				.containsExactly("h1=hv1", "!h2");
+	}
+
 	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
 		String methodName = requestMethod.name().toLowerCase();
 		String path = "/" + methodName;
@@ -409,6 +429,12 @@ class RequestMappingHandlerMappingTests {
 
 		@PostExchange(url = "/custom", contentType = "application/json", accept = "text/plain;charset=UTF-8")
 		public void customValuesExchange(){}
+
+		@HttpExchange(method="GET", url = "/headers",
+				headers = {"h1=hv1", "!h2", "Accept=application/ignored"})
+		public String customHeadersExchange() {
+			return "info";
+		}
 	}
 
 	@HttpExchange("/exchange")

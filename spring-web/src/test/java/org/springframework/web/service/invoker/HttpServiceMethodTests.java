@@ -48,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.http.MediaType.APPLICATION_CBOR_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
 
 /**
  * Tests for {@link HttpServiceMethod} with
@@ -184,6 +185,15 @@ class HttpServiceMethodTests {
 		assertThat(requestValues.getUriTemplate()).isEqualTo("/url");
 		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 		assertThat(requestValues.getHeaders().getAccept()).containsOnly(MediaType.APPLICATION_JSON);
+
+		service.performGetWithHeaders();
+
+		requestValues = this.client.getRequestValues();
+		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.GET);
+		assertThat(requestValues.getUriTemplate()).isEmpty();
+		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(requestValues.getHeaders().getAccept()).isEmpty();
+		assertThat(requestValues.getHeaders().get("CustomHeader")).containsExactly("a", "b", "c");
 	}
 
 	@Test
@@ -337,6 +347,10 @@ class HttpServiceMethodTests {
 
 		@PostExchange(url = "/url", contentType = APPLICATION_JSON_VALUE, accept = APPLICATION_JSON_VALUE)
 		void performPost();
+
+		@HttpExchange(contentType = APPLICATION_JSON_VALUE, headers = {"CustomHeader=a,b, c",
+				"Content-Type=" + APPLICATION_NDJSON_VALUE}, method = "GET")
+		void performGetWithHeaders();
 
 	}
 

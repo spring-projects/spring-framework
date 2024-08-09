@@ -60,4 +60,10 @@ public @interface PostExchange {
 	@AliasFor(annotation = HttpExchange.class)
 	String[] accept() default {};
 
+	/**
+	 * Alias for {@link HttpExchange#headers()}.
+	 */
+	@AliasFor(annotation = HttpExchange.class)
+	String[] headers() default {};
+
 }

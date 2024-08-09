@@ -19,8 +19,10 @@ package org.springframework.web.service.invoker;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -46,6 +48,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
@@ -156,6 +160,7 @@ final class HttpServiceMethod {
 	private record HttpRequestValuesInitializer(
 			@Nullable HttpMethod httpMethod, @Nullable String url,
 			@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes,
+			@Nullable MultiValueMap<String, String> otherHeaders,
 			Supplier<HttpRequestValues.Builder> requestValuesSupplier) {
 
 		public HttpRequestValues.Builder initializeRequestValuesBuilder() {
@@ -171,6 +176,16 @@ final class HttpServiceMethod {
 			}
 			if (this.acceptMediaTypes != null) {
 				requestValues.setAccept(this.acceptMediaTypes);
+			}
+			if (this.otherHeaders != null) {
+				this.otherHeaders.forEach((name, values) -> {
+					if (values.size() == 1) {
+						requestValues.addHeader(name, values.get(0));
+					}
+					else {
+						requestValues.addHeader(name, values.toArray(new String[0]));
+					}
+				});
 			}
 			return requestValues;
 		}
@@ -202,9 +217,10 @@ final class HttpServiceMethod {
 			String url = initUrl(typeAnnotation, methodAnnotation, embeddedValueResolver);
 			MediaType contentType = initContentType(typeAnnotation, methodAnnotation);
 			List<MediaType> acceptableMediaTypes = initAccept(typeAnnotation, methodAnnotation);
-
-			return new HttpRequestValuesInitializer(
-					httpMethod, url, contentType, acceptableMediaTypes, requestValuesSupplier);
+			MultiValueMap<String, String> headers = initHeaders(typeAnnotation, methodAnnotation,
+					embeddedValueResolver);
+			return new HttpRequestValuesInitializer(httpMethod, url, contentType,
+					acceptableMediaTypes, headers, requestValuesSupplier);
 		}
 
 		@Nullable
@@ -275,6 +291,50 @@ final class HttpServiceMethod {
 			String[] typeLevelAccept = (typeAnnotation != null ? typeAnnotation.accept() : null);
 			if (!ObjectUtils.isEmpty(typeLevelAccept)) {
 				return MediaType.parseMediaTypes(List.of(typeLevelAccept));
+			}
+
+			return null;
+		}
+
+		private static MultiValueMap<String, String> parseHeaders(String[] headersArray,
+				@Nullable StringValueResolver embeddedValueResolver) {
+			MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+			for (String h: headersArray) {
+				String[] headerPair = StringUtils.split(h, "=");
+				if (headerPair != null) {
+					String headerName = headerPair[0].trim();
+					List<String> headerValues = new ArrayList<>();
+					Set<String> parsedValues = StringUtils.commaDelimitedListToSet(headerPair[1]);
+					for (String headerValue : parsedValues) {
+						if (embeddedValueResolver != null) {
+							headerValue = embeddedValueResolver.resolveStringValue(headerValue);
+						}
+						if (headerValue != null) {
+							headerValue = headerValue.trim();
+							headerValues.add(headerValue);
+						}
+					}
+					if (!headerValues.isEmpty()) {
+						headers.addAll(headerName, headerValues);
+					}
+				}
+			}
+			return headers;
+		}
+
+		@Nullable
+		private static MultiValueMap<String, String> initHeaders(@Nullable HttpExchange typeAnnotation, HttpExchange methodAnnotation,
+				@Nullable StringValueResolver embeddedValueResolver) {
+			MultiValueMap<String, String> methodLevelHeaders = parseHeaders(methodAnnotation.headers(),
+					embeddedValueResolver);
+			if (!ObjectUtils.isEmpty(methodLevelHeaders)) {
+				return methodLevelHeaders;
+			}
+
+			MultiValueMap<String, String> typeLevelHeaders = (typeAnnotation != null ?
+					parseHeaders(typeAnnotation.headers(), embeddedValueResolver) : null);
+			if (!ObjectUtils.isEmpty(typeLevelHeaders)) {
+				return typeLevelHeaders;
 			}
 
 			return null;

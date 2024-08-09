@@ -449,7 +449,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				.paths(resolveEmbeddedValuesInPatterns(toStringArray(httpExchange.value())))
 				.methods(toMethodArray(httpExchange.method()))
 				.consumes(toStringArray(httpExchange.contentType()))
-				.produces(httpExchange.accept());
+				.produces(httpExchange.accept())
+				.headers(httpExchange.headers());
 
 		if (customCondition != null) {
 			builder.customCondition(customCondition);

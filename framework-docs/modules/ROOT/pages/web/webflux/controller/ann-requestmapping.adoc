@@ -606,3 +606,8 @@ subset of the method parameters that `@RequestMapping` does. Notably, it exclude
 server-side specific parameter types. For details, see the list for
 xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[@HttpExchange] and
 xref:web/webflux/controller/ann-methods/arguments.adoc[@RequestMapping].
+
+`@HttpExchange` also supports a `headers()` parameter which accepts `"name=value"`-like
+pairs like in `@RequestMapping(headers={})` on the client side. On the server side,
+this extends to the full syntax that
+xref:#webflux-ann-requestmapping-params-and-headers[`@RequestMapping`] supports.
