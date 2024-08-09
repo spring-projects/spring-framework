@@ -439,14 +439,14 @@ To customize the default message, you can add properties to
 xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
 resource bundles using any of the above errors codes and message arguments. Note also that the
 message argument `"name"` is itself a `MessagreSourceResolvable` with error codes
-`"student.name"` and `"name"` and can customized too. For example:
+`"person.name"` and `"name"` and can customized too. For example:
 
 Properties::
 +
 [source,properties,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
-Size.student.name=Please, provide a {0} that is between {2} and {1} characters long
-student.name=username
+Size.peron.name=Please, provide a {0} that is between {2} and {1} characters long
+person.name=username
 ----
 
 A `ConstraintViolation` on the `degrees` method parameter is adapted to a
