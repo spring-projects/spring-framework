@@ -22,12 +22,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.core.*;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.KotlinDetector;
-import org.springframework.core.MethodParameter;
-import org.springframework.core.ReactiveAdapter;
-import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -125,7 +122,13 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				ErrorResponse.class.isAssignableFrom(type) || ProblemDetail.class.isAssignableFrom(type) ||
 				HttpHeaders.class.isAssignableFrom(type));
 	}
-
+	private boolean hasMoreThanTwoLevelGenerics(HandlerResult result){
+		ResolvableType returnType = result.getReturnType();
+		if(returnType.hasGenerics() && returnType.getGeneric().hasGenerics()){
+			return returnType.getGeneric().getGeneric().hasGenerics();
+		}
+		return false;
+	}
 
 	@Override
 	@SuppressWarnings({"ConstantConditions", "NullAway"})
@@ -141,7 +144,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			returnValueMono = Mono.from(adapter.toPublisher(result.getReturnValue()));
 			boolean isContinuation = (KotlinDetector.isSuspendingFunction(actualParameter.getMethod()) &&
 					!COROUTINES_FLOW_CLASS_NAME.equals(actualParameter.getParameterType().getName()));
-			bodyParameter = (isContinuation ? actualParameter.nested() : actualParameter.nested().nested());
+			boolean hasMoreThanTwoLevelGenerics = hasMoreThanTwoLevelGenerics(result);
+			bodyParameter = isContinuation && !hasMoreThanTwoLevelGenerics ? actualParameter.nested() : actualParameter.nested().nested();
 		}
 		else {
 			returnValueMono = Mono.justOrEmpty(result.getReturnValue());

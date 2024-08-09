@@ -15,7 +15,9 @@
  */
 
 package org.springframework.web.reactive.result.method.annotation
-
+import com.fasterxml.jackson.annotation.JsonValue
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -31,8 +33,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpServerErrorException
@@ -76,6 +76,15 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		val entity = performGet("/suspend-response-entity", HttpHeaders.EMPTY, String::class.java)
 		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(entity.body).isEqualTo("{\"value\":\"foo\"}")
+	}
+
+	@ParameterizedHttpServerTest
+	fun `Suspending ResponseEntity handler method with list`(httpServer: HttpServer) {
+		startServer(httpServer)
+
+		val entity = performGet("/suspend-response-entity-with-list", HttpHeaders.EMPTY, String::class.java)
+		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(entity.body).isEqualTo("[{\"value\":\"foo\"}]")
 	}
 
 	@ParameterizedHttpServerTest
@@ -162,6 +171,12 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 			return ResponseEntity.ok(FooContainer("foo"))
 		}
 
+		@GetMapping("/suspend-response-entity-with-list")
+		suspend fun suspendingResponseEntityWithListEndpoint(): APIResponse<List<FooContainer<String>>> {
+			delay(1)
+			return APIResponse.Success(listOf(FooContainer("foo")))
+		}
+
 		@GetMapping("/flow")
 		fun flowEndpoint()= flow {
 			emit("foo")
@@ -215,5 +230,27 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
 
 	class FooContainer<T>(val value: T)
+}
 
+sealed class APIResponse<T>(httpStatus: HttpStatus) : ResponseEntity<APIResponse<T>>(httpStatus) {
+
+	class Success<T>(
+		private val response: T,
+		val status: HttpStatus = HttpStatus.OK
+	) : APIResponse<T>(status) {
+		override fun getBody(): APIResponse<T> = this
+		@JsonValue fun value() = response
+	}
+
+	class Error<T>(
+		private val httpStatus: HttpStatus,
+		private val errorCode: String,
+		private val message: String
+	) : APIResponse<T>(httpStatus) {
+		override fun getBody() = this
+		@JsonValue fun value() = mapOf(
+			"errorCode" to errorCode,
+			"message" to message
+		)
+	}
 }
