@@ -91,13 +91,10 @@ class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	void handleFragmentsRendering() throws Exception {
-		FragmentsRendering rendering = FragmentsRendering.with("viewName")
-				.header("headerName", "headerValue")
-				.build();
+		FragmentsRendering rendering = FragmentsRendering.with("viewName").build();
 
 		handler.handleReturnValue(rendering, returnParamModelAndView, mavContainer, webRequest);
 		assertThat(mavContainer.getView()).isInstanceOf(SmartView.class);
-		assertThat(this.webRequest.getResponse().getHeader("headerName")).isEqualTo("headerValue");
 	}
 
 	@Test

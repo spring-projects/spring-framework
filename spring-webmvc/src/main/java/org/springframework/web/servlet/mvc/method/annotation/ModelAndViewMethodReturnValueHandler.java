@@ -18,12 +18,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collection;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -100,13 +96,6 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 		}
 
 		if (returnValue instanceof FragmentsRendering rendering) {
-			mavContainer.setStatus(rendering.status());
-			HttpHeaders headers = rendering.headers();
-			if (!headers.isEmpty()) {
-				HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
-				Assert.state(response != null, "No HttpServletResponse");
-				headers.forEach((name, values) -> values.forEach(value -> response.addHeader(name, value)));
-			}
 			mavContainer.setView(rendering);
 			return;
 		}

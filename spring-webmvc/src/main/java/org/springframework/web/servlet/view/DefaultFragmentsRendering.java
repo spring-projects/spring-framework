@@ -101,6 +101,14 @@ final class DefaultFragmentsRendering implements FragmentsRendering {
 			@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		if (this.status != null) {
+			response.setStatus(this.status.value());
+		}
+
+		if (!this.headers.isEmpty()) {
+			this.headers.forEach((name, values) -> values.forEach(value -> response.addHeader(name, value)));
+		}
+
 		if (model != null) {
 			model.forEach((key, value) ->
 					this.modelAndViews.forEach(mv -> mv.getModel().putIfAbsent(key, value)));

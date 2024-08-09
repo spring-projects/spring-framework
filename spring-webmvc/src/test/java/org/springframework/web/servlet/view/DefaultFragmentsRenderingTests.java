@@ -43,7 +43,6 @@ import static org.junit.jupiter.api.condition.JRE.JAVA_21;
 @DisabledForJreRange(min = JAVA_21, disabledReason = "Kotlin doesn't support Java 21+ yet")
 public class DefaultFragmentsRenderingTests {
 
-
 	@Test
 	void render() throws Exception {
 
@@ -59,11 +58,13 @@ public class DefaultFragmentsRenderingTests {
 
 		FragmentsRendering view = FragmentsRendering.with("fragment1", Map.of("foo", "Foo"))
 				.fragment("fragment2", Map.of("bar", "Bar"))
+				.header("headerName", "headerValue")
 				.build();
 
 		view.resolveNestedViews(viewResolver, Locale.ENGLISH);
 		view.render(Collections.emptyMap(), request, response);
 
+		assertThat(response.getHeader("headerName")).isEqualTo("headerValue");
 		assertThat(response.getContentAsString()).isEqualTo("""
 				<p>
 					Hello Foo
