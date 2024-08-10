@@ -350,7 +350,7 @@ public class TableMetaDataContext {
 				throw new InvalidDataAccessApiUsageException(message);
 			}
 		}
-		String params = String.join(", ", Collections.nCopies(columnCount, "?"));
+		String params = "?" + ", ?".repeat(columnCount - 1);
 		insertStatement.append(params);
 		insertStatement.append(')');
 		return insertStatement.toString();
