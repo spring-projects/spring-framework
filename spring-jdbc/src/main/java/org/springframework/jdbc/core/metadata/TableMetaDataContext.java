@@ -17,7 +17,6 @@
 package org.springframework.jdbc.core.metadata;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -351,7 +350,7 @@ public class TableMetaDataContext {
 				throw new InvalidDataAccessApiUsageException(message);
 			}
 		}
-		String params = String.join(", ", Collections.nCopies(columnCount, "?"));
+		String params = columnCount == 0 ? "" : "?" + ", ?".repeat(columnCount - 1);
 		insertStatement.append(params);
 		insertStatement.append(')');
 		return insertStatement.toString();
