@@ -520,6 +520,7 @@ following kinds of expressions cannot be compiled.
 * Expressions using overloaded operators
 * Expressions using array construction syntax
 * Expressions using selection or projection
+* Expressions using bean references
 
 Compilation of additional kinds of expressions may be supported in the future.
 
