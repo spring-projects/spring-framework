@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
- * A builder for creating "Cache-Control" HTTP response headers. As of Spring
- * Framework 6.2, this class is immutable.
+ * A builder for creating "Cache-Control" HTTP response headers.
  *
  * <p>Adding Cache-Control directives to HTTP responses can significantly improve the client
  * experience when interacting with a web application. This builder creates opinionated
@@ -52,74 +51,55 @@ import org.springframework.util.StringUtils;
  */
 public class CacheControl {
 
-	private static final CacheControl EMPTY = new CacheControl();
+	@Nullable
+	private Duration maxAge;
+
+	private boolean noCache = false;
+
+	private boolean noStore = false;
+
+	private boolean mustRevalidate = false;
+
+	private boolean noTransform = false;
+
+	private boolean cachePublic = false;
+
+	private boolean cachePrivate = false;
+
+	private boolean proxyRevalidate = false;
 
 	@Nullable
-	private final Duration maxAge;
-
-	private final boolean noCache;
-
-	private final boolean noStore;
-
-	private final boolean mustRevalidate;
-
-	private final boolean noTransform;
-
-	private final boolean cachePublic;
-
-	private final boolean cachePrivate;
-
-	private final boolean proxyRevalidate;
+	private Duration staleWhileRevalidate;
 
 	@Nullable
-	private final Duration staleWhileRevalidate;
+	private Duration staleIfError;
 
 	@Nullable
-	private final Duration staleIfError;
+	private Duration sMaxAge;
 
-	@Nullable
-	private final Duration sMaxAge;
+	private boolean immutable = false;
 
-	private final boolean immutable;
 
 	/**
 	 * Create an empty CacheControl instance.
 	 * @see #empty()
 	 */
 	protected CacheControl() {
-		this(null, false, false, false, false, false, false, false, null, null, null, false);
 	}
 
-	private CacheControl(@Nullable Duration maxAge, boolean noCache, boolean noStore,
-			boolean mustRevalidate, boolean noTransform, boolean cachePublic,
-			boolean cachePrivate, boolean proxyRevalidate, @Nullable Duration staleWhileRevalidate,
-			@Nullable Duration staleIfError, @Nullable Duration sMaxAge, boolean immutable) {
-		this.maxAge = maxAge;
-		this.noCache = noCache;
-		this.noStore = noStore;
-		this.mustRevalidate = mustRevalidate;
-		this.noTransform = noTransform;
-		this.cachePublic = cachePublic;
-		this.cachePrivate = cachePrivate;
-		this.proxyRevalidate = proxyRevalidate;
-		this.staleWhileRevalidate = staleWhileRevalidate;
-		this.staleIfError = staleIfError;
-		this.sMaxAge = sMaxAge;
-		this.immutable = immutable;
-	}
 
 	/**
 	 * Return an empty directive.
 	 * <p>This is well suited for using other optional directives without "max-age",
 	 * "no-cache" or "no-store".
-	 * @return an empty directive
+	 * @return {@code this}, to facilitate method chaining
 	 */
 	public static CacheControl empty() {
-		return EMPTY;
+		return new CacheControl();
 	}
 
 	/**
-	 * Return a "max-age=" directive.
+	 * Add a "max-age=" directive.
 	 * <p>This directive is well suited for publicly caching resources, knowing that
 	 * they won't change within the configured amount of time. Additional directives
 	 * can be also used, in case resources shouldn't be cached ({@link #cachePrivate()})
@@ -129,7 +109,7 @@ public class CacheControl {
 	 * directive should be set ({@link #mustRevalidate()}
 	 * @param maxAge the maximum time the response should be cached
 	 * @param unit the time unit of the {@code maxAge} argument
-	 * @return a CacheControl instance with a "max-age" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see #maxAge(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.8">rfc7234 section 5.2.2.8</a>
 	 */
@@ -138,7 +118,7 @@ public class CacheControl {
 	}
 
 	/**
-	 * Return a "max-age=" directive.
+	 * Add a "max-age=" directive.
 	 * <p>This directive is well suited for publicly caching resources, knowing that
 	 * they won't change within the configured amount of time. Additional directives
 	 * can be also used, in case resources shouldn't be cached ({@link #cachePrivate()})
@@ -147,17 +127,18 @@ public class CacheControl {
 	 * become stale (i.e. the "max-age" delay is passed), the "must-revalidate"
 	 * directive should be set ({@link #mustRevalidate()}
 	 * @param maxAge the maximum time the response should be cached
-	 * @return a CacheControl instance with a "max-age" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @since 5.2
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.8">rfc7234 section 5.2.2.8</a>
 	 */
 	public static CacheControl maxAge(Duration maxAge) {
-		return new CacheControl(maxAge, false, false, false, false, false, false, false,
-				null, null, null, false);
+		CacheControl cc = new CacheControl();
+		cc.maxAge = maxAge;
+		return cc;
 	}
 
 	/**
-	 * Return a "no-cache" directive.
+	 * Add a "no-cache" directive.
 	 * <p>This directive is well suited for telling caches that the response
 	 * can be reused only if the client revalidates it with the server.
 	 * This directive won't disable cache altogether and may result with clients
@@ -165,102 +146,99 @@ public class CacheControl {
 	 * and the server responding with "304 - Not Modified" status.
 	 * <p>In order to disable caching and minimize requests/responses exchanges,
 	 * the {@link #noStore()} directive should be used instead of {@code #noCache()}.
-	 * @return a CacheControl instance with a "no-cache" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.2">rfc7234 section 5.2.2.2</a>
 	 */
 	public static CacheControl noCache() {
-		return new CacheControl(null, true, false, false, false, false, false, false,
-				null, null, null, false);
+		CacheControl cc = new CacheControl();
+		cc.noCache = true;
+		return cc;
 	}
 
 	/**
-	 * Return a "no-store" directive.
+	 * Add a "no-store" directive.
 	 * <p>This directive is well suited for preventing caches (browsers and proxies)
 	 * to cache the content of responses.
-	 * @return a CacheControl instance with a "no-store" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.3">rfc7234 section 5.2.2.3</a>
 	 */
 	public static CacheControl noStore() {
-		return new CacheControl(null, false, true, false, false, false, false, false,
-				null, null, null, false);
+		CacheControl cc = new CacheControl();
+		cc.noStore = true;
+		return cc;
 	}
 
 
 	/**
-	 * Return a new instance with an additional "must-revalidate" directive.
+	 * Add a "must-revalidate" directive.
 	 * <p>This directive indicates that once it has become stale, a cache MUST NOT
 	 * use the response to satisfy subsequent requests without successful validation
 	 * on the origin server.
-	 * @return a new CacheControl instance with an additional "must-revalidate" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.1">rfc7234 section 5.2.2.1</a>
 	 */
 	public CacheControl mustRevalidate() {
-		return new CacheControl(this.maxAge, this.noCache, this.noStore, true, this.noTransform,
-				this.cachePublic, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
-				this.staleIfError, this.sMaxAge, this.immutable);
+		this.mustRevalidate = true;
+		return this;
 	}
 
 	/**
-	 * Return a new instance with an additional "no-transform" directive.
+	 * Add a "no-transform" directive.
 	 * <p>This directive indicates that intermediaries (caches and others) should
 	 * not transform the response content. This can be useful to force caches and
 	 * CDNs not to automatically gzip or optimize the response content.
-	 * @return a new CacheControl instance with an additional "no-transform" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.4">rfc7234 section 5.2.2.4</a>
 	 */
 	public CacheControl noTransform() {
-		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, true,
-				this.cachePublic, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
-				this.staleIfError, this.sMaxAge, this.immutable);
+		this.noTransform = true;
+		return this;
 	}
 
 	/**
-	 * Return a new instance with an additional "public" directive.
+	 * Add a "public" directive.
 	 * <p>This directive indicates that any cache MAY store the response,
 	 * even if the response would normally be non-cacheable or cacheable
 	 * only within a private cache.
-	 * @return a new CacheControl instance with an additional "public" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.5">rfc7234 section 5.2.2.5</a>
 	 */
 	public CacheControl cachePublic() {
-		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
-				true, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
-				this.staleIfError, this.sMaxAge, this.immutable);
+		this.cachePublic = true;
+		return this;
 	}
 
 	/**
-	 * Return a new instance with an additional "private" directive.
+	 * Add a "private" directive.
 	 * <p>This directive indicates that the response message is intended
 	 * for a single user and MUST NOT be stored by a shared cache.
-	 * @return a new CacheControl instance with an additional "private" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.6">rfc7234 section 5.2.2.6</a>
 	 */
 	public CacheControl cachePrivate() {
-		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
-				this.cachePublic, true, this.proxyRevalidate, this.staleWhileRevalidate,
-				this.staleIfError, this.sMaxAge, this.immutable);
+		this.cachePrivate = true;
+		return this;
 	}
 
 	/**
-	 * Return a new instance with an additional "proxy-revalidate" directive.
+	 * Add a "proxy-revalidate" directive.
 	 * <p>This directive has the same meaning as the "must-revalidate" directive,
 	 * except that it does not apply to private caches (i.e. browsers, HTTP clients).
-	 * @return a new CacheControl instance with an additional "proxy-revalidate" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.7">rfc7234 section 5.2.2.7</a>
 	 */
 	public CacheControl proxyRevalidate() {
-		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
-				this.cachePublic, this.cachePrivate, true, this.staleWhileRevalidate,
-				this.staleIfError, this.sMaxAge, this.immutable);
+		this.proxyRevalidate = true;
+		return this;
 	}
 
 	/**
-	 * Return a new instance with an additional "s-maxage" directive.
+	 * Add an "s-maxage" directive.
 	 * <p>This directive indicates that, in shared caches, the maximum age specified
 	 * by this directive overrides the maximum age specified by other directives.
 	 * @param sMaxAge the maximum time the response should be cached
 	 * @param unit the time unit of the {@code sMaxAge} argument
-	 * @return a new CacheControl instance with an additional "s-maxage" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see #sMaxAge(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.9">rfc7234 section 5.2.2.9</a>
 	 */
@@ -269,22 +247,21 @@ public class CacheControl {
 	}
 
 	/**
-	 * Return a new instance with an additional "s-maxage" directive.
+	 * Add an "s-maxage" directive.
 	 * <p>This directive indicates that, in shared caches, the maximum age specified
 	 * by this directive overrides the maximum age specified by other directives.
 	 * @param sMaxAge the maximum time the response should be cached
-	 * @return a new CacheControl instance with an additional "s-maxage" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @since 5.2
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.9">rfc7234 section 5.2.2.9</a>
 	 */
 	public CacheControl sMaxAge(Duration sMaxAge) {
-		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
-				this.cachePublic, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
-				this.staleIfError, sMaxAge, this.immutable);
+		this.sMaxAge = sMaxAge;
+		return this;
 	}
 
 	/**
-	 * Return a new instance with an additional "stale-while-revalidate" directive.
+	 * Add a "stale-while-revalidate" directive.
 	 * <p>This directive indicates that caches MAY serve the response in which it
 	 * appears after it becomes stale, up to the indicated number of seconds.
 	 * If a cached response is served stale due to the presence of this extension,
@@ -292,7 +269,7 @@ public class CacheControl {
 	 * (i.e. without blocking).
 	 * @param staleWhileRevalidate the maximum time the response should be used while being revalidated
 	 * @param unit the time unit of the {@code staleWhileRevalidate} argument
-	 * @return a new CacheControl instance with an additional "stale-while-revalidate" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see #staleWhileRevalidate(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-3">rfc5861 section 3</a>
 	 */
@@ -301,30 +278,29 @@ public class CacheControl {
 	}
 
 	/**
-	 * Return a new instance with an additional "stale-while-revalidate" directive.
+	 * Add a "stale-while-revalidate" directive.
 	 * <p>This directive indicates that caches MAY serve the response in which it
 	 * appears after it becomes stale, up to the indicated number of seconds.
 	 * If a cached response is served stale due to the presence of this extension,
 	 * the cache SHOULD attempt to revalidate it while still serving stale responses
 	 * (i.e. without blocking).
 	 * @param staleWhileRevalidate the maximum time the response should be used while being revalidated
-	 * @return a new CacheControl instance with an additional "stale-while-revalidate" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @since 5.2
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-3">rfc5861 section 3</a>
 	 */
 	public CacheControl staleWhileRevalidate(Duration staleWhileRevalidate) {
-		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
-				this.cachePublic, this.cachePrivate, this.proxyRevalidate, staleWhileRevalidate,
-				this.staleIfError, this.sMaxAge, this.immutable);
+		this.staleWhileRevalidate = staleWhileRevalidate;
+		return this;
 	}
 
 	/**
-	 * Return a new instance with an additional "stale-if-error" directive.
+	 * Add a "stale-if-error" directive.
 	 * <p>This directive indicates that when an error is encountered, a cached stale response
 	 * MAY be used to satisfy the request, regardless of other freshness information.
 	 * @param staleIfError the maximum time the response should be used when errors are encountered
 	 * @param unit the time unit of the {@code staleIfError} argument
-	 * @return a new CacheControl instance with an additional "stale-if-error" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @see #staleIfError(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-4">rfc5861 section 4</a>
 	 */
@@ -333,34 +309,32 @@ public class CacheControl {
 	}
 
 	/**
-	 * Return a new instance with an additional "stale-if-error" directive.
+	 * Add a "stale-if-error" directive.
 	 * <p>This directive indicates that when an error is encountered, a cached stale response
 	 * MAY be used to satisfy the request, regardless of other freshness information.
 	 * @param staleIfError the maximum time the response should be used when errors are encountered
-	 * @return a new CacheControl instance with an additional "stale-if-error" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @since 5.2
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-4">rfc5861 section 4</a>
 	 */
 	public CacheControl staleIfError(Duration staleIfError) {
-		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
-				this.cachePublic, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
-				staleIfError, this.sMaxAge, this.immutable);
+		this.staleIfError = staleIfError;
+		return this;
 	}
 
 	/**
-	 * Return a new instance with an additional "immutable" directive.
+	 * Add an "immutable" directive.
 	 * <p>This directive indicates that the origin server will not update the
 	 * representation of that resource during the freshness lifetime of the response.
 	 * Adding a {@link #maxAge(Duration) max-age} directive is strongly advised
 	 * to enforce the actual freshness lifetime.
-	 * @return a new CacheControl instance with an additional "immutable" directive
+	 * @return {@code this}, to facilitate method chaining
 	 * @since 6.0.5
 	 * @see <a href="https://tools.ietf.org/html/rfc8246">rfc8246</a>
 	 */
 	public CacheControl immutable() {
-		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
-				this.cachePublic, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
-				this.staleIfError, this.sMaxAge, true);
+		this.immutable = true;
+		return this;
 	}
 
 	/**
