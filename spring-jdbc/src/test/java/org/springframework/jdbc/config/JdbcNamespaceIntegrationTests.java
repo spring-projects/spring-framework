@@ -86,9 +86,9 @@ class JdbcNamespaceIntegrationTests {
 
 	@Test
 	void createWithGeneratedDatabaseName() {
-		Predicate<String> urlPredicate = url -> url.startsWith("jdbc:hsqldb:mem:");
-		urlPredicate.and(url -> !url.endsWith("dataSource"));
-		urlPredicate.and(url -> !url.endsWith("shouldBeOverriddenByGeneratedName"));
+		Predicate<String> urlPredicate = ((Predicate<String>) url -> url.startsWith("jdbc:hsqldb:mem:"))
+				.and(url -> !url.endsWith("dataSource"))
+				.and(url -> !url.endsWith("shouldBeOverriddenByGeneratedName"));
 		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-generated.xml", urlPredicate);
 	}
 
