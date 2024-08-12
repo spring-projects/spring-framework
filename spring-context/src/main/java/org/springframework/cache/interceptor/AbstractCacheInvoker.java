@@ -16,6 +16,10 @@
 
 package org.springframework.cache.interceptor;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+
 import org.springframework.cache.Cache;
 import org.springframework.lang.Nullable;
 import org.springframework.util.function.SingletonSupplier;
@@ -75,6 +79,52 @@ public abstract class AbstractCacheInvoker {
 		catch (RuntimeException ex) {
 			getErrorHandler().handleCacheGetError(ex, cache, key);
 			return null;  // If the exception is handled, return a cache miss
+		}
+	}
+
+	@Nullable
+	protected <T> T doGet(Cache cache, Object key, Callable<T> valueLoader) {
+		try {
+			return cache.get(key, valueLoader);
+		}
+		catch (Cache.ValueRetrievalException ex) {
+			throw ex;
+		}
+		catch (RuntimeException ex) {
+			getErrorHandler().handleCacheGetError(ex, cache, key);
+			try {
+				return valueLoader.call();
+			}
+			catch (Exception ex2) {
+				throw new RuntimeException(ex2);
+			}
+		}
+	}
+
+	@Nullable
+	protected CompletableFuture<?> doRetrieve(Cache cache, Object key) {
+		try {
+			return cache.retrieve(key);
+		}
+		catch (Cache.ValueRetrievalException ex) {
+			throw ex;
+		}
+		catch (RuntimeException ex) {
+			getErrorHandler().handleCacheGetError(ex, cache, key);
+			return null;
+		}
+	}
+
+	protected <T> CompletableFuture<T> doRetrieve(Cache cache, Object key, Supplier<CompletableFuture<T>> valueLoader) {
+		try {
+			return cache.retrieve(key, valueLoader);
+		}
+		catch (Cache.ValueRetrievalException ex) {
+			throw ex;
+		}
+		catch (RuntimeException ex) {
+			getErrorHandler().handleCacheGetError(ex, cache, key);
+			return valueLoader.get();
 		}
 	}
 

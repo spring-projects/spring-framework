@@ -17,11 +17,15 @@
 package org.springframework.cache.interceptor;
 
 import java.util.Collections;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -39,6 +43,8 @@ import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.BDDMockito.willThrow;
@@ -83,9 +89,54 @@ class CacheErrorHandlerTests {
 		willThrow(exception).given(this.cache).get(0L);
 
 		Object result = this.simpleService.get(0L);
-		verify(this.errorHandler).handleCacheGetError(exception, cache, 0L);
+		verify(this.errorHandler).handleCacheGetError(exception, this.cache, 0L);
 		verify(this.cache).get(0L);
 		verify(this.cache).put(0L, result); // result of the invocation
+	}
+
+	@Test
+	public void getSyncFail() {
+		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
+		willThrow(exception).given(this.cache).get(eq(0L), any(Callable.class));
+
+		Object result = this.simpleService.getSync(0L);
+		assertThat(result).isEqualTo(0L);
+		verify(this.errorHandler).handleCacheGetError(exception, this.cache, 0L);
+		verify(this.cache).get(eq(0L), any(Callable.class));
+	}
+
+	@Test
+	public void getCompletableFutureFail() {
+		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
+		willThrow(exception).given(this.cache).retrieve(eq(0L));
+
+		Object result = this.simpleService.getFuture(0L).join();
+		assertThat(result).isEqualTo(0L);
+		verify(this.errorHandler).handleCacheGetError(exception, this.cache, 0L);
+		verify(this.cache).retrieve(eq(0L));
+	}
+
+	@Test
+	public void getMonoFail() {
+		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
+		willThrow(exception).given(this.cache).retrieve(eq(0L));
+
+		Object result = this.simpleService.getMono(0L).block();
+		assertThat(result).isEqualTo(0L);
+		verify(this.errorHandler).handleCacheGetError(exception, this.cache, 0L);
+		verify(this.cache).retrieve(eq(0L));
+	}
+
+
+	@Test
+	public void getFluxFail() {
+		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
+		willThrow(exception).given(this.cache).retrieve(eq(0L));
+
+		Object result = this.simpleService.getFlux(0L).blockLast();
+		assertThat(result).isEqualTo(0L);
+		verify(this.errorHandler).handleCacheGetError(exception, this.cache, 0L);
+		verify(this.cache).retrieve(eq(0L));
 	}
 
 	@Test
@@ -218,6 +269,26 @@ class CacheErrorHandlerTests {
 		@Cacheable
 		public Object get(long id) {
 			return this.counter.getAndIncrement();
+		}
+
+		@Cacheable(sync = true)
+		public Object getSync(long id) {
+			return this.counter.getAndIncrement();
+		}
+
+		@Cacheable
+		public CompletableFuture<Long> getFuture(long id) {
+			return CompletableFuture.completedFuture(this.counter.getAndIncrement());
+		}
+
+		@Cacheable
+		public Mono<Long> getMono(long id) {
+			return Mono.just(this.counter.getAndIncrement());
+		}
+
+		@Cacheable
+		public Flux<Long> getFlux(long id) {
+			return Flux.just(this.counter.getAndIncrement(), 0L);
 		}
 
 		@CachePut
