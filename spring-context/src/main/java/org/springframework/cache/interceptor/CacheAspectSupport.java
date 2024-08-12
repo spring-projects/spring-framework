@@ -510,6 +510,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 							(value != null ? CompletableFuture.completedFuture(unwrapCacheValue(value)) : null),
 							invoker, method, contexts));
 				}
+				else {
+					continue;
+				}
 			}
 			if (this.reactiveCachingHandler != null) {
 				Object returnValue = this.reactiveCachingHandler.findInCaches(
