@@ -112,7 +112,7 @@ public class CacheControl {
 	 * Return an empty directive.
 	 * <p>This is well suited for using other optional directives without "max-age",
 	 * "no-cache" or "no-store".
-	 * @return en empty directive
+	 * @return an empty directive
 	 */
 	public static CacheControl empty() {
 		return EMPTY;
