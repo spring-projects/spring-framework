@@ -51,42 +51,55 @@ import org.springframework.util.StringUtils;
  */
 public class CacheControl {
 
-	@Nullable
-	private Duration maxAge;
-
-	private boolean noCache = false;
-
-	private boolean noStore = false;
-
-	private boolean mustRevalidate = false;
-
-	private boolean noTransform = false;
-
-	private boolean cachePublic = false;
-
-	private boolean cachePrivate = false;
-
-	private boolean proxyRevalidate = false;
+	private static final CacheControl EMPTY = new CacheControl(null, false, false, false,
+		false, false, false, false, null, null,
+		null, false);
 
 	@Nullable
-	private Duration staleWhileRevalidate;
+	private final Duration maxAge;
+
+	private final boolean noCache;
+
+	private final boolean noStore;
+
+	private final boolean mustRevalidate;
+
+	private final boolean noTransform;
+
+	private final boolean cachePublic;
+
+	private final boolean cachePrivate;
+
+	private final boolean proxyRevalidate;
 
 	@Nullable
-	private Duration staleIfError;
+	private final Duration staleWhileRevalidate;
 
 	@Nullable
-	private Duration sMaxAge;
+	private final Duration staleIfError;
 
-	private boolean immutable = false;
+	@Nullable
+	private final Duration sMaxAge;
 
+	private final boolean immutable;
 
-	/**
-	 * Create an empty CacheControl instance.
-	 * @see #empty()
-	 */
-	protected CacheControl() {
+	private CacheControl(@Nullable Duration maxAge, boolean noCache, boolean noStore,
+		boolean mustRevalidate, boolean noTransform, boolean cachePublic,
+		boolean cachePrivate, boolean proxyRevalidate, @Nullable Duration staleWhileRevalidate,
+		@Nullable Duration staleIfError, @Nullable Duration sMaxAge, boolean immutable) {
+		this.maxAge = maxAge;
+		this.noCache = noCache;
+		this.noStore = noStore;
+		this.mustRevalidate = mustRevalidate;
+		this.noTransform = noTransform;
+		this.cachePublic = cachePublic;
+		this.cachePrivate = cachePrivate;
+		this.proxyRevalidate = proxyRevalidate;
+		this.staleWhileRevalidate = staleWhileRevalidate;
+		this.staleIfError = staleIfError;
+		this.sMaxAge = sMaxAge;
+		this.immutable = immutable;
 	}
-
 
 	/**
 	 * Return an empty directive.
@@ -95,7 +108,7 @@ public class CacheControl {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public static CacheControl empty() {
-		return new CacheControl();
+		return EMPTY;
 	}
 
 	/**
@@ -132,9 +145,8 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.8">rfc7234 section 5.2.2.8</a>
 	 */
 	public static CacheControl maxAge(Duration maxAge) {
-		CacheControl cc = new CacheControl();
-		cc.maxAge = maxAge;
-		return cc;
+		return new CacheControl(maxAge, false, false, false, false, false, false, false,
+			null, null, null, false);
 	}
 
 	/**
@@ -150,9 +162,8 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.2">rfc7234 section 5.2.2.2</a>
 	 */
 	public static CacheControl noCache() {
-		CacheControl cc = new CacheControl();
-		cc.noCache = true;
-		return cc;
+		return new CacheControl(null, true, false, false, false, false, false, false,
+			null, null, null, false);
 	}
 
 	/**
@@ -163,9 +174,8 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.3">rfc7234 section 5.2.2.3</a>
 	 */
 	public static CacheControl noStore() {
-		CacheControl cc = new CacheControl();
-		cc.noStore = true;
-		return cc;
+		return new CacheControl(null, false, true, false, false, false, false, false,
+			null, null, null, false);
 	}
 
 
@@ -178,8 +188,9 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.1">rfc7234 section 5.2.2.1</a>
 	 */
 	public CacheControl mustRevalidate() {
-		this.mustRevalidate = true;
-		return this;
+		return new CacheControl(this.maxAge, this.noCache, this.noStore, true, this.noTransform,
+			this.cachePublic, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
+			this.staleIfError, this.sMaxAge, this.immutable);
 	}
 
 	/**
@@ -191,8 +202,9 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.4">rfc7234 section 5.2.2.4</a>
 	 */
 	public CacheControl noTransform() {
-		this.noTransform = true;
-		return this;
+		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, true,
+			this.cachePublic, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
+			this.staleIfError, this.sMaxAge, this.immutable);
 	}
 
 	/**
@@ -204,8 +216,9 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.5">rfc7234 section 5.2.2.5</a>
 	 */
 	public CacheControl cachePublic() {
-		this.cachePublic = true;
-		return this;
+		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
+			true, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
+			this.staleIfError, this.sMaxAge, this.immutable);
 	}
 
 	/**
@@ -216,8 +229,9 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.6">rfc7234 section 5.2.2.6</a>
 	 */
 	public CacheControl cachePrivate() {
-		this.cachePrivate = true;
-		return this;
+		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
+			this.cachePublic, true, this.proxyRevalidate, this.staleWhileRevalidate,
+			this.staleIfError, this.sMaxAge, this.immutable);
 	}
 
 	/**
@@ -228,8 +242,9 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.7">rfc7234 section 5.2.2.7</a>
 	 */
 	public CacheControl proxyRevalidate() {
-		this.proxyRevalidate = true;
-		return this;
+		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
+			this.cachePublic, this.cachePrivate, true, this.staleWhileRevalidate,
+			this.staleIfError, this.sMaxAge, this.immutable);
 	}
 
 	/**
@@ -256,8 +271,9 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.9">rfc7234 section 5.2.2.9</a>
 	 */
 	public CacheControl sMaxAge(Duration sMaxAge) {
-		this.sMaxAge = sMaxAge;
-		return this;
+		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
+			this.cachePublic, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
+			this.staleIfError, sMaxAge, this.immutable);
 	}
 
 	/**
@@ -290,8 +306,9 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-3">rfc5861 section 3</a>
 	 */
 	public CacheControl staleWhileRevalidate(Duration staleWhileRevalidate) {
-		this.staleWhileRevalidate = staleWhileRevalidate;
-		return this;
+		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
+			this.cachePublic, this.cachePrivate, this.proxyRevalidate, staleWhileRevalidate,
+			this.staleIfError, this.sMaxAge, this.immutable);
 	}
 
 	/**
@@ -318,8 +335,9 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-4">rfc5861 section 4</a>
 	 */
 	public CacheControl staleIfError(Duration staleIfError) {
-		this.staleIfError = staleIfError;
-		return this;
+		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
+			this.cachePublic, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
+			staleIfError, this.sMaxAge, this.immutable);
 	}
 
 	/**
@@ -333,8 +351,9 @@ public class CacheControl {
 	 * @see <a href="https://tools.ietf.org/html/rfc8246">rfc8246</a>
 	 */
 	public CacheControl immutable() {
-		this.immutable = true;
-		return this;
+		return new CacheControl(this.maxAge, this.noCache, this.noStore, this.mustRevalidate, this.noTransform,
+			this.cachePublic, this.cachePrivate, this.proxyRevalidate, this.staleWhileRevalidate,
+			this.staleIfError, this.sMaxAge, true);
 	}
 
 	/**
