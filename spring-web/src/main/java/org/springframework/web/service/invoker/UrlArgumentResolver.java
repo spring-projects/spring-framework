@@ -47,13 +47,12 @@ public class UrlArgumentResolver implements HttpServiceArgumentResolver {
 			argument = optionalValue.orElse(null);
 		}
 
-		if (argument != null) {
-			requestValues.setUri((URI) argument);
+		if (argument == null) {
+			Assert.isTrue(parameter.isOptional(), "URI is required");
 			return true;
 		}
 
-		Assert.isTrue(parameter.isOptional(), "URI is required");
-
+		requestValues.setUri((URI) argument);
 		return true;
 	}
 

@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.rsocket.service;
 
-import java.util.Optional;
-
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import org.junit.jupiter.api.Test;
@@ -128,41 +126,6 @@ class PayloadArgumentResolverTests extends RSocketServiceArgumentResolverTestSup
 		assertNullValues(resolvedMono);
 	}
 
-	@Test
-	void nullPayloadWithOptional() {
-		boolean resolved = execute(null, initMethodParameter(Service.class, "executeOptional", 0));
-		assertNullValues(resolved);
-
-		boolean resolvedMono = execute(null, initMethodParameter(Service.class, "executeOptionalMono", 0));
-		assertNullValues(resolvedMono);
-	}
-
-	@Test
-	void emptyPayloadWithOptional() {
-		boolean resolved = execute(Optional.empty(), initMethodParameter(Service.class, "executeOptional", 0));
-		assertNullValues(resolved);
-
-		boolean resolvedMono = execute(Optional.empty(), initMethodParameter(Service.class, "executeOptionalMono", 0));
-		assertNullValues(resolvedMono);
-	}
-
-	@Test
-	void optionalStringPayload() {
-		String payload = "payloadValue";
-		boolean resolved = execute(Optional.of(payload), initMethodParameter(Service.class, "executeOptional", 0));
-
-		assertPayload(resolved, payload);
-	}
-
-	@Test
-	void optionalMonoPayload() {
-		Mono<String> payloadMono = Mono.just("payloadValue");
-		boolean resolved = execute(Optional.of(payloadMono), initMethodParameter(Service.class, "executeOptionalMono", 0));
-
-		assertPayloadMono(resolved, payloadMono);
-	}
-
-
 	private void assertPayload(boolean resolved, String payload) {
 		assertThat(resolved).isTrue();
 		assertThat(getRequestValues().getPayloadValue()).isEqualTo(payload);
@@ -183,7 +146,7 @@ class PayloadArgumentResolverTests extends RSocketServiceArgumentResolverTestSup
 		assertThat(getRequestValues().getPayloadElementType()).isNull();
 	}
 
-	@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
+	@SuppressWarnings({"unused"})
 	private interface Service {
 
 		void execute(@Payload String body);
@@ -194,13 +157,9 @@ class PayloadArgumentResolverTests extends RSocketServiceArgumentResolverTestSup
 
 		void executeMono(@Payload Mono<String> body);
 
-		void executeOptional(@Payload Optional<String> body);
-
 		void executeNullableMono(@Nullable @Payload Mono<String> body);
 
 		void executeNotRequiredMono(@Payload(required = false) Mono<String> body);
-
-		void executeOptionalMono(@Payload Optional<Mono<String>> body);
 
 		void executeSingle(@Payload Single<String> body);
 

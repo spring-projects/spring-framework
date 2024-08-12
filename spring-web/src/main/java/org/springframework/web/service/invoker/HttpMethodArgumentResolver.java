@@ -53,15 +53,16 @@ public class HttpMethodArgumentResolver implements HttpServiceArgumentResolver {
 			argument = optionalValue.orElse(null);
 		}
 
-		if(argument != null) {
-			HttpMethod httpMethod = (HttpMethod) argument;
-			requestValues.setHttpMethod(httpMethod);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Resolved HTTP method to: " + httpMethod.name());
-			}
+		if (argument == null) {
+			Assert.isTrue(parameter.isOptional(), "HttpMethod is required");
 			return true;
 		}
-		Assert.isTrue(parameter.isOptional(), "HttpMethod is required");
+
+		HttpMethod httpMethod = (HttpMethod) argument;
+		requestValues.setHttpMethod(httpMethod);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved HTTP method to: " + httpMethod.name());
+		}
 		return true;
 	}
 

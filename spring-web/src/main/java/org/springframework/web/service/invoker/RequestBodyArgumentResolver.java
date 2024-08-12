@@ -71,42 +71,39 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 			return false;
 		}
 
-		parameter = parameter.nestedIfOptional();
-
 		if (argument instanceof Optional<?> optionalValue) {
 			argument = optionalValue.orElse(null);
 		}
 
-		if (argument != null) {
-			if (this.reactiveAdapterRegistry != null) {
-				ReactiveAdapter adapter = this.reactiveAdapterRegistry
-						.getAdapter(parameter.getNestedParameterType());
-				if (adapter != null) {
-					MethodParameter nestedParameter = parameter.nested();
-
-					String message = "Async type for @RequestBody should produce value(s)";
-					Assert.isTrue(!adapter.isNoValue(), message);
-					Assert.isTrue(nestedParameter.getNestedParameterType() != Void.class, message);
-
-					if (requestValues instanceof ReactiveHttpRequestValues.Builder reactiveRequestValues) {
-						reactiveRequestValues.setBodyPublisher(
-								adapter.toPublisher(argument), asParameterizedTypeRef(nestedParameter));
-					}
-					else {
-						throw new IllegalStateException(
-								"RequestBody with a reactive type is only supported with reactive client");
-					}
-
-					return true;
-				}
-			}
-
-			// Not a reactive type
-			requestValues.setBodyValue(argument);
+		if (argument == null) {
+			Assert.isTrue(!annot.required() || parameter.isOptional(), "RequestBody is required");
 			return true;
 		}
-		Assert.isTrue(!annot.required() || parameter.isOptional(), "RequestBody is required");
 
+		if (this.reactiveAdapterRegistry != null) {
+			ReactiveAdapter adapter = this.reactiveAdapterRegistry
+					.getAdapter(parameter.getParameterType());
+			if (adapter != null) {
+				MethodParameter nestedParameter = parameter.nested();
+
+				String message = "Async type for @RequestBody should produce value(s)";
+				Assert.isTrue(!adapter.isNoValue(), message);
+				Assert.isTrue(nestedParameter.getNestedParameterType() != Void.class, message);
+
+				if (requestValues instanceof ReactiveHttpRequestValues.Builder reactiveRequestValues) {
+					reactiveRequestValues.setBodyPublisher(
+							adapter.toPublisher(argument), asParameterizedTypeRef(nestedParameter));
+				}
+				else {
+					throw new IllegalStateException(
+							"RequestBody with a reactive type is only supported with reactive client");
+				}
+
+				return true;
+			}
+		}
+		// Not a reactive type
+		requestValues.setBodyValue(argument);
 		return true;
 	}
 

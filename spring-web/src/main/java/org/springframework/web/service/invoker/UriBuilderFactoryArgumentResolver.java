@@ -54,13 +54,12 @@ public class UriBuilderFactoryArgumentResolver implements HttpServiceArgumentRes
 			argument = optionalValue.orElse(null);
 		}
 
-		if (argument != null) {
-			requestValues.setUriBuilderFactory((UriBuilderFactory) argument);
+		if (argument == null) {
+			Assert.isTrue(parameter.isOptional(), "UriBuilderFactory is required");
 			return true;
 		}
 
-		Assert.isTrue(parameter.isOptional(), "UriBuilderFactory is required");
-
+		requestValues.setUriBuilderFactory((UriBuilderFactory) argument);
 		return true;
 	}
 }

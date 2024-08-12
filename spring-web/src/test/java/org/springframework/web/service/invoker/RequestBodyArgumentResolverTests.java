@@ -148,21 +148,11 @@ class RequestBodyArgumentResolverTests {
 
 		assertThat(getBodyValue()).isNull();
 		assertThat(getPublisherBody()).isNull();
-
-		this.service.executeOptionalMono(null);
-
-		assertThat(getBodyValue()).isNull();
-		assertThat(getPublisherBody()).isNull();
 	}
 
 	@Test
 	void emptyOptionalRequestBody() {
 		this.service.executeOptional(Optional.empty());
-
-		assertThat(getBodyValue()).isNull();
-		assertThat(getPublisherBody()).isNull();
-
-		this.service.executeOptionalMono(Optional.empty());
 
 		assertThat(getBodyValue()).isNull();
 		assertThat(getPublisherBody()).isNull();
@@ -175,16 +165,6 @@ class RequestBodyArgumentResolverTests {
 
 		assertThat(getBodyValue()).isEqualTo(body);
 		assertThat(getPublisherBody()).isNull();
-	}
-
-	@Test
-	void optionalMonoBody() {
-		Mono<String> bodyMono = Mono.just("bodyValue");
-		this.service.executeOptionalMono(Optional.of(bodyMono));
-
-		assertThat(getBodyValue()).isNull();
-		assertThat(getPublisherBody()).isSameAs(bodyMono);
-		assertThat(getBodyElementType()).isEqualTo(new ParameterizedTypeReference<String>() { });
 	}
 
 
@@ -231,9 +211,6 @@ class RequestBodyArgumentResolverTests {
 
 		@GetExchange
 		void executeNotRequiredMono(@RequestBody(required = false) Mono<String> body);
-
-		@GetExchange
-		void executeOptionalMono(@RequestBody Optional<Mono<String>> body);
 
 		@GetExchange
 		void executeSingle(@RequestBody Single<String> body);
