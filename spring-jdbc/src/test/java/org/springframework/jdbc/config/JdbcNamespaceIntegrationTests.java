@@ -16,8 +16,6 @@
 
 package org.springframework.jdbc.config;
 
-import java.util.function.Predicate;
-
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
@@ -35,6 +33,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.AbstractDriverBasedDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -70,26 +69,24 @@ class JdbcNamespaceIntegrationTests {
 
 	@Test
 	void createWithAnonymousDataSourceAndDefaultDatabaseName() {
-		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-default-and-anonymous-datasource.xml",
-			url -> url.endsWith(DEFAULT_DATABASE_NAME));
+		assertThat(extractDataSourceUrl("jdbc-config-db-name-default-and-anonymous-datasource.xml"))
+				.endsWith(DEFAULT_DATABASE_NAME);
 	}
 
 	@Test
 	void createWithImplicitDatabaseName() {
-		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-implicit.xml", url -> url.endsWith("dataSource"));
+		assertThat(extractDataSourceUrl("jdbc-config-db-name-implicit.xml")).endsWith("dataSource");
 	}
 
 	@Test
 	void createWithExplicitDatabaseName() {
-		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-explicit.xml", url -> url.endsWith("customDbName"));
+		assertThat(extractDataSourceUrl("jdbc-config-db-name-explicit.xml")).endsWith("customDbName");
 	}
 
 	@Test
 	void createWithGeneratedDatabaseName() {
-		Predicate<String> urlPredicate = url -> url.startsWith("jdbc:hsqldb:mem:");
-		urlPredicate.and(url -> !url.endsWith("dataSource"));
-		urlPredicate.and(url -> !url.endsWith("shouldBeOverriddenByGeneratedName"));
-		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-generated.xml", urlPredicate);
+		assertThat(extractDataSourceUrl("jdbc-config-db-name-generated.xml")).startsWith("jdbc:hsqldb:mem:")
+				.doesNotEndWith("dataSource").doesNotEndWith("shouldBeOverriddenByGeneratedName");
 	}
 
 	@Test
@@ -191,13 +188,14 @@ class JdbcNamespaceIntegrationTests {
 		}
 	}
 
-	private void assertCorrectSetupForSingleDataSource(String file, Predicate<String> urlPredicate) {
+	@Nullable
+	private String extractDataSourceUrl(String file) {
 		try (ConfigurableApplicationContext context = context(file)) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			assertNumRowsInTestTable(new JdbcTemplate(dataSource), 1);
 			assertThat(dataSource).isInstanceOf(AbstractDriverBasedDataSource.class);
 			AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
-			assertThat(urlPredicate.test(adbDataSource.getUrl())).isTrue();
+			return adbDataSource.getUrl();
 		}
 	}
 
