@@ -23,6 +23,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,9 +51,11 @@ import reactor.test.StepVerifier;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.ResponseCookie;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -65,6 +70,9 @@ class ClientHttpConnectorTests {
 
 	private static final Set<HttpMethod> METHODS_WITH_BODY =
 			Set.of(HttpMethod.PUT, HttpMethod.POST, HttpMethod.PATCH);
+	public static final String MAX_AGE_AND_EXPIRES = "Max-Age-And-Expires";
+	public static final String MAX_AGE_ONLY = "Max-Age-Only";
+	public static final String EXPIRES_ONLY = "Expires-Only";
 
 	private final MockWebServer server = new MockWebServer();
 
@@ -172,6 +180,70 @@ class ClientHttpConnectorTests {
 				.verify();
 	}
 
+	@ParameterizedConnectorTest
+	void testExpiresMaxAgeAttributes(ClientHttpConnector connector) {
+		// maxAge is set to 12 days from system time.
+		long maxAge = 1036800L;
+
+		// expires date is set to 10 days from system time.
+		long expires = 864000L;
+		ZonedDateTime currentDateTime = ZonedDateTime.now(java.time.ZoneOffset.UTC);
+		ZonedDateTime futureDateTime = currentDateTime.plusSeconds(expires);
+
+		// processing time may affect the calculation of ZonedDateTime.now during merge of expires and max age
+		// therefore we check range with buffer of 2 seconds
+		long maxAgeLowerLimit = maxAge - 2;
+		long maxAgeUpperLimit = maxAge + 2;
+		long expiresLowerLimit = expires - 2;
+		long expiresUpperLimit = expires + 2;
+
+		List<HttpCookie> httpCookies = getHttpCookies(maxAge, futureDateTime);
+		prepareResponse(response -> {
+			response.setResponseCode(200);
+			httpCookies.forEach(httpCookie -> response.addHeader("Set-Cookie", httpCookie.toString()));
+		});
+
+		ClientHttpResponse response = connector.connect(HttpMethod.POST, this.server.url("/").uri(),
+				ReactiveHttpOutputMessage::setComplete).block();
+		assertThat(response).isNotNull();
+		assertThat(response.getCookies()).isNotEmpty();
+
+		List<ResponseCookie> maxAgeAndExpiresCookies = response.getCookies().get(MAX_AGE_AND_EXPIRES);
+		assertThat(maxAgeAndExpiresCookies).size().isEqualTo(1);
+		Duration maxAgeAndExpires = maxAgeAndExpiresCookies.get(0).getMaxAge();
+		assertThat(maxAgeAndExpires.getSeconds()).isGreaterThanOrEqualTo(maxAgeLowerLimit);
+		assertThat(maxAgeAndExpires.getSeconds()).isLessThanOrEqualTo(maxAgeUpperLimit);
+
+		List<ResponseCookie> maxAgeOnlyCookies = response.getCookies().get(MAX_AGE_ONLY);
+		assertThat(maxAgeOnlyCookies).size().isEqualTo(1);
+		Duration maxAgeOnly = maxAgeOnlyCookies.get(0).getMaxAge();
+		assertThat(maxAgeOnly.getSeconds()).isGreaterThanOrEqualTo(maxAgeLowerLimit);
+		assertThat(maxAgeOnly.getSeconds()).isLessThanOrEqualTo(maxAgeUpperLimit);
+
+		List<ResponseCookie> expiresOnlyCookies = response.getCookies().get(EXPIRES_ONLY);
+		assertThat(expiresOnlyCookies).size().isEqualTo(1);
+		Duration expiresOnly = expiresOnlyCookies.get(0).getMaxAge();
+		assertThat(expiresOnly.getSeconds()).isGreaterThanOrEqualTo(expiresLowerLimit);
+		assertThat(expiresOnly.getSeconds()).isLessThanOrEqualTo(expiresUpperLimit);
+	}
+
+	private List<HttpCookie> getHttpCookies(long maxAge, ZonedDateTime futureDateTime) {
+		String expires = futureDateTime.format(DateTimeFormatter.RFC_1123_DATE_TIME);
+
+		List<HttpCookie> httpCookies = new ArrayList<>();
+
+		String maxAgeAndExpiresValue = String.format("; Max-Age=%d; Expires=%s", maxAge, expires);
+		httpCookies.add(new HttpCookie(MAX_AGE_AND_EXPIRES, maxAgeAndExpiresValue));
+
+		String maxAgeOnlyValue = String.format("; Max-Age=%d", maxAge);
+		httpCookies.add(new HttpCookie(MAX_AGE_ONLY, maxAgeOnlyValue));
+
+		String expiresValue = String.format("; Expires=%s", expires);
+		httpCookies.add(new HttpCookie(EXPIRES_ONLY, expiresValue));
+
+		return httpCookies;
+	}
+
 	private Buffer randomBody(int size) {
 		Buffer responseBody = new Buffer();
 		Random rnd = new Random();
@@ -211,7 +283,9 @@ class ClientHttpConnectorTests {
 		return Arrays.asList(
 				named("Reactor Netty", new ReactorClientHttpConnector()),
 				named("Jetty", new JettyClientHttpConnector()),
-				named("HttpComponents", new HttpComponentsClientHttpConnector())
+				named("HttpComponents", new HttpComponentsClientHttpConnector()),
+				named("Jdk", new JdkClientHttpConnector()),
+				named("Reactor Netty 2", new ReactorNetty2ClientHttpConnector())
 		);
 	}
 

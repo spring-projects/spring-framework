@@ -128,7 +128,7 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 						ResponseCookie.fromClientResponse(cookie.name().toString(), cookie.value().toString())
 								.domain(toString(cookie.domain()))
 								.path(toString(cookie.path()))
-								.maxAge(toLong(cookie.maxAge()))
+								.maxAge(getMaxAgeSeconds(cookie))
 								.secure(cookie.isSecure())
 								.httpOnly(cookie.isHttpOnly())
 								.sameSite(getSameSite(cookie))
@@ -136,13 +136,16 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 
+	private static long getMaxAgeSeconds(HttpSetCookie cookie) {
+		String maxAge = (cookie.maxAge() == null) ? null : cookie.maxAge().toString();
+		String expires = toString(cookie.expires());
+
+		return ClientHttpResponse.mergeMaxAgeAndExpires(maxAge, expires);
+	}
+
 	@Nullable
 	private static String toString(@Nullable CharSequence value) {
 		return (value != null ? value.toString() : null);
-	}
-
-	private static long toLong(@Nullable Long value) {
-		return (value != null ? value : -1);
 	}
 
 	@Nullable

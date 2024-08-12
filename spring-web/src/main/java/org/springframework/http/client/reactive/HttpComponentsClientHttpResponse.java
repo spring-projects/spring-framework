@@ -70,8 +70,7 @@ class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
 	}
 
 	private static long getMaxAgeSeconds(Cookie cookie) {
-		String maxAgeAttribute = cookie.getAttribute(Cookie.MAX_AGE_ATTR);
-		return (maxAgeAttribute != null ? Long.parseLong(maxAgeAttribute) : -1);
+		return ClientHttpResponse.mergeMaxAgeAndExpires(cookie.getAttribute(Cookie.MAX_AGE_ATTR), cookie.getAttribute(Cookie.EXPIRES_ATTR));
 	}
 
 

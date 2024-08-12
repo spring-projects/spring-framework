@@ -16,9 +16,15 @@
 
 package org.springframework.http.client.reactive;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -50,5 +56,25 @@ public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 	 * Return a read-only map of response cookies received from the server.
 	 */
 	MultiValueMap<String, ResponseCookie> getCookies();
+
+	static long mergeMaxAgeAndExpires(@Nullable String maxAgeAttribute, @Nullable String expiresAttribute) {
+		if (maxAgeAttribute != null) {
+			return Long.parseLong(maxAgeAttribute);
+		}
+		else if (expiresAttribute != null) {
+			ZonedDateTime expiresDate = HttpHeaders.getZonedDateTime(expiresAttribute);
+
+			// Verify that the input date is in the future
+			ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+			if (expiresDate == null || expiresDate.isBefore(now)) {
+				return -1;
+			}
+			else {
+				// Calculate the difference in seconds
+				return ChronoUnit.SECONDS.between(now, expiresDate);
+			}
+		}
+		return -1;
+	}
 
 }

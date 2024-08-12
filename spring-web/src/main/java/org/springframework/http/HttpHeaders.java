@@ -1549,19 +1549,35 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 				headerValue = headerValue.substring(0, parametersIndex);
 			}
 
-			for (DateTimeFormatter dateFormatter : DATE_PARSERS) {
-				try {
-					return ZonedDateTime.parse(headerValue, dateFormatter);
-				}
-				catch (DateTimeParseException ex) {
-					// ignore
-				}
+			ZonedDateTime zonedDateTime = getZonedDateTime(headerValue);
+			if (zonedDateTime != null) {
+				return zonedDateTime;
 			}
 
 		}
 		if (rejectInvalid) {
 			throw new IllegalArgumentException("Cannot parse date value \"" + headerValue +
 					"\" for \"" + headerName + "\" header");
+		}
+		return null;
+	}
+
+	/**
+	 * Parses the date in headers with Date formats specified in the HTTP RFC to use for parsing.
+	 * {@link HttpHeaders#DATE_PARSERS}
+	 * @param date the date header value as string
+	 * @return the parsed date header value
+	 */
+	// used in ClientHttpResponse
+	@Nullable
+	public static ZonedDateTime getZonedDateTime(String date) {
+		for (DateTimeFormatter dateFormatter : DATE_PARSERS) {
+			try {
+				return ZonedDateTime.parse(date, dateFormatter);
+			}
+			catch (DateTimeParseException ex) {
+				// ignore
+			}
 		}
 		return null;
 	}
