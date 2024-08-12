@@ -63,6 +63,7 @@ public class HttpMethodArgumentResolver implements HttpServiceArgumentResolver {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Resolved HTTP method to: " + httpMethod.name());
 		}
+
 		return true;
 	}
 

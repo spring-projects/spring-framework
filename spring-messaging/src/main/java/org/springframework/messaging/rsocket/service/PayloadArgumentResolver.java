@@ -56,14 +56,13 @@ public class PayloadArgumentResolver implements RSocketServiceArgumentResolver {
 		}
 
 		if (argument == null) {
-			boolean required = (annot == null || annot.required()) && !parameter.isOptional();
-			Assert.isTrue(!required, () -> "Missing payload");
+			boolean isOptional = ((annot != null && !annot.required()) || parameter.isOptional());
+			Assert.isTrue(isOptional, () -> "Missing payload");
 			return true;
 		}
 
-		ReactiveAdapter reactiveAdapter = this.reactiveAdapterRegistry
-				.getAdapter(parameter.getParameterType());
-		if (reactiveAdapter == null) {
+		ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(parameter.getParameterType());
+		if (adapter == null) {
 			requestValues.setPayloadValue(argument);
 		}
 		else {
@@ -71,12 +70,13 @@ public class PayloadArgumentResolver implements RSocketServiceArgumentResolver {
 
 			String message = "Async type for @Payload should produce value(s)";
 			Assert.isTrue(nestedParameter.getNestedParameterType() != Void.class, message);
-			Assert.isTrue(!reactiveAdapter.isNoValue(), message);
+			Assert.isTrue(!adapter.isNoValue(), message);
 
 			requestValues.setPayload(
-					reactiveAdapter.toPublisher(argument),
+					adapter.toPublisher(argument),
 					ParameterizedTypeReference.forType(nestedParameter.getNestedGenericParameterType()));
 		}
+
 		return true;
 	}
 }

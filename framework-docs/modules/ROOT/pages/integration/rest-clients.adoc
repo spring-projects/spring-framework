@@ -978,10 +978,12 @@ method parameters:
   `MultiValueMap<String, ?>` with multiple cookies, a `Collection<?>` of values, or an
   individual value. Type conversion is supported for non-String values.
 
-The parameters can't be null unless they are set as not required through the annotation,
-annotated with `@Nullable` or they are `Optional`.
-
 |===
+
+Method parameters cannot be `null` unless the `required` attribute (where available on a
+parameter annotation) is set to `false`, or the parameter is marked optional as determined by
+{spring-framework-api}/core/MethodParameter.html#isOptional()[`MethodParameter#isOptional`].
+
 
 
 [[rest-http-interface-return-values]]

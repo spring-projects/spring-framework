@@ -81,8 +81,7 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 		}
 
 		if (this.reactiveAdapterRegistry != null) {
-			ReactiveAdapter adapter = this.reactiveAdapterRegistry
-					.getAdapter(parameter.getParameterType());
+			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(parameter.getParameterType());
 			if (adapter != null) {
 				MethodParameter nestedParameter = parameter.nested();
 
@@ -102,6 +101,7 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 				return true;
 			}
 		}
+
 		// Not a reactive type
 		requestValues.setBodyValue(argument);
 		return true;
