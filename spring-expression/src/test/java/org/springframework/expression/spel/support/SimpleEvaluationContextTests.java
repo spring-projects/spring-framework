@@ -211,6 +211,52 @@ class SimpleEvaluationContextTests {
 		assertIncrementAndDecrementWritesForIndexedStructures(context);
 	}
 
+	@Test
+	void forPropertyAccessorsWithAssignmentDisabled() {
+		SimpleEvaluationContext context = SimpleEvaluationContext
+				.forPropertyAccessors(new CompilableMapAccessor(false), DataBindingPropertyAccessor.forReadOnlyAccess())
+				.withIndexAccessors(colorsIndexAccessor)
+				.withAssignmentDisabled()
+				.build();
+
+		assertCommonReadOnlyModeBehavior(context);
+
+		// WRITE -- via assignment operator
+
+		// Variable
+		assertAssignmentDisabled(context, "#myVar = 'rejected'");
+
+		// Property
+		assertAssignmentDisabled(context, "name = 'rejected'");
+		assertAssignmentDisabled(context, "map.yellow = 'rejected'");
+		assertIncrementDisabled(context, "count++");
+		assertIncrementDisabled(context, "++count");
+		assertDecrementDisabled(context, "count--");
+		assertDecrementDisabled(context, "--count");
+
+		// Array Index
+		assertAssignmentDisabled(context, "array[0] = 'rejected'");
+		assertIncrementDisabled(context, "numbers[0]++");
+		assertIncrementDisabled(context, "++numbers[0]");
+		assertDecrementDisabled(context, "numbers[0]--");
+		assertDecrementDisabled(context, "--numbers[0]");
+
+		// List Index
+		assertAssignmentDisabled(context, "list[0] = 'rejected'");
+
+		// Map Index -- key as String
+		assertAssignmentDisabled(context, "map['red'] = 'rejected'");
+
+		// Map Index -- key as pseudo property name
+		assertAssignmentDisabled(context, "map[yellow] = 'rejected'");
+
+		// String Index
+		assertAssignmentDisabled(context, "name[0] = 'rejected'");
+
+		// Object Index
+		assertAssignmentDisabled(context, "['name'] = 'rejected'");
+	}
+
 
 	private void assertReadWriteMode(SimpleEvaluationContext context) {
 		// Variables can always be set programmatically within an EvaluationContext.
