@@ -191,15 +191,15 @@ class HttpHeadersTests {
 	}
 
 	@Test
-	void illegalETag() {
+	void illegalETagWithoutQuotes() {
 		String eTag = "v2.6";
 		assertThatIllegalArgumentException().isThrownBy(() -> headers.setETag(eTag));
 	}
 
 	@Test
-	void illegalETagWithoutQuoteAfterWSlash() {
+	void illegalWeakETagWithoutLeadingQuote() {
 		String etag = "W/v2.6\"";
-		assertThatIllegalArgumentException().as("Invalid Weak ETag").isThrownBy(() -> headers.setETag(etag));
+		assertThatIllegalArgumentException().isThrownBy(() -> headers.setETag(etag));
 	}
 
 	@Test
