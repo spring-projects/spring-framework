@@ -41,6 +41,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
+import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.ITestBean;
@@ -219,6 +220,12 @@ class ConfigurationClassProcessingTests {
 		assertThat(foo.getSpouse()).isNull();
 	}
 
+	@Test  // gh-33330
+	void configurationWithMethodNameMismatch() {
+		assertThatExceptionOfType(BeanDefinitionOverrideException.class)
+				.isThrownBy(() -> initBeanFactory(ConfigWithMethodNameMismatch.class));
+	}
+
 	@Test
 	void configurationWithAdaptivePrototypes() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -352,6 +359,7 @@ class ConfigurationClassProcessingTests {
 			String configBeanName = configClass.getName();
 			factory.registerBeanDefinition(configBeanName, new RootBeanDefinition(configClass));
 		}
+		factory.setAllowBeanDefinitionOverriding(false);
 		ConfigurationClassPostProcessor ccpp = new ConfigurationClassPostProcessor();
 		ccpp.postProcessBeanDefinitionRegistry(factory);
 		ccpp.postProcessBeanFactory(factory);
@@ -522,6 +530,19 @@ class ConfigurationClassProcessingTests {
 		@Override
 		public TestBean bar() {
 			return null;
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithMethodNameMismatch {
+
+		@Bean(name = "foo") public TestBean foo() {
+			return new SpousyTestBean("foo");
+		}
+
+		@Bean(name = "foo") public TestBean fooX() {
+			return new SpousyTestBean("fooX");
 		}
 	}
 

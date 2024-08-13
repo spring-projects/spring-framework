@@ -298,16 +298,12 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 		BeanDefinition existingBeanDef = this.registry.getBeanDefinition(beanName);
 
-		// Is the existing bean definition one that was created from a configuration class?
-		// -> allow the current bean method to override, since both are at second-pass level.
-		// However, if the bean method is an overloaded case on the same configuration class,
-		// preserve the existing bean definition.
+		// If the bean method is an overloaded case on the same configuration class,
+		// preserve the existing bean definition and mark it as overloaded.
 		if (existingBeanDef instanceof ConfigurationClassBeanDefinition ccbd) {
-			if (ccbd.getMetadata().getClassName().equals(
-					beanMethod.getConfigurationClass().getMetadata().getClassName())) {
-				if (ccbd.getFactoryMethodMetadata().getMethodName().equals(ccbd.getFactoryMethodName())) {
-					ccbd.setNonUniqueFactoryMethodName(ccbd.getFactoryMethodMetadata().getMethodName());
-				}
+			if (ccbd.getMetadata().getClassName().equals(beanMethod.getConfigurationClass().getMetadata().getClassName()) &&
+					ccbd.getFactoryMethodMetadata().getMethodName().equals(beanMethod.getMetadata().getMethodName())) {
+				ccbd.setNonUniqueFactoryMethodName(ccbd.getFactoryMethodMetadata().getMethodName());
 				return true;
 			}
 			else {
