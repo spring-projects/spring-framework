@@ -649,6 +649,10 @@ class CustomEditorTests {
 		assertThat(localeEditor.getAsText()).isEqualTo("en_CA");
 
 		localeEditor = new LocaleEditor();
+		localeEditor.setAsText("zh-Hans");
+		assertThat(localeEditor.getValue()).isEqualTo(Locale.forLanguageTag("zh-Hans"));
+
+		localeEditor = new LocaleEditor();
 		assertThat(localeEditor.getAsText()).isEmpty();
 	}
 

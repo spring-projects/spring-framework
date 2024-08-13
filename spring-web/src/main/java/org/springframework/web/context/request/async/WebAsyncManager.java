@@ -245,8 +245,7 @@ public final class WebAsyncManager {
 	}
 
 	/**
-	 * Mark the {@link WebAsyncManager} as wrapping a
-	 * multipart async request.
+	 * Mark the {@link WebAsyncManager} as wrapping a multipart async request.
 	 * @since 6.1.12
 	 */
 	public void setMultipartRequestParsed(boolean isMultipart) {
