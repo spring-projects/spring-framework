@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1044,9 +1044,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setETag(@Nullable String etag) {
 		if (etag != null) {
-			Assert.isTrue(etag.startsWith("\"") || etag.startsWith("W/"),
-					"Invalid ETag: does not start with W/ or \"");
-			Assert.isTrue(etag.endsWith("\""), "Invalid ETag: does not end with \"");
+			Assert.isTrue(etag.startsWith("\"") || etag.startsWith("W/\""), "ETag does not start with W/\" or \"");
+			Assert.isTrue(etag.endsWith("\""), "ETag does not end with \"");
 			set(ETAG, etag);
 		}
 		else {
