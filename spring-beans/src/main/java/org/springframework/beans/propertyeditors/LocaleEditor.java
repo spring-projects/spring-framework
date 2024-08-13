@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 26.05.2003
  * @see java.util.Locale
- * @see org.springframework.util.StringUtils#parseLocaleString
+ * @see org.springframework.util.StringUtils#parseLocale
  */
 public class LocaleEditor extends PropertyEditorSupport {
 
 	@Override
 	public void setAsText(String text) {
-		setValue(StringUtils.parseLocaleString(text));
+		setValue(StringUtils.parseLocale(text));
 	}
 
 	@Override
