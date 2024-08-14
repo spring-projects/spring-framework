@@ -291,7 +291,6 @@ configure(allprojects) { project ->
 		}
 		repositories {
 			mavenCentral()
-			maven { url "https://repo.spring.io/snapshot" } // reactor
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
 		}
 	}
