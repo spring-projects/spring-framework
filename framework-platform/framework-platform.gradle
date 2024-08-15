@@ -20,7 +20,7 @@ dependencies {
 	api(platform("org.eclipse.jetty.ee10:jetty-ee10-bom:12.0.12"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.8.1"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.6.3"))
-	api(platform("org.junit:junit-bom:5.10.3"))
+	api(platform("org.junit:junit-bom:5.11.0"))
 	api(platform("org.mockito:mockito-bom:5.12.0"))
 
 	constraints {
