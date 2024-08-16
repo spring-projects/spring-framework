@@ -30,10 +30,10 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -60,7 +60,7 @@ import org.springframework.util.MultiValueMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.MULTIPART_MIXED;
 
@@ -85,20 +85,20 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("clientHttpRequestFactories")
 	@interface ParameterizedRestTemplateTest {
 	}
 
 	@SuppressWarnings("removal")
-	static Stream<Named<ClientHttpRequestFactory>> clientHttpRequestFactories() {
+	static Stream<Arguments> clientHttpRequestFactories() {
 		return Stream.of(
-			named("JDK HttpURLConnection", new SimpleClientHttpRequestFactory()),
-			named("HttpComponents", new HttpComponentsClientHttpRequestFactory()),
-			named("OkHttp", new org.springframework.http.client.OkHttp3ClientHttpRequestFactory()),
-			named("Jetty", new JettyClientHttpRequestFactory()),
-			named("JDK HttpClient", new JdkClientHttpRequestFactory()),
-			named("Reactor Netty", new ReactorNettyClientRequestFactory())
+			argumentSet("JDK HttpURLConnection", new SimpleClientHttpRequestFactory()),
+			argumentSet("HttpComponents", new HttpComponentsClientHttpRequestFactory()),
+			argumentSet("OkHttp", new org.springframework.http.client.OkHttp3ClientHttpRequestFactory()),
+			argumentSet("Jetty", new JettyClientHttpRequestFactory()),
+			argumentSet("JDK HttpClient", new JdkClientHttpRequestFactory()),
+			argumentSet("Reactor Netty", new ReactorNettyClientRequestFactory())
 		);
 	}
 
