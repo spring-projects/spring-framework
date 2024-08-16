@@ -33,6 +33,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST;
 
@@ -49,9 +50,9 @@ class RequestAttributesThreadLocalAccessorTests {
 
 
 	private static Stream<Arguments> propagation() {
-		RequestAttributes previous = mock(RequestAttributes.class);
-		RequestAttributes current = mock(RequestAttributes.class);
-		return Stream.of(Arguments.of(null, current), Arguments.of(previous, current));
+		RequestAttributes previous = mock();
+		RequestAttributes current = mock();
+		return Stream.of(arguments(null, current), arguments(previous, current));
 	}
 
 	@ParameterizedTest

@@ -46,9 +46,9 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.eclipse.jetty.client.Request;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -83,7 +83,7 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Integration tests using an {@link ExchangeFunction} through {@link WebClient}.
@@ -99,17 +99,17 @@ class WebClientIntegrationTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("arguments")
 	@interface ParameterizedWebClientTest {
 	}
 
-	static Stream<Named<ClientHttpConnector>> arguments() {
+	static Stream<Arguments> arguments() {
 		return Stream.of(
-				named("Reactor Netty", new ReactorClientHttpConnector()),
-				named("JDK", new JdkClientHttpConnector()),
-				named("Jetty", new JettyClientHttpConnector()),
-				named("HttpComponents", new HttpComponentsClientHttpConnector())
+				argumentSet("Reactor Netty", new ReactorClientHttpConnector()),
+				argumentSet("JDK", new JdkClientHttpConnector()),
+				argumentSet("Jetty", new JettyClientHttpConnector()),
+				argumentSet("HttpComponents", new HttpComponentsClientHttpConnector())
 		);
 	}
 

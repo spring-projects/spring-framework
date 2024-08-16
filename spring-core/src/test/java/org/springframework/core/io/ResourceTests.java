@@ -54,8 +54,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Tests for various {@link Resource} implementations.
@@ -67,7 +66,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
  */
 class ResourceTests {
 
-	@ParameterizedTest(name = "{index}: {0}")
+	@ParameterizedTest
 	@MethodSource("resource")
 	void resourceIsValid(Resource resource) throws Exception {
 		assertThat(resource.getFilename()).isEqualTo("ResourceTests.class");
@@ -79,7 +78,7 @@ class ResourceTests {
 		assertThat(resource.getContentAsByteArray()).containsExactly(Files.readAllBytes(Path.of(resource.getURI())));
 	}
 
-	@ParameterizedTest(name = "{index}: {0}")
+	@ParameterizedTest
 	@MethodSource("resource")
 	void resourceCreateRelative(Resource resource) throws Exception {
 		Resource relative1 = resource.createRelative("ClassPathResourceTests.class");
@@ -91,7 +90,7 @@ class ResourceTests {
 		assertThat(relative1.lastModified()).isGreaterThan(0);
 	}
 
-	@ParameterizedTest(name = "{index}: {0}")
+	@ParameterizedTest
 	@MethodSource("resource")
 	void resourceCreateRelativeWithFolder(Resource resource) throws Exception {
 		Resource relative2 = resource.createRelative("support/PathMatchingResourcePatternResolverTests.class");
@@ -103,7 +102,7 @@ class ResourceTests {
 		assertThat(relative2.lastModified()).isGreaterThan(0);
 	}
 
-	@ParameterizedTest(name = "{index}: {0}")
+	@ParameterizedTest
 	@MethodSource("resource")
 	void resourceCreateRelativeWithDotPath(Resource resource) throws Exception {
 		Resource relative3 = resource.createRelative("../CollectionFactoryTests.class");
@@ -115,7 +114,7 @@ class ResourceTests {
 		assertThat(relative3.lastModified()).isGreaterThan(0);
 	}
 
-	@ParameterizedTest(name = "{index}: {0}")
+	@ParameterizedTest
 	@MethodSource("resource")
 	void resourceCreateRelativeUnknown(Resource resource) throws Exception {
 		Resource relative4 = resource.createRelative("X.class");
@@ -133,13 +132,13 @@ class ResourceTests {
 		URL resourceClass = ResourceTests.class.getResource("ResourceTests.class");
 		Path resourceClassFilePath = Paths.get(resourceClass.toURI());
 		return Stream.of(
-				arguments(named("ClassPathResource", new ClassPathResource("org/springframework/core/io/ResourceTests.class"))),
-				arguments(named("ClassPathResource with ClassLoader", new ClassPathResource("org/springframework/core/io/ResourceTests.class", ResourceTests.class.getClassLoader()))),
-				arguments(named("ClassPathResource with Class", new ClassPathResource("ResourceTests.class", ResourceTests.class))),
-				arguments(named("FileSystemResource", new FileSystemResource(resourceClass.getFile()))),
-				arguments(named("FileSystemResource with File", new FileSystemResource(new File(resourceClass.getFile())))),
-				arguments(named("FileSystemResource with File path", new FileSystemResource(resourceClassFilePath))),
-				arguments(named("UrlResource", new UrlResource(resourceClass)))
+				argumentSet("ClassPathResource", new ClassPathResource("org/springframework/core/io/ResourceTests.class")),
+				argumentSet("ClassPathResource with ClassLoader", new ClassPathResource("org/springframework/core/io/ResourceTests.class", ResourceTests.class.getClassLoader())),
+				argumentSet("ClassPathResource with Class", new ClassPathResource("ResourceTests.class", ResourceTests.class)),
+				argumentSet("FileSystemResource", new FileSystemResource(resourceClass.getFile())),
+				argumentSet("FileSystemResource with File", new FileSystemResource(new File(resourceClass.getFile()))),
+				argumentSet("FileSystemResource with File path", new FileSystemResource(resourceClassFilePath)),
+				argumentSet("UrlResource", new UrlResource(resourceClass))
 		);
 	}
 

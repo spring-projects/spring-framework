@@ -60,6 +60,8 @@ import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -83,7 +85,10 @@ class RequestMappingHandlerMappingTests {
 		mapping2.setPatternParser(null);
 		mapping2.setApplicationContext(wac2);
 
-		return Stream.of(Arguments.of(mapping1, wac1), Arguments.of(mapping2, wac2));
+		return Stream.of(
+				arguments(named("PathPatternParser", mapping1), wac1),
+				arguments(named("AntPathMatcher", mapping2), wac2)
+			);
 	}
 
 	@Test

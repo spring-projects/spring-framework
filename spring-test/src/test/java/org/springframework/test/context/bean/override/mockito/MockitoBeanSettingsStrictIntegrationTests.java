@@ -18,12 +18,11 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.FieldSource;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Events;
 import org.mockito.Mockito;
@@ -33,6 +32,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.test.context.bean.override.mockito.MockitoBeanForByNameLookupIntegrationTests.Config;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.testkit.engine.EventConditions.event;
 import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
@@ -50,7 +50,7 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.me
 class MockitoBeanSettingsStrictIntegrationTests {
 
 	@ParameterizedTest
-	@MethodSource("strictCases")
+	@FieldSource("strictCases")
 	void unusedStubbingIsReported(Class<?> forCase) {
 		Events events = EngineTestKit.engine("junit-jupiter")
 				.selectors(selectClass(forCase))
@@ -65,12 +65,10 @@ class MockitoBeanSettingsStrictIntegrationTests {
 								message(msg -> msg.contains("Unnecessary stubbings detected.")))));
 	}
 
-	private static Stream<Named<Class<?>>> strictCases() {
-		return Stream.of(
-				Named.of("explicit strictness", ExplicitStrictness.class),
-				Named.of("implicit strictness with @MockitoBean on field", ImplicitStrictnessWithMockitoBean.class)
+	static final List<Arguments> strictCases = List.of(
+			argumentSet("explicit strictness", ExplicitStrictness.class),
+			argumentSet("implicit strictness with @MockitoBean on field", ImplicitStrictnessWithMockitoBean.class)
 		);
-	}
 
 	abstract static class BaseCase {
 

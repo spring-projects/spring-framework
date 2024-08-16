@@ -53,8 +53,7 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Base class for tests that read or write data buffers with an extension to check
@@ -197,7 +196,7 @@ public abstract class AbstractDataBufferAllocatingTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
 	public @interface ParameterizedDataBufferAllocatingTest {
 	}
@@ -205,28 +204,28 @@ public abstract class AbstractDataBufferAllocatingTests {
 	public static Stream<Arguments> dataBufferFactories() {
 		return Stream.of(
 			// Netty 4
-			arguments(named("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = true",
-					new NettyDataBufferFactory(netty4OffHeapUnpooled))),
-			arguments(named("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = false",
-					new NettyDataBufferFactory(netty4OnHeapUnpooled))),
-			arguments(named("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = true",
-					new NettyDataBufferFactory(netty4OffHeapPooled))),
-			arguments(named("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = false",
-					new NettyDataBufferFactory(netty4OnHeapPooled))),
+			argumentSet("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = true",
+					new NettyDataBufferFactory(netty4OffHeapUnpooled)),
+			argumentSet("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = false",
+					new NettyDataBufferFactory(netty4OnHeapUnpooled)),
+			argumentSet("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = true",
+					new NettyDataBufferFactory(netty4OffHeapPooled)),
+			argumentSet("NettyDataBufferFactory - PooledByteBufAllocator - preferDirect = false",
+					new NettyDataBufferFactory(netty4OnHeapPooled)),
 			// Netty 5
-			arguments(named("Netty5DataBufferFactory - BufferAllocator.onHeapUnpooled()",
-					new Netty5DataBufferFactory(netty5OnHeapUnpooled))),
-			arguments(named("Netty5DataBufferFactory - BufferAllocator.offHeapUnpooled()",
-					new Netty5DataBufferFactory(netty5OffHeapUnpooled))),
-			arguments(named("Netty5DataBufferFactory - BufferAllocator.onHeapPooled()",
-					new Netty5DataBufferFactory(netty5OnHeapPooled))),
-			arguments(named("Netty5DataBufferFactory - BufferAllocator.offHeapPooled()",
-					new Netty5DataBufferFactory(netty5OffHeapPooled))),
+			argumentSet("Netty5DataBufferFactory - BufferAllocator.onHeapUnpooled()",
+					new Netty5DataBufferFactory(netty5OnHeapUnpooled)),
+			argumentSet("Netty5DataBufferFactory - BufferAllocator.offHeapUnpooled()",
+					new Netty5DataBufferFactory(netty5OffHeapUnpooled)),
+			argumentSet("Netty5DataBufferFactory - BufferAllocator.onHeapPooled()",
+					new Netty5DataBufferFactory(netty5OnHeapPooled)),
+			argumentSet("Netty5DataBufferFactory - BufferAllocator.offHeapPooled()",
+					new Netty5DataBufferFactory(netty5OffHeapPooled)),
 			// Default
-			arguments(named("DefaultDataBufferFactory - preferDirect = true",
-					new DefaultDataBufferFactory(true))),
-			arguments(named("DefaultDataBufferFactory - preferDirect = false",
-					new DefaultDataBufferFactory(false)))
+			argumentSet("DefaultDataBufferFactory - preferDirect = true",
+					new DefaultDataBufferFactory(true)),
+			argumentSet("DefaultDataBufferFactory - preferDirect = false",
+					new DefaultDataBufferFactory(false))
 		);
 	}
 

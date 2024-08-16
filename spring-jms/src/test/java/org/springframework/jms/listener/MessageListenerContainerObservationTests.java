@@ -28,7 +28,6 @@ import jakarta.jms.MessageListener;
 import jakarta.jms.TextMessage;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.junit.EmbeddedActiveMQExtension;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -40,8 +39,7 @@ import org.springframework.jms.core.JmsTemplate;
 
 import static io.micrometer.observation.tck.TestObservationRegistryAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Observation tests for {@link AbstractMessageListenerContainer} implementations.
@@ -63,7 +61,7 @@ class MessageListenerContainerObservationTests {
 		connectionFactory = new ActiveMQConnectionFactory(server.getVmURL());
 	}
 
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("listenerContainers")
 	void shouldRecordJmsProcessObservations(AbstractMessageListenerContainer listenerContainer) throws Exception {
 		CountDownLatch latch = new CountDownLatch(1);
@@ -84,14 +82,13 @@ class MessageListenerContainerObservationTests {
 		listenerContainer.shutdown();
 	}
 
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("listenerContainers")
 	void shouldRecordJmsPublishObservations(AbstractMessageListenerContainer listenerContainer) throws Exception {
-		CountDownLatch latch = new CountDownLatch(1);
 		listenerContainer.setConnectionFactory(connectionFactory);
 		listenerContainer.setObservationRegistry(registry);
 		listenerContainer.setDestinationName("spring.test.observation");
-		listenerContainer.setMessageListener((SessionAwareMessageListener) (message, session) -> {
+		listenerContainer.setMessageListener((SessionAwareMessageListener<?>) (message, session) -> {
 			Message response = session.createTextMessage("test response");
 			session.createProducer(message.getJMSReplyTo()).send(response);
 		});
@@ -106,12 +103,12 @@ class MessageListenerContainerObservationTests {
 		// response sent to the template
 		assertThat(registry).hasNumberOfObservationsWithNameEqualTo("jms.message.publish", 1);
 
-		Assertions.assertThat(response.getText()).isEqualTo("test response");
+		assertThat(response.getText()).isEqualTo("test response");
 		listenerContainer.stop();
 		listenerContainer.shutdown();
 	}
 
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("listenerContainers")
 	void shouldHaveObservationScopeInErrorHandler(AbstractMessageListenerContainer listenerContainer) throws Exception {
 		CountDownLatch latch = new CountDownLatch(1);
@@ -143,8 +140,8 @@ class MessageListenerContainerObservationTests {
 
 	static Stream<Arguments> listenerContainers() {
 		return Stream.of(
-				arguments(named(DefaultMessageListenerContainer.class.getSimpleName(), new DefaultMessageListenerContainer())),
-				arguments(named(SimpleMessageListenerContainer.class.getSimpleName(), new SimpleMessageListenerContainer()))
+				argumentSet(DefaultMessageListenerContainer.class.getSimpleName(), new DefaultMessageListenerContainer()),
+				argumentSet(SimpleMessageListenerContainer.class.getSimpleName(), new SimpleMessageListenerContainer())
 		);
 	}
 

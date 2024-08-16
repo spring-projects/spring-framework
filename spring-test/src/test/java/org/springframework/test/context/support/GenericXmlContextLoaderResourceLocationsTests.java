@@ -30,8 +30,7 @@ import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Unit test which verifies proper
@@ -51,7 +50,7 @@ class GenericXmlContextLoaderResourceLocationsTests {
 	private static final Log logger = LogFactory.getLog(GenericXmlContextLoaderResourceLocationsTests.class);
 
 
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("contextConfigurationLocationsData")
 	void assertContextConfigurationLocations(Class<?> testClass, String[] expectedLocations) {
 		ContextConfiguration contextConfig = testClass.getAnnotation(ContextConfiguration.class);
@@ -98,7 +97,7 @@ class GenericXmlContextLoaderResourceLocationsTests {
 	}
 
 	private static Arguments args(Class<?> testClass, String[] expectedLocations) {
-		return arguments(named(testClass.getSimpleName(), testClass), expectedLocations);
+		return argumentSet(testClass.getSimpleName(), testClass, expectedLocations);
 	}
 
 	private static String[] array(String... elements) {

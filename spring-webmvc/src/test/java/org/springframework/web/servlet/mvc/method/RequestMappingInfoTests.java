@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -35,6 +36,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 
@@ -47,10 +49,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 class RequestMappingInfoTests {
 
 	@SuppressWarnings("unused")
-	static Stream<RequestMappingInfo.Builder> pathPatternsArguments() {
+	static Stream<Named<RequestMappingInfo.Builder>> pathPatternsArguments() {
 		RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 		config.setPathMatcher(new AntPathMatcher());
-		return Stream.of(RequestMappingInfo.paths(), RequestMappingInfo.paths().options(config));
+		return Stream.of(
+				named("PathPatternParser", RequestMappingInfo.paths()),
+				named("AntPathMatcher", RequestMappingInfo.paths().options(config))
+			);
 	}
 
 

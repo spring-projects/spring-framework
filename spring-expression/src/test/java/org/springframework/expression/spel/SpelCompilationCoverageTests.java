@@ -68,8 +68,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.within;
 import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.springframework.expression.spel.SpelMessage.EXCEPTION_DURING_INDEX_READ;
 import static org.springframework.expression.spel.standard.SpelExpressionTestUtils.assertIsCompiled;
 
@@ -955,7 +954,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				assertThat(getAst().getExitDescriptor()).isEqualTo(exitTypeDescriptor);
 			}
 
-			@ParameterizedTest(name = "{0}")
+			@ParameterizedTest
 			@MethodSource("fruitMapIndexAccessors")
 			void indexWithReferenceIndexTypeAndReferenceValueType(IndexAccessor indexAccessor) {
 				String exitTypeDescriptor = CodeFlow.toDescriptor(String.class);
@@ -1010,10 +1009,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 			static Stream<Arguments> fruitMapIndexAccessors() {
 				return Stream.of(
-					arguments(named("FruitMapIndexAccessor",
-							new FruitMapIndexAccessor())),
-					arguments(named("ReflectiveIndexAccessor",
-							new ReflectiveIndexAccessor(FruitMap.class, Color.class, "getFruit", "setFruit")))
+					argumentSet("FruitMapIndexAccessor",
+							new FruitMapIndexAccessor()),
+					argumentSet("ReflectiveIndexAccessor",
+							new ReflectiveIndexAccessor(FruitMap.class, Color.class, "getFruit", "setFruit"))
 				);
 			}
 		}

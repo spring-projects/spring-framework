@@ -203,7 +203,7 @@ class ResourceWebHandlerTests {
 		}
 
 		@ParameterizedTest
-		@MethodSource("httpMethods")
+		@MethodSource("org.springframework.http.HttpMethod#values()")
 		void resourceNotFound(HttpMethod method) {
 			MockServerHttpRequest request = MockServerHttpRequest.method(method, "").build();
 			MockServerWebExchange exchange = MockServerWebExchange.from(request);
@@ -221,10 +221,6 @@ class ResourceWebHandlerTests {
 			AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
 			StepVerifier.create(mono).consumeErrorWith(exceptionRef::set).verify();
 			StepVerifier.create(mono).consumeErrorWith(ex -> assertThat(ex).isNotSameAs(exceptionRef.get())).verify();
-		}
-
-		static Stream<HttpMethod> httpMethods() {
-			return Arrays.stream(HttpMethod.values());
 		}
 
 	}
@@ -684,7 +680,7 @@ class ResourceWebHandlerTests {
 		}
 
 		@ParameterizedTest
-		@MethodSource("httpMethods")
+		@MethodSource("org.springframework.http.HttpMethod#values()")
 		void resolvePathWithTraversal(HttpMethod method) throws Exception {
 			Resource location = new ClassPathResource("test/", getClass());
 			this.handler.setLocations(List.of(location));

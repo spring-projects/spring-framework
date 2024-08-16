@@ -218,14 +218,14 @@ class StatementCreatorUtilsTests {
 		verify(preparedStatement).setTimestamp(1, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{0} -> {1}")
 	@MethodSource("javaTimeTypes")
 	public void testSetParameterValueWithJavaTimeTypes(Object o, int sqlType) throws SQLException {
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, sqlType, o);
 		verify(preparedStatement).setObject(1, o, sqlType);
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "{0} -> {1}")
 	@MethodSource("javaTimeTypes")
 	void javaTimeTypesToSqlParameterType(Object o, int expectedSqlType) {
 		assertThat(StatementCreatorUtils.javaTypeToSqlParameterType(o.getClass()))

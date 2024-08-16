@@ -55,8 +55,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
@@ -430,7 +429,7 @@ class DefaultPartHttpMessageReaderTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("org.springframework.http.codec.multipart.DefaultPartHttpMessageReaderTests#messageReaders()")
 	@interface ParameterizedDefaultPartHttpMessageReaderTest {
 	}
@@ -443,8 +442,8 @@ class DefaultPartHttpMessageReaderTests {
 		onDisk.setMaxInMemorySize(100);
 
 		return Stream.of(
-				arguments(named("in-memory", inMemory)),
-				arguments(named("on-disk", onDisk)));
+				argumentSet("in-memory", inMemory),
+				argumentSet("on-disk", onDisk));
 	}
 
 }

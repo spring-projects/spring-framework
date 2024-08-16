@@ -40,8 +40,7 @@ import org.springframework.test.context.web.WebTestContextBootstrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.context.BootstrapUtils.resolveTestContextBootstrapper;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
@@ -105,7 +104,7 @@ class BootstrapUtilsTests {
 	/**
 	 * @since 5.3
 	 */
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource
 	void resolveTestContextBootstrapperInEnclosingClassHierarchy(Class<?> testClass, Class<?> expectedBootstrapper) {
 		assertBootstrapper(testClass, expectedBootstrapper);
@@ -130,7 +129,7 @@ class BootstrapUtilsTests {
 	}
 
 	private static Arguments args(Class<?> testClass, Class<? extends TestContextBootstrapper> expectedBootstrapper) {
-		return arguments(named(testClass.getSimpleName(), testClass), expectedBootstrapper);
+		return argumentSet(testClass.getSimpleName(), testClass, expectedBootstrapper);
 	}
 
 	/**

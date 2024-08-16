@@ -18,9 +18,9 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -34,7 +34,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyCoreHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
@@ -42,7 +41,7 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.Tomcat
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
  * Integration tests related to the use of context paths.
@@ -51,17 +50,17 @@ import static org.junit.jupiter.api.Named.named;
  */
 class ContextPathIntegrationTests {
 
-	static Stream<Named<HttpServer>> httpServers() {
+	static Stream<Arguments> httpServers() {
 		return Stream.of(
-				named("Jetty", new JettyHttpServer()),
-				named("Jetty Core", new JettyCoreHttpServer()),
-				named("Reactor Netty", new ReactorHttpServer()),
-				named("Tomcat", new TomcatHttpServer()),
-				named("Undertow", new UndertowHttpServer())
+				argumentSet("Jetty", new JettyHttpServer()),
+				argumentSet("Jetty Core", new JettyCoreHttpServer()),
+				argumentSet("Reactor Netty", new ReactorHttpServer()),
+				argumentSet("Tomcat", new TomcatHttpServer()),
+				argumentSet("Undertow", new UndertowHttpServer())
 		);
 	}
 
-	@ParameterizedTest(name = "[{index}] {0}")
+	@ParameterizedTest
 	@MethodSource("httpServers")
 	void multipleWebFluxApps(AbstractHttpServer server) throws Exception {
 		AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext(WebAppConfig.class);
