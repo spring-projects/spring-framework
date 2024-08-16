@@ -13,7 +13,7 @@ content:
   - url: https://github.com/spring-projects/spring-framework
     # Refname matching:
     # https://docs.antora.org/antora/latest/playbook/content-refname-matching/
-    branches: ['main', '{6..9}.+({0..9}).x']
+    branches: ['main', '{6..9}.+({1..9}).x']
     tags: ['v{6..9}.+({0..9}).+({0..9})?(-{RC,M}*)', '!(v6.0.{0..8})', '!(v6.0.0-{RC,M}{0..9})']
     start_path: framework-docs
 asciidoc:
