@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,10 @@ class BindingReflectionHintsRegistrarKotlinTests {
 		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleDataClass::class.java, "component1")).accepts(hints)
 		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleDataClass::class.java, "copy")).accepts(hints)
 		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleDataClass::class.java, "getName")).accepts(hints)
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleDataClass::class.java, "isNonNullable")).accepts(hints)
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleDataClass::class.java, "isNullable")).accepts(hints)
 		val copyDefault: Method = SampleDataClass::class.java.getMethod("copy\$default", SampleDataClass::class.java,
-			String::class.java , Int::class.java, Object::class.java)
+			String::class.java, Boolean::class.javaPrimitiveType, Boolean::class.javaObjectType, Int::class.java, Object::class.java)
 		assertThat(RuntimeHintsPredicates.reflection().onMethod(copyDefault)).accepts(hints)
 	}
 
@@ -84,6 +86,6 @@ class BindingReflectionHintsRegistrarKotlinTests {
 @kotlinx.serialization.Serializable
 class SampleSerializableClass(val name: String)
 
-data class SampleDataClass(val name: String)
+data class SampleDataClass(val name: String, val isNonNullable: Boolean, val isNullable: Boolean?)
 
 class SampleClass(val name: String)
