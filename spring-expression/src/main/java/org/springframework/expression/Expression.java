@@ -40,7 +40,7 @@ public interface Expression {
 	String getExpressionString();
 
 	/**
-	 * Evaluate this expression in the default standard context.
+	 * Evaluate this expression in the default context and return the result of evaluation.
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
@@ -48,8 +48,8 @@ public interface Expression {
 	Object getValue() throws EvaluationException;
 
 	/**
-	 * Evaluate this expression in the default context. If the result
-	 * of the evaluation does not match (and cannot be converted to)
+	 * Evaluate this expression in the default context and return the result of evaluation.
+	 * <p>If the result of the evaluation does not match (and cannot be converted to)
 	 * the expected result type then an exception will be thrown.
 	 * @param desiredResultType the type the caller would like the result to be
 	 * @return the evaluation result
@@ -59,7 +59,8 @@ public interface Expression {
 	<T> T getValue(@Nullable Class<T> desiredResultType) throws EvaluationException;
 
 	/**
-	 * Evaluate this expression against the specified root object.
+	 * Evaluate this expression in the default context against the specified root object
+	 * and return the result of evaluation.
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
@@ -68,9 +69,10 @@ public interface Expression {
 	Object getValue(@Nullable Object rootObject) throws EvaluationException;
 
 	/**
-	 * Evaluate this expression in the default context against the specified root
-	 * object. If the result of the evaluation does not match (and cannot be
-	 * converted to) the expected result type then an exception will be thrown.
+	 * Evaluate this expression in the default context against the specified root object
+	 * and return the result of evaluation.
+	 * <p>If the result of the evaluation does not match (and cannot be converted to)
+	 * the expected result type then an exception will be thrown.
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @param desiredResultType the type the caller would like the result to be
 	 * @return the evaluation result
@@ -81,8 +83,7 @@ public interface Expression {
 			throws EvaluationException;
 
 	/**
-	 * Evaluate this expression in the provided context and return the result
-	 * of evaluation.
+	 * Evaluate this expression in the provided context and return the result of evaluation.
 	 * @param context the context in which to evaluate the expression
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
@@ -91,9 +92,10 @@ public interface Expression {
 	Object getValue(EvaluationContext context) throws EvaluationException;
 
 	/**
-	 * Evaluate this expression in the provided context and return the result
-	 * of evaluation, but use the supplied root context as an override for any
-	 * default root object specified in the context.
+	 * Evaluate this expression in the provided context against the specified root object
+	 * and return the result of evaluation.
+	 * <p>The supplied root object will be used as an override for any default root object
+	 * configured in the context.
 	 * @param context the context in which to evaluate the expression
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @return the evaluation result
@@ -103,10 +105,9 @@ public interface Expression {
 	Object getValue(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException;
 
 	/**
-	 * Evaluate this expression in the provided context which can resolve references
-	 * to properties, methods, types, etc. The type of the evaluation result is
-	 * expected to be of a particular type, and an exception will be thrown if it
-	 * is not and cannot be converted to that type.
+	 * Evaluate this expression in the provided context and return the result of evaluation.
+	 * <p>If the result of the evaluation does not match (and cannot be converted to)
+	 * the expected result type then an exception will be thrown.
 	 * @param context the context in which to evaluate the expression
 	 * @param desiredResultType the type the caller would like the result to be
 	 * @return the evaluation result
@@ -117,11 +118,12 @@ public interface Expression {
 			throws EvaluationException;
 
 	/**
-	 * Evaluate this expression in the provided context which can resolve references
-	 * to properties, methods, types, etc. The type of the evaluation result is
-	 * expected to be of a particular type, and an exception will be thrown if it
-	 * is not and cannot be converted to that type.j
-	 * <p>The supplied root object overrides any specified in the supplied context.
+	 * Evaluate this expression in the provided context against the specified root object
+	 * and return the result of evaluation.
+	 * <p>The supplied root object will be used as an override for any default root object
+	 * configured in the context.
+	 * <p>If the result of the evaluation does not match (and cannot be converted to)
+	 * the expected result type then an exception will be thrown.
 	 * @param context the context in which to evaluate the expression
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @param desiredResultType the type the caller would like the result to be
@@ -163,9 +165,9 @@ public interface Expression {
 
 	/**
 	 * Return the most general type that can be passed to the
-	 * {@link #setValue(EvaluationContext, Object, Object)} method for the given
-	 * context.
-	 * <p>The supplied root object overrides any specified in the supplied context.
+	 * {@link #setValue(EvaluationContext, Object, Object)} method for the given context.
+	 * <p>The supplied root object will be used as an override for any default root object
+	 * configured in the context.
 	 * @param context the context in which to evaluate the expression
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @return the most general type of value that can be set in this context
@@ -207,7 +209,8 @@ public interface Expression {
 	 * Return a descriptor for the most general type that can be passed to the
 	 * {@link #setValue(EvaluationContext, Object, Object)} method for the given
 	 * context.
-	 * <p>The supplied root object overrides any specified in the supplied context.
+	 * <p>The supplied root object will be used as an override for any default root object
+	 * configured in the context.
 	 * @param context the context in which to evaluate the expression
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @return a type descriptor for values that can be set in this context
@@ -235,7 +238,8 @@ public interface Expression {
 
 	/**
 	 * Determine if this expression can be written to, i.e. setValue() can be called.
-	 * <p>The supplied root object overrides any specified in the supplied context.
+	 * <p>The supplied root object will be used as an override for any default root object
+	 * configured in the context.
 	 * @param context the context in which the expression should be checked
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @return {@code true} if the expression is writable; {@code false} otherwise
@@ -244,7 +248,7 @@ public interface Expression {
 	boolean isWritable(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException;
 
 	/**
-	 * Set this expression in the provided context to the value provided.
+	 * Set this expression in the default context to the value provided.
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @param value the new value
 	 * @throws EvaluationException if there is a problem during evaluation
@@ -261,7 +265,8 @@ public interface Expression {
 
 	/**
 	 * Set this expression in the provided context to the value provided.
-	 * <p>The supplied root object overrides any specified in the supplied context.
+	 * <p>The supplied root object will be used as an override for any default root object
+	 * configured in the context.
 	 * @param context the context in which to set the value of the expression
 	 * @param rootObject the root object against which to evaluate the expression
 	 * @param value the new value
