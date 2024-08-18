@@ -88,7 +88,7 @@ class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	void equalsHashCodeAndToStringForBeanName() {
+	void equalsHashCodeAndToString() {
 		String beanName = getSingletonBeanName(SimpleControllerAdvice.class);
 		ControllerAdviceBean bean1 = createSingletonControllerAdviceBean(SimpleControllerAdvice.class);
 		ControllerAdviceBean bean2 = createSingletonControllerAdviceBean(SimpleControllerAdvice.class);
@@ -96,33 +96,17 @@ class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	void orderedWithLowestPrecedenceByDefaultForBeanName() {
+	void orderedWithLowestPrecedenceByDefault() {
 		assertOrder(SimpleControllerAdvice.class, Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
-	void orderedWithLowestPrecedenceByDefaultForBeanInstance() {
-		assertOrder(SimpleControllerAdvice.class, Ordered.LOWEST_PRECEDENCE);
-	}
-
-	@Test
-	void orderedViaOrderedInterfaceForBeanName() {
+	void orderedViaOrderedInterface() {
 		assertOrder(OrderedControllerAdvice.class, 42);
 	}
 
 	@Test
-	void orderedViaOrderedInterfaceForBeanInstance() {
-		assertOrder(OrderedControllerAdvice.class, 42);
-	}
-
-	@Test
-	void orderedViaAnnotationForBeanName() {
-		assertOrder(OrderAnnotationControllerAdvice.class, 100);
-		assertOrder(PriorityAnnotationControllerAdvice.class, 200);
-	}
-
-	@Test
-	void orderedViaAnnotationForBeanInstance() {
+	void orderedViaAnnotation() {
 		assertOrder(OrderAnnotationControllerAdvice.class, 100);
 		assertOrder(PriorityAnnotationControllerAdvice.class, 200);
 	}
