@@ -225,6 +225,16 @@ class RestClientObservationTests {
 	}
 
 	@Test
+	void exchangeInternalShouldOpenAndCloseObservationScope() throws Exception {
+		mockSentRequest(GET, "https://example.org");
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+
+		client.get().uri("https://example.org").exchange((request, response) -> response.bodyTo(String.class));
+		assertThat(observationRegistry).isNotNull();
+	}
+
+	@Test
 	void registerObservationWhenReadingStream() throws Exception {
 		mockSentRequest(GET, "https://example.org");
 		mockResponseStatus(HttpStatus.OK);

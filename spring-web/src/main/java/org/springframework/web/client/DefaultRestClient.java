@@ -520,6 +520,7 @@ final class DefaultRestClient implements RestClient {
 
 			ClientHttpResponse clientResponse = null;
 			Observation observation = null;
+			Observation.Scope scope = null;
 			URI uri = null;
 			try {
 				uri = initUri();
@@ -532,6 +533,7 @@ final class DefaultRestClient implements RestClient {
 				observationContext.setUriTemplate((String) attributes.get(URI_TEMPLATE_ATTRIBUTE));
 				observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(observationConvention,
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry).start();
+				scope = observation.openScope();
 				if (this.body != null) {
 					this.body.writeTo(clientRequest);
 				}
@@ -559,8 +561,13 @@ final class DefaultRestClient implements RestClient {
 				throw error;
 			}
 			finally {
-				if (close && clientResponse != null) {
-					clientResponse.close();
+				if (close) {
+					if (clientResponse != null) {
+						clientResponse.close();
+					}
+					if (scope != null) {
+						scope.close();
+					}
 					if (observation != null) {
 						observation.stop();
 					}
