@@ -179,7 +179,7 @@
 			<property name="offset" value="0"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
-			<property name="target" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF"/>
+			<property name="target" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, RECORD_DEF"/>
 			<property name="tagOrder" value="@author, @since, @param, @see, @version, @serial, @deprecated"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.javadoc.AtclauseOrderCheck">
