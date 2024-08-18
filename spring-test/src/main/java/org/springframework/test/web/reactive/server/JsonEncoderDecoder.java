@@ -31,15 +31,17 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link Encoder} and {@link Decoder} that is able to handle a map to and from
- * JSON. Used to configure the jsonpath infrastructure without having a hard
+ * {@link Encoder} and {@link Decoder} that is able to encode and decode
+ * a {@link Map} to and from JSON.
+ *
+ * <p>Used to configure the jsonpath infrastructure without having a hard
  * dependency on the library.
  *
- * @param encoder the JSON encoder
- * @param decoder the JSON decoder
  * @author Stephane Nicoll
  * @author Rossen Stoyanchev
  * @since 6.2
+ * @param encoder the JSON encoder
+ * @param decoder the JSON decoder
  */
 record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 
@@ -89,7 +91,7 @@ record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 	}
 
 	/**
-	 * Find the first suitable {@link Decoder} that can decode a {@link Map} to
+	 * Find the first suitable {@link Decoder} that can decode a {@link Map} from
 	 * JSON.
 	 * @param readers the readers to inspect
 	 * @return a suitable JSON {@link Decoder} or {@code null}
