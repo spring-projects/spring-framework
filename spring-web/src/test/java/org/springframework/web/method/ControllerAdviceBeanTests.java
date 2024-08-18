@@ -89,7 +89,7 @@ class ControllerAdviceBeanTests {
 
 	@Test
 	void equalsHashCodeAndToString() {
-		String beanName = getSingletonBeanName(SimpleControllerAdvice.class);
+		String beanName = SimpleControllerAdvice.class.getSimpleName();
 		ControllerAdviceBean bean1 = createSingletonControllerAdviceBean(SimpleControllerAdvice.class);
 		ControllerAdviceBean bean2 = createSingletonControllerAdviceBean(SimpleControllerAdvice.class);
 		assertEqualsHashCodeAndToString(bean1, bean2, beanName);
@@ -113,8 +113,9 @@ class ControllerAdviceBeanTests {
 
 	@Test
 	void resolveBeanForSingletonBean() {
+		String beanName = SimpleControllerAdvice.class.getSimpleName();
 		ControllerAdviceBean cab = createSingletonControllerAdviceBean(SimpleControllerAdvice.class);
-		Object bean = this.applicationContext.getBean(getSingletonBeanName(SimpleControllerAdvice.class));
+		Object bean = this.applicationContext.getBean(beanName);
 		assertThat(cab).extracting("resolvedBean").isNull();
 		Object resolvedBean = cab.resolveBean();
 		assertThat(cab).extracting("resolvedBean").isEqualTo(bean);
@@ -122,7 +123,7 @@ class ControllerAdviceBeanTests {
 	}
 
 	@Test
-	void resolveBeanForNonSingletonBean() {
+	void resolveBeanForPrototypeBean() {
 		ControllerAdviceBean cab = createPrototypeControllerAdviceBean(SimpleControllerAdvice.class);
 		assertThat(cab).extracting("resolvedBean").isNull();
 		Object resolvedBean = cab.resolveBean();
@@ -220,25 +221,17 @@ class ControllerAdviceBeanTests {
 	}
 
 	private ControllerAdviceBean createSingletonControllerAdviceBean(Class<?> beanType) {
-		String beanName = getSingletonBeanName(beanType);
+		String beanName = beanType.getSimpleName();
 		this.applicationContext.registerSingleton(beanName, beanType);
 		ControllerAdvice controllerAdvice = AnnotatedElementUtils.findMergedAnnotation(beanType, ControllerAdvice.class);
 		return new ControllerAdviceBean(beanName, this.applicationContext, controllerAdvice);
 	}
 
-	private static String getSingletonBeanName(Class<?> beanType) {
-		return beanType.getSimpleName() + "Singleton";
-	}
-
 	private ControllerAdviceBean createPrototypeControllerAdviceBean(Class<?> beanType) {
-		String beanName = getPrototypeBeanName(beanType);
+		String beanName = beanType.getSimpleName();
 		this.applicationContext.registerPrototype(beanName, beanType);
 		ControllerAdvice controllerAdvice = AnnotatedElementUtils.findMergedAnnotation(beanType, ControllerAdvice.class);
 		return new ControllerAdviceBean(beanName, this.applicationContext, controllerAdvice);
-	}
-
-	private static String getPrototypeBeanName(Class<?> beanType) {
-		return beanType.getSimpleName() + "Prototype";
 	}
 
 	private void assertEqualsHashCodeAndToString(ControllerAdviceBean bean1, ControllerAdviceBean bean2, String toString) {
