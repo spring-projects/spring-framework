@@ -27,10 +27,10 @@ import org.springframework.util.StringUtils;
 /**
  * Represents an ETag for HTTP conditional requests.
  *
- * @param tag the unquoted tag value
- * @param weak whether the entity tag is for weak or strong validation
  * @author Rossen Stoyanchev
  * @since 5.3.38
+ * @param tag the unquoted tag value
+ * @param weak whether the entity tag is for weak or strong validation
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7232">RFC 7232</a>
  */
 public record ETag(String tag, boolean weak) {
