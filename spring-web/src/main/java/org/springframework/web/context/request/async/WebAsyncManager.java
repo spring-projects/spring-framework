@@ -388,16 +388,15 @@ public final class WebAsyncManager {
 		synchronized (WebAsyncManager.this) {
 			if (!this.state.compareAndSet(State.ASYNC_PROCESSING, State.RESULT_SET)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Async result already set: " +
-							"[" + this.state.get() + "], ignored result: " + result +
-							" for " + formatUri(this.asyncWebRequest));
+					logger.debug("Async result already set: [" + this.state.get() +
+							"], ignored result for " + formatUri(this.asyncWebRequest));
 				}
 				return;
 			}
 
 			this.concurrentResult = result;
 			if (logger.isDebugEnabled()) {
-				logger.debug("Async result set to: " + result + " for " + formatUri(this.asyncWebRequest));
+				logger.debug("Async result set for " + formatUri(this.asyncWebRequest));
 			}
 
 			if (this.asyncWebRequest.isAsyncComplete()) {
