@@ -520,6 +520,7 @@ final class DefaultRestClient implements RestClient {
 
 			ClientHttpResponse clientResponse = null;
 			Observation observation = null;
+			Observation.Scope observationScope = null;
 			URI uri = null;
 			try {
 				uri = initUri();
@@ -532,6 +533,7 @@ final class DefaultRestClient implements RestClient {
 				observationContext.setUriTemplate((String) attributes.get(URI_TEMPLATE_ATTRIBUTE));
 				observation = ClientHttpObservationDocumentation.HTTP_CLIENT_EXCHANGES.observation(observationConvention,
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry).start();
+				observationScope = observation.openScope();
 				if (this.body != null) {
 					this.body.writeTo(clientRequest);
 				}
@@ -540,11 +542,14 @@ final class DefaultRestClient implements RestClient {
 				}
 				clientResponse = clientRequest.execute();
 				observationContext.setResponse(clientResponse);
-				ConvertibleClientHttpResponse convertibleWrapper = new DefaultConvertibleClientHttpResponse(clientResponse, observation);
+				ConvertibleClientHttpResponse convertibleWrapper = new DefaultConvertibleClientHttpResponse(clientResponse, observation, observationScope);
 				return exchangeFunction.exchange(clientRequest, convertibleWrapper);
 			}
 			catch (IOException ex) {
 				ResourceAccessException resourceAccessException = createResourceAccessException(uri, this.httpMethod, ex);
+				if (observationScope != null) {
+					observationScope.close();
+				}
 				if (observation != null) {
 					observation.error(resourceAccessException);
 					observation.stop();
@@ -552,6 +557,9 @@ final class DefaultRestClient implements RestClient {
 				throw resourceAccessException;
 			}
 			catch (Throwable error) {
+				if (observationScope != null) {
+					observationScope.close();
+				}
 				if (observation != null) {
 					observation.error(error);
 					observation.stop();
@@ -561,6 +569,9 @@ final class DefaultRestClient implements RestClient {
 			finally {
 				if (close && clientResponse != null) {
 					clientResponse.close();
+					if (observationScope != null) {
+						observationScope.close();
+					}
 					if (observation != null) {
 						observation.stop();
 					}
@@ -771,10 +782,12 @@ final class DefaultRestClient implements RestClient {
 
 		private final Observation observation;
 
+		private final Observation.Scope observationScope;
 
-		public DefaultConvertibleClientHttpResponse(ClientHttpResponse delegate, Observation observation) {
+		public DefaultConvertibleClientHttpResponse(ClientHttpResponse delegate, Observation observation, Observation.Scope observationScope) {
 			this.delegate = delegate;
 			this.observation = observation;
+			this.observationScope = observationScope;
 		}
 
 
@@ -815,6 +828,7 @@ final class DefaultRestClient implements RestClient {
 		@Override
 		public void close() {
 			this.delegate.close();
+			this.observationScope.close();
 			this.observation.stop();
 		}
 
