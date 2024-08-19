@@ -25,11 +25,13 @@ import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.annotation.ReflectiveProcessor;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link ReflectiveProcessor} implementation for {@link Controller} and
@@ -71,6 +73,11 @@ class ControllerMappingReflectiveProcessor implements ReflectiveProcessor {
 
 	protected void registerMethodHints(ReflectionHints hints, Method method) {
 		hints.registerMethod(method, ExecutableMode.INVOKE);
+		Class<?> declaringClass = method.getDeclaringClass();
+		if (KotlinDetector.isKotlinType(declaringClass)) {
+			ReflectionUtils.doWithMethods(declaringClass, m -> hints.registerMethod(m, ExecutableMode.INVOKE),
+					m -> m.getName().equals(method.getName() + "$default"));
+		}
 		for (Parameter parameter : method.getParameters()) {
 			registerParameterTypeHints(hints, MethodParameter.forParameter(parameter));
 		}
