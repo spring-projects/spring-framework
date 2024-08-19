@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @author Michał Rowicki
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 class DefaultWebTestClient implements WebTestClient {
@@ -490,7 +491,14 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
-			Flux<T> body = this.response.bodyToFlux(elementTypeRef);
+			Flux<T> body;
+			if (elementTypeRef.getType().equals(Void.class)) {
+				this.response.releaseBody().block();
+				body = Flux.empty();
+			}
+			else {
+				body = this.response.bodyToFlux(elementTypeRef);
+			}
 			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 
