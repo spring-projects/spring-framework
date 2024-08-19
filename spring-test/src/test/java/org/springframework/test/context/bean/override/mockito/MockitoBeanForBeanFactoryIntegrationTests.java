@@ -18,8 +18,10 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,7 @@ import static org.mockito.BDDMockito.when;
  * @author Simon Baslé
  */
 @SpringJUnitConfig
+@TestMethodOrder(OrderAnnotation.class)
 class MockitoBeanForBeanFactoryIntegrationTests {
 
 	@MockitoBean

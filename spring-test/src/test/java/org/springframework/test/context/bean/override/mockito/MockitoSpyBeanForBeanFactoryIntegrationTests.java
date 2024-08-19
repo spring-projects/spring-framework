@@ -16,8 +16,10 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -37,6 +39,7 @@ import static org.mockito.Mockito.doReturn;
  * @author Simon Baslé
  */
 @SpringJUnitConfig
+@TestMethodOrder(OrderAnnotation.class)
 class MockitoSpyBeanForBeanFactoryIntegrationTests {
 
 	@MockitoSpyBean

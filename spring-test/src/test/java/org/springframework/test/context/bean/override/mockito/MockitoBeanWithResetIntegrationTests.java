@@ -16,8 +16,10 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.doReturn;
  * @since 6.2
  */
 @SpringJUnitConfig
+@TestMethodOrder(OrderAnnotation.class)
 public class MockitoBeanWithResetIntegrationTests {
 
 	@MockitoBean(reset = MockReset.BEFORE)
