@@ -18,6 +18,7 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -44,15 +45,22 @@ class MockitoBeanForBeanFactoryIntegrationTests {
 	@Autowired
 	private ApplicationContext applicationContext;
 
+	@Order(1)
 	@Test
 	void beanReturnedByFactoryIsMocked() {
 		TestBean bean = this.applicationContext.getBean(TestBean.class);
 		assertThat(bean).isSameAs(this.testBean);
 
-		when(testBean.hello()).thenReturn("amock");
+		when(this.testBean.hello()).thenReturn("amock");
 		assertThat(bean.hello()).isEqualTo("amock");
 
 		assertThat(TestFactoryBean.USED).isFalse();
+	}
+
+	@Order(2)
+	@Test
+	void beanReturnedByFactoryIsReset() {
+		assertThat(this.testBean.hello()).isNull();
 	}
 
 	@Configuration(proxyBeanMethods = false)
