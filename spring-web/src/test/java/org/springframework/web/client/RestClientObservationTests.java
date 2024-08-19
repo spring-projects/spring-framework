@@ -27,15 +27,19 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationHandler;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationContext;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
@@ -73,12 +77,15 @@ class RestClientObservationTests {
 
 	@BeforeEach
 	void setupEach() {
-		this.client = RestClient.builder()
+		this.client = createBuilder().build();
+		this.observationRegistry.observationConfig().observationHandler(new ContextAssertionObservationHandler());
+	}
+
+	RestClient.Builder createBuilder() {
+		return RestClient.builder()
 				.messageConverters(converters -> converters.add(0, this.converter))
 				.requestFactory(this.requestFactory)
-				.observationRegistry(this.observationRegistry)
-				.build();
-		this.observationRegistry.observationConfig().observationHandler(new ContextAssertionObservationHandler());
+				.observationRegistry(this.observationRegistry);
 	}
 
 	@Test
@@ -238,6 +245,22 @@ class RestClientObservationTests {
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
 	}
 
+	@Test
+	void openScopeWithObservation() throws Exception {
+		this.client = createBuilder().requestInterceptor(new ObservationContextInterceptor(this.observationRegistry))
+				.defaultStatusHandler(new ObservationErrorHandler(this.observationRegistry)).build();
+		mockSentRequest(GET, "https://example.org");
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+
+		client.get().uri("https://example.org").retrieve().toBodilessEntity();
+	}
+
+	@AfterEach
+	void checkAfter() {
+		assertThat(this.observationRegistry.getCurrentObservationScope()).isNull();
+	}
+
 
 	private void mockSentRequest(HttpMethod method, String uri) throws Exception {
 		mockSentRequest(method, uri, new HttpHeaders());
@@ -286,6 +309,40 @@ class RestClientObservationTests {
 
 	record User(String name) {
 
+	}
+
+	static class ObservationContextInterceptor implements ClientHttpRequestInterceptor {
+
+		private final TestObservationRegistry observationRegistry;
+
+		public ObservationContextInterceptor(TestObservationRegistry observationRegistry) {
+			this.observationRegistry = observationRegistry;
+		}
+
+		@Override
+		public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+			assertThat(this.observationRegistry.getCurrentObservationScope()).isNotNull();
+			return execution.execute(request, body);
+		}
+	}
+
+	static class ObservationErrorHandler implements ResponseErrorHandler {
+
+		final TestObservationRegistry observationRegistry;
+
+		ObservationErrorHandler(TestObservationRegistry observationRegistry) {
+			this.observationRegistry = observationRegistry;
+		}
+
+		@Override
+		public boolean hasError(ClientHttpResponse response) throws IOException {
+			return true;
+		}
+
+		@Override
+		public void handleError(ClientHttpResponse response) throws IOException {
+			assertThat(this.observationRegistry.getCurrentObservationScope()).isNotNull();
+		}
 	}
 
 }
