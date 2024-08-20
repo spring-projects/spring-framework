@@ -30,11 +30,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -128,12 +124,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public ServerResponse.BodyBuilder eTag(String etag) {
 		Assert.notNull(etag, "etag must not be null");
-		if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
-			etag = "\"" + etag;
-		}
-		if (!etag.endsWith("\"")) {
-			etag = etag + "\"";
-		}
+		etag = ETag.format(etag);
 		this.headers.setETag(etag);
 		return this;
 	}

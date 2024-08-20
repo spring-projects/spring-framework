@@ -45,14 +45,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRange;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.InvalidMediaTypeException;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.SmartHttpMessageConverter;
@@ -166,12 +159,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 	@Override
 	public EntityResponse.Builder<T> eTag(String etag) {
-		if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
-			etag = "\"" + etag;
-		}
-		if (!etag.endsWith("\"")) {
-			etag = etag + "\"";
-		}
+		etag = ETag.format(etag);
 		this.headers.setETag(etag);
 		return this;
 	}

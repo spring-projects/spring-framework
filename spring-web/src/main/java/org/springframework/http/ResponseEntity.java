@@ -570,12 +570,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		@Override
 		public BodyBuilder eTag(@Nullable String etag) {
 			if (etag != null) {
-				if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
-					etag = "\"" + etag;
-				}
-				if (!etag.endsWith("\"")) {
-					etag = etag + "\"";
-				}
+				etag = ETag.format(etag);
 			}
 			this.headers.setETag(etag);
 			return this;
