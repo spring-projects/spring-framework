@@ -383,7 +383,7 @@ public interface RestOperations {
 	 * @since 4.3.5
 	 * @see HttpEntity
 	 * @see RestTemplate#setRequestFactory
-	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsClientRequestFactory
 	 */
 	@Nullable
 	<T> T patchForObject(String url, @Nullable Object request, Class<T> responseType, Object... uriVariables)
@@ -405,7 +405,7 @@ public interface RestOperations {
 	 * @since 4.3.5
 	 * @see HttpEntity
 	 * @see RestTemplate#setRequestFactory
-	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsClientRequestFactory
 	 */
 	@Nullable
 	<T> T patchForObject(String url, @Nullable Object request, Class<T> responseType,
@@ -425,7 +425,7 @@ public interface RestOperations {
 	 * @since 4.3.5
 	 * @see HttpEntity
 	 * @see RestTemplate#setRequestFactory
-	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsClientRequestFactory
 	 */
 	@Nullable
 	<T> T patchForObject(URI url, @Nullable Object request, Class<T> responseType)
