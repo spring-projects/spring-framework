@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * @since 5.0
  * @see reactor.netty.http.client.HttpClient
  */
-public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLifecycle {
+public class ReactorNettyClientHttpConnector implements ClientHttpConnector, SmartLifecycle {
 
 	/**
 	 * Channel attribute key under which {@code WebClient} request attributes are stored as a Map.
@@ -59,7 +59,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 	public static final AttributeKey<Map<String, Object>> ATTRIBUTES_KEY =
 			AttributeKey.valueOf(ReactorClientHttpRequest.class.getName() + ".ATTRIBUTES");
 
-	private static final Log logger = LogFactory.getLog(ReactorClientHttpConnector.class);
+	private static final Log logger = LogFactory.getLog(ReactorNettyClientHttpConnector.class);
 
 	private static final Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
 
@@ -82,7 +82,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 	 * Default constructor. Initializes {@link HttpClient} via:
 	 * <pre class="code">HttpClient.create().compress(true)</pre>
 	 */
-	public ReactorClientHttpConnector() {
+	public ReactorNettyClientHttpConnector() {
 		this.httpClient = defaultInitializer.apply(HttpClient.create());
 		this.resourceFactory = null;
 		this.mapper = null;
@@ -93,7 +93,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 	 * @param httpClient the client to use
 	 * @since 5.1
 	 */
-	public ReactorClientHttpConnector(HttpClient httpClient) {
+	public ReactorNettyClientHttpConnector(HttpClient httpClient) {
 		Assert.notNull(httpClient, "HttpClient is required");
 		this.httpClient = httpClient;
 		this.resourceFactory = null;
@@ -118,7 +118,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 	 * @param mapper a mapper for further initialization of the created client
 	 * @since 5.1
 	 */
-	public ReactorClientHttpConnector(ReactorResourceFactory resourceFactory, Function<HttpClient, HttpClient> mapper) {
+	public ReactorNettyClientHttpConnector(ReactorResourceFactory resourceFactory, Function<HttpClient, HttpClient> mapper) {
 		this.resourceFactory = resourceFactory;
 		this.mapper = mapper;
 		if (resourceFactory.isRunning()) {

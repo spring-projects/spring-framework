@@ -27,7 +27,7 @@ class InterceptingStreamingHttpComponentsTests extends AbstractHttpRequestFactor
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
-		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+		HttpComponentsClientRequestFactory requestFactory = new HttpComponentsClientRequestFactory();
 		return new InterceptingClientHttpRequestFactory(requestFactory, null);
 	}
 

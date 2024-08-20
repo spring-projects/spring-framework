@@ -33,11 +33,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 6.1
  */
-class ReactorClientHttpConnectorTests {
+class ReactorNettyClientHttpConnectorTests {
 
 	@Test
 	void restartWithDefaultConstructor() {
-		ReactorClientHttpConnector connector = new ReactorClientHttpConnector();
+		ReactorNettyClientHttpConnector connector = new ReactorNettyClientHttpConnector();
 		assertThat(connector.isRunning()).isTrue();
 		connector.start();
 		assertThat(connector.isRunning()).isTrue();
@@ -52,7 +52,7 @@ class ReactorClientHttpConnectorTests {
 	@Test
 	void restartWithHttpClient() {
 		HttpClient httpClient = HttpClient.create();
-		ReactorClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);
+		ReactorNettyClientHttpConnector connector = new ReactorNettyClientHttpConnector(httpClient);
 		assertThat(connector.isRunning()).isTrue();
 		connector.start();
 		assertThat(connector.isRunning()).isTrue();
@@ -69,7 +69,7 @@ class ReactorClientHttpConnectorTests {
 		ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
 		resourceFactory.afterPropertiesSet();
 		Function<HttpClient, HttpClient> mapper = Function.identity();
-		ReactorClientHttpConnector connector = new ReactorClientHttpConnector(resourceFactory, mapper);
+		ReactorNettyClientHttpConnector connector = new ReactorNettyClientHttpConnector(resourceFactory, mapper);
 		assertThat(connector.isRunning()).isTrue();
 		connector.start();
 		assertThat(connector.isRunning()).isTrue();
@@ -85,7 +85,7 @@ class ReactorClientHttpConnectorTests {
 	void lateStartWithExternalResourceFactory() {
 		ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
 		Function<HttpClient, HttpClient> mapper = Function.identity();
-		ReactorClientHttpConnector connector = new ReactorClientHttpConnector(resourceFactory, mapper);
+		ReactorNettyClientHttpConnector connector = new ReactorNettyClientHttpConnector(resourceFactory, mapper);
 		assertThat(connector.isRunning()).isFalse();
 		resourceFactory.start();
 		connector.start();
@@ -102,7 +102,7 @@ class ReactorClientHttpConnectorTests {
 	void lazyStartWithExternalResourceFactory() throws Exception {
 		ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
 		Function<HttpClient, HttpClient> mapper = Function.identity();
-		ReactorClientHttpConnector connector = new ReactorClientHttpConnector(resourceFactory, mapper);
+		ReactorNettyClientHttpConnector connector = new ReactorNettyClientHttpConnector(resourceFactory, mapper);
 		assertThat(connector.isRunning()).isFalse();
 		resourceFactory.start();
 		connector.connect(HttpMethod.GET, new URI(""), request -> Mono.empty());

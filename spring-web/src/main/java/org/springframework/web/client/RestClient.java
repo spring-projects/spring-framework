@@ -42,6 +42,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.HttpComponentsClientRequestFactory;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
@@ -385,7 +386,7 @@ public interface RestClient {
 		 * for plugging in and/or customizing options of the underlying HTTP
 		 * client library (e.g. SSL).
 		 * <p>If no request factory is specified, {@code RestClient} uses
-		 * {@linkplain org.springframework.http.client.HttpComponentsClientHttpRequestFactory Apache Http Client},
+		 * {@linkplain HttpComponentsClientRequestFactory Apache Http Client},
 		 * {@linkplain org.springframework.http.client.JettyClientHttpRequestFactory Jetty Http Client}
 		 * if available on the classpath, and defaults to the
 		 * {@linkplain org.springframework.http.client.JdkClientHttpRequestFactory JDK HttpClient}

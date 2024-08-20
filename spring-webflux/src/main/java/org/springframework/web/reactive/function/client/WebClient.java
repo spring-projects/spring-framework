@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.http.client.reactive.ReactorNettyClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
@@ -293,7 +294,7 @@ public interface WebClient {
 		 * plugging in and/or customizing options of the underlying HTTP client
 		 * library (e.g. SSL).
 		 * <p>By default this is set to
-		 * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector
+		 * {@link ReactorNettyClientHttpConnector
 		 * ReactorClientHttpConnector}.
 		 * @param connector the connector to use
 		 */

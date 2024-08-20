@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	}
 
 	/**
-	 * Called by {@link ReactorClientHttpConnector} when a cancellation is detected
+	 * Called by {@link ReactorNettyClientHttpConnector} when a cancellation is detected
 	 * but the content has not been subscribed to. If the subscription never
 	 * materializes then the content will remain not drained. Or it could still
 	 * materialize if the cancellation happened very early, or the response

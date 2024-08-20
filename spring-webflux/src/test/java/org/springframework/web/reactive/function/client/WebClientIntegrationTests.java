@@ -76,7 +76,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorNettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
@@ -106,7 +106,7 @@ class WebClientIntegrationTests {
 
 	static Stream<Arguments> arguments() {
 		return Stream.of(
-				argumentSet("Reactor Netty", new ReactorClientHttpConnector()),
+				argumentSet("Reactor Netty", new ReactorNettyClientHttpConnector()),
 				argumentSet("JDK", new JdkClientHttpConnector()),
 				argumentSet("Jetty", new JettyClientHttpConnector()),
 				argumentSet("HttpComponents", new HttpComponentsClientHttpConnector())
@@ -206,7 +206,7 @@ class WebClientIntegrationTests {
 		StepVerifier.create(result).expectComplete().verify();
 
 		if (nativeRequest.get() instanceof ChannelOperations<?,?> nativeReq) {
-			Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(ReactorClientHttpConnector.ATTRIBUTES_KEY);
+			Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(ReactorNettyClientHttpConnector.ATTRIBUTES_KEY);
 			assertThat(attributes.get()).isNotNull();
 			assertThat(attributes.get()).containsEntry("foo", "bar");
 		}
@@ -441,7 +441,7 @@ class WebClientIntegrationTests {
 		this.server = new MockWebServer();
 		WebClient webClient = WebClient
 				.builder()
-				.clientConnector(new ReactorClientHttpConnector(HttpClient.create(connectionProvider)))
+				.clientConnector(new ReactorNettyClientHttpConnector(HttpClient.create(connectionProvider)))
 				.baseUrl(this.server.url("/").toString())
 				.build();
 

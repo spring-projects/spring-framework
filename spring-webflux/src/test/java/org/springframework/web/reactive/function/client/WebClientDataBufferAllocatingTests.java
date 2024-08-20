@@ -39,7 +39,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ReactorResourceFactory;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorNettyClientHttpConnector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -81,16 +81,16 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.build();
 	}
 
-	private ReactorClientHttpConnector initConnector() {
+	private ReactorNettyClientHttpConnector initConnector() {
 		assertThat(super.bufferFactory).isNotNull();
 
 		if (super.bufferFactory instanceof NettyDataBufferFactory nettyDataBufferFactory) {
 			ByteBufAllocator allocator = nettyDataBufferFactory.getByteBufAllocator();
-			return new ReactorClientHttpConnector(this.factory,
+			return new ReactorNettyClientHttpConnector(this.factory,
 					client -> client.option(ChannelOption.ALLOCATOR, allocator));
 		}
 		else {
-			return new ReactorClientHttpConnector();
+			return new ReactorNettyClientHttpConnector();
 		}
 	}
 

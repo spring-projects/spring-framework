@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorNettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.lang.Nullable;
@@ -336,7 +336,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private ClientHttpConnector initConnector() {
 		if (reactorNettyClientPresent) {
-			return new ReactorClientHttpConnector();
+			return new ReactorNettyClientHttpConnector();
 		}
 		else if (reactorNetty2ClientPresent) {
 			return new ReactorNetty2ClientHttpConnector();

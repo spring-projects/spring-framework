@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientRequestFactory;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -58,7 +58,7 @@ class WebRequestDataBinderIntegrationTests {
 
 	private final PartListServlet partListServlet = new PartListServlet();
 
-	private final RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+	private final RestTemplate template = new RestTemplate(new HttpComponentsClientRequestFactory());
 
 	private Server jettyServer;
 

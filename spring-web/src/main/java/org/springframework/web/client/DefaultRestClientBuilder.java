@@ -32,7 +32,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientRequestFactory;
 import org.springframework.http.client.InterceptingClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
@@ -443,7 +443,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			return this.requestFactory;
 		}
 		else if (httpComponentsClientPresent) {
-			return new HttpComponentsClientHttpRequestFactory();
+			return new HttpComponentsClientRequestFactory();
 		}
 		else if (jettyClientPresent) {
 			return new JettyClientHttpRequestFactory();

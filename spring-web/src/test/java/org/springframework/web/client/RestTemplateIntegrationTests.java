@@ -47,10 +47,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
-import org.springframework.http.client.ReactorNettyClientRequestFactory;
+import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -94,11 +94,11 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	static Stream<Arguments> clientHttpRequestFactories() {
 		return Stream.of(
 			argumentSet("JDK HttpURLConnection", new SimpleClientHttpRequestFactory()),
-			argumentSet("HttpComponents", new HttpComponentsClientHttpRequestFactory()),
+			argumentSet("HttpComponents", new HttpComponentsClientRequestFactory()),
 			argumentSet("OkHttp", new org.springframework.http.client.OkHttp3ClientHttpRequestFactory()),
 			argumentSet("Jetty", new JettyClientHttpRequestFactory()),
 			argumentSet("JDK HttpClient", new JdkClientHttpRequestFactory()),
-			argumentSet("Reactor Netty", new ReactorNettyClientRequestFactory())
+			argumentSet("Reactor Netty", new ReactorClientHttpRequestFactory())
 		);
 	}
 

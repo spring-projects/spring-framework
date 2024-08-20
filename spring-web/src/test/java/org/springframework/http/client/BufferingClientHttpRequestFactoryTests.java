@@ -32,7 +32,7 @@ class BufferingClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryT
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
-		return new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory());
+		return new BufferingClientHttpRequestFactory(new HttpComponentsClientRequestFactory());
 	}
 
 	@Test

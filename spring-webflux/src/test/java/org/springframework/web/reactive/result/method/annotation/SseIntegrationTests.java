@@ -40,7 +40,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorNettyClientHttpConnector;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.lang.Nullable;
@@ -303,19 +303,19 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	static Stream<Arguments> arguments() {
 		return Stream.of(
-				args(new JettyHttpServer(), new ReactorClientHttpConnector()),
+				args(new JettyHttpServer(), new ReactorNettyClientHttpConnector()),
 				args(new JettyHttpServer(), new JettyClientHttpConnector()),
 				args(new JettyHttpServer(), new HttpComponentsClientHttpConnector()),
-				args(new JettyCoreHttpServer(), new ReactorClientHttpConnector()),
+				args(new JettyCoreHttpServer(), new ReactorNettyClientHttpConnector()),
 				args(new JettyCoreHttpServer(), new JettyClientHttpConnector()),
 				args(new JettyCoreHttpServer(), new HttpComponentsClientHttpConnector()),
-				args(new ReactorHttpServer(), new ReactorClientHttpConnector()),
+				args(new ReactorHttpServer(), new ReactorNettyClientHttpConnector()),
 				args(new ReactorHttpServer(), new JettyClientHttpConnector()),
 				args(new ReactorHttpServer(), new HttpComponentsClientHttpConnector()),
-				args(new TomcatHttpServer(), new ReactorClientHttpConnector()),
+				args(new TomcatHttpServer(), new ReactorNettyClientHttpConnector()),
 				args(new TomcatHttpServer(), new JettyClientHttpConnector()),
 				args(new TomcatHttpServer(), new HttpComponentsClientHttpConnector()),
-				args(new UndertowHttpServer(), new ReactorClientHttpConnector()),
+				args(new UndertowHttpServer(), new ReactorNettyClientHttpConnector()),
 				args(new UndertowHttpServer(), new JettyClientHttpConnector()),
 				args(new UndertowHttpServer(), new HttpComponentsClientHttpConnector())
 		);

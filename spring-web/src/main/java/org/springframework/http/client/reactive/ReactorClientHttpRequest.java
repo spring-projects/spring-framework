@@ -139,13 +139,13 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 	/**
 	 * Saves the {@link #getAttributes() request attributes} to the
 	 * {@link reactor.netty.channel.ChannelOperations#channel() channel} as a single map
-	 * attribute under the key {@link ReactorClientHttpConnector#ATTRIBUTES_KEY}.
+	 * attribute under the key {@link ReactorNettyClientHttpConnector#ATTRIBUTES_KEY}.
 	 */
 	@Override
 	protected void applyAttributes() {
 		if (!getAttributes().isEmpty()) {
 			((ChannelOperations<?, ?>) this.request).channel()
-					.attr(ReactorClientHttpConnector.ATTRIBUTES_KEY).set(getAttributes());
+					.attr(ReactorNettyClientHttpConnector.ATTRIBUTES_KEY).set(getAttributes());
 		}
 	}
 

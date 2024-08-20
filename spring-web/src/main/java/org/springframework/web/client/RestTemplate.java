@@ -44,6 +44,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.HttpComponentsClientRequestFactory;
 import org.springframework.http.client.observation.ClientHttpObservationDocumentation;
 import org.springframework.http.client.observation.ClientRequestObservationContext;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
@@ -241,7 +242,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * Create a new instance of the {@link RestTemplate} based on the given {@link ClientHttpRequestFactory}.
 	 * @param requestFactory the HTTP request factory to use
 	 * @see org.springframework.http.client.SimpleClientHttpRequestFactory
-	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+	 * @see HttpComponentsClientRequestFactory
 	 */
 	public RestTemplate(ClientHttpRequestFactory requestFactory) {
 		this();

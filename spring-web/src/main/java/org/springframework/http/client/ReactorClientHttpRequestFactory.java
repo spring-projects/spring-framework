@@ -43,9 +43,9 @@ import org.springframework.util.Assert;
  * @author Sebastien Deleuze
  * @since 6.1
  */
-public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactory, SmartLifecycle {
+public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory, SmartLifecycle {
 
-	private static final Log logger = LogFactory.getLog(ReactorNettyClientRequestFactory.class);
+	private static final Log logger = LogFactory.getLog(ReactorClientHttpRequestFactory.class);
 
 	private static final Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
 
@@ -73,7 +73,7 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 	 * Create a new instance of the {@code ReactorNettyClientRequestFactory}
 	 * with a default {@link HttpClient} that has compression enabled.
 	 */
-	public ReactorNettyClientRequestFactory() {
+	public ReactorClientHttpRequestFactory() {
 		this.httpClient = defaultInitializer.apply(HttpClient.create());
 		this.resourceFactory = null;
 		this.mapper = null;
@@ -84,7 +84,7 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 	 * based on the given {@link HttpClient}.
 	 * @param httpClient the client to base on
 	 */
-	public ReactorNettyClientRequestFactory(HttpClient httpClient) {
+	public ReactorClientHttpRequestFactory(HttpClient httpClient) {
 		Assert.notNull(httpClient, "HttpClient must not be null");
 		this.httpClient = httpClient;
 		this.resourceFactory = null;
@@ -108,7 +108,7 @@ public class ReactorNettyClientRequestFactory implements ClientHttpRequestFactor
 	 * @param resourceFactory the resource factory to obtain the resources from
 	 * @param mapper a mapper for further initialization of the created client
 	 */
-	public ReactorNettyClientRequestFactory(ReactorResourceFactory resourceFactory, Function<HttpClient, HttpClient> mapper) {
+	public ReactorClientHttpRequestFactory(ReactorResourceFactory resourceFactory, Function<HttpClient, HttpClient> mapper) {
 		this.resourceFactory = resourceFactory;
 		this.mapper = mapper;
 		if (resourceFactory.isRunning()) {

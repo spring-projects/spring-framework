@@ -34,7 +34,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpsServer;
@@ -75,8 +75,8 @@ class ServerHttpsRequestIntegrationTests {
 				.build();
 		CloseableHttpClient httpclient = HttpClients.custom().
 				setConnectionManager(connectionManager).build();
-		HttpComponentsClientHttpRequestFactory requestFactory =
-				new HttpComponentsClientHttpRequestFactory(httpclient);
+		HttpComponentsClientRequestFactory requestFactory =
+				new HttpComponentsClientRequestFactory(httpclient);
 		this.restTemplate = new RestTemplate(requestFactory);
 	}
 

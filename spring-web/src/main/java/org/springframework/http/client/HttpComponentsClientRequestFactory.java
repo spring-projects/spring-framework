@@ -62,7 +62,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.1
  */
-public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
+public class HttpComponentsClientRequestFactory implements ClientHttpRequestFactory, DisposableBean {
 
 	private HttpClient httpClient;
 
@@ -78,7 +78,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
 	 * with a default {@link HttpClient} based on system properties.
 	 */
-	public HttpComponentsClientHttpRequestFactory() {
+	public HttpComponentsClientRequestFactory() {
 		this.httpClient = HttpClients.createSystem();
 	}
 
@@ -87,7 +87,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * with the given {@link HttpClient} instance.
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
-	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
+	public HttpComponentsClientRequestFactory(HttpClient httpClient) {
 		this.httpClient = httpClient;
 	}
 

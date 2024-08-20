@@ -46,7 +46,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientRequestFactory;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
@@ -138,7 +138,7 @@ class RequestPartIntegrationTests {
 		AllEncompassingFormHttpMessageConverter converter = new AllEncompassingFormHttpMessageConverter();
 		converter.setPartConverters(converters);
 
-		restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+		restTemplate = new RestTemplate(new HttpComponentsClientRequestFactory());
 		restTemplate.setMessageConverters(Collections.singletonList(converter));
 	}
 

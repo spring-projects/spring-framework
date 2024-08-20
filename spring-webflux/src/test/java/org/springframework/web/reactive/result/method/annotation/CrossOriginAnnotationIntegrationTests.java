@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientRequestFactory;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -78,7 +78,7 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 	@Override
 	protected RestTemplate initRestTemplate() {
 		// JDK default HTTP client disallowed headers like Origin
-		return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+		return new RestTemplate(new HttpComponentsClientRequestFactory());
 	}
 
 

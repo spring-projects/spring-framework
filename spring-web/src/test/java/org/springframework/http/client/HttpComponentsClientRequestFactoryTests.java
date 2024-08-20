@@ -45,11 +45,11 @@ import static org.mockito.Mockito.withSettings;
  * @author Stephane Nicoll
  * @author Brian Clozel
  */
-class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+class HttpComponentsClientRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
-		return new HttpComponentsClientHttpRequestFactory();
+		return new HttpComponentsClientRequestFactory();
 	}
 
 	@Override
@@ -63,7 +63,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 	@SuppressWarnings("deprecation")
 	void assertCustomConfig() throws Exception {
 		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(httpClient);
+		HttpComponentsClientRequestFactory hrf = new HttpComponentsClientRequestFactory(httpClient);
 		hrf.setConnectTimeout(1234);
 		hrf.setConnectionRequestTimeout(4321);
 
@@ -88,7 +88,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		Configurable configurable = (Configurable) client;
 		given(configurable.getConfig()).willReturn(defaultConfig);
 
-		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(client);
+		HttpComponentsClientRequestFactory hrf = new HttpComponentsClientRequestFactory(client);
 		assertThat(retrieveRequestConfig(hrf)).as("Default client configuration is expected").isSameAs(defaultConfig);
 
 		hrf.setConnectionRequestTimeout(4567);
@@ -111,7 +111,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		Configurable configurable = (Configurable) client;
 		given(configurable.getConfig()).willReturn(defaultConfig);
 
-		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(client);
+		HttpComponentsClientRequestFactory hrf = new HttpComponentsClientRequestFactory(client);
 		hrf.setConnectTimeout(5000);
 
 		RequestConfig requestConfig = retrieveRequestConfig(hrf);
@@ -130,7 +130,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		Configurable configurable = (Configurable) client;
 		given(configurable.getConfig()).willReturn(defaultConfig);
 
-		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory() {
+		HttpComponentsClientRequestFactory hrf = new HttpComponentsClientRequestFactory() {
 			@Override
 			public HttpClient getHttpClient() {
 				return client;
@@ -182,7 +182,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		return Stream.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.TRACE);
 	}
 
-	private RequestConfig retrieveRequestConfig(HttpComponentsClientHttpRequestFactory factory) throws Exception {
+	private RequestConfig retrieveRequestConfig(HttpComponentsClientRequestFactory factory) throws Exception {
 		URI uri = URI.create(baseUrl + "/status/ok");
 		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)
 				factory.createRequest(uri, HttpMethod.GET);

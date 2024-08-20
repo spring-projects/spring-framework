@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
+import org.springframework.http.client.HttpComponentsClientRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.Assert;
 
@@ -66,7 +67,7 @@ public abstract class HttpAccessor {
 	 * Configure the Apache HttpComponents or OkHttp request factory to enable PATCH.</b>
 	 * @see #createRequest(URI, HttpMethod)
 	 * @see SimpleClientHttpRequestFactory
-	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+	 * @see HttpComponentsClientRequestFactory
 	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
 	public void setRequestFactory(ClientHttpRequestFactory requestFactory) {
