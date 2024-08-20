@@ -134,6 +134,15 @@ public record ETag(String tag, boolean weak) {
 		return result;
 	}
 
+	public static String format(String etag) {
+		if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
+			etag = "\"" + etag;
+		}
+		if (!etag.endsWith("\"")) {
+			etag = etag + "\"";
+		}
+		return etag;
+	}
 
 	private enum State {
 
