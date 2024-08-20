@@ -474,7 +474,7 @@ class BeanUtilsTests {
 		assertSignatureEquals(desiredMethod, "doSomethingWithAMultiDimensionalArray(java.lang.String[][])");
 	}
 
-	@Test
+	@Test  // gh-10731
 	void propertyDescriptorShouldMatchWithCachedDescriptors() {
 		PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
 
