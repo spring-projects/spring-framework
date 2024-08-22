@@ -1,4 +1,4 @@
-name: Deploy Docs
+name: Build and Deploy Documentation
 run-name: ${{ format('{0} ({1})', github.workflow, github.event.inputs.build-refname || 'all') }}
 on:
   workflow_dispatch:
@@ -12,19 +12,24 @@ env:
   GRADLE_ENTERPRISE_SECRET_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
 permissions: read-all
 jobs:
-  build:
+  build-and-deploy-docs:
+    name: Build and Deploy Documentation
     if: github.repository_owner == 'spring-projects'
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Check Out
+      uses: actions/checkout@v4
       with:
         fetch-depth: 5
-    - name: Set Up Gradle
-      uses: spring-io/spring-gradle-build-action@v2
+    - name: Set Up Java
+      uses: actions/setup-java@v4
       with:
+        distribution: 'liberica'
         java-version: '17'
-        distribution: temurin
+    - name: Set Up Gradle
+      uses: gradle/actions/setup-gradle@d9c87d481d55275bb5441eef3fe0e46805f9ef70 # v3.5.0
+      with:
+        cache-read-only: false
     - name: Set up refname build
       if: github.event.inputs.build-refname
       run: |
@@ -42,7 +47,7 @@ jobs:
         docs-host: ${{ secrets.DOCS_HOST }}
         docs-ssh-key: ${{ secrets.DOCS_SSH_KEY }}
         docs-ssh-host-key: ${{ secrets.DOCS_SSH_HOST_KEY }}
-    - name: Bust Clouflare Cache
+    - name: Bust Cloudflare Cache
       uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@v0.0.16
       with:
         context-root: spring-framework
