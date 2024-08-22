@@ -1,7 +1,7 @@
 [[context-introduction]]
 = Additional Capabilities of the `ApplicationContext`
 
-As discussed in the xref:web/webmvc-view/mvc-xslt.adoc#mvc-view-xslt-beandefs[chapter introduction], the `org.springframework.beans.factory`
+As discussed in the xref:core/beans/introduction.adoc[chapter introduction], the `org.springframework.beans.factory`
 package provides basic functionality for managing and manipulating beans, including in a
 programmatic way. The `org.springframework.context` package adds the
 {spring-framework-api}/context/ApplicationContext.html[`ApplicationContext`]
