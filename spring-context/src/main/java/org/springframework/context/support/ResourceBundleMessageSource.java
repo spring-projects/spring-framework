@@ -243,12 +243,12 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 				return ResourceBundle.getBundle(basename, locale, classLoader, control);
 			}
 			catch (UnsupportedOperationException ex) {
-				// Probably in a Jigsaw environment on JDK 9+
+				// Probably in a Java Module System environment on JDK 9+
 				this.control = null;
 				String encoding = getDefaultEncoding();
 				if (encoding != null && logger.isInfoEnabled()) {
 					logger.info("ResourceBundleMessageSource is configured to read resources with encoding '" +
-							encoding + "' but ResourceBundle.Control not supported in current system environment: " +
+							encoding + "' but ResourceBundle.Control is not supported in current system environment: " +
 							ex.getMessage() + " - falling back to plain ResourceBundle.getBundle retrieval with the " +
 							"platform default encoding. Consider setting the 'defaultEncoding' property to 'null' " +
 							"for participating in the platform default and therefore avoiding this log message.");

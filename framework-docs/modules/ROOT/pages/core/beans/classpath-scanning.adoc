@@ -317,8 +317,8 @@ exposed based on security policies in some environments -- for example, standalo
 JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests -- see
 {stackoverflow-questions}/19394570/java-jre-7u45-breaks-classloader-getresources).
 
-On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
-However, make sure that your component classes are exported in your `module-info`
+On the module path (Java Module System), Spring's classpath scanning generally works as
+expected. However, make sure that your component classes are exported in your `module-info`
 descriptors. If you expect Spring to invoke non-public members of your classes, make
 sure that they are 'opened' (that is, that they use an `opens` declaration instead of an
 `exports` declaration in your `module-info` descriptor).

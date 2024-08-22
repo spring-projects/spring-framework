@@ -37,12 +37,12 @@ support for different application architectures, including messaging, transactio
 persistence, and web. It also includes the Servlet-based Spring MVC web framework and, in
 parallel, the Spring WebFlux reactive web framework.
 
-A note about modules: Spring's framework jars allow for deployment to JDK 9's module path
-("Jigsaw"). For use in Jigsaw-enabled applications, the Spring Framework 5 jars come with
-"Automatic-Module-Name" manifest entries which define stable language-level module names
-("spring.core", "spring.context", etc.) independent from jar artifact names (the jars follow
-the same naming pattern with "-" instead of ".", e.g. "spring-core" and "spring-context").
-Of course, Spring's framework jars keep working fine on the classpath on both JDK 8 and 9+.
+A note about modules: Spring Framework's jars allow for deployment to the module path (Java
+Module System). For use in module-enabled applications, the Spring Framework jars come with
+`Automatic-Module-Name` manifest entries which define stable language-level module names
+(`spring.core`, `spring.context`, etc.) independent from jar artifact names. The jars follow
+the same naming pattern with `-` instead of `.` – for example, `spring-core` and `spring-context`.
+Of course, Spring Framework's jars also work fine on the classpath.
 
 
 

@@ -905,8 +905,8 @@ policies in some environments -- for example, stand-alone applications on JDK 1.
 and higher (which requires 'Trusted-Library' to be set up in your manifests. See
 {stackoverflow-questions}/19394570/java-jre-7u45-breaks-classloader-getresources).
 
-On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
-Putting resources into a dedicated directory is highly recommendable here as well,
+On the module path (Java Module System), Spring's classpath scanning generally works as
+expected. Putting resources into a dedicated directory is highly recommendable here as well,
 avoiding the aforementioned portability problems with searching the jar file root level.
 ====
 

@@ -332,10 +332,10 @@ public abstract class ClassUtils {
 	 * @return a class instance for the supplied name
 	 * @throws IllegalArgumentException if the class name was not resolvable
 	 * (that is, the class could not be found or the class file could not be loaded)
-	 * @throws IllegalStateException if the corresponding class is resolvable but
-	 * there was a readability mismatch in the inheritance hierarchy of the class
-	 * (typically a missing dependency declaration in a Jigsaw module definition
-	 * for a superclass or interface implemented by the class to be loaded here)
+	 * @throws IllegalStateException if the corresponding class is resolvable but there
+	 * was a readability mismatch in the inheritance hierarchy of the class (typically a
+	 * missing dependency declaration in a Java Module System module definition for a
+	 * superclass or interface implemented by the class to be loaded here)
 	 * @see #forName(String, ClassLoader)
 	 */
 	public static Class<?> resolveClassName(String className, @Nullable ClassLoader classLoader)
@@ -365,10 +365,10 @@ public abstract class ClassUtils {
 	 * (can be {@code null} which indicates the default class loader)
 	 * @return whether the specified class is present (including all of its
 	 * superclasses and interfaces)
-	 * @throws IllegalStateException if the corresponding class is resolvable but
-	 * there was a readability mismatch in the inheritance hierarchy of the class
-	 * (typically a missing dependency declaration in a Jigsaw module definition
-	 * for a superclass or interface implemented by the class to be checked here)
+	 * @throws IllegalStateException if the corresponding class is resolvable but there
+	 * was a readability mismatch in the inheritance hierarchy of the class (typically a
+	 * missing dependency declaration in a Java Module System module definition for a
+	 * superclass or interface implemented by the class to be checked here)
 	 */
 	public static boolean isPresent(String className, @Nullable ClassLoader classLoader) {
 		try {
@@ -1388,8 +1388,9 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine a corresponding interface method for the given method handle, if possible.
-	 * <p>This is particularly useful for arriving at a public exported type on Jigsaw
-	 * which can be reflectively invoked without an illegal access warning.
+	 * <p>This is particularly useful for arriving at a public exported type on the Java
+	 * Module System which allows the method to be invoked via reflection without an illegal
+	 * access warning.
 	 * @param method the method to be invoked, potentially from an implementation class
 	 * @return the corresponding interface method, or the original method if none found
 	 * @since 5.1
@@ -1402,8 +1403,9 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine a corresponding interface method for the given method handle, if possible.
-	 * <p>This is particularly useful for arriving at a public exported type on Jigsaw
-	 * which can be reflectively invoked without an illegal access warning.
+	 * <p>This is particularly useful for arriving at a public exported type on the Java
+	 * Module System which allows the method to be invoked via reflection without an illegal
+	 * access warning.
 	 * @param method the method to be invoked, potentially from an implementation class
 	 * @param targetClass the target class to check for declared interfaces
 	 * @return the corresponding interface method, or the original method if none found
