@@ -136,12 +136,14 @@ public abstract class ClassUtils {
 
 	/**
 	 * Cache for equivalent methods on a public interface implemented by the declaring class.
+	 * <p>A {@code null} value signals that no public interface method was found for the key.
 	 */
 	private static final Map<Method, Method> interfaceMethodCache = new ConcurrentReferenceHashMap<>(256);
 
 	/**
 	 * Cache for equivalent public methods in a public declaring type within the type hierarchy
 	 * of the method's declaring class.
+	 * <p>A {@code null} value signals that no publicly accessible method was found for the key.
 	 * @since 6.2
 	 */
 	private static final Map<Method, Method> publiclyAccessibleMethodCache = new ConcurrentReferenceHashMap<>(256);
