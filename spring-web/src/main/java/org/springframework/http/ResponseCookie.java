@@ -50,14 +50,14 @@ public final class ResponseCookie extends HttpCookie {
 	private final boolean partitioned;
 
 	@Nullable
-	private final String sameSite;
+	private final SameSite sameSite;
 
 
 	/**
 	 * Private constructor. See {@link #from(String, String)}.
 	 */
 	private ResponseCookie(String name, @Nullable String value, Duration maxAge, @Nullable String domain,
-			@Nullable String path, boolean secure, boolean httpOnly, boolean partitioned, @Nullable String sameSite) {
+			@Nullable String path, boolean secure, boolean httpOnly, boolean partitioned, @Nullable SameSite sameSite) {
 
 		super(name, value);
 		Assert.notNull(maxAge, "Max age must not be null");
@@ -137,7 +137,11 @@ public final class ResponseCookie extends HttpCookie {
 	 */
 	@Nullable
 	public String getSameSite() {
-		return this.sameSite;
+		if(ObjectUtils.isEmpty(this.sameSite)) {
+			return null;
+		}
+
+		return this.sameSite.getValue();
 	}
 
 	/**
@@ -196,8 +200,8 @@ public final class ResponseCookie extends HttpCookie {
 		if (this.partitioned) {
 			sb.append("; Partitioned");
 		}
-		if (StringUtils.hasText(this.sameSite)) {
-			sb.append("; SameSite=").append(this.sameSite);
+		if (!ObjectUtils.isEmpty(this.sameSite)) {
+			sb.append("; SameSite=").append(this.sameSite.getValue());
 		}
 		return sb.toString();
 	}
@@ -304,6 +308,8 @@ public final class ResponseCookie extends HttpCookie {
 		 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
 		 */
 		ResponseCookieBuilder sameSite(@Nullable String sameSite);
+
+		ResponseCookieBuilder sameSite(@Nullable SameSite sameSite);
 
 		/**
 		 * Create the HttpCookie.
@@ -423,7 +429,7 @@ public final class ResponseCookie extends HttpCookie {
 		private boolean partitioned;
 
 		@Nullable
-		private String sameSite;
+		private SameSite sameSite;
 
 		public DefaultResponseCookieBuilder(String name, @Nullable String value, boolean lenient) {
 			this.name = name;
@@ -494,6 +500,17 @@ public final class ResponseCookie extends HttpCookie {
 
 		@Override
 		public ResponseCookieBuilder sameSite(@Nullable String sameSite) {
+			if(!StringUtils.hasText(sameSite)) {
+				this.sameSite = null;
+				return this;
+			}
+
+			this.sameSite = SameSite.fromSuffix(sameSite);
+			return this;
+		}
+
+		@Override
+		public ResponseCookieBuilder sameSite(@Nullable SameSite sameSite) {
 			this.sameSite = sameSite;
 			return this;
 		}
@@ -505,4 +522,82 @@ public final class ResponseCookie extends HttpCookie {
 		}
 	}
 
+	/**
+	 * Enumeration representing the possible values for the "SameSite" attribute of an HTTP cookie.
+	 * This attribute restricts how cookies are sent with cross-site requests, providing three levels of restriction:
+	 * <ul>
+	 *   <li>{@code Strict}: Cookies are only sent in a first-party context (i.e., same site as the request).</li>
+	 *   <li>{@code Lax}: Cookies are sent in a first-party context and with top-level navigation, but not with third-party requests.</li>
+	 *   <li>{@code None}: Cookies are sent in all contexts, including cross-site requests, but must be used with the "Secure" attribute.</li>
+	 * </ul>
+	 *
+	 * <p>This enum is used to control the scope of cookies in relation to cross-site requests,
+	 * providing enhanced security and privacy for web applications by mitigating cross-site request forgery (CSRF) attacks.</p>
+	 *
+	 * @see <a href="https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis#name-the-samesite-attribute">The SameSite Attribute</a>
+	 */
+	enum SameSite {
+
+		/**
+		 * "Strict" SameSite setting. Cookies are only sent in a "same-site" context.
+		 * This setting provides the highest level of protection against cross-site attacks.
+		 */
+		STRICT("Strict"),
+
+		/**
+		 * "Lax" SameSite setting. Cookies are sent in a "same-site" context and with top-level navigations,
+		 * but are not sent with third-party or subresource requests.
+		 */
+		LAX("Lax"),
+
+		/**
+		 * "None" SameSite setting. Cookies are sent in all contexts, including cross-site requests.
+		 * This setting requires the cookie to be marked as "Secure" to be sent over HTTPS connections only.
+		 */
+		NONE("None");
+
+		private final String value;
+
+		/**
+		 * Constructor for initializing the enum with a specific name.
+		 *
+		 * @param value the name of the SameSite value
+		 */
+
+		SameSite(String value) {
+			this.value = value;
+		}
+
+		/**
+		 * Returns the {@code SameSite} enum instance corresponding to the given string suffix.
+		 * The input string is normalized by trimming and converting to uppercase before matching.
+		 *
+		 * @param suffix the string representation of the SameSite value
+		 * @return the corresponding {@code SameSite} enum instance, or {@link #NONE} if the input is null, empty, or does not match any enum value.
+		 */
+		static SameSite fromSuffix(String suffix) {
+			if (!StringUtils.hasText(suffix)) {
+				return LAX;
+			}
+
+			String normalizedInput = suffix.trim().toUpperCase();
+
+			for (SameSite sameSite : SameSite.values()) {
+				if (sameSite.value.equalsIgnoreCase(normalizedInput)) {
+					return sameSite;
+				}
+			}
+
+			return LAX;
+		}
+
+		/**
+		 * Returns the value of the SameSite setting.
+		 *
+		 * @return the value of this SameSite setting.
+		 */
+		public String getValue() {
+			return this.value;
+		}
+	}
 }

@@ -37,7 +37,7 @@ class ResponseCookieTests {
 		assertThat(ResponseCookie.from("id", "1fWa").build().toString()).isEqualTo("id=1fWa");
 
 		ResponseCookie cookie = ResponseCookie.from("id", "1fWa")
-				.domain("abc").path("/path").maxAge(0).httpOnly(true).partitioned(true).secure(true).sameSite("None")
+				.domain("abc").path("/path").maxAge(0).httpOnly(true).partitioned(true).secure(true).sameSite(ResponseCookie.SameSite.NONE)
 				.build();
 
 		assertThat(cookie.toString()).isEqualTo("id=1fWa; Path=/path; Domain=abc; " +
@@ -91,5 +91,47 @@ class ResponseCookieTests {
 					assertThat(cookie.getDomain()).isNull();
 				});
 
+	}
+
+	@Test
+	void basicWithSameSiteEnum() {
+		ResponseCookie cookieStrict = ResponseCookie.from("id", "1fWa")
+				.domain("abc").path("/path").maxAge(0).httpOnly(true).partitioned(true).secure(true).sameSite(ResponseCookie.SameSite.STRICT)
+				.build();
+
+		assertThat(cookieStrict.toString()).isEqualTo("id=1fWa; Path=/path; Domain=abc; " +
+				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
+				"Secure; HttpOnly; Partitioned; SameSite=Strict");
+
+		ResponseCookie cookieLax = ResponseCookie.from("id", "1fWa")
+				.domain("abc").path("/path").maxAge(0).httpOnly(true).partitioned(true).secure(true).sameSite(ResponseCookie.SameSite.LAX)
+				.build();
+
+		assertThat(cookieLax.toString()).isEqualTo("id=1fWa; Path=/path; Domain=abc; " +
+				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
+				"Secure; HttpOnly; Partitioned; SameSite=Lax");
+
+		ResponseCookie cookieNone = ResponseCookie.from("id", "1fWa")
+				.domain("abc").path("/path").maxAge(0).httpOnly(true).partitioned(true).secure(true).sameSite(ResponseCookie.SameSite.NONE)
+				.build();
+
+		assertThat(cookieNone.toString()).isEqualTo("id=1fWa; Path=/path; Domain=abc; " +
+				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
+				"Secure; HttpOnly; Partitioned; SameSite=None");
+	}
+
+	@Test
+	void fromSuffixValidInputs() {
+		Arrays.asList("strict", "STRICT", "Strict"," strict ", " STRICT ", "StRiCt", "sTrIcT")
+				.forEach(suffix -> assertThat(ResponseCookie.SameSite.fromSuffix(suffix)).isEqualTo(ResponseCookie.SameSite.STRICT));
+
+		Arrays.asList("lax", "LAX", "Lax", " lax ", " LAX ", "lAx", "LaX")
+				.forEach(suffix -> assertThat(ResponseCookie.SameSite.fromSuffix(suffix)).isEqualTo(ResponseCookie.SameSite.LAX));
+
+		Arrays.asList("none", "NONE", " None ", " NONE ", "nOnE", "NoNe")
+				.forEach(suffix -> assertThat(ResponseCookie.SameSite.fromSuffix(suffix)).isEqualTo(ResponseCookie.SameSite.NONE));
+
+		Arrays.asList("", null, "XXX")
+				.forEach(suffix -> assertThat(ResponseCookie.SameSite.fromSuffix(suffix)).isEqualTo(ResponseCookie.SameSite.LAX));
 	}
 }
