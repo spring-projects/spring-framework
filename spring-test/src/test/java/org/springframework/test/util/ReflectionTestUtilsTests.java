@@ -32,6 +32,7 @@ import org.springframework.test.util.subpackage.StaticMethods;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.invokeGetterMethod;
 import static org.springframework.test.util.ReflectionTestUtils.invokeMethod;
@@ -48,7 +49,7 @@ class ReflectionTestUtilsTests {
 
 	private static final Float PI = (float) 22 / 7;
 
-	private final Person person = new PersonEntity();
+	private final PersonEntity person = new PersonEntity();
 
 	private final Component component = new Component();
 
@@ -156,7 +157,7 @@ class ReflectionTestUtilsTests {
 		assertThat(person.getAge()).as("age (private field)").isEqualTo(42);
 		assertThat(person.getEyeColor()).as("eye color (package private field)").isEqualTo("blue");
 		assertThat(person.likesPets()).as("'likes pets' flag (package private boolean field)").isTrue();
-		assertThat(person.getFavoriteNumber()).as("'favorite number' (package field)").isEqualTo(PI);
+		assertThat(person.getFavoriteNumber()).as("'favorite number' (private field)").isEqualTo(PI);
 	}
 
 	private static void assertSetFieldAndGetFieldBehaviorForProxy(Person proxy, Person target) {
@@ -168,7 +169,7 @@ class ReflectionTestUtilsTests {
 		assertThat(target.getAge()).as("age (private field)").isEqualTo(42);
 		assertThat(target.getEyeColor()).as("eye color (package private field)").isEqualTo("blue");
 		assertThat(target.likesPets()).as("'likes pets' flag (package private boolean field)").isTrue();
-		assertThat(target.getFavoriteNumber()).as("'favorite number' (package field)").isEqualTo(PI);
+		assertThat(target.getFavoriteNumber()).as("'favorite number' (private field)").isEqualTo(PI);
 	}
 
 	@Test
@@ -188,7 +189,7 @@ class ReflectionTestUtilsTests {
 
 		assertThat(person.getName()).as("name (protected field)").isNull();
 		assertThat(person.getEyeColor()).as("eye color (package private field)").isNull();
-		assertThat(person.getFavoriteNumber()).as("'favorite number' (package field)").isNull();
+		assertThat(person.getFavoriteNumber()).as("'favorite number' (private field)").isNull();
 	}
 
 	@Test
@@ -295,6 +296,22 @@ class ReflectionTestUtilsTests {
 		assertThat(invokeGetterMethod(person, "favoriteNumber")).isEqualTo(PI);
 	}
 
+	@Test  // gh-33429
+	void invokingPrivateGetterMethodViaCglibProxyInvokesMethodOnUltimateTarget() {
+		this.person.setPrivateEye("I");
+		ProxyFactory pf = new ProxyFactory(this.person);
+		pf.setProxyTargetClass(true);
+		PersonEntity proxy = (PersonEntity) pf.getProxy();
+		assertThat(AopUtils.isCglibProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
+
+		assertSoftly(softly -> {
+			softly.assertThat(getField(this.person, "privateEye")).as("'privateEye' (private field in target)").isEqualTo("I");
+			softly.assertThat(getField(proxy, "privateEye")).as("'privateEye' (private field in proxy)").isEqualTo("I");
+			softly.assertThat(invokeGetterMethod(this.person, "privateEye")).as("'privateEye' (getter on target)").isEqualTo("I");
+			softly.assertThat(invokeGetterMethod(proxy, "privateEye")).as("'privateEye' (getter on proxy)").isEqualTo("I");
+		});
+	}
+
 	@Test
 	void invokeSetterMethodWithNullValuesForNonPrimitives() {
 		invokeSetterMethod(person, "name", null, String.class);
@@ -304,6 +321,41 @@ class ReflectionTestUtilsTests {
 		assertThat(person.getName()).as("name (private method)").isNull();
 		assertThat(person.getEyeColor()).as("eye color (package private method)").isNull();
 		assertThat(person.getFavoriteNumber()).as("'favorite number' (protected method for a Number)").isNull();
+	}
+
+	@Test  // gh-33429
+	void invokingPrivateSetterMethodViaCglibProxyInvokesMethodOnUltimateTarget() {
+		ProxyFactory pf = new ProxyFactory(this.person);
+		pf.setProxyTargetClass(true);
+		PersonEntity proxy = (PersonEntity) pf.getProxy();
+		assertThat(AopUtils.isCglibProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
+
+		// Set reflectively
+		invokeSetterMethod(proxy, "favoriteNumber", PI, Number.class);
+
+		assertSoftly(softly -> {
+			softly.assertThat(getField(proxy, "favoriteNumber")).as("'favorite number' (private field)").isEqualTo(PI);
+			softly.assertThat(proxy.getFavoriteNumber()).as("'favorite number' (getter on proxy)").isEqualTo(PI);
+			softly.assertThat(this.person.getFavoriteNumber()).as("'favorite number' (getter on target)").isEqualTo(PI);
+		});
+	}
+
+	@Test  // gh-33429
+	void invokingFinalSetterMethodViaCglibProxyInvokesMethodOnUltimateTarget() {
+		ProxyFactory pf = new ProxyFactory(this.person);
+		pf.setProxyTargetClass(true);
+		PersonEntity proxy = (PersonEntity) pf.getProxy();
+		assertThat(AopUtils.isCglibProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
+		assertThat(proxy.getPuzzle()).as("puzzle").isNull();
+
+		// Set reflectively
+		invokeSetterMethod(proxy, "puzzle", "enigma", String.class);
+
+		assertSoftly(softly -> {
+			softly.assertThat(getField(proxy, "puzzle")).as("'puzzle' (private field)").isEqualTo("enigma");
+			softly.assertThat(proxy.getPuzzle()).as("'puzzle' (getter on proxy)").isEqualTo("enigma");
+			softly.assertThat(this.person.getPuzzle()).as("'puzzle' (getter on target)").isEqualTo("enigma");
+		});
 	}
 
 	@Test
@@ -360,6 +412,23 @@ class ReflectionTestUtilsTests {
 		invokeMethod(component, "destroy");
 		assertThat(component.getNumber()).as("number").isNull();
 		assertThat(component.getText()).as("text").isNull();
+	}
+
+	@Test  // gh-33429
+	void invokingPrivateMethodViaCglibProxyInvokesMethodOnUltimateTarget() {
+		ProxyFactory pf = new ProxyFactory(this.person);
+		pf.setProxyTargetClass(true);
+		PersonEntity proxy = (PersonEntity) pf.getProxy();
+		assertThat(AopUtils.isCglibProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
+
+		// Set reflectively
+		invokeMethod(proxy, "setFavoriteNumber", PI);
+
+		assertSoftly(softly -> {
+			softly.assertThat(getField(proxy, "favoriteNumber")).as("'favorite number' (private field)").isEqualTo(PI);
+			softly.assertThat(proxy.getFavoriteNumber()).as("'favorite number' (getter on proxy)").isEqualTo(PI);
+			softly.assertThat(this.person.getFavoriteNumber()).as("'favorite number' (getter on target)").isEqualTo(PI);
+		});
 	}
 
 	@Test

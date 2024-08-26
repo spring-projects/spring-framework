@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -289,22 +290,14 @@ public abstract class ReflectionTestUtils {
 	/**
 	 * Invoke the setter method with the given {@code name} on the supplied
 	 * target object with the supplied {@code value}.
-	 * <p>This method traverses the class hierarchy in search of the desired
-	 * method. In addition, an attempt will be made to make non-{@code public}
-	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
-	 * {@code private}, and <em>package-private</em> setter methods.
-	 * <p>In addition, this method supports JavaBean-style <em>property</em>
-	 * names. For example, if you wish to set the {@code name} property on the
-	 * target object, you may pass either &quot;name&quot; or
-	 * &quot;setName&quot; as the method name.
+	 * <p>This method delegates to
+	 * {@link #invokeSetterMethod(Object, String, Object, Class)}, supplying
+	 * {@code null} for the parameter type.
 	 * @param target the target object on which to invoke the specified setter
 	 * method
 	 * @param name the name of the setter method to invoke or the corresponding
 	 * property name
 	 * @param value the value to provide to the setter method
-	 * @see ReflectionUtils#findMethod(Class, String, Class[])
-	 * @see ReflectionUtils#makeAccessible(Method)
-	 * @see ReflectionUtils#invokeMethod(Method, Object, Object[])
 	 */
 	public static void invokeSetterMethod(Object target, String name, Object value) {
 		invokeSetterMethod(target, name, value, null);
@@ -317,19 +310,24 @@ public abstract class ReflectionTestUtils {
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> setter methods.
-	 * <p>In addition, this method supports JavaBean-style <em>property</em>
-	 * names. For example, if you wish to set the {@code name} property on the
-	 * target object, you may pass either &quot;name&quot; or
-	 * &quot;setName&quot; as the method name.
+	 * <p>This method also supports JavaBean-style <em>property</em> names. For
+	 * example, if you wish to set the {@code name} property on the target object,
+	 * you may pass either {@code "name"} or {@code "setName"} as the method name.
+	 * <p>As of Spring Framework 6.2, if the supplied target object is a CGLIB
+	 * proxy which does not intercept the setter method, the proxy will be
+	 * {@linkplain AopTestUtils#getUltimateTargetObject unwrapped} allowing the
+	 * setter method to be invoked directly on the ultimate target of the proxy.
 	 * @param target the target object on which to invoke the specified setter
 	 * method
 	 * @param name the name of the setter method to invoke or the corresponding
 	 * property name
 	 * @param value the value to provide to the setter method
 	 * @param type the formal parameter type declared by the setter method
+	 * (may be {@code null} to indicate any type)
 	 * @see ReflectionUtils#findMethod(Class, String, Class[])
 	 * @see ReflectionUtils#makeAccessible(Method)
 	 * @see ReflectionUtils#invokeMethod(Method, Object, Object[])
+	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
 	public static void invokeSetterMethod(Object target, String name, @Nullable Object value, @Nullable Class<?> type) {
 		Assert.notNull(target, "Target object must not be null");
@@ -357,6 +355,14 @@ public abstract class ReflectionTestUtils {
 					safeToString(target), value));
 		}
 
+		if (springAopPresent) {
+			// If the target is a CGLIB proxy which does not intercept the method, invoke the
+			// method on the ultimate target.
+			if (isCglibProxyThatDoesNotInterceptMethod(target, method)) {
+				target = AopTestUtils.getUltimateTargetObject(target);
+			}
+		}
+
 		ReflectionUtils.makeAccessible(method);
 		ReflectionUtils.invokeMethod(method, target, value);
 	}
@@ -368,10 +374,13 @@ public abstract class ReflectionTestUtils {
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> getter methods.
-	 * <p>In addition, this method supports JavaBean-style <em>property</em>
-	 * names. For example, if you wish to get the {@code name} property on the
-	 * target object, you may pass either &quot;name&quot; or
-	 * &quot;getName&quot; as the method name.
+	 * <p>This method also supports JavaBean-style <em>property</em> names. For
+	 * example, if you wish to get the {@code name} property on the target object,
+	 * you may pass either {@code "name"} or {@code "getName"} as the method name.
+	 * <p>As of Spring Framework 6.2, if the supplied target object is a CGLIB
+	 * proxy which does not intercept the getter method, the proxy will be
+	 * {@linkplain AopTestUtils#getUltimateTargetObject unwrapped} allowing the
+	 * getter method to be invoked directly on the ultimate target of the proxy.
 	 * @param target the target object on which to invoke the specified getter
 	 * method
 	 * @param name the name of the getter method to invoke or the corresponding
@@ -380,6 +389,7 @@ public abstract class ReflectionTestUtils {
 	 * @see ReflectionUtils#findMethod(Class, String, Class[])
 	 * @see ReflectionUtils#makeAccessible(Method)
 	 * @see ReflectionUtils#invokeMethod(Method, Object, Object[])
+	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
 	@Nullable
 	public static Object invokeGetterMethod(Object target, String name) {
@@ -400,6 +410,14 @@ public abstract class ReflectionTestUtils {
 					"Could not find getter method '%s' on %s", getterMethodName, safeToString(target)));
 		}
 
+		if (springAopPresent) {
+			// If the target is a CGLIB proxy which does not intercept the method, invoke the
+			// method on the ultimate target.
+			if (isCglibProxyThatDoesNotInterceptMethod(target, method)) {
+				target = AopTestUtils.getUltimateTargetObject(target);
+			}
+		}
+
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Invoking getter method '%s' on %s", getterMethodName, safeToString(target)));
 		}
@@ -418,10 +436,6 @@ public abstract class ReflectionTestUtils {
 	 * @return the invocation result, if any
 	 * @see #invokeMethod(Class, String, Object...)
 	 * @see #invokeMethod(Object, Class, String, Object...)
-	 * @see MethodInvoker
-	 * @see ReflectionUtils#makeAccessible(Method)
-	 * @see ReflectionUtils#invokeMethod(Method, Object, Object[])
-	 * @see ReflectionUtils#handleReflectionException(Exception)
 	 */
 	@Nullable
 	public static <T> T invokeMethod(Object target, String name, Object... args) {
@@ -441,10 +455,6 @@ public abstract class ReflectionTestUtils {
 	 * @since 5.2
 	 * @see #invokeMethod(Object, String, Object...)
 	 * @see #invokeMethod(Object, Class, String, Object...)
-	 * @see MethodInvoker
-	 * @see ReflectionUtils#makeAccessible(Method)
-	 * @see ReflectionUtils#invokeMethod(Method, Object, Object[])
-	 * @see ReflectionUtils#handleReflectionException(Exception)
 	 */
 	@Nullable
 	public static <T> T invokeMethod(Class<?> targetClass, String name, Object... args) {
@@ -459,6 +469,10 @@ public abstract class ReflectionTestUtils {
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> methods.
+	 * <p>As of Spring Framework 6.2, if the supplied target object is a CGLIB
+	 * proxy which does not intercept the method, the proxy will be
+	 * {@linkplain AopTestUtils#getUltimateTargetObject unwrapped} allowing the
+	 * method to be invoked directly on the ultimate target of the proxy.
 	 * @param targetObject the target object on which to invoke the method; may
 	 * be {@code null} if the method is static
 	 * @param targetClass the target class on which to invoke the method; may
@@ -471,8 +485,8 @@ public abstract class ReflectionTestUtils {
 	 * @see #invokeMethod(Class, String, Object...)
 	 * @see MethodInvoker
 	 * @see ReflectionUtils#makeAccessible(Method)
-	 * @see ReflectionUtils#invokeMethod(Method, Object, Object[])
 	 * @see ReflectionUtils#handleReflectionException(Exception)
+	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
@@ -492,6 +506,15 @@ public abstract class ReflectionTestUtils {
 			methodInvoker.setTargetMethod(name);
 			methodInvoker.setArguments(args);
 			methodInvoker.prepare();
+
+			if (targetObject != null && springAopPresent) {
+				// If the target is a CGLIB proxy which does not intercept the method, invoke the
+				// method on the ultimate target.
+				if (isCglibProxyThatDoesNotInterceptMethod(targetObject, methodInvoker.getPreparedMethod())) {
+					targetObject = AopTestUtils.getUltimateTargetObject(targetObject);
+					methodInvoker.setTargetObject(targetObject);
+				}
+			}
 
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Invoking method '%s' on %s or %s with arguments %s", name,
@@ -518,6 +541,15 @@ public abstract class ReflectionTestUtils {
 
 	private static String safeToString(@Nullable Class<?> clazz) {
 		return String.format("target class [%s]", (clazz != null ? clazz.getName() : null));
+	}
+
+	/**
+	 * Determine if the supplied target object is a CBLIB proxy that does not intercept the
+	 * supplied method.
+	 * @since 6.2
+	 */
+	private static boolean isCglibProxyThatDoesNotInterceptMethod(Object target, Method method) {
+		return (AopUtils.isCglibProxy(target) && !method.getDeclaringClass().equals(target.getClass()));
 	}
 
 }
