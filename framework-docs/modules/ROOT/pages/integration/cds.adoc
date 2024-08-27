@@ -65,7 +65,7 @@ a "shared objects file" source, as shown in the following example:
 If CDS can't be enabled or if you have a large number of classes that are not loaded from the cache, make sure that
 the following conditions are fulfilled when creating and using the archive:
 
- - The very same JVM must used.
+ - The very same JVM must be used.
  - The classpath must be specified as a list of JARs, and avoid the usage of directories and `*` wildcard characters.
  - The timestamps of the JARs must be preserved.
  - When using the archive, the classpath must be the same than the one used to create the archive, in the same order.
