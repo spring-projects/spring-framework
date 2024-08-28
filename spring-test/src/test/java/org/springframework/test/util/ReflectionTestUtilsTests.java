@@ -65,50 +65,50 @@ class ReflectionTestUtilsTests {
 	@Test
 	void setFieldWithNullTargetObject() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> setField((Object) null, "id", 99L))
-			.withMessageStartingWith("Either targetObject or targetClass");
+				.isThrownBy(() -> setField((Object) null, "id", 99L))
+				.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	void getFieldWithNullTargetObject() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> getField((Object) null, "id"))
-			.withMessageStartingWith("Either targetObject or targetClass");
+				.isThrownBy(() -> getField((Object) null, "id"))
+				.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	void setFieldWithNullTargetClass() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> setField(null, "id", 99L))
-			.withMessageStartingWith("Either targetObject or targetClass");
+				.isThrownBy(() -> setField(null, "id", 99L))
+				.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	void getFieldWithNullTargetClass() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> getField(null, "id"))
-			.withMessageStartingWith("Either targetObject or targetClass");
+				.isThrownBy(() -> getField(null, "id"))
+				.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	void setFieldWithNullNameAndNullType() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> setField(person, null, 99L, null))
-			.withMessageStartingWith("Either name or type");
+				.isThrownBy(() -> setField(person, null, 99L, null))
+				.withMessageStartingWith("Either name or type");
 	}
 
 	@Test
 	void setFieldWithBogusName() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> setField(person, "bogus", 99L, long.class))
-			.withMessageStartingWith("Could not find field 'bogus'");
+				.isThrownBy(() -> setField(person, "bogus", 99L, long.class))
+				.withMessageStartingWith("Could not find field 'bogus'");
 	}
 
 	@Test
 	void setFieldWithWrongType() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> setField(person, "id", 99L, String.class))
-			.withMessageStartingWith("Could not find field");
+				.isThrownBy(() -> setField(person, "id", 99L, String.class))
+				.withMessageStartingWith("Could not find field");
 	}
 
 	@Test
@@ -434,29 +434,29 @@ class ReflectionTestUtilsTests {
 	@Test
 	void invokeInitMethodBeforeAutowiring() {
 		assertThatIllegalStateException()
-			.isThrownBy(() -> invokeMethod(component, "init"))
-			.withMessageStartingWith("number must not be null");
+				.isThrownBy(() -> invokeMethod(component, "init"))
+				.withMessageStartingWith("number must not be null");
 	}
 
 	@Test
 	void invokeMethodWithIncompatibleArgumentTypes() {
 		assertThatIllegalStateException()
-			.isThrownBy(() -> invokeMethod(component, "subtract", "foo", 2.0))
-			.withMessageStartingWith("Method not found");
+				.isThrownBy(() -> invokeMethod(component, "subtract", "foo", 2.0))
+				.withMessageStartingWith("Method not found");
 	}
 
 	@Test
 	void invokeMethodWithTooFewArguments() {
 		assertThatIllegalStateException()
-			.isThrownBy(() -> invokeMethod(component, "configure", 42))
-			.withMessageStartingWith("Method not found");
+				.isThrownBy(() -> invokeMethod(component, "configure", 42))
+				.withMessageStartingWith("Method not found");
 	}
 
 	@Test
 	void invokeMethodWithTooManyArguments() {
 		assertThatIllegalStateException()
-			.isThrownBy(() -> invokeMethod(component, "configure", 42, "enigma", "baz", "quux"))
-			.withMessageStartingWith("Method not found");
+				.isThrownBy(() -> invokeMethod(component, "configure", 42, "enigma", "baz", "quux"))
+				.withMessageStartingWith("Method not found");
 	}
 
 	@Test // SPR-14363
@@ -469,7 +469,7 @@ class ReflectionTestUtilsTests {
 	void setFieldOnLegacyEntityWithSideEffectsInToString() {
 		String testCollaborator = "test collaborator";
 		setField(entity, "collaborator", testCollaborator, Object.class);
-		assertThat(entity.toString()).contains(testCollaborator);
+		assertThat(entity).asString().contains(testCollaborator);
 	}
 
 	@Test // SPR-14363
@@ -489,28 +489,28 @@ class ReflectionTestUtilsTests {
 	void invokeSetterMethodOnLegacyEntityWithSideEffectsInToString() {
 		String testCollaborator = "test collaborator";
 		invokeSetterMethod(entity, "collaborator", testCollaborator);
-		assertThat(entity.toString()).contains(testCollaborator);
+		assertThat(entity).asString().contains(testCollaborator);
 	}
 
 	@Test
 	void invokeStaticMethodWithNullTargetClass() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> invokeMethod(null, null))
-			.withMessage("Target class must not be null");
+				.isThrownBy(() -> invokeMethod(null, null))
+				.withMessage("Target class must not be null");
 	}
 
 	@Test
 	void invokeStaticMethodWithNullMethodName() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> invokeMethod(getClass(), null))
-			.withMessage("Method name must not be empty");
+				.isThrownBy(() -> invokeMethod(getClass(), null))
+				.withMessage("Method name must not be empty");
 	}
 
 	@Test
 	void invokeStaticMethodWithEmptyMethodName() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> invokeMethod(getClass(), "  "))
-			.withMessage("Method name must not be empty");
+				.isThrownBy(() -> invokeMethod(getClass(), "  "))
+				.withMessage("Method name must not be empty");
 	}
 
 	@Test
@@ -550,8 +550,8 @@ class ReflectionTestUtilsTests {
 	@Test
 	void invokeStaticMethodWithNullTargetObjectAndNullTargetClass() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> invokeMethod(null, (Class<?>) null, "id"))
-			.withMessage("Either 'targetObject' or 'targetClass' for the method must be specified");
+				.isThrownBy(() -> invokeMethod(null, (Class<?>) null, "id"))
+				.withMessage("Either 'targetObject' or 'targetClass' for the method must be specified");
 	}
 
 }
