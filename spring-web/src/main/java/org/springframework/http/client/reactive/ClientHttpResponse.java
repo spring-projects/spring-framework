@@ -51,7 +51,7 @@ public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 	 * @return the HTTP status as an integer value
 	 * @since 5.0.6
 	 * @see #getStatusCode()
-	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
+	 * @deprecated in favor of {@link #getStatusCode()}, for removal in 7.0
 	 */
 	@Deprecated(since = "6.0", forRemoval = true)
 	default int getRawStatusCode() {

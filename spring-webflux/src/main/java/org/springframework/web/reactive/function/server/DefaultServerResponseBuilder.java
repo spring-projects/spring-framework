@@ -323,6 +323,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		@Override
 		@Deprecated
+		@SuppressWarnings("removal")
 		public int rawStatusCode() {
 			return this.statusCode.value();
 		}

@@ -125,7 +125,7 @@ public class RestClientResponseException extends RestClientException {
 
 	/**
 	 * Return the raw HTTP status code value.
-	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
+	 * @deprecated in favor of {@link #getStatusCode()}, for removal in 7.0
 	 */
 	@Deprecated(since = "6.0")
 	public int getRawStatusCode() {

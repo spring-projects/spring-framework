@@ -179,7 +179,7 @@ public class ExchangeResult {
 	/**
 	 * Return the HTTP status code as an integer.
 	 * @since 5.1.10
-	 * @deprecated as of 6.0, in favor of {@link #getStatus()}
+	 * @deprecated in favor of {@link #getStatus()}, for removal in 7.0
 	 */
 	@Deprecated(since = "6.0", forRemoval = true)
 	public int getRawStatusCode() {

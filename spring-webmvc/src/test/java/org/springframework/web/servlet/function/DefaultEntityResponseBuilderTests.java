@@ -66,7 +66,7 @@ class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	void status() {
 		String body = "foo";
 		EntityResponse<String> result =

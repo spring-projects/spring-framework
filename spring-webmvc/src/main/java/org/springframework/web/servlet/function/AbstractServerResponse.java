@@ -67,6 +67,7 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 
 	@Override
 	@Deprecated
+	@SuppressWarnings("removal")
 	public int rawStatusCode() {
 		return this.statusCode.value();
 	}
