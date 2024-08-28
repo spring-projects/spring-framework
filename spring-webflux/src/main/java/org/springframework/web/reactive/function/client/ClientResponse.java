@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,17 @@ public interface ClientResponse {
 	 * @return the HTTP status as an HttpStatusCode value (never {@code null})
 	 */
 	HttpStatusCode statusCode();
+
+	/**
+	 * Return the raw status code of this response.
+	 * @return the HTTP status as an integer value
+	 * @since 5.1
+	 * @deprecated in favor of {@link #statusCode()}, for removal in 7.0
+	 */
+	@Deprecated(since = "6.0", forRemoval = true)
+	default int rawStatusCode() {
+		return statusCode().value();
+	}
 
 	/**
 	 * Return the headers of this response.

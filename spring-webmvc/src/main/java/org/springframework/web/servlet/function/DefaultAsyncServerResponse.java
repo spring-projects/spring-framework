@@ -85,6 +85,7 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 
 	@Override
 	@Deprecated
+	@SuppressWarnings("removal")
 	public int rawStatusCode() {
 		return delegate(ServerResponse::rawStatusCode);
 	}

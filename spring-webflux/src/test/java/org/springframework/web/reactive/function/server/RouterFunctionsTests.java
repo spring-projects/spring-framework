@@ -223,7 +223,7 @@ class RouterFunctionsTests {
 					public HttpStatus statusCode() {
 						return HttpStatus.OK;
 					}
-					@SuppressWarnings("deprecation")
+					@SuppressWarnings("removal")
 					@Override
 					public int rawStatusCode() {
 						return 200;
@@ -262,7 +262,7 @@ class RouterFunctionsTests {
 					public HttpStatus statusCode() {
 						return HttpStatus.OK;
 					}
-					@SuppressWarnings("deprecation")
+					@SuppressWarnings("removal")
 					@Override
 					public int rawStatusCode() {
 						return 200;

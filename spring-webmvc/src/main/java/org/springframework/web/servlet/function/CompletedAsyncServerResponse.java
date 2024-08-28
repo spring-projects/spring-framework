@@ -58,6 +58,7 @@ final class CompletedAsyncServerResponse implements AsyncServerResponse {
 
 	@Override
 	@Deprecated
+	@SuppressWarnings("removal")
 	public int rawStatusCode() {
 		return this.serverResponse.rawStatusCode();
 	}

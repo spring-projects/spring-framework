@@ -89,6 +89,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 
 	@Override
 	@Deprecated
+	@SuppressWarnings("removal")
 	public Integer getRawStatusCode() {
 		Integer status = super.getRawStatusCode();
 		return (status != null ? status : this.exchange.getStatusCode());

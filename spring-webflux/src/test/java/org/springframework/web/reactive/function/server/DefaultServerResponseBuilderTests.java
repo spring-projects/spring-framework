@@ -80,7 +80,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	void status() {
 		Mono<ServerResponse> result = ServerResponse.status(HttpStatus.CREATED).build();
 		StepVerifier.create(result)

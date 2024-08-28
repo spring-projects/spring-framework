@@ -84,7 +84,7 @@ class DefaultEntityResponseBuilderTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	void status() {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).status(HttpStatus.CREATED).build();

@@ -70,9 +70,9 @@ public interface ServerResponse {
 	 * Return the status code of this response as integer.
 	 * @return the status as an integer
 	 * @since 5.2
-	 * @deprecated as of 6.0, in favor of {@link #statusCode()}
+	 * @deprecated in favor of {@link #statusCode()}, for removal in 7.0
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	int rawStatusCode();
 
 	/**

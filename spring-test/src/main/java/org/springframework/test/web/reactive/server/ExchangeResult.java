@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,6 +174,16 @@ public class ExchangeResult {
 	 */
 	public HttpStatusCode getStatus() {
 		return this.response.getStatusCode();
+	}
+
+	/**
+	 * Return the HTTP status code as an integer.
+	 * @since 5.1.10
+	 * @deprecated in favor of {@link #getStatus()}, for removal in 7.0
+	 */
+	@Deprecated(since = "6.0", forRemoval = true)
+	public int getRawStatusCode() {
+		return getStatus().value();
 	}
 
 	/**

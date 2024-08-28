@@ -43,6 +43,19 @@ public interface ClientHttpResponse extends HttpInputMessage, Closeable {
 	HttpStatusCode getStatusCode() throws IOException;
 
 	/**
+	 * Get the HTTP status code as an integer.
+	 * @return the HTTP status as an integer value
+	 * @throws IOException in case of I/O errors
+	 * @since 3.1.1
+	 * @see #getStatusCode()
+	 * @deprecated in favor of {@link #getStatusCode()}, for removal in 7.0
+	 */
+	@Deprecated(since = "6.0", forRemoval = true)
+	default int getRawStatusCode() throws IOException {
+		return getStatusCode().value();
+	}
+
+	/**
 	 * Get the HTTP status text of the response.
 	 * @return the HTTP status text
 	 * @throws IOException in case of I/O errors

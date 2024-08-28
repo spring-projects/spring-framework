@@ -55,7 +55,7 @@ class DefaultServerResponseBuilderTests {
 	static final ServerResponse.Context EMPTY_CONTEXT = Collections::emptyList;
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	void status() {
 		ServerResponse response = ServerResponse.status(HttpStatus.CREATED).build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED);

@@ -824,7 +824,7 @@ public interface WebClient {
 		 *     .retrieve()
 		 *     .bodyToMono(Account.class)
 		 *     .onErrorResume(WebClientResponseException.class,
-		 *          ex -&gt; ex.getRawStatusCode() == 404 ? Mono.empty() : Mono.error(ex));
+		 *          ex -&gt; ex.getStatusCode().value() == 404 ? Mono.empty() : Mono.error(ex));
 		 * </pre>
 		 * @param statusPredicate to match responses with
 		 * @param exceptionFunction to map the response to an error signal
