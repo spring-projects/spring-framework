@@ -599,14 +599,14 @@ options for using `@Configuration` classes in this kind of "`XML-centric`" situa
 [[beans-java-combining-xml-centric-declare-as-bean]]
 ==== Declaring `@Configuration` classes as plain Spring `<bean/>` elements
 
-Remember that `@Configuration` classes are ultimately bean definitions in the
-container. In this series examples, we create a `@Configuration` class named `AppConfig` and
+Remember that `@Configuration` classes are ultimately bean definitions in the container.
+In this series of examples, we create a `@Configuration` class named `AppConfig` and
 include it within `system-test-config.xml` as a `<bean/>` definition. Because
 `<context:annotation-config/>` is switched on, the container recognizes the
 `@Configuration` annotation and processes the `@Bean` methods declared in `AppConfig`
 properly.
 
-The following example shows an ordinary configuration class in Java:
+The following example shows the `AppConfig` configuration class in Java and Kotlin:
 
 [tabs]
 ======
@@ -660,6 +660,7 @@ The following example shows part of a sample `system-test-config.xml` file:
 	<beans>
 		<!-- enable processing of annotations such as @Autowired and @Configuration -->
 		<context:annotation-config/>
+
 		<context:property-placeholder location="classpath:/com/acme/jdbc.properties"/>
 
 		<bean class="com.acme.AppConfig"/>
@@ -706,8 +707,8 @@ Kotlin::
 ----
 ======
 
-NOTE: In `system-test-config.xml` file, the `AppConfig` `<bean/>` does not declare an `id`
-element. While it would be acceptable to do so, it is unnecessary, given that no other bean
+NOTE: In the `system-test-config.xml` file, the `AppConfig` `<bean/>` does not declare an `id`
+attribute. While it would be acceptable to do so, it is unnecessary, given that no other bean
 ever refers to it, and it is unlikely to be explicitly fetched from the container by name.
 Similarly, the `DataSource` bean is only ever autowired by type, so an explicit bean `id`
 is not strictly required.
@@ -718,8 +719,8 @@ is not strictly required.
 
 Because `@Configuration` is meta-annotated with `@Component`, `@Configuration`-annotated
 classes are automatically candidates for component scanning. Using the same scenario as
-described in the previous example, we can redefine `system-test-config.xml` to take advantage of component-scanning.
-Note that, in this case, we need not explicitly declare
+described in the previous example, we can redefine `system-test-config.xml` to take
+advantage of component-scanning. Note that, in this case, we need not explicitly declare
 `<context:annotation-config/>`, because `<context:component-scan/>` enables the same
 functionality.
 
@@ -730,6 +731,7 @@ The following example shows the modified `system-test-config.xml` file:
 	<beans>
 		<!-- picks up and registers AppConfig as a bean definition -->
 		<context:component-scan base-package="com.acme"/>
+
 		<context:property-placeholder location="classpath:/com/acme/jdbc.properties"/>
 
 		<bean class="org.springframework.jdbc.datasource.DriverManagerDataSource">
@@ -744,13 +746,12 @@ The following example shows the modified `system-test-config.xml` file:
 === `@Configuration` Class-centric Use of XML with `@ImportResource`
 
 In applications where `@Configuration` classes are the primary mechanism for configuring
-the container, it is still likely necessary to use at least some XML. In these
-scenarios, you can use `@ImportResource` and define only as much XML as you need. Doing
-so achieves a "`Java-centric`" approach to configuring the container and keeps XML to a
-bare minimum. The following example (which includes a configuration class, an XML file
-that defines a bean, a properties file, and the `main` class) shows how to use
-the `@ImportResource` annotation to achieve "`Java-centric`" configuration that uses XML
-as needed:
+the container, it may still be necessary to use at least some XML. In such scenarios, you
+can use `@ImportResource` and define only as much XML as you need. Doing so achieves a
+"`Java-centric`" approach to configuring the container and keeps XML to a bare minimum.
+The following example (which includes a configuration class, an XML file that defines a
+bean, a properties file, and the `main()` method) shows how to use the `@ImportResource`
+annotation to achieve "`Java-centric`" configuration that uses XML as needed:
 
 [tabs]
 ======
@@ -803,17 +804,17 @@ Kotlin::
 ----
 ======
 
+.properties-config.xml
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	properties-config.xml
 	<beans>
 		<context:property-placeholder location="classpath:/com/acme/jdbc.properties"/>
 	</beans>
 ----
 
+.jdbc.properties
 [literal,subs="verbatim,quotes"]
 ----
-jdbc.properties
 jdbc.url=jdbc:hsqldb:hsql://localhost/xdb
 jdbc.username=sa
 jdbc.password=
@@ -845,6 +846,4 @@ Kotlin::
 	}
 ----
 ======
-
-
 
