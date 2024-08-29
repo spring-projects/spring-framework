@@ -627,7 +627,7 @@ Java::
 
 		@Bean
 		public TransferService transferService() {
-			return new TransferService(accountRepository());
+			return new TransferServiceImpl(accountRepository());
 		}
 	}
 ----
@@ -776,6 +776,17 @@ Java::
 		public DataSource dataSource() {
 			return new DriverManagerDataSource(url, username, password);
 		}
+
+		@Bean
+		public AccountRepository accountRepository(DataSource dataSource) {
+			return new JdbcAccountRepository(dataSource);
+		}
+
+		@Bean
+		public TransferService transferService(AccountRepository accountRepository) {
+			return new TransferServiceImpl(accountRepository);
+		}
+
 	}
 ----
 
@@ -800,6 +811,17 @@ Kotlin::
 		fun dataSource(): DataSource {
 			return DriverManagerDataSource(url, username, password)
 		}
+
+		@Bean
+		fun accountRepository(dataSource: DataSource): AccountRepository {
+			return JdbcAccountRepository(dataSource)
+		}
+
+		@Bean
+		fun transferService(accountRepository: AccountRepository): TransferService {
+			return TransferServiceImpl(accountRepository)
+		}
+
 	}
 ----
 ======
