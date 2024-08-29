@@ -331,8 +331,10 @@ TIP: Constructor injection in `@Configuration` classes is only supported as of S
 Framework 4.3. Note also that there is no need to specify `@Autowired` if the target
 bean defines only one constructor.
 
-.[[beans-java-injecting-imported-beans-fq]]Fully-qualifying imported beans for ease of navigation
---
+[discrete]
+[[beans-java-injecting-imported-beans-fq]]
+==== Fully-qualifying imported beans for ease of navigation
+
 In the preceding scenario, using `@Autowired` works well and provides the desired
 modularity, but determining exactly where the autowired bean definitions are declared is
 still somewhat ambiguous. For example, as a developer looking at `ServiceConfig`, how do
@@ -501,7 +503,6 @@ Now `ServiceConfig` is loosely coupled with respect to the concrete
 get a type hierarchy of `RepositoryConfig` implementations. In this
 way, navigating `@Configuration` classes and their dependencies becomes no different
 than the usual process of navigating interface-based code.
---
 
 TIP: If you want to influence the startup creation order of certain beans, consider
 declaring some of them as `@Lazy` (for creation on first access instead of on startup)
@@ -594,8 +595,10 @@ that uses Spring XML, it is easier to create `@Configuration` classes on an
 as-needed basis and include them from the existing XML files. Later in this section, we cover the
 options for using `@Configuration` classes in this kind of "`XML-centric`" situation.
 
-.[[beans-java-combining-xml-centric-declare-as-bean]]Declaring `@Configuration` classes as plain Spring `<bean/>` elements
---
+[discrete]
+[[beans-java-combining-xml-centric-declare-as-bean]]
+==== Declaring `@Configuration` classes as plain Spring `<bean/>` elements
+
 Remember that `@Configuration` classes are ultimately bean definitions in the
 container. In this series examples, we create a `@Configuration` class named `AppConfig` and
 include it within `system-test-config.xml` as a `<bean/>` definition. Because
@@ -703,16 +706,16 @@ Kotlin::
 ----
 ======
 
-
 NOTE: In `system-test-config.xml` file, the `AppConfig` `<bean/>` does not declare an `id`
 element. While it would be acceptable to do so, it is unnecessary, given that no other bean
 ever refers to it, and it is unlikely to be explicitly fetched from the container by name.
 Similarly, the `DataSource` bean is only ever autowired by type, so an explicit bean `id`
 is not strictly required.
---
 
-.[[beans-java-combining-xml-centric-component-scan]] Using <context:component-scan/> to pick up `@Configuration` classes
---
+[discrete]
+[[beans-java-combining-xml-centric-component-scan]]
+==== Using <context:component-scan/> to pick up `@Configuration` classes
+
 Because `@Configuration` is meta-annotated with `@Component`, `@Configuration`-annotated
 classes are automatically candidates for component scanning. Using the same scenario as
 described in the previous example, we can redefine `system-test-config.xml` to take advantage of component-scanning.
@@ -736,7 +739,6 @@ The following example shows the modified `system-test-config.xml` file:
 		</bean>
 	</beans>
 ----
---
 
 [[beans-java-combining-java-centric]]
 === `@Configuration` Class-centric Use of XML with `@ImportResource`
