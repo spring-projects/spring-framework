@@ -541,7 +541,7 @@ Java::
 		MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(Profile.class.getName());
 		if (attrs != null) {
 			for (Object value : attrs.get("value")) {
-				if (context.getEnvironment().acceptsProfiles(((String[]) value))) {
+				if (context.getEnvironment().matchesProfiles((String[]) value)) {
 					return true;
 				}
 			}
@@ -560,7 +560,7 @@ Kotlin::
 		val attrs = metadata.getAllAnnotationAttributes(Profile::class.java.name)
 		if (attrs != null) {
 			for (value in attrs["value"]!!) {
-				if (context.environment.acceptsProfiles(Profiles.of(*value as Array<String>))) {
+				if (context.environment.matchesProfiles(*value as Array<String>)) {
 					return true
 				}
 			}
