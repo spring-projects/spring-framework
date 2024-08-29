@@ -44,7 +44,7 @@ import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.lang.Nullable;
 
 /**
- * Adapt an Eclipse Jetty {@link Response} to a {@link org.springframework.http.server.ServerHttpResponse}.
+ * Adapt an Eclipse Jetty {@link Response} to an {@link org.springframework.http.server.ServerHttpResponse}.
  *
  * @author Greg Wilkins
  * @author Lachlan Roberts
@@ -53,6 +53,7 @@ import org.springframework.lang.Nullable;
 class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements ZeroCopyHttpOutputMessage {
 
 	private final Response response;
+
 
 	public JettyCoreServerHttpResponse(Response response, JettyDataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory, new HttpHeaders(new JettyHeadersAdapter(response.getHeaders())));
@@ -76,6 +77,7 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 			}
 		}
 	}
+
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> body) {
@@ -158,16 +160,16 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 		return (T) this.response;
 	}
 
+
 	private static class ResponseHttpCookie implements org.eclipse.jetty.http.HttpCookie {
+
 		private final ResponseCookie responseCookie;
 
-		public ResponseHttpCookie(ResponseCookie responseCookie) {
+
+		ResponseHttpCookie(ResponseCookie responseCookie) {
 			this.responseCookie = responseCookie;
 		}
 
-		public ResponseCookie getResponseCookie() {
-			return this.responseCookie;
-		}
 
 		@Override
 		public String getName() {
@@ -233,5 +235,7 @@ class JettyCoreServerHttpResponse extends AbstractServerHttpResponse implements 
 		public Map<String, String> getAttributes() {
 			return Collections.emptyMap();
 		}
+
 	}
+
 }
