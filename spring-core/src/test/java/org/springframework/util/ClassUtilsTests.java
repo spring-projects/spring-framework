@@ -998,7 +998,6 @@ class ClassUtilsTests {
 	private interface MethodsInterface {
 
 		default void defaultPrint() {
-
 		}
 
 		void print(String messages);
@@ -1009,15 +1008,12 @@ class ClassUtilsTests {
 
 		@Override
 		public void print(String message) {
-
 		}
 
 		protected void protectedPrint() {
-
 		}
 
 		void packageAccessiblePrint() {
-
 		}
 	}
 
@@ -1026,14 +1022,11 @@ class ClassUtilsTests {
 
 		@Override
 		protected void protectedPrint() {
-
 		}
 
 		@Override
 		public void packageAccessiblePrint() {
-
 		}
-
 	}
 
 	private interface PrivateInterface {
