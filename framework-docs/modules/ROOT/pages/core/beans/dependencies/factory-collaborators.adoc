@@ -162,7 +162,7 @@ Kotlin::
 .[[beans-factory-ctor-arguments-type]]Constructor argument type matching
 --
 In the preceding scenario, the container can use type matching with simple types if
-you explicitly specify the type of the constructor argument by using the `type` attribute,
+you explicitly specify the type of the constructor argument via the `type` attribute,
 as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]

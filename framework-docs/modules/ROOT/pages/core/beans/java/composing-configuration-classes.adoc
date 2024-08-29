@@ -116,7 +116,7 @@ the configuration model, in that references to other beans must be valid Java sy
 Fortunately, solving this problem is simple. As
 xref:core/beans/java/bean-annotation.adoc#beans-java-dependencies[we already discussed],
 a `@Bean` method can have an arbitrary number of parameters that describe the bean
-dependencies. Consider the following more real-world scenario with several `@Configuration`
+dependencies. Consider the following more realistic scenario with several `@Configuration`
 classes, each depending on beans declared in the others:
 
 [tabs]
