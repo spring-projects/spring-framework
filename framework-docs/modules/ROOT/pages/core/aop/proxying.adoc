@@ -193,9 +193,8 @@ in the advice associated with a method invocation getting a chance to run.
 Okay, so what is to be done about this? The best approach (the term "best" is used
 loosely here) is to refactor your code such that the self-invocation does not happen.
 This does entail some work on your part, but it is the best, least-invasive approach.
-The next approach is absolutely horrendous, and we hesitate to point it out, precisely
-because it is so horrendous. You can (painful as it is to us) totally tie the logic
-within your class to Spring AOP, as the following example shows:
+The next approach is a little counter-intuitive, you can inject self by field or method
+(constructor injection is not supported), as the following example shows:
 
 [tabs]
 ======
@@ -205,9 +204,12 @@ Java::
 ----
 	public class SimplePojo implements Pojo {
 
+	    @Autowired
+        private SimplePojo self;
+
 		public void foo() {
-			// this works, but... gah!
-			((Pojo) AopContext.currentProxy()).bar();
+			// this works
+			self.bar();
 		}
 
 		public void bar() {
@@ -222,9 +224,12 @@ Kotlin::
 ----
 	class SimplePojo : Pojo {
 
+		@Autowired
+		private lateinit var self: SimplePojo
+
 		fun foo() {
-			// this works, but... gah!
-			(AopContext.currentProxy() as Pojo).bar()
+			// this works
+			self.bar()
 		}
 
 		fun bar() {
