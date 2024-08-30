@@ -6,22 +6,26 @@ target object. JDK dynamic proxies are built into the JDK, whereas CGLIB is a co
 open-source class definition library (repackaged into `spring-core`).
 
 If the target object to be proxied implements at least one interface, a JDK dynamic
-proxy is used. All of the interfaces implemented by the target type are proxied.
-If the target object does not implement any interfaces, a CGLIB proxy is created.
+proxy is used, and all of the interfaces implemented by the target type are proxied.
+If the target object does not implement any interfaces, a CGLIB proxy is created which
+is a runtime-generated subclass of the target type.
 
 If you want to force the use of CGLIB proxying (for example, to proxy every method
 defined for the target object, not only those implemented by its interfaces),
 you can do so. However, you should consider the following issues:
 
-* With CGLIB, `final` methods cannot be advised, as they cannot be overridden in
-  runtime-generated subclasses.
-* As of Spring 4.0, the constructor of your proxied object is NOT called twice anymore,
-  since the CGLIB proxy instance is created through Objenesis. Only if your JVM does
-  not allow for constructor bypassing, you might see double invocations and
-  corresponding debug log entries from Spring's AOP support.
-* Your CGLIB proxy usage may face limitations with the JDK 9+ platform module system.
-  As a typical case, you cannot create a CGLIB proxy for a class from the `java.lang`
-  package when deploying on the module path. Such cases require a JVM bootstrap flag
+* `final` classes cannot be proxied, because they cannot be extended.
+* `final` methods cannot be advised, because they cannot be overridden.
+* `private` methods cannot be advised, because they cannot be overridden.
+* Methods that are not visible – for example, package-private methods in a parent class
+  from a different package – cannot be advised because they are effectively private.
+* The constructor of your proxied object will not be called twice, since the CGLIB proxy
+  instance is created through Objenesis. However, if your JVM does not allow for
+  constructor bypassing, you might see double invocations and corresponding debug log
+  entries from Spring's AOP support.
+* Your CGLIB proxy usage may face limitations with the Java Module System. As a typical
+  case, you cannot create a CGLIB proxy for a class from the `java.lang` package when
+  deploying on the module path. Such cases require a JVM bootstrap flag
   `--add-opens=java.base/java.lang=ALL-UNNAMED` which is not available for modules.
 
 To force the use of CGLIB proxies, set the value of the `proxy-target-class` attribute
@@ -65,9 +69,8 @@ Spring AOP is proxy-based. It is vitally important that you grasp the semantics 
 what that last statement actually means before you write your own aspects or use any of
 the Spring AOP-based aspects supplied with the Spring Framework.
 
-Consider first the scenario where you have a plain-vanilla, un-proxied,
-nothing-special-about-it, straight object reference, as the following
-code snippet shows:
+Consider first the scenario where you have a plain-vanilla, un-proxied object reference,
+as the following code snippet shows:
 
 [tabs]
 ======
@@ -187,15 +190,24 @@ the interceptors (advice) that are relevant to that particular method call. Howe
 once the call has finally reached the target object (the `SimplePojo` reference in
 this case), any method calls that it may make on itself, such as `this.bar()` or
 `this.foo()`, are going to be invoked against the `this` reference, and not the proxy.
-This has important implications. It means that self-invocation is not going to result
-in the advice associated with a method invocation getting a chance to run.
+This has important implications. It means that self invocation is not going to result
+in the advice associated with a method invocation getting a chance to run. In other words,
+self invocation via an explicit or implicit `this` reference will bypass the advice.
 
-Okay, so what is to be done about this? The best approach (the term "best" is used
-loosely here) is to refactor your code such that the self-invocation does not happen.
-This does entail some work on your part, but it is the best, least-invasive approach.
-The next approach is absolutely horrendous, and we hesitate to point it out, precisely
-because it is so horrendous. You can (painful as it is to us) totally tie the logic
-within your class to Spring AOP, as the following example shows:
+To address that, you have the following options.
+
+Avoid self invocation ::
+  The best approach (the term "best" is used loosely here) is to refactor your code such
+  that the self invocation does not happen. This does entail some work on your part, but
+  it is the best, least-invasive approach.
+Inject a self reference ::
+  An alternative approach is to make use of
+  xref:core/beans/annotation-config/autowired.adoc#beans-autowired-annotation-self-injection[self injection],
+  and invoke methods on the proxy via the self reference instead of via `this`.
+Use `AopContext.currentProxy()` ::
+  This last approach is highly discouraged, and we hesitate to point it out, in favor of
+  the previous options. However, as a last resort you can choose to tie the logic within
+  your class to Spring AOP, as the following example shows.
 
 [tabs]
 ======
@@ -206,7 +218,7 @@ Java::
 	public class SimplePojo implements Pojo {
 
 		public void foo() {
-			// this works, but... gah!
+			// This works, but it should be avoided if possible.
 			((Pojo) AopContext.currentProxy()).bar();
 		}
 
@@ -223,7 +235,7 @@ Kotlin::
 	class SimplePojo : Pojo {
 
 		fun foo() {
-			// this works, but... gah!
+			// This works, but it should be avoided if possible.
 			(AopContext.currentProxy() as Pojo).bar()
 		}
 
@@ -234,10 +246,10 @@ Kotlin::
 ----
 ======
 
-This totally couples your code to Spring AOP, and it makes the class itself aware of
-the fact that it is being used in an AOP context, which flies in the face of AOP. It
-also requires some additional configuration when the proxy is being created, as the
-following example shows:
+The use of `AopContext.currentProxy()` totally couples your code to Spring AOP, and it
+makes the class itself aware of the fact that it is being used in an AOP context, which
+reduces some of the benefits of AOP. It also requires that the `ProxyFactory` is
+configured to expose the proxy, as the following example shows:
 
 [tabs]
 ======
@@ -277,9 +289,6 @@ Kotlin::
 ----
 ======
 
-Finally, it must be noted that AspectJ does not have this self-invocation issue because
-it is not a proxy-based AOP framework.
-
-
-
+NOTE: AspectJ compile-time weaving and load-time weaving do not have this self-invocation
+issue because they apply advice within the bytecode instead of via a proxy.
 
