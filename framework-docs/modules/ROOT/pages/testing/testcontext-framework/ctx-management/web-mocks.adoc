@@ -20,7 +20,7 @@ managed per test method by the `ServletTestExecutionListener`.
 
 [tabs]
 ======
-Injecting mocks::
+Java::
 +
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
