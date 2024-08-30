@@ -179,27 +179,10 @@ is preserved in `@Bean` return type signatures or collection inheritance hierarc
 In this case, you can use qualifier values to select among same-typed collections,
 as outlined in the previous paragraph.
 
-`@Autowired` also considers self references for injection (that is, references
-back to the bean that is currently injected). Note that self injection is a fallback.
-Regular dependencies on other components always have precedence. In that sense, self
-references do not participate in regular candidate selection and are therefore in
-particular never primary. On the contrary, they always end up as lowest precedence.
-In practice, you should use self references as a last resort only (for example, for
-calling other methods on the same instance through the bean's transactional proxy).
-Consider factoring out the affected methods to a separate delegate bean in such a scenario.
-Alternatively, you can use `@Resource`, which may obtain a proxy back to the current bean
-by its unique name.
-
-[NOTE]
-====
-Trying to inject the results from `@Bean` methods on the same configuration class is
-effectively a self-reference scenario as well. Either lazily resolve such references
-in the method signature where it is actually needed (as opposed to an autowired field
-in the configuration class) or declare the affected `@Bean` methods as `static`,
-decoupling them from the containing configuration class instance and its lifecycle.
-Otherwise, such beans are only considered in the fallback phase, with matching beans
-on other configuration classes selected as primary candidates instead (if available).
-====
+`@Autowired` also considers self references for injection (that is, references back to
+the bean that is currently injected). See
+xref:core/beans/annotation-config/autowired.adoc#beans-autowired-annotation-self-injection[Self Injection]
+for details.
 
 `@Autowired` applies to fields, constructors, and multi-argument methods, allowing for
 narrowing through qualifier annotations at the parameter level. In contrast, `@Resource`
