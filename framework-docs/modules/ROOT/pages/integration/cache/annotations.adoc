@@ -332,7 +332,7 @@ metadata, such as the argument names. The following table describes the items ma
 available to the context so that you can use them for key and conditional computations:
 
 [[cache-spel-context-tbl]]
-.Cache SpEL available metadata
+.Cache metadata available in SpEL expressions
 |===
 | Name| Location| Description| Example
 
@@ -358,7 +358,7 @@ available to the context so that you can use them for key and conditional comput
 
 | `args`
 | Root object
-| The arguments (as array) used for invoking the target
+| The arguments (as an object array) used for invoking the target
 | `#root.args[0]`
 
 | `caches`
@@ -368,9 +368,10 @@ available to the context so that you can use them for key and conditional comput
 
 | Argument name
 | Evaluation context
-| Name of any of the method arguments. If the names are not available
-  (perhaps due to having no debug information), the argument names are also available under the `#a<#arg>`
-  where `#arg` stands for the argument index (starting from `0`).
+| The name of a particular method argument. If the names are not available
+  (for example, because the code was compiled without the `-parameters` flag), individual
+  arguments are also available using the `#a<#arg>` syntax where `<#arg>` stands for the
+  argument index (starting from 0).
 | `#iban` or `#a0` (you can also use `#p0` or `#p<#arg>` notation as an alias).
 
 | `result`

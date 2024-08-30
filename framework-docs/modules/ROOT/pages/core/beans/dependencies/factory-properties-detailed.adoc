@@ -582,7 +582,7 @@ it needs to be declared in the XML file even though it is not defined in an XSD 
 (it exists inside the Spring core).
 
 For the rare cases where the constructor argument names are not available (usually if
-the bytecode was compiled without debugging information), you can use fallback to the
+the bytecode was compiled without the `-parameters` flag), you can fall back to the
 argument indexes, as follows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
