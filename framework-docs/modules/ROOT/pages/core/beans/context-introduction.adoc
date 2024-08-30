@@ -644,7 +644,7 @@ Each `SpEL` expression evaluates against a dedicated context. The following tabl
 items made available to the context so that you can use them for conditional event processing:
 
 [[context-functionality-events-annotation-tbl]]
-.Event SpEL available metadata
+.Event metadata available in SpEL expressions
 |===
 | Name| Location| Description| Example
 
@@ -660,8 +660,8 @@ items made available to the context so that you can use them for conditional eve
 
 | __Argument name__
 | evaluation context
-| The name of any of the method arguments. If, for some reason, the names are not available
-  (for example, because there is no debug information in the compiled byte code), individual
+| The name of a particular method argument. If the names are not available
+  (for example, because the code was compiled without the `-parameters` flag), individual
   arguments are also available using the `#a<#arg>` syntax where `<#arg>` stands for the
   argument index (starting from 0).
 | `#blEvent` or `#a0` (you can also use `#p0` or `#p<#arg>` parameter notation as an alias)

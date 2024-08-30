@@ -211,8 +211,8 @@ example shows:
 ----
 
 Keep in mind that, to make this work out of the box, your code must be compiled with the
-debug flag enabled so that Spring can look up the parameter name from the constructor.
-If you cannot or do not want to compile your code with the debug flag, you can use the
+`-parameters` flag enabled so that Spring can look up the parameter name from the constructor.
+If you cannot or do not want to compile your code with the `-parameters` flag, you can use the
 https://download.oracle.com/javase/8/docs/api/java/beans/ConstructorProperties.html[@ConstructorProperties]
 JDK annotation to explicitly name your constructor arguments. The sample class would
 then have to look as follows:
