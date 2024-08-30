@@ -22,11 +22,16 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
+import jakarta.servlet.AsyncContext;
 import jakarta.servlet.AsyncEvent;
 import jakarta.servlet.AsyncListener;
 import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -150,6 +155,21 @@ class ServerHttpObservationFilterTests {
 	}
 
 	@Test
+	void shouldRegisterListenerForAsyncStarts() throws Exception {
+		CustomAsyncFilter customAsyncFilter = new CustomAsyncFilter();
+		this.mockFilterChain = new MockFilterChain(new NoOpServlet(), customAsyncFilter);
+		this.request.setAsyncSupported(true);
+		this.request.setDispatcherType(DispatcherType.REQUEST);
+		this.filter.doFilter(this.request, this.response, this.mockFilterChain);
+		customAsyncFilter.asyncContext.dispatch();
+		this.request.setDispatcherType(DispatcherType.ASYNC);
+		AsyncContext newAsyncContext = this.request.startAsync();
+		newAsyncContext.complete();
+
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS").hasBeenStopped();
+	}
+
+	@Test
 	void shouldCloseObservationAfterAsyncError() throws Exception {
 		this.request.setAsyncSupported(true);
 		this.request.startAsync();
@@ -210,6 +230,29 @@ class ServerHttpObservationFilterTests {
 			Assert.notNull(response, "response must not be null");
 			response.setHeader("X-Trace-Id", "badc0ff33");
 		}
+
+	}
+
+	@SuppressWarnings("serial")
+	static class NoOpServlet extends HttpServlet {
+
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+		}
+
+	}
+
+	static class CustomAsyncFilter implements Filter {
+
+		AsyncContext asyncContext;
+
+		@Override
+		public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+			this.asyncContext = servletRequest.startAsync();
+			filterChain.doFilter(servletRequest, servletResponse);
+		}
+
 	}
 
 }

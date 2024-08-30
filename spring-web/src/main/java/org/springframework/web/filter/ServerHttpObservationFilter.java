@@ -119,13 +119,13 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 			throw ex;
 		}
 		finally {
-			// If async is started, register a listener for completion notification.
-			if (request.isAsyncStarted()) {
+			// If async is started during the first dispatch, register a listener for completion notification.
+			if (request.isAsyncStarted() && request.getDispatcherType() == DispatcherType.REQUEST) {
 				request.getAsyncContext().addListener(new ObservationAsyncListener(observation));
 			}
 			// scope is opened for ASYNC dispatches, but the observation will be closed
 			// by the async listener.
-			else if (request.getDispatcherType() != DispatcherType.ASYNC){
+			else if (!isAsyncDispatch(request)) {
 				Throwable error = fetchException(request);
 				if (error != null) {
 					observation.error(error);
@@ -180,6 +180,7 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 
 		@Override
 		public void onStartAsync(AsyncEvent event) {
+			event.getAsyncContext().addListener(this);
 		}
 
 		@Override

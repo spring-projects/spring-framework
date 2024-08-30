@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 
@@ -663,6 +666,44 @@ class MockHttpServletRequestTests {
 				request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
+	@Test
+	void shouldRejectAsyncStartsIfUnsupported() {
+		assertThat(request.isAsyncStarted()).isFalse();
+		assertThatIllegalStateException().isThrownBy(request::startAsync);
+	}
+
+	@Test
+	void startAsyncShouldUpdateRequestState() {
+		assertThat(request.isAsyncStarted()).isFalse();
+		request.setAsyncSupported(true);
+		AsyncContext asyncContext = request.startAsync();
+		assertThat(request.isAsyncStarted()).isTrue();
+	}
+
+	@Test
+	void shouldNotifyAsyncListeners() {
+		request.setAsyncSupported(true);
+		AsyncContext asyncContext = request.startAsync();
+		TestAsyncListener testAsyncListener = new TestAsyncListener();
+		asyncContext.addListener(testAsyncListener);
+		asyncContext.complete();
+		assertThat(testAsyncListener.events).hasSize(1);
+		assertThat(testAsyncListener.events.get(0)).extracting("name").isEqualTo("onComplete");
+	}
+
+	@Test
+	void shouldNotifyAsyncListenersWhenNewAsyncStarted() {
+		request.setAsyncSupported(true);
+		AsyncContext asyncContext = request.startAsync();
+		TestAsyncListener testAsyncListener = new TestAsyncListener();
+		asyncContext.addListener(testAsyncListener);
+		AsyncContext newAsyncContext = request.startAsync();
+		assertThat(testAsyncListener.events).hasSize(1);
+		ListenerEvent listenerEvent = testAsyncListener.events.get(0);
+		assertThat(listenerEvent).extracting("name").isEqualTo("onStartAsync");
+		assertThat(listenerEvent.event.getAsyncContext()).isEqualTo(newAsyncContext);
+	}
+
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
 		int count = 0;
 		while (enum1.hasMoreElements()) {
@@ -671,5 +712,32 @@ class MockHttpServletRequestTests {
 			assertThat(enum2.nextElement()).as(message).isEqualTo(enum1.nextElement());
 		}
 	}
+
+	static class TestAsyncListener implements AsyncListener {
+
+		List<ListenerEvent> events = new ArrayList<>();
+
+		@Override
+		public void onComplete(AsyncEvent asyncEvent) throws IOException {
+			this.events.add(new ListenerEvent("onComplete", asyncEvent));
+		}
+
+		@Override
+		public void onTimeout(AsyncEvent asyncEvent) throws IOException {
+			this.events.add(new ListenerEvent("onTimeout", asyncEvent));
+		}
+
+		@Override
+		public void onError(AsyncEvent asyncEvent) throws IOException {
+			this.events.add(new ListenerEvent("onError", asyncEvent));
+		}
+
+		@Override
+		public void onStartAsync(AsyncEvent asyncEvent) throws IOException {
+			this.events.add(new ListenerEvent("onStartAsync", asyncEvent));
+		}
+	}
+
+	record ListenerEvent(String name, AsyncEvent event) {}
 
 }
