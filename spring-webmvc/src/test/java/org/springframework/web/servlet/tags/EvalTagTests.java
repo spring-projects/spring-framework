@@ -22,14 +22,15 @@ import java.util.Locale;
 import java.util.Map;
 
 import jakarta.servlet.jsp.tagext.Tag;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
-import org.springframework.format.number.PercentStyleFormatter;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -49,6 +50,8 @@ class EvalTagTests extends AbstractTagTests {
 
 	@BeforeEach
 	void setup() {
+		LocaleContextHolder.setDefaultLocale(Locale.UK);
+
 		context = createPageContext();
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
@@ -56,6 +59,11 @@ class EvalTagTests extends AbstractTagTests {
 		context.getRequest().setAttribute("bean", new Bean());
 		tag = new EvalTag();
 		tag.setPageContext(context);
+	}
+
+	@AfterEach
+	void reset() {
+		LocaleContextHolder.setDefaultLocale(null);
 	}
 
 
@@ -81,13 +89,12 @@ class EvalTagTests extends AbstractTagTests {
 
 	@Test
 	void printFormattedScopedAttributeResult() throws Exception {
-		PercentStyleFormatter formatter = new PercentStyleFormatter();
 		tag.setExpression("bean.formattable");
 		int action = tag.doStartTag();
 		assertThat(action).isEqualTo(Tag.EVAL_BODY_INCLUDE);
 		action = tag.doEndTag();
 		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
-		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEqualTo(formatter.print(new BigDecimal(".25"), Locale.getDefault()));
+		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEqualTo("25%");
 	}
 
 	@Test
