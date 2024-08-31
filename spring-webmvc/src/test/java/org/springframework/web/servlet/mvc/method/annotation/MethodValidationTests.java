@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -29,10 +30,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.executable.ExecutableValidator;
 import jakarta.validation.metadata.BeanDescriptor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -92,6 +95,8 @@ class MethodValidationTests {
 
 	@BeforeEach
 	void setup() throws Exception {
+		LocaleContextHolder.setDefaultLocale(Locale.UK);
+
 		LocalValidatorFactoryBean validatorBean = new LocalValidatorFactoryBean();
 		validatorBean.afterPropertiesSet();
 		this.jakartaValidator = new InvocationCountingValidator(validatorBean);
@@ -119,6 +124,11 @@ class MethodValidationTests {
 				List.of(new StringHttpMessageConverter(), new MappingJackson2HttpMessageConverter()));
 		handlerAdapter.afterPropertiesSet();
 		return handlerAdapter;
+	}
+
+	@AfterEach
+	void reset() {
+		LocaleContextHolder.setDefaultLocale(null);
 	}
 
 
