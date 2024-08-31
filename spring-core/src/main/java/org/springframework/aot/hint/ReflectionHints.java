@@ -182,6 +182,7 @@ public class ReflectionHints {
 	 * @param type the type to consider
 	 * @param typeHint a builder to further customize hints for each type
 	 * @return {@code this}, to facilitate method chaining
+	 * @since 6.2
 	 */
 	public ReflectionHints registerForInterfaces(Class<?> type, Consumer<TypeHint.Builder> typeHint) {
 		Class<?> currentClass = type;
