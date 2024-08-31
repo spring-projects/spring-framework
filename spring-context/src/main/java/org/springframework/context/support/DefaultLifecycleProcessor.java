@@ -371,6 +371,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				if (logger.isWarnEnabled()) {
 					logger.warn("Failed to stop bean '" + beanName + "'", ex);
 				}
+				if (bean instanceof SmartLifecycle) {
+					latch.countDown();
+				}
 			}
 		}
 	}
