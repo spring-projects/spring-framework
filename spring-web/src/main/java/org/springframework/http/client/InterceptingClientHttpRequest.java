@@ -94,7 +94,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 				 * Set the latest body.length to "Content-Length"
 				 */
 				long contentLength = request.getHeaders().getContentLength();
-				if (contentLength >-1 & contentLength != body.length) {
+				if (contentLength > -1 && contentLength != body.length) {
 					request.getHeaders().setContentLength(body.length);
 				}
 
