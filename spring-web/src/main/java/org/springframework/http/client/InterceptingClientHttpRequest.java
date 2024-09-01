@@ -88,6 +88,13 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 				return nextInterceptor.intercept(request, body, this);
 			}
 			else {
+
+				/*
+				 * After intercepted by the interceptors, the length of the body may change.
+				 * Set the latest body.length to "Content-Length"
+				 */
+				request.getHeaders().setContentLength(body.length);
+
 				HttpMethod method = request.getMethod();
 				ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), method);
 				request.getHeaders().forEach((key, value) -> delegate.getHeaders().addAll(key, value));

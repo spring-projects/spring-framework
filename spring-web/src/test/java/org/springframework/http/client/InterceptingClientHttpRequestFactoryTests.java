@@ -204,6 +204,9 @@ class InterceptingClientHttpRequestFactoryTests {
 		ClientHttpRequest request = requestFactory.createRequest(URI.create("https://example.com"), HttpMethod.GET);
 		request.execute();
 		assertThat(Arrays.equals(changedBody, requestMock.getBodyAsBytes())).isTrue();
+
+		// When the request body is changed, the "Content-Length" in the request header also needs to be changed.
+		assertThat(requestMock.getHeaders().getContentLength()).isEqualTo(changedBody.length);
 	}
 
 
