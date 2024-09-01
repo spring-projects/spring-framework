@@ -204,6 +204,7 @@ class InterceptingClientHttpRequestFactoryTests {
 		ClientHttpRequest request = requestFactory.createRequest(URI.create("https://example.com"), HttpMethod.GET);
 		request.execute();
 		assertThat(Arrays.equals(changedBody, requestMock.getBodyAsBytes())).isTrue();
+		assertThat(requestMock.getHeaders().getContentLength()).isEqualTo(changedBody.length);
 	}
 
 
