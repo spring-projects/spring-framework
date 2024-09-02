@@ -197,12 +197,59 @@ regular autowiring candidate selection and are therefore in particular never pri
 the contrary, they always end up as lowest precedence.
 
 In practice, you should use self references as a last resort only – for example, for
-calling other methods on the same instance through the bean's transactional proxy. As an
-alternative, consider factoring out the affected methods to a separate delegate bean in
-such a scenario.
+calling other methods on the same instance through the bean's transactional proxy,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	public class SimplePojo implements Pojo {
+
+        @Autowired
+        private Pojo self;
+
+		public void foo() {
+			// @Transactional on method bar() works
+			self.bar();
+		}
+
+		@Transactional
+		public void bar() {
+			// some logic...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	class SimplePojo : Pojo {
+
+		@Autowired
+		private lateinit var self: Pojo
+
+		fun foo() {
+			// @Transactional on method bar() works
+			self.bar()
+		}
+
+		@Transactional
+		fun bar() {
+			// some logic...
+		}
+	}
+----
+======
 
 Another alternative is to use `@Resource`, which may obtain a proxy back to the current
 bean by its unique name.
+
+Another alternative is to consider factoring out the affected methods to a separate delegate
+bean in such a scenario.
 
 ======
 [NOTE]
