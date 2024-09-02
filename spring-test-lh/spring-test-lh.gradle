@@ -4,6 +4,8 @@ dependencies {
     implementation(project(":spring-beans"))
     implementation(project(":spring-context"))
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
+    optional("org.aspectj:aspectjweaver")
+
     testImplementation("org.junit.jupiter:junit-jupiter")
 
 }
