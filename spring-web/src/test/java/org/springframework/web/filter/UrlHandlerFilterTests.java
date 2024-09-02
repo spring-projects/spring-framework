@@ -70,6 +70,23 @@ public class UrlHandlerFilterTests {
 	}
 
 	@Test
+	void shouldNotSkipTrailingSlashForRootPath() throws Exception {
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/**").wrapRequest().build();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		request.setPathInfo("/");
+
+		MockFilterChain chain = new MockFilterChain();
+		filter.doFilterInternal(request, new MockHttpServletResponse(), chain);
+
+		HttpServletRequest actual = (HttpServletRequest) chain.getRequest();
+		assertThat(actual).isNotNull().isSameAs(request);
+		assertThat(actual.getRequestURI()).isEqualTo("/");
+		assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost/");
+		assertThat(actual.getServletPath()).isEqualTo("");
+		assertThat(actual.getPathInfo()).isEqualTo("/");
+	}
+
+	@Test
 	void noTrailingSlashWithRequestWrapping() throws Exception {
 		testNoTrailingSlashWithRequestWrapping("/path/**", "/path/123");
 		testNoTrailingSlashWithRequestWrapping("/path/*", "/path/123");

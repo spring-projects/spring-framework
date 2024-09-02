@@ -279,7 +279,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		@Override
 		public boolean canHandle(HttpServletRequest request, RequestPath path) {
 			List<PathContainer.Element> elements = path.elements();
-			return (!elements.isEmpty() && elements.get(elements.size() - 1).value().equals("/"));
+			return (elements.size() > 1 && elements.get(elements.size() - 1).value().equals("/"));
 		}
 
 		@Override
