@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 /**
  * Tests for {@link TransactionAttributeSourceEditor}.
  *
- * <p>Format is: {@code FQN.Method=tx attribute representation}
+ * <p>Format is: {@code <fully-qualified class name>.<method-name>=tx attribute representation}
  *
  * @author Rod Johnson
  * @author Sam Brannen

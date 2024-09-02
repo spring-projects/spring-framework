@@ -77,7 +77,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * For example, "Exception" will match nearly anything, and will probably hide other rules.
 	 * "java.lang.Exception" would be correct if "Exception" was meant to define a rule for all
 	 * checked exceptions. With more unusual exception names such as "BaseBusinessException"
-	 * there's no need to use a FQN.
+	 * there's no need to use fully-qualified class name.
 	 * @param mappings exception patterns (can also be fully qualified class names) as keys,
 	 * and error view names as values
 	 */

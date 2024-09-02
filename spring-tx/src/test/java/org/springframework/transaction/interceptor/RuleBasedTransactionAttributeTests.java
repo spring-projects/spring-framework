@@ -108,7 +108,7 @@ class RuleBasedTransactionAttributeTests {
 	void ruleForCommitOnSubclassOfChecked() {
 		List<RollbackRuleAttribute> list = new ArrayList<>();
 		// Note that it's important to ensure that we have this as
-		// a FQN: otherwise it will match everything!
+		// fully-qualified class name: otherwise it will match everything!
 		list.add(new RollbackRuleAttribute("java.lang.Exception"));
 		list.add(new NoRollbackRuleAttribute("IOException"));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
