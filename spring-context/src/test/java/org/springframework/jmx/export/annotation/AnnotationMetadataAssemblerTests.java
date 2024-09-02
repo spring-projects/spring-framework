@@ -22,7 +22,7 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.jmx.IJmxTestBean;
+import org.springframework.jmx.ITestBean;
 import org.springframework.jmx.export.assembler.AbstractMetadataAssemblerTests;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 
@@ -93,7 +93,7 @@ class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerTests {
 	}
 
 	@Override
-	protected IJmxTestBean createJmxTestBean() {
+	protected ITestBean createJmxTestBean() {
 		return new AnnotationTestSubBean();
 	}
 

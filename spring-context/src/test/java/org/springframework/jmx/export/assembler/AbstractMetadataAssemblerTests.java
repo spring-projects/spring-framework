@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.testfixture.interceptor.NopInterceptor;
-import org.springframework.jmx.IJmxTestBean;
+import org.springframework.jmx.ITestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
@@ -156,7 +156,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 	@Test
 	void testWithCglibProxy() throws Exception {
-		IJmxTestBean tb = createJmxTestBean();
+		Object tb = createJmxTestBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(tb);
 		pf.addAdvice(new NopInterceptor());
@@ -230,7 +230,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		return 9;
 	}
 
-	protected IJmxTestBean createJmxTestBean() {
+	protected ITestBean createJmxTestBean() {
 		return new JmxTestBean();
 	}
 

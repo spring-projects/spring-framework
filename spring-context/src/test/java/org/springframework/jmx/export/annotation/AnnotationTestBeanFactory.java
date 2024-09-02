@@ -17,7 +17,6 @@
 package org.springframework.jmx.export.annotation;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.jmx.IJmxTestBean;
 
 /**
  * @author Juergen Hoeller
@@ -36,7 +35,7 @@ public class AnnotationTestBeanFactory implements FactoryBean<FactoryCreatedAnno
 	}
 
 	@Override
-	public Class<? extends IJmxTestBean> getObjectType() {
+	public Class<? extends AnnotationTestBean> getObjectType() {
 		return FactoryCreatedAnnotationTestBean.class;
 	}
 

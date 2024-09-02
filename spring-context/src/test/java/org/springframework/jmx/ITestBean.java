@@ -16,21 +16,10 @@
 
 package org.springframework.jmx;
 
-/**
- * @author Rob Harrop
- * @author Juergen Hoeller
- */
-public interface IJmxTestBean extends ITestBean {
+public interface ITestBean {
 
-	int add(int x, int y);
+	void setName(String name) throws Exception;
 
-	long myOperation();
-
-	void setAge(int age);
-
-	int getAge();
-
-	// used to test invalid methods that exist in the proxy interface
-	void dontExposeMe();
+	String getName();
 
 }

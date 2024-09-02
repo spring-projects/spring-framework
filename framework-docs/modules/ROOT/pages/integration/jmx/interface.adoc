@@ -11,10 +11,10 @@ controlling the management interfaces of your beans.
 
 
 [[jmx-interface-assembler]]
-== Using the `MBeanInfoAssembler` Interface
+== Using the `MBeanInfoAssembler` API
 
 Behind the scenes, the `MBeanExporter` delegates to an implementation of the
-`org.springframework.jmx.export.assembler.MBeanInfoAssembler` interface, which is
+`org.springframework.jmx.export.assembler.MBeanInfoAssembler` API, which is
 responsible for defining the management interface of each bean that is exposed.
 The default implementation,
 `org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler`,
@@ -28,34 +28,30 @@ or any arbitrary interface.
 [[jmx-interface-metadata]]
 == Using Source-level Metadata: Java Annotations
 
-By using the `MetadataMBeanInfoAssembler`, you can define the management interfaces
-for your beans by using source-level metadata. The reading of metadata is encapsulated
-by the `org.springframework.jmx.export.metadata.JmxAttributeSource` interface.
-Spring JMX provides a default implementation that uses Java annotations, namely
-`org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource`.
-You must configure the `MetadataMBeanInfoAssembler` with an implementation instance of
-the `JmxAttributeSource` interface for it to function correctly (there is no default).
+By using the `MetadataMBeanInfoAssembler`, you can define the management interfaces for
+your beans by using source-level metadata. The reading of metadata is encapsulated by the
+`org.springframework.jmx.export.metadata.JmxAttributeSource` interface. Spring JMX
+provides a default implementation that uses Java annotations, namely
+`org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource`. You must
+configure the `MetadataMBeanInfoAssembler` with an implementation instance of the
+`JmxAttributeSource` interface for it to function correctly, since there is no default.
 
 To mark a bean for export to JMX, you should annotate the bean class with the
-`ManagedResource` annotation. You must mark each method you wish to expose as an operation
-with the `ManagedOperation` annotation and mark each property you wish to expose
-with the `ManagedAttribute` annotation. When marking properties, you can omit
+`@ManagedResource` annotation. You must annotate each method you wish to expose as an
+operation with the `@ManagedOperation` annotation and annotate each property you wish to
+expose with the `@ManagedAttribute` annotation. When annotating properties, you can omit
 either the annotation of the getter or the setter to create a write-only or read-only
 attribute, respectively.
 
-NOTE: A `ManagedResource`-annotated bean must be public, as must the methods exposing
-an operation or an attribute.
+NOTE: A `@ManagedResource`-annotated bean must be public, as must the methods exposing
+operations or attributes.
 
-The following example shows the annotated version of the `JmxTestBean` class that we
-used in xref:integration/jmx/exporting.adoc#jmx-exporting-mbeanserver[Creating an MBeanServer]:
+The following example shows an annotated version of the `JmxTestBean` class that we
+used in xref:integration/jmx/exporting.adoc#jmx-exporting-mbeanserver[Creating an MBeanServer].
 
 [source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.jmx;
-
-	import org.springframework.jmx.export.annotation.ManagedResource;
-	import org.springframework.jmx.export.annotation.ManagedOperation;
-	import org.springframework.jmx.export.annotation.ManagedAttribute;
 
 	@ManagedResource(
 			objectName="bean:name=testBean4",
@@ -67,18 +63,18 @@ used in xref:integration/jmx/exporting.adoc#jmx-exporting-mbeanserver[Creating a
 			persistPeriod=200,
 			persistLocation="foo",
 			persistName="bar")
-	public class AnnotationTestBean implements IJmxTestBean {
+	public class AnnotationTestBean {
 
-		private String name;
 		private int age;
-
-		@ManagedAttribute(description="The Age Attribute", currencyTimeLimit=15)
-		public int getAge() {
-			return age;
-		}
+		private String name;
 
 		public void setAge(int age) {
 			this.age = age;
+		}
+
+		@ManagedAttribute(description="The Age Attribute", currencyTimeLimit=15)
+		public int getAge() {
+			return this.age;
 		}
 
 		@ManagedAttribute(description="The Name Attribute",
@@ -91,13 +87,12 @@ used in xref:integration/jmx/exporting.adoc#jmx-exporting-mbeanserver[Creating a
 
 		@ManagedAttribute(defaultValue="foo", persistPeriod=300)
 		public String getName() {
-			return name;
+			return this.name;
 		}
 
 		@ManagedOperation(description="Add two numbers")
-		@ManagedOperationParameters({
-			@ManagedOperationParameter(name = "x", description = "The first number"),
-			@ManagedOperationParameter(name = "y", description = "The second number")})
+		@ManagedOperationParameter(name = "x", description = "The first number")
+		@ManagedOperationParameter(name = "y", description = "The second number")
 		public int add(int x, int y) {
 			return x + y;
 		}
@@ -109,20 +104,23 @@ used in xref:integration/jmx/exporting.adoc#jmx-exporting-mbeanserver[Creating a
 	}
 ----
 
-In the preceding example, you can see that the `JmxTestBean` class is marked with the
-`ManagedResource` annotation and that this `ManagedResource` annotation is configured
-with a set of properties. These properties can be used to configure various aspects
+In the preceding example, you can see that the `AnnotationTestBean` class is annotated
+with `@ManagedResource` and that this `@ManagedResource` annotation is configured
+with a set of attributes. These attributes can be used to configure various aspects
 of the MBean that is generated by the `MBeanExporter` and are explained in greater
-detail later in xref:integration/jmx/interface.adoc#jmx-interface-metadata-types[Source-level Metadata Types].
+detail later in xref:integration/jmx/interface.adoc#jmx-interface-metadata-types[Spring JMX Annotations].
 
-Both the `age` and `name` properties are annotated with the `ManagedAttribute`
-annotation, but, in the case of the `age` property, only the getter is marked.
+Both the `age` and `name` properties are annotated with `@ManagedAttribute`,
+but, in the case of the `age` property, only the getter method is annotated.
 This causes both of these properties to be included in the management interface
-as attributes, but the `age` attribute is read-only.
+as managed attributes, but the `age` attribute is read-only.
 
-Finally, the `add(int, int)` method is marked with the `ManagedOperation` attribute,
+Finally, the `add(int, int)` method is annotated with `@ManagedOperation`,
 whereas the `dontExposeMe()` method is not. This causes the management interface to
 contain only one operation (`add(int, int)`) when you use the `MetadataMBeanInfoAssembler`.
+
+NOTE: The `AnnotationTestBean` class is not required to implement any Java interfaces,
+since the JMX management interface is derived solely from annotations.
 
 The following configuration shows how you can configure the `MBeanExporter` to use the
 `MetadataMBeanInfoAssembler`:
@@ -130,14 +128,12 @@ The following configuration shows how you can configure the `MBeanExporter` to u
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
+
 		<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
 			<property name="assembler" ref="assembler"/>
 			<property name="namingStrategy" ref="namingStrategy"/>
 			<property name="autodetect" value="true"/>
 		</bean>
-
-		<bean id="jmxAttributeSource"
-				class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
 
 		<!-- will create management interface using annotation metadata -->
 		<bean id="assembler"
@@ -151,102 +147,116 @@ The following configuration shows how you can configure the `MBeanExporter` to u
 			<property name="attributeSource" ref="jmxAttributeSource"/>
 		</bean>
 
+		<bean id="jmxAttributeSource"
+				class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+
 		<bean id="testBean" class="org.springframework.jmx.AnnotationTestBean">
 			<property name="name" value="TEST"/>
 			<property name="age" value="100"/>
 		</bean>
+
 	</beans>
 ----
 
-In the preceding example, an `MetadataMBeanInfoAssembler` bean has been configured with an
+In the preceding example, a `MetadataMBeanInfoAssembler` bean has been configured with an
 instance of the `AnnotationJmxAttributeSource` class and passed to the `MBeanExporter`
 through the assembler property. This is all that is required to take advantage of
-metadata-driven management interfaces for your Spring-exposed MBeans.
+annotation-driven management interfaces for your Spring-exposed MBeans.
 
 
 [[jmx-interface-metadata-types]]
-== Source-level Metadata Types
+== Spring JMX Annotations
 
-The following table describes the source-level metadata types that are available for use in Spring JMX:
+The following table describes the annotations that are available for use in Spring JMX:
 
 [[jmx-metadata-types]]
-.Source-level metadata types
+.Spring JMX annotations
+[cols="1,1,3"]
 |===
-| Purpose| Annotation| Annotation Type
+| Annotation | Applies to | Description
 
-| Mark all instances of a `Class` as JMX managed resources.
 | `@ManagedResource`
-| Class
+| Classes
+| Marks all instances of a `Class` as JMX managed resources.
 
-| Mark a method as a JMX operation.
-| `@ManagedOperation`
-| Method
+| `@ManagedNotification`
+| Classes
+| Indicates a JMX notification emitted by a managed resource.
 
-| Mark a getter or setter as one half of a JMX attribute.
 | `@ManagedAttribute`
-| Method (only getters and setters)
+| Methods (only getters and setters)
+| Marks a getter or setter as one half of a JMX attribute.
 
-| Define descriptions for operation parameters.
-| `@ManagedOperationParameter` and `@ManagedOperationParameters`
-| Method
+| `@ManagedMetric`
+| Methods (only getters)
+| Marks a getter as a JMX attribute, with added descriptor properties to indicate that it is a metric.
+
+| `@ManagedOperation`
+| Methods
+| Marks a method as a JMX operation.
+
+| `@ManagedOperationParameter`
+| Methods
+| Defines a description for an operation parameter.
 |===
 
-The following table describes the configuration parameters that are available for use on these source-level
-metadata types:
+The following table describes some of the common attributes that are available for use in
+these annotations. Consult the Javadoc for each annotation for further details.
 
 [[jmx-metadata-parameters]]
-.Source-level metadata parameters
-[cols="1,3,1"]
+.Spring JMX annotation attributes
+[cols="1,1,3"]
 |===
-| Parameter | Description | Applies to
+| Attribute | Applies to | Description
 
-| `ObjectName`
+| `objectName`
+| `@ManagedResource`
 | Used by `MetadataNamingStrategy` to determine the `ObjectName` of a managed resource.
-| `ManagedResource`
 
 | `description`
-| Sets the friendly description of the resource, attribute or operation.
-| `ManagedResource`, `ManagedAttribute`, `ManagedOperation`, or `ManagedOperationParameter`
+| `@ManagedResource`, `@ManagedNotification`, `@ManagedAttribute`, `@ManagedMetric`,
+  `@ManagedOperation`, `@ManagedOperationParameter`
+| Sets the description of the resource, notification, attribute, metric, or operation.
 
 | `currencyTimeLimit`
+| `@ManagedResource`, `@ManagedAttribute`, `@ManagedMetric`
 | Sets the value of the `currencyTimeLimit` descriptor field.
-| `ManagedResource` or `ManagedAttribute`
 
 | `defaultValue`
+| `@ManagedAttribute`
 | Sets the value of the `defaultValue` descriptor field.
-| `ManagedAttribute`
 
 | `log`
+| `@ManagedResource`
 | Sets the value of the `log` descriptor field.
-| `ManagedResource`
 
 | `logFile`
+| `@ManagedResource`
 | Sets the value of the `logFile` descriptor field.
-| `ManagedResource`
 
 | `persistPolicy`
+| `@ManagedResource`, `@ManagedMetric`
 | Sets the value of the `persistPolicy` descriptor field.
-| `ManagedResource`
 
 | `persistPeriod`
+| `@ManagedResource`, `@ManagedMetric`
 | Sets the value of the `persistPeriod` descriptor field.
-| `ManagedResource`
 
 | `persistLocation`
+| `@ManagedResource`
 | Sets the value of the `persistLocation` descriptor field.
-| `ManagedResource`
 
 | `persistName`
+| `@ManagedResource`
 | Sets the value of the `persistName` descriptor field.
-| `ManagedResource`
 
 | `name`
+| `@ManagedOperationParameter`
 | Sets the display name of an operation parameter.
-| `ManagedOperationParameter`
 
 | `index`
+| `@ManagedOperationParameter`
 | Sets the index of an operation parameter.
-| `ManagedOperationParameter`
 |===
 
 
@@ -255,14 +265,14 @@ metadata types:
 
 To simplify configuration even further, Spring includes the
 `AutodetectCapableMBeanInfoAssembler` interface, which extends the `MBeanInfoAssembler`
-interface to add support for autodetection of MBean resources. If you configure the
+interface to add support for auto-detection of MBean resources. If you configure the
 `MBeanExporter` with an instance of `AutodetectCapableMBeanInfoAssembler`, it is
-allowed to "`vote`" on the inclusion of beans for exposure to JMX.
+allowed to "vote" on the inclusion of beans for exposure to JMX.
 
 The only implementation of the `AutodetectCapableMBeanInfo` interface is
 the `MetadataMBeanInfoAssembler`, which votes to include any bean that is marked
 with the `ManagedResource` attribute. The default approach in this case is to use the
-bean name as the `ObjectName`, which results in a configuration similar to the following:
+bean name as the `ObjectName`, which results in configuration similar to the following:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -274,26 +284,29 @@ bean name as the `ObjectName`, which results in a configuration similar to the f
 			<property name="assembler" ref="assembler"/>
 		</bean>
 
-		<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
-			<property name="name" value="TEST"/>
-			<property name="age" value="100"/>
-		</bean>
-
 		<bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
 			<property name="attributeSource">
 				<bean class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
 			</property>
 		</bean>
 
+		<bean id="testBean" class="org.springframework.jmx.AnnotationTestBean">
+			<property name="name" value="TEST"/>
+			<property name="age" value="100"/>
+		</bean>
+
 	</beans>
 ----
 
 Notice that, in the preceding configuration, no beans are passed to the `MBeanExporter`.
-However, the `JmxTestBean` is still registered, since it is marked with the `ManagedResource`
-attribute and the `MetadataMBeanInfoAssembler` detects this and votes to include it.
-The only problem with this approach is that the name of the `JmxTestBean` now has business
-meaning. You can address this issue by changing the default behavior for `ObjectName`
-creation as defined in xref:integration/jmx/naming.adoc[Controlling  `ObjectName` Instances for Your Beans].
+However, the `AnnotationTestBean` is still registered, since it is annotated with
+`@ManagedResource` and the `MetadataMBeanInfoAssembler` detects this and votes to include
+it. The only downside with this approach is that the name of the `AnnotationTestBean` now
+has business meaning. You can address this issue by configuring an `ObjectNamingStrategy`
+as explained in xref:integration/jmx/naming.adoc[Controlling `ObjectName` Instances for
+Your Beans]. You can also see an example which uses the `MetadataNamingStrategy` in
+xref:integration/jmx/interface.adoc#jmx-interface-metadata[Using Source-level Metadata: Java Annotations].
+
 
 
 [[jmx-interface-java]]
