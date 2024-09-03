@@ -34,6 +34,10 @@ Kotlin::
 You can use the xref:web/webmvc/mvc-config/message-converters.adoc[Message Converters] option of the xref:web/webmvc/mvc-config.adoc[MVC Config] to
 configure or customize message conversion.
 
+NOTE: Form data should be read using xref:web/webmvc/mvc-controller/ann-methods/requestparam.adoc[`@RequestParam`],
+not with `@RequestBody` which can't always be used reliably since in the Servlet API, request parameter
+access causes the request body to be parsed, and it can't be read again.
+
 You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
 By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
