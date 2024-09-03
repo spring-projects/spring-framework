@@ -36,8 +36,9 @@ public class CompilableMapAccessor implements CompilablePropertyAccessor {
 
 	private final boolean allowWrite;
 
+
 	/**
-	 * Create a new map accessor for reading as well as writing.
+	 * Create a new {@code CompilableMapAccessor} for reading as well as writing.
 	 * @since 6.2
 	 * @see #CompilableMapAccessor(boolean)
 	 */
@@ -46,7 +47,7 @@ public class CompilableMapAccessor implements CompilablePropertyAccessor {
 	}
 
 	/**
-	 * Create a new map accessor for reading and possibly also writing.
+	 * Create a new {@code CompilableMapAccessor} for reading and possibly also writing.
 	 * @param allowWrite whether to allow write operations on a target instance
 	 * @since 6.2
 	 * @see #canWrite
@@ -54,6 +55,7 @@ public class CompilableMapAccessor implements CompilablePropertyAccessor {
 	public CompilableMapAccessor(boolean allowWrite) {
 		this.allowWrite = allowWrite;
 	}
+
 
 	@Override
 	public Class<?>[] getSpecificTargetClasses() {
