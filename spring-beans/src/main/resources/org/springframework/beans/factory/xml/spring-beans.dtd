@@ -137,8 +137,8 @@
 <!ATTLIST bean name CDATA #IMPLIED>
 
 <!--
-	Each bean definition must specify the fully qualified name of the class,
-	except if it serves only as a parent definition for child bean definitions.
+	Each bean definition must specify the fully-qualified name of the class,
+	unless it serves only as a parent definition for child bean definitions.
 -->
 <!ATTLIST bean class CDATA #IMPLIED>
 
@@ -452,7 +452,7 @@
 <!--
 	Specification of the type of an overloaded method argument as a String.
 	For convenience, this may be a substring of the fully-qualified class name.
-	E.g. all the following would match "java.lang.String":
+	For example, all the following would match "java.lang.String":
 	- java.lang.String
 	- String
 	- Str

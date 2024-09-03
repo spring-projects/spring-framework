@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ class RuleBasedTransactionAttributeTests {
 	@Test
 	void ruleForCommitOnSubclassOfChecked() {
 		List<RollbackRuleAttribute> list = new ArrayList<>();
-		// Note that it's important to ensure that we have this as
+		// Note that it's important to ensure that we have this as a
 		// fully-qualified class name: otherwise it will match everything!
 		list.add(new RollbackRuleAttribute("java.lang.Exception"));
 		list.add(new NoRollbackRuleAttribute("IOException"));

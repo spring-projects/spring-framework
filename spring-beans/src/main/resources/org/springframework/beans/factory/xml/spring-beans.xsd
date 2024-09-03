@@ -270,7 +270,7 @@
 		<xsd:attribute name="class" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation source="java:java.lang.Class"><![CDATA[
-	The fully qualified name of the bean's class, except if it serves only
+	The fully-qualified name of the bean's class, unless it serves only
 	as a parent definition for child bean definitions.
 				]]></xsd:documentation>
 			</xsd:annotation>
@@ -766,7 +766,7 @@
 					<xsd:documentation><![CDATA[
 	Specification of the type of an overloaded method argument as a String.
 	For convenience, this may be a substring of the fully-qualified class name.
-	E.g. all the following would match "java.lang.String":
+	For example, all the following would match "java.lang.String":
 	- java.lang.String
 	- String
 	- Str
@@ -1091,7 +1091,7 @@
 		<xsd:attribute name="value-type" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation source="java:java.lang.Class"><![CDATA[
-	The default Java type for nested values. Must be a fully qualified
+	The default Java type for nested values. Must be a fully-qualified
 	class name.
 				]]></xsd:documentation>
 			</xsd:annotation>
@@ -1120,7 +1120,7 @@
 				<xsd:attribute name="key-type" type="xsd:string">
 					<xsd:annotation>
 						<xsd:documentation source="java:java.lang.Class"><![CDATA[
-	The default Java type for nested entry keys. Must be a fully qualified
+	The default Java type for nested entry keys. Must be a fully-qualified
 	class name.
 						]]></xsd:documentation>
 					</xsd:annotation>

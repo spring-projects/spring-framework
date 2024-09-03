@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,8 @@ public class MethodMapTransactionAttributeSource
 		Assert.notNull(name, "Name must not be null");
 		int lastDotIndex = name.lastIndexOf('.');
 		if (lastDotIndex == -1) {
-			throw new IllegalArgumentException("'" + name + "' is not a valid method name: format is <fully-qualified class name>.<method-name>");
+			throw new IllegalArgumentException(
+					"'" + name + "' is not a valid method name: format is <fully-qualified class name>.<method-name>");
 		}
 		String className = name.substring(0, lastDotIndex);
 		String methodName = name.substring(lastDotIndex + 1);
