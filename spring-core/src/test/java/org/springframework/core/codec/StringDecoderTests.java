@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.codec;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -75,14 +76,15 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 		String s = String.format("%s\n%s\n%s", u, e, o);
 		Flux<DataBuffer> input = toDataBuffers(s, 1, UTF_8);
 
-		// TODO: temporarily replace testDecodeAll with explicit decode/cancel/empty
-		// see https://github.com/reactor/reactor-core/issues/2041
-
-//		testDecode(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
-//		testDecodeCancel(input, TYPE, null, null);
-//		testDecodeEmpty(TYPE, null, null);
-
 		testDecodeAll(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
+	}
+
+	@Test // gh-30299
+	public void decodeAndCancelWithPendingChunks() {
+		Flux<DataBuffer> input = toDataBuffers("abc", 1, UTF_8).concatWith(Flux.never());
+		Flux<String> result = this.decoder.decode(input, TYPE, null, null);
+
+		StepVerifier.create(result).thenAwait(Duration.ofMillis(100)).thenCancel().verify();
 	}
 
 	@Test

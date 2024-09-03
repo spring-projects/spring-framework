@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,8 +29,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.AccessException;
@@ -55,6 +62,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
  * Checks SpelCompiler behavior. This should cover compilation all compiled node types.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 4.1
  */
 public class SpelCompilationCoverageTests extends AbstractExpressionTests {
@@ -128,6 +136,489 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	private SpelNodeImpl ast;
 
+
+	@Nested
+	class VariableReferenceTests {
+
+		@Test
+		void userDefinedVariable() {
+			EvaluationContext ctx = new StandardEvaluationContext();
+			ctx.setVariable("target", "abc");
+			expression = parser.parseExpression("#target");
+			assertThat(expression.getValue(ctx)).isEqualTo("abc");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(ctx)).isEqualTo("abc");
+			ctx.setVariable("target", "123");
+			assertThat(expression.getValue(ctx)).isEqualTo("123");
+
+			// Changing the variable type from String to Integer results in a
+			// ClassCastException in the compiled code.
+			ctx.setVariable("target", 42);
+			assertThatExceptionOfType(SpelEvaluationException.class)
+				.isThrownBy(() -> expression.getValue(ctx))
+				.withCauseInstanceOf(ClassCastException.class);
+
+			ctx.setVariable("target", "abc");
+			expression = parser.parseExpression("#target.charAt(0)");
+			assertThat(expression.getValue(ctx)).isEqualTo('a');
+			assertCanCompile(expression);
+			assertThat(expression.getValue(ctx)).isEqualTo('a');
+			ctx.setVariable("target", "1");
+			assertThat(expression.getValue(ctx)).isEqualTo('1');
+
+			// Changing the variable type from String to Integer results in a
+			// ClassCastException in the compiled code.
+			ctx.setVariable("target", 42);
+			assertThatExceptionOfType(SpelEvaluationException.class)
+				.isThrownBy(() -> expression.getValue(ctx))
+				.withCauseInstanceOf(ClassCastException.class);
+		}
+
+	}
+
+	@Nested
+	class IndexingTests {
+
+		@Test
+		void indexIntoPrimitiveShortArray() {
+			short[] shorts = { (short) 33, (short) 44, (short) 55 };
+
+			expression = parser.parseExpression("[2]");
+
+			assertThat(expression.getValue(shorts)).isEqualTo((short) 55);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(shorts)).isEqualTo((short) 55);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("S");
+		}
+
+		@Test
+		void indexIntoPrimitiveByteArray() {
+			byte[] bytes = { (byte) 2, (byte) 3, (byte) 4 };
+
+			expression = parser.parseExpression("[2]");
+
+			assertThat(expression.getValue(bytes)).isEqualTo((byte) 4);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(bytes)).isEqualTo((byte) 4);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("B");
+		}
+
+		@Test
+		void indexIntoPrimitiveIntArray() {
+			int[] ints = { 8, 9, 10 };
+
+			expression = parser.parseExpression("[2]");
+
+			assertThat(expression.getValue(ints)).isEqualTo(10);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(ints)).isEqualTo(10);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
+		}
+
+		@Test
+		void indexIntoPrimitiveLongArray() {
+			long[] longs = { 2L, 3L, 4L };
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(expression.getValue(longs)).isEqualTo(2L);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(longs)).isEqualTo(2L);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("J");
+		}
+
+		@Test
+		void indexIntoPrimitiveFloatArray() {
+			float[] floats = { 6.0f, 7.0f, 8.0f };
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(expression.getValue(floats)).isEqualTo(6.0f);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(floats)).isEqualTo(6.0f);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("F");
+		}
+
+		@Test
+		void indexIntoPrimitiveDoubleArray() {
+			double[] doubles = { 3.0d, 4.0d, 5.0d };
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(expression.getValue(doubles)).isEqualTo(4.0d);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(doubles)).isEqualTo(4.0d);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("D");
+		}
+
+		@Test
+		void indexIntoPrimitiveCharArray() {
+			char[] chars = { 'a', 'b', 'c' };
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(expression.getValue(chars)).isEqualTo('b');
+			assertCanCompile(expression);
+			assertThat(expression.getValue(chars)).isEqualTo('b');
+			assertThat(getAst().getExitDescriptor()).isEqualTo("C");
+		}
+
+		@Test
+		void indexIntoStringArray() {
+			String[] strings = { "a", "b", "c" };
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(expression.getValue(strings)).isEqualTo("a");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(strings)).isEqualTo("a");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+		}
+
+		@Test
+		void indexIntoNumberArray() {
+			Number[] numbers = { 2, 8, 9 };
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(expression.getValue(numbers)).isEqualTo(8);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(numbers)).isEqualTo(8);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Number");
+		}
+
+		@Test
+		void indexInto2DPrimitiveIntArray() {
+			int[][] array = new int[][] {
+				{ 1, 2, 3 },
+				{ 4, 5, 6 }
+			};
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("4 5 6");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("4 5 6");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("[I");
+
+			expression = parser.parseExpression("[1][2]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("6");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("6");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
+		}
+
+		@Test
+		void indexInto2DStringArray() {
+			String[][] array = new String[][] {
+				{ "a", "b", "c" },
+				{ "d", "e", "f" }
+			};
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("d e f");
+			assertCanCompile(expression);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("[Ljava/lang/String");
+			assertThat(stringify(expression.getValue(array))).isEqualTo("d e f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("[Ljava/lang/String");
+
+			expression = parser.parseExpression("[1][2]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("f");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void indexIntoArrayOfListOfString() {
+			List<String>[] array = new List[] {
+				List.of("a", "b", "c"),
+				List.of("d", "e", "f")
+			};
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("d e f");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("d e f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/util/List");
+
+			expression = parser.parseExpression("[1][2]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("f");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void indexIntoArrayOfMap() {
+			Map<String, String>[] array = new Map[] { Map.of("key", "value1") };
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("{key=value1}");
+			assertCanCompile(expression);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/util/Map");
+			assertThat(stringify(expression.getValue(array))).isEqualTo("{key=value1}");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/util/Map");
+
+			expression = parser.parseExpression("[0]['key']");
+
+			assertThat(stringify(expression.getValue(array))).isEqualTo("value1");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(array))).isEqualTo("value1");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoListOfString() {
+			List<String> list = List.of("aaa", "bbb", "ccc");
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(expression.getValue(list)).isEqualTo("bbb");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(list)).isEqualTo("bbb");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoListOfInteger() {
+			List<Integer> list = List.of(123, 456, 789);
+
+			expression = parser.parseExpression("[2]");
+
+			assertThat(expression.getValue(list)).isEqualTo(789);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(list)).isEqualTo(789);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoListOfStringArray() {
+			List<String[]> list = List.of(
+				new String[] { "a", "b", "c" },
+				new String[] { "d", "e", "f" }
+			);
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d e f");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d e f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			expression = parser.parseExpression("[1][0]");
+
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+		}
+
+		@Test
+		void indexIntoListOfIntegerArray() {
+			List<Integer[]> list = List.of(
+				new Integer[] { 1, 2, 3 },
+				new Integer[] { 4, 5, 6 }
+			);
+
+			expression = parser.parseExpression("[0]");
+
+			assertThat(stringify(expression.getValue(list))).isEqualTo("1 2 3");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(list))).isEqualTo("1 2 3");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			expression = parser.parseExpression("[0][1]");
+
+			assertThat(expression.getValue(list)).isEqualTo(2);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(list)).isEqualTo(2);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Integer");
+		}
+
+		@Test
+		void indexIntoListOfListOfString() {
+			List<List<String>> list = List.of(
+				List.of("a", "b", "c"),
+				List.of("d", "e", "f")
+			);
+
+			expression = parser.parseExpression("[1]");
+
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d e f");
+			assertCanCompile(expression);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+			assertThat(stringify(expression.getValue(list))).isEqualTo("d e f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			expression = parser.parseExpression("[1][2]");
+
+			assertThat(stringify(expression.getValue(list))).isEqualTo("f");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(list))).isEqualTo("f");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoMap() {
+			Map<String, Integer> map = Map.of("aaa", 111);
+
+			expression = parser.parseExpression("['aaa']");
+
+			assertThat(expression.getValue(map)).isEqualTo(111);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(map)).isEqualTo(111);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoMapOfListOfString() {
+			Map<String, List<String>> map = Map.of("foo", List.of("a", "b", "c"));
+
+			expression = parser.parseExpression("['foo']");
+
+			assertThat(stringify(expression.getValue(map))).isEqualTo("a b c");
+			assertCanCompile(expression);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+			assertThat(stringify(expression.getValue(map))).isEqualTo("a b c");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			expression = parser.parseExpression("['foo'][2]");
+
+			assertThat(stringify(expression.getValue(map))).isEqualTo("c");
+			assertCanCompile(expression);
+			assertThat(stringify(expression.getValue(map))).isEqualTo("c");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test
+		void indexIntoObject() {
+			TestClass6 tc = new TestClass6();
+
+			// field access
+			expression = parser.parseExpression("['orange']");
+
+			assertThat(expression.getValue(tc)).isEqualTo("value1");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(tc)).isEqualTo("value1");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+
+			// field access
+			expression = parser.parseExpression("['peach']");
+
+			assertThat(expression.getValue(tc)).isEqualTo(34L);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(tc)).isEqualTo(34L);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("J");
+
+			// property access (getter)
+			expression = parser.parseExpression("['banana']");
+
+			assertThat(expression.getValue(tc)).isEqualTo("value3");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(tc)).isEqualTo("value3");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/String");
+		}
+
+		@Test  // gh-32694, gh-32908
+		void indexIntoArrayUsingIntegerWrapper() {
+			context.setVariable("array", new int[] {1, 2, 3, 4});
+			context.setVariable("index", 2);
+
+			expression = parser.parseExpression("#array[#index]");
+
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("I");
+		}
+
+		@Test  // gh-32694, gh-32908
+		void indexIntoListUsingIntegerWrapper() {
+			context.setVariable("list", List.of(1, 2, 3, 4));
+			context.setVariable("index", 2);
+
+			expression = parser.parseExpression("#list[#index]");
+
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo(3);
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		@Test  // gh-32903
+		void indexIntoMapUsingPrimitiveLiteral() {
+			Map<Object, String> map = Map.of(
+					false, "0",   // BooleanLiteral
+					1, "ABC",     // IntLiteral
+					2L, "XYZ",    // LongLiteral
+					9.99F, "~10", // FloatLiteral
+					3.14159, "PI" // RealLiteral
+				);
+			context.setVariable("map", map);
+
+			// BooleanLiteral
+			expression = parser.parseExpression("#map[false]");
+			assertThat(expression.getValue(context)).isEqualTo("0");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("0");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// IntLiteral
+			expression = parser.parseExpression("#map[1]");
+			assertThat(expression.getValue(context)).isEqualTo("ABC");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("ABC");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// LongLiteral
+			expression = parser.parseExpression("#map[2L]");
+			assertThat(expression.getValue(context)).isEqualTo("XYZ");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("XYZ");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// FloatLiteral
+			expression = parser.parseExpression("#map[9.99F]");
+			assertThat(expression.getValue(context)).isEqualTo("~10");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("~10");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+
+			// RealLiteral
+			expression = parser.parseExpression("#map[3.14159]");
+			assertThat(expression.getValue(context)).isEqualTo("PI");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(context)).isEqualTo("PI");
+			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
+		}
+
+		private String stringify(Object object) {
+			Stream<? extends Object> stream;
+			if (object instanceof Collection<?> collection) {
+				stream = collection.stream();
+			}
+			else if (object instanceof Object[] objects) {
+				stream = Arrays.stream(objects);
+			}
+			else if (object instanceof int[] ints) {
+				stream = Arrays.stream(ints).mapToObj(Integer::valueOf);
+			}
+			else {
+				return String.valueOf(object);
+			}
+			return stream.map(Object::toString).collect(Collectors.joining(" "));
+		}
+
+	}
 
 	@Test
 	void typeReference() {
@@ -768,6 +1259,34 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(context)).isNull();
 	}
 
+	@Test  // gh-27421
+	public void nullSafeMethodChainingWithNonStaticVoidMethod() throws Exception {
+		FooObjectHolder foh = new FooObjectHolder();
+		StandardEvaluationContext context = new StandardEvaluationContext(foh);
+		SpelExpression expression = (SpelExpression) parser.parseExpression("getFoo()?.doFoo()");
+
+		FooObject.doFooInvoked = false;
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isTrue();
+
+		FooObject.doFooInvoked = false;
+		foh.foo = null;
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isFalse();
+
+		assertCanCompile(expression);
+
+		FooObject.doFooInvoked = false;
+		foh.foo = new FooObject();
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isTrue();
+
+		FooObject.doFooInvoked = false;
+		foh.foo = null;
+		assertThat(expression.getValue(context)).isNull();
+		assertThat(FooObject.doFooInvoked).isFalse();
+	}
+
 	@Test
 	public void nullsafeMethodChaining_SPR16489() throws Exception {
 		FooObjectHolder foh = new FooObjectHolder();
@@ -995,6 +1514,60 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(ctx).toString()).isEqualTo("4.0");
 		assertCanCompile(expression);
 		assertThat(expression.getValue(ctx).toString()).isEqualTo("4.0");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"voidMethod", "voidWrapperMethod"})
+	public void voidFunctionReference(String method) throws Exception {
+		assertVoidFunctionReferenceBehavior(method);
+	}
+
+	private void assertVoidFunctionReferenceBehavior(String methodName) throws Exception {
+		Method method = getClass().getDeclaredMethod(methodName, String.class);
+
+		EvaluationContext ctx = new StandardEvaluationContext();
+		ctx.setVariable("voidMethod", method);
+
+		expression = parser.parseExpression("#voidMethod('a')");
+
+		voidMethodInvokedWith = null;
+		expression.getValue(ctx);
+		assertThat(voidMethodInvokedWith).isEqualTo("a");
+		assertCanCompile(expression);
+
+		voidMethodInvokedWith = null;
+		expression.getValue(ctx);
+		assertThat(voidMethodInvokedWith).isEqualTo("a");
+		assertCanCompile(expression);
+
+		voidMethodInvokedWith = null;
+		expression.getValue(ctx);
+		assertThat(voidMethodInvokedWith).isEqualTo("a");
+		assertCanCompile(expression);
+
+		expression = parser.parseExpression("#voidMethod(#a)");
+		ctx.setVariable("a", "foo");
+
+		voidMethodInvokedWith = null;
+		expression.getValue(ctx);
+		assertThat(voidMethodInvokedWith).isEqualTo("foo");
+		assertCanCompile(expression);
+
+		voidMethodInvokedWith = null;
+		expression.getValue(ctx);
+		assertThat(voidMethodInvokedWith).isEqualTo("foo");
+		assertCanCompile(expression);
+	}
+
+	private static String voidMethodInvokedWith;
+
+	public static Void voidWrapperMethod(String str) {
+		voidMethodInvokedWith = str;
+		return null;
+	}
+
+	public static void voidMethod(String str) {
+		voidMethodInvokedWith = str;
 	}
 
 	@Test
@@ -3841,6 +4414,74 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		tc.reset();
 	}
 
+	@Test  // gh-27421
+	public void nullSafeInvocationOfNonStaticVoidMethod() {
+		// non-static method, no args, void return
+		expression = parser.parseExpression("new %s()?.one()".formatted(TestClass5.class.getName()));
+
+		assertCantCompile(expression);
+
+		TestClass5._i = 0;
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+
+		TestClass5._i = 0;
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+	}
+
+	@Test  // gh-27421
+	public void nullSafeInvocationOfStaticVoidMethod() {
+		// static method, no args, void return
+		expression = parser.parseExpression("T(%s)?.two()".formatted(TestClass5.class.getName()));
+
+		assertCantCompile(expression);
+
+		TestClass5._i = 0;
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+
+		TestClass5._i = 0;
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+	}
+
+	@Test  // gh-27421
+	public void nullSafeInvocationOfNonStaticVoidWrapperMethod() {
+		// non-static method, no args, Void return
+		expression = parser.parseExpression("new %s()?.oneVoidWrapper()".formatted(TestClass5.class.getName()));
+
+		assertCantCompile(expression);
+
+		TestClass5._i = 0;
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+
+		TestClass5._i = 0;
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+	}
+
+	@Test  // gh-27421
+	public void nullSafeInvocationOfStaticVoidWrapperMethod() {
+		// static method, no args, Void return
+		expression = parser.parseExpression("T(%s)?.twoVoidWrapper()".formatted(TestClass5.class.getName()));
+
+		assertCantCompile(expression);
+
+		TestClass5._i = 0;
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+
+		TestClass5._i = 0;
+		assertCanCompile(expression);
+		assertThat(expression.getValue()).isNull();
+		assertThat(TestClass5._i).isEqualTo(1);
+	}
+
 	@Test
 	void methodReference() {
 		TestClass5 tc = new TestClass5();
@@ -5305,84 +5946,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 
-	static class CompilableMapAccessor implements CompilablePropertyAccessor {
-
-		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			Map<?,?> map = (Map<?,?>) target;
-			return map.containsKey(name);
-		}
-
-		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			Map<?,?> map = (Map<?,?>) target;
-			Object value = map.get(name);
-			if (value == null && !map.containsKey(name)) {
-				throw new MapAccessException(name);
-			}
-			return new TypedValue(value);
-		}
-
-		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
-			return true;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-			Map<String, Object> map = (Map<String, Object>) target;
-			map.put(name, newValue);
-		}
-
-		@Override
-		public Class<?>[] getSpecificTargetClasses() {
-			return new Class<?>[] {Map.class};
-		}
-
-		@Override
-		public boolean isCompilable() {
-			return true;
-		}
-
-		@Override
-		public Class<?> getPropertyType() {
-			return Object.class;
-		}
-
-		@Override
-		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
-			String descriptor = cf.lastDescriptor();
-			if (descriptor == null) {
-				cf.loadTarget(mv);
-			}
-			mv.visitLdcInsn(propertyName);
-			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get","(Ljava/lang/Object;)Ljava/lang/Object;",true);
-		}
-	}
-
-
-	/**
-	 * Exception thrown from {@code read} in order to reset a cached
-	 * PropertyAccessor, allowing other accessors to have a try.
-	 */
-	@SuppressWarnings("serial")
-	private static class MapAccessException extends AccessException {
-
-		private final String key;
-
-		public MapAccessException(String key) {
-			super(null);
-			this.key = key;
-		}
-
-		@Override
-		public String getMessage() {
-			return "Map does not contain a value for key '" + this.key + "'";
-		}
-	}
-
-
 	public static class Greeter {
 
 		public String getWorld() {
@@ -5405,7 +5968,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	public static class FooObject {
 
+		static boolean doFooInvoked = false;
+
 		public Object getObject() { return "hello"; }
+		public void doFoo() { doFooInvoked = true; }
 	}
 
 
@@ -5653,9 +6219,23 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			field = null;
 		}
 
-		public void one() { i = 1; }
+		public void one() {
+			_i = 1;
+			this.i = 1;
+		}
+
+		public Void oneVoidWrapper() {
+			_i = 1;
+			this.i = 1;
+			return null;
+		}
 
 		public static void two() { _i = 1; }
+
+		public static Void twoVoidWrapper() {
+			_i = 1;
+			return null;
+		}
 
 		public String three() { return "hello"; }
 		public long four() { return 3277700L; }
@@ -6254,5 +6834,20 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			_valueF2 = value==null?null:Float.valueOf(value);
 		}
 	}
+
+	// NOTE: saveGeneratedClassFile() can be copied to SpelCompiler and uncommented
+	// at the end of createExpressionClass(SpelNodeImpl) in order to review generated
+	// byte code for debugging purposes.
+	//
+	// private static void saveGeneratedClassFile(String stringAST, String className, byte[] data) {
+	//		Path path = Path.of("build", StringUtils.replace(className, "/", ".") + ".class");
+	//		System.out.println("Writing compiled SpEL expression [%s] to [%s]".formatted(stringAST, path.toAbsolutePath()));
+	//		try {
+	//			Files.copy(new ByteArrayInputStream(data), path);
+	//		}
+	//		catch (IOException ex) {
+	//			throw new UncheckedIOException(ex);
+	//		}
+	//	}
 
 }

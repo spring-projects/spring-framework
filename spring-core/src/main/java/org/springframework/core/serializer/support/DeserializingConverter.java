@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.serializer.DefaultDeserializer;
 import org.springframework.core.serializer.Deserializer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -50,10 +51,11 @@ public class DeserializingConverter implements Converter<byte[], Object> {
 	/**
 	 * Create a {@code DeserializingConverter} for using an {@link java.io.ObjectInputStream}
 	 * with the given {@code ClassLoader}.
+	 * @param classLoader the ClassLoader to use
 	 * @since 4.2.1
 	 * @see DefaultDeserializer#DefaultDeserializer(ClassLoader)
 	 */
-	public DeserializingConverter(ClassLoader classLoader) {
+	public DeserializingConverter(@Nullable ClassLoader classLoader) {
 		this.deserializer = new DefaultDeserializer(classLoader);
 	}
 

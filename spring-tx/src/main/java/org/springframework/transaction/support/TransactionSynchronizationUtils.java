@@ -108,7 +108,7 @@ public abstract class TransactionSynchronizationUtils {
 				synchronization.beforeCompletion();
 			}
 			catch (Throwable ex) {
-				logger.debug("TransactionSynchronization.beforeCompletion threw exception", ex);
+				logger.error("TransactionSynchronization.beforeCompletion threw exception", ex);
 			}
 		}
 	}
@@ -172,7 +172,7 @@ public abstract class TransactionSynchronizationUtils {
 					synchronization.afterCompletion(completionStatus);
 				}
 				catch (Throwable ex) {
-					logger.debug("TransactionSynchronization.afterCompletion threw exception", ex);
+					logger.error("TransactionSynchronization.afterCompletion threw exception", ex);
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
@@ -160,7 +159,7 @@ final class SerializableTypeWrapper {
 
 		/**
 		 * Return the source of the type, or {@code null} if not known.
-		 * <p>The default implementations returns {@code null}.
+		 * <p>The default implementation returns {@code null}.
 		 */
 		@Nullable
 		default Object getSource() {
@@ -204,19 +203,23 @@ final class SerializableTypeWrapper {
 				return forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, -1));
 			}
 			else if (Type[].class == method.getReturnType() && ObjectUtils.isEmpty(args)) {
-				Type[] result = new Type[((Type[]) method.invoke(this.provider.getType())).length];
+				Object returnValue = ReflectionUtils.invokeMethod(method, this.provider.getType());
+				if (returnValue == null) {
+					return null;
+				}
+				Type[] result = new Type[((Type[]) returnValue).length];
 				for (int i = 0; i < result.length; i++) {
 					result[i] = forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, i));
 				}
 				return result;
 			}
 
-			try {
-				return method.invoke(this.provider.getType(), args);
+			Type type = this.provider.getType();
+			if (type instanceof TypeVariable<?> tv && method.getName().equals("getName")) {
+				// Avoid reflection for common comparison of type variables
+				return tv.getName();
 			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+			return ReflectionUtils.invokeMethod(method, type, args);
 		}
 	}
 

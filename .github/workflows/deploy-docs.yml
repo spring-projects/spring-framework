@@ -1,0 +1,34 @@
+name: Deploy Docs
+on:
+  push:
+    branches:
+      - 'main'
+      - '*.x'
+      - '!gh-pages'
+    tags:
+      - 'v*'
+  repository_dispatch:
+    types: request-build-reference # legacy
+  workflow_dispatch:
+permissions:
+  actions: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'spring-projects'
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        ref: docs-build
+        fetch-depth: 1
+    - name: Dispatch (partial build)
+      if: github.ref_type == 'branch'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh workflow run deploy-docs.yml -r $(git rev-parse --abbrev-ref HEAD) -f build-refname=${{ github.ref_name }}
+    - name: Dispatch (full build)
+      if: github.ref_type == 'tag'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh workflow run deploy-docs.yml -r $(git rev-parse --abbrev-ref HEAD)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,12 @@ import org.graalvm.nativeimage.hosted.Feature;
 class PreComputeFieldFeature implements Feature {
 
 	private static Pattern[] patterns = {
-			Pattern.compile(Pattern.quote("org.springframework.core.NativeDetector#imageCode")),
-			Pattern.compile(Pattern.quote("org.springframework.cglib.core.AbstractClassGenerator#imageCode")),
+			Pattern.compile(Pattern.quote("org.springframework.core.NativeDetector#inNativeImage")),
+			Pattern.compile(Pattern.quote("org.springframework.cglib.core.AbstractClassGenerator#inNativeImage")),
+			Pattern.compile(Pattern.quote("org.springframework.aot.AotDetector#inNativeImage")),
 			Pattern.compile(Pattern.quote("org.springframework.") + ".*#.*Present"),
 			Pattern.compile(Pattern.quote("org.springframework.") + ".*#.*PRESENT"),
-			Pattern.compile(Pattern.quote("reactor.") + ".*#.*Available"),
+			Pattern.compile(Pattern.quote("reactor.core.") + ".*#.*Available"),
 			Pattern.compile(Pattern.quote("org.apache.commons.logging.LogAdapter") + "#.*Present")
 	};
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,10 +75,10 @@ public abstract class AbstractDataSource implements DataSource {
 		throw new UnsupportedOperationException("setLogWriter");
 	}
 
-
-	//---------------------------------------------------------------------
-	// Implementation of JDBC 4.0's Wrapper interface
-	//---------------------------------------------------------------------
+	@Override
+	public Logger getParentLogger() {
+		return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -93,16 +93,6 @@ public abstract class AbstractDataSource implements DataSource {
 	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
 		return iface.isInstance(this);
-	}
-
-
-	//---------------------------------------------------------------------
-	// Implementation of JDBC 4.1's getParentLogger method
-	//---------------------------------------------------------------------
-
-	@Override
-	public Logger getParentLogger() {
-		return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	}
 
 }

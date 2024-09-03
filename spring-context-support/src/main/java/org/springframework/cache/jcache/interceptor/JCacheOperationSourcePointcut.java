@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * A Pointcut that matches if the underlying {@link JCacheOperationSource}
+ * A {@code Pointcut} that matches if the underlying {@link JCacheOperationSource}
  * has an operation for a given method.
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @deprecated since 6.0.10, as it is not used by the framework anymore
  */
+@Deprecated(since = "6.0.10", forRemoval = true)
 @SuppressWarnings("serial")
 public abstract class JCacheOperationSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
@@ -49,13 +51,8 @@ public abstract class JCacheOperationSourcePointcut extends StaticMethodMatcherP
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof JCacheOperationSourcePointcut otherPc)) {
-			return false;
-		}
-		return ObjectUtils.nullSafeEquals(getCacheOperationSource(), otherPc.getCacheOperationSource());
+		return (this == other || (other instanceof JCacheOperationSourcePointcut that &&
+				ObjectUtils.nullSafeEquals(getCacheOperationSource(), that.getCacheOperationSource())));
 	}
 
 	@Override

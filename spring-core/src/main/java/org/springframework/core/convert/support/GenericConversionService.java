@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,8 +205,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * @param targetType the target type
 	 * @return the converted value
 	 * @throws ConversionException if a conversion exception occurred
-	 * @throws IllegalArgumentException if targetType is {@code null},
-	 * or sourceType is {@code null} but source is not {@code null}
+	 * @throws IllegalArgumentException if targetType is {@code null}
 	 */
 	@Nullable
 	public Object convert(@Nullable Object source, TypeDescriptor targetType) {
@@ -388,7 +387,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		@Override
 		public String toString() {
-			return (this.typeInfo + " : " + this.converter);
+			return this.typeInfo + " : " + this.converter;
 		}
 	}
 
@@ -439,7 +438,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		@Override
 		public String toString() {
-			return (this.typeInfo + " : " + this.converterFactory);
+			return this.typeInfo + " : " + this.converterFactory;
 		}
 	}
 
@@ -460,25 +459,19 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof ConverterCacheKey otherKey)) {
-				return false;
-			}
-			return (this.sourceType.equals(otherKey.sourceType)) &&
-					this.targetType.equals(otherKey.targetType);
+			return (this == other || (other instanceof ConverterCacheKey that &&
+					this.sourceType.equals(that.sourceType)) &&
+					this.targetType.equals(that.targetType));
 		}
 
 		@Override
 		public int hashCode() {
-			return (this.sourceType.hashCode() * 29 + this.targetType.hashCode());
+			return this.sourceType.hashCode() * 29 + this.targetType.hashCode();
 		}
 
 		@Override
 		public String toString() {
-			return ("ConverterCacheKey [sourceType = " + this.sourceType +
-					", targetType = " + this.targetType + "]");
+			return "ConverterCacheKey [sourceType = " + this.sourceType + ", targetType = " + this.targetType + "]";
 		}
 
 		@Override

@@ -1,0 +1,435 @@
+[[testcontext-executing-sql]]
+= Executing SQL Scripts
+
+When writing integration tests against a relational database, it is often beneficial to
+run SQL scripts to modify the database schema or insert test data into tables. The
+`spring-jdbc` module provides support for _initializing_ an embedded or existing database
+by executing SQL scripts when the Spring `ApplicationContext` is loaded. See
+xref:data-access/jdbc/embedded-database-support.adoc[Embedded database support] and
+xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-dao-testing[Testing data access logic with an embedded database]
+ for details.
+
+Although it is very useful to initialize a database for testing _once_ when the
+`ApplicationContext` is loaded, sometimes it is essential to be able to modify the
+database _during_ integration tests. The following sections explain how to run SQL
+scripts programmatically and declaratively during integration tests.
+
+[[testcontext-executing-sql-programmatically]]
+== Executing SQL scripts programmatically
+
+Spring provides the following options for executing SQL scripts programmatically within
+integration test methods.
+
+* `org.springframework.jdbc.datasource.init.ScriptUtils`
+* `org.springframework.jdbc.datasource.init.ResourceDatabasePopulator`
+* `org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests`
+* `org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests`
+
+`ScriptUtils` provides a collection of static utility methods for working with SQL
+scripts and is mainly intended for internal use within the framework. However, if you
+require full control over how SQL scripts are parsed and run, `ScriptUtils` may suit
+your needs better than some of the other alternatives described later. See the
+{api-spring-framework}/jdbc/datasource/init/ScriptUtils.html[javadoc] for individual
+methods in `ScriptUtils` for further details.
+
+`ResourceDatabasePopulator` provides an object-based API for programmatically populating,
+initializing, or cleaning up a database by using SQL scripts defined in external
+resources. `ResourceDatabasePopulator` provides options for configuring the character
+encoding, statement separator, comment delimiters, and error handling flags used when
+parsing and running the scripts. Each of the configuration options has a reasonable
+default value. See the
+{api-spring-framework}/jdbc/datasource/init/ResourceDatabasePopulator.html[javadoc] for
+details on default values. To run the scripts configured in a
+`ResourceDatabasePopulator`, you can invoke either the `populate(Connection)` method to
+run the populator against a `java.sql.Connection` or the `execute(DataSource)` method
+to run the populator against a `javax.sql.DataSource`. The following example
+specifies SQL scripts for a test schema and test data, sets the statement separator to
+`@@`, and run the scripts against a `DataSource`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Test
+	void databaseTest() {
+		ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+		populator.addScripts(
+				new ClassPathResource("test-schema.sql"),
+				new ClassPathResource("test-data.sql"));
+		populator.setSeparator("@@");
+		populator.execute(this.dataSource);
+		// run code that uses the test schema and data
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Test
+	fun databaseTest() {
+		val populator = ResourceDatabasePopulator()
+		populator.addScripts(
+				ClassPathResource("test-schema.sql"),
+				ClassPathResource("test-data.sql"))
+		populator.setSeparator("@@")
+		populator.execute(dataSource)
+		// run code that uses the test schema and data
+	}
+----
+======
+
+Note that `ResourceDatabasePopulator` internally delegates to `ScriptUtils` for parsing
+and running SQL scripts. Similarly, the `executeSqlScript(..)` methods in
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-junit4[`AbstractTransactionalJUnit4SpringContextTests`]
+and xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-testng[`AbstractTransactionalTestNGSpringContextTests`]
+internally use a `ResourceDatabasePopulator` to run SQL scripts. See the Javadoc for the
+various `executeSqlScript(..)` methods for further details.
+
+[[testcontext-executing-sql-declaratively]]
+== Executing SQL scripts declaratively with @Sql
+
+In addition to the aforementioned mechanisms for running SQL scripts programmatically,
+you can declaratively configure SQL scripts in the Spring TestContext Framework.
+Specifically, you can declare the `@Sql` annotation on a test class or test method to
+configure individual SQL statements or the resource paths to SQL scripts that should be
+run against a given database before or after an integration test method. Support for
+`@Sql` is provided by the `SqlScriptsTestExecutionListener`, which is enabled by default.
+
+NOTE: Method-level `@Sql` declarations override class-level declarations by default. As
+of Spring Framework 5.2, however, this behavior may be configured per test class or per
+test method via `@SqlMergeMode`. See
+xref:testing/testcontext-framework/executing-sql.adoc#testcontext-executing-sql-declaratively-script-merging[Merging and Overriding Configuration with `@SqlMergeMode`] for further details.
+
+[[testcontext-executing-sql-declaratively-script-resources]]
+=== Path Resource Semantics
+
+Each path is interpreted as a Spring `Resource`. A plain path (for example,
+`"schema.sql"`) is treated as a classpath resource that is relative to the package in
+which the test class is defined. A path starting with a slash is treated as an absolute
+classpath resource (for example, `"/org/example/schema.sql"`). A path that references a
+URL (for example, a path prefixed with `classpath:`, `file:`, `http:`) is loaded by using
+the specified resource protocol.
+
+The following example shows how to use `@Sql` at the class level and at the method level
+within a JUnit Jupiter based integration test class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitConfig
+	@Sql("/test-schema.sql")
+	class DatabaseTests {
+
+		@Test
+		void emptySchemaTest() {
+			// run code that uses the test schema without any test data
+		}
+
+		@Test
+		@Sql({"/test-schema.sql", "/test-user-data.sql"})
+		void userTest() {
+			// run code that uses the test schema and test data
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitConfig
+	@Sql("/test-schema.sql")
+	class DatabaseTests {
+
+		@Test
+		fun emptySchemaTest() {
+			// run code that uses the test schema without any test data
+		}
+
+		@Test
+		@Sql("/test-schema.sql", "/test-user-data.sql")
+		fun userTest() {
+			// run code that uses the test schema and test data
+		}
+	}
+----
+======
+
+[[testcontext-executing-sql-declaratively-script-detection]]
+=== Default Script Detection
+
+If no SQL scripts or statements are specified, an attempt is made to detect a `default`
+script, depending on where `@Sql` is declared. If a default cannot be detected, an
+`IllegalStateException` is thrown.
+
+* Class-level declaration: If the annotated test class is `com.example.MyTest`, the
+  corresponding default script is `classpath:com/example/MyTest.sql`.
+* Method-level declaration: If the annotated test method is named `testMethod()` and is
+  defined in the class `com.example.MyTest`, the corresponding default script is
+  `classpath:com/example/MyTest.testMethod.sql`.
+
+[[testcontext-executing-sql-declaratively-multiple-annotations]]
+=== Declaring Multiple `@Sql` Sets
+
+If you need to configure multiple sets of SQL scripts for a given test class or test
+method but with different syntax configuration, different error handling rules, or
+different execution phases per set, you can declare multiple instances of `@Sql`. With
+Java 8, you can use `@Sql` as a repeatable annotation. Otherwise, you can use the
+`@SqlGroup` annotation as an explicit container for declaring multiple instances of
+`@Sql`.
+
+The following example shows how to use `@Sql` as a repeatable annotation with Java 8:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Test
+	@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`"))
+	@Sql("/test-user-data.sql")
+	void userTest() {
+		// run code that uses the test schema and test data
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// Repeatable annotations with non-SOURCE retention are not yet supported by Kotlin
+----
+======
+
+In the scenario presented in the preceding example, the `test-schema.sql` script uses a
+different syntax for single-line comments.
+
+The following example is identical to the preceding example, except that the `@Sql`
+declarations are grouped together within `@SqlGroup`. With Java 8 and above, the use of
+`@SqlGroup` is optional, but you may need to use `@SqlGroup` for compatibility with
+other JVM languages such as Kotlin.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Test
+	@SqlGroup({
+		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
+		@Sql("/test-user-data.sql")
+	)}
+	void userTest() {
+		// run code that uses the test schema and test data
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Test
+	@SqlGroup(
+		Sql("/test-schema.sql", config = SqlConfig(commentPrefix = "`")),
+		Sql("/test-user-data.sql"))
+	fun userTest() {
+		// Run code that uses the test schema and test data
+	}
+----
+======
+
+[[testcontext-executing-sql-declaratively-script-execution-phases]]
+=== Script Execution Phases
+
+By default, SQL scripts are run before the corresponding test method. However, if
+you need to run a particular set of scripts after the test method (for example, to clean
+up database state), you can use the `executionPhase` attribute in `@Sql`, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Test
+	@Sql(
+		scripts = "create-test-data.sql",
+		config = @SqlConfig(transactionMode = ISOLATED)
+	)
+	@Sql(
+		scripts = "delete-test-data.sql",
+		config = @SqlConfig(transactionMode = ISOLATED),
+		executionPhase = AFTER_TEST_METHOD
+	)
+	void userTest() {
+		// run code that needs the test data to be committed
+		// to the database outside of the test's transaction
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Test
+	@SqlGroup(
+		Sql("create-test-data.sql",
+			config = SqlConfig(transactionMode = ISOLATED)),
+		Sql("delete-test-data.sql",
+			config = SqlConfig(transactionMode = ISOLATED),
+			executionPhase = AFTER_TEST_METHOD))
+	fun userTest() {
+		// run code that needs the test data to be committed
+		// to the database outside of the test's transaction
+	}
+----
+======
+
+Note that `ISOLATED` and `AFTER_TEST_METHOD` are statically imported from
+`Sql.TransactionMode` and `Sql.ExecutionPhase`, respectively.
+
+[[testcontext-executing-sql-declaratively-script-configuration]]
+=== Script Configuration with `@SqlConfig`
+
+You can configure script parsing and error handling by using the `@SqlConfig` annotation.
+When declared as a class-level annotation on an integration test class, `@SqlConfig`
+serves as global configuration for all SQL scripts within the test class hierarchy. When
+declared directly by using the `config` attribute of the `@Sql` annotation, `@SqlConfig`
+serves as local configuration for the SQL scripts declared within the enclosing `@Sql`
+annotation. Every attribute in `@SqlConfig` has an implicit default value, which is
+documented in the javadoc of the corresponding attribute. Due to the rules defined for
+annotation attributes in the Java Language Specification, it is, unfortunately, not
+possible to assign a value of `null` to an annotation attribute. Thus, in order to
+support overrides of inherited global configuration, `@SqlConfig` attributes have an
+explicit default value of either `""` (for Strings), `{}` (for arrays), or `DEFAULT` (for
+enumerations). This approach lets local declarations of `@SqlConfig` selectively override
+individual attributes from global declarations of `@SqlConfig` by providing a value other
+than `""`, `{}`, or `DEFAULT`. Global `@SqlConfig` attributes are inherited whenever
+local `@SqlConfig` attributes do not supply an explicit value other than `""`, `{}`, or
+`DEFAULT`. Explicit local configuration, therefore, overrides global configuration.
+
+The configuration options provided by `@Sql` and `@SqlConfig` are equivalent to those
+supported by `ScriptUtils` and `ResourceDatabasePopulator` but are a superset of those
+provided by the `<jdbc:initialize-database/>` XML namespace element. See the javadoc of
+individual attributes in {api-spring-framework}/test/context/jdbc/Sql.html[`@Sql`] and
+{api-spring-framework}/test/context/jdbc/SqlConfig.html[`@SqlConfig`] for details.
+
+[[testcontext-executing-sql-declaratively-tx]]
+*Transaction management for `@Sql`*
+
+By default, the `SqlScriptsTestExecutionListener` infers the desired transaction
+semantics for scripts configured by using `@Sql`. Specifically, SQL scripts are run
+without a transaction, within an existing Spring-managed transaction (for example, a
+transaction managed by the `TransactionalTestExecutionListener` for a test annotated with
+`@Transactional`), or within an isolated transaction, depending on the configured value
+of the `transactionMode` attribute in `@SqlConfig` and the presence of a
+`PlatformTransactionManager` in the test's `ApplicationContext`. As a bare minimum,
+however, a `javax.sql.DataSource` must be present in the test's `ApplicationContext`.
+
+If the algorithms used by `SqlScriptsTestExecutionListener` to detect a `DataSource` and
+`PlatformTransactionManager` and infer the transaction semantics do not suit your needs,
+you can specify explicit names by setting the `dataSource` and `transactionManager`
+attributes of `@SqlConfig`. Furthermore, you can control the transaction propagation
+behavior by setting the `transactionMode` attribute of `@SqlConfig` (for example, whether
+scripts should be run in an isolated transaction). Although a thorough discussion of all
+supported options for transaction management with `@Sql` is beyond the scope of this
+reference manual, the javadoc for
+{api-spring-framework}/test/context/jdbc/SqlConfig.html[`@SqlConfig`] and
+{api-spring-framework}/test/context/jdbc/SqlScriptsTestExecutionListener.html[`SqlScriptsTestExecutionListener`]
+provide detailed information, and the following example shows a typical testing scenario
+that uses JUnit Jupiter and transactional tests with `@Sql`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitConfig(TestDatabaseConfig.class)
+	@Transactional
+	class TransactionalSqlScriptsTests {
+
+		final JdbcTemplate jdbcTemplate;
+
+		@Autowired
+		TransactionalSqlScriptsTests(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
+		}
+
+		@Test
+		@Sql("/test-data.sql")
+		void usersTest() {
+			// verify state in test database:
+			assertNumUsers(2);
+			// run code that uses the test data...
+		}
+
+		int countRowsInTable(String tableName) {
+			return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
+		}
+
+		void assertNumUsers(int expected) {
+			assertEquals(expected, countRowsInTable("user"),
+				"Number of rows in the [user] table.");
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitConfig(TestDatabaseConfig::class)
+	@Transactional
+	class TransactionalSqlScriptsTests @Autowired constructor(dataSource: DataSource) {
+
+		val jdbcTemplate: JdbcTemplate = JdbcTemplate(dataSource)
+
+		@Test
+		@Sql("/test-data.sql")
+		fun usersTest() {
+			// verify state in test database:
+			assertNumUsers(2)
+			// run code that uses the test data...
+		}
+
+		fun countRowsInTable(tableName: String): Int {
+			return JdbcTestUtils.countRowsInTable(jdbcTemplate, tableName)
+		}
+
+		fun assertNumUsers(expected: Int) {
+			assertEquals(expected, countRowsInTable("user"),
+					"Number of rows in the [user] table.")
+		}
+	}
+----
+======
+
+Note that there is no need to clean up the database after the `usersTest()` method is
+run, since any changes made to the database (either within the test method or within the
+`/test-data.sql` script) are automatically rolled back by the
+`TransactionalTestExecutionListener` (see xref:testing/testcontext-framework/tx.adoc[transaction management] for
+details).
+
+[[testcontext-executing-sql-declaratively-script-merging]]
+=== Merging and Overriding Configuration with `@SqlMergeMode`
+
+As of Spring Framework 5.2, it is possible to merge method-level `@Sql` declarations with
+class-level declarations. For example, this allows you to provide the configuration for a
+database schema or some common test data once per test class and then provide additional,
+use case specific test data per test method. To enable `@Sql` merging, annotate either
+your test class or test method with `@SqlMergeMode(MERGE)`. To disable merging for a
+specific test method (or specific test subclass), you can switch back to the default mode
+via `@SqlMergeMode(OVERRIDE)`. Consult the xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[`@SqlMergeMode` annotation documentation section]
+ for examples and further details.
+
+

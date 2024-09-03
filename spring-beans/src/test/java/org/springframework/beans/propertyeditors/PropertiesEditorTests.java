@@ -151,7 +151,7 @@ public class PropertiesEditorTests {
 	}
 
 	@Test
-	public void usingMapAsValueSource() throws Exception {
+	public void usingMapAsValueSource() {
 		Map<String, String> map = new HashMap<>();
 		map.put("one", "1");
 		map.put("two", "2");
@@ -160,8 +160,7 @@ public class PropertiesEditorTests {
 		pe.setValue(map);
 		Object value = pe.getValue();
 		assertThat(value).isNotNull();
-		boolean condition = value instanceof Properties;
-		assertThat(condition).isTrue();
+		assertThat(value instanceof Properties).isTrue();
 		Properties props = (Properties) value;
 		assertThat(props).hasSize(3);
 		assertThat(props.getProperty("one")).isEqualTo("1");

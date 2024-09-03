@@ -32,8 +32,8 @@ dependencies {
 	optional(project(":spring-context-support"))  // for JavaMail and JSR-107 support
 	optional(project(":spring-orm"))  // for JPA exception translation support
 	optional(project(":spring-tx"))  // for JPA, @Transactional support
-	optional("javax.cache:cache-api")  // for JCache aspect
 	optional("jakarta.transaction:jakarta.transaction-api")  // for @jakarta.transaction.Transactional support
+	optional("javax.cache:cache-api")  // for JCache aspect
 	testImplementation(project(":spring-core"))  // for CodeStyleAspect
 	testImplementation(project(":spring-test"))
 	testImplementation(testFixtures(project(":spring-context")))

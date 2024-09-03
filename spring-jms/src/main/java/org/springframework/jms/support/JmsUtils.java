@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,7 +217,7 @@ public abstract class JmsUtils {
 		try {
 			session.commit();
 		}
-		catch (jakarta.jms.TransactionInProgressException | jakarta.jms.IllegalStateException ex) {
+		catch (jakarta.jms.TransactionInProgressException ex) {
 			// Ignore -> can only happen in case of a JTA transaction.
 		}
 	}
@@ -232,7 +232,7 @@ public abstract class JmsUtils {
 		try {
 			session.rollback();
 		}
-		catch (jakarta.jms.TransactionInProgressException | jakarta.jms.IllegalStateException ex) {
+		catch (jakarta.jms.TransactionInProgressException ex) {
 			// Ignore -> can only happen in case of a JTA transaction.
 		}
 	}

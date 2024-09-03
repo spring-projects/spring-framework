@@ -1,0 +1,84 @@
+[[beans-child-bean-definitions]]
+= Bean Definition Inheritance
+
+A bean definition can contain a lot of configuration information, including constructor
+arguments, property values, and container-specific information, such as the initialization
+method, a static factory method name, and so on. A child bean definition inherits
+configuration data from a parent definition. The child definition can override some
+values or add others as needed. Using parent and child bean definitions can save a lot
+of typing. Effectively, this is a form of templating.
+
+If you work with an `ApplicationContext` interface programmatically, child bean
+definitions are represented by the `ChildBeanDefinition` class. Most users do not work
+with them on this level. Instead, they configure bean definitions declaratively in a class
+such as the `ClassPathXmlApplicationContext`. When you use XML-based configuration
+metadata, you can indicate a child bean definition by using the `parent` attribute,
+specifying the parent bean as the value of this attribute. The following example shows how
+to do so:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="inheritedTestBean" abstract="true"
+			class="org.springframework.beans.TestBean">
+		<property name="name" value="parent"/>
+		<property name="age" value="1"/>
+	</bean>
+
+	<bean id="inheritsWithDifferentClass"
+			class="org.springframework.beans.DerivedTestBean"
+			parent="inheritedTestBean" init-method="initialize">  <1>
+		<property name="name" value="override"/>
+		<!-- the age property value of 1 will be inherited from parent -->
+	</bean>
+----
+<1> Note the `parent` attribute.
+
+A child bean definition uses the bean class from the parent definition if none is
+specified but can also override it. In the latter case, the child bean class must be
+compatible with the parent (that is, it must accept the parent's property values).
+
+A child bean definition inherits scope, constructor argument values, property values, and
+method overrides from the parent, with the option to add new values. Any scope, initialization
+method, destroy method, or `static` factory method settings that you specify
+override the corresponding parent settings.
+
+The remaining settings are always taken from the child definition: depends on,
+autowire mode, dependency check, singleton, and lazy init.
+
+The preceding example explicitly marks the parent bean definition as abstract by using
+the `abstract` attribute. If the parent definition does not specify a class, explicitly
+marking the parent bean definition as `abstract` is required, as the following example
+shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="inheritedTestBeanWithoutClass" abstract="true">
+		<property name="name" value="parent"/>
+		<property name="age" value="1"/>
+	</bean>
+
+	<bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
+			parent="inheritedTestBeanWithoutClass" init-method="initialize">
+		<property name="name" value="override"/>
+		<!-- age will inherit the value of 1 from the parent bean definition-->
+	</bean>
+----
+
+The parent bean cannot be instantiated on its own because it is incomplete, and it is
+also explicitly marked as `abstract`. When a definition is `abstract`, it is
+usable only as a pure template bean definition that serves as a parent definition for
+child definitions. Trying to use such an `abstract` parent bean on its own, by referring
+to it as a ref property of another bean or doing an explicit `getBean()` call with the
+parent bean ID returns an error. Similarly, the container's internal
+`preInstantiateSingletons()` method ignores bean definitions that are defined as
+abstract.
+
+NOTE: `ApplicationContext` pre-instantiates all singletons by default. Therefore, it is
+important (at least for singleton beans) that if you have a (parent) bean definition
+which you intend to use only as a template, and this definition specifies a class, you
+must make sure to set the __abstract__ attribute to __true__, otherwise the application
+context will actually (attempt to) pre-instantiate the `abstract` bean.
+
+
+
+

@@ -60,8 +60,8 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, JdkProxyTxConfig.class, RepoConfigA.class);
 		assertThatExceptionOfType(BeanCreationException.class)
-			.isThrownBy(ctx::refresh)
-			.withCauseInstanceOf(IllegalStateException.class);
+				.isThrownBy(ctx::refresh)
+				.withCauseInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -70,7 +70,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 		ctx.register(Config.class, SubclassProxyTxConfig.class, RepoConfigA.class);
 		ctx.refresh();
 
-		Thread.sleep(100);  // allow @Scheduled method to be called several times
+		Thread.sleep(200);  // allow @Scheduled method to be called several times
 
 		MyRepository repository = ctx.getBean(MyRepository.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
@@ -85,7 +85,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 		ctx.register(Config.class, JdkProxyTxConfig.class, RepoConfigB.class);
 		ctx.refresh();
 
-		Thread.sleep(100);  // allow @Scheduled method to be called several times
+		Thread.sleep(200);  // allow @Scheduled method to be called several times
 
 		MyRepositoryWithScheduledMethod repository = ctx.getBean(MyRepositoryWithScheduledMethod.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
@@ -100,7 +100,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 		ctx.register(AspectConfig.class, MyRepositoryWithScheduledMethodImpl.class);
 		ctx.refresh();
 
-		Thread.sleep(100);  // allow @Scheduled method to be called several times
+		Thread.sleep(200);  // allow @Scheduled method to be called several times
 
 		MyRepositoryWithScheduledMethod repository = ctx.getBean(MyRepositoryWithScheduledMethod.class);
 		assertThat(AopUtils.isCglibProxy(repository)).isTrue();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,13 +85,33 @@ class ClassPathScanningCandidateComponentProviderTests {
 			ClassPathScanningCandidateComponentProviderTests.class.getClassLoader(),
 			new ClassPathResource("spring.components", NamedComponent.class));
 
+	private static final Set<Class<?>> springComponents = Set.of(
+			DefaultNamedComponent.class,
+			NamedComponent.class,
+			FooServiceImpl.class,
+			StubFooDao.class,
+			NamedStubDao.class,
+			ServiceInvocationCounter.class,
+			BarComponent.class
+	);
+
+	private static final Set<Class<?>> scannedJakartaComponents = Set.of(
+			JakartaNamedComponent.class,
+			JakartaManagedBeanComponent.class
+	);
+
+	private static final Set<Class<?>> indexedJakartaComponents = Set.of(
+			IndexedJakartaNamedComponent.class,
+			IndexedJakartaManagedBeanComponent.class
+	);
+
 
 	@Test
 	void defaultsWithScan() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
 		provider.setResourceLoader(new DefaultResourceLoader(
 				CandidateComponentsTestClassLoader.disableIndex(getClass().getClassLoader())));
-		testDefault(provider, true, false);
+		testDefault(provider, TEST_BASE_PACKAGE, true, false);
 	}
 
 	@Test
@@ -101,32 +121,9 @@ class ClassPathScanningCandidateComponentProviderTests {
 		testDefault(provider, "example", true, true);
 	}
 
-	private static final Set<Class<?>> springComponents = Set.of(
-			DefaultNamedComponent.class,
-			NamedComponent.class,
-			FooServiceImpl.class,
-			StubFooDao.class,
-			NamedStubDao.class,
-			ServiceInvocationCounter.class,
-			BarComponent.class
-		);
+	private void testDefault(ClassPathScanningCandidateComponentProvider provider, String basePackage,
+			boolean includeScannedJakartaComponents, boolean includeIndexedJakartaComponents) {
 
-	private static final Set<Class<?>> scannedJakartaComponents = Set.of(
-			JakartaNamedComponent.class,
-			JakartaManagedBeanComponent.class
-		);
-
-	private static final Set<Class<?>> indexedJakartaComponents = Set.of(
-			IndexedJakartaNamedComponent.class,
-			IndexedJakartaManagedBeanComponent.class
-		);
-
-
-	private void testDefault(ClassPathScanningCandidateComponentProvider provider, boolean includeScannedJakartaComponents, boolean includeIndexedJakartaComponents) {
-		testDefault(provider, TEST_BASE_PACKAGE, includeScannedJakartaComponents, includeIndexedJakartaComponents);
-	}
-
-	private void testDefault(ClassPathScanningCandidateComponentProvider provider, String basePackage, boolean includeScannedJakartaComponents, boolean includeIndexedJakartaComponents) {
 		Set<Class<?>> expectedTypes = new HashSet<>(springComponents);
 		if (includeScannedJakartaComponents) {
 			expectedTypes.addAll(scannedJakartaComponents);
@@ -205,7 +202,7 @@ class ClassPathScanningCandidateComponentProviderTests {
 
 	private void testCustomAnnotationTypeIncludeFilter(ClassPathScanningCandidateComponentProvider provider) {
 		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
-		testDefault(provider, false, false);
+		testDefault(provider, TEST_BASE_PACKAGE, false, false);
 	}
 
 	@Test

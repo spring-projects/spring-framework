@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextAnnotationUtils;
@@ -91,6 +90,10 @@ import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
  * {@link TestContextTransactionUtils#retrieveTransactionManager} for details
  * on permissible configuration constellations and on the algorithms used to
  * locate these beans.
+ *
+ * <h3>Required Dependencies</h3>
+ * <p>Use of this listener requires the {@code spring-jdbc} and {@code spring-tx}
+ * modules as well as their transitive dependencies to be present on the classpath.
  *
  * @author Sam Brannen
  * @author Dmitry Semukhin
@@ -311,7 +314,6 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		}
 	}
 
-	@NonNull
 	private ResourceDatabasePopulator createDatabasePopulator(MergedSqlConfig mergedSqlConfig) {
 		ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
 		populator.setSqlScriptEncoding(mergedSqlConfig.getEncoding());

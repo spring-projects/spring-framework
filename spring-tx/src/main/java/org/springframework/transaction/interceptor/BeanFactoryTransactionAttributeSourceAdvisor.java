@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.transaction.interceptor;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
-import org.springframework.lang.Nullable;
 
 /**
  * Advisor driven by a {@link TransactionAttributeSource}, used to include
@@ -34,16 +33,7 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class BeanFactoryTransactionAttributeSourceAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 
-	@Nullable
-	private TransactionAttributeSource transactionAttributeSource;
-
-	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut() {
-		@Override
-		@Nullable
-		protected TransactionAttributeSource getTransactionAttributeSource() {
-			return transactionAttributeSource;
-		}
-	};
+	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut();
 
 
 	/**
@@ -53,7 +43,7 @@ public class BeanFactoryTransactionAttributeSourceAdvisor extends AbstractBeanFa
 	 * @see TransactionInterceptor#setTransactionAttributeSource
 	 */
 	public void setTransactionAttributeSource(TransactionAttributeSource transactionAttributeSource) {
-		this.transactionAttributeSource = transactionAttributeSource;
+		this.pointcut.setTransactionAttributeSource(transactionAttributeSource);
 	}
 
 	/**

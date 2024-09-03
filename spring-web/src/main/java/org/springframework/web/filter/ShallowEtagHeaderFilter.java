@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,10 @@ import org.springframework.web.util.WebUtils;
  * <p>Since the ETag is based on the response content, the response
  * (e.g. a {@link org.springframework.web.servlet.View}) is still rendered.
  * As such, this filter only saves bandwidth, not server performance.
+ *
+ * <p>State-changing HTTP methods and other HTTP conditional request headers such as
+ * {@code If-Match} and {@code If-Unmodified-Since} are outside the scope of this filter.
+ * Please consider using {@link ServletWebRequest#checkNotModified(String, long)} instead.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev

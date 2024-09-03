@@ -43,6 +43,7 @@ import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValues;
@@ -353,12 +354,18 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 	}
 
 	@Override
+	public void resetBeanDefinition(String beanName) {
+		this.injectionMetadataCache.remove(beanName);
+	}
+
+	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		String beanName = registeredBean.getBeanName();
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
 		InjectionMetadata metadata = findInjectionMetadata(beanDefinition, beanClass, beanName);
-		Collection<InjectedElement> injectedElements = metadata.getInjectedElements();
+		Collection<InjectedElement> injectedElements = metadata.getInjectedElements(
+				beanDefinition.getPropertyValues());
 		if (!CollectionUtils.isEmpty(injectedElements)) {
 			return new AotContribution(beanClass, injectedElements);
 		}
@@ -369,11 +376,6 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		InjectionMetadata metadata = findPersistenceMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
 		return metadata;
-	}
-
-	@Override
-	public void resetBeanDefinition(String beanName) {
-		this.injectionMetadataCache.remove(beanName);
 	}
 
 	@Override
@@ -769,11 +771,11 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 
 		private final Class<?> target;
 
-		private final Collection<InjectedElement> injectedElements;
+		private final List<InjectedElement> injectedElements;
 
 		AotContribution(Class<?> target, Collection<InjectedElement> injectedElements) {
 			this.target = target;
-			this.injectedElements = injectedElements;
+			this.injectedElements = List.copyOf(injectedElements);
 		}
 
 		@Override
@@ -797,16 +799,44 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 
 		private CodeBlock generateMethodCode(RuntimeHints hints, GeneratedClass generatedClass) {
 			CodeBlock.Builder code = CodeBlock.builder();
-			InjectionCodeGenerator injectionCodeGenerator =
-					new InjectionCodeGenerator(generatedClass.getName(), hints);
-			for (InjectedElement injectedElement : this.injectedElements) {
-				CodeBlock resourceToInject = generateResourceToInjectCode(generatedClass.getMethods(),
-						(PersistenceElement) injectedElement);
-				code.add(injectionCodeGenerator.generateInjectionCode(
-						injectedElement.getMember(), INSTANCE_PARAMETER,
-						resourceToInject));
+			if (this.injectedElements.size() == 1) {
+				code.add(generateInjectedElementMethodCode(hints, generatedClass, this.injectedElements.get(0)));
+			}
+			else {
+				for (InjectedElement injectedElement : this.injectedElements) {
+					code.addStatement(applyInjectedElement(hints, generatedClass, injectedElement));
+				}
 			}
 			code.addStatement("return $L", INSTANCE_PARAMETER);
+			return code.build();
+		}
+
+		private CodeBlock applyInjectedElement(RuntimeHints hints, GeneratedClass generatedClass, InjectedElement injectedElement) {
+			String injectedElementName = injectedElement.getMember().getName();
+			GeneratedMethod generatedMethod = generatedClass.getMethods().add(new String[] { "apply", injectedElementName }, method -> {
+				method.addJavadoc("Apply the persistence injection for '$L'.", injectedElementName);
+				method.addModifiers(javax.lang.model.element.Modifier.PRIVATE,
+						javax.lang.model.element.Modifier.STATIC);
+				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+				method.addParameter(this.target, INSTANCE_PARAMETER);
+				method.addCode(generateInjectedElementMethodCode(hints, generatedClass, injectedElement));
+			});
+			ArgumentCodeGenerator argumentCodeGenerator = ArgumentCodeGenerator
+					.of(RegisteredBean.class, REGISTERED_BEAN_PARAMETER).and(this.target, INSTANCE_PARAMETER);
+			return generatedMethod.toMethodReference().toInvokeCodeBlock(argumentCodeGenerator, generatedClass.getName());
+		}
+
+		private CodeBlock generateInjectedElementMethodCode(RuntimeHints hints, GeneratedClass generatedClass,
+				InjectedElement injectedElement) {
+
+			CodeBlock.Builder code = CodeBlock.builder();
+			InjectionCodeGenerator injectionCodeGenerator =
+					new InjectionCodeGenerator(generatedClass.getName(), hints);
+			CodeBlock resourceToInject = generateResourceToInjectCode(generatedClass.getMethods(),
+					(PersistenceElement) injectedElement);
+			code.add(injectionCodeGenerator.generateInjectionCode(
+					injectedElement.getMember(), INSTANCE_PARAMETER,
+					resourceToInject));
 			return code.build();
 		}
 
@@ -821,7 +851,7 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 						EntityManagerFactoryUtils.class, ListableBeanFactory.class,
 						REGISTERED_BEAN_PARAMETER, unitName);
 			}
-			String[] methodNameParts = {"get", unitName, "EntityManager"};
+			String[] methodNameParts = { "get", unitName, "EntityManager" };
 			GeneratedMethod generatedMethod = generatedMethods.add(methodNameParts, method ->
 					generateGetEntityManagerMethod(method, injectedElement));
 			return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);

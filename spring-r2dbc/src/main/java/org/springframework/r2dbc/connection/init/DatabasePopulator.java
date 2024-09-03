@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import reactor.core.publisher.Mono;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
 import org.springframework.util.Assert;
 
@@ -44,17 +43,18 @@ public interface DatabasePopulator {
 	 * already configured and ready to use, must not be {@code null}
 	 * @return {@link Mono} that initiates script execution and is
 	 * notified upon completion
-	 * @throws ScriptException in all other error cases
+	 * @throws ScriptException in case of any errors
 	 */
-	Mono<Void> populate(Connection connection) throws ScriptException;
+	Mono<Void> populate(Connection connection);
 
 	/**
 	 * Execute the given {@link DatabasePopulator} against the given {@link ConnectionFactory}.
 	 * @param connectionFactory the {@link ConnectionFactory} to execute against
 	 * @return {@link Mono} that initiates {@link DatabasePopulator#populate(Connection)}
 	 * and is notified upon completion
+	 * @throws ScriptException in case of any errors
 	 */
-	default Mono<Void> populate(ConnectionFactory connectionFactory) throws DataAccessException {
+	default Mono<Void> populate(ConnectionFactory connectionFactory) {
 		Assert.notNull(connectionFactory, "ConnectionFactory must not be null");
 		return Mono.usingWhen(ConnectionFactoryUtils.getConnection(connectionFactory), //
 				this::populate, //

@@ -27,8 +27,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import test.mixin.Lockable;
-import test.mixin.LockedException;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
@@ -42,6 +40,8 @@ import org.springframework.aop.testfixture.advice.CountingBeforeAdvice;
 import org.springframework.aop.testfixture.advice.MyThrowsHandler;
 import org.springframework.aop.testfixture.interceptor.NopInterceptor;
 import org.springframework.aop.testfixture.interceptor.TimestampIntroductionInterceptor;
+import org.springframework.aop.testfixture.mixin.Lockable;
+import org.springframework.aop.testfixture.mixin.LockedException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
@@ -139,22 +139,24 @@ public class ProxyFactoryBeanTests {
 	private void testDoubleTargetSourceIsRejected(String name) {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(DBL_TARGETSOURCE_CONTEXT, CLASS));
+
 		assertThatExceptionOfType(BeanCreationException.class).as("Should not allow TargetSource to be specified in interceptorNames as well as targetSource property")
-			.isThrownBy(() -> bf.getBean(name))
-			.havingCause()
-			.isInstanceOf(AopConfigException.class)
-			.withMessageContaining("TargetSource");
+				.isThrownBy(() -> bf.getBean(name))
+				.havingCause()
+				.isInstanceOf(AopConfigException.class)
+				.withMessageContaining("TargetSource");
 	}
 
 	@Test
 	public void testTargetSourceNotAtEndOfInterceptorNamesIsRejected() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(NOTLAST_TARGETSOURCE_CONTEXT, CLASS));
+
 		assertThatExceptionOfType(BeanCreationException.class).as("TargetSource or non-advised object must be last in interceptorNames")
-			.isThrownBy(() -> bf.getBean("targetSourceNotLast"))
-			.havingCause()
-			.isInstanceOf(AopConfigException.class)
-			.withMessageContaining("interceptorNames");
+				.isThrownBy(() -> bf.getBean("targetSourceNotLast"))
+				.havingCause()
+				.isInstanceOf(AopConfigException.class)
+				.withMessageContaining("interceptorNames");
 	}
 
 	@Test
@@ -171,7 +173,7 @@ public class ProxyFactoryBeanTests {
 		assertThat(cba.getCalls()).isEqualTo(1);
 
 		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&directTarget");
-		assertThat(TestBean.class.isAssignableFrom(pfb.getObjectType())).as("Has correct object type").isTrue();
+		assertThat(pfb.getObjectType()).isAssignableTo(TestBean.class);
 	}
 
 	@Test
@@ -181,7 +183,7 @@ public class ProxyFactoryBeanTests {
 		ITestBean tb = (ITestBean) bf.getBean("viaTargetSource");
 		assertThat(tb.getName()).isEqualTo("Adam");
 		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&viaTargetSource");
-		assertThat(TestBean.class.isAssignableFrom(pfb.getObjectType())).as("Has correct object type").isTrue();
+		assertThat(pfb.getObjectType()).isAssignableTo(TestBean.class);
 	}
 
 	@Test
@@ -190,11 +192,15 @@ public class ProxyFactoryBeanTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(TARGETSOURCE_CONTEXT, CLASS));
 
 		ITestBean tb = (ITestBean) bf.getBean("noTarget");
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-				tb.getName())
-			.withMessage("getName");
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(tb::getName).withMessage("getName");
 		FactoryBean<?> pfb = (ProxyFactoryBean) bf.getBean("&noTarget");
-		assertThat(ITestBean.class.isAssignableFrom(pfb.getObjectType())).as("Has correct object type").isTrue();
+		assertThat(pfb.getObjectType()).isAssignableTo(ITestBean.class);
+	}
+
+	@Test
+	public void testGetObjectTypeOnUninitializedFactoryBean() {
+		ProxyFactoryBean pfb = new ProxyFactoryBean();
+		assertThat(pfb.getObjectType()).isNull();
 	}
 
 	/**
@@ -227,12 +233,12 @@ public class ProxyFactoryBeanTests {
 
 	@Test
 	public void testPrototypeInstancesAreNotEqual() {
-		assertThat(ITestBean.class.isAssignableFrom(factory.getType("prototype"))).as("Has correct object type").isTrue();
+		assertThat(factory.getType("prototype")).isAssignableTo(ITestBean.class);
 		ITestBean test2 = (ITestBean) factory.getBean("prototype");
 		ITestBean test2_1 = (ITestBean) factory.getBean("prototype");
 		assertThat(test2).as("Prototype instances !=").isNotSameAs(test2_1);
 		assertThat(test2).as("Prototype instances equal").isEqualTo(test2_1);
-		assertThat(ITestBean.class.isAssignableFrom(factory.getType("prototype"))).as("Has correct object type").isTrue();
+		assertThat(factory.getType("prototype")).isAssignableTo(ITestBean.class);
 	}
 
 	/**
@@ -291,13 +297,13 @@ public class ProxyFactoryBeanTests {
 	@Test
 	public void testCanGetFactoryReferenceAndManipulate() {
 		ProxyFactoryBean config = (ProxyFactoryBean) factory.getBean("&test1");
-		assertThat(ITestBean.class.isAssignableFrom(config.getObjectType())).as("Has correct object type").isTrue();
-		assertThat(ITestBean.class.isAssignableFrom(factory.getType("test1"))).as("Has correct object type").isTrue();
+		assertThat(config.getObjectType()).isAssignableTo(ITestBean.class);
+		assertThat(factory.getType("test1")).isAssignableTo(ITestBean.class);
 		// Trigger lazy initialization.
 		config.getObject();
 		assertThat(config.getAdvisors().length).as("Have one advisors").isEqualTo(1);
-		assertThat(ITestBean.class.isAssignableFrom(config.getObjectType())).as("Has correct object type").isTrue();
-		assertThat(ITestBean.class.isAssignableFrom(factory.getType("test1"))).as("Has correct object type").isTrue();
+		assertThat(config.getObjectType()).isAssignableTo(ITestBean.class);
+		assertThat(factory.getType("test1")).isAssignableTo(ITestBean.class);
 
 		ITestBean tb = (ITestBean) factory.getBean("test1");
 		// no exception

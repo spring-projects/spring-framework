@@ -25,7 +25,7 @@ import org.springframework.cglib.transform.MethodFilterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 
 /**
- * A {@link GeneratorStrategy} suitable for use with {@link org.springframework.cglib.Enhancer} which
+ * A {@link GeneratorStrategy} suitable for use with {@link org.springframework.cglib.proxy.Enhancer} which
  * causes all undeclared exceptions thrown from within a proxied method to be wrapped
  * in an alternative exception of your choice.
  */

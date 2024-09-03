@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -260,7 +260,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 
 	@Override
-	public Mono<Void> populate(Connection connection) throws ScriptException {
+	public Mono<Void> populate(Connection connection) {
 		Assert.notNull(connection, "Connection must not be null");
 		return Flux.fromIterable(this.scripts).concatMap(resource -> {
 			EncodedResource encodedScript = new EncodedResource(resource, this.sqlScriptEncoding);

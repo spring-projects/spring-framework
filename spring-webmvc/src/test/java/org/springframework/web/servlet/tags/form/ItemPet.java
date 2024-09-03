@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import java.beans.PropertyEditorSupport;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author Juergen Hoeller
@@ -45,13 +46,8 @@ public class ItemPet {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof ItemPet otherPet)) {
-			return false;
-		}
-		return (this.name != null && this.name.equals(otherPet.getName()));
+		return (this == other || (other instanceof ItemPet that &&
+				ObjectUtils.nullSafeEquals(this.name, that.getName())));
 	}
 
 	@Override

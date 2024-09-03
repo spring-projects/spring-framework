@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,8 +123,8 @@ public class MethodInvoker {
 
 	/**
 	 * Set a fully qualified static method name to invoke,
-	 * e.g. "example.MyExampleClass.myExampleMethod".
-	 * Convenient alternative to specifying targetClass and targetMethod.
+	 * e.g. "example.MyExampleClass.myExampleMethod". This is a
+	 * convenient alternative to specifying targetClass and targetMethod.
 	 * @see #setTargetClass
 	 * @see #setTargetMethod
 	 */
@@ -157,14 +157,16 @@ public class MethodInvoker {
 	public void prepare() throws ClassNotFoundException, NoSuchMethodException {
 		if (this.staticMethod != null) {
 			int lastDotIndex = this.staticMethod.lastIndexOf('.');
-			if (lastDotIndex == -1 || lastDotIndex == this.staticMethod.length()) {
+			if (lastDotIndex == -1 || lastDotIndex == this.staticMethod.length() - 1) {
 				throw new IllegalArgumentException(
 						"staticMethod must be a fully qualified class plus method name: " +
 						"e.g. 'example.MyExampleClass.myExampleMethod'");
 			}
 			String className = this.staticMethod.substring(0, lastDotIndex);
 			String methodName = this.staticMethod.substring(lastDotIndex + 1);
-			this.targetClass = resolveClassName(className);
+			if (this.targetClass == null || !this.targetClass.getName().equals(className)) {
+				this.targetClass = resolveClassName(className);
+			}
 			this.targetMethod = methodName;
 		}
 

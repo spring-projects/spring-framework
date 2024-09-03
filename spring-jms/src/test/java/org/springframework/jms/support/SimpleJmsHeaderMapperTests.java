@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,11 @@ import org.springframework.messaging.support.MessageBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- *
  * @author Mark Fisher
- * @author Gary Russel
+ * @author Gary Russell
  * @author Stephane Nicoll
  */
-public class SimpleJmsHeaderMapperTests {
+class SimpleJmsHeaderMapperTests {
 
 	private final SimpleJmsHeaderMapper mapper = new SimpleJmsHeaderMapper();
 
@@ -45,7 +44,7 @@ public class SimpleJmsHeaderMapperTests {
 	// Outbound mapping
 
 	@Test
-	public void jmsReplyToMappedFromHeader() throws JMSException {
+	void jmsReplyToMappedFromHeader() throws JMSException {
 		Destination replyTo = new Destination() {};
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.REPLY_TO, replyTo).build();
@@ -57,7 +56,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void JmsReplyToIgnoredIfIncorrectType() throws JMSException {
+	void JmsReplyToIgnoredIfIncorrectType() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.REPLY_TO, "not-a-destination").build();
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
@@ -66,7 +65,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsCorrelationIdMappedFromHeader() throws JMSException {
+	void jmsCorrelationIdMappedFromHeader() throws JMSException {
 		String jmsCorrelationId = "ABC-123";
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.CORRELATION_ID, jmsCorrelationId).build();
@@ -77,7 +76,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsCorrelationIdNumberConvertsToString() throws JMSException {
+	void jmsCorrelationIdNumberConvertsToString() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.CORRELATION_ID, 123).build();
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
@@ -86,7 +85,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsCorrelationIdIgnoredIfIncorrectType() throws JMSException {
+	void jmsCorrelationIdIgnoredIfIncorrectType() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.CORRELATION_ID, new Date()).build();
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
@@ -95,7 +94,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsTypeMappedFromHeader() throws JMSException {
+	void jmsTypeMappedFromHeader() throws JMSException {
 		String jmsType = "testing";
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.TYPE, jmsType).build();
@@ -106,7 +105,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsTypeIgnoredIfIncorrectType() throws JMSException {
+	void jmsTypeIgnoredIfIncorrectType() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.TYPE, 123).build();
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
@@ -115,7 +114,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsReadOnlyPropertiesNotMapped() throws JMSException {
+	void jmsReadOnlyPropertiesNotMapped() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.DESTINATION, new Destination() {})
 				.setHeader(JmsHeaders.DELIVERY_MODE, DeliveryMode.NON_PERSISTENT)
@@ -137,7 +136,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void contentTypePropertyMappedFromHeader() throws JMSException {
+	void contentTypePropertyMappedFromHeader() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader(MessageHeaders.CONTENT_TYPE, "foo")
 				.build();
@@ -149,20 +148,18 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void userDefinedPropertyMappedFromHeader() throws JMSException {
+	void userDefinedPropertyMappedFromHeader() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader("foo", 123)
 				.build();
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		mapper.fromHeaders(message.getHeaders(), jmsMessage);
 		Object value = jmsMessage.getObjectProperty("foo");
-		assertThat(value).isNotNull();
-		assertThat(value.getClass()).isEqualTo(Integer.class);
-		assertThat(((Integer) value).intValue()).isEqualTo(123);
+		assertThat(value).isExactlyInstanceOf(Integer.class).isEqualTo(123);
 	}
 
 	@Test
-	public void userDefinedPropertyMappedFromHeaderWithCustomPrefix() throws JMSException {
+	void userDefinedPropertyMappedFromHeaderWithCustomPrefix() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader("foo", 123)
 				.build();
@@ -170,13 +167,11 @@ public class SimpleJmsHeaderMapperTests {
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		mapper.fromHeaders(message.getHeaders(), jmsMessage);
 		Object value = jmsMessage.getObjectProperty("custom_foo");
-		assertThat(value).isNotNull();
-		assertThat(value.getClass()).isEqualTo(Integer.class);
-		assertThat(((Integer) value).intValue()).isEqualTo(123);
+		assertThat(value).isExactlyInstanceOf(Integer.class).isEqualTo(123);
 	}
 
 	@Test
-	public void userDefinedPropertyWithUnsupportedType() throws JMSException {
+	void userDefinedPropertyWithUnsupportedType() throws JMSException {
 		Destination destination = new Destination() {};
 		Message<String> message = initBuilder()
 				.setHeader("destination", destination)
@@ -188,7 +183,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedCorrelationIdPropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedCorrelationIdPropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public String getJMSCorrelationID() throws JMSException {
@@ -199,7 +194,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedDestinationPropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedDestinationPropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public Destination getJMSDestination() throws JMSException {
@@ -210,7 +205,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedDeliveryModePropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedDeliveryModePropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public int getJMSDeliveryMode() throws JMSException {
@@ -221,7 +216,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedExpirationPropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedExpirationPropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public long getJMSExpiration() throws JMSException {
@@ -232,7 +227,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedMessageIdPropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedMessageIdPropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public String getJMSMessageID() throws JMSException {
@@ -243,7 +238,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedPriorityPropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedPriorityPropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public int getJMSPriority() throws JMSException {
@@ -254,7 +249,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedReplyToPropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedReplyToPropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public Destination getJMSReplyTo() throws JMSException {
@@ -265,7 +260,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedRedeliveredPropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedRedeliveredPropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public boolean getJMSRedelivered() throws JMSException {
@@ -276,7 +271,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedTypePropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedTypePropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public String getJMSType() throws JMSException {
@@ -287,7 +282,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedTimestampPropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedTimestampPropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public long getJMSTimestamp() throws JMSException {
@@ -298,7 +293,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToReadDisallowedUserPropertyIsNotFatal() throws JMSException {
+	void attemptToReadDisallowedUserPropertyIsNotFatal() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage() {
 			@Override
 			public Object getObjectProperty(String name) throws JMSException {
@@ -318,7 +313,7 @@ public class SimpleJmsHeaderMapperTests {
 	// Inbound mapping
 
 	@Test
-	public void jmsCorrelationIdMappedToHeader() throws JMSException {
+	void jmsCorrelationIdMappedToHeader() throws JMSException {
 		String correlationId = "ABC-123";
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setJMSCorrelationID(correlationId);
@@ -326,7 +321,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void destinationMappedToHeader() throws JMSException {
+	void destinationMappedToHeader() throws JMSException {
 		Destination destination = new Destination() {};
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setJMSDestination(destination);
@@ -334,7 +329,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsDeliveryModeMappedToHeader() throws JMSException {
+	void jmsDeliveryModeMappedToHeader() throws JMSException {
 		int deliveryMode = 1;
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setJMSDeliveryMode(deliveryMode);
@@ -342,7 +337,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsExpirationMappedToHeader() throws JMSException {
+	void jmsExpirationMappedToHeader() throws JMSException {
 		long expiration = 1000L;
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setJMSExpiration(expiration);
@@ -350,7 +345,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsMessageIdMappedToHeader() throws JMSException {
+	void jmsMessageIdMappedToHeader() throws JMSException {
 		String messageId = "ID:ABC-123";
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setJMSMessageID(messageId);
@@ -358,7 +353,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsPriorityMappedToHeader() throws JMSException {
+	void jmsPriorityMappedToHeader() throws JMSException {
 		int priority = 8;
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setJMSPriority(priority);
@@ -366,7 +361,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsReplyToMappedToHeader() throws JMSException {
+	void jmsReplyToMappedToHeader() throws JMSException {
 		Destination replyTo = new Destination() {};
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setJMSReplyTo(replyTo);
@@ -374,7 +369,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsTypeMappedToHeader() throws JMSException {
+	void jmsTypeMappedToHeader() throws JMSException {
 		String type = "testing";
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setJMSType(type);
@@ -382,7 +377,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void jmsTimestampMappedToHeader() throws JMSException {
+	void jmsTimestampMappedToHeader() throws JMSException {
 		long timestamp = 123L;
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setJMSTimestamp(timestamp);
@@ -390,21 +385,21 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void contentTypePropertyMappedToHeader() throws JMSException {
+	void contentTypePropertyMappedToHeader() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setStringProperty("content_type", "foo");
 		assertInboundHeader(jmsMessage, MessageHeaders.CONTENT_TYPE, "foo");
 	}
 
 	@Test
-	public void userDefinedPropertyMappedToHeader() throws JMSException {
+	void userDefinedPropertyMappedToHeader() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setIntProperty("foo", 123);
 		assertInboundHeader(jmsMessage, "foo", 123);
 	}
 
 	@Test
-	public void userDefinedPropertyMappedToHeaderWithCustomPrefix() throws JMSException {
+	void userDefinedPropertyMappedToHeaderWithCustomPrefix() throws JMSException {
 		jakarta.jms.Message jmsMessage = new StubTextMessage();
 		jmsMessage.setIntProperty("foo", 123);
 		mapper.setInboundPrefix("custom_");
@@ -412,7 +407,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void propertyMappingExceptionIsNotFatal() throws JMSException {
+	void propertyMappingExceptionIsNotFatal() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader("foo", 123)
 				.setHeader("bad", 456)
@@ -437,7 +432,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void illegalArgumentExceptionIsNotFatal() throws JMSException {
+	void illegalArgumentExceptionIsNotFatal() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader("foo", 123)
 				.setHeader("bad", 456)
@@ -462,7 +457,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToWriteDisallowedReplyToPropertyIsNotFatal() throws JMSException {
+	void attemptToWriteDisallowedReplyToPropertyIsNotFatal() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.REPLY_TO, new Destination() {})
 				.setHeader("foo", "bar")
@@ -480,7 +475,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToWriteDisallowedTypePropertyIsNotFatal() throws JMSException {
+	void attemptToWriteDisallowedTypePropertyIsNotFatal() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.TYPE, "someType")
 				.setHeader("foo", "bar")
@@ -498,7 +493,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToWriteDisallowedCorrelationIdStringPropertyIsNotFatal() throws JMSException {
+	void attemptToWriteDisallowedCorrelationIdStringPropertyIsNotFatal() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.CORRELATION_ID, "abc")
 				.setHeader("foo", "bar")
@@ -516,7 +511,7 @@ public class SimpleJmsHeaderMapperTests {
 	}
 
 	@Test
-	public void attemptToWriteDisallowedCorrelationIdNumberPropertyIsNotFatal() throws JMSException {
+	void attemptToWriteDisallowedCorrelationIdNumberPropertyIsNotFatal() throws JMSException {
 		Message<String> message = initBuilder()
 				.setHeader(JmsHeaders.CORRELATION_ID, 123)
 				.setHeader("foo", "bar")

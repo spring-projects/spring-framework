@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory.aot;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -40,18 +41,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Internal {@link BeanRegistrationCodeFragments} implementation used by
- * default.
+ * Internal {@link BeanRegistrationCodeFragments} implementation used by default.
  *
  * @author Phillip Webb
  */
 class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragments {
-
-	/**
-	 * The variable name used to hold the bean type.
-	 */
-	private static final String BEAN_TYPE_VARIABLE = "beanType";
-
 
 	private final BeanRegistrationsCode beanRegistrationsCode;
 
@@ -60,8 +54,8 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	private final BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory;
 
 
-	DefaultBeanRegistrationCodeFragments(BeanRegistrationsCode beanRegistrationsCode,
-			RegisteredBean registeredBean,
+	DefaultBeanRegistrationCodeFragments(
+			BeanRegistrationsCode beanRegistrationsCode, RegisteredBean registeredBean,
 			BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory) {
 
 		this.beanRegistrationsCode = beanRegistrationsCode;
@@ -71,9 +65,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 
 
 	@Override
-	public ClassName getTarget(RegisteredBean registeredBean,
-			Executable constructorOrFactoryMethod) {
-
+	public ClassName getTarget(RegisteredBean registeredBean, Executable constructorOrFactoryMethod) {
 		Class<?> target = extractDeclaringClass(registeredBean.getBeanType(), constructorOrFactoryMethod);
 		while (target.getName().startsWith("java.") && registeredBean.isInnerBean()) {
 			RegisteredBean parent = registeredBean.getParent();
@@ -85,9 +77,8 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 
 	private Class<?> extractDeclaringClass(ResolvableType beanType, Executable executable) {
 		Class<?> declaringClass = ClassUtils.getUserClass(executable.getDeclaringClass());
-		if (executable instanceof Constructor<?>
-				&& AccessControl.forMember(executable).isPublic()
-				&& FactoryBean.class.isAssignableFrom(declaringClass)) {
+		if (executable instanceof Constructor<?> && AccessControl.forMember(executable).isPublic() &&
+				FactoryBean.class.isAssignableFrom(declaringClass)) {
 			return extractTargetClassFromFactoryBean(declaringClass, beanType);
 		}
 		return executable.getDeclaringClass();
@@ -96,8 +87,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	/**
 	 * Extract the target class of a public {@link FactoryBean} based on its
 	 * constructor. If the implementation does not resolve the target class
-	 * because it itself uses a generic, attempt to extract it from the
-	 * bean type.
+	 * because it itself uses a generic, attempt to extract it from the bean type.
 	 * @param factoryBeanType the factory bean type
 	 * @param beanType the bean type
 	 * @return the target class to use
@@ -118,26 +108,49 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 			ResolvableType beanType, BeanRegistrationCode beanRegistrationCode) {
 
 		CodeBlock.Builder code = CodeBlock.builder();
-		code.addStatement(generateBeanTypeCode(beanType));
+		RootBeanDefinition mbd = this.registeredBean.getMergedBeanDefinition();
+		Class<?> beanClass = (mbd.hasBeanClass() ? ClassUtils.getUserClass(mbd.getBeanClass()) : null);
+		CodeBlock beanClassCode = generateBeanClassCode(
+				beanRegistrationCode.getClassName().packageName(),
+				(beanClass != null ? beanClass : beanType.toClass()));
 		code.addStatement("$T $L = new $T($L)", RootBeanDefinition.class,
-				BEAN_DEFINITION_VARIABLE, RootBeanDefinition.class, BEAN_TYPE_VARIABLE);
+				BEAN_DEFINITION_VARIABLE, RootBeanDefinition.class, beanClassCode);
+		if (targetTypeNecessary(beanType, beanClass)) {
+			code.addStatement("$L.setTargetType($L)", BEAN_DEFINITION_VARIABLE, generateBeanTypeCode(beanType));
+		}
 		return code.build();
+	}
+
+	private CodeBlock generateBeanClassCode(String targetPackage, Class<?> beanClass) {
+		if (Modifier.isPublic(beanClass.getModifiers()) || targetPackage.equals(beanClass.getPackageName())) {
+			return CodeBlock.of("$T.class", beanClass);
+		}
+		else {
+			return CodeBlock.of("$S", beanClass.getName());
+		}
 	}
 
 	private CodeBlock generateBeanTypeCode(ResolvableType beanType) {
 		if (!beanType.hasGenerics()) {
-			return CodeBlock.of("$T<?> $L = $T.class", Class.class, BEAN_TYPE_VARIABLE,
-					ClassUtils.getUserClass(beanType.toClass()));
+			return CodeBlock.of("$T.class", ClassUtils.getUserClass(beanType.toClass()));
 		}
-		return CodeBlock.of("$T $L = $L", ResolvableType.class, BEAN_TYPE_VARIABLE,
-				ResolvableTypeCodeGenerator.generateCode(beanType));
+		return ResolvableTypeCodeGenerator.generateCode(beanType);
+	}
+
+	private boolean targetTypeNecessary(ResolvableType beanType, @Nullable Class<?> beanClass) {
+		if (beanType.hasGenerics()) {
+			return true;
+		}
+		if (beanClass != null && this.registeredBean.getMergedBeanDefinition().getFactoryMethodName() != null) {
+			return true;
+		}
+		return (beanClass != null && !beanType.toClass().equals(beanClass));
 	}
 
 	@Override
 	public CodeBlock generateSetBeanDefinitionPropertiesCode(
-			GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode, RootBeanDefinition beanDefinition,
-			Predicate<String> attributeFilter) {
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
+			RootBeanDefinition beanDefinition, Predicate<String> attributeFilter) {
 
 		return new BeanDefinitionPropertiesCodeGenerator(
 				generationContext.getRuntimeHints(), attributeFilter,
@@ -147,9 +160,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	}
 
 	@Nullable
-	protected CodeBlock generateValueCode(GenerationContext generationContext,
-			String name, Object value) {
-
+	protected CodeBlock generateValueCode(GenerationContext generationContext, String name, Object value) {
 		RegisteredBean innerRegisteredBean = getInnerRegisteredBean(value);
 		if (innerRegisteredBean != null) {
 			BeanDefinitionMethodGenerator methodGenerator = this.beanDefinitionMethodGeneratorFactory
@@ -175,9 +186,8 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 
 	@Override
 	public CodeBlock generateSetBeanInstanceSupplierCode(
-			GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode, CodeBlock instanceSupplierCode,
-			List<MethodReference> postProcessors) {
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
+			CodeBlock instanceSupplierCode, List<MethodReference> postProcessors) {
 
 		CodeBlock.Builder code = CodeBlock.builder();
 		if (postProcessors.isEmpty()) {
@@ -197,8 +207,8 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	}
 
 	@Override
-	public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode,
+	public CodeBlock generateInstanceSupplierCode(
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode,
 			Executable constructorOrFactoryMethod, boolean allowDirectSupplierShortcut) {
 
 		return new InstanceSupplierCodeGenerator(generationContext,
@@ -207,8 +217,8 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	}
 
 	@Override
-	public CodeBlock generateReturnCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode) {
+	public CodeBlock generateReturnCode(
+			GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 
 		CodeBlock.Builder code = CodeBlock.builder();
 		code.addStatement("return $L", BEAN_DEFINITION_VARIABLE);

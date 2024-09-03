@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,9 +123,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 	public void send(SseEventBuilder builder) throws IOException {
 		Set<DataWithMediaType> dataToSend = builder.build();
 		synchronized (this) {
-			for (DataWithMediaType entry : dataToSend) {
-				super.send(entry.getData(), entry.getMediaType());
-			}
+			super.send(dataToSend);
 		}
 	}
 

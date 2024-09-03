@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,9 +68,21 @@ public class StandardBeanInfoFactory implements BeanInfoFactory, Ordered {
 	@Override
 	@NonNull
 	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
-		return (shouldIntrospectorIgnoreBeaninfoClasses ?
+		BeanInfo beanInfo = (shouldIntrospectorIgnoreBeaninfoClasses ?
 				Introspector.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO) :
 				Introspector.getBeanInfo(beanClass));
+
+		// Immediately remove class from Introspector cache to allow for proper garbage
+		// collection on class loader shutdown; we cache it in CachedIntrospectionResults
+		// in a GC-friendly manner. This is necessary (again) for the JDK ClassInfo cache.
+		Class<?> classToFlush = beanClass;
+		do {
+			Introspector.flushFromCaches(classToFlush);
+			classToFlush = classToFlush.getSuperclass();
+		}
+		while (classToFlush != null && classToFlush != Object.class);
+
+		return beanInfo;
 	}
 
 	@Override

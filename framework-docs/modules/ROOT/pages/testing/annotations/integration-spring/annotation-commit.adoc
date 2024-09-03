@@ -1,0 +1,39 @@
+[[spring-testing-annotation-commit]]
+= `@Commit`
+
+`@Commit` indicates that the transaction for a transactional test method should be
+committed after the test method has completed. You can use `@Commit` as a direct
+replacement for `@Rollback(false)` to more explicitly convey the intent of the code.
+Analogous to `@Rollback`, `@Commit` can also be declared as a class-level or method-level
+annotation.
+
+The following example shows how to use the `@Commit` annotation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Commit // <1>
+	@Test
+	void testProcessWithoutRollback() {
+		// ...
+	}
+----
+<1> Commit the result of the test to the database.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Commit // <1>
+	@Test
+	fun testProcessWithoutRollback() {
+		// ...
+	}
+----
+<1> Commit the result of the test to the database.
+======
+
+

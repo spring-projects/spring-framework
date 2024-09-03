@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -329,15 +329,15 @@ class ReflectionHintsPredicatesTests {
 		}
 
 		@Test
-		void methodIntrospectionMatchesIntrospectDeclaredMethods() {
+		void methodIntrospectionDoesNotMatchIntrospectDeclaredMethods() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INTROSPECT_DECLARED_METHODS);
-			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").introspect());
+			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "publicMethod").introspect());
 		}
 
 		@Test
-		void methodIntrospectionMatchesInvokeDeclaredMethods() {
+		void methodIntrospectionDoesNotMatchInvokeDeclaredMethods() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_METHODS);
-			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").introspect());
+			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "publicMethod").introspect());
 		}
 
 		@Test
@@ -373,9 +373,9 @@ class ReflectionHintsPredicatesTests {
 		}
 
 		@Test
-		void methodInvocationMatchesInvokeDeclaredMethods() {
+		void methodInvocationDoesNotMatchInvokeDeclaredMethods() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.INVOKE_DECLARED_METHODS);
-			assertPredicateMatches(reflection.onMethod(SampleClass.class, "publicMethod").invoke());
+			assertPredicateDoesNotMatch(reflection.onMethod(SampleClass.class, "publicMethod").invoke());
 		}
 
 		@Test
@@ -482,9 +482,9 @@ class ReflectionHintsPredicatesTests {
 		}
 
 		@Test
-		void fieldReflectionMatchesDeclaredFieldsHint() {
+		void fieldReflectionDoesNotMatchDeclaredFieldsHint() {
 			runtimeHints.reflection().registerType(SampleClass.class, MemberCategory.DECLARED_FIELDS);
-			assertPredicateMatches(reflection.onField(SampleClass.class, "publicField"));
+			assertPredicateDoesNotMatch(reflection.onField(SampleClass.class, "publicField"));
 		}
 
 		@Test

@@ -74,7 +74,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Hibernate.
- * Compatible with Hibernate ORM 5.5/5.6 as well as 6.0/6.1.
+ * Compatible with Hibernate ORM 5.5/5.6 as well as 6.0/6.1/6.2.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -124,8 +124,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 * @since 5.1
 	 * @see java.sql.SQLException
 	 * @see org.hibernate.JDBCException
+	 * @see org.springframework.jdbc.support.SQLExceptionSubclassTranslator
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
-	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
 	 */
 	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
 		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
@@ -245,31 +245,31 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			DataAccessException dae = this.jdbcExceptionTranslator.translate(
 					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
 			if (dae != null) {
-				throw dae;
+				return dae;
 			}
 		}
 
 		if (ex instanceof JDBCConnectionException) {
 			return new DataAccessResourceFailureException(ex.getMessage(), ex);
 		}
-		if (ex instanceof SQLGrammarException hibJdbcEx) {
-			return new InvalidDataAccessResourceUsageException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
+		if (ex instanceof SQLGrammarException hibEx) {
+			return new InvalidDataAccessResourceUsageException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof QueryTimeoutException hibJdbcEx) {
-			return new org.springframework.dao.QueryTimeoutException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
+		if (ex instanceof QueryTimeoutException hibEx) {
+			return new org.springframework.dao.QueryTimeoutException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof LockAcquisitionException hibJdbcEx) {
-			return new CannotAcquireLockException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
+		if (ex instanceof LockAcquisitionException hibEx) {
+			return new CannotAcquireLockException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof PessimisticLockException hibJdbcEx) {
-			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
+		if (ex instanceof PessimisticLockException hibEx) {
+			return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
-		if (ex instanceof ConstraintViolationException hibJdbcEx) {
-			return new DataIntegrityViolationException(ex.getMessage()  + "; SQL [" + hibJdbcEx.getSQL() +
-					"]; constraint [" + hibJdbcEx.getConstraintName() + "]", ex);
+		if (ex instanceof ConstraintViolationException hibEx) {
+			return new DataIntegrityViolationException(ex.getMessage()  + "; SQL [" + hibEx.getSQL() +
+					"]; constraint [" + hibEx.getConstraintName() + "]", ex);
 		}
-		if (ex instanceof DataException hibJdbcEx) {
-			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + hibJdbcEx.getSQL() + "]", ex);
+		if (ex instanceof DataException hibEx) {
+			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + hibEx.getSQL() + "]", ex);
 		}
 		// end of JDBCException subclass handling
 

@@ -1,0 +1,13 @@
+[[websocket-stomp-authorization]]
+= Authorization
+:page-section-summary-toc: 1
+
+Spring Security provides
+{docs-spring-security}/servlet/integrations/websocket.html#websocket-authorization[WebSocket sub-protocol authorization]
+that uses a `ChannelInterceptor` to authorize messages based on the user header in them.
+Also, Spring Session provides
+https://docs.spring.io/spring-session/reference/web-socket.html[WebSocket integration]
+that ensures the user's HTTP session does not expire while the WebSocket session is still active.
+
+
+

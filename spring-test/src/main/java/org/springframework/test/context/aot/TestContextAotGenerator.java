@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.core.log.LogMessage;
 import org.springframework.javapoet.ClassName;
 import org.springframework.test.context.BootstrapUtils;
 import org.springframework.test.context.ContextLoadException;
@@ -86,6 +85,8 @@ public class TestContextAotGenerator {
 
 	private final RuntimeHints runtimeHints;
 
+	private final boolean failOnError;
+
 
 	/**
 	 * Create a new {@link TestContextAotGenerator} that uses the supplied
@@ -103,9 +104,23 @@ public class TestContextAotGenerator {
 	 * @param runtimeHints the {@code RuntimeHints} to use
 	 */
 	public TestContextAotGenerator(GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
+		this(generatedFiles, runtimeHints, false);
+	}
+
+	/**
+	 * Create a new {@link TestContextAotGenerator} that uses the supplied
+	 * {@link GeneratedFiles}, {@link RuntimeHints}, and {@code failOnError} flag.
+	 * @param generatedFiles the {@code GeneratedFiles} to use
+	 * @param runtimeHints the {@code RuntimeHints} to use
+	 * @param failOnError {@code true} if errors encountered during AOT processing
+	 * should result in an exception that fails the overall process
+	 * @since 6.0.12
+	 */
+	TestContextAotGenerator(GeneratedFiles generatedFiles, RuntimeHints runtimeHints, boolean failOnError) {
 		this.testRuntimeHintsRegistrars = AotServices.factories().load(TestRuntimeHintsRegistrar.class);
 		this.generatedFiles = generatedFiles;
 		this.runtimeHints = runtimeHints;
+		this.failOnError = failOnError;
 	}
 
 
@@ -195,8 +210,10 @@ public class TestContextAotGenerator {
 		ClassLoader classLoader = getClass().getClassLoader();
 		MultiValueMap<ClassName, Class<?>> initializerClassMappings = new LinkedMultiValueMap<>();
 		mergedConfigMappings.forEach((mergedConfig, testClasses) -> {
-			logger.debug(LogMessage.format("Generating AOT artifacts for test classes %s",
-					testClasses.stream().map(Class::getName).toList()));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Generating AOT artifacts for test classes " +
+						testClasses.stream().map(Class::getName).toList());
+			}
 			this.mergedConfigRuntimeHints.registerHints(this.runtimeHints, mergedConfig, classLoader);
 			try {
 				// Use first test class discovered for a given unique MergedContextConfiguration.
@@ -209,8 +226,20 @@ public class TestContextAotGenerator {
 				generationContext.writeGeneratedContent();
 			}
 			catch (Exception ex) {
-				logger.warn(LogMessage.format("Failed to generate AOT artifacts for test classes %s",
-						testClasses.stream().map(Class::getName).toList()), ex);
+				if (this.failOnError) {
+					throw new TestContextAotException("Failed to generate AOT artifacts for test classes " +
+							testClasses.stream().map(Class::getName).toList(), ex);
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to generate AOT artifacts for test classes " +
+							testClasses.stream().map(Class::getName).toList(), ex);
+				}
+				else if (logger.isWarnEnabled()) {
+					logger.warn("""
+							Failed to generate AOT artifacts for test classes %s. \
+							Enable DEBUG logging to view the stack trace. %s"""
+								.formatted(testClasses.stream().map(Class::getName).toList(), ex));
+				}
 			}
 		});
 		return initializerClassMappings;
@@ -295,8 +324,8 @@ public class TestContextAotGenerator {
 
 	DefaultGenerationContext createGenerationContext(Class<?> testClass) {
 		ClassNameGenerator classNameGenerator = new ClassNameGenerator(ClassName.get(testClass));
-		DefaultGenerationContext generationContext =
-				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
+		TestContextGenerationContext generationContext =
+				new TestContextGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		return generationContext.withName(nextTestContextId());
 	}
 

@@ -1,0 +1,33 @@
+[[webflux-ann-httpentity]]
+= `HttpEntity`
+
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/httpentity.adoc[See equivalent in the Servlet stack]#
+
+`HttpEntity` is more or less identical to using xref:web/webflux/controller/ann-methods/requestbody.adoc[`@RequestBody`] but is based on a
+container object that exposes request headers and the body. The following example uses an
+`HttpEntity`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/accounts")
+	public void handle(HttpEntity<Account> entity) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/accounts")
+	fun handle(entity: HttpEntity<Account>) {
+		// ...
+	}
+----
+======
+
+

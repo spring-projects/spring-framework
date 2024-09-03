@@ -50,16 +50,17 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class MethodReference extends SpelNodeImpl {
 
-	private final String name;
-
 	private final boolean nullSafe;
 
+	private final String name;
+
 	@Nullable
-	private String originalPrimitiveExitTypeDescriptor;
+	private Character originalPrimitiveExitTypeDescriptor;
 
 	@Nullable
 	private volatile CachedMethodExecutor cachedExecutor;
@@ -72,6 +73,17 @@ public class MethodReference extends SpelNodeImpl {
 	}
 
 
+	/**
+	 * Does this node represent a null-safe method reference?
+	 * @since 6.0.13
+	 */
+	public final boolean isNullSafe() {
+		return this.nullSafe;
+	}
+
+	/**
+	 * Get the name of the referenced method.
+	 */
 	public final String getName() {
 		return this.name;
 	}
@@ -247,8 +259,8 @@ public class MethodReference extends SpelNodeImpl {
 		if (executorToCheck != null && executorToCheck.get() instanceof ReflectiveMethodExecutor reflectiveMethodExecutor) {
 			Method method = reflectiveMethodExecutor.getMethod();
 			String descriptor = CodeFlow.toDescriptor(method.getReturnType());
-			if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
-				this.originalPrimitiveExitTypeDescriptor = descriptor;
+			if (this.nullSafe && CodeFlow.isPrimitive(descriptor) && (descriptor.charAt(0) != 'V')) {
+				this.originalPrimitiveExitTypeDescriptor = descriptor.charAt(0);
 				this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
 			}
 			else {
@@ -347,10 +359,16 @@ public class MethodReference extends SpelNodeImpl {
 
 		if (this.originalPrimitiveExitTypeDescriptor != null) {
 			// The output of the accessor will be a primitive but from the block above it might be null,
-			// so to have a 'common stack' element at skipIfNull target we need to box the primitive
+			// so to have a 'common stack' element at the skipIfNull target we need to box the primitive.
 			CodeFlow.insertBoxIfNecessary(mv, this.originalPrimitiveExitTypeDescriptor);
 		}
+
 		if (skipIfNull != null) {
+			if ("V".equals(this.exitTypeDescriptor)) {
+				// If the method return type is 'void', we need to push a null object
+				// reference onto the stack to satisfy the needs of the skipIfNull target.
+				mv.visitInsn(ACONST_NULL);
+			}
 			mv.visitLabel(skipIfNull);
 		}
 	}

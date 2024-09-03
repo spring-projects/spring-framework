@@ -90,8 +90,7 @@ class BeanDefinitionMethodGenerator {
 
 
 	/**
-	 * Generate the method that returns the {@link BeanDefinition} to be
-	 * registered.
+	 * Generate the method that returns the {@link BeanDefinition} to be registered.
 	 * @param generationContext the generation context
 	 * @param beanRegistrationsCode the bean registrations code
 	 * @return a reference to the generated method.
@@ -100,8 +99,7 @@ class BeanDefinitionMethodGenerator {
 			BeanRegistrationsCode beanRegistrationsCode) {
 
 		registerRuntimeHintsIfNecessary(generationContext.getRuntimeHints());
-		BeanRegistrationCodeFragments codeFragments = getCodeFragments(generationContext,
-				beanRegistrationsCode);
+		BeanRegistrationCodeFragments codeFragments = getCodeFragments(generationContext, beanRegistrationsCode);
 		ClassName target = codeFragments.getTarget(this.registeredBean, this.constructorOrFactoryMethod);
 		if (isWritablePackageName(target)) {
 			GeneratedClass generatedClass = lookupGeneratedClass(generationContext, target);
@@ -187,7 +185,7 @@ class BeanDefinitionMethodGenerator {
 
 		return generatedMethods.add("getBeanDefinition", method -> {
 			method.addJavadoc("Get the $L definition for '$L'.",
-					(!this.registeredBean.isInnerBean()) ? "bean" : "inner-bean",
+					(this.registeredBean.isInnerBean() ? "inner-bean" : "bean"),
 					getName());
 			method.addModifiers(modifier, Modifier.STATIC);
 			method.returns(BeanDefinition.class);
@@ -214,9 +212,9 @@ class BeanDefinitionMethodGenerator {
 
 	private String getSimpleBeanName(String beanName) {
 		int lastDot = beanName.lastIndexOf('.');
-		beanName = (lastDot != -1) ? beanName.substring(lastDot + 1) : beanName;
+		beanName = (lastDot != -1 ? beanName.substring(lastDot + 1) : beanName);
 		int lastDollar = beanName.lastIndexOf('$');
-		beanName = (lastDollar != -1) ? beanName.substring(lastDollar + 1) : beanName;
+		beanName = (lastDollar != -1 ? beanName.substring(lastDollar + 1) : beanName);
 		return StringUtils.uncapitalize(beanName);
 	}
 

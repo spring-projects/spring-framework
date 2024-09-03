@@ -120,9 +120,10 @@ public class StandardClassMetadata implements ClassMetadata {
 		return StringUtils.toStringArray(memberClassNames);
 	}
 
+
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof StandardClassMetadata that &&
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof StandardClassMetadata that &&
 				getIntrospectedClass().equals(that.getIntrospectedClass())));
 	}
 

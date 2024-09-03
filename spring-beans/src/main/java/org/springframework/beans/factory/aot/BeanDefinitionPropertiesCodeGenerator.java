@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,14 @@ package org.springframework.beans.factory.aot;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -40,6 +43,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.javapoet.CodeBlock;
@@ -52,24 +56,23 @@ import org.springframework.util.StringUtils;
 
 /**
  * Internal code generator to set {@link RootBeanDefinition} properties.
- * <p>
- * Generates code in the following form:<blockquote><pre class="code">
+ *
+ * <p>Generates code in the following form:<pre class="code">
  * beanDefinition.setPrimary(true);
  * beanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
  * ...
- * </pre></blockquote>
- * <p>
- * The generated code expects the following variables to be available:
- * <p>
+ * </pre>
+ *
+ * <p>The generated code expects the following variables to be available:
  * <ul>
- * <li>{@code beanDefinition} - The {@link RootBeanDefinition} to
- * configure.</li>
+ * <li>{@code beanDefinition}: the {@link RootBeanDefinition} to configure</li>
  * </ul>
- * <p>
- * Note that this generator does <b>not</b> set the {@link InstanceSupplier}.
+ *
+ * <p>Note that this generator does <b>not</b> set the {@link InstanceSupplier}.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 class BeanDefinitionPropertiesCodeGenerator {
@@ -119,11 +122,12 @@ class BeanDefinitionPropertiesCodeGenerator {
 		addConstructorArgumentValues(code, beanDefinition);
 		addPropertyValues(code, beanDefinition);
 		addAttributes(code, beanDefinition);
+		addQualifiers(code, beanDefinition);
 		return code.build();
 	}
 
-	private void addInitDestroyMethods(Builder code,
-			AbstractBeanDefinition beanDefinition, @Nullable String[] methodNames, String format) {
+	private void addInitDestroyMethods(Builder code, AbstractBeanDefinition beanDefinition,
+			@Nullable String[] methodNames, String format) {
 		if (!ObjectUtils.isEmpty(methodNames)) {
 			Class<?> beanType = ClassUtils.getUserClass(beanDefinition.getResolvableType().toClass());
 			Arrays.stream(methodNames).forEach(methodName -> addInitDestroyHint(beanType, methodName));
@@ -135,17 +139,33 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private void addInitDestroyHint(Class<?> beanUserClass, String methodName) {
-		Method method = ReflectionUtils.findMethod(beanUserClass, methodName);
+		Class<?> methodDeclaringClass = beanUserClass;
+
+		// Parse fully-qualified method name if necessary.
+		int indexOfDot = methodName.lastIndexOf('.');
+		if (indexOfDot > 0) {
+			String className = methodName.substring(0, indexOfDot);
+			methodName = methodName.substring(indexOfDot + 1);
+			if (!beanUserClass.getName().equals(className)) {
+				try {
+					methodDeclaringClass = ClassUtils.forName(className, beanUserClass.getClassLoader());
+				}
+				catch (Throwable ex) {
+					throw new IllegalStateException("Failed to load Class [" + className +
+							"] from ClassLoader [" + beanUserClass.getClassLoader() + "]", ex);
+				}
+			}
+		}
+
+		Method method = ReflectionUtils.findMethod(methodDeclaringClass, methodName);
 		if (method != null) {
 			this.hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
 		}
 	}
 
-	private void addConstructorArgumentValues(CodeBlock.Builder code,
-			BeanDefinition beanDefinition) {
-
-		Map<Integer, ValueHolder> argumentValues = beanDefinition
-				.getConstructorArgumentValues().getIndexedArgumentValues();
+	private void addConstructorArgumentValues(CodeBlock.Builder code, BeanDefinition beanDefinition) {
+		Map<Integer, ValueHolder> argumentValues =
+				beanDefinition.getConstructorArgumentValues().getIndexedArgumentValues();
 		if (!argumentValues.isEmpty()) {
 			argumentValues.forEach((index, valueHolder) -> {
 				CodeBlock valueCode = generateValue(valueHolder.getName(), valueHolder.getValue());
@@ -156,9 +176,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 		}
 	}
 
-	private void addPropertyValues(CodeBlock.Builder code,
-			RootBeanDefinition beanDefinition) {
-
+	private void addPropertyValues(CodeBlock.Builder code, RootBeanDefinition beanDefinition) {
 		MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();
 		if (!propertyValues.isEmpty()) {
 			for (PropertyValue propertyValue : propertyValues) {
@@ -176,6 +194,22 @@ class BeanDefinitionPropertiesCodeGenerator {
 						this.hints.reflection().registerMethod(writeMethod, ExecutableMode.INVOKE);
 					}
 				}
+			}
+		}
+	}
+
+	private void addQualifiers(CodeBlock.Builder code, RootBeanDefinition beanDefinition) {
+		Set<AutowireCandidateQualifier> qualifiers = beanDefinition.getQualifiers();
+		if (!qualifiers.isEmpty()) {
+			for (AutowireCandidateQualifier qualifier : qualifiers) {
+				Collection<CodeBlock> arguments = new ArrayList<>();
+				arguments.add(CodeBlock.of("$S", qualifier.getTypeName()));
+				Object qualifierValue = qualifier.getAttribute(AutowireCandidateQualifier.VALUE_KEY);
+				if (qualifierValue != null) {
+					arguments.add(generateValue("value", qualifierValue));
+				}
+				code.addStatement("$L.addQualifier(new $T($L))", BEAN_DEFINITION_VARIABLE,
+						AutowireCandidateQualifier.class, CodeBlock.join(arguments, ", "));
 			}
 		}
 	}
@@ -223,8 +257,8 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private boolean hasScope(String defaultValue, String actualValue) {
-		return StringUtils.hasText(actualValue)
-				&& !ConfigurableBeanFactory.SCOPE_SINGLETON.equals(actualValue);
+		return StringUtils.hasText(actualValue) &&
+				!ConfigurableBeanFactory.SCOPE_SINGLETON.equals(actualValue);
 	}
 
 	private boolean hasDependsOn(String[] defaultValue, String[] actualValue) {
@@ -236,16 +270,15 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private CodeBlock toStringVarArgs(String[] strings) {
-		return Arrays.stream(strings).map(string -> CodeBlock.of("$S", string))
-				.collect(CodeBlock.joining(","));
+		return Arrays.stream(strings).map(string -> CodeBlock.of("$S", string)).collect(CodeBlock.joining(","));
 	}
 
 	private Object toRole(int value) {
 		return switch (value) {
-			case BeanDefinition.ROLE_INFRASTRUCTURE -> CodeBlock.builder()
-					.add("$T.ROLE_INFRASTRUCTURE", BeanDefinition.class).build();
-			case BeanDefinition.ROLE_SUPPORT -> CodeBlock.builder()
-					.add("$T.ROLE_SUPPORT", BeanDefinition.class).build();
+			case BeanDefinition.ROLE_INFRASTRUCTURE ->
+				CodeBlock.builder().add("$T.ROLE_INFRASTRUCTURE", BeanDefinition.class).build();
+			case BeanDefinition.ROLE_SUPPORT ->
+				CodeBlock.builder().add("$T.ROLE_SUPPORT", BeanDefinition.class).build();
 			default -> value;
 		};
 	}
@@ -255,16 +288,14 @@ class BeanDefinitionPropertiesCodeGenerator {
 			Function<B, T> getter, String format) {
 
 		addStatementForValue(code, beanDefinition, getter,
-				(defaultValue, actualValue) -> !Objects.equals(defaultValue, actualValue),
-				format);
+				(defaultValue, actualValue) -> !Objects.equals(defaultValue, actualValue), format);
 	}
 
 	private <B extends BeanDefinition, T> void addStatementForValue(
 			CodeBlock.Builder code, BeanDefinition beanDefinition,
 			Function<B, T> getter, BiPredicate<T, T> filter, String format) {
 
-		addStatementForValue(code, beanDefinition, getter, filter, format,
-				actualValue -> actualValue);
+		addStatementForValue(code, beanDefinition, getter, filter, format, actualValue -> actualValue);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -276,8 +307,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 		T defaultValue = getter.apply((B) DEFAULT_BEAN_DEFINITION);
 		T actualValue = getter.apply((B) beanDefinition);
 		if (filter.test(defaultValue, actualValue)) {
-			code.addStatement(format, BEAN_DEFINITION_VARIABLE,
-					formatter.apply(actualValue));
+			code.addStatement(format, BEAN_DEFINITION_VARIABLE, formatter.apply(actualValue));
 		}
 	}
 

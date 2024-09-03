@@ -201,7 +201,7 @@ public final class MessageBuilder<T> {
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Message<T> createMessage(@Nullable T payload, MessageHeaders messageHeaders) {
+	public static <T> Message<T> createMessage(T payload, MessageHeaders messageHeaders) {
 		Assert.notNull(payload, "Payload must not be null");
 		Assert.notNull(messageHeaders, "MessageHeaders must not be null");
 		if (payload instanceof Throwable throwable) {

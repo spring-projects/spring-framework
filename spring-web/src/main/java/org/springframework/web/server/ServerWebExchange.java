@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,20 @@ public interface ServerWebExchange {
 	 * part is not cached, and can only be read once.
 	 */
 	Mono<MultiValueMap<String, Part>> getMultipartData();
+
+	/**
+	 * Cleans up any storage used for multipart handling.
+	 * @since 6.0.10
+	 * @see Part#delete()
+	 */
+	default Mono<Void> cleanupMultipart() {
+		return getMultipartData()
+				.onErrorResume(t -> Mono.empty())  // ignore errors reading multipart data
+				.flatMapIterable(Map::values)
+				.flatMapIterable(Function.identity())
+				.flatMap(part -> part.delete().onErrorResume(ex -> Mono.empty()))
+				.then();
+	}
 
 	/**
 	 * Return the {@link LocaleContext} using the configured

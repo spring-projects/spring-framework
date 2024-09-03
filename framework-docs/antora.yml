@@ -1,0 +1,32 @@
+name: framework
+version: true
+title: Spring Framework
+nav:
+  - modules/ROOT/nav.adoc
+ext:
+  collector:
+    run:
+      command: gradlew -q -PbuildSrc.skipTests=true "-Dorg.gradle.jvmargs=-Xmx3g -XX:+HeapDumpOnOutOfMemoryError" :framework-docs:generateAntoraResources
+      local: true
+    scan:
+      dir: ./build/generated-antora-resources
+
+asciidoc:
+  attributes:
+    attribute-missing: 'warn'
+    # FIXME: the copyright is not removed
+    # FIXME: The package is not renamed
+    chomp: 'all'
+    include-java: 'example$docs-src/main/java/org/springframework/docs'
+    spring-framework-main-code: 'https://github.com/spring-projects/spring-framework/tree/main'
+    docs-site: 'https://docs.spring.io'
+    docs-spring: "{docs-site}/spring-framework/docs/{spring-version}"
+    docs-spring-framework: '{docs-site}/spring-framework/docs/{spring-version}'
+    api-spring-framework: '{docs-spring-framework}/javadoc-api/org/springframework'
+    docs-graalvm: 'https://www.graalvm.org/22.3/reference-manual'
+    docs-spring-boot: '{docs-site}/spring-boot/docs/current/reference'
+    docs-spring-gemfire: '{docs-site}/spring-gemfire/docs/current/reference'
+    docs-spring-security: '{docs-site}/spring-security/reference'
+    gh-rsocket: 'https://github.com/rsocket'
+    gh-rsocket-extensions: '{gh-rsocket}/rsocket/blob/master/Extensions'
+    gh-rsocket-java: '{gh-rsocket}/rsocket-java{gh-rsocket}/rsocket-java'

@@ -27,7 +27,8 @@ import java.util.Base64;
  * @author Gary Russell
  * @since 4.1
  * @see java.util.Base64
- * @deprecated as of Spring Framework 6.0.5 in favor of {@link Base64}.
+ * @deprecated as of Spring Framework 6.0.5 in favor of {@link Base64}; scheduled
+ * for removal in 6.2
  */
 @Deprecated(since = "6.0.5", forRemoval = true)
 public abstract class Base64Utils {

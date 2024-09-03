@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -550,6 +550,29 @@ public abstract class AbstractAdaptableMessageListener
 				}
 				return this.headers;
 			}
+
+			@Override
+			public String toString() {
+				StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+				if (this.payload == null) {
+					sb.append(" [rawMessage=").append(this.message);
+				}
+				else {
+					sb.append(" [payload=");
+					if (this.payload instanceof byte[] bytes) {
+						sb.append("byte[").append(bytes.length).append(']');
+					}
+					else {
+						sb.append(this.payload);
+					}
+				}
+				if (this.headers != null) {
+					sb.append(", headers=").append(this.headers);
+				}
+				sb.append(']');
+				return sb.toString();
+			}
+
 		}
 	}
 

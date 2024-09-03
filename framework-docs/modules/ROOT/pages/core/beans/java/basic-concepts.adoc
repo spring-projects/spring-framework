@@ -1,0 +1,88 @@
+[[beans-java-basic-concepts]]
+= Basic Concepts: `@Bean` and `@Configuration`
+
+The central artifacts in Spring's Java configuration support are
+`@Configuration`-annotated classes and `@Bean`-annotated methods.
+
+The `@Bean` annotation is used to indicate that a method instantiates, configures, and
+initializes a new object to be managed by the Spring IoC container. For those familiar
+with Spring's `<beans/>` XML configuration, the `@Bean` annotation plays the same role as
+the `<bean/>` element. You can use `@Bean`-annotated methods with any Spring
+`@Component`. However, they are most often used with `@Configuration` beans.
+
+Annotating a class with `@Configuration` indicates that its primary purpose is as a
+source of bean definitions. Furthermore, `@Configuration` classes let inter-bean
+dependencies be defined by calling other `@Bean` methods in the same class.
+The simplest possible `@Configuration` class reads as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public MyServiceImpl myService() {
+			return new MyServiceImpl();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		fun myService(): MyServiceImpl {
+			return MyServiceImpl()
+		}
+	}
+----
+======
+
+The preceding `AppConfig` class is equivalent to the following Spring `<beans/>` XML:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<bean id="myService" class="com.acme.services.MyServiceImpl"/>
+	</beans>
+----
+
+.Full @Configuration vs "`lite`" @Bean mode?
+****
+When `@Bean` methods are declared within classes that are not annotated with
+`@Configuration`, they are referred to as being processed in a "`lite`" mode. Bean methods
+declared in a `@Component` or even in a plain old class are considered to be "`lite`",
+with a different primary purpose of the containing class and a `@Bean` method
+being a sort of bonus there. For example, service components may expose management views
+to the container through an additional `@Bean` method on each applicable component class.
+In such scenarios, `@Bean` methods are a general-purpose factory method mechanism.
+
+Unlike full `@Configuration`, lite `@Bean` methods cannot declare inter-bean dependencies.
+Instead, they operate on their containing component's internal state and, optionally, on
+arguments that they may declare. Such a `@Bean` method should therefore not invoke other
+`@Bean` methods. Each such method is literally only a factory method for a particular
+bean reference, without any special runtime semantics. The positive side-effect here is
+that no CGLIB subclassing has to be applied at runtime, so there are no limitations in
+terms of class design (that is, the containing class may be `final` and so forth).
+
+In common scenarios, `@Bean` methods are to be declared within `@Configuration` classes,
+ensuring that "`full`" mode is always used and that cross-method references therefore
+get redirected to the container's lifecycle management. This prevents the same
+`@Bean` method from accidentally being invoked through a regular Java call, which helps
+to reduce subtle bugs that can be hard to track down when operating in "`lite`" mode.
+****
+
+The `@Bean` and `@Configuration` annotations are discussed in depth in the following sections.
+First, however, we cover the various ways of creating a spring container by using
+Java-based configuration.
+
+
+

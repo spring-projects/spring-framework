@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public abstract class NamedParameterUtils {
 	 * Set of characters that qualify as parameter separators,
 	 * indicating that a parameter name in an SQL String has ended.
 	 */
-	private static final String PARAMETER_SEPARATORS = "\"':&,;()|=+-*%/\\<>^]";
+	private static final String PARAMETER_SEPARATORS = "\"':&,;()|=+-*%/\\<>^";
 
 	/**
 	 * An index with separator flags per character code.
@@ -142,16 +142,25 @@ public abstract class NamedParameterUtils {
 					j++;
 				}
 				else {
-					while (j < statement.length && !isParameterSeparator(statement[j])) {
+					boolean paramWithSquareBrackets = false;
+					while (j < statement.length) {
+						c = statement[j];
+						if (isParameterSeparator(c)) {
+							break;
+						}
+						if (c == '[') {
+							paramWithSquareBrackets = true;
+						}
+						else if (c == ']') {
+							if (!paramWithSquareBrackets) {
+								break;
+							}
+							paramWithSquareBrackets = false;
+						}
 						j++;
 					}
 					if (j - i > 1) {
 						parameter = sql.substring(i + 1, j);
-						if (j < statement.length && statement[j] == ']' && parameter.contains("[")) {
-							// preserve end bracket for index/key
-							j++;
-							parameter = sql.substring(i + 1, j);
-						}
 						namedParameterCount = addNewNamedParameter(
 								namedParameters, namedParameterCount, parameter);
 						totalParameterCount = addNamedParameter(

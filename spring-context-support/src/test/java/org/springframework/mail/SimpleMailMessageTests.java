@@ -121,6 +121,7 @@ public class SimpleMailMessageTests {
 		assertThat(message2.hashCode()).isEqualTo(message1.hashCode());
 	}
 
+	@Test
 	public final void testEqualsObject() {
 		SimpleMailMessage message1;
 		SimpleMailMessage message2;

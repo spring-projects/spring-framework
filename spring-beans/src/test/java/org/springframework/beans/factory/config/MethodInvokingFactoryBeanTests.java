@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,9 +135,9 @@ public class MethodInvokingFactoryBeanTests {
 		mcfb.setTargetMethod("method1");
 		mcfb.afterPropertiesSet();
 		Integer i = (Integer) mcfb.getObject();
-		assertThat(i.intValue()).isEqualTo(1);
+		assertThat(i).isEqualTo(1);
 		i = (Integer) mcfb.getObject();
-		assertThat(i.intValue()).isEqualTo(1);
+		assertThat(i).isEqualTo(1);
 
 		// non-singleton, non-static
 		tc1 = new TestClass1();
@@ -147,9 +147,9 @@ public class MethodInvokingFactoryBeanTests {
 		mcfb.setSingleton(false);
 		mcfb.afterPropertiesSet();
 		i = (Integer) mcfb.getObject();
-		assertThat(i.intValue()).isEqualTo(1);
+		assertThat(i).isEqualTo(1);
 		i = (Integer) mcfb.getObject();
-		assertThat(i.intValue()).isEqualTo(2);
+		assertThat(i).isEqualTo(2);
 
 		// singleton, static
 		TestClass1._staticField1 = 0;
@@ -158,9 +158,9 @@ public class MethodInvokingFactoryBeanTests {
 		mcfb.setTargetMethod("staticMethod1");
 		mcfb.afterPropertiesSet();
 		i = (Integer) mcfb.getObject();
-		assertThat(i.intValue()).isEqualTo(1);
+		assertThat(i).isEqualTo(1);
 		i = (Integer) mcfb.getObject();
-		assertThat(i.intValue()).isEqualTo(1);
+		assertThat(i).isEqualTo(1);
 
 		// non-singleton, static
 		TestClass1._staticField1 = 0;
@@ -169,9 +169,9 @@ public class MethodInvokingFactoryBeanTests {
 		mcfb.setSingleton(false);
 		mcfb.afterPropertiesSet();
 		i = (Integer) mcfb.getObject();
-		assertThat(i.intValue()).isEqualTo(1);
+		assertThat(i).isEqualTo(1);
 		i = (Integer) mcfb.getObject();
-		assertThat(i.intValue()).isEqualTo(2);
+		assertThat(i).isEqualTo(2);
 
 		// void return value
 		mcfb = new MethodInvokingFactoryBean();

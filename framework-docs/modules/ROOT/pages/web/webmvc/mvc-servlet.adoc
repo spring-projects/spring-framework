@@ -1,0 +1,117 @@
+[[mvc-servlet]]
+= DispatcherServlet
+
+[.small]#xref:web/webflux/dispatcher-handler.adoc[See equivalent in the Reactive stack]#
+
+Spring MVC, as many other web frameworks, is designed around the front controller
+pattern where a central `Servlet`, the `DispatcherServlet`, provides a shared algorithm
+for request processing, while actual work is performed by configurable delegate components.
+This model is flexible and supports diverse workflows.
+
+The `DispatcherServlet`, as any `Servlet`, needs to be declared and mapped according
+to the Servlet specification by using Java configuration or in `web.xml`.
+In turn, the `DispatcherServlet` uses Spring configuration to discover
+the delegate components it needs for request mapping, view resolution, exception
+handling, xref:web/webmvc/mvc-servlet/special-bean-types.adoc[and more].
+
+The following example of the Java configuration registers and initializes
+the `DispatcherServlet`, which is auto-detected by the Servlet container
+(see xref:web/webmvc/mvc-servlet/container-config.adoc[Servlet Config]):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MyWebApplicationInitializer implements WebApplicationInitializer {
+
+		@Override
+		public void onStartup(ServletContext servletContext) {
+
+			// Load Spring web application configuration
+			AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+			context.register(AppConfig.class);
+
+			// Create and register the DispatcherServlet
+			DispatcherServlet servlet = new DispatcherServlet(context);
+			ServletRegistration.Dynamic registration = servletContext.addServlet("app", servlet);
+			registration.setLoadOnStartup(1);
+			registration.addMapping("/app/*");
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyWebApplicationInitializer : WebApplicationInitializer {
+
+		override fun onStartup(servletContext: ServletContext) {
+
+			// Load Spring web application configuration
+			val context = AnnotationConfigWebApplicationContext()
+			context.register(AppConfig::class.java)
+
+			// Create and register the DispatcherServlet
+			val servlet = DispatcherServlet(context)
+			val registration = servletContext.addServlet("app", servlet)
+			registration.setLoadOnStartup(1)
+			registration.addMapping("/app/*")
+		}
+	}
+----
+======
+
+NOTE: In addition to using the ServletContext API directly, you can also extend
+`AbstractAnnotationConfigDispatcherServletInitializer` and override specific methods
+(see the example under xref:web/webmvc/mvc-servlet/context-hierarchy.adoc[Context Hierarchy]).
+
+NOTE: For programmatic use cases, a `GenericWebApplicationContext` can be used as an
+alternative to `AnnotationConfigWebApplicationContext`. See the
+{api-spring-framework}/web/context/support/GenericWebApplicationContext.html[`GenericWebApplicationContext`]
+javadoc for details.
+
+The following example of `web.xml` configuration registers and initializes the `DispatcherServlet`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+<web-app>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/app-context.xml</param-value>
+	</context-param>
+
+	<servlet>
+		<servlet-name>app</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value></param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>app</servlet-name>
+		<url-pattern>/app/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>
+----
+
+NOTE: Spring Boot follows a different initialization sequence. Rather than hooking into
+the lifecycle of the Servlet container, Spring Boot uses Spring configuration to
+bootstrap itself and the embedded Servlet container. `Filter` and `Servlet` declarations
+are detected in Spring configuration and registered with the Servlet container.
+For more details, see the
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-embedded-container[Spring Boot documentation].
+
+
+

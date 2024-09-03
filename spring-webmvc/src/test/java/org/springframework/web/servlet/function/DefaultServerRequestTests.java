@@ -27,10 +27,12 @@ import java.security.Principal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.Part;
@@ -61,8 +63,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
+ * Tests for {@link DefaultServerRequest}.
  * @author Arjen Poutsma
- * @since 5.1
  */
 class DefaultServerRequestTests {
 
@@ -112,6 +114,46 @@ class DefaultServerRequestTests {
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		assertThat(request.attribute("foo")).contains("bar");
+	}
+
+	@Test
+	void attributes() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
+		servletRequest.setAttribute("foo", "bar");
+		servletRequest.setAttribute("baz", "qux");
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		Map<String, Object> attributesMap = request.attributes();
+		assertThat(attributesMap).isNotEmpty();
+		assertThat(attributesMap).containsEntry("foo", "bar");
+		assertThat(attributesMap).containsEntry("baz", "qux");
+		assertThat(attributesMap).doesNotContainEntry("foo", "blah");
+
+		Set<Map.Entry<String, Object>> entrySet = attributesMap.entrySet();
+		assertThat(entrySet).isNotEmpty();
+		assertThat(entrySet).hasSize(attributesMap.size());
+		assertThat(entrySet).contains(Map.entry("foo", "bar"));
+		assertThat(entrySet).contains(Map.entry("baz", "qux"));
+		assertThat(entrySet).doesNotContain(Map.entry("foo", "blah"));
+		assertThat(entrySet).isUnmodifiable();
+
+		assertThat(entrySet.iterator()).toIterable().contains(Map.entry("foo", "bar"), Map.entry("baz", "qux"));
+		Iterator<String> attributes = servletRequest.getAttributeNames().asIterator();
+		Iterator<Map.Entry<String, Object>> entrySetIterator = entrySet.iterator();
+		while (attributes.hasNext()) {
+			attributes.next();
+			assertThat(entrySetIterator).hasNext();
+			entrySetIterator.next();
+		}
+		assertThat(entrySetIterator).isExhausted();
+
+		attributesMap.clear();
+		assertThat(attributesMap).isEmpty();
+		assertThat(attributesMap).hasSize(0);
+		assertThat(entrySet).isEmpty();
+		assertThat(entrySet).hasSize(0);
+		assertThat(entrySet.iterator()).isExhausted();
 	}
 
 	@Test

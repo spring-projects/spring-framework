@@ -1,0 +1,91 @@
+[[mvc-view-document]]
+= PDF and Excel
+
+Spring offers ways to return output other than HTML, including PDF and Excel spreadsheets.
+This section describes how to use those features.
+
+
+
+[[mvc-view-document-intro]]
+== Introduction to Document Views
+
+An HTML page is not always the best way for the user to view the model output,
+and Spring makes it simple to generate a PDF document or an Excel spreadsheet
+dynamically from the model data. The document is the view and is streamed from the
+server with the correct content type, to (hopefully) enable the client PC to run their
+spreadsheet or PDF viewer application in response.
+
+In order to use Excel views, you need to add the Apache POI library to your classpath.
+For PDF generation, you need to add (preferably) the OpenPDF library.
+
+NOTE: You should use the latest versions of the underlying document-generation libraries,
+if possible. In particular, we strongly recommend OpenPDF (for example, OpenPDF 1.2.12)
+instead of the outdated original iText 2.1.7, since OpenPDF is actively maintained and
+fixes an important vulnerability for untrusted PDF content.
+
+
+
+[[mvc-view-document-pdf]]
+== PDF Views
+
+A simple PDF view for a word list could extend
+`org.springframework.web.servlet.view.document.AbstractPdfView` and implement the
+`buildPdfDocument()` method, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class PdfWordList extends AbstractPdfView {
+
+		protected void buildPdfDocument(Map<String, Object> model, Document doc, PdfWriter writer,
+				HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+			List<String> words = (List<String>) model.get("wordList");
+			for (String word : words) {
+				doc.add(new Paragraph(word));
+			}
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class PdfWordList : AbstractPdfView() {
+
+		override fun buildPdfDocument(model: Map<String, Any>, doc: Document, writer: PdfWriter,
+				request: HttpServletRequest, response: HttpServletResponse) {
+
+			val words = model["wordList"] as List<String>
+			for (word in words) {
+				doc.add(Paragraph(word))
+			}
+		}
+	}
+----
+======
+
+A controller can return such a view either from an external view definition
+(referencing it by name) or as a `View` instance from the handler method.
+
+
+
+[[mvc-view-document-excel]]
+== Excel Views
+
+Since Spring Framework 4.2,
+`org.springframework.web.servlet.view.document.AbstractXlsView` is provided as a base
+class for Excel views. It is based on Apache POI, with specialized subclasses (`AbstractXlsxView`
+and `AbstractXlsxStreamingView`) that supersede the outdated `AbstractExcelView` class.
+
+The programming model is similar to `AbstractPdfView`, with `buildExcelDocument()`
+as the central template method and controllers being able to return such a view from
+an external definition (by name) or as a `View` instance from the handler method.
+
+
+
+

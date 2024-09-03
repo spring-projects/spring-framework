@@ -309,13 +309,8 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof WebSocketHttpHeaders otherHeaders)) {
-			return false;
-		}
-		return this.headers.equals(otherHeaders.headers);
+		return (this == other || (other instanceof WebSocketHttpHeaders that &&
+				this.headers.equals(that.headers)));
 	}
 
 	@Override

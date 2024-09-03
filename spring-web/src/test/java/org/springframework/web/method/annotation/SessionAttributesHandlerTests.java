@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 package org.springframework.web.method.annotation;
-
 
 import java.util.HashSet;
 
@@ -35,20 +34,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link SessionAttributesHandler}.
+ *
  * @author Rossen Stoyanchev
  */
-public class SessionAttributesHandlerTests {
+class SessionAttributesHandlerTests {
 
 	private final SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
-	private final SessionAttributesHandler sessionAttributesHandler = new SessionAttributesHandler(
-		SessionAttributeHandler.class, sessionAttributeStore);
+	private final SessionAttributesHandler sessionAttributesHandler =
+			new SessionAttributesHandler(TestSessionAttributesHolder.class, sessionAttributeStore);
 
 	private final NativeWebRequest request = new ServletWebRequest(new MockHttpServletRequest());
 
 
 	@Test
-	public void isSessionAttribute() throws Exception {
+	void isSessionAttribute() {
 		assertThat(sessionAttributesHandler.isHandlerSessionAttribute("attr1", String.class)).isTrue();
 		assertThat(sessionAttributesHandler.isHandlerSessionAttribute("attr2", String.class)).isTrue();
 		assertThat(sessionAttributesHandler.isHandlerSessionAttribute("simple", TestBean.class)).isTrue();
@@ -56,22 +56,26 @@ public class SessionAttributesHandlerTests {
 	}
 
 	@Test
-	public void retrieveAttributes() throws Exception {
+	void retrieveAttributes() {
 		sessionAttributeStore.storeAttribute(request, "attr1", "value1");
 		sessionAttributeStore.storeAttribute(request, "attr2", "value2");
 		sessionAttributeStore.storeAttribute(request, "attr3", new TestBean());
 		sessionAttributeStore.storeAttribute(request, "attr4", new TestBean());
 
-		assertThat(sessionAttributesHandler.retrieveAttributes(request).keySet()).as("Named attributes (attr1, attr2) should be 'known' right away").isEqualTo(new HashSet<>(asList("attr1", "attr2")));
+		assertThat(sessionAttributesHandler.retrieveAttributes(request).keySet())
+				.as("Named attributes (attr1, attr2) should be 'known' right away")
+				.isEqualTo(new HashSet<>(asList("attr1", "attr2")));
 
 		// Resolve 'attr3' by type
 		sessionAttributesHandler.isHandlerSessionAttribute("attr3", TestBean.class);
 
-		assertThat(sessionAttributesHandler.retrieveAttributes(request).keySet()).as("Named attributes (attr1, attr2) and resolved attribute (att3) should be 'known'").isEqualTo(new HashSet<>(asList("attr1", "attr2", "attr3")));
+		assertThat(sessionAttributesHandler.retrieveAttributes(request).keySet())
+				.as("Named attributes (attr1, attr2) and resolved attribute (attr3) should be 'known'")
+				.isEqualTo(new HashSet<>(asList("attr1", "attr2", "attr3")));
 	}
 
 	@Test
-	public void cleanupAttributes() throws Exception {
+	void cleanupAttributes() {
 		sessionAttributeStore.storeAttribute(request, "attr1", "value1");
 		sessionAttributeStore.storeAttribute(request, "attr2", "value2");
 		sessionAttributeStore.storeAttribute(request, "attr3", new TestBean());
@@ -90,7 +94,7 @@ public class SessionAttributesHandlerTests {
 	}
 
 	@Test
-	public void storeAttributes() throws Exception {
+	void storeAttributes() {
 		ModelMap model = new ModelMap();
 		model.put("attr1", "value1");
 		model.put("attr2", "value2");
@@ -105,8 +109,8 @@ public class SessionAttributesHandlerTests {
 	}
 
 
-	@SessionAttributes(names = { "attr1", "attr2" }, types = { TestBean.class })
-	private static class SessionAttributeHandler {
+	@SessionAttributes(names = {"attr1", "attr2"}, types = TestBean.class)
+	private static class TestSessionAttributesHolder {
 	}
 
 }

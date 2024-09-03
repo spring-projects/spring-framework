@@ -149,9 +149,10 @@ public class StandardMethodMetadata implements MethodMetadata {
 				annotationName, classValuesAsString, false);
 	}
 
+
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof StandardMethodMetadata that &&
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof StandardMethodMetadata that &&
 				this.introspectedMethod.equals(that.introspectedMethod)));
 	}
 

@@ -451,8 +451,9 @@ class MimeTypeTests {
 		MimeType audioWave = new MimeType("audio", "wave");
 		MimeType audioBasicLevel = new MimeType("audio", "basic", singletonMap("level", "1"));
 
-		List<MimeType> mimeTypes = new ArrayList<>(List.of(MimeTypeUtils.ALL, audio, audioWave, audioBasic,
-				audioBasicLevel));
+		List<MimeType> mimeTypes = new ArrayList<>(
+				List.of(MimeTypeUtils.ALL, audio, audioWave, audioBasic, audioBasicLevel));
+
 		MimeTypeUtils.sortBySpecificity(mimeTypes);
 
 		assertThat(mimeTypes).containsExactly(audioWave, audioBasicLevel, audioBasic, audio, MimeTypeUtils.ALL);

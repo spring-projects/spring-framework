@@ -67,63 +67,63 @@ public class DefaultJmsListenerContainerFactory
 	/**
 	 * @see DefaultMessageListenerContainer#setTaskExecutor
 	 */
-	public void setTaskExecutor(Executor taskExecutor) {
+	public void setTaskExecutor(@Nullable Executor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setTransactionManager
 	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setCacheLevel
 	 */
-	public void setCacheLevel(Integer cacheLevel) {
+	public void setCacheLevel(@Nullable Integer cacheLevel) {
 		this.cacheLevel = cacheLevel;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setCacheLevelName
 	 */
-	public void setCacheLevelName(String cacheLevelName) {
+	public void setCacheLevelName(@Nullable String cacheLevelName) {
 		this.cacheLevelName = cacheLevelName;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setConcurrency
 	 */
-	public void setConcurrency(String concurrency) {
+	public void setConcurrency(@Nullable String concurrency) {
 		this.concurrency = concurrency;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setMaxMessagesPerTask
 	 */
-	public void setMaxMessagesPerTask(Integer maxMessagesPerTask) {
+	public void setMaxMessagesPerTask(@Nullable Integer maxMessagesPerTask) {
 		this.maxMessagesPerTask = maxMessagesPerTask;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setReceiveTimeout
 	 */
-	public void setReceiveTimeout(Long receiveTimeout) {
+	public void setReceiveTimeout(@Nullable Long receiveTimeout) {
 		this.receiveTimeout = receiveTimeout;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setRecoveryInterval
 	 */
-	public void setRecoveryInterval(Long recoveryInterval) {
+	public void setRecoveryInterval(@Nullable Long recoveryInterval) {
 		this.recoveryInterval = recoveryInterval;
 	}
 
 	/**
 	 * @see DefaultMessageListenerContainer#setBackOff
 	 */
-	public void setBackOff(BackOff backOff) {
+	public void setBackOff(@Nullable BackOff backOff) {
 		this.backOff = backOff;
 	}
 

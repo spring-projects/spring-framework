@@ -1,6 +1,0 @@
-[[testing.appendix]]
-= Appendix
-
-include::testing-annotations.adoc[leveloffset=+1]
-
-include::testing-resources.adoc[leveloffset=+1]

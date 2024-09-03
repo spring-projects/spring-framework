@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,24 +50,20 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @since 6.0
  */
-class JdkClientHttpResponse implements ClientHttpResponse {
+class JdkClientHttpResponse extends AbstractClientHttpResponse {
 
 	private static final Pattern SAME_SITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
 
 
-	private final HttpResponse<Flow.Publisher<List<ByteBuffer>>> response;
 
-	private final DataBufferFactory bufferFactory;
+	public JdkClientHttpResponse(HttpResponse<Flow.Publisher<List<ByteBuffer>>> response,
+			DataBufferFactory bufferFactory) {
 
-	private final HttpHeaders headers;
-
-
-	public JdkClientHttpResponse(
-			HttpResponse<Flow.Publisher<List<ByteBuffer>>> response, DataBufferFactory bufferFactory) {
-
-		this.response = response;
-		this.bufferFactory = bufferFactory;
-		this.headers = adaptHeaders(response);
+		super(HttpStatusCode.valueOf(response.statusCode()),
+				adaptHeaders(response),
+				adaptCookies(response),
+				adaptBody(response, bufferFactory)
+		);
 	}
 
 	private static HttpHeaders adaptHeaders(HttpResponse<Flow.Publisher<List<ByteBuffer>>> response) {
@@ -78,20 +74,8 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 		return HttpHeaders.readOnlyHttpHeaders(multiValueMap);
 	}
 
-
-	@Override
-	public HttpStatusCode getStatusCode() {
-		return HttpStatusCode.valueOf(this.response.statusCode());
-	}
-
-	@Override
-	public HttpHeaders getHeaders() {
-		return this.headers;
-	}
-
-	@Override
-	public MultiValueMap<String, ResponseCookie> getCookies() {
-		return this.response.headers().allValues(HttpHeaders.SET_COOKIE).stream()
+	private static MultiValueMap<String, ResponseCookie> adaptCookies(HttpResponse<Flow.Publisher<List<ByteBuffer>>> response) {
+		return response.headers().allValues(HttpHeaders.SET_COOKIE).stream()
 				.flatMap(header -> {
 					Matcher matcher = SAME_SITE_PATTERN.matcher(header);
 					String sameSite = (matcher.matches() ? matcher.group(1) : null);
@@ -102,7 +86,7 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 						LinkedMultiValueMap::addAll);
 	}
 
-	private ResponseCookie toResponseCookie(HttpCookie cookie, @Nullable String sameSite) {
+	private static ResponseCookie toResponseCookie(HttpCookie cookie, @Nullable String sameSite) {
 		return ResponseCookie.from(cookie.getName(), cookie.getValue())
 				.domain(cookie.getDomain())
 				.httpOnly(cookie.isHttpOnly())
@@ -113,12 +97,12 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 				.build();
 	}
 
-	@Override
-	public Flux<DataBuffer> getBody() {
-		return JdkFlowAdapter.flowPublisherToFlux(this.response.body())
+	private static Flux<DataBuffer> adaptBody(HttpResponse<Flow.Publisher<List<ByteBuffer>>> response, DataBufferFactory bufferFactory) {
+		return JdkFlowAdapter.flowPublisherToFlux(response.body())
 				.flatMapIterable(Function.identity())
-				.map(this.bufferFactory::wrap)
-				.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
+				.map(bufferFactory::wrap)
+				.doOnDiscard(DataBuffer.class, DataBufferUtils::release)
+				.cache(0);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.aot.hint.support;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.ResourcePatternHint;
 import org.springframework.aot.hint.ResourcePatternHints;
+import org.springframework.aot.hint.support.FilePatternResourceHintsRegistrar.Builder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -37,80 +37,94 @@ class FilePatternResourceHintsRegistrarTests {
 
 	private final ResourceHints hints = new ResourceHints();
 
+	@Test
+	void configureWithNoClasspathLocation() {
+		assertThatIllegalArgumentException().isThrownBy(FilePatternResourceHintsRegistrar::forClassPathLocations)
+				.withMessageContaining("At least one classpath location must be specified");
+	}
 
 	@Test
-	void createWithInvalidName() {
-		assertThatIllegalArgumentException().isThrownBy(() -> new FilePatternResourceHintsRegistrar(
-						List.of("test*"), List.of(""), List.of(".txt")))
+	void configureWithInvalidFilePrefix() {
+		Builder builder = FilePatternResourceHintsRegistrar.forClassPathLocations("");
+		assertThatIllegalArgumentException().isThrownBy(() -> builder.withFilePrefixes("test*"))
 				.withMessageContaining("cannot contain '*'");
 	}
 
 	@Test
-	void createWithInvalidExtension() {
-		assertThatIllegalArgumentException().isThrownBy(() -> new FilePatternResourceHintsRegistrar(
-						List.of("test"), List.of(""), List.of("txt")))
-				.withMessageContaining("should start with '.'");
+	void configureWithInvalidFileExtension() {
+		Builder builder = FilePatternResourceHintsRegistrar.forClassPathLocations("");
+		assertThatIllegalArgumentException().isThrownBy(() -> builder.withFileExtensions("txt"))
+				.withMessageContaining("must start with '.'");
 	}
 
 	@Test
 	void registerWithSinglePattern() {
-		new FilePatternResourceHintsRegistrar(List.of("test"), List.of(""), List.of(".txt"))
+		FilePatternResourceHintsRegistrar.forClassPathLocations("")
+				.withFilePrefixes("test").withFileExtensions(".txt")
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
 				.satisfies(includes("/", "test*.txt"));
 	}
 
 	@Test
-	void registerWithMultipleNames() {
-		new FilePatternResourceHintsRegistrar(List.of("test", "another"), List.of(""), List.of(".txt"))
+	void registerWithMultipleFilePrefixes() {
+		FilePatternResourceHintsRegistrar.forClassPathLocations("")
+				.withFilePrefixes("test").withFilePrefixes("another")
+				.withFileExtensions(".txt")
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
-				.satisfies(includes("/" , "test*.txt", "another*.txt"));
+				.satisfies(includes("/", "test*.txt", "another*.txt"));
 	}
 
 	@Test
-	void registerWithMultipleLocations() {
-		new FilePatternResourceHintsRegistrar(List.of("test"), List.of("", "META-INF"), List.of(".txt"))
+	void registerWithMultipleClasspathLocations() {
+		FilePatternResourceHintsRegistrar.forClassPathLocations("").withClasspathLocations("META-INF")
+				.withFilePrefixes("test").withFileExtensions(".txt")
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
 				.satisfies(includes("/", "test*.txt", "META-INF", "META-INF/test*.txt"));
 	}
 
 	@Test
-	void registerWithMultipleExtensions() {
-		new FilePatternResourceHintsRegistrar(List.of("test"), List.of(""), List.of(".txt", ".conf"))
+	void registerWithMultipleFileExtensions() {
+		FilePatternResourceHintsRegistrar.forClassPathLocations("")
+				.withFilePrefixes("test").withFileExtensions(".txt").withFileExtensions(".conf")
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
 				.satisfies(includes("/", "test*.txt", "test*.conf"));
 	}
 
 	@Test
-	void registerWithLocationWithoutTrailingSlash() {
-		new FilePatternResourceHintsRegistrar(List.of("test"), List.of("META-INF"), List.of(".txt"))
+	void registerWithClasspathLocationWithoutTrailingSlash() {
+		FilePatternResourceHintsRegistrar.forClassPathLocations("META-INF")
+				.withFilePrefixes("test").withFileExtensions(".txt")
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
 				.satisfies(includes("/", "META-INF", "META-INF/test*.txt"));
 	}
 
 	@Test
-	void registerWithLocationWithLeadingSlash() {
-		new FilePatternResourceHintsRegistrar(List.of("test"), List.of("/"), List.of(".txt"))
+	void registerWithClasspathLocationWithLeadingSlash() {
+		FilePatternResourceHintsRegistrar.forClassPathLocations("/")
+				.withFilePrefixes("test").withFileExtensions(".txt")
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
 				.satisfies(includes("/", "test*.txt"));
 	}
 
 	@Test
-	void registerWithLocationUsingResourceClasspathPrefix() {
-		new FilePatternResourceHintsRegistrar(List.of("test"), List.of("classpath:META-INF"), List.of(".txt"))
+	void registerWithClasspathLocationUsingResourceClasspathPrefix() {
+		FilePatternResourceHintsRegistrar.forClassPathLocations("classpath:META-INF")
+				.withFilePrefixes("test").withFileExtensions(".txt")
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
 				.satisfies(includes("/", "META-INF", "META-INF/test*.txt"));
 	}
 
 	@Test
-	void registerWithLocationUsingResourceClasspathPrefixAndTrailingSlash() {
-		new FilePatternResourceHintsRegistrar(List.of("test"), List.of("classpath:/META-INF"), List.of(".txt"))
+	void registerWithClasspathLocationUsingResourceClasspathPrefixAndTrailingSlash() {
+		FilePatternResourceHintsRegistrar.forClassPathLocations("classpath:/META-INF")
+				.withFilePrefixes("test").withFileExtensions(".txt")
 				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).singleElement()
 				.satisfies(includes("/", "META-INF", "META-INF/test*.txt"));
@@ -118,12 +132,12 @@ class FilePatternResourceHintsRegistrarTests {
 
 	@Test
 	void registerWithNonExistingLocationDoesNotRegisterHint() {
-		new FilePatternResourceHintsRegistrar(List.of("test"),
-				List.of("does-not-exist/", "another-does-not-exist/"),
-				List.of(".txt")).registerHints(this.hints, null);
+		FilePatternResourceHintsRegistrar.forClassPathLocations("does-not-exist/")
+				.withClasspathLocations("another-does-not-exist/")
+				.withFilePrefixes("test").withFileExtensions(".txt")
+				.registerHints(this.hints, null);
 		assertThat(this.hints.resourcePatternHints()).isEmpty();
 	}
-
 
 	private Consumer<ResourcePatternHints> includes(String... patterns) {
 		return hint -> {

@@ -1,0 +1,387 @@
+[[format]]
+= Spring Field Formatting
+
+As discussed in the previous section, xref:core/validation/convert.adoc[`core.convert`] is a
+general-purpose type conversion system. It provides a unified `ConversionService` API as
+well as a strongly typed `Converter` SPI for implementing conversion logic from one type
+to another. A Spring container uses this system to bind bean property values. In
+addition, both the Spring Expression Language (SpEL) and `DataBinder` use this system to
+bind field values. For example, when SpEL needs to coerce a `Short` to a `Long` to
+complete an `expression.setValue(Object bean, Object value)` attempt, the `core.convert`
+system performs the coercion.
+
+Now consider the type conversion requirements of a typical client environment, such as a
+web or desktop application. In such environments, you typically convert from `String`
+to support the client postback process, as well as back to `String` to support the
+view rendering process. In addition, you often need to localize `String` values. The more
+general `core.convert` `Converter` SPI does not address such formatting requirements
+directly. To directly address them, Spring provides a convenient `Formatter` SPI that
+provides a simple and robust alternative to `PropertyEditor` implementations for client
+environments.
+
+In general, you can use the `Converter` SPI when you need to implement general-purpose type
+conversion logic -- for example, for converting between a `java.util.Date` and a `Long`.
+You can use the `Formatter` SPI when you work in a client environment (such as a web
+application) and need to parse and print localized field values. The `ConversionService`
+provides a unified type conversion API for both SPIs.
+
+
+
+[[format-Formatter-SPI]]
+== The `Formatter` SPI
+
+The `Formatter` SPI to implement field formatting logic is simple and strongly typed. The
+following listing shows the `Formatter` interface definition:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package org.springframework.format;
+
+	public interface Formatter<T> extends Printer<T>, Parser<T> {
+	}
+----
+
+`Formatter` extends from the `Printer` and `Parser` building-block interfaces. The
+following listing shows the definitions of those two interfaces:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public interface Printer<T> {
+
+		String print(T fieldValue, Locale locale);
+	}
+----
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import java.text.ParseException;
+
+	public interface Parser<T> {
+
+		T parse(String clientValue, Locale locale) throws ParseException;
+	}
+----
+
+To create your own `Formatter`, implement the `Formatter` interface shown earlier.
+Parameterize `T` to be the type of object you wish to format -- for example,
+`java.util.Date`. Implement the `print()` operation to print an instance of `T` for
+display in the client locale. Implement the `parse()` operation to parse an instance of
+`T` from the formatted representation returned from the client locale. Your `Formatter`
+should throw a `ParseException` or an `IllegalArgumentException` if a parse attempt fails. Take
+care to ensure that your `Formatter` implementation is thread-safe.
+
+The `format` subpackages provide several `Formatter` implementations as a convenience.
+The `number` package provides `NumberStyleFormatter`, `CurrencyStyleFormatter`, and
+`PercentStyleFormatter` to format `Number` objects that use a `java.text.NumberFormat`.
+The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
+a `java.text.DateFormat`.
+
+The following `DateFormatter` is an example `Formatter` implementation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+----
+	package org.springframework.format.datetime;
+
+	public final class DateFormatter implements Formatter<Date> {
+
+		private String pattern;
+
+		public DateFormatter(String pattern) {
+			this.pattern = pattern;
+		}
+
+		public String print(Date date, Locale locale) {
+			if (date == null) {
+				return "";
+			}
+			return getDateFormat(locale).format(date);
+		}
+
+		public Date parse(String formatted, Locale locale) throws ParseException {
+			if (formatted.length() == 0) {
+				return null;
+			}
+			return getDateFormat(locale).parse(formatted);
+		}
+
+		protected DateFormat getDateFormat(Locale locale) {
+			DateFormat dateFormat = new SimpleDateFormat(this.pattern, locale);
+			dateFormat.setLenient(false);
+			return dateFormat;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+----
+	class DateFormatter(private val pattern: String) : Formatter<Date> {
+
+		override fun print(date: Date, locale: Locale)
+				= getDateFormat(locale).format(date)
+
+		@Throws(ParseException::class)
+		override fun parse(formatted: String, locale: Locale)
+				= getDateFormat(locale).parse(formatted)
+
+		protected fun getDateFormat(locale: Locale): DateFormat {
+			val dateFormat = SimpleDateFormat(this.pattern, locale)
+			dateFormat.isLenient = false
+			return dateFormat
+		}
+	}
+----
+======
+
+The Spring team welcomes community-driven `Formatter` contributions. See
+https://github.com/spring-projects/spring-framework/issues[GitHub Issues] to contribute.
+
+
+
+[[format-CustomFormatAnnotations]]
+== Annotation-driven Formatting
+
+Field formatting can be configured by field type or annotation. To bind
+an annotation to a `Formatter`, implement `AnnotationFormatterFactory`. The following
+listing shows the definition of the `AnnotationFormatterFactory` interface:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package org.springframework.format;
+
+	public interface AnnotationFormatterFactory<A extends Annotation> {
+
+		Set<Class<?>> getFieldTypes();
+
+		Printer<?> getPrinter(A annotation, Class<?> fieldType);
+
+		Parser<?> getParser(A annotation, Class<?> fieldType);
+	}
+----
+
+To create an implementation:
+
+. Parameterize `A` to be the field `annotationType` with which you wish to associate
+formatting  logic -- for example `org.springframework.format.annotation.DateTimeFormat`.
+. Have `getFieldTypes()` return the types of fields on which the annotation can be used.
+. Have `getPrinter()` return a `Printer` to print the value of an annotated field.
+. Have `getParser()` return a `Parser` to parse a `clientValue` for an annotated field.
+
+The following example `AnnotationFormatterFactory` implementation binds the `@NumberFormat`
+annotation to a formatter to let a number style or pattern be specified:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public final class NumberFormatAnnotationFormatterFactory
+			implements AnnotationFormatterFactory<NumberFormat> {
+
+		private static final Set<Class<?>> FIELD_TYPES = Set.of(Short.class,
+				Integer.class, Long.class, Float.class, Double.class,
+				BigDecimal.class, BigInteger.class);
+
+		public Set<Class<?>> getFieldTypes() {
+			return FIELD_TYPES;
+		}
+
+		public Printer<Number> getPrinter(NumberFormat annotation, Class<?> fieldType) {
+			return configureFormatterFrom(annotation, fieldType);
+		}
+
+		public Parser<Number> getParser(NumberFormat annotation, Class<?> fieldType) {
+			return configureFormatterFrom(annotation, fieldType);
+		}
+
+		private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
+			if (!annotation.pattern().isEmpty()) {
+				return new NumberStyleFormatter(annotation.pattern());
+			}
+			// else
+			return switch(annotation.style()) {
+				case Style.PERCENT -> new PercentStyleFormatter();
+				case Style.CURRENCY -> new CurrencyStyleFormatter();
+				default -> new NumberStyleFormatter();
+			};
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class NumberFormatAnnotationFormatterFactory : AnnotationFormatterFactory<NumberFormat> {
+
+		override fun getFieldTypes(): Set<Class<*>> {
+			return setOf(Short::class.java, Int::class.java, Long::class.java, Float::class.java, Double::class.java, BigDecimal::class.java, BigInteger::class.java)
+		}
+
+		override fun getPrinter(annotation: NumberFormat, fieldType: Class<*>): Printer<Number> {
+			return configureFormatterFrom(annotation, fieldType)
+		}
+
+		override fun getParser(annotation: NumberFormat, fieldType: Class<*>): Parser<Number> {
+			return configureFormatterFrom(annotation, fieldType)
+		}
+
+		private fun configureFormatterFrom(annotation: NumberFormat, fieldType: Class<*>): Formatter<Number> {
+			return if (annotation.pattern.isNotEmpty()) {
+				NumberStyleFormatter(annotation.pattern)
+			} else {
+				val style = annotation.style
+				when {
+					style === NumberFormat.Style.PERCENT -> PercentStyleFormatter()
+					style === NumberFormat.Style.CURRENCY -> CurrencyStyleFormatter()
+					else -> NumberStyleFormatter()
+				}
+			}
+		}
+	}
+----
+======
+
+To trigger formatting, you can annotate fields with `@NumberFormat`, as the following
+example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MyModel {
+
+		@NumberFormat(style=Style.CURRENCY)
+		private BigDecimal decimal;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyModel(
+		@field:NumberFormat(style = Style.CURRENCY) private val decimal: BigDecimal
+	)
+----
+======
+
+
+[[format-annotations-api]]
+=== Format Annotation API
+
+A portable format annotation API exists in the `org.springframework.format.annotation`
+package. You can use `@NumberFormat` to format `Number` fields such as `Double` and
+`Long`, and `@DateTimeFormat` to format `java.util.Date`, `java.util.Calendar`, `Long`
+(for millisecond timestamps) as well as JSR-310 `java.time`.
+
+The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
+(yyyy-MM-dd):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MyModel {
+
+		@DateTimeFormat(iso=ISO.DATE)
+		private Date date;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyModel(
+		@DateTimeFormat(iso=ISO.DATE) private val date: Date
+	)
+----
+======
+
+
+[[format-FormatterRegistry-SPI]]
+== The `FormatterRegistry` SPI
+
+The `FormatterRegistry` is an SPI for registering formatters and converters.
+`FormattingConversionService` is an implementation of `FormatterRegistry` suitable for
+most environments. You can programmatically or declaratively configure this variant
+as a Spring bean, e.g. by using `FormattingConversionServiceFactoryBean`. Because this
+implementation also implements `ConversionService`, you can directly configure it
+for use with Spring's `DataBinder` and the Spring Expression Language (SpEL).
+
+The following listing shows the `FormatterRegistry` SPI:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package org.springframework.format;
+
+	public interface FormatterRegistry extends ConverterRegistry {
+
+		void addPrinter(Printer<?> printer);
+
+		void addParser(Parser<?> parser);
+
+		void addFormatter(Formatter<?> formatter);
+
+		void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter);
+
+		void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser);
+
+		void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory);
+	}
+----
+
+As shown in the preceding listing, you can register formatters by field type or by annotation.
+
+The `FormatterRegistry` SPI lets you configure formatting rules centrally, instead of
+duplicating such configuration across your controllers. For example, you might want to
+enforce that all date fields are formatted a certain way or that fields with a specific
+annotation are formatted in a certain way. With a shared `FormatterRegistry`, you define
+these rules once, and they are applied whenever formatting is needed.
+
+
+
+[[format-FormatterRegistrar-SPI]]
+== The `FormatterRegistrar` SPI
+
+`FormatterRegistrar` is an SPI for registering formatters and converters through the
+FormatterRegistry. The following listing shows its interface definition:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package org.springframework.format;
+
+	public interface FormatterRegistrar {
+
+		void registerFormatters(FormatterRegistry registry);
+	}
+----
+
+A `FormatterRegistrar` is useful when registering multiple related converters and
+formatters for a given formatting category, such as date formatting. It can also be
+useful where declarative registration is insufficient -- for example, when a formatter
+needs to be indexed under a specific field type different from its own `<T>` or when
+registering a `Printer`/`Parser` pair. The next section provides more information on
+converter and formatter registration.
+
+
+
+[[format-configuring-formatting-mvc]]
+== Configuring Formatting in Spring MVC
+
+See xref:web/webmvc/mvc-config/conversion.adoc[Conversion and Formatting] in the Spring MVC chapter.
+
+
+
+

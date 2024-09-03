@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Register the necessary reflection hints so that the specified type can be
- * bound at runtime. Fields, constructors, properties and record components
+ * bound at runtime. Fields, constructors, properties, and record components
  * are registered, except for a set of types like those in the {@code java.}
  * package where just the type is registered. Types are discovered transitively
  * on properties and record components, and generic types are registered as well.
@@ -54,8 +54,9 @@ public class BindingReflectionHintsRegistrar {
 
 	private static final String JACKSON_ANNOTATION = "com.fasterxml.jackson.annotation.JacksonAnnotation";
 
-	private static final boolean jacksonAnnotationPresent = ClassUtils.isPresent(JACKSON_ANNOTATION,
-			BindingReflectionHintsRegistrar.class.getClassLoader());
+	private static final boolean jacksonAnnotationPresent =
+			ClassUtils.isPresent(JACKSON_ANNOTATION, BindingReflectionHintsRegistrar.class.getClassLoader());
+
 
 	/**
 	 * Register the necessary reflection hints to bind the specified types.
@@ -94,8 +95,7 @@ public class BindingReflectionHintsRegistrar {
 							registerRecordHints(hints, seen, recordComponent.getAccessor());
 						}
 					}
-					typeHint.withMembers(
-							MemberCategory.DECLARED_FIELDS,
+					typeHint.withMembers(MemberCategory.DECLARED_FIELDS,
 							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 					for (Method method : clazz.getMethods()) {
 						String methodName = method.getName();
@@ -132,8 +132,7 @@ public class BindingReflectionHintsRegistrar {
 	}
 
 	private void registerPropertyHints(ReflectionHints hints, Set<Type> seen, @Nullable Method method, int parameterIndex) {
-		if (method != null && method.getDeclaringClass() != Object.class &&
-				method.getDeclaringClass() != Enum.class) {
+		if (method != null && method.getDeclaringClass() != Object.class && method.getDeclaringClass() != Enum.class) {
 			hints.registerMethod(method, ExecutableMode.INVOKE);
 			MethodParameter methodParameter = MethodParameter.forExecutable(method, parameterIndex);
 			Type methodParameterType = methodParameter.getGenericParameterType();
@@ -158,6 +157,10 @@ public class BindingReflectionHintsRegistrar {
 			types.add(clazz);
 			for (ResolvableType genericResolvableType : resolvableType.getGenerics()) {
 				collectReferencedTypes(types, genericResolvableType);
+			}
+			Class<?> superClass = clazz.getSuperclass();
+			if (superClass != null && superClass != Object.class && superClass != Record.class && superClass != Enum.class) {
+				types.add(superClass);
 			}
 		}
 	}
@@ -187,16 +190,23 @@ public class BindingReflectionHintsRegistrar {
 				.from(element, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
 				.stream(JACKSON_ANNOTATION)
 				.filter(MergedAnnotation::isMetaPresent)
-				.forEach(action::accept);
+				.forEach(action);
 	}
 
 	private void registerHintsForClassAttributes(ReflectionHints hints, MergedAnnotation<Annotation> annotation) {
-		annotation.getRoot().asMap().values().forEach(value -> {
+		annotation.getRoot().asMap().forEach((attributeName, value) -> {
 			if (value instanceof Class<?> classValue && value != Void.class) {
-				hints.registerType(classValue, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				if (attributeName.equals("builder")) {
+					hints.registerType(classValue, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+							MemberCategory.INVOKE_DECLARED_METHODS);
+				}
+				else {
+					hints.registerType(classValue, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				}
 			}
 		});
 	}
+
 
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.

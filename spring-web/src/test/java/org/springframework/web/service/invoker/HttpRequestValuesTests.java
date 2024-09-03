@@ -50,7 +50,7 @@ class HttpRequestValuesTests {
 	@ParameterizedTest
 	@ValueSource(strings = {"POST", "PUT", "PATCH"})
 	@SuppressWarnings("unchecked")
-	void requestParamAsFormData(String httpMethod) {
+	void formData(String httpMethod) {
 
 		HttpRequestValues requestValues = HttpRequestValues.builder().setHttpMethod(HttpMethod.valueOf(httpMethod))
 				.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -65,7 +65,7 @@ class HttpRequestValuesTests {
 	}
 
 	@Test
-	void requestParamAsQueryParamsInUriTemplate() {
+	void queryParamsWithUriTemplate() {
 
 		HttpRequestValues requestValues = HttpRequestValues.builder().setHttpMethod(HttpMethod.POST)
 				.setUriTemplate("/path")
@@ -99,23 +99,25 @@ class HttpRequestValuesTests {
 	}
 
 	@Test
-	void requestParamAsQueryParamsInUri() {
+	void queryParamsWithPreparedUri() {
+
+		URI uri = URI.create("/my%20path");
 
 		HttpRequestValues requestValues = HttpRequestValues.builder().setHttpMethod(HttpMethod.POST)
-				.setUri(URI.create("/path"))
+				.setUri(uri)
 				.addRequestParameter("param1", "1st value")
 				.addRequestParameter("param2", "2nd value A", "2nd value B")
 				.build();
 
 		assertThat(requestValues.getUri().toString())
-				.isEqualTo("/path?param1=1st%20value&param2=2nd%20value%20A&param2=2nd%20value%20B");
+				.isEqualTo("/my%20path?param1=1st%20value&param2=2nd%20value%20A&param2=2nd%20value%20B");
 	}
 
 	@Test
 	void requestPart() {
-		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.add("foo", "bar");
-		HttpEntity<String> entity = new HttpEntity<>("body", entityHeaders);
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("foo", "bar");
+		HttpEntity<String> entity = new HttpEntity<>("body", headers);
 
 		HttpRequestValues requestValues = HttpRequestValues.builder()
 				.addRequestPart("form field", "form value")
@@ -127,6 +129,26 @@ class HttpRequestValuesTests {
 		assertThat(map).hasSize(2);
 		assertThat(map.getFirst("form field").getBody()).isEqualTo("form value");
 		assertThat(map.getFirst("entity")).isEqualTo(entity);
+	}
+
+	@Test
+	void requestPartAndRequestParam() {
+
+		HttpRequestValues requestValues = HttpRequestValues.builder()
+				.setUriTemplate("/path")
+				.addRequestPart("form field", "form value")
+				.addRequestParameter("query param", "query value")
+				.build();
+
+		String uriTemplate = requestValues.getUriTemplate();
+		assertThat(uriTemplate).isNotNull();
+
+		assertThat(uriTemplate).isEqualTo("/path?{queryParam0}={queryParam0[0]}");
+
+		@SuppressWarnings("unchecked")
+		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) requestValues.getBodyValue();
+		assertThat(map).hasSize(1);
+		assertThat(map.getFirst("form field").getBody()).isEqualTo("form value");
 	}
 
 }

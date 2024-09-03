@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.springframework.http.HttpStatus;
  * {@link #reason} that should be returned.
  *
  * <p>The status code is applied to the HTTP response when the handler
- * method is invoked and overrides status information set by other means,
- * like {@code ResponseEntity} or {@code "redirect:"}.
+ * method is invoked, but does not override status information set by other
+ * means, such as {@code ResponseEntity} or {@code "redirect:"}.
  *
  * <p><strong>Warning</strong>: when using this annotation on an exception
  * class, or when setting the {@code reason} attribute of this annotation,

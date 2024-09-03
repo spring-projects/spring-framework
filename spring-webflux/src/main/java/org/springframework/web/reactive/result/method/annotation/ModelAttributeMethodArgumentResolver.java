@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.MethodParameter;
@@ -45,6 +46,7 @@ import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 
 /**
  * Resolve {@code @ModelAttribute} annotated method arguments.
@@ -63,6 +65,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentResolverSupport {
@@ -255,7 +258,12 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 					args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);
 				}
 				else {
-					args[i] = binder.convertIfNecessary(value, paramTypes[i], methodParam);
+					try {
+						args[i] = binder.convertIfNecessary(value, paramTypes[i], methodParam);
+					}
+					catch (TypeMismatchException ex) {
+						throw new ServerWebInputException("Type mismatch.", methodParam, ex);
+					}
 				}
 			}
 			return BeanUtils.instantiateClass(ctor, args);

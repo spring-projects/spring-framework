@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.convert.support;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -29,15 +30,19 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Unit tests for {@link ObjectToObjectConverter}.
  *
  * @author Sam Brannen
- * @author Phil Webb
+ * @author Phillip Webb
  * @since 5.3.21
  * @see org.springframework.core.convert.converter.DefaultConversionServiceTests#convertObjectToObjectUsingValueOfMethod()
  */
 class ObjectToObjectConverterTests {
 
-	private final GenericConversionService conversionService = new GenericConversionService() {{
-		addConverter(new ObjectToObjectConverter());
-	}};
+	private final GenericConversionService conversionService = new GenericConversionService();
+
+
+	@BeforeEach
+	void setup() {
+		conversionService.addConverter(new ObjectToObjectConverter());
+	}
 
 
 	/**
@@ -47,7 +52,7 @@ class ObjectToObjectConverterTests {
 	@Test
 	void nonStaticToTargetTypeSimpleNameMethodWithMatchingReturnType() {
 		assertThat(conversionService.canConvert(Source.class, Data.class))
-			.as("can convert Source to Data").isTrue();
+				.as("can convert Source to Data").isTrue();
 		Data data = conversionService.convert(new Source("test"), Data.class);
 		assertThat(data).asString().isEqualTo("test");
 	}
@@ -55,21 +60,21 @@ class ObjectToObjectConverterTests {
 	@Test
 	void nonStaticToTargetTypeSimpleNameMethodWithDifferentReturnType() {
 		assertThat(conversionService.canConvert(Text.class, Data.class))
-			.as("can convert Text to Data").isFalse();
+				.as("can convert Text to Data").isFalse();
 		assertThat(conversionService.canConvert(Text.class, Optional.class))
-			.as("can convert Text to Optional").isFalse();
+				.as("can convert Text to Optional").isFalse();
 		assertThatExceptionOfType(ConverterNotFoundException.class)
-			.as("convert Text to Data")
-			.isThrownBy(() -> conversionService.convert(new Text("test"), Data.class));
+				.as("convert Text to Data")
+				.isThrownBy(() -> conversionService.convert(new Text("test"), Data.class));
 	}
 
 	@Test
 	void staticValueOfFactoryMethodWithDifferentReturnType() {
 		assertThat(conversionService.canConvert(String.class, Data.class))
-			.as("can convert String to Data").isFalse();
+				.as("can convert String to Data").isFalse();
 		assertThatExceptionOfType(ConverterNotFoundException.class)
-			.as("convert String to Data")
-			.isThrownBy(() -> conversionService.convert("test", Data.class));
+				.as("convert String to Data")
+				.isThrownBy(() -> conversionService.convert("test", Data.class));
 	}
 
 
@@ -84,8 +89,8 @@ class ObjectToObjectConverterTests {
 		public Data toData() {
 			return new Data(this.value);
 		}
-
 	}
+
 
 	static class Text {
 
@@ -98,8 +103,8 @@ class ObjectToObjectConverterTests {
 		public Optional<Data> toData() {
 			return Optional.of(new Data(this.value));
 		}
-
 	}
+
 
 	static class Data {
 
@@ -115,9 +120,8 @@ class ObjectToObjectConverterTests {
 		}
 
 		public static Optional<Data> valueOf(String string) {
-			return (string != null) ? Optional.of(new Data(string)) : Optional.empty();
+			return (string != null ? Optional.of(new Data(string)) : Optional.empty());
 		}
-
 	}
 
 }

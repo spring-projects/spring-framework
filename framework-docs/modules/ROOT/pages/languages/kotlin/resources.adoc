@@ -1,0 +1,45 @@
+[[kotlin-resources]]
+= Resources
+
+We recommend the following resources for people learning how to build applications with
+Kotlin and the Spring Framework:
+
+* https://kotlinlang.org/docs/reference/[Kotlin language reference]
+* https://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
+* https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow, with `spring` and `kotlin` tags]
+* https://play.kotlinlang.org/[Try Kotlin in your browser]
+* https://blog.jetbrains.com/kotlin/[Kotlin blog]
+* https://kotlin.link/[Awesome Kotlin]
+
+
+
+[[examples]]
+== Examples
+
+The following Github projects offer examples that you can learn from and possibly even extend:
+
+* https://github.com/sdeleuze/spring-boot-kotlin-demo[spring-boot-kotlin-demo]: Regular Spring Boot and Spring Data JPA project
+* https://github.com/mixitconf/mixit[mixit]: Spring Boot 2, WebFlux, and Reactive Spring Data MongoDB
+* https://github.com/sdeleuze/spring-kotlin-functional[spring-kotlin-functional]: Standalone WebFlux and functional bean definition DSL
+* https://github.com/sdeleuze/spring-kotlin-fullstack[spring-kotlin-fullstack]: WebFlux Kotlin fullstack example with Kotlin2js for frontend instead of JavaScript or TypeScript
+* https://github.com/spring-petclinic/spring-petclinic-kotlin[spring-petclinic-kotlin]: Kotlin version of the Spring PetClinic Sample Application
+* https://github.com/sdeleuze/spring-kotlin-deepdive[spring-kotlin-deepdive]: A step-by-step migration guide for Boot 1.0 and Java to Boot 2.0 and Kotlin
+* https://github.com/spring-cloud/spring-cloud-gcp/tree/master/spring-cloud-gcp-kotlin-samples/spring-cloud-gcp-kotlin-app-sample[spring-cloud-gcp-kotlin-app-sample]: Spring Boot with Google Cloud Platform Integrations
+
+
+
+[[issues]]
+== Issues
+
+The following list categorizes the pending issues related to Spring and Kotlin support:
+
+* Spring Framework
+** https://github.com/spring-projects/spring-framework/issues/20606[Unable to use WebTestClient with mock server in Kotlin]
+** https://github.com/spring-projects/spring-framework/issues/20496[Support null-safety at generics, varargs and array elements level]
+* Kotlin
+** https://youtrack.jetbrains.com/issue/KT-6380[Parent issue for Spring Framework support]
+** https://youtrack.jetbrains.com/issue/KT-5464[Kotlin requires type inference where Java doesn't]
+** https://youtrack.jetbrains.com/issue/KT-20283[Smart cast regression with open classes]
+** https://youtrack.jetbrains.com/issue/KT-14984[Impossible to pass not all SAM argument as function]
+** https://youtrack.jetbrains.com/issue/KT-15125[Support JSR 223 bindings directly via script variables]
+** https://youtrack.jetbrains.com/issue/KT-6653[Kotlin properties do not override Java-style getters and setters]

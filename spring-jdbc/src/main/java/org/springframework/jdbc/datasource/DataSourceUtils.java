@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Helper class that provides static methods for obtaining JDBC Connections from
- * a {@link javax.sql.DataSource}. Includes special support for Spring-managed
- * transactional Connections, e.g. managed by {@link DataSourceTransactionManager}
+ * Helper class that provides static methods for obtaining JDBC {@code Connection}s
+ * from a {@link javax.sql.DataSource}. Includes special support for Spring-managed
+ * transactional {@code Connection}s, e.g. managed by {@link DataSourceTransactionManager}
  * or {@link org.springframework.transaction.jta.JtaTransactionManager}.
  *
  * <p>Used internally by Spring's {@link org.springframework.jdbc.core.JdbcTemplate},
@@ -46,7 +46,8 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @see #getConnection
  * @see #releaseConnection
- * @see DataSourceTransactionManager
+ * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.jdbc.support.JdbcTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
@@ -310,8 +311,7 @@ public abstract class DataSourceUtils {
 	}
 
 	/**
-	 * Apply the current transaction timeout, if any,
-	 * to the given JDBC Statement object.
+	 * Apply the current transaction timeout, if any, to the given JDBC Statement object.
 	 * @param stmt the JDBC Statement object
 	 * @param dataSource the DataSource that the Connection was obtained from
 	 * @throws SQLException if thrown by JDBC methods

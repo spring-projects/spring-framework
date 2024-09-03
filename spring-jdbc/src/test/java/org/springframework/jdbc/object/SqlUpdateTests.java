@@ -211,9 +211,8 @@ public class SqlUpdateTests {
 		given(resultSet.getObject(1)).willReturn(11);
 		given(preparedStatement.executeUpdate()).willReturn(1);
 		given(preparedStatement.getGeneratedKeys()).willReturn(resultSet);
-		given(connection.prepareStatement(INSERT_GENERATE_KEYS,
-				PreparedStatement.RETURN_GENERATED_KEYS)
-			).willReturn(preparedStatement);
+		given(connection.prepareStatement(INSERT_GENERATE_KEYS, PreparedStatement.RETURN_GENERATED_KEYS))
+				.willReturn(preparedStatement);
 
 		GeneratedKeysUpdater pc = new GeneratedKeysUpdater();
 		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
@@ -221,7 +220,7 @@ public class SqlUpdateTests {
 
 		assertThat(rowsAffected).isEqualTo(1);
 		assertThat(generatedKeyHolder.getKeyList()).hasSize(1);
-		assertThat(generatedKeyHolder.getKey().intValue()).isEqualTo(11);
+		assertThat(generatedKeyHolder.getKey()).isEqualTo(11);
 		verify(preparedStatement).setString(1, "rod");
 		verify(resultSet).close();
 	}
@@ -293,6 +292,7 @@ public class SqlUpdateTests {
 		assertThatExceptionOfType(JdbcUpdateAffectedIncorrectNumberOfRowsException.class).isThrownBy(
 				pc::run);
 	}
+
 
 	private class Updater extends SqlUpdate {
 

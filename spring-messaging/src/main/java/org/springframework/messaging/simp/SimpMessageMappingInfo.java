@@ -77,8 +77,8 @@ public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappi
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj) || (obj instanceof SimpMessageMappingInfo that && this.delegate.equals(that.delegate));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof SimpMessageMappingInfo that && this.delegate.equals(that.delegate)));
 	}
 
 	@Override

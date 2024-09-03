@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,9 +134,9 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 		parameter = parameter.nestedIfOptional();
 		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getNestedGenericParameterType());
-		String name = Conventions.getVariableNameForParameter(parameter);
 
 		if (binderFactory != null) {
+			String name = Conventions.getVariableNameForParameter(parameter);
 			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
 			if (arg != null) {
 				validateIfApplicable(binder, parameter);

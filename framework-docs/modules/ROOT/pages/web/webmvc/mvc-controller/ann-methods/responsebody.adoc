@@ -1,0 +1,49 @@
+[[mvc-ann-responsebody]]
+= `@ResponseBody`
+
+[.small]#xref:web/webflux/controller/ann-methods/responsebody.adoc[See equivalent in the Reactive stack]#
+
+You can use the `@ResponseBody` annotation on a method to have the return serialized
+to the response body through an
+xref:integration/rest-clients.adoc#rest-message-conversion[HttpMessageConverter].
+The following listing shows an example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@GetMapping("/accounts/{id}")
+	@ResponseBody
+	public Account handle() {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@GetMapping("/accounts/{id}")
+	@ResponseBody
+	fun handle(): Account {
+		// ...
+	}
+----
+======
+
+`@ResponseBody` is also supported at the class level, in which case it is inherited by
+all controller methods. This is the effect of `@RestController`, which is nothing more
+than a meta-annotation marked with `@Controller` and `@ResponseBody`.
+
+You can use `@ResponseBody` with reactive types.
+See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types] for more details.
+
+You can use the xref:web/webmvc/mvc-config/message-converters.adoc[Message Converters] option of the xref:web/webmvc/mvc-config.adoc[MVC Config] to
+configure or customize message conversion.
+
+You can combine `@ResponseBody` methods with JSON serialization views.
+See xref:web/webmvc/mvc-controller/ann-methods/jackson.adoc[Jackson JSON] for details.
+
+

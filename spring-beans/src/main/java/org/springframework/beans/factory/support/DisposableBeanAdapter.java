@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,8 +65,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	private static final String SHUTDOWN_METHOD_NAME = "shutdown";
 
-	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
 
+	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
 
 	private final Object bean;
 
@@ -116,8 +116,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			if (!this.invokeAutoCloseable) {
 				this.destroyMethodNames = destroyMethodNames;
 				List<Method> destroyMethods = new ArrayList<>(destroyMethodNames.length);
-				for (int i = 0; i < destroyMethodNames.length; i++) {
-					String destroyMethodName = destroyMethodNames[i];
+				for (String destroyMethodName : destroyMethodNames) {
 					Method destroyMethod = determineDestroyMethod(destroyMethodName);
 					if (destroyMethod == null) {
 						if (beanDefinition.isEnforceDestroyMethod()) {
@@ -240,7 +239,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 		}
 		else if (this.destroyMethodNames != null) {
-			for (String destroyMethodName: this.destroyMethodNames) {
+			for (String destroyMethodName : this.destroyMethodNames) {
 				Method destroyMethod = determineDestroyMethod(destroyMethodName);
 				if (destroyMethod != null) {
 					invokeCustomDestroyMethod(
@@ -252,15 +251,18 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 
 	@Nullable
-	private Method determineDestroyMethod(String name) {
+	private Method determineDestroyMethod(String destroyMethodName) {
 		try {
 			Class<?> beanClass = this.bean.getClass();
-			Method destroyMethod = findDestroyMethod(beanClass, name);
+			MethodDescriptor descriptor = MethodDescriptor.create(this.beanName, beanClass, destroyMethodName);
+			String methodName = descriptor.methodName();
+
+			Method destroyMethod = findDestroyMethod(descriptor.declaringClass(), methodName);
 			if (destroyMethod != null) {
 				return destroyMethod;
 			}
-			for (Class<?> beanInterface : beanClass.getInterfaces()) {
-				destroyMethod = findDestroyMethod(beanInterface, name);
+			for (Class<?> beanInterface : ClassUtils.getAllInterfacesForClass(beanClass)) {
+				destroyMethod = findDestroyMethod(beanInterface, methodName);
 				if (destroyMethod != null) {
 					return destroyMethod;
 				}
@@ -288,7 +290,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 */
 	private void invokeCustomDestroyMethod(Method destroyMethod) {
 		int paramCount = destroyMethod.getParameterCount();
-		final Object[] args = new Object[paramCount];
+		Object[] args = new Object[paramCount];
 		if (paramCount == 1) {
 			args[0] = Boolean.TRUE;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,8 +97,8 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	private static String initMessage(HttpStatusCode status, String reasonPhrase, @Nullable HttpRequest request) {
-		return status.value() + " " + reasonPhrase +
-				(request != null ? " from " + request.getMethod() + " " + request.getURI() : "");
+		return status.value() + " " + reasonPhrase + (request != null ?
+				" from " + WebClientUtils.getRequestDescription(request.getMethod(), request.getURI()) : "");
 	}
 
 	/**
@@ -233,22 +233,21 @@ public class WebClientResponseException extends WebClientException {
 	 */
 	@Nullable
 	public <E> E getResponseBodyAs(Class<E> targetType) {
-		return getResponseBodyAs(ResolvableType.forClass(targetType));
+		return decodeBody(ResolvableType.forClass(targetType));
 	}
 
 	/**
-	 * Variant of {@link #getResponseBodyAs(Class)} with
-	 * {@link ParameterizedTypeReference}.
+	 * Variant of {@link #getResponseBodyAs(Class)} with {@link ParameterizedTypeReference}.
 	 * @since 6.0
 	 */
 	@Nullable
 	public <E> E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
-		return getResponseBodyAs(ResolvableType.forType(targetType.getType()));
+		return decodeBody(ResolvableType.forType(targetType.getType()));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private <E> E getResponseBodyAs(ResolvableType targetType) {
+	private <E> E decodeBody(ResolvableType targetType) {
 		Assert.state(this.bodyDecodeFunction != null, "Decoder function not set");
 		return (E) this.bodyDecodeFunction.apply(targetType);
 	}

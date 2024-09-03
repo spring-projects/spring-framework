@@ -498,7 +498,6 @@ public class SpringFactoriesLoader {
 
 	/**
 	 * Strategy for resolving constructor arguments based on their type.
-	 *
 	 * @since 6.0
 	 * @see ArgumentResolver#of(Class, Object)
 	 * @see ArgumentResolver#ofSupplied(Class, Supplier)
@@ -595,13 +594,11 @@ public class SpringFactoriesLoader {
 		 */
 		static ArgumentResolver from(Function<Class<?>, Object> function) {
 			return new ArgumentResolver() {
-
 				@SuppressWarnings("unchecked")
 				@Override
 				public <T> T resolve(Class<T> type) {
 					return (T) function.apply(type);
 				}
-
 			};
 		}
 	}
@@ -609,7 +606,6 @@ public class SpringFactoriesLoader {
 
 	/**
 	 * Strategy for handling a failure that occurs when instantiating a factory.
-	 *
 	 * @since 6.0
 	 * @see FailureHandler#throwing()
 	 * @see FailureHandler#logging(Log)
@@ -671,7 +667,7 @@ public class SpringFactoriesLoader {
 		static FailureHandler handleMessage(BiConsumer<Supplier<String>, Throwable> messageHandler) {
 			return (factoryType, factoryImplementationName, failure) -> {
 				Supplier<String> messageSupplier = () -> "Unable to instantiate factory class [%s] for factory type [%s]"
-					.formatted(factoryImplementationName, factoryType.getName());
+						.formatted(factoryImplementationName, factoryType.getName());
 				messageHandler.accept(messageSupplier, failure);
 			};
 		}

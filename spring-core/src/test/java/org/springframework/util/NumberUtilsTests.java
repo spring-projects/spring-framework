@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,8 +104,8 @@ class NumberUtilsTests {
 
 	@Test
 	void parseNumberAsHex() {
-		String aByte = "0x" + Integer.toHexString(Byte.valueOf(Byte.MAX_VALUE).intValue());
-		String aShort = "0x" + Integer.toHexString(Short.valueOf(Short.MAX_VALUE).intValue());
+		String aByte = "0x" + Integer.toHexString(Byte.valueOf(Byte.MAX_VALUE));
+		String aShort = "0x" + Integer.toHexString(Short.valueOf(Short.MAX_VALUE));
 		String anInteger = "0x" + Integer.toHexString(Integer.MAX_VALUE);
 		String aLong = "0x" + Long.toHexString(Long.MAX_VALUE);
 		String aReallyBigInt = "FEBD4E677898DFEBFFEE44";
@@ -368,35 +368,35 @@ class NumberUtilsTests {
 
 
 	private void assertLongEquals(String aLong) {
-		assertThat(NumberUtils.parseNumber(aLong, Long.class).longValue()).as("Long did not parse").isEqualTo(Long.MAX_VALUE);
+		assertThat(NumberUtils.parseNumber(aLong, Long.class)).as("Long did not parse").isEqualTo(Long.MAX_VALUE);
 	}
 
 	private void assertIntegerEquals(String anInteger) {
-		assertThat(NumberUtils.parseNumber(anInteger, Integer.class).intValue()).as("Integer did not parse").isEqualTo(Integer.MAX_VALUE);
+		assertThat(NumberUtils.parseNumber(anInteger, Integer.class)).as("Integer did not parse").isEqualTo(Integer.MAX_VALUE);
 	}
 
 	private void assertShortEquals(String aShort) {
-		assertThat(NumberUtils.parseNumber(aShort, Short.class).shortValue()).as("Short did not parse").isEqualTo(Short.MAX_VALUE);
+		assertThat(NumberUtils.parseNumber(aShort, Short.class)).as("Short did not parse").isEqualTo(Short.MAX_VALUE);
 	}
 
 	private void assertByteEquals(String aByte) {
-		assertThat(NumberUtils.parseNumber(aByte, Byte.class).byteValue()).as("Byte did not parse").isEqualTo(Byte.MAX_VALUE);
+		assertThat(NumberUtils.parseNumber(aByte, Byte.class)).as("Byte did not parse").isEqualTo(Byte.MAX_VALUE);
 	}
 
 	private void assertNegativeLongEquals(String aLong) {
-		assertThat(NumberUtils.parseNumber(aLong, Long.class).longValue()).as("Long did not parse").isEqualTo(Long.MIN_VALUE);
+		assertThat(NumberUtils.parseNumber(aLong, Long.class)).as("Long did not parse").isEqualTo(Long.MIN_VALUE);
 	}
 
 	private void assertNegativeIntegerEquals(String anInteger) {
-		assertThat(NumberUtils.parseNumber(anInteger, Integer.class).intValue()).as("Integer did not parse").isEqualTo(Integer.MIN_VALUE);
+		assertThat(NumberUtils.parseNumber(anInteger, Integer.class)).as("Integer did not parse").isEqualTo(Integer.MIN_VALUE);
 	}
 
 	private void assertNegativeShortEquals(String aShort) {
-		assertThat(NumberUtils.parseNumber(aShort, Short.class).shortValue()).as("Short did not parse").isEqualTo(Short.MIN_VALUE);
+		assertThat(NumberUtils.parseNumber(aShort, Short.class)).as("Short did not parse").isEqualTo(Short.MIN_VALUE);
 	}
 
 	private void assertNegativeByteEquals(String aByte) {
-		assertThat(NumberUtils.parseNumber(aByte, Byte.class).byteValue()).as("Byte did not parse").isEqualTo(Byte.MIN_VALUE);
+		assertThat(NumberUtils.parseNumber(aByte, Byte.class)).as("Byte did not parse").isEqualTo(Byte.MIN_VALUE);
 	}
 
 	private void assertToNumberOverflow(Number number, Class<? extends Number> targetClass) {

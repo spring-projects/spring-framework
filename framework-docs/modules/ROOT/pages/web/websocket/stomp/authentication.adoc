@@ -1,0 +1,34 @@
+[[websocket-stomp-authentication]]
+= Authentication
+
+Every STOMP over WebSocket messaging session begins with an HTTP request.
+That can be a request to upgrade to WebSockets (that is, a WebSocket handshake)
+or, in the case of SockJS fallbacks, a series of SockJS HTTP transport requests.
+
+Many web applications already have authentication and authorization in place to
+secure HTTP requests. Typically, a user is authenticated through Spring Security
+by using some mechanism such as a login page, HTTP basic authentication, or another way.
+The security context for the authenticated user is saved in the HTTP session
+and is associated with subsequent requests in the same cookie-based session.
+
+Therefore, for a WebSocket handshake or for SockJS HTTP transport requests,
+typically, there is already an authenticated user accessible through
+`HttpServletRequest#getUserPrincipal()`. Spring automatically associates that user
+with a WebSocket or SockJS session created for them and, subsequently, with all
+STOMP messages transported over that session through a user header.
+
+In short, a typical web application needs to do nothing
+beyond what it already does for security. The user is authenticated at
+the HTTP request level with a security context that is maintained through a cookie-based
+HTTP session (which is then associated with WebSocket or SockJS sessions created
+for that user) and results in a user header being stamped on every `Message` flowing
+through the application.
+
+The STOMP protocol does have `login` and `passcode` headers on the `CONNECT` frame.
+Those were originally designed for and are needed for STOMP over TCP. However, for STOMP
+over WebSocket, by default, Spring ignores authentication headers at the STOMP protocol
+level, and assumes that the user is already authenticated at the HTTP transport level.
+The expectation is that the WebSocket or SockJS session contain the authenticated user.
+
+
+

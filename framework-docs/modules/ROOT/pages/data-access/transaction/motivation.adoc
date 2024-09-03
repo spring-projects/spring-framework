@@ -1,0 +1,90 @@
+[[transaction-motivation]]
+= Advantages of the Spring Framework's Transaction Support Model
+
+Traditionally, EE application developers have had two choices for transaction management:
+global or local transactions, both of which have profound limitations. Global
+and local transaction management is reviewed in the next two sections, followed by a
+discussion of how the Spring Framework's transaction management support addresses the
+limitations of the global and local transaction models.
+
+
+[[transaction-global]]
+== Global Transactions
+
+Global transactions let you work with multiple transactional resources, typically
+relational databases and message queues. The application server manages global
+transactions through the JTA, which is a cumbersome API (partly due to its
+exception model). Furthermore, a JTA `UserTransaction` normally needs to be sourced from
+JNDI, meaning that you also need to use JNDI in order to use JTA. The use
+of global transactions limits any potential reuse of application code, as JTA is
+normally only available in an application server environment.
+
+Previously, the preferred way to use global transactions was through EJB CMT
+(Container Managed Transaction). CMT is a form of declarative transaction
+management (as distinguished from programmatic transaction management). EJB CMT
+removes the need for transaction-related JNDI lookups, although the use of EJB
+itself necessitates the use of JNDI. It removes most but not all of the need to write
+Java code to control transactions. The significant downside is that CMT is tied to JTA
+and an application server environment. Also, it is only available if one chooses to
+implement business logic in EJBs (or at least behind a transactional EJB facade). The
+negatives of EJB in general are so great that this is not an attractive proposition,
+especially in the face of compelling alternatives for declarative transaction management.
+
+
+[[transaction-local]]
+== Local Transactions
+
+Local transactions are resource-specific, such as a transaction associated with a JDBC
+connection. Local transactions may be easier to use but have a significant disadvantage:
+They cannot work across multiple transactional resources. For example, code that manages
+transactions by using a JDBC connection cannot run within a global JTA transaction. Because
+the application server is not involved in transaction management, it cannot help ensure
+correctness across multiple resources. (It is worth noting that most applications use a
+single transaction resource.) Another downside is that local transactions are invasive
+to the programming model.
+
+
+[[transaction-programming-model]]
+== Spring Framework's Consistent Programming Model
+
+Spring resolves the disadvantages of global and local transactions. It lets
+application developers use a consistent programming model in any environment.
+You write your code once, and it can benefit from different transaction management
+strategies in different environments. The Spring Framework provides both declarative and
+programmatic transaction management. Most users prefer declarative transaction
+management, which we recommend in most cases.
+
+With programmatic transaction management, developers work with the Spring Framework
+transaction abstraction, which can run over any underlying transaction infrastructure.
+With the preferred declarative model, developers typically write little or no code
+related to transaction management and, hence, do not depend on the Spring Framework
+transaction API or any other transaction API.
+
+.Do you need an application server for transaction management?
+****
+The Spring Framework's transaction management support changes traditional rules as to
+when an enterprise Java application requires an application server.
+
+In particular, you do not need an application server purely for declarative transactions
+through EJBs. In fact, even if your application server has powerful JTA capabilities,
+you may decide that the Spring Framework's declarative transactions offer more power and
+a more productive programming model than EJB CMT.
+
+Typically, you need an application server's JTA capability only if your application needs
+to handle transactions across multiple resources, which is not a requirement for many
+applications. Many high-end applications use a single, highly scalable database (such as
+Oracle RAC) instead. Stand-alone transaction managers (such as
+https://www.atomikos.com/[Atomikos Transactions])
+are other options. Of course, you may need other application server capabilities, such as
+Java Message Service (JMS) and Jakarta EE Connector Architecture (JCA).
+
+The Spring Framework gives you the choice of when to scale your application to a fully
+loaded application server. Gone are the days when the only alternative to using EJB
+CMT or JTA was to write code with local transactions (such as those on JDBC connections)
+and face a hefty rework if you need that code to run within global, container-managed
+transactions. With the Spring Framework, only some of the bean definitions in your
+configuration file need to change (rather than your code).
+****
+
+
+

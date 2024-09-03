@@ -613,11 +613,12 @@ public class ResolvableMethod {
 
 	private static class MethodInvocationInterceptor implements MethodInterceptor, InvocationHandler {
 
+		@Nullable
 		private Method invokedMethod;
 
 		@Override
 		@Nullable
-		public Object intercept(Object object, Method method, Object[] args, MethodProxy proxy) {
+		public Object intercept(Object object, Method method, @Nullable Object[] args, @Nullable MethodProxy proxy) {
 			if (ReflectionUtils.isObjectMethod(method)) {
 				return ReflectionUtils.invokeMethod(method, object, args);
 			}
@@ -629,10 +630,11 @@ public class ResolvableMethod {
 
 		@Override
 		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public Object invoke(Object proxy, Method method, @Nullable Object[] args) {
 			return intercept(proxy, method, args, null);
 		}
 
+		@Nullable
 		Method getInvokedMethod() {
 			return this.invokedMethod;
 		}

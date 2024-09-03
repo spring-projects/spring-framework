@@ -76,10 +76,12 @@ class GenericApplicationContextTests {
 
 	private final GenericApplicationContext context = new GenericApplicationContext();
 
+
 	@AfterEach
 	void closeContext() {
 		context.close();
 	}
+
 
 	@Test
 	void getBeanForClass() {
@@ -91,7 +93,7 @@ class GenericApplicationContextTests {
 		assertThat(context.getBean(CharSequence.class)).isSameAs(context.getBean("testBean"));
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
-			.isThrownBy(() -> context.getBean(Object.class));
+				.isThrownBy(() -> context.getBean(Object.class));
 	}
 
 	@Test
@@ -124,16 +126,16 @@ class GenericApplicationContextTests {
 
 		assertThat(context.getBean(String.class)).isSameAs(context.getBean("testBean"));
 		assertThat(context.getAutowireCapableBeanFactory().getBean(String.class))
-			.isSameAs(context.getAutowireCapableBeanFactory().getBean("testBean"));
+				.isSameAs(context.getAutowireCapableBeanFactory().getBean("testBean"));
 
 		context.close();
 
 		assertThatIllegalStateException()
-			.isThrownBy(() -> context.getBean(String.class));
+				.isThrownBy(() -> context.getBean(String.class));
 		assertThatIllegalStateException()
-			.isThrownBy(() -> context.getAutowireCapableBeanFactory().getBean(String.class));
+				.isThrownBy(() -> context.getAutowireCapableBeanFactory().getBean(String.class));
 		assertThatIllegalStateException()
-			.isThrownBy(() -> context.getAutowireCapableBeanFactory().getBean("testBean"));
+				.isThrownBy(() -> context.getAutowireCapableBeanFactory().getBean("testBean"));
 	}
 
 	@Test
@@ -234,9 +236,9 @@ class GenericApplicationContextTests {
 		assertThat(context.getBeanNamesForType(BeanB.class)).containsExactly("b");
 		assertThat(context.getBeanNamesForType(BeanC.class)).containsExactly("c");
 		assertThat(context.getBeansOfType(BeanA.class)).isEmpty();
-		assertThat(context.getBeansOfType(BeanB.class).values().iterator().next())
+		assertThat(context.getBeansOfType(BeanB.class).values()).element(0)
 			.isSameAs(context.getBean(BeanB.class));
-		assertThat(context.getBeansOfType(BeanC.class).values().iterator().next())
+		assertThat(context.getBeansOfType(BeanC.class).values()).element(0)
 			.isSameAs(context.getBean(BeanC.class));
 	}
 
@@ -279,8 +281,8 @@ class GenericApplicationContextTests {
 		// java.nio.file.InvalidPathException: Illegal char <:> at index 4: ping:foo
 		if (resourceLoader instanceof FileSystemResourceLoader && OS.WINDOWS.isCurrentOs()) {
 			assertThatExceptionOfType(InvalidPathException.class)
-				.isThrownBy(() -> context.getResource(pingLocation))
-				.withMessageContaining(pingLocation);
+					.isThrownBy(() -> context.getResource(pingLocation))
+					.withMessageContaining(pingLocation);
 		}
 		else {
 			resource = context.getResource(pingLocation);
@@ -295,8 +297,8 @@ class GenericApplicationContextTests {
 		assertThat(resource).isInstanceOf(FileUrlResource.class);
 		resource = context.getResource(pingLocation);
 		assertThat(resource).asInstanceOf(type(ByteArrayResource.class))
-			.extracting(bar -> new String(bar.getByteArray(), UTF_8))
-			.isEqualTo("pong:foo");
+				.extracting(bar -> new String(bar.getByteArray(), UTF_8))
+				.isEqualTo("pong:foo");
 	}
 
 	@Test
@@ -509,6 +511,7 @@ class GenericApplicationContextTests {
 		context.close();
 	}
 
+
 	private MergedBeanDefinitionPostProcessor registerMockMergedBeanDefinitionPostProcessor(GenericApplicationContext context) {
 		MergedBeanDefinitionPostProcessor bpp = mock();
 		context.registerBeanDefinition("bpp", BeanDefinitionBuilder.rootBeanDefinition(
@@ -533,7 +536,7 @@ class GenericApplicationContextTests {
 		}
 	}
 
-	static class BeanB implements ApplicationContextAware  {
+	static class BeanB implements ApplicationContextAware {
 
 		ApplicationContext applicationContext;
 
@@ -563,8 +566,8 @@ class GenericApplicationContextTests {
 		public void setCounter(Integer counter) {
 			this.counter = counter;
 		}
-
 	}
+
 
 	static class TestAotFactoryBean<T> extends AbstractFactoryBean<T> {
 
@@ -583,6 +586,7 @@ class GenericApplicationContextTests {
 			return (T) new Object();
 		}
 	}
+
 
 	static class PingPongProtocolResolver implements ProtocolResolver {
 

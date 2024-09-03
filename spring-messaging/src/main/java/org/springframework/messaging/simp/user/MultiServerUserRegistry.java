@@ -369,8 +369,8 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			return (this == obj || (obj instanceof SimpUser that && this.name.equals(that.getName())));
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof SimpUser that && this.name.equals(that.getName())));
 		}
 
 		@Override
@@ -455,8 +455,8 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			return (this == obj || (obj instanceof SimpSession that && this.id.equals(that.getId())));
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof SimpSession that && this.id.equals(that.getId())));
 		}
 
 		@Override
@@ -532,14 +532,9 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof SimpSubscription otherSubscription)) {
-				return false;
-			}
-			return (getId().equals(otherSubscription.getId()) &&
-					ObjectUtils.nullSafeEquals(getSession(), otherSubscription.getSession()));
+			return (this == other || (other instanceof SimpSubscription that &&
+					getId().equals(that.getId()) &&
+					ObjectUtils.nullSafeEquals(getSession(), that.getSession())));
 		}
 
 		@Override

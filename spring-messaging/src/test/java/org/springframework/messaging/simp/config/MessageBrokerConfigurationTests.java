@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.Test;
@@ -69,6 +70,9 @@ import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.tcp.ReconnectStrategy;
+import org.springframework.messaging.tcp.TcpConnectionHandler;
+import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
@@ -622,7 +626,9 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.enableStompBrokerRelay("/topic", "/queue").setAutoStartup(true)
+			registry.enableStompBrokerRelay("/topic", "/queue")
+					.setAutoStartup(true)
+					.setTcpClient(new NoOpTcpClient())
 					.setUserDestinationBroadcast("/topic/unresolved-user-destination")
 					.setUserRegistryBroadcast("/topic/simp-user-registry");
 		}
@@ -785,6 +791,26 @@ public class MessageBrokerConfigurationTests {
 
 	@SuppressWarnings("serial")
 	private static class CustomThreadPoolTaskExecutor extends ThreadPoolTaskExecutor {
+	}
+
+
+	private static class NoOpTcpClient implements TcpOperations<byte[]> {
+
+		@Override
+		public CompletableFuture<Void> connectAsync(TcpConnectionHandler<byte[]> handler) {
+			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public CompletableFuture<Void> connectAsync(TcpConnectionHandler<byte[]> handler, ReconnectStrategy strategy) {
+			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public CompletableFuture<Void> shutdownAsync() {
+			return CompletableFuture.completedFuture(null);
+		}
+
 	}
 
 }

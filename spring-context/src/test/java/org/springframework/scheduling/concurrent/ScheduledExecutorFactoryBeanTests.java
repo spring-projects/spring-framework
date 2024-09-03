@@ -41,14 +41,14 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 class ScheduledExecutorFactoryBeanTests {
 
 	@Test
-	void throwsExceptionIfPoolSizeIsLessThanZero() throws Exception {
+	void throwsExceptionIfPoolSizeIsLessThanZero() {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
 		assertThatIllegalArgumentException().isThrownBy(() -> factory.setPoolSize(-1));
 	}
 
 	@Test
 	@SuppressWarnings("serial")
-	void shutdownNowIsPropagatedToTheExecutorOnDestroy() throws Exception {
+	void shutdownNowIsPropagatedToTheExecutorOnDestroy() {
 		final ScheduledExecutorService executor = mock();
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
@@ -66,7 +66,7 @@ class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	void shutdownIsPropagatedToTheExecutorOnDestroy() throws Exception {
+	void shutdownIsPropagatedToTheExecutorOnDestroy() {
 		final ScheduledExecutorService executor = mock();
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
@@ -85,7 +85,7 @@ class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	void oneTimeExecutionIsSetUpAndFiresCorrectly() throws Exception {
+	void oneTimeExecutionIsSetUpAndFiresCorrectly() {
 		Runnable runnable = mock();
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
@@ -99,7 +99,7 @@ class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	void fixedRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
+	void fixedRepeatedExecutionIsSetUpAndFiresCorrectly() {
 		Runnable runnable = mock();
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
@@ -117,7 +117,7 @@ class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	void fixedRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
+	void fixedRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() {
 		Runnable runnable = mock();
 		willThrow(new IllegalStateException()).given(runnable).run();
 
@@ -137,7 +137,7 @@ class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	void withInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
+	void withInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectly() {
 		Runnable runnable = mock();
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
@@ -157,7 +157,7 @@ class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	void withInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
+	void withInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() {
 		Runnable runnable = mock();
 		willThrow(new IllegalStateException()).given(runnable).run();
 
@@ -179,7 +179,7 @@ class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	void settingThreadFactoryToNullForcesUseOfDefaultButIsOtherwiseCool() throws Exception {
+	void settingThreadFactoryToNullForcesUseOfDefaultButIsOtherwiseCool() {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			@Override
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
@@ -197,7 +197,7 @@ class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	void settingRejectedExecutionHandlerToNullForcesUseOfDefaultButIsOtherwiseCool() throws Exception {
+	void settingRejectedExecutionHandlerToNullForcesUseOfDefaultButIsOtherwiseCool() {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			@Override
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
@@ -211,7 +211,7 @@ class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
-	void objectTypeReportsCorrectType() throws Exception {
+	void objectTypeReportsCorrectType() {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
 		assertThat(factory.getObjectType()).isEqualTo(ScheduledExecutorService.class);
 	}

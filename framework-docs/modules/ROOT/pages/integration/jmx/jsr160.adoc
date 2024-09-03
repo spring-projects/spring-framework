@@ -1,0 +1,103 @@
+[[jmx-jsr160]]
+= Using JSR-160 Connectors
+
+For remote access, Spring JMX module offers two `FactoryBean` implementations inside the
+`org.springframework.jmx.support` package for creating both server- and client-side
+connectors.
+
+
+[[jmx-jsr160-server]]
+== Server-side Connectors
+
+To have Spring JMX create, start, and expose a JSR-160 `JMXConnectorServer`, you can use the
+following configuration:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean"/>
+----
+
+By default, `ConnectorServerFactoryBean` creates a `JMXConnectorServer` bound to
+`service:jmx:jmxmp://localhost:9875`. The `serverConnector` bean thus exposes the
+local `MBeanServer` to clients through the JMXMP protocol on localhost, port 9875. Note
+that the JMXMP protocol is marked as optional by the JSR 160 specification. Currently,
+the main open-source JMX implementation, MX4J, and the one provided with the JDK
+do not support JMXMP.
+
+To specify another URL and register the `JMXConnectorServer` itself with the
+`MBeanServer`, you can use the `serviceUrl` and `ObjectName` properties, respectively,
+as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="serverConnector"
+			class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+		<property name="objectName" value="connector:name=rmi"/>
+		<property name="serviceUrl"
+				value="service:jmx:rmi://localhost/jndi/rmi://localhost:1099/myconnector"/>
+	</bean>
+----
+
+If the `ObjectName` property is set, Spring automatically registers your connector
+with the `MBeanServer` under that `ObjectName`. The following example shows the full set of
+parameters that you can pass to the `ConnectorServerFactoryBean` when creating a
+`JMXConnector`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="serverConnector"
+			class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+		<property name="objectName" value="connector:name=iiop"/>
+		<property name="serviceUrl"
+			value="service:jmx:iiop://localhost/jndi/iiop://localhost:900/myconnector"/>
+		<property name="threaded" value="true"/>
+		<property name="daemon" value="true"/>
+		<property name="environment">
+			<map>
+				<entry key="someKey" value="someValue"/>
+			</map>
+		</property>
+	</bean>
+----
+
+Note that, when you use a RMI-based connector, you need the lookup service (`tnameserv` or
+`rmiregistry`) to be started in order for the name registration to complete.
+
+
+[[jmx-jsr160-client]]
+== Client-side Connectors
+
+To create an `MBeanServerConnection` to a remote JSR-160-enabled `MBeanServer`, you can use the
+`MBeanServerConnectionFactoryBean`, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+		<property name="serviceUrl" value="service:jmx:rmi://localhost/jndi/rmi://localhost:1099/jmxrmi"/>
+	</bean>
+----
+
+
+[[jmx-jsr160-protocols]]
+== JMX over Hessian or SOAP
+
+JSR-160 permits extensions to the way in which communication is done between the client
+and the server. The examples shown in the preceding sections use the mandatory RMI-based implementation
+required by the JSR-160 specification (IIOP and JRMP) and the (optional) JMXMP. By using
+other providers or JMX implementations (such as http://mx4j.sourceforge.net[MX4J]) you
+can take advantage of protocols such as SOAP or Hessian over simple HTTP or SSL and others,
+as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+		<property name="objectName" value="connector:name=burlap"/>
+		<property name="serviceUrl" value="service:jmx:burlap://localhost:9874"/>
+	</bean>
+----
+
+In the preceding example, we used MX4J 3.0.0. See the official MX4J
+documentation for more information.
+
+
+

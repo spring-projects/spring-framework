@@ -145,9 +145,12 @@ final class LogAdapter {
 		private static final LoggerContext loggerContext =
 				LogManager.getContext(Log4jLog.class.getClassLoader(), false);
 
-		private final ExtendedLogger logger;
+		private final String name;
+
+		private final transient ExtendedLogger logger;
 
 		public Log4jLog(String name) {
+			this.name = name;
 			LoggerContext context = loggerContext;
 			if (context == null) {
 				// Circular call in early-init scenario -> static field not initialized yet
@@ -260,6 +263,10 @@ final class LogAdapter {
 			else {
 				this.logger.logIfEnabled(FQCN, level, null, message, exception);
 			}
+		}
+
+		protected Object readResolve() {
+			return new Log4jLog(this.name);
 		}
 	}
 

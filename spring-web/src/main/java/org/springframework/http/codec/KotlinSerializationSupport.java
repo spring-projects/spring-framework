@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,7 @@ import org.springframework.util.MimeType;
  */
 public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 
-	private static final Map<Type, KSerializer<Object>> serializerCache = new ConcurrentReferenceHashMap<>();
-
+	private final Map<Type, KSerializer<Object>> serializerCache = new ConcurrentReferenceHashMap<>();
 
 	private final T format;
 
@@ -119,10 +118,10 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 	@Nullable
 	protected final KSerializer<Object> serializer(ResolvableType resolvableType) {
 		Type type = resolvableType.getType();
-		KSerializer<Object> serializer = serializerCache.get(type);
+		KSerializer<Object> serializer = this.serializerCache.get(type);
 		if (serializer == null) {
 			try {
-				serializer = SerializersKt.serializerOrNull(type);
+				serializer = SerializersKt.serializerOrNull(this.format.getSerializersModule(), type);
 			}
 			catch (IllegalArgumentException ignored) {
 			}
@@ -130,7 +129,7 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 				if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
 					return null;
 				}
-				serializerCache.put(type, serializer);
+				this.serializerCache.put(type, serializer);
 			}
 		}
 		return serializer;

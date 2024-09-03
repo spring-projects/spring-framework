@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -507,16 +507,8 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#equals(Object)
 	 */
 	public static boolean isEqualsMethod(@Nullable Method method) {
-		if (method == null) {
-			return false;
-		}
-		if (method.getParameterCount() != 1) {
-			return false;
-		}
-		if (!method.getName().equals("equals")) {
-			return false;
-		}
-		return method.getParameterTypes()[0] == Object.class;
+		return (method != null && method.getParameterCount() == 1 && method.getName().equals("equals") &&
+				method.getParameterTypes()[0] == Object.class);
 	}
 
 	/**
@@ -524,7 +516,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public static boolean isHashCodeMethod(@Nullable Method method) {
-		return method != null && method.getParameterCount() == 0 && method.getName().equals("hashCode");
+		return (method != null && method.getParameterCount() == 0 && method.getName().equals("hashCode"));
 	}
 
 	/**

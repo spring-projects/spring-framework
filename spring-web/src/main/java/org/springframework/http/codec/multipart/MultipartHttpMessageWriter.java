@@ -241,7 +241,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 				.concatMap(value -> encodePart(boundary, name, value, bufferFactory));
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private <T> Flux<DataBuffer> encodePart(byte[] boundary, String name, T value, DataBufferFactory factory) {
 		MultipartHttpOutputMessage message = new MultipartHttpOutputMessage(factory);
 		HttpHeaders headers = message.getHeaders();

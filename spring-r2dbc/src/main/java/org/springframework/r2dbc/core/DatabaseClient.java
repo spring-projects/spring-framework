@@ -37,9 +37,9 @@ import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.util.Assert;
 
 /**
- * A non-blocking, reactive client for performing database calls with
- * Reactive Streams back pressure. Provides a higher level, common API over
- * R2DBC client libraries.
+ * A non-blocking, reactive client for performing database calls with Reactive Streams
+ * back pressure. Provides a higher level, common API over R2DBC client libraries.
+ * Propagates {@link org.springframework.dao.DataAccessException} variants for errors.
  *
  * <p>Use the static factory method {@link #create(ConnectionFactory)} or obtain
  * a {@linkplain DatabaseClient#builder() builder} to create an instance.
@@ -163,10 +163,9 @@ public interface DatabaseClient extends ConnectionAccessor {
 	interface GenericExecuteSpec {
 
 		/**
-		 * Bind a non-{@code null} value to a parameter identified by its
-		 * {@code index}. {@code value} can be either a scalar value or {@link io.r2dbc.spi.Parameter}.
+		 * Bind a non-{@code null} value to a parameter identified by its {@code index}.
 		 * @param index zero based index to bind the parameter to
-		 * @param value either a scalar value or {@link io.r2dbc.spi.Parameter}
+		 * @param value either a scalar value or a {@link io.r2dbc.spi.Parameter}
 		 */
 		GenericExecuteSpec bind(int index, Object value);
 
@@ -180,7 +179,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		/**
 		 * Bind a non-{@code null} value to a parameter identified by its {@code name}.
 		 * @param name the name of the parameter
-		 * @param value the value to bind
+		 * @param value either a scalar value or a {@link io.r2dbc.spi.Parameter}
 		 */
 		GenericExecuteSpec bind(String name, Object value);
 
@@ -222,7 +221,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * Configure a result mapping {@link Function function} and enter the execution stage.
 		 * @param mappingFunction a function that maps from {@link Readable} to the result type
 		 * @param <R> the result type
-		 * @return a {@link FetchSpec} for configuration what to fetch
+		 * @return a {@link RowsFetchSpec} for configuration what to fetch
 		 * @since 6.0
 		 */
 		<R> RowsFetchSpec<R> map(Function<? super Readable, R> mappingFunction);
@@ -232,12 +231,12 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * @param mappingFunction a function that maps from {@link Row} and {@link RowMetadata}
 		 * to the result type
 		 * @param <R> the result type
-		 * @return a {@link FetchSpec} for configuration what to fetch
+		 * @return a {@link RowsFetchSpec} for configuration what to fetch
 		 */
 		<R> RowsFetchSpec<R> map(BiFunction<Row, RowMetadata, R> mappingFunction);
 
 		/**
-		 * Perform the SQL call and apply {@link BiFunction function} to the {@link  Result}.
+		 * Perform the SQL call and apply {@link BiFunction function} to the {@link Result}.
 		 * @param mappingFunction a function that maps from {@link Result} into a result publisher
 		 * @param <R> the result type
 		 * @return a {@link Flux} that emits mapped elements

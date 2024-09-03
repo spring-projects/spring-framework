@@ -124,8 +124,10 @@ public class FieldError extends ObjectError {
 
 	@Override
 	public String toString() {
+		// We would preferably use ObjectUtils.nullSafeConciseToString(rejectedValue) here but
+		// keep including the full nullSafeToString representation for backwards compatibility.
 		return "Field error in object '" + getObjectName() + "' on field '" + this.field +
-				"': rejected value [" + ObjectUtils.nullSafeConciseToString(this.rejectedValue) + "]; " +
+				"': rejected value [" + ObjectUtils.nullSafeToString(this.rejectedValue) + "]; " +
 				resolvableToString();
 	}
 

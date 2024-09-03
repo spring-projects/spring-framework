@@ -197,7 +197,7 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void onMessage(Message message, @Nullable Session session) throws JMSException {
 		// Check whether the delegate is a MessageListener impl itself.
 		// In that case, the adapter will simply act as a pass-through.

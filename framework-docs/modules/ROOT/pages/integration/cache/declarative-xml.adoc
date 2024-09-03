@@ -1,0 +1,56 @@
+[[cache-declarative-xml]]
+= Declarative XML-based Caching
+
+If annotations are not an option (perhaps due to having no access to the sources
+or no external code), you can use XML for declarative caching. So, instead of
+annotating the methods for caching, you can specify the target method and the
+caching directives externally (similar to the declarative transaction management
+xref:data-access/transaction/declarative/first-example.adoc[advice]). The example
+from the previous section can be translated into the following example:
+
+[source,xml,indent=0]
+[subs="verbatim"]
+----
+	<!-- the service we want to make cacheable -->
+	<bean id="bookService" class="x.y.service.DefaultBookService"/>
+
+	<!-- cache definitions -->
+	<cache:advice id="cacheAdvice" cache-manager="cacheManager">
+		<cache:caching cache="books">
+			<cache:cacheable method="findBook" key="#isbn"/>
+			<cache:cache-evict method="loadBooks" all-entries="true"/>
+		</cache:caching>
+	</cache:advice>
+
+	<!-- apply the cacheable behavior to all BookService interfaces -->
+	<aop:config>
+		<aop:advisor advice-ref="cacheAdvice" pointcut="execution(* x.y.BookService.*(..))"/>
+	</aop:config>
+
+	<!-- cache manager definition omitted -->
+----
+
+In the preceding configuration, the `bookService` is made cacheable. The caching semantics
+to apply are encapsulated in the `cache:advice` definition, which causes the `findBooks`
+method to be used for putting data into the cache and the `loadBooks` method for evicting
+data. Both definitions work against the `books` cache.
+
+The `aop:config` definition applies the cache advice to the appropriate points in the
+program by using the AspectJ pointcut expression (more information is available in
+xref:core/aop.adoc[Aspect Oriented Programming with Spring]). In the preceding example,
+all methods from the `BookService` are considered and the cache advice is applied to them.
+
+The declarative XML caching supports all of the annotation-based model, so moving between
+the two should be fairly easy. Furthermore, both can be used inside the same application.
+The XML-based approach does not touch the target code. However, it is inherently more
+verbose. When dealing with classes that have overloaded methods that are targeted for
+caching, identifying the proper methods does take an extra effort, since the `method`
+argument is not a good discriminator. In these cases, you can use the AspectJ pointcut
+to cherry pick the target methods and apply the appropriate caching functionality.
+However, through XML, it is easier to apply package or group or interface-wide caching
+(again, due to the AspectJ pointcut) and to create template-like definitions (as we did
+in the preceding example by defining the target cache through the `cache:definitions`
+`cache` attribute).
+
+
+

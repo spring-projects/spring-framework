@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class MethodInvokerTests {
 		mi.setTargetMethod("method1");
 		mi.prepare();
 		Integer i = (Integer) mi.invoke();
-		assertThat(i.intValue()).isEqualTo(1);
+		assertThat(i).isEqualTo(1);
 
 		// defensive check: singleton, non-static should work with null array
 		tc1 = new TestClass1();
@@ -52,7 +52,7 @@ class MethodInvokerTests {
 		mi.setArguments((Object[]) null);
 		mi.prepare();
 		i = (Integer) mi.invoke();
-		assertThat(i.intValue()).isEqualTo(1);
+		assertThat(i).isEqualTo(1);
 
 		// sanity check: check that argument count matching works
 		mi = new MethodInvoker();

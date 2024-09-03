@@ -737,7 +737,6 @@ public class CodeEmitter extends LocalVariablesSorter {
      * on the top of the stack with the unwrapped (primitive)
      * equivalent. For example, Character -> char.
      * @param type the class indicating the desired type of the top stack value
-     * @return true if the value was unboxed
      */
     public void unbox(Type type) {
         Type t = Constants.TYPE_NUMBER;

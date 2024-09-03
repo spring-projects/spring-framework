@@ -220,14 +220,24 @@ public abstract class AbstractResource implements Resource {
 		return null;
 	}
 
+	/**
+	 * Lazily access the logger for debug logging in case of an exception.
+	 */
+	private void debug(Supplier<String> message, Throwable ex) {
+		Log logger = LogFactory.getLog(getClass());
+		if (logger.isDebugEnabled()) {
+			logger.debug(message.get(), ex);
+		}
+	}
+
 
 	/**
 	 * This implementation compares description strings.
 	 * @see #getDescription()
 	 */
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof Resource that &&
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof Resource that &&
 				getDescription().equals(that.getDescription())));
 	}
 
@@ -247,13 +257,6 @@ public abstract class AbstractResource implements Resource {
 	@Override
 	public String toString() {
 		return getDescription();
-	}
-
-	private void debug(Supplier<String> message, Throwable ex) {
-		Log logger = LogFactory.getLog(getClass());
-		if (logger.isDebugEnabled()) {
-			logger.debug(message.get(), ex);
-		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors
+ * Copyright 2002-2023 the original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,6 @@ package org.springframework.ui
  * @author Mario Arias
  * @since 5.0
  */
-operator fun Model.set(attributeName: String, attributeValue: Any) {
+operator fun Model.set(attributeName: String, attributeValue: Any?) {
 	this.addAttribute(attributeName, attributeValue)
 }

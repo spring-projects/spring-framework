@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,31 +94,31 @@ public class StubTextMessage implements TextMessage {
 	@Override
 	public boolean getBooleanProperty(String name) throws JMSException {
 		Object value = this.properties.get(name);
-		return (value instanceof Boolean) ? ((Boolean) value).booleanValue() : false;
+		return (value instanceof Boolean b) ? b : false;
 	}
 
 	@Override
 	public byte getByteProperty(String name) throws JMSException {
 		Object value = this.properties.get(name);
-		return (value instanceof Byte) ? ((Byte) value).byteValue() : 0;
+		return (value instanceof Byte b) ? b : 0;
 	}
 
 	@Override
 	public double getDoubleProperty(String name) throws JMSException {
 		Object value = this.properties.get(name);
-		return (value instanceof Double) ? ((Double) value).doubleValue() : 0;
+		return (value instanceof Double d) ? d : 0;
 	}
 
 	@Override
 	public float getFloatProperty(String name) throws JMSException {
 		Object value = this.properties.get(name);
-		return (value instanceof Float) ? ((Float) value).floatValue() : 0;
+		return (value instanceof Float f) ? f : 0;
 	}
 
 	@Override
 	public int getIntProperty(String name) throws JMSException {
 		Object value = this.properties.get(name);
-		return (value instanceof Integer) ? ((Integer) value).intValue() : 0;
+		return (value instanceof Integer i) ? i : 0;
 	}
 
 	@Override
@@ -184,7 +184,7 @@ public class StubTextMessage implements TextMessage {
 	@Override
 	public long getLongProperty(String name) throws JMSException {
 		Object value = this.properties.get(name);
-		return (value instanceof Long) ? ((Long) value).longValue() : 0;
+		return (value instanceof Long l) ? l : 0;
 	}
 
 	@Override
@@ -200,13 +200,13 @@ public class StubTextMessage implements TextMessage {
 	@Override
 	public short getShortProperty(String name) throws JMSException {
 		Object value = this.properties.get(name);
-		return (value instanceof Short) ? ((Short) value).shortValue() : 0;
+		return (value instanceof Short s) ? s : 0;
 	}
 
 	@Override
 	public String getStringProperty(String name) throws JMSException {
 		Object value = this.properties.get(name);
-		return (value instanceof String) ? (String) value : null;
+		return (value instanceof String text) ? text : null;
 	}
 
 	@Override

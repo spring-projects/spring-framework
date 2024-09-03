@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,7 @@ suspend inline fun <reified T : Any> ClientResponse.awaitBody(): T =
  * `KClass` non-nullable coroutines variant of [ClientResponse.bodyToMono].
  * Please consider `awaitBody<Foo>` variant if possible.
  *
+ * @throws NoSuchElementException if the underlying [Mono] does not emit any value
  * @author Igor Manushin
  * @since 5.3
  */

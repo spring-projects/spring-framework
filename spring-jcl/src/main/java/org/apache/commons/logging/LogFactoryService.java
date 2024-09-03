@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,12 @@ public class LogFactoryService extends LogFactory {
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 
+	public LogFactoryService() {
+		System.out.println("Standard Commons Logging discovery in action with spring-jcl: " +
+				"please remove commons-logging.jar from classpath in order to avoid potential conflicts");
+	}
+
+
 	@Override
 	public Log getInstance(Class<?> clazz) {
 		return getInstance(clazz.getName());
@@ -47,8 +53,9 @@ public class LogFactoryService extends LogFactory {
 	}
 
 
-	// Just in case some code happens to call uncommon Commons Logging methods...
+	// Just in case some code happens to rely on Commons Logging attributes...
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		if (value != null) {
 			this.attributes.put(name, value);
@@ -58,18 +65,22 @@ public class LogFactoryService extends LogFactory {
 		}
 	}
 
+	@Override
 	public void removeAttribute(String name) {
 		this.attributes.remove(name);
 	}
 
+	@Override
 	public Object getAttribute(String name) {
 		return this.attributes.get(name);
 	}
 
+	@Override
 	public String[] getAttributeNames() {
 		return this.attributes.keySet().toArray(new String[0]);
 	}
 
+	@Override
 	public void release() {
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,9 +90,18 @@ public class DefaultGenerationContext implements GenerationContext {
 		this.runtimeHints = runtimeHints;
 	}
 
-	private DefaultGenerationContext(DefaultGenerationContext existing, String name) {
-		int sequence = existing.sequenceGenerator.computeIfAbsent(name, key -> new AtomicInteger()).getAndIncrement();
-		String featureName = (sequence > 0 ? name + sequence : name);
+	/**
+	 * Create a new {@link DefaultGenerationContext} instance based on the
+	 * supplied {@code existing} context and feature name.
+	 * @param existing the existing context upon which to base the new one
+	 * @param featureName the feature name to use
+	 * @since 6.0.12
+	 */
+	protected DefaultGenerationContext(DefaultGenerationContext existing, String featureName) {
+		int sequence = existing.sequenceGenerator.computeIfAbsent(featureName, key -> new AtomicInteger()).getAndIncrement();
+		if (sequence > 0) {
+			featureName += sequence;
+		}
 		this.sequenceGenerator = existing.sequenceGenerator;
 		this.generatedClasses = existing.generatedClasses.withFeatureNamePrefix(featureName);
 		this.generatedFiles = existing.generatedFiles;

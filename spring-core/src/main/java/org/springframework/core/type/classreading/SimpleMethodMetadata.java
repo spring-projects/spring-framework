@@ -100,9 +100,10 @@ final class SimpleMethodMetadata implements MethodMetadata {
 		return this.annotations;
 	}
 
+
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof SimpleMethodMetadata that && this.source.equals(that.source)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof SimpleMethodMetadata that && this.source.equals(that.source)));
 	}
 
 	@Override

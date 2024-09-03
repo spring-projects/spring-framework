@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,36 +27,40 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * A Pointcut that matches if the underlying {@link CacheOperationSource}
- * has an attribute for a given method.
+ * A {@code Pointcut} that matches if the underlying {@link CacheOperationSource}
+ * has an operation for a given method.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  */
 @SuppressWarnings("serial")
-abstract class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
+final class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-	protected CacheOperationSourcePointcut() {
+	@Nullable
+	private CacheOperationSource cacheOperationSource;
+
+
+	public CacheOperationSourcePointcut() {
 		setClassFilter(new CacheOperationSourceClassFilter());
 	}
 
 
+	public void setCacheOperationSource(@Nullable CacheOperationSource cacheOperationSource) {
+		this.cacheOperationSource = cacheOperationSource;
+	}
+
 	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
-		CacheOperationSource cas = getCacheOperationSource();
-		return (cas != null && !CollectionUtils.isEmpty(cas.getCacheOperations(method, targetClass)));
+		return (this.cacheOperationSource == null ||
+				!CollectionUtils.isEmpty(this.cacheOperationSource.getCacheOperations(method, targetClass)));
 	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof CacheOperationSourcePointcut otherPc)) {
-			return false;
-		}
-		return ObjectUtils.nullSafeEquals(getCacheOperationSource(), otherPc.getCacheOperationSource());
+		return (this == other || (other instanceof CacheOperationSourcePointcut that &&
+				ObjectUtils.nullSafeEquals(this.cacheOperationSource, that.cacheOperationSource)));
 	}
 
 	@Override
@@ -66,31 +70,43 @@ abstract class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut 
 
 	@Override
 	public String toString() {
-		return getClass().getName() + ": " + getCacheOperationSource();
+		return getClass().getName() + ": " + this.cacheOperationSource;
 	}
-
-
-	/**
-	 * Obtain the underlying {@link CacheOperationSource} (may be {@code null}).
-	 * To be implemented by subclasses.
-	 */
-	@Nullable
-	protected abstract CacheOperationSource getCacheOperationSource();
 
 
 	/**
 	 * {@link ClassFilter} that delegates to {@link CacheOperationSource#isCandidateClass}
 	 * for filtering classes whose methods are not worth searching to begin with.
 	 */
-	private class CacheOperationSourceClassFilter implements ClassFilter {
+	private final class CacheOperationSourceClassFilter implements ClassFilter {
 
 		@Override
 		public boolean matches(Class<?> clazz) {
 			if (CacheManager.class.isAssignableFrom(clazz)) {
 				return false;
 			}
-			CacheOperationSource cas = getCacheOperationSource();
-			return (cas == null || cas.isCandidateClass(clazz));
+			return (cacheOperationSource == null || cacheOperationSource.isCandidateClass(clazz));
+		}
+
+		@Nullable
+		private CacheOperationSource getCacheOperationSource() {
+			return cacheOperationSource;
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof CacheOperationSourceClassFilter that &&
+					ObjectUtils.nullSafeEquals(getCacheOperationSource(), that.getCacheOperationSource())));
+		}
+
+		@Override
+		public int hashCode() {
+			return CacheOperationSourceClassFilter.class.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return CacheOperationSourceClassFilter.class.getName() + ": " + getCacheOperationSource();
 		}
 	}
 

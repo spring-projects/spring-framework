@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,14 +54,14 @@ package org.springframework.validation;
  *    }
  * }</pre>
  *
- * <p>See also the Spring reference manual for a fuller discussion of
- * the {@code Validator} interface and its role in an enterprise
- * application.
+ * <p>See also the Spring reference manual for a fuller discussion of the
+ * {@code Validator} interface and its role in an enterprise application.
  *
  * @author Rod Johnson
  * @see SmartValidator
  * @see Errors
  * @see ValidationUtils
+ * @see DataBinder#setValidator
  */
 public interface Validator {
 
@@ -81,11 +81,14 @@ public interface Validator {
 	boolean supports(Class<?> clazz);
 
 	/**
-	 * Validate the supplied {@code target} object, which must be
-	 * of a {@link Class} for which the {@link #supports(Class)} method
-	 * typically has (or would) return {@code true}.
+	 * Validate the given {@code target} object which must be of a
+	 * {@link Class} for which the {@link #supports(Class)} method
+	 * typically has returned (or would return) {@code true}.
 	 * <p>The supplied {@link Errors errors} instance can be used to report
-	 * any resulting validation errors.
+	 * any resulting validation errors, typically as part of a larger
+	 * binding process which this validator is meant to participate in.
+	 * Binding errors have typically been pre-registered with the
+	 * {@link Errors errors} instance before this invocation already.
 	 * @param target the object that is to be validated
 	 * @param errors contextual state about the validation process
 	 * @see ValidationUtils

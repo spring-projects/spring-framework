@@ -30,6 +30,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -64,10 +66,13 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @author Eddú Meléndez
  * @author Rob Winch
+ * @author Brian Clozel
  * @since 4.3
  * @see <a href="https://tools.ietf.org/html/rfc7239">https://tools.ietf.org/html/rfc7239</a>
  */
 public class ForwardedHeaderFilter extends OncePerRequestFilter {
+
+	private static final Log logger = LogFactory.getLog(ForwardedHeaderFilter.class);
 
 	private static final Set<String> FORWARDED_HEADER_NAMES =
 			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(10, Locale.ENGLISH));
@@ -143,15 +148,32 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			filterChain.doFilter(wrappedRequest, response);
 		}
 		else {
-			HttpServletRequest wrappedRequest =
-					new ForwardedHeaderExtractingRequest(request);
-
-			HttpServletResponse wrappedResponse = this.relativeRedirects ?
-					RelativeRedirectResponseWrapper.wrapIfNecessary(response, HttpStatus.SEE_OTHER) :
-					new ForwardedHeaderExtractingResponse(response, wrappedRequest);
-
+			HttpServletRequest wrappedRequest = null;
+			HttpServletResponse wrappedResponse = null;
+			try {
+				wrappedRequest = new ForwardedHeaderExtractingRequest(request);
+				wrappedResponse = this.relativeRedirects ?
+						RelativeRedirectResponseWrapper.wrapIfNecessary(response, HttpStatus.SEE_OTHER) :
+						new ForwardedHeaderExtractingResponse(response, wrappedRequest);
+			}
+			catch (Throwable ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to apply forwarded headers to " + formatRequest(request), ex);
+				}
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+				return;
+			}
 			filterChain.doFilter(wrappedRequest, wrappedResponse);
 		}
+	}
+
+	/**
+	 * Format the request for logging purposes including HTTP method and URL.
+	 * @param request the request to format
+	 * @return the String to display, never empty or {@code null}
+	 */
+	protected String formatRequest(HttpServletRequest request) {
+		return "HTTP " + request.getMethod() + " \"" + request.getRequestURI() + "\"";
 	}
 
 	@Override

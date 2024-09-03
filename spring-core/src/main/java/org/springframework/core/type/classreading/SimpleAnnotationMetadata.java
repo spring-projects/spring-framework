@@ -163,8 +163,8 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof SimpleAnnotationMetadata that && this.className.equals(that.className)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof SimpleAnnotationMetadata that && this.className.equals(that.className)));
 	}
 
 	@Override

@@ -96,9 +96,8 @@ public class EnableAsyncTests {
 	public void properExceptionForExistingProxyDependencyMismatch() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class, AsyncBeanWithInterface.class, AsyncBeanUser.class);
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
-				ctx::refresh)
-			.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(ctx::refresh)
+				.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
 		ctx.close();
 	}
 
@@ -106,9 +105,8 @@ public class EnableAsyncTests {
 	public void properExceptionForResolvedProxyDependencyMismatch() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class, AsyncBeanUser.class, AsyncBeanWithInterface.class);
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
-				ctx::refresh)
-			.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(ctx::refresh)
+				.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
 		ctx.close();
 	}
 
@@ -208,8 +206,7 @@ public class EnableAsyncTests {
 		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AspectJAsyncAnnotationConfig.class);
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(
-				ctx::refresh);
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(ctx::refresh);
 	}
 
 	@Test
@@ -520,6 +517,7 @@ public class EnableAsyncTests {
 			return new ThreadPoolTaskExecutor();
 		}
 	}
+
 
 	@Configuration
 	@EnableAsync

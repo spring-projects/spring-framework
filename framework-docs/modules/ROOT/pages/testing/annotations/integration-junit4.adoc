@@ -1,0 +1,209 @@
+[[integration-testing-annotations-junit4]]
+= Spring JUnit 4 Testing Annotations
+
+The following annotations are supported only when used in conjunction with the
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-runner[SpringRunner], xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's JUnit 4 rules]
+, or xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-junit4[Spring's JUnit 4 support classes]:
+
+* xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-ifprofilevalue[`@IfProfileValue`]
+* xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-profilevaluesourceconfiguration[`@ProfileValueSourceConfiguration`]
+* xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-timed[`@Timed`]
+* xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-repeat[`@Repeat`]
+
+[[integration-testing-annotations-junit4-ifprofilevalue]]
+== `@IfProfileValue`
+
+`@IfProfileValue` indicates that the annotated test is enabled for a specific testing
+environment. If the configured `ProfileValueSource` returns a matching `value` for the
+provided `name`, the test is enabled. Otherwise, the test is disabled and, effectively,
+ignored.
+
+You can apply `@IfProfileValue` at the class level, the method level, or both.
+Class-level usage of `@IfProfileValue` takes precedence over method-level usage for any
+methods within that class or its subclasses. Specifically, a test is enabled if it is
+enabled both at the class level and at the method level. The absence of `@IfProfileValue`
+means the test is implicitly enabled. This is analogous to the semantics of JUnit 4's
+`@Ignore` annotation, except that the presence of `@Ignore` always disables a test.
+
+The following example shows a test that has an `@IfProfileValue` annotation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@IfProfileValue(name="java.vendor", value="Oracle Corporation") // <1>
+	@Test
+	public void testProcessWhichRunsOnlyOnOracleJvm() {
+		// some logic that should run only on Java VMs from Oracle Corporation
+	}
+----
+<1> Run this test only when the Java vendor is "Oracle Corporation".
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@IfProfileValue(name="java.vendor", value="Oracle Corporation") // <1>
+	@Test
+	fun testProcessWhichRunsOnlyOnOracleJvm() {
+		// some logic that should run only on Java VMs from Oracle Corporation
+	}
+----
+<1> Run this test only when the Java vendor is "Oracle Corporation".
+======
+
+
+Alternatively, you can configure `@IfProfileValue` with a list of `values` (with `OR`
+semantics) to achieve TestNG-like support for test groups in a JUnit 4 environment.
+Consider the following example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"}) // <1>
+	@Test
+	public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
+		// some logic that should run only for unit and integration test groups
+	}
+----
+<1> Run this test for unit tests and integration tests.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@IfProfileValue(name="test-groups", values=["unit-tests", "integration-tests"]) // <1>
+	@Test
+	fun testProcessWhichRunsForUnitOrIntegrationTestGroups() {
+		// some logic that should run only for unit and integration test groups
+	}
+----
+<1> Run this test for unit tests and integration tests.
+======
+
+
+[[integration-testing-annotations-junit4-profilevaluesourceconfiguration]]
+== `@ProfileValueSourceConfiguration`
+
+`@ProfileValueSourceConfiguration` is a class-level annotation that specifies what type
+of `ProfileValueSource` to use when retrieving profile values configured through the
+`@IfProfileValue` annotation. If `@ProfileValueSourceConfiguration` is not declared for a
+test, `SystemProfileValueSource` is used by default. The following example shows how to
+use `@ProfileValueSourceConfiguration`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ProfileValueSourceConfiguration(CustomProfileValueSource.class) // <1>
+	public class CustomProfileValueSourceTests {
+		// class body...
+	}
+----
+<1> Use a custom profile value source.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ProfileValueSourceConfiguration(CustomProfileValueSource::class) // <1>
+	class CustomProfileValueSourceTests {
+		// class body...
+	}
+----
+<1> Use a custom profile value source.
+======
+
+
+[[integration-testing-annotations-junit4-timed]]
+== `@Timed`
+
+`@Timed` indicates that the annotated test method must finish execution in a specified
+time period (in milliseconds). If the text execution time exceeds the specified time
+period, the test fails.
+
+The time period includes running the test method itself, any repetitions of the test (see
+`@Repeat`), as well as any setting up or tearing down of the test fixture. The following
+example shows how to use it:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Timed(millis = 1000) // <1>
+	public void testProcessWithOneSecondTimeout() {
+		// some logic that should not take longer than 1 second to run
+	}
+----
+<1> Set the time period for the test to one second.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Timed(millis = 1000) // <1>
+	fun testProcessWithOneSecondTimeout() {
+		// some logic that should not take longer than 1 second to run
+	}
+----
+<1> Set the time period for the test to one second.
+======
+
+
+Spring's `@Timed` annotation has different semantics than JUnit 4's `@Test(timeout=...)`
+support. Specifically, due to the manner in which JUnit 4 handles test execution timeouts
+(that is, by executing the test method in a separate `Thread`), `@Test(timeout=...)`
+preemptively fails the test if the test takes too long. Spring's `@Timed`, on the other
+hand, does not preemptively fail the test but rather waits for the test to complete
+before failing.
+
+[[integration-testing-annotations-junit4-repeat]]
+== `@Repeat`
+
+`@Repeat` indicates that the annotated test method must be run repeatedly. The number of
+times that the test method is to be run is specified in the annotation.
+
+The scope of execution to be repeated includes execution of the test method itself as
+well as any setting up or tearing down of the test fixture. When used with the
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[`SpringMethodRule`], the scope additionally includes
+preparation of the test instance by `TestExecutionListener` implementations. The
+following example shows how to use the `@Repeat` annotation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Repeat(10) // <1>
+	@Test
+	public void testProcessRepeatedly() {
+		// ...
+	}
+----
+<1> Repeat this test ten times.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Repeat(10) // <1>
+	@Test
+	fun testProcessRepeatedly() {
+		// ...
+	}
+----
+<1> Repeat this test ten times.
+======
+
+
+

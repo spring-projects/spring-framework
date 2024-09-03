@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-
 /**
  * Unit tests for {@link Bindings}.
  *
@@ -35,7 +34,9 @@ import static org.mockito.Mockito.verify;
 class BindingsUnitTests {
 
 	BindMarkersFactory markersFactory = BindMarkersFactory.indexed("$", 1);
+
 	BindTarget bindTarget = mock();
+
 
 	@Test
 	void shouldCreateBindings() {

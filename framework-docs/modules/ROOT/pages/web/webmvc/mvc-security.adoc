@@ -1,0 +1,20 @@
+[[mvc-web-security]]
+= Web Security
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webflux/security.adoc[See equivalent in the Reactive stack]#
+
+The https://spring.io/projects/spring-security[Spring Security] project provides support
+for protecting web applications from malicious exploits. See the Spring Security
+reference documentation, including:
+
+* {docs-spring-security}/servlet/integrations/mvc.html[Spring MVC Security]
+* {docs-spring-security}/servlet/test/mockmvc/setup.html[Spring MVC Test Support]
+* {docs-spring-security}/features/exploits/csrf.html#csrf-protection[CSRF protection]
+* {docs-spring-security}/features/exploits/headers.html[Security Response Headers]
+
+https://hdiv.org/[HDIV] is another web security framework that integrates with Spring MVC.
+
+
+
+

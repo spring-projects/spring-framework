@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,10 @@ import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
 import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.http.customJson
 import org.springframework.web.testfixture.http.MockHttpInputMessage
 import org.springframework.web.testfixture.http.MockHttpOutputMessage
+import java.math.BigDecimal
 
 /**
  * Tests for the JSON conversion using kotlinx.serialization.
@@ -67,6 +69,8 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(converter.canRead(typeTokenOf<List<Ordered>>(), List::class.java, MediaType.APPLICATION_JSON)).isFalse()
 
 		assertThat(converter.canRead(ResolvableType.NONE.type, null, MediaType.APPLICATION_JSON)).isFalse()
+
+		assertThat(converter.canRead(BigDecimal::class.java, null, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test
@@ -90,6 +94,8 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(converter.canWrite(typeTokenOf<Ordered>(), Ordered::class.java, MediaType.APPLICATION_JSON)).isFalse()
 
 		assertThat(converter.canWrite(ResolvableType.NONE.type, SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
+
+		assertThat(converter.canWrite(BigDecimal::class.java, BigDecimal::class.java, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test
@@ -312,6 +318,42 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 
 		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf(contentType.toString()))
 		assertThat(result).isEqualTo("\"H\u00e9llo W\u00f6rld\"")
+	}
+
+	@Test
+	fun canReadBigDecimalWithSerializerModule() {
+		val customConverter = KotlinSerializationJsonHttpMessageConverter(customJson)
+		assertThat(customConverter.canRead(BigDecimal::class.java, MediaType.APPLICATION_JSON)).isTrue()
+	}
+
+	@Test
+	fun canWriteBigDecimalWithSerializerModule() {
+		val customConverter = KotlinSerializationJsonHttpMessageConverter(customJson)
+		assertThat(customConverter.canWrite(BigDecimal::class.java, MediaType.APPLICATION_JSON)).isTrue()
+	}
+
+	@Test
+	fun readBigDecimalWithSerializerModule() {
+		val body = "1.0"
+		val inputMessage = MockHttpInputMessage(body.toByteArray(charset("UTF-8")))
+		inputMessage.headers.contentType = MediaType.APPLICATION_JSON
+		val customConverter = KotlinSerializationJsonHttpMessageConverter(customJson)
+		val result = customConverter.read(BigDecimal::class.java, inputMessage) as BigDecimal
+
+		assertThat(result).isEqualTo(BigDecimal.valueOf(1.0))
+	}
+
+	@Test
+	fun writeBigDecimalWithSerializerModule() {
+		val outputMessage = MockHttpOutputMessage()
+		val customConverter = KotlinSerializationJsonHttpMessageConverter(customJson)
+
+		customConverter.write(BigDecimal(1), null, outputMessage)
+
+		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
+
+		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(result).isEqualTo("1.0")
 	}
 
 

@@ -1,0 +1,29 @@
+[[integration-testing-annotations-spring]]
+= Spring Testing Annotations
+
+The Spring Framework provides the following set of Spring-specific annotations that you
+can use in your unit and integration tests in conjunction with the TestContext framework.
+See the corresponding javadoc for further information, including default attribute
+values, attribute aliases, and other details.
+
+Spring's testing annotations include the following:
+
+* xref:testing/annotations/integration-spring/annotation-bootstrapwith.adoc[`@BootstrapWith`]
+* xref:testing/annotations/integration-spring/annotation-contextconfiguration.adoc[`@ContextConfiguration`]
+* xref:testing/annotations/integration-spring/annotation-webappconfiguration.adoc[`@WebAppConfiguration`]
+* xref:testing/annotations/integration-spring/annotation-contexthierarchy.adoc[`@ContextHierarchy`]
+* xref:testing/annotations/integration-spring/annotation-activeprofiles.adoc[`@ActiveProfiles`]
+* xref:testing/annotations/integration-spring/annotation-testpropertysource.adoc[`@TestPropertySource`]
+* xref:testing/annotations/integration-spring/annotation-dynamicpropertysource.adoc[`@DynamicPropertySource`]
+* xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[`@DirtiesContext`]
+* xref:testing/annotations/integration-spring/annotation-testexecutionlisteners.adoc[`@TestExecutionListeners`]
+* xref:testing/annotations/integration-spring/annotation-recordapplicationevents.adoc[`@RecordApplicationEvents`]
+* xref:testing/annotations/integration-spring/annotation-commit.adoc[`@Commit`]
+* xref:testing/annotations/integration-spring/annotation-rollback.adoc[`@Rollback`]
+* xref:testing/annotations/integration-spring/annotation-beforetransaction.adoc[`@BeforeTransaction`]
+* xref:testing/annotations/integration-spring/annotation-aftertransaction.adoc[`@AfterTransaction`]
+* xref:testing/annotations/integration-spring/annotation-sql.adoc[`@Sql`]
+* xref:testing/annotations/integration-spring/annotation-sqlconfig.adoc[`@SqlConfig`]
+* xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[`@SqlMergeMode`]
+* xref:testing/annotations/integration-spring/annotation-sqlgroup.adoc[`@SqlGroup`]
+

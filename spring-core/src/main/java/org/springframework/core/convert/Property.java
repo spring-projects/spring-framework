@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -260,16 +260,11 @@ public final class Property {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof Property otherProperty)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(this.objectType, otherProperty.objectType) &&
-				ObjectUtils.nullSafeEquals(this.name, otherProperty.name) &&
-				ObjectUtils.nullSafeEquals(this.readMethod, otherProperty.readMethod) &&
-				ObjectUtils.nullSafeEquals(this.writeMethod, otherProperty.writeMethod));
+		return (this == other || (other instanceof Property that &&
+				ObjectUtils.nullSafeEquals(this.objectType, that.objectType) &&
+				ObjectUtils.nullSafeEquals(this.name, that.name) &&
+				ObjectUtils.nullSafeEquals(this.readMethod, that.readMethod) &&
+				ObjectUtils.nullSafeEquals(this.writeMethod, that.writeMethod)));
 	}
 
 	@Override

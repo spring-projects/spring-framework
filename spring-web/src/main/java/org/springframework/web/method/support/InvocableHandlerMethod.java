@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.springframework.web.method.support;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-
-import org.reactivestreams.Publisher;
 
 import org.springframework.context.MessageSource;
 import org.springframework.core.CoroutinesUtils;
@@ -232,7 +230,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Invoke the given Kotlin coroutine suspended function.
-	 *
 	 * <p>The default implementation invokes
 	 * {@link CoroutinesUtils#invokeSuspendingFunction(Method, Object, Object...)},
 	 * but subclasses can override this method to use
@@ -240,7 +237,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * instead.
 	 * @since 6.0
 	 */
-	protected Publisher<?> invokeSuspendingFunction(Method method, Object target, Object[] args) {
+	protected Object invokeSuspendingFunction(Method method, Object target, Object[] args) {
 		return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
 	}
 

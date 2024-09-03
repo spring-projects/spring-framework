@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,11 +65,15 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 
 	private final DefaultListableBeanFactory beanFactory;
 
+	private final AutowiredAnnotationBeanPostProcessor beanPostProcessor;
+
 
 	AutowiredAnnotationBeanRegistrationAotContributionTests() {
 		this.generationContext = new TestGenerationContext();
 		this.beanRegistrationCode = new MockBeanRegistrationCode(this.generationContext);
 		this.beanFactory = new DefaultListableBeanFactory();
+		this.beanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
+		this.beanPostProcessor.setBeanFactory(this.beanFactory);
 	}
 
 
@@ -185,10 +189,19 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		});
 	}
 
+	@Test
+	void contributeWhenMethodInjectionHasMatchingPropertyValue() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(InjectionBean.class);
+		beanDefinition.getPropertyValues().addPropertyValue("counter", 42);
+		this.beanFactory.registerBeanDefinition("test", beanDefinition);
+		BeanRegistrationAotContribution contribution = this.beanPostProcessor
+				.processAheadOfTime(RegisteredBean.of(this.beanFactory, "test"));
+		assertThat(contribution).isNull();
+	}
+
 	private RegisteredBean getAndApplyContribution(Class<?> beanClass) {
 		RegisteredBean registeredBean = registerBean(beanClass);
-		BeanRegistrationAotContribution contribution = new AutowiredAnnotationBeanPostProcessor()
-				.processAheadOfTime(registeredBean);
+		BeanRegistrationAotContribution contribution = this.beanPostProcessor.processAheadOfTime(registeredBean);
 		assertThat(contribution).isNotNull();
 		contribution.applyTo(this.generationContext, this.beanRegistrationCode);
 		return registeredBean;
@@ -227,6 +240,18 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 		this.generationContext.writeGeneratedContent();
 		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(BiFunction.class), compiled));
+	}
+
+	static class InjectionBean {
+
+		@SuppressWarnings("unused")
+		private Integer counter;
+
+		@Autowired
+		public void setCounter(Integer counter) {
+			this.counter = counter;
+		}
+
 	}
 
 }

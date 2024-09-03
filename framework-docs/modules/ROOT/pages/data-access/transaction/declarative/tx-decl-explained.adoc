@@ -1,0 +1,47 @@
+[[tx-decl-explained]]
+= Understanding the Spring Framework's Declarative Transaction Implementation
+
+It is not sufficient merely to tell you to annotate your classes with the
+`@Transactional` annotation, add `@EnableTransactionManagement` to your configuration,
+and expect you to understand how it all works. To provide a deeper understanding, this
+section explains the inner workings of the Spring Framework's declarative transaction
+infrastructure in the context of transaction-related issues.
+
+The most important concepts to grasp with regard to the Spring Framework's declarative
+transaction support are that this support is enabled
+xref:core/aop/proxying.adoc#aop-understanding-aop-proxies[via AOP proxies] and that the transactional
+advice is driven by metadata (currently XML- or annotation-based). The combination of AOP
+with transactional metadata yields an AOP proxy that uses a `TransactionInterceptor` in
+conjunction with an appropriate `TransactionManager` implementation to drive transactions
+around method invocations.
+
+NOTE: Spring AOP is covered in xref:core/aop.adoc[the AOP section].
+
+Spring Framework's `TransactionInterceptor` provides transaction management for
+imperative and reactive programming models. The interceptor detects the desired flavor of
+transaction management by inspecting the method return type. Methods returning a reactive
+type such as `Publisher` or Kotlin `Flow` (or a subtype of those) qualify for reactive
+transaction management. All other return types including `void` use the code path for
+imperative transaction management.
+
+Transaction management flavors impact which transaction manager is required. Imperative
+transactions require a `PlatformTransactionManager`, while reactive transactions use
+`ReactiveTransactionManager` implementations.
+
+[NOTE]
+====
+`@Transactional` commonly works with thread-bound transactions managed by
+`PlatformTransactionManager`, exposing a transaction to all data access operations within
+the current execution thread. Note: This does _not_ propagate to newly started threads
+within the method.
+
+A reactive transaction managed by `ReactiveTransactionManager` uses the Reactor context
+instead of thread-local attributes. As a consequence, all participating data access
+operations need to execute within the same Reactor context in the same reactive pipeline.
+====
+
+The following image shows a conceptual view of calling a method on a transactional proxy:
+
+image::tx.png[]
+
+

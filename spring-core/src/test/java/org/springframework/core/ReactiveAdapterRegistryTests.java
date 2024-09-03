@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -27,6 +28,7 @@ import kotlinx.coroutines.Deferred;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
+import reactor.adapter.JdkFlowAdapter;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link ReactiveAdapterRegistry}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 @SuppressWarnings("unchecked")
 class ReactiveAdapterRegistryTests {
@@ -52,14 +55,40 @@ class ReactiveAdapterRegistryTests {
 		ReactiveAdapter adapter2 = getAdapter(ExtendedFlux.class);
 		assertThat(adapter2).isSameAs(adapter1);
 
+		// Register regular reactive type (after existing adapters)
 		this.registry.registerReactiveType(
 				ReactiveTypeDescriptor.multiValue(ExtendedFlux.class, ExtendedFlux::empty),
 				o -> (ExtendedFlux<?>) o,
 				ExtendedFlux::from);
 
+		// Matches for ExtendedFlux itself
 		ReactiveAdapter adapter3 = getAdapter(ExtendedFlux.class);
 		assertThat(adapter3).isNotNull();
 		assertThat(adapter3).isNotSameAs(adapter1);
+
+		// Does not match for ExtendedFlux subclass since the default Flux adapter
+		// is being assignability-checked first when no specific match was found
+		ReactiveAdapter adapter4 = getAdapter(ExtendedExtendedFlux.class);
+		assertThat(adapter4).isSameAs(adapter1);
+
+		// Register reactive type override (before existing adapters)
+		this.registry.registerReactiveTypeOverride(
+				ReactiveTypeDescriptor.multiValue(Flux.class, ExtendedFlux::empty),
+				o -> (ExtendedFlux<?>) o,
+				ExtendedFlux::from);
+
+		// Override match for Flux
+		ReactiveAdapter adapter5 = getAdapter(Flux.class);
+		assertThat(adapter5).isNotNull();
+		assertThat(adapter5).isNotSameAs(adapter1);
+
+		// Initially registered adapter specifically matches for ExtendedFlux
+		ReactiveAdapter adapter6 = getAdapter(ExtendedFlux.class);
+		assertThat(adapter6).isSameAs(adapter3);
+
+		// Override match for ExtendedFlux subclass
+		ReactiveAdapter adapter7 = getAdapter(ExtendedExtendedFlux.class);
+		assertThat(adapter7).isSameAs(adapter5);
 	}
 
 
@@ -76,6 +105,10 @@ class ReactiveAdapterRegistryTests {
 		public void subscribe(CoreSubscriber<? super T> actual) {
 			throw new UnsupportedOperationException();
 		}
+	}
+
+
+	private static class ExtendedExtendedFlux<T> extends ExtendedFlux<T> {
 	}
 
 
@@ -110,6 +143,16 @@ class ReactiveAdapterRegistryTests {
 			Object target = getAdapter(Mono.class).fromPublisher(source);
 			assertThat(target).isInstanceOf(Mono.class);
 			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
+		}
+
+		@Test
+		void toFlowPublisher() {
+			List<Integer> sequence = Arrays.asList(1, 2, 3);
+			Publisher<Integer> source = io.reactivex.rxjava3.core.Flowable.fromIterable(sequence);
+			Object target = getAdapter(Flow.Publisher.class).fromPublisher(source);
+			assertThat(target).isInstanceOf(Flow.Publisher.class);
+			assertThat(JdkFlowAdapter.flowPublisherToFlux((Flow.Publisher<Integer>) target)
+					.collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
 		@Test

@@ -45,7 +45,7 @@ public class RequestParameterTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON)
-				.expectBody().jsonPath("$.name", "George");
+				.expectBody().jsonPath("$.name").isEqualTo("George");
 	}
 
 

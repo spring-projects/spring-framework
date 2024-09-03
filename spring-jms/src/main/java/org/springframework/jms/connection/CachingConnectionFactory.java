@@ -559,11 +559,10 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
+		public boolean equals(@Nullable Object other) {
 			// Effectively checking object equality as well as toString equality.
 			// On WebSphere MQ, Destination objects do not implement equals...
-			return (this == obj || (obj instanceof DestinationCacheKey otherKey &&
-					destinationEquals(otherKey)));
+			return (this == other || (other instanceof DestinationCacheKey that && destinationEquals(that)));
 		}
 
 		@Override
@@ -615,22 +614,17 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof ConsumerCacheKey otherKey)) {
-				return false;
-			}
-			return (destinationEquals(otherKey) &&
-					ObjectUtils.nullSafeEquals(this.selector, otherKey.selector) &&
-					ObjectUtils.nullSafeEquals(this.noLocal, otherKey.noLocal) &&
-					ObjectUtils.nullSafeEquals(this.subscription, otherKey.subscription) &&
-					this.durable == otherKey.durable);
+			return (this == other || (other instanceof ConsumerCacheKey that &&
+					destinationEquals(that) &&
+					ObjectUtils.nullSafeEquals(this.selector, that.selector) &&
+					ObjectUtils.nullSafeEquals(this.noLocal, that.noLocal) &&
+					ObjectUtils.nullSafeEquals(this.subscription, that.subscription) &&
+					this.durable == that.durable));
 		}
 
 		@Override
 		public int hashCode() {
-			return (31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector));
+			return super.hashCode() * 31 + ObjectUtils.nullSafeHashCode(this.selector);
 		}
 
 		@Override

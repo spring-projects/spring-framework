@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.lang.annotation.Target;
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 4.1
+ * @see Cacheable
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -42,8 +43,10 @@ public @interface CacheConfig {
 	 * Names of the default caches to consider for caching operations defined
 	 * in the annotated class.
 	 * <p>If none is set at the operation level, these are used instead of the default.
-	 * <p>May be used to determine the target cache (or caches), matching the
-	 * qualifier value or the bean names of a specific bean definition.
+	 * <p>Names may be used to determine the target cache(s), to be resolved via the
+	 * configured {@link #cacheResolver()} which typically delegates to
+	 * {@link org.springframework.cache.CacheManager#getCache}.
+	 * For further details see {@link Cacheable#cacheNames()}.
 	 */
 	String[] cacheNames() default {};
 

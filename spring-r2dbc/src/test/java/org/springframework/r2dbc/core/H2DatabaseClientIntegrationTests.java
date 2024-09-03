@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,15 @@ import io.r2dbc.spi.ConnectionFactory;
  *
  * @author Mark Paluch
  */
-public class H2DatabaseClientIntegrationTests
-		extends AbstractDatabaseClientIntegrationTests {
+public class H2DatabaseClientIntegrationTests extends AbstractDatabaseClientIntegrationTests {
 
-	public static String CREATE_TABLE_LEGOSET = "CREATE TABLE legoset (\n" //
-			+ "    id          serial CONSTRAINT id PRIMARY KEY,\n" //
-			+ "    version     integer NULL,\n" //
-			+ "    name        varchar(255) NOT NULL,\n" //
-			+ "    manual      integer NULL\n" //
-			+ ");";
+	private static final String CREATE_TABLE_LEGOSET = """
+			CREATE TABLE legoset (
+			id          serial CONSTRAINT id PRIMARY KEY,
+			version     integer NULL,
+			name        varchar(255) NOT NULL,
+			manual      integer NULL
+			);""";
 
 	@Override
 	protected ConnectionFactory createConnectionFactory() {

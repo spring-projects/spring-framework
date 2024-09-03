@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link BackOff} that increases the back off period for each
- * retry attempt. When the interval has reached the {@link #setMaxInterval(long)
+ * retry attempt. When the interval has reached the {@linkplain #setMaxInterval
  * max interval}, it is no longer increased. Stops retrying once the
- * {@link #setMaxElapsedTime(long) max elapsed time} has been reached.
+ * {@linkplain #setMaxElapsedTime max elapsed time} has been reached.
  *
- * <p>Example: The default interval is {@value #DEFAULT_INITIAL_INTERVAL} ms,
- * the default multiplier is {@value #DEFAULT_MULTIPLIER}, and the default max
+ * <p>Example: The default interval is {@value #DEFAULT_INITIAL_INTERVAL} ms;
+ * the default multiplier is {@value #DEFAULT_MULTIPLIER}; and the default max
  * interval is {@value #DEFAULT_MAX_INTERVAL}. For 10 attempts the sequence will be
  * as follows:
  *
@@ -44,10 +44,9 @@ import org.springframework.util.Assert;
  * 10             30000
  * </pre>
  *
- * <p>Note that the default max elapsed time is {@link Long#MAX_VALUE}. Use
- * {@link #setMaxElapsedTime(long)} to limit the maximum length of time
- * that an instance should accumulate before returning
- * {@link BackOffExecution#STOP}.
+ * <p>Note that the default max elapsed time is {@link Long#MAX_VALUE}.
+ * Use {@link #setMaxElapsedTime} to limit the maximum length of time that an
+ * instance should accumulate before returning {@link BackOffExecution#STOP}.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -107,7 +106,7 @@ public class ExponentialBackOff implements BackOff {
 
 
 	/**
-	 * The initial interval in milliseconds.
+	 * Set the initial interval in milliseconds.
 	 */
 	public void setInitialInterval(long initialInterval) {
 		this.initialInterval = initialInterval;
@@ -121,7 +120,7 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
-	 * The value to multiply the current interval by for each retry attempt.
+	 * Set the value to multiply the current interval by for each retry attempt.
 	 */
 	public void setMultiplier(double multiplier) {
 		checkMultiplier(multiplier);
@@ -136,21 +135,21 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
-	 * The maximum back off time.
+	 * Set the maximum back off time in milliseconds.
 	 */
 	public void setMaxInterval(long maxInterval) {
 		this.maxInterval = maxInterval;
 	}
 
 	/**
-	 * Return the maximum back off time.
+	 * Return the maximum back off time in milliseconds.
 	 */
 	public long getMaxInterval() {
 		return this.maxInterval;
 	}
 
 	/**
-	 * The maximum elapsed time in milliseconds after which a call to
+	 * Set the maximum elapsed time in milliseconds after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
 	 */
 	public void setMaxElapsedTime(long maxElapsedTime) {
@@ -184,10 +183,9 @@ public class ExponentialBackOff implements BackOff {
 
 		@Override
 		public long nextBackOff() {
-			if (this.currentElapsedTime >= maxElapsedTime) {
+			if (this.currentElapsedTime >= getMaxElapsedTime()) {
 				return STOP;
 			}
-
 			long nextInterval = computeNextInterval();
 			this.currentElapsedTime += nextInterval;
 			return nextInterval;
@@ -213,7 +211,6 @@ public class ExponentialBackOff implements BackOff {
 			i *= getMultiplier();
 			return Math.min(i, maxInterval);
 		}
-
 
 		@Override
 		public String toString() {

@@ -1,0 +1,145 @@
+[[beans-resource-annotation]]
+= Injection with `@Resource`
+
+Spring also supports injection by using the JSR-250 `@Resource` annotation
+(`jakarta.annotation.Resource`) on fields or bean property setter methods.
+This is a common pattern in Jakarta EE: for example, in JSF-managed beans and JAX-WS
+endpoints. Spring supports this pattern for Spring-managed objects as well.
+
+`@Resource` takes a name attribute. By default, Spring interprets that value as
+the bean name to be injected. In other words, it follows by-name semantics,
+as demonstrated in the following example:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SimpleMovieLister {
+
+		private MovieFinder movieFinder;
+
+		@Resource(name="myMovieFinder") // <1>
+		public void setMovieFinder(MovieFinder movieFinder) {
+			this.movieFinder = movieFinder;
+		}
+	}
+----
+<1> This line injects a `@Resource`.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+class SimpleMovieLister {
+
+	@Resource(name="myMovieFinder") // <1>
+	private lateinit var movieFinder:MovieFinder
+}
+----
+<1> This line injects a `@Resource`.
+======
+--
+
+
+If no name is explicitly specified, the default name is derived from the field name or
+setter method. In case of a field, it takes the field name. In case of a setter method,
+it takes the bean property name. The following example is going to have the bean
+named `movieFinder` injected into its setter method:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SimpleMovieLister {
+
+		private MovieFinder movieFinder;
+
+		@Resource
+		public void setMovieFinder(MovieFinder movieFinder) {
+			this.movieFinder = movieFinder;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class SimpleMovieLister {
+
+		@set:Resource
+		private lateinit var movieFinder: MovieFinder
+
+	}
+----
+======
+--
+
+NOTE: The name provided with the annotation is resolved as a bean name by the
+`ApplicationContext` of which the `CommonAnnotationBeanPostProcessor` is aware.
+The names can be resolved through JNDI if you configure Spring's
+{api-spring-framework}/jndi/support/SimpleJndiBeanFactory.html[`SimpleJndiBeanFactory`]
+explicitly. However, we recommend that you rely on the default behavior and
+use Spring's JNDI lookup capabilities to preserve the level of indirection.
+
+In the exclusive case of `@Resource` usage with no explicit name specified, and similar
+to `@Autowired`, `@Resource` finds a primary type match instead of a specific named bean
+and resolves well known resolvable dependencies: the `BeanFactory`,
+`ApplicationContext`, `ResourceLoader`, `ApplicationEventPublisher`, and `MessageSource`
+interfaces.
+
+Thus, in the following example, the `customerPreferenceDao` field first looks for a bean
+named "customerPreferenceDao" and then falls back to a primary type match for the type
+`CustomerPreferenceDao`:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MovieRecommender {
+
+		@Resource
+		private CustomerPreferenceDao customerPreferenceDao;
+
+		@Resource
+		private ApplicationContext context; // <1>
+
+		public MovieRecommender() {
+		}
+
+		// ...
+	}
+----
+<1> The `context` field is injected based on the known resolvable dependency type:
+`ApplicationContext`.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MovieRecommender {
+
+		@Resource
+		private lateinit var customerPreferenceDao: CustomerPreferenceDao
+
+
+		@Resource
+		private lateinit var context: ApplicationContext // <1>
+
+		// ...
+	}
+----
+<1> The `context` field is injected based on the known resolvable dependency type:
+`ApplicationContext`.
+======
+--
+

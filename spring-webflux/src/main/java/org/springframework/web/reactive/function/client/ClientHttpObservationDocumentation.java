@@ -136,8 +136,9 @@ public enum ClientHttpObservationDocumentation implements ObservationDocumentati
 
 		/**
 		 * Client name derived from the request URI host.
-		 * @deprecated in favor of {@link LowCardinalityKeyNames#CLIENT_NAME}.
-		 * This will be available both as a low and high cardinality key value.
+		 * @deprecated in favor of {@link LowCardinalityKeyNames#CLIENT_NAME};
+		 * scheduled for removal in 6.2. This will be available both as a low and
+		 * high cardinality key value.
 		 */
 		@Deprecated(since = "6.0.5", forRemoval = true)
 		CLIENT_NAME {

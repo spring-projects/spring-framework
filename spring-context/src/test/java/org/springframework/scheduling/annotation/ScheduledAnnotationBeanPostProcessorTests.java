@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		FixedDelay, 5_000
 		FixedDelayInSeconds, 5_000
 		FixedDelayInMinutes, 180_000
+		FixedDelayWithMaxValue, -1
 	""")
 	void fixedDelayTask(@NameToClass Class<?> beanClass, long expectedInterval) {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
@@ -120,7 +121,8 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(targetObject).isEqualTo(target);
 		assertThat(targetMethod.getName()).isEqualTo("fixedDelay");
 		assertThat(task.getInitialDelayDuration()).isZero();
-		assertThat(task.getIntervalDuration()).isEqualTo(Duration.ofMillis(expectedInterval));
+		assertThat(task.getIntervalDuration()).isEqualTo(
+				Duration.ofMillis(expectedInterval < 0 ? Long.MAX_VALUE : expectedInterval));
 	}
 
 	@ParameterizedTest
@@ -343,8 +345,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		BeanDefinition targetDefinition = new RootBeanDefinition(CronWithInvalidTimezoneTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(context::refresh);
 	}
 
 	@Test
@@ -355,8 +356,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("methodValidation", validationDefinition);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(context::refresh);
 	}
 
 	@Test
@@ -702,18 +702,16 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		BeanDefinition targetDefinition = new RootBeanDefinition(EmptyAnnotationTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(context::refresh);
 	}
 
 	@Test
-	void invalidCron() throws Throwable {
+	void invalidCron() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(InvalidCronTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(context::refresh);
 	}
 
 	@Test
@@ -722,8 +720,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		BeanDefinition targetDefinition = new RootBeanDefinition(NonEmptyParamListTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
-		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
-				context::refresh);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(context::refresh);
 	}
 
 
@@ -744,6 +741,13 @@ class ScheduledAnnotationBeanPostProcessorTests {
 	static class FixedDelayInMinutes {
 
 		@Scheduled(fixedDelay = 3, timeUnit = TimeUnit.MINUTES)
+		void fixedDelay() {
+		}
+	}
+
+	static class FixedDelayWithMaxValue {
+
+		@Scheduled(fixedDelay = Long.MAX_VALUE)
 		void fixedDelay() {
 		}
 	}

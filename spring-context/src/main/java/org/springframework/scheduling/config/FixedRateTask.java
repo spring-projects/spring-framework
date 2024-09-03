@@ -56,5 +56,4 @@ public class FixedRateTask extends IntervalTask {
 		super(task);
 	}
 
-
 }

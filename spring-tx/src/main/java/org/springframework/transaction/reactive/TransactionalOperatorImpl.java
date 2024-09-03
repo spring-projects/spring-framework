@@ -112,10 +112,11 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 	 * @param ex the throwable to try to unwrap
 	 */
 	private Throwable unwrapIfResourceCleanupFailure(Throwable ex) {
-		if (ex instanceof RuntimeException &&
-				ex.getCause() != null &&
-				ex.getMessage().startsWith("Async resource cleanup failed")) {
-			return ex.getCause();
+		if (ex instanceof RuntimeException && ex.getCause() != null) {
+			String msg = ex.getMessage();
+			if (msg != null && msg.startsWith("Async resource cleanup failed")) {
+				return ex.getCause();
+			}
 		}
 		return ex;
 	}

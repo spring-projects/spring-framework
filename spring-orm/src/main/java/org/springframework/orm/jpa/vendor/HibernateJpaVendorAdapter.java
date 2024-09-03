@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,11 @@ import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate.
- * Compatible with Hibernate ORM 5.5/5.6 as well as 6.0/6.1.
+ * Compatible with Hibernate ORM 5.5/5.6 as well as 6.0/6.1/6.2.
  *
  * <p>Exposes Hibernate's persistence provider and Hibernate's Session as extended
  * EntityManager interface, and adapts {@link AbstractJpaVendorAdapter}'s common
@@ -68,6 +69,9 @@ import org.springframework.lang.Nullable;
  * @see HibernateJpaDialect
  */
 public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
+
+	private static final boolean oldDialectsPresent = ClassUtils.isPresent(
+			"org.hibernate.dialect.PostgreSQL95Dialect", HibernateJpaVendorAdapter.class.getClassLoader());
 
 	private final HibernateJpaDialect jpaDialect = new HibernateJpaDialect();
 
@@ -159,6 +163,9 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 					PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
 		}
 
+		// For SpringBeanContainer to be called on Hibernate 6.2
+		jpaProperties.put("hibernate.cdi.extensions", "true");
+
 		return jpaProperties;
 	}
 
@@ -167,22 +174,40 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @param database the target database
 	 * @return the Hibernate database dialect class, or {@code null} if none found
 	 */
+	@SuppressWarnings("deprecation")  // for DerbyDialect and PostgreSQLDialect on Hibernate 6.2
 	@Nullable
 	protected Class<?> determineDatabaseDialectClass(Database database) {
-		return switch (database) {
-			case DB2 -> DB2Dialect.class;
-			case DERBY -> DerbyTenSevenDialect.class;
-			case H2 -> H2Dialect.class;
-			case HANA -> HANAColumnStoreDialect.class;
-			case HSQL -> HSQLDialect.class;
-			case INFORMIX -> Informix10Dialect.class;
-			case MYSQL -> MySQL57Dialect.class;
-			case ORACLE -> Oracle12cDialect.class;
-			case POSTGRESQL -> PostgreSQL95Dialect.class;
-			case SQL_SERVER -> SQLServer2012Dialect.class;
-			case SYBASE -> SybaseDialect.class;
-			default -> null;
-		};
+		if (oldDialectsPresent) {  // Hibernate <6.2
+			return switch (database) {
+				case DB2 -> DB2Dialect.class;
+				case DERBY -> DerbyTenSevenDialect.class;
+				case H2 -> H2Dialect.class;
+				case HANA -> HANAColumnStoreDialect.class;
+				case HSQL -> HSQLDialect.class;
+				case INFORMIX -> Informix10Dialect.class;
+				case MYSQL -> MySQL57Dialect.class;
+				case ORACLE -> Oracle12cDialect.class;
+				case POSTGRESQL -> PostgreSQL95Dialect.class;
+				case SQL_SERVER -> SQLServer2012Dialect.class;
+				case SYBASE -> SybaseDialect.class;
+				default -> null;
+			};
+		}
+		else {  // Hibernate 6.2 aligned
+			return switch (database) {
+				case DB2 -> DB2Dialect.class;
+				case DERBY -> org.hibernate.dialect.DerbyDialect.class;
+				case H2 -> H2Dialect.class;
+				case HANA -> HANAColumnStoreDialect.class;
+				case HSQL -> HSQLDialect.class;
+				case MYSQL -> MySQL57Dialect.class;
+				case ORACLE -> Oracle12cDialect.class;
+				case POSTGRESQL -> org.hibernate.dialect.PostgreSQLDialect.class;
+				case SQL_SERVER -> SQLServer2012Dialect.class;
+				case SYBASE -> SybaseDialect.class;
+				default -> null;
+			};
+		}
 	}
 
 	@Override

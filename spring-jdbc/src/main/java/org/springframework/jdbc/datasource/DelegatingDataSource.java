@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,6 +105,16 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	}
 
 	@Override
+	public int getLoginTimeout() throws SQLException {
+		return obtainTargetDataSource().getLoginTimeout();
+	}
+
+	@Override
+	public void setLoginTimeout(int seconds) throws SQLException {
+		obtainTargetDataSource().setLoginTimeout(seconds);
+	}
+
+	@Override
 	public PrintWriter getLogWriter() throws SQLException {
 		return obtainTargetDataSource().getLogWriter();
 	}
@@ -115,19 +125,9 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	}
 
 	@Override
-	public int getLoginTimeout() throws SQLException {
-		return obtainTargetDataSource().getLoginTimeout();
+	public Logger getParentLogger() {
+		return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	}
-
-	@Override
-	public void setLoginTimeout(int seconds) throws SQLException {
-		obtainTargetDataSource().setLoginTimeout(seconds);
-	}
-
-
-	//---------------------------------------------------------------------
-	// Implementation of JDBC 4.0's Wrapper interface
-	//---------------------------------------------------------------------
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -141,16 +141,6 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
 		return (iface.isInstance(this) || obtainTargetDataSource().isWrapperFor(iface));
-	}
-
-
-	//---------------------------------------------------------------------
-	// Implementation of JDBC 4.1's getParentLogger method
-	//---------------------------------------------------------------------
-
-	@Override
-	public Logger getParentLogger() {
-		return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	}
 
 }

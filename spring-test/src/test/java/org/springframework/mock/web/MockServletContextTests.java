@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,10 +105,10 @@ class MockServletContextTests {
 
 		@Test
 		void servletVersion() {
-			assertThat(servletContext.getMajorVersion()).isEqualTo(3);
-			assertThat(servletContext.getMinorVersion()).isEqualTo(1);
-			assertThat(servletContext.getEffectiveMajorVersion()).isEqualTo(3);
-			assertThat(servletContext.getEffectiveMinorVersion()).isEqualTo(1);
+			assertThat(servletContext.getMajorVersion()).isEqualTo(6);
+			assertThat(servletContext.getMinorVersion()).isEqualTo(0);
+			assertThat(servletContext.getEffectiveMajorVersion()).isEqualTo(6);
+			assertThat(servletContext.getEffectiveMinorVersion()).isEqualTo(0);
 
 			servletContext.setMajorVersion(4);
 			servletContext.setMinorVersion(0);

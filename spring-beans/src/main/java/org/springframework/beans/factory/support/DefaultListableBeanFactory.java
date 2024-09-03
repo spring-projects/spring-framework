@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,16 +121,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
 	@Nullable
-	private static Class<?> javaxInjectProviderClass;
+	private static Class<?> jakartaInjectProviderClass;
 
 	static {
 		try {
-			javaxInjectProviderClass =
+			jakartaInjectProviderClass =
 					ClassUtils.forName("jakarta.inject.Provider", DefaultListableBeanFactory.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - Provider interface simply not supported then.
-			javaxInjectProviderClass = null;
+			jakartaInjectProviderClass = null;
 		}
 	}
 
@@ -979,7 +979,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (String beanName : beanNames) {
 			Object singletonInstance = getSingleton(beanName);
 			if (singletonInstance instanceof SmartInitializingSingleton smartSingleton) {
-				StartupStep smartInitialize = this.getApplicationStartup().start("spring.beans.smart-initialize")
+				StartupStep smartInitialize = getApplicationStartup().start("spring.beans.smart-initialize")
 						.tag("beanName", beanName);
 				smartSingleton.afterSingletonsInstantiated();
 				smartInitialize.end();
@@ -1327,7 +1327,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				ObjectProvider.class == descriptor.getDependencyType()) {
 			return new DependencyObjectProvider(descriptor, requestingBeanName);
 		}
-		else if (javaxInjectProviderClass == descriptor.getDependencyType()) {
+		else if (jakartaInjectProviderClass == descriptor.getDependencyType()) {
 			return new Jsr330Factory().createDependencyProvider(descriptor, requestingBeanName);
 		}
 		else {
@@ -1472,7 +1472,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), resolvedArrayType);
-			if (result instanceof Object[] array) {
+			if (result instanceof Object[] array && array.length > 1) {
 				Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
 				if (comparator != null) {
 					Arrays.sort(array, comparator);
@@ -1664,7 +1664,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (priorityCandidate != null) {
 			return priorityCandidate;
 		}
-		// Fallback
+		// Fallback: pick directly registered dependency or qualified bean name match
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateName = entry.getKey();
 			Object beanInstance = entry.getValue();
@@ -1757,7 +1757,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Return whether the bean definition for the given bean name has been
 	 * marked as a primary bean.
 	 * @param beanName the name of the bean
-	 * @param beanInstance the corresponding bean instance (can be null)
+	 * @param beanInstance the corresponding bean instance (can be {@code null})
 	 * @return whether the given bean qualifies as primary
 	 */
 	protected boolean isPrimary(String beanName, Object beanInstance) {
@@ -2083,7 +2083,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				public boolean isRequired() {
 					return false;
 				}
-
 				@Override
 				@Nullable
 				public Object resolveNotUnique(ResolvableType type, Map<String, Object> matchingBeans) {
@@ -2137,7 +2136,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return resolveStream(true);
 		}
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		private Stream<Object> resolveStream(boolean ordered) {
 			DependencyDescriptor descriptorToUse = new StreamDependencyDescriptor(this.descriptor, ordered);
 			Object result = doResolveDependency(descriptorToUse, this.beanName, null, null);

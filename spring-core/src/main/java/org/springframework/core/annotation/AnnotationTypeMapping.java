@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 5.2
  * @see AnnotationTypeMappings
  */
@@ -58,7 +59,7 @@ final class AnnotationTypeMapping {
 	/**
 	 * Set used to track which convention-based annotation attribute overrides
 	 * have already been checked. Each key is the combination of the fully
-	 * qualified class names of a composed annotation and a meta-annotation
+	 * qualified class name of a composed annotation and a meta-annotation
 	 * that it is either present or meta-present on the composed annotation,
 	 * separated by a dash.
 	 * @since 6.0
@@ -102,8 +103,8 @@ final class AnnotationTypeMapping {
 	private final Set<Method> claimedAliases = new HashSet<>();
 
 
-	AnnotationTypeMapping(@Nullable AnnotationTypeMapping source,
-			Class<? extends Annotation> annotationType, @Nullable Annotation annotation) {
+	AnnotationTypeMapping(@Nullable AnnotationTypeMapping source, Class<? extends Annotation> annotationType,
+			@Nullable Annotation annotation, Set<Class<? extends Annotation>> visitedAnnotationTypes) {
 
 		this.source = source;
 		this.root = (source != null ? source.getRoot() : this);
@@ -123,7 +124,7 @@ final class AnnotationTypeMapping {
 		processAliases();
 		addConventionMappings();
 		addConventionAnnotationValues();
-		this.synthesizable = computeSynthesizableFlag();
+		this.synthesizable = computeSynthesizableFlag(visitedAnnotationTypes);
 	}
 
 
@@ -319,7 +320,7 @@ final class AnnotationTypeMapping {
 				logger.isWarnEnabled()) {
 			logger.warn("""
 					Support for convention-based annotation attribute overrides is deprecated \
-					and will be removed in Spring Framework 6.1. Please annotate the following \
+					and will be removed in Spring Framework 6.2. Please annotate the following \
 					attributes in @%s with appropriate @AliasFor declarations: %s"""
 						.formatted(rootAnnotationTypeName, conventionMappedAttributes));
 		}
@@ -373,7 +374,10 @@ final class AnnotationTypeMapping {
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean computeSynthesizableFlag() {
+	private boolean computeSynthesizableFlag(Set<Class<? extends Annotation>> visitedAnnotationTypes) {
+		// Track that we have visited the current annotation type.
+		visitedAnnotationTypes.add(this.annotationType);
+
 		// Uses @AliasFor for local aliases?
 		for (int index : this.aliasMappings) {
 			if (index != -1) {
@@ -402,9 +406,15 @@ final class AnnotationTypeMapping {
 				if (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation())) {
 					Class<? extends Annotation> annotationType =
 							(Class<? extends Annotation>) (type.isAnnotation() ? type : type.getComponentType());
-					AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
-					if (mapping.isSynthesizable()) {
-						return true;
+					// Ensure we have not yet visited the current nested annotation type, in order
+					// to avoid infinite recursion for JVM languages other than Java that support
+					// recursive annotation definitions.
+					if (visitedAnnotationTypes.add(annotationType)) {
+						AnnotationTypeMapping mapping =
+								AnnotationTypeMappings.forAnnotationType(annotationType, visitedAnnotationTypes).get(0);
+						if (mapping.isSynthesizable()) {
+							return true;
+						}
 					}
 				}
 			}

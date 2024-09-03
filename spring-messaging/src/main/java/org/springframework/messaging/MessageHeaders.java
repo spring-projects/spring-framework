@@ -333,8 +333,8 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	// equals, hashCode, toString
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof MessageHeaders that && this.headers.equals(that.headers)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof MessageHeaders that && this.headers.equals(that.headers)));
 	}
 
 	@Override

@@ -64,6 +64,28 @@ class BindingReflectionHintsRegistrarTests {
 	}
 
 	@Test
+	void registerTypeForSerializationWithExtendingClass() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleExtendingClass.class);
+		assertThat(this.hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleEmptyClass.class));
+					assertThat(typeHint.getMemberCategories()).containsExactlyInAnyOrder(
+							MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+					assertThat(typeHint.constructors()).isEmpty();
+					assertThat(typeHint.fields()).isEmpty();
+					assertThat(typeHint.methods()).isEmpty();
+				},
+				typeHint -> {
+					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleExtendingClass.class));
+					assertThat(typeHint.getMemberCategories()).containsExactlyInAnyOrder(
+							MemberCategory.DECLARED_FIELDS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+					assertThat(typeHint.constructors()).isEmpty();
+					assertThat(typeHint.fields()).isEmpty();
+					assertThat(typeHint.methods()).isEmpty();
+				});
+	}
+
+	@Test
 	void registerTypeForSerializationWithNoProperty() {
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithNoProperty.class);
 		assertThat(this.hints.reflection().typeHints()).singleElement()
@@ -267,7 +289,8 @@ class BindingReflectionHintsRegistrarTests {
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithJacksonCustomStrategy.class);
 		assertThat(RuntimeHintsPredicates.reflection().onType(PropertyNamingStrategies.UpperSnakeCaseStrategy.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
 				.accepts(this.hints);
-		assertThat(RuntimeHintsPredicates.reflection().onType(SampleRecordWithJacksonCustomStrategy.Builder.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+		assertThat(RuntimeHintsPredicates.reflection().onType(SampleRecordWithJacksonCustomStrategy.Builder.class)
+				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS))
 				.accepts(this.hints);
 	}
 
@@ -282,6 +305,9 @@ class BindingReflectionHintsRegistrarTests {
 
 
 	static class SampleEmptyClass {
+	}
+
+	static class SampleExtendingClass extends SampleEmptyClass {
 	}
 
 	static class SampleClassWithNoProperty {

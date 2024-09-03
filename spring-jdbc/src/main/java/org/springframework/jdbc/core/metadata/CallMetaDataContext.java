@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.core.metadata;
 
-import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -115,28 +114,28 @@ public class CallMetaDataContext {
 	}
 
 	/**
-	 * Specify a limited set of in parameters to be used.
+	 * Specify a limited set of the {@code in} parameters to be used.
 	 */
 	public void setLimitedInParameterNames(Set<String> limitedInParameterNames) {
 		this.limitedInParameterNames = limitedInParameterNames;
 	}
 
 	/**
-	 * Get a limited set of in parameters to be used.
+	 * Get the limited set of the {@code in} parameters to be used.
 	 */
 	public Set<String> getLimitedInParameterNames() {
 		return this.limitedInParameterNames;
 	}
 
 	/**
-	 * Specify the names of the out parameters.
+	 * Specify the names of the {@code out} parameters.
 	 */
 	public void setOutParameterNames(List<String> outParameterNames) {
 		this.outParameterNames = outParameterNames;
 	}
 
 	/**
-	 * Get a list of the out parameter names.
+	 * Get the list of the {@code out} parameter names.
 	 */
 	public List<String> getOutParameterNames() {
 		return this.outParameterNames;
@@ -434,14 +433,14 @@ public class CallMetaDataContext {
 					if (paramNameToUse == null) {
 						paramNameToUse = "";
 					}
-					if (meta.getParameterType() == DatabaseMetaData.procedureColumnOut) {
+					if (meta.isOutParameter()) {
 						workParams.add(provider.createDefaultOutParameter(paramNameToUse, meta));
 						outParamNames.add(paramNameToUse);
 						if (logger.isDebugEnabled()) {
 							logger.debug("Added meta-data out parameter for '" + paramNameToUse + "'");
 						}
 					}
-					else if (meta.getParameterType() == DatabaseMetaData.procedureColumnInOut) {
+					else if (meta.isInOutParameter()) {
 						workParams.add(provider.createDefaultInOutParameter(paramNameToUse, meta));
 						outParamNames.add(paramNameToUse);
 						if (logger.isDebugEnabled()) {
@@ -554,7 +553,7 @@ public class CallMetaDataContext {
 		Map<String, String> callParameterNames = CollectionUtils.newHashMap(this.callParameters.size());
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {
-				String parameterName =  parameter.getName();
+				String parameterName = parameter.getName();
 				String parameterNameToMatch = provider.parameterNameToUse(parameterName);
 				if (parameterNameToMatch != null) {
 					callParameterNames.put(parameterNameToMatch.toLowerCase(), parameterName);
@@ -606,7 +605,7 @@ public class CallMetaDataContext {
 		int i = 0;
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {
-				String parameterName =  parameter.getName();
+				String parameterName = parameter.getName();
 				matchedParameters.put(parameterName, parameterValues[i++]);
 			}
 		}

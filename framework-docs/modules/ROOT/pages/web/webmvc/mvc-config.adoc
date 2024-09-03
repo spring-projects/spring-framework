@@ -1,0 +1,18 @@
+[[mvc-config]]
+= MVC Config
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[See equivalent in the Reactive stack]#
+
+The MVC Java configuration and the MVC XML namespace provide default configuration
+suitable for most applications and a configuration API to customize it.
+
+For more advanced customizations, which are not available in the configuration API,
+see xref:web/webmvc/mvc-config/advanced-java.adoc[Advanced Java Config] and xref:web/webmvc/mvc-config/advanced-xml.adoc[Advanced XML Config].
+
+You do not need to understand the underlying beans created by the MVC Java configuration
+and the MVC namespace. If you want to learn more, see xref:web/webmvc/mvc-servlet/special-bean-types.adoc[Special Bean Types]
+and xref:web/webmvc/mvc-servlet/config.adoc[Web MVC Config].
+
+
+

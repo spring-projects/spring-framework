@@ -1,0 +1,74 @@
+[[expressions-ref-literal]]
+= Literal Expressions
+
+SpEL supports the following types of literal expressions.
+
+- strings
+- numeric values: integer (`int` or `long`), hexadecimal (`int` or `long`), real (`float`
+  or `double`)
+- boolean values: `true` or `false`
+- null
+
+Strings can delimited by single quotation marks (`'`) or double quotation marks (`"`). To
+include a single quotation mark within a string literal enclosed in single quotation
+marks, use two adjacent single quotation mark characters. Similarly, to include a double
+quotation mark within a string literal enclosed in double quotation marks, use two
+adjacent double quotation mark characters.
+
+Numbers support the use of the negative sign, exponential notation, and decimal points.
+By default, real numbers are parsed by using `Double.parseDouble()`.
+
+The following listing shows simple usage of literals. Typically, they are not used in
+isolation like this but, rather, as part of a more complex expression -- for example,
+using a literal on one side of a logical comparison operator or as an argument to a
+method.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	ExpressionParser parser = new SpelExpressionParser();
+
+	// evaluates to "Hello World"
+	String helloWorld = (String) parser.parseExpression("'Hello World'").getValue();
+
+	// evaluates to "Tony's Pizza"
+	String pizzaParlor = (String) parser.parseExpression("'Tony''s Pizza'").getValue();
+
+	double avogadrosNumber = (Double) parser.parseExpression("6.0221415E+23").getValue();
+
+	// evaluates to 2147483647
+	int maxValue = (Integer) parser.parseExpression("0x7FFFFFFF").getValue();
+
+	boolean trueValue = (Boolean) parser.parseExpression("true").getValue();
+
+	Object nullValue = parser.parseExpression("null").getValue();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val parser = SpelExpressionParser()
+
+	// evaluates to "Hello World"
+	val helloWorld = parser.parseExpression("'Hello World'").value as String
+
+	// evaluates to "Tony's Pizza"
+	val pizzaParlor = parser.parseExpression("'Tony''s Pizza'").value as String
+
+	val avogadrosNumber = parser.parseExpression("6.0221415E+23").value as Double
+
+	// evaluates to 2147483647
+	val maxValue = parser.parseExpression("0x7FFFFFFF").value as Int
+
+	val trueValue = parser.parseExpression("true").value as Boolean
+
+	val nullValue = parser.parseExpression("null").value
+----
+======
+
+
+

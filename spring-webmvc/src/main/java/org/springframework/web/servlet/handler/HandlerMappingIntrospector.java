@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -51,6 +57,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Helper class to get information from the {@code HandlerMapping} that would
@@ -64,17 +71,29 @@ import org.springframework.web.util.UrlPathHelper;
  * request.
  * </ul>
  *
- * <p><strong>Note:</strong> This is primarily an SPI to allow Spring Security
+ * <p>Note that this is primarily an SPI to allow Spring Security
  * to align its pattern matching with the same pattern matching that would be
  * used in Spring MVC for a given request, in order to avoid security issues.
- * Use of this introspector should be avoided for other purposes because it
- * incurs the overhead of resolving the handler for a request.
+ *
+ * <p>Use of this component incurs the performance overhead of mapping the
+ * request, and should not be repeated multiple times per request.
+ * {@link #createCacheFilter()} exposes a Filter to cache the results.
+ * Applications that rely on Spring Security don't need to deploy this Filter
+ * since Spring Security doe that. However, other custom security layers, used
+ * in place of Spring Security that use this component should deploy the cache
+ * Filter with requirements described in the Javadoc for the method.
  *
  * @author Rossen Stoyanchev
  * @since 4.3.1
  */
 public class HandlerMappingIntrospector
 		implements CorsConfigurationSource, ApplicationContextAware, InitializingBean {
+
+	private static final Log logger = LogFactory.getLog(HandlerMappingIntrospector.class.getName());
+
+	private static final String CACHED_RESULT_ATTRIBUTE =
+			HandlerMappingIntrospector.class.getName() + ".CachedResult";
+
 
 	@Nullable
 	private ApplicationContext applicationContext;
@@ -83,6 +102,8 @@ public class HandlerMappingIntrospector
 	private List<HandlerMapping> handlerMappings;
 
 	private Map<HandlerMapping, PathPatternMatchableHandlerMapping> pathPatternMappings = Collections.emptyMap();
+
+	private final CacheResultLogHelper cacheLogHelper = new CacheResultLogHelper();
 
 
 	@Override
@@ -153,6 +174,86 @@ public class HandlerMappingIntrospector
 
 
 	/**
+	 * {@link Filter} that looks up the {@code MatchableHandlerMapping} and
+	 * {@link CorsConfiguration} for the request proactively before delegating
+	 * to the rest of the chain, caching the result in a request attribute, and
+	 * restoring it after the chain returns.
+	 * <p><strong>Note:</strong> Applications that rely on Spring Security do
+	 * not use this component directly and should not deploy the filter instead
+	 * allowing Spring Security to do it. Other custom security layers used in
+	 * place of Spring Security that also rely on {@code HandlerMappingIntrospector}
+	 * should deploy this filter ahead of other filters where lookups are
+	 * performed, and should also make sure the filter is configured to handle
+	 * all dispatcher types.
+	 * @return the Filter instance to use
+	 * @since 6.0.14
+	 */
+	public Filter createCacheFilter() {
+		return (request, response, chain) -> {
+			CachedResult previous = setCache((HttpServletRequest) request);
+			try {
+				chain.doFilter(request, response);
+			}
+			finally {
+				resetCache(request, previous);
+			}
+		};
+	}
+
+	/**
+	 * Perform a lookup and save the {@link CachedResult} as a request attribute.
+	 * This method can be invoked from a filter before subsequent calls to
+	 * {@link #getMatchableHandlerMapping(HttpServletRequest)} and
+	 * {@link #getCorsConfiguration(HttpServletRequest)} to avoid repeated lookups.
+	 * @param request the current request
+	 * @return the previous {@link CachedResult}, if there is one from a parent dispatch
+	 * @since 6.0.14
+	 */
+	@Nullable
+	public CachedResult setCache(HttpServletRequest request) {
+		CachedResult previous = (CachedResult) request.getAttribute(CACHED_RESULT_ATTRIBUTE);
+		if (previous == null || !previous.matches(request)) {
+			HttpServletRequest wrapped = new AttributesPreservingRequest(request);
+			CachedResult result;
+			try {
+				// Try to get both in one lookup (with ignoringException=false)
+				result = doWithHandlerMapping(wrapped, false, (mapping, executionChain) -> {
+					MatchableHandlerMapping matchableMapping = createMatchableHandlerMapping(mapping, wrapped);
+					CorsConfiguration corsConfig = getCorsConfiguration(executionChain, wrapped);
+					return new CachedResult(request, matchableMapping, corsConfig, null, null);
+				});
+			}
+			catch (Exception ex) {
+				try {
+					// Try CorsConfiguration at least with ignoreException=true
+					AttributesPreservingRequest requestToUse = new AttributesPreservingRequest(request);
+					result = doWithHandlerMapping(requestToUse, true, (mapping, executionChain) -> {
+						CorsConfiguration corsConfig = getCorsConfiguration(executionChain, wrapped);
+						return new CachedResult(request, null, corsConfig, ex, null);
+					});
+				}
+				catch (Exception ex2) {
+					result = new CachedResult(request, null, null, ex, new IllegalStateException(ex2));
+				}
+			}
+			if (result == null) {
+				result = new CachedResult(request, null, null, null, null);
+			}
+			request.setAttribute(CACHED_RESULT_ATTRIBUTE, result);
+		}
+		return previous;
+	}
+
+	/**
+	 * Restore a previous {@link CachedResult}. This method can be invoked from
+	 * a filter after delegating to the rest of the chain.
+	 * @since 6.0.14
+	 */
+	public void resetCache(ServletRequest request, @Nullable CachedResult cachedResult) {
+		request.setAttribute(CACHED_RESULT_ATTRIBUTE, cachedResult);
+	}
+
+	/**
 	 * Find the {@link HandlerMapping} that would handle the given request and
 	 * return a {@link MatchableHandlerMapping} to use for path matching.
 	 * @param request the current request
@@ -163,39 +264,62 @@ public class HandlerMappingIntrospector
 	 */
 	@Nullable
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
-		HttpServletRequest wrappedRequest = new AttributesPreservingRequest(request);
+		CachedResult result = CachedResult.getResultFor(request);
+		if (result != null) {
+			return result.getHandlerMapping();
+		}
+		this.cacheLogHelper.logHandlerMappingCacheMiss(request);
+		HttpServletRequest requestToUse = new AttributesPreservingRequest(request);
+		return doWithHandlerMapping(requestToUse, false,
+				(mapping, executionChain) -> createMatchableHandlerMapping(mapping, requestToUse));
+	}
 
-		return doWithHandlerMapping(wrappedRequest, false, (mapping, executionChain) -> {
-			if (mapping instanceof MatchableHandlerMapping) {
-				PathPatternMatchableHandlerMapping pathPatternMapping = this.pathPatternMappings.get(mapping);
-				if (pathPatternMapping != null) {
-					RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(wrappedRequest);
-					return new LookupPathMatchableHandlerMapping(pathPatternMapping, requestPath);
-				}
-				else {
-					String lookupPath = (String) wrappedRequest.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
-					return new LookupPathMatchableHandlerMapping((MatchableHandlerMapping) mapping, lookupPath);
-				}
+	private MatchableHandlerMapping createMatchableHandlerMapping(HandlerMapping mapping, HttpServletRequest request) {
+		if (mapping instanceof MatchableHandlerMapping) {
+			PathPatternMatchableHandlerMapping pathPatternMapping = this.pathPatternMappings.get(mapping);
+			if (pathPatternMapping != null) {
+				RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(request);
+				return new LookupPathMatchableHandlerMapping(pathPatternMapping, requestPath);
 			}
-			throw new IllegalStateException("HandlerMapping is not a MatchableHandlerMapping");
-		});
+			else {
+				String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
+				return new LookupPathMatchableHandlerMapping((MatchableHandlerMapping) mapping, lookupPath);
+			}
+		}
+		throw new IllegalStateException("HandlerMapping is not a MatchableHandlerMapping");
 	}
 
 	@Override
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-		AttributesPreservingRequest wrappedRequest = new AttributesPreservingRequest(request);
-		return doWithHandlerMappingIgnoringException(wrappedRequest, (handlerMapping, executionChain) -> {
-			for (HandlerInterceptor interceptor : executionChain.getInterceptorList()) {
-				if (interceptor instanceof CorsConfigurationSource ccs) {
-					return ccs.getCorsConfiguration(wrappedRequest);
-				}
+		CachedResult result = CachedResult.getResultFor(request);
+		if (result != null) {
+			return result.getCorsConfig();
+		}
+		this.cacheLogHelper.logCorsConfigCacheMiss(request);
+		try {
+			boolean ignoreException = true;
+			AttributesPreservingRequest requestToUse = new AttributesPreservingRequest(request);
+			return doWithHandlerMapping(requestToUse, ignoreException,
+					(handlerMapping, executionChain) -> getCorsConfiguration(executionChain, requestToUse));
+		}
+		catch (Exception ex) {
+			// HandlerMapping exceptions are ignored. More basic error like parsing the request path.
+			throw new IllegalStateException(ex);
+		}
+	}
+
+	@Nullable
+	private static CorsConfiguration getCorsConfiguration(HandlerExecutionChain chain, HttpServletRequest request) {
+		for (HandlerInterceptor interceptor : chain.getInterceptorList()) {
+			if (interceptor instanceof CorsConfigurationSource source) {
+				return source.getCorsConfiguration(request);
 			}
-			if (executionChain.getHandler() instanceof CorsConfigurationSource ccs) {
-				return ccs.getCorsConfiguration(wrappedRequest);
-			}
-			return null;
-		});
+		}
+		if (chain.getHandler() instanceof CorsConfigurationSource source) {
+			return source.getCorsConfiguration(request);
+		}
+		return null;
 	}
 
 	@Nullable
@@ -236,15 +360,112 @@ public class HandlerMappingIntrospector
 		return null;
 	}
 
-	@Nullable
-	private <T> T doWithHandlerMappingIgnoringException(
-			HttpServletRequest request, BiFunction<HandlerMapping, HandlerExecutionChain, T> matchHandler) {
 
-		try {
-			return doWithHandlerMapping(request, true, matchHandler);
+	/**
+	 * Container for a {@link MatchableHandlerMapping} and {@link CorsConfiguration}
+	 * for a given request matched by dispatcher type and requestURI.
+	 * @since 6.0.14
+	 */
+	@SuppressWarnings("serial")
+	public static final class CachedResult {
+
+		private final DispatcherType dispatcherType;
+
+		private final String requestURI;
+
+		@Nullable
+		private final MatchableHandlerMapping handlerMapping;
+
+		@Nullable
+		private final CorsConfiguration corsConfig;
+
+		@Nullable
+		private final Exception failure;
+
+		@Nullable
+		private final IllegalStateException corsConfigFailure;
+
+		private CachedResult(HttpServletRequest request,
+				@Nullable MatchableHandlerMapping mapping, @Nullable CorsConfiguration config,
+				@Nullable Exception failure, @Nullable IllegalStateException corsConfigFailure) {
+
+			this.dispatcherType = request.getDispatcherType();
+			this.requestURI = request.getRequestURI();
+			this.handlerMapping = mapping;
+			this.corsConfig = config;
+			this.failure = failure;
+			this.corsConfigFailure = corsConfigFailure;
 		}
-		catch (Exception ex) {
-			throw new IllegalStateException("HandlerMapping exception not suppressed", ex);
+
+		public boolean matches(HttpServletRequest request) {
+			return (this.dispatcherType.equals(request.getDispatcherType()) &&
+					this.requestURI.equals(request.getRequestURI()));
+		}
+
+		@Nullable
+		public MatchableHandlerMapping getHandlerMapping() throws Exception {
+			if (this.failure != null) {
+				throw this.failure;
+			}
+			return this.handlerMapping;
+		}
+
+		@Nullable
+		public CorsConfiguration getCorsConfig() {
+			if (this.corsConfigFailure != null) {
+				throw this.corsConfigFailure;
+			}
+			return this.corsConfig;
+		}
+
+		@Override
+		public String toString() {
+			return "CachedResult for " + this.dispatcherType + " dispatch to '" + this.requestURI + "'";
+		}
+
+
+		/**
+		 * Return a {@link CachedResult} that matches the given request.
+		 */
+		@Nullable
+		public static CachedResult getResultFor(HttpServletRequest request) {
+			CachedResult result = (CachedResult) request.getAttribute(CACHED_RESULT_ATTRIBUTE);
+			return (result != null && result.matches(request) ? result : null);
+		}
+	}
+
+
+	private static class CacheResultLogHelper {
+
+		private final Map<String, AtomicInteger> counters =
+				Map.of("MatchableHandlerMapping", new AtomicInteger(), "CorsConfiguration", new AtomicInteger());
+
+		public void logHandlerMappingCacheMiss(HttpServletRequest request) {
+			logCacheMiss("MatchableHandlerMapping", request);
+		}
+
+		public void logCorsConfigCacheMiss(HttpServletRequest request) {
+			logCacheMiss("CorsConfiguration", request);
+		}
+
+		private void logCacheMiss(String label, HttpServletRequest request) {
+			AtomicInteger counter = this.counters.get(label);
+			Assert.notNull(counter, "Expected '" + label + "' counter.");
+
+			String message = getLogMessage(label, request);
+
+			if (logger.isWarnEnabled() && counter.getAndIncrement() == 0) {
+				logger.warn(message + " This is logged once only at WARN level, and every time at TRACE.");
+			}
+			else if (logger.isTraceEnabled()) {
+				logger.trace("No CachedResult, performing " + label + " lookup instead.");
+			}
+		}
+
+		private static String getLogMessage(String label, HttpServletRequest request) {
+			return "Cache miss for " + request.getDispatcherType() + " dispatch to '" + request.getRequestURI() + "' " +
+					"(previous " + request.getAttribute(CACHED_RESULT_ATTRIBUTE) + "). " +
+					"Performing " + label + " lookup.";
 		}
 	}
 
@@ -309,10 +530,15 @@ public class HandlerMappingIntrospector
 					ServletRequestPathUtils.PATH_ATTRIBUTE : UrlPathHelper.PATH_ATTRIBUTE);
 		}
 
+		@Override
+		public PathPatternParser getPatternParser() {
+			return this.delegate.getPatternParser();
+		}
+
 		@Nullable
 		@Override
 		public RequestMatchResult match(HttpServletRequest request, String pattern) {
-			pattern = (StringUtils.hasLength(pattern) && !pattern.startsWith("/") ? "/" + pattern : pattern);
+			pattern = initFullPathPattern(pattern);
 			Object previousPath = request.getAttribute(this.pathAttributeName);
 			request.setAttribute(this.pathAttributeName, this.lookupPath);
 			try {
@@ -321,6 +547,11 @@ public class HandlerMappingIntrospector
 			finally {
 				request.setAttribute(this.pathAttributeName, previousPath);
 			}
+		}
+
+		private String initFullPathPattern(String pattern) {
+			PathPatternParser parser = (getPatternParser() != null ? getPatternParser() : PathPatternParser.defaultInstance);
+			return parser.initFullPathPattern(pattern);
 		}
 
 		@Nullable

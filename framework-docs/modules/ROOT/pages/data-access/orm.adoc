@@ -1,0 +1,8 @@
+[[orm]]
+= Object Relational Mapping (ORM) Data Access
+:page-section-summary-toc: 1
+
+This section covers data access when you use Object Relational Mapping (ORM).
+
+
+

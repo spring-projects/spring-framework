@@ -1,0 +1,13 @@
+[[spring-web]]
+= Web on Servlet Stack
+:page-section-summary-toc: 1
+
+This part of the documentation covers support for Servlet-stack web applications built on the
+Servlet API and deployed to Servlet containers. Individual chapters include xref:web/webmvc.adoc#mvc[Spring MVC],
+xref:web/webmvc-view.adoc[View Technologies], xref:web/webmvc-cors.adoc[CORS Support], and xref:web/websocket.adoc[WebSocket Support].
+For reactive-stack web applications, see xref:testing/unit.adoc#mock-objects-web-reactive[Web on Reactive Stack].
+
+
+
+
+

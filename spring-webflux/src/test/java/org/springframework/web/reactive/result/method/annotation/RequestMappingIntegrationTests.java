@@ -61,6 +61,17 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 	}
 
 
+	@ParameterizedHttpServerTest // gh-30293
+	void emptyMapping(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		String url = "http://localhost:" + this.port;
+		assertThat(getRestTemplate().getForObject(url, String.class)).isEqualTo("root");
+
+		url += "/";
+		assertThat(getRestTemplate().getForObject(url, String.class)).isEqualTo("root");
+	}
+
 	@ParameterizedHttpServerTest
 	void httpHead(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
@@ -105,6 +116,11 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 	@RestController
 	@SuppressWarnings("unused")
 	private static class TestRestController {
+
+		@GetMapping
+		public String get() {
+			return "root";
+		}
 
 		@GetMapping("/text")
 		public String textGet() {

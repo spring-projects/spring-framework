@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,19 +41,6 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent implements Reso
 
 	private final ResolvableType payloadType;
 
-	/**
-	 * Create a new PayloadApplicationEvent.
-	 * @param source the object on which the event initially occurred (never {@code null})
-	 * @param payload the payload object (never {@code null})
-	 * @param payloadType the type object of payload object (can be {@code null})
-	 * @since 6.0
-	 */
-	public PayloadApplicationEvent(Object source, T payload, @Nullable ResolvableType payloadType) {
-		super(source);
-		Assert.notNull(payload, "Payload must not be null");
-		this.payload = payload;
-		this.payloadType = (payloadType != null) ? payloadType : ResolvableType.forInstance(payload);
-	}
 
 	/**
 	 * Create a new PayloadApplicationEvent, using the instance to infer its type.
@@ -62,6 +49,22 @@ public class PayloadApplicationEvent<T> extends ApplicationEvent implements Reso
 	 */
 	public PayloadApplicationEvent(Object source, T payload) {
 		this(source, payload, null);
+	}
+
+	/**
+	 * Create a new PayloadApplicationEvent based on the provided payload type.
+	 * @param source the object on which the event initially occurred (never {@code null})
+	 * @param payload the payload object (never {@code null})
+	 * @param payloadType the type object of payload object (can be {@code null}).
+	 * Note that this is meant to indicate the payload type (e.g. {@code String}),
+	 * not the full event type (such as {@code PayloadApplicationEvent<&lt;String&gt;}).
+	 * @since 6.0
+	 */
+	public PayloadApplicationEvent(Object source, T payload, @Nullable ResolvableType payloadType) {
+		super(source);
+		Assert.notNull(payload, "Payload must not be null");
+		this.payload = payload;
+		this.payloadType = (payloadType != null ? payloadType : ResolvableType.forInstance(payload));
 	}
 
 

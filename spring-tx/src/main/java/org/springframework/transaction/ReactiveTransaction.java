@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.transaction;
 
 /**
- * Representation of an ongoing reactive transaction.
+ * Representation of an ongoing {@link ReactiveTransactionManager} transaction.
  * This is currently a marker interface extending {@link TransactionExecution}
  * but may acquire further methods in a future revision.
  *
@@ -30,6 +30,7 @@ package org.springframework.transaction;
  * @since 5.2
  * @see #setRollbackOnly()
  * @see ReactiveTransactionManager#getReactiveTransaction
+ * @see org.springframework.transaction.reactive.TransactionCallback#doInTransaction
  */
 public interface ReactiveTransaction extends TransactionExecution {
 

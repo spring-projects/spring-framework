@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,6 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.core.AttributeAccessor;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.ResolvableType;
@@ -162,6 +161,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** Map from scope identifier String to corresponding Scope. */
 	private final Map<String, Scope> scopes = new LinkedHashMap<>(8);
 
+	/** Application startup metrics. **/
+	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
+
 	/** Map from bean name to merged RootBeanDefinition. */
 	private final Map<String, RootBeanDefinition> mergedBeanDefinitions = new ConcurrentHashMap<>(256);
 
@@ -172,8 +174,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final ThreadLocal<Object> prototypesCurrentlyInCreation =
 			new NamedThreadLocal<>("Prototype beans currently in creation");
 
-	/** Application startup metrics. **/
-	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
 	/**
 	 * Create a new AbstractBeanFactory.
@@ -583,7 +583,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Class<?>[] typesToMatch = (FactoryBean.class == classToMatch ?
 				new Class<?>[] {classToMatch} : new Class<?>[] {FactoryBean.class, classToMatch});
 
-
 		// Attempt to predict the bean type
 		Class<?> predictedType = null;
 
@@ -733,7 +732,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			aliases.add(fullBeanName);
 		}
 		String[] retrievedAliases = super.getAliases(beanName);
-		String prefix = factoryPrefix ? FACTORY_BEAN_PREFIX : "";
+		String prefix = (factoryPrefix ? FACTORY_BEAN_PREFIX : "");
 		for (String retrievedAlias : retrievedAliases) {
 			String alias = prefix + retrievedAlias;
 			if (!alias.equals(name)) {
@@ -1056,7 +1055,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@Override
 	public void setApplicationStartup(ApplicationStartup applicationStartup) {
-		Assert.notNull(applicationStartup, "applicationStartup must not be null");
+		Assert.notNull(applicationStartup, "ApplicationStartup must not be null");
 		this.applicationStartup = applicationStartup;
 	}
 
@@ -1501,13 +1500,21 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (mbd.hasBeanClass()) {
 				return mbd.getBeanClass();
 			}
-			return doResolveBeanClass(mbd, typesToMatch);
+			Class<?> beanClass = doResolveBeanClass(mbd, typesToMatch);
+			if (mbd.hasBeanClass()) {
+				mbd.prepareMethodOverrides();
+			}
+			return beanClass;
 		}
 		catch (ClassNotFoundException ex) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
 		}
 		catch (LinkageError err) {
 			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
+		}
+		catch (BeanDefinitionValidationException ex) {
+			throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
+					beanName, "Validation of method overrides failed", ex);
 		}
 	}
 
@@ -1644,7 +1651,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * already. The implementation is allowed to instantiate the target factory bean if
 	 * {@code allowInit} is {@code true} and the type cannot be determined another way;
 	 * otherwise it is restricted to introspecting signatures and related metadata.
-	 * <p>If no {@link FactoryBean#OBJECT_TYPE_ATTRIBUTE} if set on the bean definition
+	 * <p>If no {@link FactoryBean#OBJECT_TYPE_ATTRIBUTE} is set on the bean definition
 	 * and {@code allowInit} is {@code true}, the default implementation will create
 	 * the FactoryBean via {@code getBean} to call its {@code getObjectType} method.
 	 * Subclasses are encouraged to optimize this, typically by inspecting the generic
@@ -1687,25 +1694,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				onSuppressedException(ex);
 			}
 		}
-		return ResolvableType.NONE;
-	}
 
-	/**
-	 * Determine the bean type for a FactoryBean by inspecting its attributes for a
-	 * {@link FactoryBean#OBJECT_TYPE_ATTRIBUTE} value.
-	 * @param attributes the attributes to inspect
-	 * @return a {@link ResolvableType} extracted from the attributes or
-	 * {@code ResolvableType.NONE}
-	 * @since 5.2
-	 */
-	ResolvableType getTypeForFactoryBeanFromAttributes(AttributeAccessor attributes) {
-		Object attribute = attributes.getAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE);
-		if (attribute instanceof ResolvableType resolvableType) {
-			return resolvableType;
-		}
-		if (attribute instanceof Class<?> clazz) {
-			return ResolvableType.forClass(clazz);
-		}
+		// FactoryBean type not resolvable
 		return ResolvableType.NONE;
 	}
 

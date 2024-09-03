@@ -96,6 +96,25 @@ public interface Environment extends PropertyResolver {
 	String[] getDefaultProfiles();
 
 	/**
+	 * Determine whether one of the given profile expressions matches the
+	 * {@linkplain #getActiveProfiles() active profiles} &mdash; or in the case
+	 * of no explicit active profiles, whether one of the given profile expressions
+	 * matches the {@linkplain #getDefaultProfiles() default profiles}.
+	 * <p>Profile expressions allow for complex, boolean profile logic to be
+	 * expressed &mdash; for example {@code "p1 & p2"}, {@code "(p1 & p2) | p3"},
+	 * etc. See {@link Profiles#of(String...)} for details on the supported
+	 * expression syntax.
+	 * <p>This method is a convenient shortcut for
+	 * {@code env.acceptsProfiles(Profiles.of(profileExpressions))}.
+	 * @since 5.3.28
+	 * @see Profiles#of(String...)
+	 * @see #acceptsProfiles(Profiles)
+	 */
+	default boolean matchesProfiles(String... profileExpressions) {
+		return acceptsProfiles(Profiles.of(profileExpressions));
+	}
+
+	/**
 	 * Determine whether one or more of the given profiles is active &mdash; or
 	 * in the case of no explicit {@linkplain #getActiveProfiles() active profiles},
 	 * whether one or more of the given profiles is included in the set of
@@ -116,25 +135,6 @@ public interface Environment extends PropertyResolver {
 	 */
 	@Deprecated
 	boolean acceptsProfiles(String... profiles);
-
-	/**
-	 * Determine whether one of the given profile expressions matches the
-	 * {@linkplain #getActiveProfiles() active profiles} &mdash; or in the case
-	 * of no explicit active profiles, whether one of the given profile expressions
-	 * matches the {@linkplain #getDefaultProfiles() default profiles}.
-	 * <p>Profile expressions allow for complex, boolean profile logic to be
-	 * expressed &mdash; for example {@code "p1 & p2"}, {@code "(p1 & p2) | p3"},
-	 * etc. See {@link Profiles#of(String...)} for details on the supported
-	 * expression syntax.
-	 * <p>This method is a convenient shortcut for
-	 * {@code env.acceptsProfiles(Profiles.of(profileExpressions))}.
-	 * @since 5.3.28
-	 * @see Profiles#of(String...)
-	 * @see #acceptsProfiles(Profiles)
-	 */
-	default boolean matchesProfiles(String... profileExpressions) {
-		return acceptsProfiles(Profiles.of(profileExpressions));
-	}
 
 	/**
 	 * Determine whether the given {@link Profiles} predicate matches the

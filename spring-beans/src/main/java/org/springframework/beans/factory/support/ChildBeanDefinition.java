@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,13 +157,8 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof ChildBeanDefinition that)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(this.parentName, that.parentName) && super.equals(other));
+		return (this == other || (other instanceof ChildBeanDefinition that &&
+				ObjectUtils.nullSafeEquals(this.parentName, that.parentName) && super.equals(other)));
 	}
 
 	@Override

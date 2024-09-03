@@ -143,8 +143,7 @@ public class JdbcTransactionManagerTests {
 		tm = new JdbcTransactionManager(dsToUse);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -171,8 +170,7 @@ public class JdbcTransactionManagerTests {
 		});
 
 		assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		if (autoCommit && (!lazyConnection || createStatement)) {
 			InOrder ordered = inOrder(con);
@@ -234,8 +232,7 @@ public class JdbcTransactionManagerTests {
 		tm = new JdbcTransactionManager(dsToUse);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertThat(TransactionSynchronizationManager.hasResource(dsToUse)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		final RuntimeException ex = new RuntimeException("Application exception");
 		assertThatRuntimeException().isThrownBy(() ->
@@ -260,8 +257,7 @@ public class JdbcTransactionManagerTests {
 			.isEqualTo(ex);
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		if (autoCommit && (!lazyConnection || createStatement)) {
 			InOrder ordered = inOrder(con);
@@ -282,8 +278,7 @@ public class JdbcTransactionManagerTests {
 		tm.setTransactionSynchronization(JdbcTransactionManager.SYNCHRONIZATION_NEVER);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		ConnectionHolder conHolder = new ConnectionHolder(con, true);
 		TransactionSynchronizationManager.bindResource(ds, conHolder);
@@ -293,8 +288,7 @@ public class JdbcTransactionManagerTests {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Has thread connection").isTrue();
-					assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-							.isFalse();
+					assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 					assertThat(status.isNewTransaction()).as("Is existing transaction").isFalse();
 					throw ex;
 				}
@@ -303,8 +297,7 @@ public class JdbcTransactionManagerTests {
 		}
 		catch (RuntimeException ex2) {
 			// expected
-			assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-					.isFalse();
+			assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 			assertThat(ex2).as("Correct exception thrown").isEqualTo(ex);
 		}
 		finally {
@@ -330,8 +323,7 @@ public class JdbcTransactionManagerTests {
 			tm.setFailEarlyOnGlobalRollbackOnly(true);
 		}
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		TestTransactionSynchronization synch =
@@ -394,8 +386,7 @@ public class JdbcTransactionManagerTests {
 		tm.setValidateExistingTransaction(true);
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		assertThatExceptionOfType(IllegalTransactionStateException.class).isThrownBy(() -> {
 				final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -428,8 +419,7 @@ public class JdbcTransactionManagerTests {
 		tm.setValidateExistingTransaction(true);
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		assertThatExceptionOfType(IllegalTransactionStateException.class).isThrownBy(() -> {
 			final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -460,8 +450,7 @@ public class JdbcTransactionManagerTests {
 	@Test
 	public void testParticipatingTransactionWithTransactionStartedFromSynch() throws Exception {
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -504,8 +493,7 @@ public class JdbcTransactionManagerTests {
 		given(ds2.getConnection()).willReturn(con2);
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 
@@ -544,8 +532,7 @@ public class JdbcTransactionManagerTests {
 		// tm has no synch enabled (used at outer level), tm2 has synch enabled (inner level)
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		final TestTransactionSynchronization synch =
@@ -591,8 +578,7 @@ public class JdbcTransactionManagerTests {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -639,8 +625,7 @@ public class JdbcTransactionManagerTests {
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
 		assertThat(TransactionSynchronizationManager.hasResource(ds2)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -690,8 +675,7 @@ public class JdbcTransactionManagerTests {
 
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
 		assertThat(TransactionSynchronizationManager.hasResource(ds2)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		assertThatExceptionOfType(CannotCreateTransactionException.class).isThrownBy(() ->
 			tt.execute(new TransactionCallbackWithoutResult() {
@@ -721,8 +705,7 @@ public class JdbcTransactionManagerTests {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -734,8 +717,7 @@ public class JdbcTransactionManagerTests {
 				tt.execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-						assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection")
-								.isFalse();
+						assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
 						assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization active").isTrue();
 						assertThat(status.isNewTransaction()).as("Isn't new transaction").isFalse();
 						assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
@@ -759,8 +741,7 @@ public class JdbcTransactionManagerTests {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		assertThatExceptionOfType(IllegalTransactionStateException.class).isThrownBy(() ->
 			tt.execute(new TransactionCallbackWithoutResult() {
@@ -788,8 +769,7 @@ public class JdbcTransactionManagerTests {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -825,8 +805,7 @@ public class JdbcTransactionManagerTests {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1586,8 +1565,7 @@ public class JdbcTransactionManagerTests {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1610,8 +1588,7 @@ public class JdbcTransactionManagerTests {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1630,8 +1607,7 @@ public class JdbcTransactionManagerTests {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 		assertThat(TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isFalse();
-		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active")
-				.isFalse();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).as("Synchronization not active").isFalse();
 
 		tt.execute(new TransactionCallbackWithoutResult() {
 			@Override

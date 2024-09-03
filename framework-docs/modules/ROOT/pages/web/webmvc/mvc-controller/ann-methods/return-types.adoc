@@ -1,0 +1,105 @@
+[[mvc-ann-return-types]]
+= Return Values
+
+[.small]#xref:web/webflux/controller/ann-methods/return-types.adoc[See equivalent in the Reactive stack]#
+
+The next table describes the supported controller method return values. Reactive types are
+supported for all return values.
+
+[cols="1,2", options="header"]
+|===
+| Controller method return value | Description
+
+| `@ResponseBody`
+| The return value is converted through `HttpMessageConverter` implementations and written to the
+  response. See xref:web/webmvc/mvc-controller/ann-methods/responsebody.adoc[`@ResponseBody`].
+
+| `HttpEntity<B>`, `ResponseEntity<B>`
+| The return value that specifies the full response (including HTTP headers and body) is to be converted
+  through `HttpMessageConverter` implementations and written to the response.
+  See xref:web/webmvc/mvc-controller/ann-methods/responseentity.adoc[ResponseEntity].
+
+| `HttpHeaders`
+| For returning a response with headers and no body.
+
+| `ErrorResponse`
+| To render an RFC 7807 error response with details in the body,
+  see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
+
+| `ProblemDetail`
+| To render an RFC 7807 error response with details in the body,
+  see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
+
+| `String`
+| A view name to be resolved with `ViewResolver` implementations and used together with the implicit
+  model -- determined through command objects and `@ModelAttribute` methods. The handler
+  method can also programmatically enrich the model by declaring a `Model` argument
+  (see xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-registration[Explicit Registrations]).
+
+| `View`
+| A `View` instance to use for rendering together with the implicit model -- determined
+  through command objects and `@ModelAttribute` methods. The handler method can also
+  programmatically enrich the model by declaring a `Model` argument
+  (see xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-registration[Explicit Registrations]).
+
+| `java.util.Map`, `org.springframework.ui.Model`
+| Attributes to be added to the implicit model, with the view name implicitly determined
+  through a `RequestToViewNameTranslator`.
+
+| `@ModelAttribute`
+| An attribute to be added to the model, with the view name implicitly determined through
+  a `RequestToViewNameTranslator`.
+
+  Note that `@ModelAttribute` is optional. See "Any other return value" at the end of
+  this table.
+
+| `ModelAndView` object
+| The view and model attributes to use and, optionally, a response status.
+
+| `void`
+| A method with a `void` return type (or `null` return value) is considered to have fully
+  handled the response if it also has a `ServletResponse`, an `OutputStream` argument, or
+  an `@ResponseStatus` annotation. The same is also true if the controller has made a positive
+  `ETag` or `lastModified` timestamp check (see xref:web/webmvc/mvc-caching.adoc#mvc-caching-etag-lastmodified[Controllers] for details).
+
+  If none of the above is true, a `void` return type can also indicate "`no response body`" for
+  REST controllers or a default view name selection for HTML controllers.
+
+| `DeferredResult<V>`
+| Produce any of the preceding return values asynchronously from any thread -- for example, as a
+  result of some event or callback. See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-deferredresult[`DeferredResult`].
+
+| `Callable<V>`
+| Produce any of the above return values asynchronously in a Spring MVC-managed thread.
+  See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[`Callable`].
+
+| `ListenableFuture<V>`,
+  `java.util.concurrent.CompletionStage<V>`,
+  `java.util.concurrent.CompletableFuture<V>`
+| Alternative to `DeferredResult`, as a convenience (for example, when an underlying service
+  returns one of those).
+
+| `ResponseBodyEmitter`, `SseEmitter`
+| Emit a stream of objects asynchronously to be written to the response with
+  `HttpMessageConverter` implementations. Also supported as the body of a `ResponseEntity`.
+  See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-http-streaming[HTTP Streaming].
+
+| `StreamingResponseBody`
+| Write to the response `OutputStream` asynchronously. Also supported as the body of a
+  `ResponseEntity`. See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-http-streaming[HTTP Streaming].
+
+| Reactor and other reactive types registered via `ReactiveAdapterRegistry`
+| A single value type, e.g. `Mono`, is comparable to returning `DeferredResult`.
+  A multi-value type, e.g. `Flux`, may be treated as a stream depending on the requested
+  media type, e.g. "text/event-stream", "application/json+stream", or otherwise is
+  collected to a List and rendered as a single value. See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and
+  xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types].
+
+| Other return values
+| If a return value remains unresolved in any other way, it is treated as a model
+  attribute, unless it is a simple type as determined by
+  {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+  in which case it remains unresolved.
+|===
+
+

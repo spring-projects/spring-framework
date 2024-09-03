@@ -282,13 +282,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof ContentChunkInfo otherCci)) {
-				return false;
-			}
-			return (this.start == otherCci.start && this.end == otherCci.end);
+			return (this == other || (other instanceof ContentChunkInfo that &&
+					this.start == that.start && this.end == that.end));
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,11 @@ public interface ExchangeFunction {
 
 	/**
 	 * Exchange the given request for a {@link ClientResponse} promise.
-	 *
 	 * <p><strong>Note:</strong> When calling this method from an
 	 * {@link ExchangeFilterFunction} that handles the response in some way,
 	 * extra care must be taken to always consume its content or otherwise
 	 * propagate it downstream for further handling, for example by the
-	 * {@link WebClient}. Please, see the reference documentation for more
+	 * {@link WebClient}. Please see the reference documentation for more
 	 * details on this.
 	 * @param request the request to exchange
 	 * @return the delayed response

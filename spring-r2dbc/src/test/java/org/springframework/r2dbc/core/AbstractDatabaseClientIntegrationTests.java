@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  * @author Mingyuan Wu
  */
-public abstract class AbstractDatabaseClientIntegrationTests {
+abstract class AbstractDatabaseClientIntegrationTests {
 
 	private ConnectionFactory connectionFactory;
+
 
 	@BeforeEach
 	public void before() {
@@ -52,8 +53,7 @@ public abstract class AbstractDatabaseClientIntegrationTests {
 	}
 
 	/**
-	 * Creates a {@link ConnectionFactory} to be used in this test.
-	 *
+	 * Create a {@link ConnectionFactory} to be used in this test.
 	 * @return the {@link ConnectionFactory} to be used in this test
 	 */
 	protected abstract ConnectionFactory createConnectionFactory();
@@ -66,10 +66,10 @@ public abstract class AbstractDatabaseClientIntegrationTests {
 	 * <li>name varchar(255), nullable</li>
 	 * <li>manual integer, nullable</li>
 	 * </ul>
-	 *
 	 * @return the CREATE TABLE statement for table {@code legoset} with three columns.
 	 */
 	protected abstract String getCreateTableStatement();
+
 
 	@Test
 	public void executeInsert() {
@@ -88,10 +88,8 @@ public abstract class AbstractDatabaseClientIntegrationTests {
 				.map(row -> row.get("id"))
 				.first()
 				.as(StepVerifier::create)
-				.assertNext(actual -> {
-							assertThat(actual).isInstanceOf(Number.class);
-							assertThat(((Number) actual).intValue()).isEqualTo(42055);
-						}).verifyComplete();
+				.assertNext(actual -> assertThat(actual).isInstanceOf(Number.class).isEqualTo(42055))
+				.verifyComplete();
 	}
 
 	@Test

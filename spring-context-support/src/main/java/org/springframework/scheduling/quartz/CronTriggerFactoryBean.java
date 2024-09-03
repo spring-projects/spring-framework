@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 
 	private int priority;
 
-	private int misfireInstruction;
+	private int misfireInstruction = CronTrigger.MISFIRE_INSTRUCTION_SMART_POLICY;
 
 	@Nullable
 	private String description;
@@ -196,19 +196,21 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	}
 
 	/**
-	 * Specify a misfire instruction for this trigger.
+	 * Specify the misfire instruction for this trigger.
 	 */
 	public void setMisfireInstruction(int misfireInstruction) {
 		this.misfireInstruction = misfireInstruction;
 	}
 
 	/**
-	 * Set the misfire instruction via the name of the corresponding
-	 * constant in the {@link org.quartz.CronTrigger} class.
-	 * Default is {@code MISFIRE_INSTRUCTION_SMART_POLICY}.
+	 * Set the misfire instruction for this trigger via the name of the corresponding
+	 * constant in the {@link org.quartz.Trigger} and {@link org.quartz.CronTrigger}
+	 * classes.
+	 * <p>Default is {@code MISFIRE_INSTRUCTION_SMART_POLICY}.
+	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
+	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY
 	 * @see org.quartz.CronTrigger#MISFIRE_INSTRUCTION_FIRE_ONCE_NOW
 	 * @see org.quartz.CronTrigger#MISFIRE_INSTRUCTION_DO_NOTHING
-	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
 	 */
 	public void setMisfireInstructionName(String constantName) {
 		this.misfireInstruction = constants.asNumber(constantName).intValue();

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package org.springframework.core;
 
 import java.lang.reflect.ParameterizedType;
@@ -67,8 +66,8 @@ public abstract class ParameterizedTypeReference<T> {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof ParameterizedTypeReference<?> that && this.type.equals(that.type)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof ParameterizedTypeReference<?> that && this.type.equals(that.type)));
 	}
 
 	@Override
@@ -91,8 +90,7 @@ public abstract class ParameterizedTypeReference<T> {
 	 * @since 4.3.12
 	 */
 	public static <T> ParameterizedTypeReference<T> forType(Type type) {
-		return new ParameterizedTypeReference<>(type) {
-		};
+		return new ParameterizedTypeReference<>(type) {};
 	}
 
 	private static Class<?> findParameterizedTypeReferenceSubclass(Class<?> child) {

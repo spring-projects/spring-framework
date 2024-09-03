@@ -374,7 +374,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	private void testProblemDetailMediaType(String expectedContentType) throws Exception {
-		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+		MyProblemDetail problemDetail = new MyProblemDetail(HttpStatus.BAD_REQUEST);
 
 		this.servletRequest.setRequestURI("/path");
 
@@ -805,7 +805,7 @@ class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	ProblemDetail handleAndReturnProblemDetail() {
+	MyProblemDetail handleAndReturnProblemDetail() {
 		return null;
 	}
 
@@ -818,6 +818,15 @@ class RequestResponseBodyMethodProcessorTests {
 	@SuppressWarnings("ConstantConditions")
 	SimpleBean getSimpleBean() {
 		return null;
+	}
+
+
+	private static class MyProblemDetail extends ProblemDetail {
+
+		public MyProblemDetail(HttpStatus status) {
+			super(status.value());
+		}
+
 	}
 
 

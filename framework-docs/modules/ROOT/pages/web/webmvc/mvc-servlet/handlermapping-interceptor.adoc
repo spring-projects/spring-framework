@@ -1,0 +1,29 @@
+[[mvc-handlermapping-interceptor]]
+= Interception
+
+All `HandlerMapping` implementations support handler interception which is useful when
+you want to apply functionality across requests. A `HandlerInterceptor` can implement the
+following:
+
+* `preHandle(..)` -- callback before the actual handler is run that returns a boolean.
+If the method returns `true`, execution continues; if it returns `false`, the rest of the
+execution chain is bypassed and the handler is not called.
+* `postHandle(..)` -- callback after the handler is run.
+* `afterCompletion(..)` -- callback after the complete request has finished.
+
+NOTE: For `@ResponseBody` and `ResponseEntity` controller methods, the response is written
+and committed within the `HandlerAdapter`, before `postHandle` is called. That means it is
+too late to change the response, such as to add an extra header. You can implement
+`ResponseBodyAdvice` and declare it as an
+xref:web/webmvc/mvc-controller/ann-advice.adoc[Controller Advice] bean or configure it
+directly on `RequestMappingHandlerAdapter`.
+
+See xref:web/webmvc/mvc-config/interceptors.adoc[Interceptors] in the section on MVC configuration for examples of how to
+configure interceptors. You can also register them directly by using setters on individual
+`HandlerMapping` implementations.
+
+WARNING: Interceptors are not ideally suited as a security layer due to the potential for
+a mismatch with annotated controller path matching. Generally, we recommend using Spring
+Security, or alternatively a similar approach integrated with the Servlet filter chain,
+and applied as early as possible.
+

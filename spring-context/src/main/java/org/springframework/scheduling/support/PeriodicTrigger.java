@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ package org.springframework.scheduling.support;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A trigger for periodic task execution. The period may be applied as either
@@ -247,15 +247,10 @@ public class PeriodicTrigger implements Trigger {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof PeriodicTrigger otherTrigger)) {
-			return false;
-		}
-		return (this.fixedRate == otherTrigger.fixedRate &&
-				this.period.equals(otherTrigger.period) &&
-				Objects.equals(this.initialDelay, otherTrigger.initialDelay));
+		return (this == other || (other instanceof PeriodicTrigger that &&
+				this.fixedRate == that.fixedRate &&
+				this.period.equals(that.period) &&
+				ObjectUtils.nullSafeEquals(this.initialDelay, that.initialDelay)));
 	}
 
 	@Override

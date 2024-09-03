@@ -1,0 +1,117 @@
+[[websocket-stomp-user-destination]]
+= User Destinations
+
+An application can send messages that target a specific user, and Spring's STOMP support
+recognizes destinations prefixed with `/user/` for this purpose.
+For example, a client might subscribe to the `/user/queue/position-updates` destination.
+`UserDestinationMessageHandler` handles this destination and transforms it into a
+destination unique to the user session (such as `/queue/position-updates-user123`).
+This provides the convenience of subscribing to a generically named destination while,
+at the same time, ensuring no collisions with other users who subscribe to the same
+destination so that each user can receive unique stock position updates.
+
+TIP: When working with user destinations, it is important to configure broker and
+application destination prefixes as shown in xref:web/websocket/stomp/enable.adoc[Enable STOMP], or otherwise the
+broker would handle "/user" prefixed messages that should only be handled by
+`UserDestinationMessageHandler`.
+
+On the sending side, messages can be sent to a destination such as
+pass:q[`/user/{username}/queue/position-updates`], which in turn is translated
+by the `UserDestinationMessageHandler` into one or more destinations, one for each
+session associated with the user. This lets any component within the application
+send messages that target a specific user without necessarily knowing anything more
+than their name and the generic destination. This is also supported through an
+annotation and a messaging template.
+
+A message-handling method can send messages to the user associated with
+the message being handled through the `@SendToUser` annotation (also supported on
+the class-level to share a common destination), as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Controller
+	public class PortfolioController {
+
+		@MessageMapping("/trade")
+		@SendToUser("/queue/position-updates")
+		public TradeResult executeTrade(Trade trade, Principal principal) {
+			// ...
+			return tradeResult;
+		}
+	}
+----
+
+If the user has more than one session, by default, all of the sessions subscribed
+to the given destination are targeted. However, sometimes, it may be necessary to
+target only the session that sent the message being handled. You can do so by
+setting the `broadcast` attribute to false, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Controller
+	public class MyController {
+
+		@MessageMapping("/action")
+		public void handleAction() throws Exception{
+			// raise MyBusinessException here
+		}
+
+		@MessageExceptionHandler
+		@SendToUser(destinations="/queue/errors", broadcast=false)
+		public ApplicationError handleException(MyBusinessException exception) {
+			// ...
+			return appError;
+		}
+	}
+----
+
+NOTE: While user destinations generally imply an authenticated user, it is not strictly required.
+A WebSocket session that is not associated with an authenticated user
+can subscribe to a user destination. In such cases, the `@SendToUser` annotation
+behaves exactly the same as with `broadcast=false` (that is, targeting only the
+session that sent the message being handled).
+
+You can send a message to user destinations from any application
+component by, for example, injecting the `SimpMessagingTemplate` created by the Java configuration or
+the XML namespace. (The bean name is `brokerMessagingTemplate` if required
+for qualification with `@Qualifier`.) The following example shows how to do so:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Service
+public class TradeServiceImpl implements TradeService {
+
+	private final SimpMessagingTemplate messagingTemplate;
+
+	@Autowired
+	public TradeServiceImpl(SimpMessagingTemplate messagingTemplate) {
+		this.messagingTemplate = messagingTemplate;
+	}
+
+	// ...
+
+	public void afterTradeExecuted(Trade trade) {
+		this.messagingTemplate.convertAndSendToUser(
+				trade.getUserName(), "/queue/position-updates", trade.getResult());
+	}
+}
+----
+
+NOTE: When you use user destinations with an external message broker, you should check the broker
+documentation on how to manage inactive queues, so that, when the user session is
+over, all unique user queues are removed. For example, RabbitMQ creates auto-delete
+queues when you use destinations such as `/exchange/amq.direct/position-updates`.
+So, in that case, the client could subscribe to `/user/exchange/amq.direct/position-updates`.
+Similarly, ActiveMQ has
+https://activemq.apache.org/delete-inactive-destinations.html[configuration options]
+for purging inactive destinations.
+
+In a multi-application server scenario, a user destination may remain unresolved because
+the user is connected to a different server. In such cases, you can configure a
+destination to broadcast unresolved messages so that other servers have a chance to try.
+This can be done through the `userDestinationBroadcast` property of the
+`MessageBrokerRegistry` in Java configuration and the `user-destination-broadcast` attribute
+of the `message-broker` element in XML.
+
+
+

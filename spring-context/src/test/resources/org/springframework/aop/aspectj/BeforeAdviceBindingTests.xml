@@ -16,18 +16,10 @@
 		</aop:aspect>
 
 		<!-- variation with external pointcut reference -->
-		<aop:aspect ref="authenticationLogger">
-			<aop:pointcut id="authenticationMethodWithString"
-					expression="execution(boolean *..SecurityManager.authenticate(..)) and args(username,java.lang.String)"/>
-			<aop:before pointcut-ref="authenticationMethodWithString"
-					method="logAuthenticationAttempt(java.lang.String)"/>
-		</aop:aspect>
 	</aop:config>
 
 	<bean id="testAspect" class="org.springframework.aop.aspectj.AdviceBindingTestAspect"/>
 
 	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
-
-	<bean id="authenticationLogger" class="org.springframework.aop.aspectj.AuthenticationLogger"/>
 
 </beans>

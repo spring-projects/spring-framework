@@ -1,0 +1,93 @@
+[[testcontext-application-events]]
+= Application Events
+
+Since Spring Framework 5.3.3, the TestContext framework provides support for recording
+xref:core/beans/context-introduction.adoc#context-functionality-events[application events] published in the
+`ApplicationContext` so that assertions can be performed against those events within
+tests. All events published during the execution of a single test are made available via
+the `ApplicationEvents` API which allows you to process the events as a
+`java.util.Stream`.
+
+To use `ApplicationEvents` in your tests, do the following.
+
+* Ensure that your test class is annotated or meta-annotated with
+  xref:testing/annotations/integration-spring/annotation-recordapplicationevents.adoc[`@RecordApplicationEvents`].
+* Ensure that the `ApplicationEventsTestExecutionListener` is registered. Note, however,
+  that `ApplicationEventsTestExecutionListener` is registered by default and only needs
+  to be manually registered if you have custom configuration via
+  `@TestExecutionListeners` that does not include the default listeners.
+* Annotate a field of type `ApplicationEvents` with `@Autowired` and use that instance of
+  `ApplicationEvents` in your test and lifecycle methods (such as `@BeforeEach` and
+  `@AfterEach` methods in JUnit Jupiter).
+** When using the xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[SpringExtension for JUnit Jupiter], you may declare a method
+   parameter of type `ApplicationEvents` in a test or lifecycle method as an alternative
+   to an `@Autowired` field in the test class.
+
+The following test class uses the `SpringExtension` for JUnit Jupiter and
+https://assertj.github.io/doc/[AssertJ] to assert the types of application events
+published while invoking a method in a Spring-managed component:
+
+// Don't use "quotes" in the "subs" section because of the asterisks in /* ... */
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@SpringJUnitConfig(/* ... */)
+	@RecordApplicationEvents // <1>
+	class OrderServiceTests {
+
+		@Autowired
+		OrderService orderService;
+
+		@Autowired
+		ApplicationEvents events; // <2>
+
+		@Test
+		void submitOrder() {
+			// Invoke method in OrderService that publishes an event
+			orderService.submitOrder(new Order(/* ... */));
+			// Verify that an OrderSubmitted event was published
+			long numEvents = events.stream(OrderSubmitted.class).count(); // <3>
+			assertThat(numEvents).isEqualTo(1);
+		}
+	}
+----
+<1> Annotate the test class with `@RecordApplicationEvents`.
+<2> Inject the `ApplicationEvents` instance for the current test.
+<3> Use the `ApplicationEvents` API to count how many `OrderSubmitted` events were published.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@SpringJUnitConfig(/* ... */)
+	@RecordApplicationEvents // <1>
+	class OrderServiceTests {
+
+		@Autowired
+		lateinit var orderService: OrderService
+
+		@Autowired
+		lateinit var events: ApplicationEvents // <2>
+
+		@Test
+		fun submitOrder() {
+			// Invoke method in OrderService that publishes an event
+			orderService.submitOrder(Order(/* ... */))
+			// Verify that an OrderSubmitted event was published
+			val numEvents = events.stream(OrderSubmitted::class).count() // <3>
+			assertThat(numEvents).isEqualTo(1)
+		}
+	}
+----
+<1> Annotate the test class with `@RecordApplicationEvents`.
+<2> Inject the `ApplicationEvents` instance for the current test.
+<3> Use the `ApplicationEvents` API to count how many `OrderSubmitted` events were published.
+======
+
+See the
+{api-spring-framework}/test/context/event/ApplicationEvents.html[`ApplicationEvents`
+javadoc] for further details regarding the `ApplicationEvents` API.
+

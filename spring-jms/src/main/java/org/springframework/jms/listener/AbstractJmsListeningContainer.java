@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,18 +125,19 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	}
 
 	/**
-	 * Specify the phase in which this container should be started and
-	 * stopped. The startup order proceeds from lowest to highest, and
-	 * the shutdown order is the reverse of that. By default this value
-	 * is Integer.MAX_VALUE meaning that this container starts as late
-	 * as possible and stops as soon as possible.
+	 * Specify the lifecycle phase in which this container should be started and stopped.
+	 * <p>The startup order proceeds from lowest to highest, and the shutdown order
+	 * is the reverse of that. The default is {@link #DEFAULT_PHASE} meaning that
+	 * this container starts as late as possible and stops as soon as possible.
+	 * @see SmartLifecycle#getPhase()
 	 */
 	public void setPhase(int phase) {
 		this.phase = phase;
 	}
 
 	/**
-	 * Return the phase in which this container will be started and stopped.
+	 * Return the lifecycle phase in which this container will be started and stopped.
+	 * @see #setPhase
 	 */
 	@Override
 	public int getPhase() {

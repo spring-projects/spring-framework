@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,13 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy;
+import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.Implementation;
+import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.One;
+import org.springframework.beans.testfixture.beans.factory.aot.TestHierarchy.Two;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
@@ -59,11 +64,13 @@ import org.springframework.context.testfixture.context.annotation.CglibConfigura
 import org.springframework.context.testfixture.context.annotation.ConfigurableCglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.GenericTemplateConfiguration;
 import org.springframework.context.testfixture.context.annotation.InitDestroyComponent;
+import org.springframework.context.testfixture.context.annotation.InjectionPointConfiguration;
 import org.springframework.context.testfixture.context.annotation.LazyAutowiredFieldComponent;
 import org.springframework.context.testfixture.context.annotation.LazyAutowiredMethodComponent;
 import org.springframework.context.testfixture.context.annotation.LazyConstructorArgumentComponent;
 import org.springframework.context.testfixture.context.annotation.LazyFactoryMethodArgumentComponent;
 import org.springframework.context.testfixture.context.annotation.PropertySourceConfiguration;
+import org.springframework.context.testfixture.context.annotation.QualifierConfiguration;
 import org.springframework.context.testfixture.context.generator.SimpleComponent;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -73,6 +80,7 @@ import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.mock.env.MockEnvironment;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -249,9 +257,9 @@ class ApplicationContextAotGeneratorTests {
 			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("initDestroyComponent");
 			InitDestroyComponent bean = freshApplicationContext.getBean(InitDestroyComponent.class);
-			assertThat(bean.events).containsExactly("customInit", "init");
+			assertThat(bean.events).containsExactly("init", "customInit");
 			freshApplicationContext.close();
-			assertThat(bean.events).containsExactly("customInit", "init", "customDestroy", "destroy");
+			assertThat(bean.events).containsExactly("init", "customInit", "destroy", "customDestroy");
 		});
 	}
 
@@ -303,6 +311,44 @@ class ApplicationContextAotGeneratorTests {
 		});
 	}
 
+	@Test
+	void processAheadOfTimeWithQualifier() {
+		GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+		applicationContext.registerBean(QualifierConfiguration.class);
+		testCompiledResult(applicationContext, (initializer, compiled) -> {
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			QualifierConfiguration configuration = freshApplicationContext.getBean(QualifierConfiguration.class);
+			assertThat(configuration).hasFieldOrPropertyWithValue("bean", "one");
+		});
+	}
+
+	@Test
+	void processAheadOfTimeWithInjectionPoint() {
+		GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+		applicationContext.registerBean(InjectionPointConfiguration.class);
+		testCompiledResult(applicationContext, (initializer, compiled) -> {
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			assertThat(freshApplicationContext.getBean("classToString"))
+					.isEqualTo(InjectionPointConfiguration.class.getName());
+		});
+	}
+
+	@Test // gh-30689
+	void processAheadOfTimeWithExplicitResolvableType() {
+		GenericApplicationContext applicationContext = new GenericApplicationContext();
+		DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(One.class);
+		beanDefinition.setResolvedFactoryMethod(ReflectionUtils.findMethod(TestHierarchy.class, "oneBean"));
+		// Override target type
+		beanDefinition.setTargetType(Two.class);
+		beanFactory.registerBeanDefinition("hierarchyBean", beanDefinition);
+		testCompiledResult(applicationContext, (initializer, compiled) -> {
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			assertThat(freshApplicationContext.getBean(Two.class))
+					.isInstanceOf(Implementation.class);
+		});
+	}
+
 	@Nested
 	@CompileWithForkedClassLoader
 	class ConfigurationClassCglibProxy {
@@ -313,8 +359,8 @@ class ApplicationContextAotGeneratorTests {
 			applicationContext.registerBean(CglibConfiguration.class);
 			TestGenerationContext context = processAheadOfTime(applicationContext);
 			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$0");
-			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$1");
-			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$2");
+			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$FastClass$$0");
+			isRegisteredCglibClass(context, CglibConfiguration.class.getName() + "$$SpringCGLIB$$FastClass$$1");
 		}
 
 		private void isRegisteredCglibClass(TestGenerationContext context, String cglibClassName) throws IOException {

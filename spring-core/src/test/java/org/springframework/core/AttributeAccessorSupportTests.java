@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.core;
 
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -82,10 +81,7 @@ class AttributeAccessorSupportTests {
 	void attributeNames() {
 		this.attributeAccessor.setAttribute(NAME, VALUE);
 		this.attributeAccessor.setAttribute("abc", "123");
-		String[] attributeNames = this.attributeAccessor.attributeNames();
-		Arrays.sort(attributeNames);
-		assertThat(Arrays.binarySearch(attributeNames, "abc")).isEqualTo(0);
-		assertThat(Arrays.binarySearch(attributeNames, NAME)).isEqualTo(1);
+		assertThat(this.attributeAccessor.attributeNames()).contains("abc", NAME);
 	}
 
 	@SuppressWarnings("serial")

@@ -335,7 +335,7 @@ class BeanWrapperGenericsTests {
 
 		Object obj = gb.getMapOfListOfInteger().get("testKey").get(0);
 		assertThat(obj).isInstanceOf(Integer.class);
-		assertThat(((Integer) obj).intValue()).isEqualTo(1);
+		assertThat(obj).isEqualTo(1);
 	}
 
 	@Test
@@ -351,7 +351,7 @@ class BeanWrapperGenericsTests {
 
 		Object obj = gb.getListOfMapOfInteger().get(0).get("testKey");
 		assertThat(obj).isInstanceOf(Integer.class);
-		assertThat(((Integer) obj).intValue()).isEqualTo(5);
+		assertThat(obj).isEqualTo(5);
 	}
 
 	@Test
@@ -366,7 +366,7 @@ class BeanWrapperGenericsTests {
 
 		Object obj = gb.getMapOfListOfListOfInteger().get("testKey").get(0).get(0);
 		assertThat(obj).isInstanceOf(Integer.class);
-		assertThat(((Integer) obj).intValue()).isEqualTo(1);
+		assertThat(obj).isEqualTo(1);
 	}
 
 	@Test

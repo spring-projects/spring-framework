@@ -227,6 +227,8 @@ public class MethodParameter {
 	 * Return the wrapped annotated element.
 	 * <p>Note: This method exposes the annotations declared on the method/constructor
 	 * itself (i.e. at the method/constructor level, not at the parameter level).
+	 * <p>To get the {@link AnnotatedElement} at the parameter level, use
+	 * {@link #getParameter()}.
 	 * @return the Method or Constructor as AnnotatedElement
 	 */
 	public AnnotatedElement getAnnotatedElement() {
@@ -750,17 +752,12 @@ public class MethodParameter {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof MethodParameter otherParam)) {
-			return false;
-		}
-		return (getContainingClass() == otherParam.getContainingClass() &&
-				ObjectUtils.nullSafeEquals(this.typeIndexesPerLevel, otherParam.typeIndexesPerLevel) &&
-				this.nestingLevel == otherParam.nestingLevel &&
-				this.parameterIndex == otherParam.parameterIndex &&
-				this.executable.equals(otherParam.executable));
+		return (this == other || (other instanceof MethodParameter that &&
+				getContainingClass() == that.getContainingClass() &&
+				ObjectUtils.nullSafeEquals(this.typeIndexesPerLevel, that.typeIndexesPerLevel) &&
+				this.nestingLevel == that.nestingLevel &&
+				this.parameterIndex == that.parameterIndex &&
+				this.executable.equals(that.executable)));
 	}
 
 	@Override
@@ -779,6 +776,7 @@ public class MethodParameter {
 	public MethodParameter clone() {
 		return new MethodParameter(this);
 	}
+
 
 	/**
 	 * Create a new MethodParameter for the given method or constructor.

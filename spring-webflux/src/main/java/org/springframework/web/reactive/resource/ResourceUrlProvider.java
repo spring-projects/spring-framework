@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
@@ -86,8 +85,9 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	public void registerHandlers(Map<String, ResourceWebHandler> handlerMap) {
 		this.handlerMap.clear();
 		handlerMap.forEach((rawPattern, resourceWebHandler) -> {
-			rawPattern = prependLeadingSlash(rawPattern);
-			PathPattern pattern = PathPatternParser.defaultInstance.parse(rawPattern);
+			PathPatternParser parser = PathPatternParser.defaultInstance;
+			rawPattern = parser.initFullPathPattern(rawPattern);
+			PathPattern pattern = parser.parse(rawPattern);
 			this.handlerMap.put(pattern, resourceWebHandler);
 		});
 	}
@@ -170,16 +170,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 					}
 					return Mono.empty();
 				});
-	}
-
-
-	private static String prependLeadingSlash(String pattern) {
-		if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
-			return "/" + pattern;
-		}
-		else {
-			return pattern;
-		}
 	}
 
 }

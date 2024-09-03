@@ -559,6 +559,15 @@ class MockHttpServletRequestBuilderTests {
 		assertThat(request.getUserPrincipal()).isEqualTo(user);
 	}
 
+	@Test
+	void remoteAddress() {
+		String ip = "10.0.0.1";
+		this.builder.remoteAddress(ip);
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getRemoteAddr()).isEqualTo(ip);
+	}
+
 	@Test  // SPR-12945
 	void mergeInvokesDefaultRequestPostProcessorFirst() {
 		final String ATTR = "ATTR";

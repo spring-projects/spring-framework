@@ -1,0 +1,35 @@
+[[mvc-ann-requestattrib]]
+= `@RequestAttribute`
+
+[.small]#xref:web/webflux/controller/ann-methods/requestattrib.adoc[See equivalent in the Reactive stack]#
+
+Similar to `@SessionAttribute`, you can use the `@RequestAttribute` annotations to
+access pre-existing request attributes created earlier (for example, by a Servlet `Filter`
+or `HandlerInterceptor`):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@GetMapping("/")
+	public String handle(@RequestAttribute Client client) { // <1>
+		// ...
+	}
+----
+<1> Using the `@RequestAttribute` annotation.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@GetMapping("/")
+	fun handle(@RequestAttribute client: Client): String { // <1>
+		// ...
+	}
+----
+<1> Using the `@RequestAttribute` annotation.
+======
+
+

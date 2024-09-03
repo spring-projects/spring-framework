@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,14 +42,12 @@ class PropertySourceRegistry {
 
 	private final List<PropertySourceDescriptor> descriptors;
 
+
 	public PropertySourceRegistry(PropertySourceProcessor propertySourceProcessor) {
 		this.propertySourceProcessor = propertySourceProcessor;
 		this.descriptors = new ArrayList<>();
 	}
 
-	public List<PropertySourceDescriptor> getDescriptors() {
-		return Collections.unmodifiableList(this.descriptors);
-	}
 
 	/**
 	 * Process the given <code>@PropertySource</code> annotation metadata.
@@ -70,12 +68,16 @@ class PropertySourceRegistry {
 		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
 
 		Class<? extends PropertySourceFactory> factoryClass = propertySource.getClass("factory");
-		Class<? extends PropertySourceFactory> factorClassToUse =
+		Class<? extends PropertySourceFactory> factoryClassToUse =
 				(factoryClass != PropertySourceFactory.class ? factoryClass : null);
-		PropertySourceDescriptor descriptor = new PropertySourceDescriptor(Arrays.asList(locations), ignoreResourceNotFound, name,
-				factorClassToUse, encoding);
+		PropertySourceDescriptor descriptor = new PropertySourceDescriptor(Arrays.asList(locations),
+				ignoreResourceNotFound, name, factoryClassToUse, encoding);
 		this.propertySourceProcessor.processPropertySource(descriptor);
 		this.descriptors.add(descriptor);
+	}
+
+	public List<PropertySourceDescriptor> getDescriptors() {
+		return Collections.unmodifiableList(this.descriptors);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -98,6 +97,10 @@ public class ResponseEntityExceptionHandlerTests {
 				.filter(method -> method.getName().startsWith("handle") && (method.getParameterCount() == 4))
 				.filter(method -> !method.getName().equals("handleErrorResponse"))
 				.map(method -> method.getParameterTypes()[0])
+				.filter(exceptionType -> {
+					String name = exceptionType.getSimpleName();
+					return !name.equals("AsyncRequestNotUsableException");
+				})
 				.forEach(exceptionType -> assertThat(annotation.value())
 						.as("@ExceptionHandler is missing declaration for " + exceptionType.getName())
 						.contains((Class<Exception>) exceptionType));
@@ -267,6 +270,15 @@ public class ResponseEntityExceptionHandlerTests {
 		testException(new AsyncRequestTimeoutException());
 	}
 
+	@Test // gh-14287, gh-31541
+	void serverErrorWithoutBody() {
+		HttpStatusCode code = HttpStatusCode.valueOf(500);
+		Exception ex = new IllegalStateException("internal error");
+		this.exceptionHandler.handleExceptionInternal(ex, null, new HttpHeaders(), code, this.request);
+
+		assertThat(this.servletRequest.getAttribute("jakarta.servlet.error.exception")).isSameAs(ex);
+	}
+
 	@Test
 	public void controllerAdvice() throws Exception {
 		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
@@ -342,11 +354,6 @@ public class ResponseEntityExceptionHandlerTests {
 	private ResponseEntity<Object> testException(Exception ex) {
 		try {
 			ResponseEntity<Object> entity = this.exceptionHandler.handleException(ex, this.request);
-
-			// SPR-9653
-			if (HttpStatus.INTERNAL_SERVER_ERROR.equals(entity.getStatusCode())) {
-				assertThat(this.servletRequest.getAttribute("jakarta.servlet.error.exception")).isSameAs(ex);
-			}
 
 			// Verify DefaultHandlerExceptionResolver would set the same status
 			this.exceptionResolver.resolveException(this.servletRequest, this.servletResponse, null, ex);

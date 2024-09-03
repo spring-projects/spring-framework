@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,8 +238,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other ||
-					(other instanceof SimpUser otherSimpUser && getName().equals(otherSimpUser.getName())));
+			return (this == other || (other instanceof SimpUser that && getName().equals(that.getName())));
 		}
 
 		@Override
@@ -294,8 +293,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other ||
-					(other instanceof SimpSubscription otherSubscription && getId().equals(otherSubscription.getId())));
+			return (this == other || (other instanceof SimpSubscription that && getId().equals(that.getId())));
 		}
 
 		@Override
@@ -344,14 +342,9 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof SimpSubscription otherSubscription)) {
-				return false;
-			}
-			return (getId().equals(otherSubscription.getId()) &&
-					getSession().getId().equals(otherSubscription.getSession().getId()));
+			return (this == other || (other instanceof SimpSubscription that &&
+					getId().equals(that.getId()) &&
+					getSession().getId().equals(that.getSession().getId())));
 		}
 
 		@Override

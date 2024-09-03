@@ -1,0 +1,328 @@
+[[mvc-uri-building]]
+= URI Links
+
+[.small]#xref:web/webflux/uri-building.adoc[See equivalent in the Reactive stack]#
+
+This section describes various options available in the Spring Framework to work with URI's.
+
+include::partial$web/web-uris.adoc[leveloffset=+1]
+
+
+
+[[mvc-servleturicomponentsbuilder]]
+== Relative Servlet Requests
+
+You can use `ServletUriComponentsBuilder` to create URIs relative to the current request,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	HttpServletRequest request = ...
+
+	// Re-uses scheme, host, port, path, and query string...
+
+	URI uri = ServletUriComponentsBuilder.fromRequest(request)
+			.replaceQueryParam("accountId", "{id}")
+			.build("123");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val request: HttpServletRequest = ...
+
+	// Re-uses scheme, host, port, path, and query string...
+
+	val uri = ServletUriComponentsBuilder.fromRequest(request)
+			.replaceQueryParam("accountId", "{id}")
+			.build("123")
+----
+======
+
+You can create URIs relative to the context path, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	HttpServletRequest request = ...
+
+	// Re-uses scheme, host, port, and context path...
+
+	URI uri = ServletUriComponentsBuilder.fromContextPath(request)
+			.path("/accounts")
+			.build()
+			.toUri();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val request: HttpServletRequest = ...
+
+	// Re-uses scheme, host, port, and context path...
+
+	val uri = ServletUriComponentsBuilder.fromContextPath(request)
+			.path("/accounts")
+			.build()
+			.toUri()
+----
+======
+
+You can create URIs relative to a Servlet (for example, `/main/{asterisk}`),
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	HttpServletRequest request = ...
+
+	// Re-uses scheme, host, port, context path, and Servlet mapping prefix...
+
+	URI uri = ServletUriComponentsBuilder.fromServletMapping(request)
+			.path("/accounts")
+			.build()
+			.toUri();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val request: HttpServletRequest = ...
+
+	// Re-uses scheme, host, port, context path, and Servlet mapping prefix...
+
+	val uri = ServletUriComponentsBuilder.fromServletMapping(request)
+			.path("/accounts")
+			.build()
+			.toUri()
+----
+======
+
+NOTE: As of 5.1, `ServletUriComponentsBuilder` ignores information from the `Forwarded` and
+`X-Forwarded-*` headers, which specify the client-originated address. Consider using the
+xref:web/webmvc/filters.adoc#filters-forwarded-headers[`ForwardedHeaderFilter`] to extract and use or to discard
+such headers.
+
+
+
+[[mvc-links-to-controllers]]
+== Links to Controllers
+
+Spring MVC provides a mechanism to prepare links to controller methods. For example,
+the following MVC controller allows for link creation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	@RequestMapping("/hotels/{hotel}")
+	public class BookingController {
+
+		@GetMapping("/bookings/{booking}")
+		public ModelAndView getBooking(@PathVariable Long booking) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Controller
+	@RequestMapping("/hotels/{hotel}")
+	class BookingController {
+
+		@GetMapping("/bookings/{booking}")
+		fun getBooking(@PathVariable booking: Long): ModelAndView {
+			// ...
+		}
+	}
+----
+======
+
+You can prepare a link by referring to the method by name, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	UriComponents uriComponents = MvcUriComponentsBuilder
+		.fromMethodName(BookingController.class, "getBooking", 21).buildAndExpand(42);
+
+	URI uri = uriComponents.encode().toUri();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val uriComponents = MvcUriComponentsBuilder
+		.fromMethodName(BookingController::class.java, "getBooking", 21).buildAndExpand(42)
+
+	val uri = uriComponents.encode().toUri()
+----
+======
+
+In the preceding example, we provide actual method argument values (in this case, the long value: `21`)
+to be used as a path variable and inserted into the URL. Furthermore, we provide the
+value, `42`, to fill in any remaining URI variables, such as the `hotel` variable inherited
+from the type-level request mapping. If the method had more arguments, we could supply null for
+arguments not needed for the URL. In general, only `@PathVariable` and `@RequestParam` arguments
+are relevant for constructing the URL.
+
+There are additional ways to use `MvcUriComponentsBuilder`. For example, you can use a technique
+akin to mock testing through proxies to avoid referring to the controller method by name, as the following example shows
+(the example assumes static import of `MvcUriComponentsBuilder.on`):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	UriComponents uriComponents = MvcUriComponentsBuilder
+		.fromMethodCall(on(BookingController.class).getBooking(21)).buildAndExpand(42);
+
+	URI uri = uriComponents.encode().toUri();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val uriComponents = MvcUriComponentsBuilder
+		.fromMethodCall(on(BookingController::class.java).getBooking(21)).buildAndExpand(42)
+
+	val uri = uriComponents.encode().toUri()
+----
+======
+
+NOTE: Controller method signatures are limited in their design when they are supposed to be usable for
+link creation with `fromMethodCall`. Aside from needing a proper parameter signature,
+there is a technical limitation on the return type (namely, generating a runtime proxy
+for link builder invocations), so the return type must not be `final`. In particular,
+the common `String` return type for view names does not work here. You should use `ModelAndView`
+or even plain `Object` (with a `String` return value) instead.
+
+The earlier examples use static methods in `MvcUriComponentsBuilder`. Internally, they rely
+on `ServletUriComponentsBuilder` to prepare a base URL from the scheme, host, port,
+context path, and servlet path of the current request. This works well in most cases.
+However, sometimes, it can be insufficient. For example, you may be outside the context of
+a request (such as a batch process that prepares links) or perhaps you need to insert a path
+prefix (such as a locale prefix that was removed from the request path and needs to be
+re-inserted into links).
+
+For such cases, you can use the static `fromXxx` overloaded methods that accept a
+`UriComponentsBuilder` to use a base URL. Alternatively, you can create an instance of `MvcUriComponentsBuilder`
+with a base URL and then use the instance-based `withXxx` methods. For example, the
+following listing uses `withMethodCall`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	UriComponentsBuilder base = ServletUriComponentsBuilder.fromCurrentContextPath().path("/en");
+	MvcUriComponentsBuilder builder = MvcUriComponentsBuilder.relativeTo(base);
+	builder.withMethodCall(on(BookingController.class).getBooking(21)).buildAndExpand(42);
+
+	URI uri = uriComponents.encode().toUri();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val base = ServletUriComponentsBuilder.fromCurrentContextPath().path("/en")
+	val builder = MvcUriComponentsBuilder.relativeTo(base)
+	builder.withMethodCall(on(BookingController::class.java).getBooking(21)).buildAndExpand(42)
+
+	val uri = uriComponents.encode().toUri()
+----
+======
+
+NOTE: As of 5.1, `MvcUriComponentsBuilder` ignores information from the `Forwarded` and
+`X-Forwarded-*` headers, which specify the client-originated address. Consider using the
+xref:web/webmvc/filters.adoc#filters-forwarded-headers[ForwardedHeaderFilter] to extract and use or to discard
+such headers.
+
+
+
+[[mvc-links-to-controllers-from-views]]
+== Links in Views
+
+In views such as Thymeleaf, FreeMarker, or JSP, you can build links to annotated controllers
+by referring to the implicitly or explicitly assigned name for each request mapping.
+
+Consider the following example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@RequestMapping("/people/{id}/addresses")
+	public class PersonAddressController {
+
+		@RequestMapping("/{country}")
+		public HttpEntity<PersonAddress> getAddress(@PathVariable String country) { ... }
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@RequestMapping("/people/{id}/addresses")
+	class PersonAddressController {
+
+		@RequestMapping("/{country}")
+		fun getAddress(@PathVariable country: String): HttpEntity<PersonAddress> { ... }
+	}
+----
+======
+
+Given the preceding controller, you can prepare a link from a JSP, as follows:
+
+[source,jsp,indent=0,subs="verbatim,quotes"]
+----
+<%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
+...
+<a href="${s:mvcUrl('PAC#getAddress').arg(0,'US').buildAndExpand('123')}">Get Address</a>
+----
+
+The preceding example relies on the `mvcUrl` function declared in the Spring tag library
+(that is, META-INF/spring.tld), but it is easy to define your own function or prepare a
+similar one for other templating technologies.
+
+Here is how this works. On startup, every `@RequestMapping` is assigned a default name
+through `HandlerMethodMappingNamingStrategy`, whose default implementation uses the
+capital letters of the class and the method name (for example, the `getThing` method in
+`ThingController` becomes "TC#getThing"). If there is a name clash, you can use
+`@RequestMapping(name="..")` to assign an explicit name or implement your own
+`HandlerMethodMappingNamingStrategy`.
+
+
+
+

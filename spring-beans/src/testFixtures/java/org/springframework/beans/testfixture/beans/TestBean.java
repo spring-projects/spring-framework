@@ -466,18 +466,13 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof TestBean tb2)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(this.name, tb2.name) && this.age == tb2.age);
+		return (this == other || (other instanceof TestBean that &&
+				ObjectUtils.nullSafeEquals(this.name, that.name) && this.age == that.age));
 	}
 
 	@Override
 	public int hashCode() {
-		return this.age;
+		return TestBean.class.hashCode();
 	}
 
 	@Override

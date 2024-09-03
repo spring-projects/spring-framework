@@ -47,14 +47,8 @@ public class NopInterceptor implements MethodInterceptor {
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof NopInterceptor that)) {
-			return false;
-		}
-		return this.count == that.count;
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof NopInterceptor that && this.count == that.count));
 	}
 
 	@Override

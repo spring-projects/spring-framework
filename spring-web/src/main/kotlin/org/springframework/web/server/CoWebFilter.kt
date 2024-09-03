@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono
 
 /**
  * Kotlin-specific implementation of the [WebFilter] interface that allows for
- * using co-routines.
+ * using coroutines.
  *
  * @author Arjen Poutsma
  * @since 6.0.5
@@ -34,14 +34,14 @@ abstract class CoWebFilter : WebFilter {
 		return mono(Dispatchers.Unconfined) {
 			filter(exchange, object : CoWebFilterChain {
 				override suspend fun filter(exchange: ServerWebExchange) {
-					return chain.filter(exchange).cast(Unit.javaClass).awaitSingleOrNull() ?: Unit
+					chain.filter(exchange).awaitSingleOrNull()
 				}
 			})}.then()
 	}
 
 	/**
 	 * Process the Web request and (optionally) delegate to the next
-	 * `WebFilter` through the given [WebFilterChain].
+	 * [WebFilter] through the given [WebFilterChain].
 	 * @param exchange the current server exchange
 	 * @param chain provides a way to delegate to the next filter
 	 */
@@ -50,7 +50,7 @@ abstract class CoWebFilter : WebFilter {
 }
 
 /**
- * Kotlin-specific adaption of [WebFilterChain] that allows for co-routines.
+ * Kotlin-specific adaption of [WebFilterChain] that allows for coroutines.
  *
  * @author Arjen Poutsma
  * @since 6.0.5

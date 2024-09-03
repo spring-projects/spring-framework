@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.springframework.ejb.config;
 
+import javax.naming.NoInitialContextException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -29,6 +32,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jndi.JndiObjectFactoryBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Rob Harrop
@@ -93,6 +97,10 @@ public class JeeNamespaceHandlerTests {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleLocalEjb");
 		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> this.beanFactory.getBean("simpleLocalEjb"))
+				.withCauseInstanceOf(NoInitialContextException.class);
 	}
 
 	@Test
@@ -100,6 +108,32 @@ public class JeeNamespaceHandlerTests {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleRemoteEjb");
 		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> this.beanFactory.getBean("simpleRemoteEjb"))
+				.withCauseInstanceOf(NoInitialContextException.class);
+	}
+
+	@Test
+	public void testComplexLocalSlsb() {
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexLocalEjb");
+		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
+		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> this.beanFactory.getBean("complexLocalEjb"))
+				.withCauseInstanceOf(NoInitialContextException.class);
+	}
+
+	@Test
+	public void testComplexRemoteSlsb() {
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexRemoteEjb");
+		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
+		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> this.beanFactory.getBean("complexRemoteEjb"))
+				.withCauseInstanceOf(NoInitialContextException.class);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,7 +173,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	private void assertNumRowsInTestTable(JdbcTemplate template, int count) {
-		assertThat(template.queryForObject("select count(*) from T_TEST", Integer.class).intValue()).isEqualTo(count);
+		assertThat(template.queryForObject("select count(*) from T_TEST", Integer.class)).isEqualTo(count);
 	}
 
 	private void assertDatabaseCreated(EmbeddedDatabase db) {

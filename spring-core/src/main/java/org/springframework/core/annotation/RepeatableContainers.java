@@ -43,6 +43,8 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class RepeatableContainers {
 
+	static final Map<Class<? extends Annotation>, Object> cache = new ConcurrentReferenceHashMap<>();
+
 	@Nullable
 	private final RepeatableContainers parent;
 
@@ -140,8 +142,6 @@ public abstract class RepeatableContainers {
 	 * Java's {@link Repeatable @Repeatable} annotation.
 	 */
 	private static class StandardRepeatableContainers extends RepeatableContainers {
-
-		private static final Map<Class<? extends Annotation>, Object> cache = new ConcurrentReferenceHashMap<>();
 
 		private static final Object NONE = new Object();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ import org.springframework.beans.factory.support.RegisteredBean;
  */
 class ReflectiveProcessorBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
-	private static final ReflectiveRuntimeHintsRegistrar REGISTRAR = new ReflectiveRuntimeHintsRegistrar();
+	private static final ReflectiveRuntimeHintsRegistrar registrar = new ReflectiveRuntimeHintsRegistrar();
+
 
 	@Override
 	public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
@@ -49,7 +50,9 @@ class ReflectiveProcessorBeanFactoryInitializationAotProcessor implements BeanFa
 		return new ReflectiveProcessorBeanFactoryInitializationAotContribution(beanTypes);
 	}
 
-	private static class ReflectiveProcessorBeanFactoryInitializationAotContribution implements BeanFactoryInitializationAotContribution {
+
+	private static class ReflectiveProcessorBeanFactoryInitializationAotContribution
+			implements BeanFactoryInitializationAotContribution {
 
 		private final Class<?>[] types;
 
@@ -60,9 +63,8 @@ class ReflectiveProcessorBeanFactoryInitializationAotProcessor implements BeanFa
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanFactoryInitializationCode beanFactoryInitializationCode) {
 			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
-			REGISTRAR.registerRuntimeHints(runtimeHints, this.types);
+			registrar.registerRuntimeHints(runtimeHints, this.types);
 		}
-
 	}
 
 }

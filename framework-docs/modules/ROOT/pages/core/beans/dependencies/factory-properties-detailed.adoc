@@ -1,0 +1,626 @@
+[[beans-factory-properties-detailed]]
+= Dependencies and Configuration in Detail
+
+As mentioned in the xref:core/beans/dependencies/factory-collaborators.adoc[previous section], you can define bean
+properties and constructor arguments as references to other managed beans (collaborators)
+or as values defined inline. Spring's XML-based configuration metadata supports
+sub-element types within its `<property/>` and `<constructor-arg/>` elements for this
+purpose.
+
+
+[[beans-value-element]]
+== Straight Values (Primitives, Strings, and so on)
+
+The `value` attribute of the `<property/>` element specifies a property or constructor
+argument as a human-readable string representation. Spring's
+xref:core/validation/convert.adoc#core-convert-ConversionService-API[conversion service] is used to convert these
+values from a `String` to the actual type of the property or argument.
+The following example shows various values being set:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<!-- results in a setDriverClassName(String) call -->
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://localhost:3306/mydb"/>
+		<property name="username" value="root"/>
+		<property name="password" value="misterkaoli"/>
+	</bean>
+----
+
+The following example uses the xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-p-namespace[p-namespace] for even more succinct
+XML configuration:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:p="http://www.springframework.org/schema/p"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+		https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+		<bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+			destroy-method="close"
+			p:driverClassName="com.mysql.jdbc.Driver"
+			p:url="jdbc:mysql://localhost:3306/mydb"
+			p:username="root"
+			p:password="misterkaoli"/>
+
+	</beans>
+----
+
+The preceding XML is more succinct. However, typos are discovered at runtime rather than
+design time, unless you use an IDE (such as https://www.jetbrains.com/idea/[IntelliJ
+IDEA] or the https://spring.io/tools[Spring Tools for Eclipse])
+that supports automatic property completion when you create bean definitions. Such IDE
+assistance is highly recommended.
+
+You can also configure a `java.util.Properties` instance, as follows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="mappings"
+		class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+
+		<!-- typed as a java.util.Properties -->
+		<property name="properties">
+			<value>
+				jdbc.driver.className=com.mysql.jdbc.Driver
+				jdbc.url=jdbc:mysql://localhost:3306/mydb
+			</value>
+		</property>
+	</bean>
+----
+
+The Spring container converts the text inside the `<value/>` element into a
+`java.util.Properties` instance by using the JavaBeans `PropertyEditor` mechanism. This
+is a nice shortcut, and is one of a few places where the Spring team do favor the use of
+the nested `<value/>` element over the `value` attribute style.
+
+[[beans-idref-element]]
+=== The `idref` element
+
+The `idref` element is simply an error-proof way to pass the `id` (a string value - not
+a reference) of another bean in the container to a `<constructor-arg/>` or `<property/>`
+element. The following example shows how to use it:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="theTargetBean" class="..."/>
+
+	<bean id="theClientBean" class="...">
+		<property name="targetName">
+			<idref bean="theTargetBean"/>
+		</property>
+	</bean>
+----
+
+The preceding bean definition snippet is exactly equivalent (at runtime) to the
+following snippet:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="theTargetBean" class="..." />
+
+	<bean id="client" class="...">
+		<property name="targetName" value="theTargetBean"/>
+	</bean>
+----
+
+The first form is preferable to the second, because using the `idref` tag lets the
+container validate at deployment time that the referenced, named bean actually
+exists. In the second variation, no validation is performed on the value that is passed
+to the `targetName` property of the `client` bean. Typos are only discovered (with most
+likely fatal results) when the `client` bean is actually instantiated. If the `client`
+bean is a xref:core/beans/factory-scopes.adoc[prototype] bean, this typo and the resulting exception
+may only be discovered long after the container is deployed.
+
+NOTE: The `local` attribute on the `idref` element is no longer supported in the 4.0 beans
+XSD, since it does not provide value over a regular `bean` reference any more. Change
+your existing `idref local` references to `idref bean` when upgrading to the 4.0 schema.
+
+A common place (at least in versions earlier than Spring 2.0) where the `<idref/>` element
+brings value is in the configuration of xref:core/aop-api/pfb.adoc#aop-pfb-1[AOP interceptors] in a
+`ProxyFactoryBean` bean definition. Using `<idref/>` elements when you specify the
+interceptor names prevents you from misspelling an interceptor ID.
+
+
+[[beans-ref-element]]
+== References to Other Beans (Collaborators)
+
+The `ref` element is the final element inside a `<constructor-arg/>` or `<property/>`
+definition element. Here, you set the value of the specified property of a bean to be a
+reference to another bean (a collaborator) managed by the container. The referenced bean
+is a dependency of the bean whose property is to be set, and it is initialized on demand
+as needed before the property is set. (If the collaborator is a singleton bean, it may
+already be initialized by the container.) All references are ultimately a reference to
+another object. Scoping and validation depend on whether you specify the ID or name of the
+other object through the `bean` or `parent` attribute.
+
+Specifying the target bean through the `bean` attribute of the `<ref/>` tag is the most
+general form and allows creation of a reference to any bean in the same container or
+parent container, regardless of whether it is in the same XML file. The value of the
+`bean` attribute may be the same as the `id` attribute of the target bean or be the same
+as one of the values in the `name` attribute of the target bean. The following example
+shows how to use a `ref` element:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<ref bean="someBean"/>
+----
+
+Specifying the target bean through the `parent` attribute creates a reference to a bean
+that is in a parent container of the current container. The value of the `parent`
+attribute may be the same as either the `id` attribute of the target bean or one of the
+values in the `name` attribute of the target bean. The target bean must be in a
+parent container of the current one. You should use this bean reference variant mainly
+when you have a hierarchy of containers and you want to wrap an existing bean in a parent
+container with a proxy that has the same name as the parent bean. The following pair of
+listings shows how to use the `parent` attribute:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<!-- in the parent context -->
+	<bean id="accountService" class="com.something.SimpleAccountService">
+		<!-- insert dependencies as required here -->
+	</bean>
+----
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<!-- in the child (descendant) context -->
+	<bean id="accountService" <!-- bean name is the same as the parent bean -->
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target">
+			<ref parent="accountService"/> <!-- notice how we refer to the parent bean -->
+		</property>
+		<!-- insert other configuration and dependencies as required here -->
+	</bean>
+----
+
+NOTE: The `local` attribute on the `ref` element is no longer supported in the 4.0 beans
+XSD, since it does not provide value over a regular `bean` reference any more. Change
+your existing `ref local` references to `ref bean` when upgrading to the 4.0 schema.
+
+
+[[beans-inner-beans]]
+== Inner Beans
+
+A `<bean/>` element inside the `<property/>` or `<constructor-arg/>` elements defines an
+inner bean, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="outer" class="...">
+		<!-- instead of using a reference to a target bean, simply define the target bean inline -->
+		<property name="target">
+			<bean class="com.example.Person"> <!-- this is the inner bean -->
+				<property name="name" value="Fiona Apple"/>
+				<property name="age" value="25"/>
+			</bean>
+		</property>
+	</bean>
+----
+
+An inner bean definition does not require a defined ID or name. If specified, the container
+does not use such a value as an identifier. The container also ignores the `scope` flag on
+creation, because inner beans are always anonymous and are always created with the outer
+bean. It is not possible to access inner beans independently or to inject them into
+collaborating beans other than into the enclosing bean.
+
+As a corner case, it is possible to receive destruction callbacks from a custom scope --
+for example, for a request-scoped inner bean contained within a singleton bean. The creation
+of the inner bean instance is tied to its containing bean, but destruction callbacks let it
+participate in the request scope's lifecycle. This is not a common scenario. Inner beans
+typically simply share their containing bean's scope.
+
+
+[[beans-collection-elements]]
+== Collections
+
+The `<list/>`, `<set/>`, `<map/>`, and `<props/>` elements set the properties
+and arguments of the Java `Collection` types `List`, `Set`, `Map`, and `Properties`,
+respectively. The following example shows how to use them:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="moreComplexObject" class="example.ComplexObject">
+		<!-- results in a setAdminEmails(java.util.Properties) call -->
+		<property name="adminEmails">
+			<props>
+				<prop key="administrator">administrator@example.org</prop>
+				<prop key="support">support@example.org</prop>
+				<prop key="development">development@example.org</prop>
+			</props>
+		</property>
+		<!-- results in a setSomeList(java.util.List) call -->
+		<property name="someList">
+			<list>
+				<value>a list element followed by a reference</value>
+				<ref bean="myDataSource" />
+			</list>
+		</property>
+		<!-- results in a setSomeMap(java.util.Map) call -->
+		<property name="someMap">
+			<map>
+				<entry key="an entry" value="just some string"/>
+				<entry key="a ref" value-ref="myDataSource"/>
+			</map>
+		</property>
+		<!-- results in a setSomeSet(java.util.Set) call -->
+		<property name="someSet">
+			<set>
+				<value>just some string</value>
+				<ref bean="myDataSource" />
+			</set>
+		</property>
+	</bean>
+----
+
+The value of a map key or value, or a set value, can also be any of the
+following elements:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	bean | ref | idref | list | set | map | props | value | null
+----
+
+[[beans-collection-elements-merging]]
+=== Collection Merging
+
+The Spring container also supports merging collections. An application
+developer can define a parent `<list/>`, `<map/>`, `<set/>` or `<props/>` element
+and have child `<list/>`, `<map/>`, `<set/>` or `<props/>` elements inherit and
+override values from the parent collection. That is, the child collection's values are
+the result of merging the elements of the parent and child collections, with the child's
+collection elements overriding values specified in the parent collection.
+
+This section on merging discusses the parent-child bean mechanism. Readers unfamiliar
+with parent and child bean definitions may wish to read the
+xref:core/beans/child-bean-definitions.adoc[relevant section] before continuing.
+
+The following example demonstrates collection merging:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<bean id="parent" abstract="true" class="example.ComplexObject">
+			<property name="adminEmails">
+				<props>
+					<prop key="administrator">administrator@example.com</prop>
+					<prop key="support">support@example.com</prop>
+				</props>
+			</property>
+		</bean>
+		<bean id="child" parent="parent">
+			<property name="adminEmails">
+				<!-- the merge is specified on the child collection definition -->
+				<props merge="true">
+					<prop key="sales">sales@example.com</prop>
+					<prop key="support">support@example.co.uk</prop>
+				</props>
+			</property>
+		</bean>
+	<beans>
+----
+
+Notice the use of the `merge=true` attribute on the `<props/>` element of the
+`adminEmails` property of the `child` bean definition. When the `child` bean is resolved
+and instantiated by the container, the resulting instance has an `adminEmails`
+`Properties` collection that contains the result of merging the child's
+`adminEmails` collection with the parent's `adminEmails` collection. The following listing
+shows the result:
+
+[literal,subs="verbatim,quotes"]
+----
+administrator=administrator@example.com
+sales=sales@example.com
+support=support@example.co.uk
+----
+
+The child `Properties` collection's value set inherits all property elements from the
+parent `<props/>`, and the child's value for the `support` value overrides the value in
+the parent collection.
+
+This merging behavior applies similarly to the `<list/>`, `<map/>`, and `<set/>`
+collection types. In the specific case of the `<list/>` element, the semantics
+associated with the `List` collection type (that is, the notion of an `ordered`
+collection of values) is maintained. The parent's values precede all of the child list's
+values. In the case of the `Map`, `Set`, and `Properties` collection types, no ordering
+exists. Hence, no ordering semantics are in effect for the collection types that underlie
+the associated `Map`, `Set`, and `Properties` implementation types that the container
+uses internally.
+
+[[beans-collection-merge-limitations]]
+=== Limitations of Collection Merging
+
+You cannot merge different collection types (such as a `Map` and a `List`). If you
+do attempt to do so, an appropriate `Exception` is thrown. The `merge` attribute must be
+specified on the lower, inherited, child definition. Specifying the `merge` attribute on
+a parent collection definition is redundant and does not result in the desired merging.
+
+[[beans-collection-elements-strongly-typed]]
+=== Strongly-typed collection
+
+Thanks to Java's support for generic types, you can use strongly typed collections.
+That is, it is possible to declare a `Collection` type such that it can only contain
+(for example) `String` elements. If you use Spring to dependency-inject a
+strongly-typed `Collection` into a bean, you can take advantage of Spring's
+type-conversion support such that the elements of your strongly-typed `Collection`
+instances are converted to the appropriate type prior to being added to the `Collection`.
+The following Java class and bean definition show how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SomeClass {
+
+		private Map<String, Float> accounts;
+
+		public void setAccounts(Map<String, Float> accounts) {
+			this.accounts = accounts;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+class SomeClass {
+	lateinit var accounts: Map<String, Float>
+}
+----
+======
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<bean id="something" class="x.y.SomeClass">
+			<property name="accounts">
+				<map>
+					<entry key="one" value="9.99"/>
+					<entry key="two" value="2.75"/>
+					<entry key="six" value="3.99"/>
+				</map>
+			</property>
+		</bean>
+	</beans>
+----
+
+When the `accounts` property of the `something` bean is prepared for injection, the generics
+information about the element type of the strongly-typed `Map<String, Float>` is
+available by reflection. Thus, Spring's type conversion infrastructure recognizes the
+various value elements as being of type `Float`, and the string values (`9.99`, `2.75`, and
+`3.99`) are converted into an actual `Float` type.
+
+
+[[beans-null-element]]
+== Null and Empty String Values
+
+Spring treats empty arguments for properties and the like as empty `Strings`. The
+following XML-based configuration metadata snippet sets the `email` property to the empty
+`String` value ("").
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="ExampleBean">
+		<property name="email" value=""/>
+	</bean>
+----
+
+The preceding example is equivalent to the following Java code:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	exampleBean.setEmail("");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	exampleBean.email = ""
+----
+======
+
+
+The `<null/>` element handles `null` values. The following listing shows an example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="ExampleBean">
+		<property name="email">
+			<null/>
+		</property>
+	</bean>
+----
+
+The preceding configuration is equivalent to the following Java code:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	exampleBean.setEmail(null);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	exampleBean.email = null
+----
+======
+
+
+[[beans-p-namespace]]
+== XML Shortcut with the p-namespace
+
+The p-namespace lets you use the `bean` element's attributes (instead of nested
+`<property/>` elements) to describe your property values collaborating beans, or both.
+
+Spring supports extensible configuration formats xref:core/appendix/xsd-schemas.adoc[with namespaces],
+which are based on an XML Schema definition. The `beans` configuration format discussed in
+this chapter is defined in an XML Schema document. However, the p-namespace is not defined
+in an XSD file and exists only in the core of Spring.
+
+The following example shows two XML snippets (the first uses
+standard XML format and the second uses the p-namespace) that resolve to the same result:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:p="http://www.springframework.org/schema/p"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+		<bean name="classic" class="com.example.ExampleBean">
+			<property name="email" value="someone@somewhere.com"/>
+		</bean>
+
+		<bean name="p-namespace" class="com.example.ExampleBean"
+			p:email="someone@somewhere.com"/>
+	</beans>
+----
+
+The example shows an attribute in the p-namespace called `email` in the bean definition.
+This tells Spring to include a property declaration. As previously mentioned, the
+p-namespace does not have a schema definition, so you can set the name of the attribute
+to the property name.
+
+This next example includes two more bean definitions that both have a reference to
+another bean:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:p="http://www.springframework.org/schema/p"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+		<bean name="john-classic" class="com.example.Person">
+			<property name="name" value="John Doe"/>
+			<property name="spouse" ref="jane"/>
+		</bean>
+
+		<bean name="john-modern"
+			class="com.example.Person"
+			p:name="John Doe"
+			p:spouse-ref="jane"/>
+
+		<bean name="jane" class="com.example.Person">
+			<property name="name" value="Jane Doe"/>
+		</bean>
+	</beans>
+----
+
+This example includes not only a property value using the p-namespace
+but also uses a special format to declare property references. Whereas the first bean
+definition uses `<property name="spouse" ref="jane"/>` to create a reference from bean
+`john` to bean `jane`, the second bean definition uses `p:spouse-ref="jane"` as an
+attribute to do the exact same thing. In this case, `spouse` is the property name,
+whereas the `-ref` part indicates that this is not a straight value but rather a
+reference to another bean.
+
+NOTE: The p-namespace is not as flexible as the standard XML format. For example, the format
+for declaring property references clashes with properties that end in `Ref`, whereas the
+standard XML format does not. We recommend that you choose your approach carefully and
+communicate this to your team members to avoid producing XML documents that use all
+three approaches at the same time.
+
+
+[[beans-c-namespace]]
+== XML Shortcut with the c-namespace
+
+Similar to the xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-p-namespace[XML Shortcut with the p-namespace], the c-namespace, introduced in Spring
+3.1, allows inlined attributes for configuring the constructor arguments rather
+then nested `constructor-arg` elements.
+
+The following example uses the `c:` namespace to do the same thing as the from
+xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[Constructor-based Dependency Injection]:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:c="http://www.springframework.org/schema/c"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+		<bean id="beanTwo" class="x.y.ThingTwo"/>
+		<bean id="beanThree" class="x.y.ThingThree"/>
+
+		<!-- traditional declaration with optional argument names -->
+		<bean id="beanOne" class="x.y.ThingOne">
+			<constructor-arg name="thingTwo" ref="beanTwo"/>
+			<constructor-arg name="thingThree" ref="beanThree"/>
+			<constructor-arg name="email" value="something@somewhere.com"/>
+		</bean>
+
+		<!-- c-namespace declaration with argument names -->
+		<bean id="beanOne" class="x.y.ThingOne" c:thingTwo-ref="beanTwo"
+			c:thingThree-ref="beanThree" c:email="something@somewhere.com"/>
+
+	</beans>
+----
+
+The `c:` namespace uses the same conventions as the `p:` one (a trailing `-ref` for
+bean references) for setting the constructor arguments by their names. Similarly,
+it needs to be declared in the XML file even though it is not defined in an XSD schema
+(it exists inside the Spring core).
+
+For the rare cases where the constructor argument names are not available (usually if
+the bytecode was compiled without debugging information), you can use fallback to the
+argument indexes, as follows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<!-- c-namespace index declaration -->
+	<bean id="beanOne" class="x.y.ThingOne" c:_0-ref="beanTwo" c:_1-ref="beanThree"
+		c:_2="something@somewhere.com"/>
+----
+
+NOTE: Due to the XML grammar, the index notation requires the presence of the leading `_`,
+as XML attribute names cannot start with a number (even though some IDEs allow it).
+A corresponding index notation is also available for `<constructor-arg>` elements but
+not commonly used since the plain order of declaration is usually sufficient there.
+
+In practice, the constructor resolution
+xref:core/beans/dependencies/factory-collaborators.adoc#beans-factory-ctor-arguments-resolution[mechanism] is quite efficient in matching
+arguments, so unless you really need to, we recommend using the name notation
+throughout your configuration.
+
+
+[[beans-compound-property-names]]
+== Compound Property Names
+
+You can use compound or nested property names when you set bean properties, as long as
+all components of the path except the final property name are not `null`. Consider the
+following bean definition:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="something" class="things.ThingOne">
+		<property name="fred.bob.sammy" value="123" />
+	</bean>
+----
+
+The `something` bean has a `fred` property, which has a `bob` property, which has a `sammy`
+property, and that final `sammy` property is being set to a value of `123`. In order for
+this to work, the `fred` property of `something` and the `bob` property of `fred` must not
+be `null` after the bean is constructed. Otherwise, a `NullPointerException` is thrown.
+
+
+

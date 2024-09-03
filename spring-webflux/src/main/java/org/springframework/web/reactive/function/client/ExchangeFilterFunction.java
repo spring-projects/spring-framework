@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
 
 /**
  * Represents a function that filters an {@linkplain ExchangeFunction exchange function}.
+ *
  * <p>The filter is executed when a {@code Subscriber} subscribes to the
  * {@code Publisher} returned by the {@code WebClient}.
  *
@@ -35,15 +36,13 @@ public interface ExchangeFilterFunction {
 
 	/**
 	 * Apply this filter to the given request and exchange function.
-	 * <p>The given {@linkplain ExchangeFunction} represents the next entity
-	 * in the chain, to be invoked via
-	 * {@linkplain ExchangeFunction#exchange(ClientRequest) invoked} in order to
-	 * proceed with the exchange, or not invoked to shortcut the chain.
-	 *
+	 * <p>The given {@link ExchangeFunction} represents the next entity in the
+	 * chain, to be invoked via {@link ExchangeFunction#exchange} in order to
+	 * proceed with the exchange, or not invoked to short-circuit the chain.
 	 * <p><strong>Note:</strong> When a filter handles the response after the
-	 * call to {@link ExchangeFunction#exchange}, extra care must be taken to
-	 * always consume its content or otherwise propagate it downstream for
-	 * further handling, for example by the {@link WebClient}. Please, see the
+	 * call to {@code ExchangeFunction.exchange(...)}, extra care must be taken
+	 * to always consume its content or otherwise propagate it downstream for
+	 * further handling, for example by the {@link WebClient}. Please see the
 	 * reference documentation for more details on this.
 	 * @param request the current request
 	 * @param next the next exchange function in the chain
@@ -52,8 +51,8 @@ public interface ExchangeFilterFunction {
 	Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next);
 
 	/**
-	 * Return a composed filter function that first applies this filter, and
-	 * then applies the given {@code "after"} filter.
+	 * Return a composed filter function that first applies this filter and
+	 * then applies the given {@code afterFilter}.
 	 * @param afterFilter the filter to apply after this filter
 	 * @return the composed filter
 	 */

@@ -16,9 +16,12 @@
 
 package org.springframework.http.server.reactive.observation;
 
+import java.util.Set;
+
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.observation.ServerHttpObservationDocumentation.HighCardinalityKeyNames;
@@ -54,6 +57,8 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
 
 	private static final KeyValue HTTP_URL_UNKNOWN = KeyValue.of(HighCardinalityKeyNames.HTTP_URL, "UNKNOWN");
+
+	private static final Set<HttpMethod> HTTP_METHODS = Set.of(HttpMethod.values());
 
 
 	private final String name;
@@ -102,13 +107,17 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 	}
 
 	protected KeyValue method(ServerRequestObservationContext context) {
-		return (context.getCarrier() != null) ?
-				KeyValue.of(LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod().name()) :
-				METHOD_UNKNOWN;
+		if (context.getCarrier() != null) {
+			HttpMethod method = context.getCarrier().getMethod();
+			if (HTTP_METHODS.contains(method)) {
+				return KeyValue.of(LowCardinalityKeyNames.METHOD, method.name());
+			}
+		}
+		return METHOD_UNKNOWN;
 	}
 
 	protected KeyValue status(ServerRequestObservationContext context) {
-		if (context.isConnectionAborted()) {
+		if (context.isConnectionAborted() && (context.getResponse() == null || !context.getResponse().isCommitted())) {
 			return STATUS_UNKNOWN;
 		}
 		return (context.getResponse() != null && context.getResponse().getStatusCode() != null) ?

@@ -168,30 +168,20 @@ final class ProfilesParser {
 		}
 
 		@Override
-		public int hashCode() {
-			return this.expressions.hashCode();
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof ParsedProfiles that &&
+					this.expressions.equals(that.expressions)));
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			ParsedProfiles that = (ParsedProfiles) obj;
-			return this.expressions.equals(that.expressions);
+		public int hashCode() {
+			return this.expressions.hashCode();
 		}
 
 		@Override
 		public String toString() {
 			return StringUtils.collectionToDelimitedString(this.expressions, " or ");
 		}
-
 	}
 
 }

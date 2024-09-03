@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * <p>Note that this property is ignored when
 	 * {@linkplain #setStreaming(boolean) streaming} is enabled, or when
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize} is set to -1.
-	 * @see Schedulers#newBoundedElastic
+	 * @see Schedulers#boundedElastic
 	 */
 	public void setBlockingOperationScheduler(Scheduler blockingOperationScheduler) {
 		Assert.notNull(blockingOperationScheduler, "'blockingOperationScheduler' must not be null");

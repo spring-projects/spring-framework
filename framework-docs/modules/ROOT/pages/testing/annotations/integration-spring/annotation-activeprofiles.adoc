@@ -1,0 +1,79 @@
+[[spring-testing-annotation-activeprofiles]]
+= `@ActiveProfiles`
+
+`@ActiveProfiles` is a class-level annotation that is used to declare which bean
+definition profiles should be active when loading an `ApplicationContext` for an
+integration test.
+
+The following example indicates that the `dev` profile should be active:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration
+	@ActiveProfiles("dev") // <1>
+	class DeveloperTests {
+		// class body...
+	}
+----
+<1> Indicate that the `dev` profile should be active.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration
+	@ActiveProfiles("dev") // <1>
+	class DeveloperTests {
+		// class body...
+	}
+----
+<1> Indicate that the `dev` profile should be active.
+======
+
+
+The following example indicates that both the `dev` and the `integration` profiles should
+be active:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration
+	@ActiveProfiles({"dev", "integration"}) // <1>
+	class DeveloperIntegrationTests {
+		// class body...
+	}
+----
+<1> Indicate that the `dev` and `integration` profiles should be active.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration
+	@ActiveProfiles(["dev", "integration"]) // <1>
+	class DeveloperIntegrationTests {
+		// class body...
+	}
+----
+<1> Indicate that the `dev` and `integration` profiles should be active.
+======
+
+
+NOTE: `@ActiveProfiles` provides support for inheriting active bean definition profiles
+declared by superclasses and enclosing classes by default. You can also resolve active
+bean definition profiles programmatically by implementing a custom
+xref:testing/testcontext-framework/ctx-management/env-profiles.adoc#testcontext-ctx-management-env-profiles-ActiveProfilesResolver[`ActiveProfilesResolver`]
+and registering it by using the `resolver` attribute of `@ActiveProfiles`.
+
+See xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[Context Configuration with Environment Profiles],
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration], and the
+{api-spring-framework}/test/context/ActiveProfiles.html[`@ActiveProfiles`] javadoc for
+examples and further details.
+

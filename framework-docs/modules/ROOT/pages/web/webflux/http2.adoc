@@ -1,0 +1,9 @@
+[[webflux-http2]]
+= HTTP/2
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webmvc/mvc-http2.adoc[See equivalent in the Servlet stack]#
+
+HTTP/2 is supported with Reactor Netty, Tomcat, Jetty, and Undertow. However, there are
+considerations related to server configuration. For more details, see the
+https://github.com/spring-projects/spring-framework/wiki/HTTP-2-support[HTTP/2 wiki page].

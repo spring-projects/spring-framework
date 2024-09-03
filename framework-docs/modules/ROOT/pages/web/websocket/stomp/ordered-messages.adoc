@@ -1,0 +1,51 @@
+[[websocket-stomp-ordered-messages]]
+= Order of Messages
+
+Messages from the broker are published to the `clientOutboundChannel`, from where they are
+written to WebSocket sessions. As the channel is backed by a `ThreadPoolExecutor`, messages
+are processed in different threads, and the resulting sequence received by the client may
+not match the exact order of publication.
+
+If this is an issue, enable the `setPreservePublishOrder` flag, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class MyConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		protected void configureMessageBroker(MessageBrokerRegistry registry) {
+			// ...
+			registry.setPreservePublishOrder(true);
+		}
+
+	}
+----
+
+The following example shows the XML configuration equivalent of the preceding example:
+
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<websocket:message-broker preserve-publish-order="true">
+			<!-- ... -->
+		</websocket:message-broker>
+
+	</beans>
+----
+
+When the flag is set, messages within the same client session are published to the
+`clientOutboundChannel` one at a time, so that the order of publication is guaranteed.
+Note that this incurs a small performance overhead, so you should enable it only if it is required.
+
+
+

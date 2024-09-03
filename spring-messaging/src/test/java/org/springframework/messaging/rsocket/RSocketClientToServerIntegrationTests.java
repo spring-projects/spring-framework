@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Server-side handling of RSocket requests.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class RSocketClientToServerIntegrationTests {
 
@@ -104,6 +105,7 @@ public class RSocketClientToServerIntegrationTests {
 	@Test
 	public void fireAndForget() {
 		Flux.range(1, 3)
+				.delayElements(Duration.ofMillis(10))
 				.concatMap(i -> requester.route("receive").data("Hello " + i).send())
 				.blockLast();
 
@@ -111,7 +113,7 @@ public class RSocketClientToServerIntegrationTests {
 				.expectNext("Hello 1")
 				.expectNext("Hello 2")
 				.expectNext("Hello 3")
-				.thenAwait(Duration.ofMillis(50))
+				.thenAwait(Duration.ofMillis(10))
 				.thenCancel()
 				.verify(Duration.ofSeconds(5));
 
@@ -173,13 +175,14 @@ public class RSocketClientToServerIntegrationTests {
 	@Test
 	public void metadataPush() {
 		Flux.just("bar", "baz")
+				.delayElements(Duration.ofMillis(10))
 				.concatMap(s -> requester.route("foo-updates").metadata(s, FOO_MIME_TYPE).sendMetadata())
 				.blockLast();
 
 		StepVerifier.create(context.getBean(ServerController.class).metadataPushPayloads.asFlux())
 				.expectNext("bar")
 				.expectNext("baz")
-				.thenAwait(Duration.ofMillis(50))
+				.thenAwait(Duration.ofMillis(10))
 				.thenCancel()
 				.verify(Duration.ofSeconds(5));
 

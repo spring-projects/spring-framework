@@ -1,0 +1,284 @@
+[[beans-java-instantiating-container]]
+= Instantiating the Spring Container by Using `AnnotationConfigApplicationContext`
+
+The following sections document Spring's `AnnotationConfigApplicationContext`, introduced in Spring
+3.0. This versatile `ApplicationContext` implementation is capable of accepting not only
+`@Configuration` classes as input but also plain `@Component` classes and classes
+annotated with JSR-330 metadata.
+
+When `@Configuration` classes are provided as input, the `@Configuration` class itself
+is registered as a bean definition and all declared `@Bean` methods within the class
+are also registered as bean definitions.
+
+When `@Component` and JSR-330 classes are provided, they are registered as bean
+definitions, and it is assumed that DI metadata such as `@Autowired` or `@Inject` are
+used within those classes where necessary.
+
+
+[[beans-java-instantiating-container-constructor]]
+== Simple Construction
+
+In much the same way that Spring XML files are used as input when instantiating a
+`ClassPathXmlApplicationContext`, you can use `@Configuration` classes as input when
+instantiating an `AnnotationConfigApplicationContext`. This allows for completely
+XML-free usage of the Spring container, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+		MyService myService = ctx.getBean(MyService.class);
+		myService.doStuff();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.beans.factory.getBean
+
+	fun main() {
+		val ctx = AnnotationConfigApplicationContext(AppConfig::class.java)
+		val myService = ctx.getBean<MyService>()
+		myService.doStuff()
+	}
+----
+======
+
+As mentioned earlier, `AnnotationConfigApplicationContext` is not limited to working only
+with `@Configuration` classes. Any `@Component` or JSR-330 annotated class may be supplied
+as input to the constructor, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(MyServiceImpl.class, Dependency1.class, Dependency2.class);
+		MyService myService = ctx.getBean(MyService.class);
+		myService.doStuff();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.beans.factory.getBean
+
+	fun main() {
+		val ctx = AnnotationConfigApplicationContext(MyServiceImpl::class.java, Dependency1::class.java, Dependency2::class.java)
+		val myService = ctx.getBean<MyService>()
+		myService.doStuff()
+	}
+----
+======
+
+The preceding example assumes that `MyServiceImpl`, `Dependency1`, and `Dependency2` use Spring
+dependency injection annotations such as `@Autowired`.
+
+
+[[beans-java-instantiating-container-register]]
+== Building the Container Programmatically by Using `register(Class<?>...)`
+
+You can instantiate an `AnnotationConfigApplicationContext` by using a no-arg constructor
+and then configure it by using the `register()` method. This approach is particularly useful
+when programmatically building an `AnnotationConfigApplicationContext`. The following
+example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public static void main(String[] args) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(AppConfig.class, OtherConfig.class);
+		ctx.register(AdditionalConfig.class);
+		ctx.refresh();
+		MyService myService = ctx.getBean(MyService.class);
+		myService.doStuff();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.beans.factory.getBean
+
+	fun main() {
+		val ctx = AnnotationConfigApplicationContext()
+		ctx.register(AppConfig::class.java, OtherConfig::class.java)
+		ctx.register(AdditionalConfig::class.java)
+		ctx.refresh()
+		val myService = ctx.getBean<MyService>()
+		myService.doStuff()
+	}
+----
+======
+
+
+[[beans-java-instantiating-container-scan]]
+== Enabling Component Scanning with `scan(String...)`
+
+To enable component scanning, you can annotate your `@Configuration` class as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "com.acme") // <1>
+	public class AppConfig  {
+		// ...
+	}
+----
+<1> This annotation enables component scanning.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@ComponentScan(basePackages = ["com.acme"]) // <1>
+	class AppConfig  {
+		// ...
+	}
+----
+<1> This annotation enables component scanning.
+======
+
+
+[TIP]
+=====
+Experienced Spring users may be familiar with the XML declaration equivalent from
+Spring's `context:` namespace, shown in the following example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<context:component-scan base-package="com.acme"/>
+	</beans>
+----
+=====
+
+In the preceding example, the `com.acme` package is scanned to look for any
+`@Component`-annotated classes, and those classes are registered as Spring bean
+definitions within the container. `AnnotationConfigApplicationContext` exposes the
+`scan(String...)` method to allow for the same component-scanning functionality, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public static void main(String[] args) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.scan("com.acme");
+		ctx.refresh();
+		MyService myService = ctx.getBean(MyService.class);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	fun main() {
+		val ctx = AnnotationConfigApplicationContext()
+		ctx.scan("com.acme")
+		ctx.refresh()
+		val myService = ctx.getBean<MyService>()
+	}
+----
+======
+
+NOTE: Remember that `@Configuration` classes are xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotated]
+with `@Component`, so they are candidates for component-scanning. In the preceding example,
+assuming that `AppConfig` is declared within the `com.acme` package (or any package
+underneath), it is picked up during the call to `scan()`. Upon `refresh()`, all its `@Bean`
+methods are processed and registered as bean definitions within the container.
+
+
+[[beans-java-instantiating-container-web]]
+== Support for Web Applications with `AnnotationConfigWebApplicationContext`
+
+A `WebApplicationContext` variant of `AnnotationConfigApplicationContext` is available
+with `AnnotationConfigWebApplicationContext`. You can use this implementation when
+configuring the Spring `ContextLoaderListener` servlet listener, Spring MVC
+`DispatcherServlet`, and so forth. The following `web.xml` snippet configures a typical
+Spring MVC web application (note the use of the `contextClass` context-param and
+init-param):
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<web-app>
+		<!-- Configure ContextLoaderListener to use AnnotationConfigWebApplicationContext
+			instead of the default XmlWebApplicationContext -->
+		<context-param>
+			<param-name>contextClass</param-name>
+			<param-value>
+				org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+			</param-value>
+		</context-param>
+
+		<!-- Configuration locations must consist of one or more comma- or space-delimited
+			fully-qualified @Configuration classes. Fully-qualified packages may also be
+			specified for component-scanning -->
+		<context-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>com.acme.AppConfig</param-value>
+		</context-param>
+
+		<!-- Bootstrap the root application context as usual using ContextLoaderListener -->
+		<listener>
+			<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+		</listener>
+
+		<!-- Declare a Spring MVC DispatcherServlet as usual -->
+		<servlet>
+			<servlet-name>dispatcher</servlet-name>
+			<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+			<!-- Configure DispatcherServlet to use AnnotationConfigWebApplicationContext
+				instead of the default XmlWebApplicationContext -->
+			<init-param>
+				<param-name>contextClass</param-name>
+				<param-value>
+					org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+				</param-value>
+			</init-param>
+			<!-- Again, config locations must consist of one or more comma- or space-delimited
+				and fully-qualified @Configuration classes -->
+			<init-param>
+				<param-name>contextConfigLocation</param-name>
+				<param-value>com.acme.web.MvcConfig</param-value>
+			</init-param>
+		</servlet>
+
+		<!-- map all requests for /app/* to the dispatcher servlet -->
+		<servlet-mapping>
+			<servlet-name>dispatcher</servlet-name>
+			<url-pattern>/app/*</url-pattern>
+		</servlet-mapping>
+	</web-app>
+----
+
+NOTE: For programmatic use cases, a `GenericWebApplicationContext` can be used as an
+alternative to `AnnotationConfigWebApplicationContext`. See the
+{api-spring-framework}/web/context/support/GenericWebApplicationContext.html[`GenericWebApplicationContext`]
+javadoc for details.
+
+

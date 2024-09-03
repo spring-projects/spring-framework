@@ -256,6 +256,16 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
+	 * Whether the request mapping has an empty URL path mapping.
+	 * @since 6.0.10
+	 */
+	public boolean isEmptyMapping() {
+		RequestCondition<?> condition = getActivePatternsCondition();
+		return (condition instanceof PathPatternsRequestCondition pprc ?
+				pprc.isEmptyPathMapping() : ((PatternsRequestCondition) condition).isEmptyPathMapping());
+	}
+
+	/**
 	 * Return the HTTP request methods of this {@link RequestMappingInfo};
 	 * or instance with 0 request methods (never {@code null}).
 	 */
@@ -465,19 +475,14 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof RequestMappingInfo otherInfo)) {
-			return false;
-		}
-		return (getActivePatternsCondition().equals(otherInfo.getActivePatternsCondition()) &&
-				this.methodsCondition.equals(otherInfo.methodsCondition) &&
-				this.paramsCondition.equals(otherInfo.paramsCondition) &&
-				this.headersCondition.equals(otherInfo.headersCondition) &&
-				this.consumesCondition.equals(otherInfo.consumesCondition) &&
-				this.producesCondition.equals(otherInfo.producesCondition) &&
-				this.customConditionHolder.equals(otherInfo.customConditionHolder));
+		return (this == other || (other instanceof RequestMappingInfo that &&
+				getActivePatternsCondition().equals(that.getActivePatternsCondition()) &&
+				this.methodsCondition.equals(that.methodsCondition) &&
+				this.paramsCondition.equals(that.paramsCondition) &&
+				this.headersCondition.equals(that.headersCondition) &&
+				this.consumesCondition.equals(that.consumesCondition) &&
+				this.producesCondition.equals(that.producesCondition) &&
+				this.customConditionHolder.equals(that.customConditionHolder)));
 	}
 
 	@Override

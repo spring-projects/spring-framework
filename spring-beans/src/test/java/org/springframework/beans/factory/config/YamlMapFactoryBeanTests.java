@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,8 +99,7 @@ public class YamlMapFactoryBeanTests {
 		assertThat(map).hasSize(1);
 		assertThat(map.containsKey("foo")).isTrue();
 		Object object = map.get("foo");
-		boolean condition = object instanceof LinkedHashMap;
-		assertThat(condition).isTrue();
+		assertThat(object instanceof LinkedHashMap).isTrue();
 		@SuppressWarnings("unchecked")
 		Map<String, Object> sub = (Map<String, Object>) object;
 		assertThat(sub.containsKey("key1.key2")).isTrue();
@@ -115,8 +114,7 @@ public class YamlMapFactoryBeanTests {
 		assertThat(map).hasSize(1);
 		assertThat(map.containsKey("foo")).isTrue();
 		Object object = map.get("foo");
-		boolean condition = object instanceof LinkedHashMap;
-		assertThat(condition).isTrue();
+		assertThat(object instanceof LinkedHashMap).isTrue();
 		@SuppressWarnings("unchecked")
 		Map<String, Object> sub = (Map<String, Object>) object;
 		assertThat(sub).hasSize(1);

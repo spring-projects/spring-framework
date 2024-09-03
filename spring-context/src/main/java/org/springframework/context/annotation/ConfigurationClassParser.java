@@ -211,8 +211,8 @@ class ConfigurationClassParser {
 	}
 
 	List<PropertySourceDescriptor> getPropertySourceDescriptors() {
-		return (this.propertySourceRegistry != null ? this.propertySourceRegistry.getDescriptors()
-				: Collections.emptyList());
+		return (this.propertySourceRegistry != null ? this.propertySourceRegistry.getDescriptors() :
+				Collections.emptyList());
 	}
 
 	protected void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter) throws IOException {
@@ -403,11 +403,14 @@ class ConfigurationClassParser {
 						this.metadataReaderFactory.getMetadataReader(original.getClassName()).getAnnotationMetadata();
 				Set<MethodMetadata> asmMethods = asm.getAnnotatedMethods(Bean.class.getName());
 				if (asmMethods.size() >= beanMethods.size()) {
+					Set<MethodMetadata> candidateMethods = new LinkedHashSet<>(beanMethods);
 					Set<MethodMetadata> selectedMethods = new LinkedHashSet<>(asmMethods.size());
 					for (MethodMetadata asmMethod : asmMethods) {
-						for (MethodMetadata beanMethod : beanMethods) {
+						for (Iterator<MethodMetadata> it = candidateMethods.iterator(); it.hasNext();) {
+							MethodMetadata beanMethod = it.next();
 							if (beanMethod.getMethodName().equals(asmMethod.getMethodName())) {
 								selectedMethods.add(beanMethod);
+								it.remove();
 								break;
 							}
 						}
@@ -1002,8 +1005,8 @@ class ConfigurationClassParser {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			return (this == obj || (obj instanceof SourceClass that &&
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof SourceClass that &&
 					this.metadata.getClassName().equals(that.metadata.getClassName())));
 		}
 

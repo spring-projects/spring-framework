@@ -45,17 +45,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  * @author Juergen Hoeller
  */
-public class ConnectionFactoryUtilsUnitTests {
+class ConnectionFactoryUtilsUnitTests {
 
 	@Test
-	public void shouldTranslateTransientResourceException() {
+	void shouldTranslateTransientResourceException() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcTransientResourceException(""));
 		assertThat(exception).isExactlyInstanceOf(TransientDataAccessResourceException.class);
 	}
 
 	@Test
-	public void shouldTranslateRollbackException() {
+	void shouldTranslateRollbackException() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcRollbackException());
 		assertThat(exception).isExactlyInstanceOf(PessimisticLockingFailureException.class);
@@ -66,28 +66,28 @@ public class ConnectionFactoryUtilsUnitTests {
 	}
 
 	@Test
-	public void shouldTranslateTimeoutException() {
+	void shouldTranslateTimeoutException() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcTimeoutException());
 		assertThat(exception).isExactlyInstanceOf(QueryTimeoutException.class);
 	}
 
 	@Test
-	public void shouldNotTranslateUnknownExceptions() {
+	void shouldNotTranslateUnknownExceptions() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
-				new MyTransientExceptions());
+				new MyTransientException());
 		assertThat(exception).isExactlyInstanceOf(UncategorizedR2dbcException.class);
 	}
 
 	@Test
-	public void shouldTranslateNonTransientResourceException() {
+	void shouldTranslateNonTransientResourceException() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcNonTransientResourceException());
 		assertThat(exception).isExactlyInstanceOf(DataAccessResourceFailureException.class);
 	}
 
 	@Test
-	public void shouldTranslateIntegrityViolationException() {
+	void shouldTranslateIntegrityViolationException() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcDataIntegrityViolationException());
 		assertThat(exception).isExactlyInstanceOf(DataIntegrityViolationException.class);
@@ -98,37 +98,41 @@ public class ConnectionFactoryUtilsUnitTests {
 
 		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcDataIntegrityViolationException("reason", "23000", 1));
-		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
+		assertThat(exception).as("Oracle").isExactlyInstanceOf(DuplicateKeyException.class);
+
+		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
+				new R2dbcDataIntegrityViolationException("reason", "23000", 301));
+		assertThat(exception).as("SAP HANA").isExactlyInstanceOf(DuplicateKeyException.class);
 
 		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcDataIntegrityViolationException("reason", "23000", 1062));
-		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
+		assertThat(exception).as("MySQL/MariaDB").isExactlyInstanceOf(DuplicateKeyException.class);
 
 		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcDataIntegrityViolationException("reason", "23000", 2601));
-		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
+		assertThat(exception).as("MS SQL Server").isExactlyInstanceOf(DuplicateKeyException.class);
 
 		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcDataIntegrityViolationException("reason", "23000", 2627));
-		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
+		assertThat(exception).as("MS SQL Server").isExactlyInstanceOf(DuplicateKeyException.class);
 	}
 
 	@Test
-	public void shouldTranslatePermissionDeniedException() {
+	void shouldTranslatePermissionDeniedException() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcPermissionDeniedException());
 		assertThat(exception).isExactlyInstanceOf(PermissionDeniedDataAccessException.class);
 	}
 
 	@Test
-	public void shouldTranslateBadSqlGrammarException() {
+	void shouldTranslateBadSqlGrammarException() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcBadGrammarException());
 		assertThat(exception).isExactlyInstanceOf(BadSqlGrammarException.class);
 	}
 
 	@Test
-	public void messageGeneration() {
+	void messageGeneration() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("TASK",
 				"SOME-SQL", new R2dbcTransientResourceException("MESSAGE"));
 		assertThat(exception).isExactlyInstanceOf(
@@ -136,7 +140,7 @@ public class ConnectionFactoryUtilsUnitTests {
 	}
 
 	@Test
-	public void messageGenerationNullSQL() {
+	void messageGenerationNullSQL() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("TASK", null,
 				new R2dbcTransientResourceException("MESSAGE"));
 		assertThat(exception).isExactlyInstanceOf(
@@ -144,7 +148,7 @@ public class ConnectionFactoryUtilsUnitTests {
 	}
 
 	@Test
-	public void messageGenerationNullMessage() {
+	void messageGenerationNullMessage() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("TASK",
 				"SOME-SQL", new R2dbcTransientResourceException());
 		assertThat(exception).isExactlyInstanceOf(
@@ -153,7 +157,7 @@ public class ConnectionFactoryUtilsUnitTests {
 
 
 	@SuppressWarnings("serial")
-	private static class MyTransientExceptions extends R2dbcException {
+	private static class MyTransientException extends R2dbcException {
 	}
 
 }

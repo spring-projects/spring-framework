@@ -172,7 +172,7 @@ class JdbcNamespaceIntegrationTests {
 	}
 
 	private void assertNumRowsInTestTable(JdbcTemplate template, int count) {
-		assertThat(template.queryForObject("select count(*) from T_TEST", Integer.class).intValue()).isEqualTo(count);
+		assertThat(template.queryForObject("select count(*) from T_TEST", Integer.class)).isEqualTo(count);
 	}
 
 	private void assertCorrectSetup(String file, String... dataSources) {

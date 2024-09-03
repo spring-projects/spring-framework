@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,19 @@ import org.springframework.util.Assert;
  */
 public class ConnectionHolder extends ResourceHolderSupport {
 
+	/**
+	 * Prefix for savepoint names.
+	 * @since 6.0.10
+	 */
+	static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
+
+
 	@Nullable
 	private Connection currentConnection;
 
 	private boolean transactionActive;
+
+	private int savepointCounter = 0;
 
 
 	/**
@@ -110,6 +119,17 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	public Connection getConnection() {
 		Assert.state(this.currentConnection != null, "Active Connection is required");
 		return this.currentConnection;
+	}
+
+	/**
+	 * Create a new savepoint for the current {@link Connection},
+	 * using generated savepoint names that are unique for the Connection.
+	 * @return the name of the new savepoint
+	 * @since 6.0.10
+	 */
+	String nextSavepoint() {
+		this.savepointCounter++;
+		return SAVEPOINT_NAME_PREFIX + this.savepointCounter;
 	}
 
 	/**

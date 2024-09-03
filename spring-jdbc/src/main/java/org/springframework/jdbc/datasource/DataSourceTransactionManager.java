@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,49 +35,52 @@ import org.springframework.transaction.support.TransactionSynchronizationUtils;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.transaction.PlatformTransactionManager}
- * implementation for a single JDBC {@link javax.sql.DataSource}. This class is
- * capable of working in any environment with any JDBC driver, as long as the setup
- * uses a {@code javax.sql.DataSource} as its {@code Connection} factory mechanism.
- * Binds a JDBC Connection from the specified DataSource to the current thread,
- * potentially allowing for one thread-bound Connection per DataSource.
+ * {@link org.springframework.transaction.PlatformTransactionManager} implementation
+ * for a single JDBC {@link javax.sql.DataSource}. This class is capable of working
+ * in any environment with any JDBC driver, as long as the setup uses a
+ * {@code javax.sql.DataSource} as its {@code Connection} factory mechanism.
+ * Binds a JDBC {@code Connection} from the specified {@code DataSource} to the
+ * current thread, potentially allowing for one thread-bound {@code Connection}
+ * per {@code DataSource}.
  *
- * <p><b>Note: The DataSource that this transaction manager operates on needs
- * to return independent Connections.</b> The Connections may come from a pool
- * (the typical case), but the DataSource must not return thread-scoped /
- * request-scoped Connections or the like. This transaction manager will
- * associate Connections with thread-bound transactions itself, according
- * to the specified propagation behavior. It assumes that a separate,
- * independent Connection can be obtained even during an ongoing transaction.
+ * <p><b>Note: The {@code DataSource} that this transaction manager operates on
+ * needs to return independent {@code Connection}s.</b> The {@code Connection}s
+ * typically come from a connection pool but the {@code DataSource} must not return
+ * specifically scoped or constrained {@code Connection}s. This transaction manager
+ * will associate {@code Connection}s with thread-bound transactions, according
+ * to the specified propagation behavior. It assumes that a separate, independent
+ * {@code Connection} can be obtained even during an ongoing transaction.
  *
- * <p>Application code is required to retrieve the JDBC Connection via
+ * <p>Application code is required to retrieve the JDBC {@code Connection} via
  * {@link DataSourceUtils#getConnection(DataSource)} instead of a standard
- * Jakarta EE-style {@link DataSource#getConnection()} call. Spring classes such as
+ * EE-style {@link DataSource#getConnection()} call. Spring classes such as
  * {@link org.springframework.jdbc.core.JdbcTemplate} use this strategy implicitly.
  * If not used in combination with this transaction manager, the
  * {@link DataSourceUtils} lookup strategy behaves exactly like the native
- * DataSource lookup; it can thus be used in a portable fashion.
+ * {@code DataSource} lookup; it can thus be used in a portable fashion.
  *
  * <p>Alternatively, you can allow application code to work with the standard
- * Jakarta EE-style lookup pattern {@link DataSource#getConnection()}, for example for
- * legacy code that is not aware of Spring at all. In that case, define a
- * {@link TransactionAwareDataSourceProxy} for your target DataSource, and pass
- * that proxy DataSource to your DAOs, which will automatically participate in
- * Spring-managed transactions when accessing it.
+ * EE-style lookup pattern {@link DataSource#getConnection()}, for example
+ * for legacy code that is not aware of Spring at all. In that case, define a
+ * {@link TransactionAwareDataSourceProxy} for your target {@code DataSource},
+ * and pass that proxy {@code DataSource} to your DAOs which will automatically
+ * participate in Spring-managed transactions when accessing it.
  *
  * <p>Supports custom isolation levels, and timeouts which get applied as
  * appropriate JDBC statement timeouts. To support the latter, application code
  * must either use {@link org.springframework.jdbc.core.JdbcTemplate}, call
- * {@link DataSourceUtils#applyTransactionTimeout} for each created JDBC Statement,
- * or go through a {@link TransactionAwareDataSourceProxy} which will create
- * timeout-aware JDBC Connections and Statements automatically.
+ * {@link DataSourceUtils#applyTransactionTimeout} for each created JDBC
+ * {@code Statement}, or go through a {@link TransactionAwareDataSourceProxy}
+ * which will create timeout-aware JDBC {@code Connection}s and {@code Statement}s
+ * automatically.
  *
  * <p>Consider defining a {@link LazyConnectionDataSourceProxy} for your target
- * DataSource, pointing both this transaction manager and your DAOs to it.
+ * {@code DataSource}, pointing both this transaction manager and your DAOs to it.
  * This will lead to optimized handling of "empty" transactions, i.e. of transactions
- * without any JDBC statements executed. A LazyConnectionDataSourceProxy will not fetch
- * an actual JDBC Connection from the target DataSource until a Statement gets executed,
- * lazily applying the specified transaction settings to the target Connection.
+ * without any JDBC statements executed. A {@code LazyConnectionDataSourceProxy} will
+ * not fetch an actual JDBC {@code Connection} from the target {@code DataSource}
+ * until a {@code Statement} gets executed, lazily applying the specified transaction
+ * settings to the target {@code Connection}.
  *
  * <p>This transaction manager supports nested transactions via the JDBC 3.0
  * {@link java.sql.Savepoint} mechanism. The
@@ -88,9 +91,9 @@ import org.springframework.util.Assert;
  * <p>This transaction manager can be used as a replacement for the
  * {@link org.springframework.transaction.jta.JtaTransactionManager} in the single
  * resource case, as it does not require a container that supports JTA, typically
- * in combination with a locally defined JDBC DataSource (e.g. an Apache Commons
- * DBCP connection pool). Switching between this local strategy and a JTA
- * environment is just a matter of configuration!
+ * in combination with a locally defined JDBC {@code DataSource} (e.g. a Hikari
+ * connection pool). Switching between this local strategy and a JTA environment
+ * is just a matter of configuration!
  *
  * <p>As of 4.3.4, this transaction manager triggers flush callbacks on registered
  * transaction synchronizations (if synchronization is generally active), assuming
@@ -112,6 +115,7 @@ import org.springframework.util.Assert;
  * @see TransactionAwareDataSourceProxy
  * @see LazyConnectionDataSourceProxy
  * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.jdbc.support.JdbcTransactionManager
  */
 @SuppressWarnings("serial")
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager
@@ -124,8 +128,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 
 	/**
-	 * Create a new DataSourceTransactionManager instance.
-	 * A DataSource has to be set to be able to use it.
+	 * Create a new {@code DataSourceTransactionManager} instance.
+	 * A {@code DataSource} has to be set to be able to use it.
 	 * @see #setDataSource
 	 */
 	public DataSourceTransactionManager() {
@@ -133,7 +137,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 	/**
-	 * Create a new DataSourceTransactionManager instance.
+	 * Create a new {@code DataSourceTransactionManager} instance.
 	 * @param dataSource the JDBC DataSource to manage transactions for
 	 */
 	public DataSourceTransactionManager(DataSource dataSource) {
@@ -144,22 +148,22 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 
 	/**
-	 * Set the JDBC DataSource that this instance should manage transactions for.
-	 * <p>This will typically be a locally defined DataSource, for example an
-	 * Apache Commons DBCP connection pool. Alternatively, you can also drive
-	 * transactions for a non-XA J2EE DataSource fetched from JNDI. For an XA
-	 * DataSource, use JtaTransactionManager.
-	 * <p>The DataSource specified here should be the target DataSource to manage
-	 * transactions for, not a TransactionAwareDataSourceProxy. Only data access
-	 * code may work with TransactionAwareDataSourceProxy, while the transaction
-	 * manager needs to work on the underlying target DataSource. If there's
-	 * nevertheless a TransactionAwareDataSourceProxy passed in, it will be
-	 * unwrapped to extract its target DataSource.
-	 * <p><b>The DataSource passed in here needs to return independent Connections.</b>
-	 * The Connections may come from a pool (the typical case), but the DataSource
-	 * must not return thread-scoped / request-scoped Connections or the like.
-	 * @see TransactionAwareDataSourceProxy
-	 * @see org.springframework.transaction.jta.JtaTransactionManager
+	 * Set the JDBC {@code DataSource} that this instance should manage transactions for.
+	 * <p>This will typically be a locally defined {@code DataSource}, for example a
+	 * Hikari connection pool. Alternatively, you can also manage transactions for a
+	 * non-XA {@code DataSource} fetched from JNDI. For an XA {@code DataSource},
+	 * use {@link org.springframework.transaction.jta.JtaTransactionManager} instead.
+	 * <p>The {@code DataSource} specified here should be the target {@code DataSource}
+	 * to manage transactions for, not a {@link TransactionAwareDataSourceProxy}.
+	 * Only data access code may work with {@code TransactionAwareDataSourceProxy} while
+	 * the transaction manager needs to work on the underlying target {@code DataSource}.
+	 * If there is nevertheless a {@code TransactionAwareDataSourceProxy} passed in,
+	 * it will be unwrapped to extract its target {@code DataSource}.
+	 * <p><b>The {@code DataSource} passed in here needs to return independent
+	 * {@code Connection}s.</b> The {@code Connection}s typically come from a
+	 * connection pool but the {@code DataSource} must not return specifically
+	 * scoped or constrained {@code Connection}s, just possibly lazily fetched.
+	 * @see LazyConnectionDataSourceProxy
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
 		if (dataSource instanceof TransactionAwareDataSourceProxy tadsp) {
@@ -174,7 +178,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 	/**
-	 * Return the JDBC DataSource that this instance manages transactions for.
+	 * Return the JDBC {@code DataSource} that this instance manages transactions for.
 	 */
 	@Nullable
 	public DataSource getDataSource() {
@@ -182,7 +186,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 	/**
-	 * Obtain the DataSource for actual use.
+	 * Obtain the {@code DataSource} for actual use.
 	 * @return the DataSource (never {@code null})
 	 * @throws IllegalStateException in case of no DataSource set
 	 * @since 5.0

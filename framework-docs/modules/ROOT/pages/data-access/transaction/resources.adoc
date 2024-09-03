@@ -1,0 +1,18 @@
+[[transaction-resources]]
+= Further Resources
+:page-section-summary-toc: 1
+
+For more information about the Spring Framework's transaction support, see:
+
+* link:++https://www.infoworld.com/article/2077963/distributed-transactions-in-spring--with-and-without-xa.html++[
+  Distributed transactions in Spring, with and without XA] is a JavaWorld presentation in
+  which Spring's David Syer guides you through seven patterns for distributed transactions
+  in Spring applications, three of them with XA and four without.
+* https://www.infoq.com/minibooks/JTDS[_Java Transaction Design Strategies_] is a book
+  available from https://www.infoq.com/[InfoQ] that provides a well-paced introduction
+  to transactions in Java. It also includes side-by-side examples of how to configure
+  and use transactions with both the Spring Framework and EJB3.
+
+
+
+

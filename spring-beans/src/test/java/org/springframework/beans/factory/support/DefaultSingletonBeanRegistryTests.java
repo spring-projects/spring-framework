@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 04.07.2006
  */
-public class DefaultSingletonBeanRegistryTests {
+class DefaultSingletonBeanRegistryTests {
+
+	private final DefaultSingletonBeanRegistry beanRegistry = new DefaultSingletonBeanRegistry();
+
 
 	@Test
-	public void testSingletons() {
-		DefaultSingletonBeanRegistry beanRegistry = new DefaultSingletonBeanRegistry();
-
+	void singletons() {
 		TestBean tb = new TestBean();
 		beanRegistry.registerSingleton("tb", tb);
 		assertThat(beanRegistry.getSingleton("tb")).isSameAs(tb);
@@ -44,20 +45,15 @@ public class DefaultSingletonBeanRegistryTests {
 		assertThat(beanRegistry.getSingleton("tb")).isSameAs(tb);
 		assertThat(beanRegistry.getSingleton("tb2")).isSameAs(tb2);
 		assertThat(beanRegistry.getSingletonCount()).isEqualTo(2);
-		String[] names = beanRegistry.getSingletonNames();
-		assertThat(names).hasSize(2);
-		assertThat(names[0]).isEqualTo("tb");
-		assertThat(names[1]).isEqualTo("tb2");
+		assertThat(beanRegistry.getSingletonNames()).containsExactly("tb", "tb2");
 
 		beanRegistry.destroySingletons();
-		assertThat(beanRegistry.getSingletonCount()).isEqualTo(0);
+		assertThat(beanRegistry.getSingletonCount()).isZero();
 		assertThat(beanRegistry.getSingletonNames()).isEmpty();
 	}
 
 	@Test
-	public void testDisposableBean() {
-		DefaultSingletonBeanRegistry beanRegistry = new DefaultSingletonBeanRegistry();
-
+	void disposableBean() {
 		DerivedTestBean tb = new DerivedTestBean();
 		beanRegistry.registerSingleton("tb", tb);
 		beanRegistry.registerDisposableBean("tb", tb);
@@ -65,21 +61,17 @@ public class DefaultSingletonBeanRegistryTests {
 
 		assertThat(beanRegistry.getSingleton("tb")).isSameAs(tb);
 		assertThat(beanRegistry.getSingletonCount()).isEqualTo(1);
-		String[] names = beanRegistry.getSingletonNames();
-		assertThat(names).hasSize(1);
-		assertThat(names[0]).isEqualTo("tb");
+		assertThat(beanRegistry.getSingletonNames()).containsExactly("tb");
 		assertThat(tb.wasDestroyed()).isFalse();
 
 		beanRegistry.destroySingletons();
-		assertThat(beanRegistry.getSingletonCount()).isEqualTo(0);
+		assertThat(beanRegistry.getSingletonCount()).isZero();
 		assertThat(beanRegistry.getSingletonNames()).isEmpty();
 		assertThat(tb.wasDestroyed()).isTrue();
 	}
 
 	@Test
-	public void testDependentRegistration() {
-		DefaultSingletonBeanRegistry beanRegistry = new DefaultSingletonBeanRegistry();
-
+	void dependentRegistration() {
 		beanRegistry.registerDependentBean("a", "b");
 		beanRegistry.registerDependentBean("b", "c");
 		beanRegistry.registerDependentBean("c", "b");

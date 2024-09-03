@@ -1,0 +1,11 @@
+[[spring-mvc-test-server-resources]]
+= Further Examples
+:page-section-summary-toc: 1
+
+The framework's own tests include
+{spring-framework-main-code}/spring-test/src/test/java/org/springframework/test/web/servlet/samples[
+many sample tests] intended to show how to use MockMvc on its own or through the
+{spring-framework-main-code}/spring-test/src/test/java/org/springframework/test/web/servlet/samples/client[
+WebTestClient]. Browse these examples for further ideas.
+
+

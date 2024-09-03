@@ -281,6 +281,10 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 				return;
 			}
 			synchronized (this) {
+				if (this.state == State.READY_TO_WRITE) {
+					s.request(n);
+					return;
+				}
 				if (this.writeSubscriber != null) {
 					if (this.state == State.EMITTING_CACHED_SIGNALS) {
 						this.demandBeforeReadyToWrite = n;

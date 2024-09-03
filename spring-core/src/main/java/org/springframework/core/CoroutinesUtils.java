@@ -70,7 +70,7 @@ public abstract class CoroutinesUtils {
 	}
 
 	/**
-	 * Invoke a suspending function and converts it to {@link Mono} or {@link Flux}.
+	 * Invoke a suspending function and convert it to {@link Mono} or {@link Flux}.
 	 * Uses an {@linkplain Dispatchers#getUnconfined() unconfined} dispatcher.
 	 * @param method the suspending function to invoke
 	 * @param target the target to invoke {@code method} on
@@ -85,7 +85,7 @@ public abstract class CoroutinesUtils {
 	}
 
 	/**
-	 * Invoke a suspending function and converts it to {@link Mono} or
+	 * Invoke a suspending function and convert it to {@link Mono} or
 	 * {@link Flux}.
 	 * @param context the coroutine context to use
 	 * @param method the suspending function to invoke

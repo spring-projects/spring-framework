@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
@@ -393,12 +391,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @since 5.0
 	 */
 	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new LinkedMultiValueMap<>());
-
-	/**
-	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match".
-	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
-	 */
-	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
 
 	private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.ENGLISH);
 
@@ -1044,9 +1036,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setETag(@Nullable String etag) {
 		if (etag != null) {
-			Assert.isTrue(etag.startsWith("\"") || etag.startsWith("W/"),
-					"Invalid ETag: does not start with W/ or \"");
-			Assert.isTrue(etag.endsWith("\""), "Invalid ETag: does not end with \"");
+			Assert.isTrue(etag.startsWith("\"") || etag.startsWith("W/\""), "ETag does not start with W/\" or \"");
+			Assert.isTrue(etag.endsWith("\""), "ETag does not end with \"");
 			set(ETAG, etag);
 		}
 		else {
@@ -1626,35 +1617,27 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Retrieve a combined result from the field values of the ETag header.
-	 * @param headerName the header name
+	 * @param name the header name
 	 * @return the combined result
 	 * @throws IllegalArgumentException if parsing fails
 	 * @since 4.3
 	 */
-	protected List<String> getETagValuesAsList(String headerName) {
-		List<String> values = get(headerName);
-		if (values != null) {
-			List<String> result = new ArrayList<>();
-			for (String value : values) {
-				if (value != null) {
-					Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
-					while (matcher.find()) {
-						if ("*".equals(matcher.group())) {
-							result.add(matcher.group());
-						}
-						else {
-							result.add(matcher.group(1));
-						}
-					}
-					if (result.isEmpty()) {
-						throw new IllegalArgumentException(
-								"Could not parse header '" + headerName + "' with value '" + value + "'");
-					}
+	protected List<String> getETagValuesAsList(String name) {
+		List<String> values = get(name);
+		if (values == null) {
+			return Collections.emptyList();
+		}
+		List<String> result = new ArrayList<>();
+		for (String value : values) {
+			if (value != null) {
+				List<ETag> tags = ETag.parse(value);
+				Assert.notEmpty(tags, "Could not parse header '" + name + "' with value '" + value + "'");
+				for (ETag tag : tags) {
+					result.add(tag.formattedTag());
 				}
 			}
-			return result;
 		}
-		return Collections.emptyList();
+		return result;
 	}
 
 	/**
@@ -1834,21 +1817,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof HttpHeaders other)) {
-			return false;
-		}
-		return unwrap(this).equals(unwrap(other));
-	}
-
-	private static MultiValueMap<String, String> unwrap(HttpHeaders headers) {
-		while (headers.headers instanceof HttpHeaders httpHeaders) {
-			headers = httpHeaders;
-		}
-		return headers.headers;
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof HttpHeaders that && unwrap(this).equals(unwrap(that))));
 	}
 
 	@Override
@@ -1953,6 +1923,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String credentialsString = username + ":" + password;
 		byte[] encodedBytes = Base64.getEncoder().encode(credentialsString.getBytes(charset));
 		return new String(encodedBytes, charset);
+	}
+
+
+	private static MultiValueMap<String, String> unwrap(HttpHeaders headers) {
+		while (headers.headers instanceof HttpHeaders httpHeaders) {
+			headers = httpHeaders;
+		}
+		return headers.headers;
 	}
 
 	// Package-private: used in ResponseCookie

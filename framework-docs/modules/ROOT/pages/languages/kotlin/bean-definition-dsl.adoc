@@ -1,0 +1,114 @@
+[[kotlin-bean-definition-dsl]]
+= Bean Definition DSL
+
+Spring Framework supports registering beans in a functional way by using lambdas
+as an alternative to XML or Java configuration (`@Configuration` and `@Bean`). In a nutshell,
+it lets you register beans with a lambda that acts as a `FactoryBean`.
+This mechanism is very efficient, as it does not require any reflection or CGLIB proxies.
+
+In Java, you can, for example, write the following:
+
+[source,java,indent=0]
+----
+	class Foo {}
+
+	class Bar {
+		private final Foo foo;
+		public Bar(Foo foo) {
+			this.foo = foo;
+		}
+	}
+
+	GenericApplicationContext context = new GenericApplicationContext();
+	context.registerBean(Foo.class);
+	context.registerBean(Bar.class, () -> new Bar(context.getBean(Foo.class)));
+----
+
+In Kotlin, with reified type parameters and `GenericApplicationContext` Kotlin extensions,
+you can instead write the following:
+
+[source,kotlin,indent=0]
+----
+	class Foo
+
+	class Bar(private val foo: Foo)
+
+	val context = GenericApplicationContext().apply {
+		registerBean<Foo>()
+		registerBean { Bar(it.getBean()) }
+	}
+----
+
+When the class `Bar` has a single constructor, you can even just specify the bean class,
+the constructor parameters will be autowired by type:
+
+[source,kotlin,indent=0]
+----
+	val context = GenericApplicationContext().apply {
+		registerBean<Foo>()
+		registerBean<Bar>()
+	}
+----
+
+In order to allow a more declarative approach and cleaner syntax, Spring Framework provides
+a {docs-spring-framework}/kdoc-api/spring-context/org.springframework.context.support/-bean-definition-dsl/index.html[Kotlin bean definition DSL]
+It declares an `ApplicationContextInitializer` through a clean declarative API,
+which lets you deal with profiles and `Environment` for customizing
+how beans are registered.
+
+In the following example notice that:
+
+* Type inference usually allows to avoid specifying the type for bean references like `ref("bazBean")`
+* It is possible to use Kotlin top level functions to declare beans using callable references like `bean(::myRouter)` in this example
+* When specifying `bean<Bar>()` or `bean(::myRouter)`, parameters are autowired by type
+* The `FooBar` bean will be registered only if the `foobar` profile is active
+
+[source,kotlin,indent=0]
+----
+	class Foo
+	class Bar(private val foo: Foo)
+	class Baz(var message: String = "")
+	class FooBar(private val baz: Baz)
+
+	val myBeans = beans {
+		bean<Foo>()
+		bean<Bar>()
+		bean("bazBean") {
+			Baz().apply {
+				message = "Hello world"
+			}
+		}
+		profile("foobar") {
+			bean { FooBar(ref("bazBean")) }
+		}
+		bean(::myRouter)
+	}
+
+	fun myRouter(foo: Foo, bar: Bar, baz: Baz) = router {
+		// ...
+	}
+----
+
+NOTE: This DSL is programmatic, meaning it allows custom registration logic of beans
+through an `if` expression, a `for` loop, or any other Kotlin constructs.
+
+You can then use this `beans()` function to register beans on the application context,
+as the following example shows:
+
+[source,kotlin,indent=0]
+----
+	val context = GenericApplicationContext().apply {
+		myBeans.initialize(this)
+		refresh()
+	}
+----
+
+NOTE: Spring Boot is based on JavaConfig and
+https://github.com/spring-projects/spring-boot/issues/8115[does not yet provide specific support for functional bean definition],
+but you can experimentally use functional bean definitions through Spring Boot's `ApplicationContextInitializer` support.
+See https://stackoverflow.com/questions/45935931/how-to-use-functional-bean-definition-kotlin-dsl-with-spring-boot-and-spring-w/46033685#46033685[this Stack Overflow answer]
+for more details and up-to-date information. See also the experimental Kofu DSL developed in https://github.com/spring-projects/spring-fu[Spring Fu incubator].
+
+
+
+

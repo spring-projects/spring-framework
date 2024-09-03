@@ -89,8 +89,12 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		return " || ";
 	}
 
-	private boolean isEmptyPathMapping() {
-		return this.patterns == EMPTY_PATH_PATTERN;
+	/**
+	 * Whether the condition is the "" (empty path) mapping.
+	 * @since 6.0.10
+	 */
+	public boolean isEmptyPathMapping() {
+		return (this.patterns == EMPTY_PATH_PATTERN);
 	}
 
 	/**

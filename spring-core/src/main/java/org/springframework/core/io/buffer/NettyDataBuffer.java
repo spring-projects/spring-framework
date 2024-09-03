@@ -313,7 +313,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 		Assert.notNull(dest, "Dest must not be null");
 
 		dest = dest.duplicate().clear();
-		dest.put(destPos, this.byteBuf.nioBuffer(), srcPos, length);
+		dest.put(destPos, this.byteBuf.nioBuffer(srcPos, length), 0, length);
 	}
 
 	@Override
@@ -363,8 +363,8 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof NettyDataBuffer that && this.byteBuf.equals(that.byteBuf)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof NettyDataBuffer that && this.byteBuf.equals(that.byteBuf)));
 	}
 
 	@Override
@@ -385,7 +385,6 @@ public class NettyDataBuffer implements PooledDataBuffer {
 		private final boolean readOnly;
 
 		private int cursor = 0;
-
 
 		public ByteBufferIterator(ByteBuffer[] byteBuffers, boolean readOnly) {
 			this.byteBuffers = byteBuffers;

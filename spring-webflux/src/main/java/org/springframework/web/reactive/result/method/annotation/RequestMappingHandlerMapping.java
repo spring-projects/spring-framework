@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,6 +152,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
 			if (typeInfo != null) {
 				info = typeInfo.combine(info);
+			}
+			if (info.getPatternsCondition().isEmptyPathMapping()) {
+				info = info.mutate().paths("", "/").options(this.config).build();
 			}
 			for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
 				if (entry.getValue().test(handlerType)) {
@@ -338,6 +341,18 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		else if (!allowCredentials.isEmpty()) {
 			throw new IllegalStateException("@CrossOrigin's allowCredentials value must be \"true\", \"false\", " +
 					"or an empty string (\"\"): current value is [" + allowCredentials + "]");
+		}
+
+		String allowPrivateNetwork = resolveCorsAnnotationValue(annotation.allowPrivateNetwork());
+		if ("true".equalsIgnoreCase(allowPrivateNetwork)) {
+			config.setAllowPrivateNetwork(true);
+		}
+		else if ("false".equalsIgnoreCase(allowPrivateNetwork)) {
+			config.setAllowPrivateNetwork(false);
+		}
+		else if (!allowPrivateNetwork.isEmpty()) {
+			throw new IllegalStateException("@CrossOrigin's allowPrivateNetwork value must be \"true\", \"false\", " +
+					"or an empty string (\"\"): current value is [" + allowPrivateNetwork + "]");
 		}
 
 		if (annotation.maxAge() >= 0) {

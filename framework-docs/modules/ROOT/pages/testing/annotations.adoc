@@ -1,0 +1,6 @@
+[[integration-testing-annotations]]
+= Annotations
+:page-section-summary-toc: 1
+
+This section covers annotations that you can use when you test Spring applications.
+

@@ -1,0 +1,109 @@
+[[websocket-stomp-client]]
+= STOMP Client
+
+Spring provides a STOMP over WebSocket client and a STOMP over TCP client.
+
+To begin, you can create and configure `WebSocketStompClient`, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	WebSocketClient webSocketClient = new StandardWebSocketClient();
+	WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
+	stompClient.setMessageConverter(new StringMessageConverter());
+	stompClient.setTaskScheduler(taskScheduler); // for heartbeats
+----
+
+In the preceding example, you could replace `StandardWebSocketClient` with `SockJsClient`,
+since that is also an implementation of `WebSocketClient`. The `SockJsClient` can
+use WebSocket or HTTP-based transport as a fallback. For more details, see
+xref:web/websocket/fallback.adoc#websocket-fallback-sockjs-client[`SockJsClient`].
+
+Next, you can establish a connection and provide a handler for the STOMP session,
+as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	String url = "ws://127.0.0.1:8080/endpoint";
+	StompSessionHandler sessionHandler = new MyStompSessionHandler();
+	stompClient.connect(url, sessionHandler);
+----
+
+When the session is ready for use, the handler is notified, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+public class MyStompSessionHandler extends StompSessionHandlerAdapter {
+
+	@Override
+	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+		// ...
+	}
+}
+----
+
+Once the session is established, any payload can be sent and is
+serialized with the configured `MessageConverter`, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+session.send("/topic/something", "payload");
+----
+
+You can also subscribe to destinations. The `subscribe` methods require a handler
+for messages on the subscription and returns a `Subscription` handle that you can
+use to unsubscribe. For each received message, the handler can specify the target
+`Object` type to which the payload should be deserialized, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+session.subscribe("/topic/something", new StompFrameHandler() {
+
+	@Override
+	public Type getPayloadType(StompHeaders headers) {
+		return String.class;
+	}
+
+	@Override
+	public void handleFrame(StompHeaders headers, Object payload) {
+		// ...
+	}
+
+});
+----
+
+To enable STOMP heartbeat, you can configure `WebSocketStompClient` with a `TaskScheduler`
+and optionally customize the heartbeat intervals (10 seconds for write inactivity,
+which causes a heartbeat to be sent, and 10 seconds for read inactivity, which
+closes the connection).
+
+`WebSocketStompClient` sends a heartbeat only in case of inactivity, i.e. when no
+other messages are sent. This can present a challenge when using an external broker
+since messages with a non-broker destination represent activity but aren't actually
+forwarded to the broker. In that case you can configure a `TaskScheduler`
+when initializing the xref:web/websocket/stomp/handle-broker-relay.adoc[External Broker] which ensures a
+heartbeat is forwarded to the broker also when only messages with a non-broker
+destination are sent.
+
+NOTE: When you use `WebSocketStompClient` for performance tests to simulate thousands
+of clients from the same machine, consider turning off heartbeats, since each
+connection schedules its own heartbeat tasks and that is not optimized for
+a large number of clients running on the same machine.
+
+The STOMP protocol also supports receipts, where the client must add a `receipt`
+header to which the server responds with a RECEIPT frame after the send or
+subscribe are processed. To support this, the `StompSession` offers
+`setAutoReceipt(boolean)` that causes a `receipt` header to be
+added on every subsequent send or subscribe event.
+Alternatively, you can also manually add a receipt header to the `StompHeaders`.
+Both send and subscribe return an instance of `Receiptable`
+that you can use to register for receipt success and failure callbacks.
+For this feature, you must configure the client with a `TaskScheduler`
+and the amount of time before a receipt expires (15 seconds by default).
+
+Note that `StompSessionHandler` itself is a `StompFrameHandler`, which lets
+it handle ERROR frames in addition to the `handleException` callback for
+exceptions from the handling of messages and `handleTransportError` for
+transport-level errors including `ConnectionLostException`.
+
+
+

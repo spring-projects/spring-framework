@@ -5,7 +5,7 @@
 
 	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"/>
 
-	<bean id="aspect" class="test.aspect.TwoAdviceAspect"/>
+	<bean id="aspect" class="org.springframework.aop.testfixture.aspectj.TwoAdviceAspect"/>
 
 	<bean id="adrian" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">

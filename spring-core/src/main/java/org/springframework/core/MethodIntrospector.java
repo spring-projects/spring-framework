@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.2.3
  */
 public final class MethodIntrospector {
@@ -74,7 +75,9 @@ public final class MethodIntrospector {
 				T result = metadataLookup.inspect(specificMethod);
 				if (result != null) {
 					Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
-					if (bridgedMethod == specificMethod || metadataLookup.inspect(bridgedMethod) == null) {
+					if (bridgedMethod == specificMethod || bridgedMethod == method ||
+							bridgedMethod.equals(specificMethod) || bridgedMethod.equals(method) ||
+							metadataLookup.inspect(bridgedMethod) == null) {
 						methodMap.put(specificMethod, result);
 					}
 				}

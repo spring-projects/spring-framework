@@ -1,0 +1,604 @@
+[[jdbc-object]]
+= Modeling JDBC Operations as Java Objects
+
+The `org.springframework.jdbc.object` package contains classes that let you access
+the database in a more object-oriented manner. As an example, you can run queries
+and get the results back as a list that contains business objects with the relational
+column data mapped to the properties of the business object. You can also run stored
+procedures and run update, delete, and insert statements.
+
+[NOTE]
+====
+Many Spring developers believe that the various RDBMS operation classes described below
+(with the exception of the xref:data-access/jdbc/object.adoc#jdbc-StoredProcedure[`StoredProcedure`] class) can often
+be replaced with straight `JdbcTemplate` calls. Often, it is simpler to write a DAO
+method that calls a method on a `JdbcTemplate` directly (as opposed to
+encapsulating a query as a full-blown class).
+
+However, if you are getting measurable value from using the RDBMS operation classes,
+you should continue to use these classes.
+====
+
+
+[[jdbc-SqlQuery]]
+== Understanding `SqlQuery`
+
+`SqlQuery` is a reusable, thread-safe class that encapsulates an SQL query. Subclasses
+must implement the `newRowMapper(..)` method to provide a `RowMapper` instance that can
+create one object per row obtained from iterating over the `ResultSet` that is created
+during the execution of the query. The `SqlQuery` class is rarely used directly, because
+the `MappingSqlQuery` subclass provides a much more convenient implementation for
+mapping rows to Java classes. Other implementations that extend `SqlQuery` are
+`MappingSqlQueryWithParameters` and `UpdatableSqlQuery`.
+
+
+[[jdbc-MappingSqlQuery]]
+== Using `MappingSqlQuery`
+
+`MappingSqlQuery` is a reusable query in which concrete subclasses must implement the
+abstract `mapRow(..)` method to convert each row of the supplied `ResultSet` into an
+object of the type specified. The following example shows a custom query that maps the
+data from the `t_actor` relation to an instance of the `Actor` class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class ActorMappingQuery extends MappingSqlQuery<Actor> {
+
+		public ActorMappingQuery(DataSource ds) {
+			super(ds, "select id, first_name, last_name from t_actor where id = ?");
+			declareParameter(new SqlParameter("id", Types.INTEGER));
+			compile();
+		}
+
+		@Override
+		protected Actor mapRow(ResultSet rs, int rowNumber) throws SQLException {
+			Actor actor = new Actor();
+			actor.setId(rs.getLong("id"));
+			actor.setFirstName(rs.getString("first_name"));
+			actor.setLastName(rs.getString("last_name"));
+			return actor;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class ActorMappingQuery(ds: DataSource) : MappingSqlQuery<Actor>(ds, "select id, first_name, last_name from t_actor where id = ?") {
+
+		init {
+			declareParameter(SqlParameter("id", Types.INTEGER))
+			compile()
+		}
+
+		override fun mapRow(rs: ResultSet, rowNumber: Int) = Actor(
+				rs.getLong("id"),
+				rs.getString("first_name"),
+				rs.getString("last_name")
+		)
+	}
+
+----
+======
+
+The class extends `MappingSqlQuery` parameterized with the `Actor` type. The constructor
+for this customer query takes a `DataSource` as the only parameter. In this
+constructor, you can call the constructor on the superclass with the `DataSource` and the SQL
+that should be run to retrieve the rows for this query. This SQL is used to
+create a `PreparedStatement`, so it may contain placeholders for any parameters to be
+passed in during execution. You must declare each parameter by using the `declareParameter`
+method passing in an `SqlParameter`. The `SqlParameter` takes a name, and the JDBC type
+as defined in `java.sql.Types`. After you define all parameters, you can call the
+`compile()` method so that the statement can be prepared and later run. This class is
+thread-safe after it is compiled, so, as long as these instances are created when the DAO
+is initialized, they can be kept as instance variables and be reused. The following
+example shows how to define such a class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	private ActorMappingQuery actorMappingQuery;
+
+	@Autowired
+	public void setDataSource(DataSource dataSource) {
+		this.actorMappingQuery = new ActorMappingQuery(dataSource);
+	}
+
+	public Customer getCustomer(Long id) {
+		return actorMappingQuery.findObject(id);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	private val actorMappingQuery = ActorMappingQuery(dataSource)
+
+	fun getCustomer(id: Long) = actorMappingQuery.findObject(id)
+----
+======
+
+The method in the preceding example retrieves the customer with the `id` that is passed in as the
+only parameter. Since we want only one object to be returned, we call the `findObject` convenience
+method with the `id` as the parameter. If we had instead a query that returned a
+list of objects and took additional parameters, we would use one of the `execute`
+methods that takes an array of parameter values passed in as varargs. The following
+example shows such a method:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public List<Actor> searchForActors(int age, String namePattern) {
+		return actorSearchMappingQuery.execute(age, namePattern);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	fun searchForActors(age: Int, namePattern: String) =
+				actorSearchMappingQuery.execute(age, namePattern)
+----
+======
+
+
+[[jdbc-SqlUpdate]]
+== Using `SqlUpdate`
+
+The `SqlUpdate` class encapsulates an SQL update. As with a query, an update object is
+reusable, and, as with all `RdbmsOperation` classes, an update can have parameters and is
+defined in SQL. This class provides a number of `update(..)` methods analogous to the
+`execute(..)` methods of query objects. The `SqlUpdate` class is concrete. It can be
+subclassed -- for example, to add a custom update method.
+However, you do not have to subclass the `SqlUpdate`
+class, since it can easily be parameterized by setting SQL and declaring parameters.
+The following example creates a custom update method named `execute`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import java.sql.Types;
+	import javax.sql.DataSource;
+	import org.springframework.jdbc.core.SqlParameter;
+	import org.springframework.jdbc.object.SqlUpdate;
+
+	public class UpdateCreditRating extends SqlUpdate {
+
+		public UpdateCreditRating(DataSource ds) {
+			setDataSource(ds);
+			setSql("update customer set credit_rating = ? where id = ?");
+			declareParameter(new SqlParameter("creditRating", Types.NUMERIC));
+			declareParameter(new SqlParameter("id", Types.NUMERIC));
+			compile();
+		}
+
+		/**
+		 * @param id for the Customer to be updated
+		 * @param rating the new value for credit rating
+		 * @return number of rows updated
+		 */
+		public int execute(int id, int rating) {
+			return update(rating, id);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import java.sql.Types
+	import javax.sql.DataSource
+	import org.springframework.jdbc.core.SqlParameter
+	import org.springframework.jdbc.`object`.SqlUpdate
+
+	class UpdateCreditRating(ds: DataSource) : SqlUpdate() {
+
+		init {
+			setDataSource(ds)
+			sql = "update customer set credit_rating = ? where id = ?"
+			declareParameter(SqlParameter("creditRating", Types.NUMERIC))
+			declareParameter(SqlParameter("id", Types.NUMERIC))
+			compile()
+		}
+
+		/**
+		 * @param id for the Customer to be updated
+		 * @param rating the new value for credit rating
+		 * @return number of rows updated
+		 */
+		fun execute(id: Int, rating: Int): Int {
+			return update(rating, id)
+		}
+	}
+----
+======
+
+
+[[jdbc-StoredProcedure]]
+== Using `StoredProcedure`
+
+The `StoredProcedure` class is an `abstract` superclass for object abstractions of RDBMS
+stored procedures.
+
+The inherited `sql` property is the name of the stored procedure in the RDBMS.
+
+To define a parameter for the `StoredProcedure` class, you can use an `SqlParameter` or one
+of its subclasses. You must specify the parameter name and SQL type in the constructor,
+as the following code snippet shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	new SqlParameter("in_id", Types.NUMERIC),
+	new SqlOutParameter("out_first_name", Types.VARCHAR),
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	SqlParameter("in_id", Types.NUMERIC),
+	SqlOutParameter("out_first_name", Types.VARCHAR),
+----
+======
+
+The SQL type is specified using the `java.sql.Types` constants.
+
+The first line (with the `SqlParameter`) declares an IN parameter. You can use IN parameters
+both for stored procedure calls and for queries using the `SqlQuery` and its
+subclasses (covered in xref:data-access/jdbc/object.adoc#jdbc-SqlQuery[Understanding `SqlQuery`]).
+
+The second line (with the `SqlOutParameter`) declares an `out` parameter to be used in the
+stored procedure call. There is also an `SqlInOutParameter` for `InOut` parameters
+(parameters that provide an `in` value to the procedure and that also return a value).
+
+For `in` parameters, in addition to the name and the SQL type, you can specify a
+scale for numeric data or a type name for custom database types. For `out` parameters,
+you can provide a `RowMapper` to handle mapping of rows returned from a `REF` cursor.
+Another option is to specify an `SqlReturnType` that lets you define customized
+handling of the return values.
+
+The next example of a simple DAO uses a `StoredProcedure` to call a function
+(`sysdate()`), which comes with any Oracle database. To use the stored procedure
+functionality, you have to create a class that extends `StoredProcedure`. In this
+example, the `StoredProcedure` class is an inner class. However, if you need to reuse the
+`StoredProcedure`, you can declare it as a top-level class. This example has no input
+parameters, but an output parameter is declared as a date type by using the
+`SqlOutParameter` class. The `execute()` method runs the procedure and extracts the
+returned date from the results `Map`. The results `Map` has an entry for each declared
+output parameter (in this case, only one) by using the parameter name as the key.
+The following listing shows our custom StoredProcedure class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import java.sql.Types;
+	import java.util.Date;
+	import java.util.HashMap;
+	import java.util.Map;
+	import javax.sql.DataSource;
+	import org.springframework.beans.factory.annotation.Autowired;
+	import org.springframework.jdbc.core.SqlOutParameter;
+	import org.springframework.jdbc.object.StoredProcedure;
+
+	public class StoredProcedureDao {
+
+		private GetSysdateProcedure getSysdate;
+
+		@Autowired
+		public void init(DataSource dataSource) {
+			this.getSysdate = new GetSysdateProcedure(dataSource);
+		}
+
+		public Date getSysdate() {
+			return getSysdate.execute();
+		}
+
+		private class GetSysdateProcedure extends StoredProcedure {
+
+			private static final String SQL = "sysdate";
+
+			public GetSysdateProcedure(DataSource dataSource) {
+				setDataSource(dataSource);
+				setFunction(true);
+				setSql(SQL);
+				declareParameter(new SqlOutParameter("date", Types.DATE));
+				compile();
+			}
+
+			public Date execute() {
+				// the 'sysdate' sproc has no input parameters, so an empty Map is supplied...
+				Map<String, Object> results = execute(new HashMap<String, Object>());
+				Date sysdate = (Date) results.get("date");
+				return sysdate;
+			}
+		}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import java.sql.Types
+	import java.util.Date
+	import java.util.Map
+	import javax.sql.DataSource
+	import org.springframework.jdbc.core.SqlOutParameter
+	import org.springframework.jdbc.object.StoredProcedure
+
+	class StoredProcedureDao(dataSource: DataSource) {
+
+		private val SQL = "sysdate"
+
+		private val getSysdate = GetSysdateProcedure(dataSource)
+
+		val sysdate: Date
+			get() = getSysdate.execute()
+
+		private inner class GetSysdateProcedure(dataSource: DataSource) : StoredProcedure() {
+
+			init {
+				setDataSource(dataSource)
+				isFunction = true
+				sql = SQL
+				declareParameter(SqlOutParameter("date", Types.DATE))
+				compile()
+			}
+
+			fun execute(): Date {
+				// the 'sysdate' sproc has no input parameters, so an empty Map is supplied...
+				val results = execute(mutableMapOf<String, Any>())
+				return results["date"] as Date
+			}
+		}
+	}
+----
+======
+
+The following example of a `StoredProcedure` has two output parameters (in this case,
+Oracle REF cursors):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import java.util.HashMap;
+	import java.util.Map;
+	import javax.sql.DataSource;
+	import oracle.jdbc.OracleTypes;
+	import org.springframework.jdbc.core.SqlOutParameter;
+	import org.springframework.jdbc.object.StoredProcedure;
+
+	public class TitlesAndGenresStoredProcedure extends StoredProcedure {
+
+		private static final String SPROC_NAME = "AllTitlesAndGenres";
+
+		public TitlesAndGenresStoredProcedure(DataSource dataSource) {
+			super(dataSource, SPROC_NAME);
+			declareParameter(new SqlOutParameter("titles", OracleTypes.CURSOR, new TitleMapper()));
+			declareParameter(new SqlOutParameter("genres", OracleTypes.CURSOR, new GenreMapper()));
+			compile();
+		}
+
+		public Map<String, Object> execute() {
+			// again, this sproc has no input parameters, so an empty Map is supplied
+			return super.execute(new HashMap<String, Object>());
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import java.util.HashMap
+	import javax.sql.DataSource
+	import oracle.jdbc.OracleTypes
+	import org.springframework.jdbc.core.SqlOutParameter
+	import org.springframework.jdbc.`object`.StoredProcedure
+
+	class TitlesAndGenresStoredProcedure(dataSource: DataSource) : StoredProcedure(dataSource, SPROC_NAME) {
+
+		companion object {
+			private const val SPROC_NAME = "AllTitlesAndGenres"
+		}
+
+		init {
+			declareParameter(SqlOutParameter("titles", OracleTypes.CURSOR, TitleMapper()))
+			declareParameter(SqlOutParameter("genres", OracleTypes.CURSOR, GenreMapper()))
+			compile()
+		}
+
+		fun execute(): Map<String, Any> {
+			// again, this sproc has no input parameters, so an empty Map is supplied
+			return super.execute(HashMap<String, Any>())
+		}
+	}
+----
+======
+
+Notice how the overloaded variants of the `declareParameter(..)` method that have been
+used in the `TitlesAndGenresStoredProcedure` constructor are passed `RowMapper`
+implementation instances. This is a very convenient and powerful way to reuse existing
+functionality. The next two examples provide code for the two `RowMapper` implementations.
+
+The `TitleMapper` class maps a `ResultSet` to a `Title` domain object for each row in
+the supplied `ResultSet`, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import java.sql.ResultSet;
+	import java.sql.SQLException;
+	import com.foo.domain.Title;
+	import org.springframework.jdbc.core.RowMapper;
+
+	public final class TitleMapper implements RowMapper<Title> {
+
+		public Title mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Title title = new Title();
+			title.setId(rs.getLong("id"));
+			title.setName(rs.getString("name"));
+			return title;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import java.sql.ResultSet
+	import com.foo.domain.Title
+	import org.springframework.jdbc.core.RowMapper
+
+	class TitleMapper : RowMapper<Title> {
+
+		override fun mapRow(rs: ResultSet, rowNum: Int) =
+				Title(rs.getLong("id"), rs.getString("name"))
+	}
+----
+======
+
+The `GenreMapper` class maps a `ResultSet` to a `Genre` domain object for each row in
+the supplied `ResultSet`, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import java.sql.ResultSet;
+	import java.sql.SQLException;
+	import com.foo.domain.Genre;
+	import org.springframework.jdbc.core.RowMapper;
+
+	public final class GenreMapper implements RowMapper<Genre> {
+
+		public Genre mapRow(ResultSet rs, int rowNum) throws SQLException {
+			return new Genre(rs.getString("name"));
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import java.sql.ResultSet
+	import com.foo.domain.Genre
+	import org.springframework.jdbc.core.RowMapper
+
+	class GenreMapper : RowMapper<Genre> {
+
+		override fun mapRow(rs: ResultSet, rowNum: Int): Genre {
+			return Genre(rs.getString("name"))
+		}
+	}
+----
+======
+
+To pass parameters to a stored procedure that has one or more input parameters in its
+definition in the RDBMS, you can code a strongly typed `execute(..)` method that would
+delegate to the untyped `execute(Map)` method in the superclass, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import java.sql.Types;
+	import java.util.Date;
+	import java.util.HashMap;
+	import java.util.Map;
+	import javax.sql.DataSource;
+	import oracle.jdbc.OracleTypes;
+	import org.springframework.jdbc.core.SqlOutParameter;
+	import org.springframework.jdbc.core.SqlParameter;
+	import org.springframework.jdbc.object.StoredProcedure;
+
+	public class TitlesAfterDateStoredProcedure extends StoredProcedure {
+
+		private static final String SPROC_NAME = "TitlesAfterDate";
+		private static final String CUTOFF_DATE_PARAM = "cutoffDate";
+
+		public TitlesAfterDateStoredProcedure(DataSource dataSource) {
+			super(dataSource, SPROC_NAME);
+			declareParameter(new SqlParameter(CUTOFF_DATE_PARAM, Types.DATE);
+			declareParameter(new SqlOutParameter("titles", OracleTypes.CURSOR, new TitleMapper()));
+			compile();
+		}
+
+		public Map<String, Object> execute(Date cutoffDate) {
+			Map<String, Object> inputs = new HashMap<String, Object>();
+			inputs.put(CUTOFF_DATE_PARAM, cutoffDate);
+			return super.execute(inputs);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import java.sql.Types
+	import java.util.Date
+	import javax.sql.DataSource
+	import oracle.jdbc.OracleTypes
+	import org.springframework.jdbc.core.SqlOutParameter
+	import org.springframework.jdbc.core.SqlParameter
+	import org.springframework.jdbc.`object`.StoredProcedure
+
+	class TitlesAfterDateStoredProcedure(dataSource: DataSource) : StoredProcedure(dataSource, SPROC_NAME) {
+
+		companion object {
+			private const val SPROC_NAME = "TitlesAfterDate"
+			private const val CUTOFF_DATE_PARAM = "cutoffDate"
+		}
+
+		init {
+			declareParameter(SqlParameter(CUTOFF_DATE_PARAM, Types.DATE))
+			declareParameter(SqlOutParameter("titles", OracleTypes.CURSOR, TitleMapper()))
+			compile()
+		}
+
+		fun execute(cutoffDate: Date) = super.execute(
+				mapOf<String, Any>(CUTOFF_DATE_PARAM to cutoffDate))
+	}
+----
+======
+
+
+

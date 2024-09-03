@@ -1,0 +1,88 @@
+[[webflux-ann-jackson]]
+= Jackson JSON
+
+Spring offers support for the Jackson JSON library.
+
+[[webflux-ann-jsonview]]
+== JSON Views
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/jackson.adoc[See equivalent in the Servlet stack]#
+
+Spring WebFlux provides built-in support for
+https://www.baeldung.com/jackson-json-view-annotation[Jackson's Serialization Views],
+which allows rendering only a subset of all fields in an `Object`. To use it with
+`@ResponseBody` or `ResponseEntity` controller methods, you can use Jackson's
+`@JsonView` annotation to activate a serialization view class, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@RestController
+	public class UserController {
+
+		@GetMapping("/user")
+		@JsonView(User.WithoutPasswordView.class)
+		public User getUser() {
+			return new User("eric", "7!jd#h23");
+		}
+	}
+
+	public class User {
+
+		public interface WithoutPasswordView {};
+		public interface WithPasswordView extends WithoutPasswordView {};
+
+		private String username;
+		private String password;
+
+		public User() {
+		}
+
+		public User(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		@JsonView(WithoutPasswordView.class)
+		public String getUsername() {
+			return this.username;
+		}
+
+		@JsonView(WithPasswordView.class)
+		public String getPassword() {
+			return this.password;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@RestController
+	class UserController {
+
+		@GetMapping("/user")
+		@JsonView(User.WithoutPasswordView::class)
+		fun getUser(): User {
+			return User("eric", "7!jd#h23")
+		}
+	}
+
+	class User(
+			@JsonView(WithoutPasswordView::class) val username: String,
+			@JsonView(WithPasswordView::class) val password: String
+	) {
+		interface WithoutPasswordView
+		interface WithPasswordView : WithoutPasswordView
+	}
+----
+======
+
+NOTE: `@JsonView` allows an array of view classes but you can only specify only one per
+controller method. Use a composite interface if you need to activate multiple views.
+
+
+

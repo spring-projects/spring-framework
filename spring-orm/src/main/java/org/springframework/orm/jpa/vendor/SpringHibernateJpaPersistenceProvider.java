@@ -22,6 +22,7 @@ import java.util.Map;
 
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceUnitInfo;
+import org.hibernate.bytecode.enhance.spi.EnhancementContext;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -42,16 +43,18 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
  * @since 4.1
  * @see Configuration#addPackage
  */
+@SuppressWarnings("removal")  // for Environment properties on Hibernate 6.2
 class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider {
 
 	static {
 		if (NativeDetector.inNativeImage()) {
 			System.setProperty(Environment.BYTECODE_PROVIDER, Environment.BYTECODE_PROVIDER_NAME_NONE);
+			System.setProperty(Environment.USE_REFLECTION_OPTIMIZER, Boolean.FALSE.toString());
 		}
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({"rawtypes", "unchecked"})  // on Hibernate 6
 	public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map properties) {
 		final List<String> mergedClassesAndPackages = new ArrayList<>(info.getManagedClassNames());
 		if (info instanceof SmartPersistenceUnitInfo smartInfo) {
@@ -62,6 +65,12 @@ class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider
 					@Override
 					public List<String> getManagedClassNames() {
 						return mergedClassesAndPackages;
+					}
+					@Override
+					public void pushClassTransformer(EnhancementContext enhancementContext) {
+						if (!NativeDetector.inNativeImage()) {
+							super.pushClassTransformer(enhancementContext);
+						}
 					}
 				}, properties).build();
 	}

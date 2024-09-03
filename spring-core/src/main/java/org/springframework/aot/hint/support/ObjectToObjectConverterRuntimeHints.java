@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
@@ -37,15 +39,17 @@ class ObjectToObjectConverterRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
+		ReflectionHints reflectionHints = hints.reflection();
 		TypeReference sqlDateTypeReference = TypeReference.of("java.sql.Date");
-		hints.reflection().registerTypeIfPresent(classLoader, sqlDateTypeReference.getName(), hint -> hint
+		reflectionHints.registerTypeIfPresent(classLoader, sqlDateTypeReference.getName(), hint -> hint
 				.withMethod("toLocalDate", Collections.emptyList(), ExecutableMode.INVOKE)
 				.onReachableType(sqlDateTypeReference)
 				.withMethod("valueOf", List.of(TypeReference.of(LocalDate.class)), ExecutableMode.INVOKE)
 				.onReachableType(sqlDateTypeReference));
 
-		hints.reflection().registerTypeIfPresent(classLoader, "org.springframework.http.HttpMethod",
+		reflectionHints.registerTypeIfPresent(classLoader, "org.springframework.http.HttpMethod",
 				builder -> builder.withMethod("valueOf", List.of(TypeReference.of(String.class)), ExecutableMode.INVOKE));
+		reflectionHints.registerTypeIfPresent(classLoader, "java.net.URI", MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 	}
 
 }

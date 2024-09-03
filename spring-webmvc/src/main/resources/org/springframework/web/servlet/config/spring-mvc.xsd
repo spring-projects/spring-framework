@@ -1350,12 +1350,12 @@
 	set on the "Access-Control-Allow-Credentials" response header of
 	preflight requests.
 
-	NOTE: Be aware that this option establishes a high
-	level of trust with the configured domains and also increases the surface
-	attack of the web application by exposing sensitive user-specific
-	information such as cookies and CSRF tokens.
+	NOTE: Be aware that this option establishes a high level of trust with
+	the configured domains and also increases the surface attack of the web
+	application by exposing sensitive user-specific information such as
+	cookies and CSRF tokens.
 
-	By default this is not set in which case the
+	By default, this is not set in which case the
 	"Access-Control-Allow-Credentials" header is also not set and
 	credentials are therefore not allowed.
 								]]></xsd:documentation>

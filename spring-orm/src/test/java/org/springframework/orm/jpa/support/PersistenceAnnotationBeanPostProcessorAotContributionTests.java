@@ -32,6 +32,7 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.FieldHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,6 +66,20 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 	void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.generationContext = new TestGenerationContext();
+	}
+
+	@Test
+	void processAheadOfTimeWhenPersistenceUnitOnFieldAndPropertyValueSet() {
+		RegisteredBean registeredBean = registerBean(DefaultPersistenceUnitField.class);
+		registeredBean.getMergedBeanDefinition().getPropertyValues().add("emf", "myEntityManagerFactory");
+		assertThat(processAheadOfTime(registeredBean)).isNotNull(); // Field not handled by property values
+	}
+
+	@Test
+	void processAheadOfTimeWhenPersistenceUnitOnMethodAndPropertyValueSet() {
+		RegisteredBean registeredBean = registerBean(DefaultPersistenceUnitMethod.class);
+		registeredBean.getMergedBeanDefinition().getPropertyValues().add("emf", "myEntityManagerFactory");
+		assertThat(processAheadOfTime(registeredBean)).isNull();
 	}
 
 	@Test
@@ -160,6 +176,28 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		});
 	}
 
+	@Test
+	void processAheadOfTimeWhenPersistenceContextOnPrivateFields() {
+		RegisteredBean registeredBean = registerBean(
+				SeveralPersistenceContextField.class);
+		testCompile(registeredBean, (actual, compiled) -> {
+			EntityManagerFactory entityManagerFactory = mock();
+			this.beanFactory.registerSingleton("custom", entityManagerFactory);
+			this.beanFactory.registerAlias("custom", "another");
+			SeveralPersistenceContextField instance = new SeveralPersistenceContextField();
+			actual.accept(registeredBean, instance);
+			assertThat(instance).extracting("customEntityManager").isNotNull();
+			assertThat(instance).extracting("anotherEntityManager").isNotNull();
+			assertThat(this.generationContext.getRuntimeHints().reflection().typeHints())
+					.singleElement().satisfies(typeHint -> {
+						assertThat(typeHint.getType()).isEqualTo(
+								TypeReference.of(SeveralPersistenceContextField.class));
+						assertThat(typeHint.fields().map(FieldHint::getName))
+								.containsOnly("customEntityManager", "anotherEntityManager");
+					});
+		});
+	}
+
 	private RegisteredBean registerBean(Class<?> beanClass) {
 		String beanName = "testBean";
 		this.beanFactory.registerBeanDefinition(beanName,
@@ -169,14 +207,18 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 
 	private void testCompile(RegisteredBean registeredBean,
 			BiConsumer<BiConsumer<RegisteredBean, Object>, Compiled> result) {
-		PersistenceAnnotationBeanPostProcessor postProcessor = new PersistenceAnnotationBeanPostProcessor();
-		BeanRegistrationAotContribution contribution = postProcessor
-				.processAheadOfTime(registeredBean);
+		BeanRegistrationAotContribution contribution = processAheadOfTime(registeredBean);
 		BeanRegistrationCode beanRegistrationCode = mock();
 		contribution.applyTo(generationContext, beanRegistrationCode);
 		generationContext.writeGeneratedContent();
 		TestCompiler.forSystem().with(generationContext)
 				.compile(compiled -> result.accept(new Invoker(compiled), compiled));
+	}
+
+	@Nullable
+	private BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		PersistenceAnnotationBeanPostProcessor postProcessor = new PersistenceAnnotationBeanPostProcessor();
+		return postProcessor.processAheadOfTime(registeredBean);
 	}
 
 	static class Invoker implements BiConsumer<RegisteredBean, Object> {
@@ -253,6 +295,18 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		public void setEntityManager(EntityManager entityManager) {
 			this.entityManager = entityManager;
 		}
+
+	}
+
+	static class SeveralPersistenceContextField {
+
+		@SuppressWarnings("unused")
+		@PersistenceContext(name = "custom")
+		private EntityManager customEntityManager;
+
+		@SuppressWarnings("unused")
+		@PersistenceContext(name = "another")
+		private EntityManager anotherEntityManager;
 
 	}
 

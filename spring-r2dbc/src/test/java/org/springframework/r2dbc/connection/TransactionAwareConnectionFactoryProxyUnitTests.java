@@ -55,13 +55,15 @@ class TransactionAwareConnectionFactoryProxyUnitTests {
 
 	R2dbcTransactionManager tm;
 
+
 	@BeforeEach
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	void before() {
 		when(connectionFactoryMock.create()).thenReturn((Mono) Mono.just(connectionMock1),
 				(Mono) Mono.just(connectionMock2), (Mono) Mono.just(connectionMock3));
 		tm = new R2dbcTransactionManager(connectionFactoryMock);
 	}
+
 
 	@Test
 	void createShouldWrapConnection() {
@@ -144,14 +146,15 @@ class TransactionAwareConnectionFactoryProxyUnitTests {
 		ConnectionFactoryUtils.getConnection(connectionFactoryMock)
 				.doOnNext(transactionalConnection::set).flatMap(connection -> proxyCf.create()
 				.doOnNext(wrappedConnection -> assertThat(((Wrapped<?>) wrappedConnection).unwrap()).isSameAs(connection)))
-				.as(rxtx::transactional)
 				.flatMapMany(Connection::close)
+				.as(rxtx::transactional)
 				.as(StepVerifier::create)
 				.verifyComplete();
 
+		verify(connectionFactoryMock, times(1)).create();
+		verify(connectionMock1, times(1)).close();
 		verifyNoInteractions(connectionMock2);
 		verifyNoInteractions(connectionMock3);
-		verify(connectionFactoryMock, times(1)).create();
 	}
 
 }

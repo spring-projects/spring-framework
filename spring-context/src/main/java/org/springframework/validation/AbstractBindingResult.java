@@ -102,8 +102,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	@Override
-	public void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs,
-			@Nullable String defaultMessage) {
+	public void rejectValue(@Nullable String field, String errorCode,
+			@Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		if (!StringUtils.hasLength(getNestedPath()) && !StringUtils.hasLength(field)) {
 			// We're at the top of the nested object hierarchy,
@@ -358,15 +358,10 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof BindingResult otherResult)) {
-			return false;
-		}
-		return (getObjectName().equals(otherResult.getObjectName()) &&
-				ObjectUtils.nullSafeEquals(getTarget(), otherResult.getTarget()) &&
-				getAllErrors().equals(otherResult.getAllErrors()));
+		return (this == other || (other instanceof BindingResult that &&
+				getObjectName().equals(that.getObjectName()) &&
+				ObjectUtils.nullSafeEquals(getTarget(), that.getTarget()) &&
+				getAllErrors().equals(that.getAllErrors())));
 	}
 
 	@Override

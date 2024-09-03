@@ -1,0 +1,208 @@
+[[mvc-container-config]]
+= Servlet Config
+
+In a Servlet environment, you have the option of configuring the Servlet container
+programmatically as an alternative or in combination with a `web.xml` file.
+The following example registers a `DispatcherServlet`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import org.springframework.web.WebApplicationInitializer;
+
+	public class MyWebApplicationInitializer implements WebApplicationInitializer {
+
+		@Override
+		public void onStartup(ServletContext container) {
+			XmlWebApplicationContext appContext = new XmlWebApplicationContext();
+			appContext.setConfigLocation("/WEB-INF/spring/dispatcher-config.xml");
+
+			ServletRegistration.Dynamic registration = container.addServlet("dispatcher", new DispatcherServlet(appContext));
+			registration.setLoadOnStartup(1);
+			registration.addMapping("/");
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.web.WebApplicationInitializer
+
+	class MyWebApplicationInitializer : WebApplicationInitializer {
+
+		override fun onStartup(container: ServletContext) {
+			val appContext = XmlWebApplicationContext()
+			appContext.setConfigLocation("/WEB-INF/spring/dispatcher-config.xml")
+
+			val registration = container.addServlet("dispatcher", DispatcherServlet(appContext))
+			registration.setLoadOnStartup(1)
+			registration.addMapping("/")
+		}
+	}
+----
+======
+
+
+`WebApplicationInitializer` is an interface provided by Spring MVC that ensures your
+implementation is detected and automatically used to initialize any Servlet 3 container.
+An abstract base class implementation of `WebApplicationInitializer` named
+`AbstractDispatcherServletInitializer` makes it even easier to register the
+`DispatcherServlet` by overriding methods to specify the servlet mapping and the
+location of the `DispatcherServlet` configuration.
+
+This is recommended for applications that use Java-based Spring configuration, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+		@Override
+		protected Class<?>[] getRootConfigClasses() {
+			return null;
+		}
+
+		@Override
+		protected Class<?>[] getServletConfigClasses() {
+			return new Class<?>[] { MyWebConfig.class };
+		}
+
+		@Override
+		protected String[] getServletMappings() {
+			return new String[] { "/" };
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyWebAppInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
+
+		override fun getRootConfigClasses(): Array<Class<*>>? {
+			return null
+		}
+
+		override fun getServletConfigClasses(): Array<Class<*>>? {
+			return arrayOf(MyWebConfig::class.java)
+		}
+
+		override fun getServletMappings(): Array<String> {
+			return arrayOf("/")
+		}
+	}
+----
+======
+
+If you use XML-based Spring configuration, you should extend directly from
+`AbstractDispatcherServletInitializer`, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MyWebAppInitializer extends AbstractDispatcherServletInitializer {
+
+		@Override
+		protected WebApplicationContext createRootApplicationContext() {
+			return null;
+		}
+
+		@Override
+		protected WebApplicationContext createServletApplicationContext() {
+			XmlWebApplicationContext cxt = new XmlWebApplicationContext();
+			cxt.setConfigLocation("/WEB-INF/spring/dispatcher-config.xml");
+			return cxt;
+		}
+
+		@Override
+		protected String[] getServletMappings() {
+			return new String[] { "/" };
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyWebAppInitializer : AbstractDispatcherServletInitializer() {
+
+		override fun createRootApplicationContext(): WebApplicationContext? {
+			return null
+		}
+
+		override fun createServletApplicationContext(): WebApplicationContext {
+			return XmlWebApplicationContext().apply {
+				setConfigLocation("/WEB-INF/spring/dispatcher-config.xml")
+			}
+		}
+
+		override fun getServletMappings(): Array<String> {
+			return arrayOf("/")
+		}
+	}
+----
+======
+
+`AbstractDispatcherServletInitializer` also provides a convenient way to add `Filter`
+instances and have them be automatically mapped to the `DispatcherServlet`, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MyWebAppInitializer extends AbstractDispatcherServletInitializer {
+
+		// ...
+
+		@Override
+		protected Filter[] getServletFilters() {
+			return new Filter[] {
+				new HiddenHttpMethodFilter(), new CharacterEncodingFilter() };
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyWebAppInitializer : AbstractDispatcherServletInitializer() {
+
+		// ...
+
+		override fun getServletFilters(): Array<Filter> {
+			return arrayOf(HiddenHttpMethodFilter(), CharacterEncodingFilter())
+		}
+	}
+----
+======
+
+Each filter is added with a default name based on its concrete type and automatically
+mapped to the `DispatcherServlet`.
+
+The `isAsyncSupported` protected method of `AbstractDispatcherServletInitializer`
+provides a single place to enable async support on the `DispatcherServlet` and all
+filters mapped to it. By default, this flag is set to `true`.
+
+Finally, if you need to further customize the `DispatcherServlet` itself, you can
+override the `createDispatcherServlet` method.
+
+
+

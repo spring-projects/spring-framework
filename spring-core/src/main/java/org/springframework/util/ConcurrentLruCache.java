@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public final class ConcurrentLruCache<K, V> {
 	}
 
 	private ConcurrentLruCache(int capacity, Function<K, V> generator, int concurrencyLevel) {
-		Assert.isTrue(capacity > 0, "Capacity must be > 0");
+		Assert.isTrue(capacity >= 0, "Capacity must be >= 0");
 		this.capacity = capacity;
 		this.cache = new ConcurrentHashMap<>(16, 0.75f, concurrencyLevel);
 		this.generator = generator;
@@ -95,6 +95,9 @@ public final class ConcurrentLruCache<K, V> {
 	 * @return the cached or newly generated value
 	 */
 	public V get(K key) {
+		if (this.capacity == 0) {
+			return this.generator.apply(key);
+		}
 		final Node<K, V> node = this.cache.get(key);
 		if (node == null) {
 			V value = this.generator.apply(key);

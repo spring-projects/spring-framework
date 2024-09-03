@@ -24,7 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
@@ -93,6 +95,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
+	private volatile boolean multipartRead = false;
+
 	@Nullable
 	private final ApplicationContext applicationContext;
 
@@ -131,7 +135,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.sessionMono = sessionManager.getSession(this).cache();
 		this.localeContextResolver = localeContextResolver;
 		this.formDataMono = initFormData(request, codecConfigurer, getLogPrefix());
-		this.multipartDataMono = initMultipartData(request, codecConfigurer, getLogPrefix());
+		this.multipartDataMono = initMultipartData(codecConfigurer, getLogPrefix());
 		this.applicationContext = applicationContext;
 	}
 
@@ -154,10 +158,9 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 				.cache();
 	}
 
-	private static Mono<MultiValueMap<String, Part>> initMultipartData(ServerHttpRequest request,
-			ServerCodecConfigurer configurer, String logPrefix) {
+	private Mono<MultiValueMap<String, Part>> initMultipartData(ServerCodecConfigurer configurer, String logPrefix) {
 
-		MediaType contentType = getContentType(request);
+		MediaType contentType = getContentType(this.request);
 		if (contentType == null || !contentType.getType().equalsIgnoreCase("multipart")) {
 			return EMPTY_MULTIPART_DATA;
 		}
@@ -168,7 +171,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		}
 
 		return reader
-				.readMono(MULTIPART_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
+				.readMono(MULTIPART_DATA_TYPE, this.request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
+				.doOnNext(ignored -> this.multipartRead = true)
 				.switchIfEmpty(EMPTY_MULTIPART_DATA)
 				.cache();
 	}
@@ -241,6 +245,25 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public Mono<MultiValueMap<String, Part>> getMultipartData() {
 		return this.multipartDataMono;
+	}
+
+	@Override
+	public Mono<Void> cleanupMultipart() {
+		return Mono.defer(() -> {
+			if (this.multipartRead) {
+				return Mono.usingWhen(getMultipartData().onErrorComplete().map(this::collectParts),
+						parts -> Mono.empty(),
+						parts -> Flux.fromIterable(parts).flatMap(part -> part.delete().onErrorComplete())
+				);
+			}
+			else {
+				return Mono.empty();
+			}
+		});
+	}
+
+	private List<Part> collectParts(MultiValueMap<String, Part> multipartData) {
+		return multipartData.values().stream().flatMap(List::stream).collect(Collectors.toList());
 	}
 
 	@Override

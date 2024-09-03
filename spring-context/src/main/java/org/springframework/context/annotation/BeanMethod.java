@@ -39,6 +39,7 @@ final class BeanMethod extends ConfigurationMethod {
 		super(metadata, configurationClass);
 	}
 
+
 	@Override
 	public void validate(ProblemReporter problemReporter) {
 		if (getMetadata().isStatic()) {
@@ -55,9 +56,8 @@ final class BeanMethod extends ConfigurationMethod {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj ||
-				(obj instanceof BeanMethod that && this.metadata.equals(that.metadata)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof BeanMethod that && this.metadata.equals(that.metadata)));
 	}
 
 	@Override
@@ -69,6 +69,7 @@ final class BeanMethod extends ConfigurationMethod {
 	public String toString() {
 		return "BeanMethod: " + this.metadata;
 	}
+
 
 	private class NonOverridableMethodError extends Problem {
 

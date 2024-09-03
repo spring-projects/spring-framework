@@ -49,8 +49,7 @@ public class PropertyPathFactoryBeanTests {
 		assertThat(xbf.getType("otb.spouse")).isEqualTo(ITestBean.class);
 		Object result1 = xbf.getBean("otb.spouse");
 		Object result2 = xbf.getBean("otb.spouse");
-		boolean condition = result1 instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(result1 instanceof TestBean).isTrue();
 		assertThat(result1).isSameAs(result2);
 		assertThat(((TestBean) result1).getAge()).isEqualTo(99);
 	}
@@ -64,12 +63,9 @@ public class PropertyPathFactoryBeanTests {
 		Object result1 = xbf.getBean("tb.spouse");
 		Object result2 = xbf.getBean("propertyPath3");
 		Object result3 = xbf.getBean("propertyPath3");
-		boolean condition2 = result1 instanceof TestBean;
-		assertThat(condition2).isTrue();
-		boolean condition1 = result2 instanceof TestBean;
-		assertThat(condition1).isTrue();
-		boolean condition = result3 instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(result1 instanceof TestBean).isTrue();
+		assertThat(result2 instanceof TestBean).isTrue();
+		assertThat(result3 instanceof TestBean).isTrue();
 		assertThat(((TestBean) result1).getAge()).isEqualTo(11);
 		assertThat(((TestBean) result2).getAge()).isEqualTo(11);
 		assertThat(((TestBean) result3).getAge()).isEqualTo(11);
@@ -93,8 +89,7 @@ public class PropertyPathFactoryBeanTests {
 		TestBean spouse = (TestBean) xbf.getBean("otb.spouse");
 		TestBean tbWithInner = (TestBean) xbf.getBean("tbWithInner");
 		assertThat(tbWithInner.getSpouse()).isSameAs(spouse);
-		boolean condition = !tbWithInner.getFriends().isEmpty();
-		assertThat(condition).isTrue();
+		assertThat(!tbWithInner.getFriends().isEmpty()).isTrue();
 		assertThat(tbWithInner.getFriends().iterator().next()).isSameAs(spouse);
 	}
 

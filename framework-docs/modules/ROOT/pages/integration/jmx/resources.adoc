@@ -1,0 +1,15 @@
+[[jmx-resources]]
+= Further Resources
+:page-section-summary-toc: 1
+
+This section contains links to further resources about JMX:
+
+* The https://www.oracle.com/technetwork/java/javase/tech/javamanagement-140525.html[JMX
+homepage] at Oracle.
+* The https://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html[JMX
+  specification] (JSR-000003).
+* The https://jcp.org/aboutJava/communityprocess/final/jsr160/index.html[JMX Remote API
+  specification] (JSR-000160).
+* The http://mx4j.sourceforge.net/[MX4J homepage]. (MX4J is an open-source implementation of
+  various JMX specs.)
+

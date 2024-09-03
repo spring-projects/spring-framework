@@ -1,0 +1,23 @@
+[[transaction-solutions-to-common-problems]]
+= Solutions to Common Problems
+:page-section-summary-toc: 1
+
+This section describes solutions to some common problems.
+
+
+[[transaction-solutions-to-common-problems-wrong-ptm]]
+== Using the Wrong Transaction Manager for a Specific `DataSource`
+
+Use the correct `PlatformTransactionManager` implementation based on your choice of
+transactional technologies and requirements. Used properly, the Spring Framework merely
+provides a straightforward and portable abstraction. If you use global
+transactions, you must use the
+`org.springframework.transaction.jta.JtaTransactionManager` class (or an
+xref:data-access/transaction/application-server-integration.adoc[application server-specific subclass] of
+it) for all your transactional operations. Otherwise, the transaction infrastructure
+tries to perform local transactions on such resources as container `DataSource`
+instances. Such local transactions do not make sense, and a good application server
+treats them as errors.
+
+
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -153,6 +154,18 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 				this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null);
 
 		assertThat(map).isEqualTo(Collections.emptyMap());
+	}
+
+	@Test
+	public void resolveMultiValueMapArgumentNoParams() throws Exception {
+
+		MethodParameter param = this.testMethod.annot(matrixAttribute().noPathVar())
+				.arg(MultiValueMap.class, String.class, String.class);
+
+		Object result = this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null);
+
+		assertThat(result).isInstanceOf(MultiValueMap.class)
+				.asInstanceOf(InstanceOfAssertFactories.MAP).isEmpty();
 	}
 
 	@Test

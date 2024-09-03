@@ -1,0 +1,490 @@
+[[beans-autowired-annotation]]
+= Using `@Autowired`
+
+[NOTE]
+====
+JSR 330's `@Inject` annotation can be used in place of Spring's `@Autowired` annotation in the
+examples included in this section. See xref:core/beans/standard-annotations.adoc[here] for more details.
+====
+
+You can apply the `@Autowired` annotation to constructors, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MovieRecommender {
+
+		private final CustomerPreferenceDao customerPreferenceDao;
+
+		@Autowired
+		public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
+			this.customerPreferenceDao = customerPreferenceDao;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MovieRecommender @Autowired constructor(
+		private val customerPreferenceDao: CustomerPreferenceDao)
+----
+======
+
+[NOTE]
+====
+As of Spring Framework 4.3, an `@Autowired` annotation on such a constructor is no longer
+necessary if the target bean defines only one constructor to begin with. However, if
+several constructors are available and there is no primary/default constructor, at least
+one of the constructors must be annotated with `@Autowired` in order to instruct the
+container which one to use. See the discussion on
+xref:core/beans/annotation-config/autowired.adoc#beans-autowired-annotation-constructor-resolution[constructor resolution] for details.
+====
+
+You can also apply the `@Autowired` annotation to _traditional_ setter methods,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SimpleMovieLister {
+
+		private MovieFinder movieFinder;
+
+		@Autowired
+		public void setMovieFinder(MovieFinder movieFinder) {
+			this.movieFinder = movieFinder;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class SimpleMovieLister {
+
+		@set:Autowired
+		lateinit var movieFinder: MovieFinder
+
+		// ...
+
+	}
+----
+======
+
+You can also apply the annotation to methods with arbitrary names and multiple
+arguments, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MovieRecommender {
+
+		private MovieCatalog movieCatalog;
+
+		private CustomerPreferenceDao customerPreferenceDao;
+
+		@Autowired
+		public void prepare(MovieCatalog movieCatalog,
+				CustomerPreferenceDao customerPreferenceDao) {
+			this.movieCatalog = movieCatalog;
+			this.customerPreferenceDao = customerPreferenceDao;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MovieRecommender {
+
+		private lateinit var movieCatalog: MovieCatalog
+
+		private lateinit var customerPreferenceDao: CustomerPreferenceDao
+
+		@Autowired
+		fun prepare(movieCatalog: MovieCatalog,
+					customerPreferenceDao: CustomerPreferenceDao) {
+			this.movieCatalog = movieCatalog
+			this.customerPreferenceDao = customerPreferenceDao
+		}
+
+		// ...
+	}
+----
+======
+
+You can apply `@Autowired` to fields as well and even mix it with constructors, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MovieRecommender {
+
+		private final CustomerPreferenceDao customerPreferenceDao;
+
+		@Autowired
+		private MovieCatalog movieCatalog;
+
+		@Autowired
+		public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
+			this.customerPreferenceDao = customerPreferenceDao;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MovieRecommender @Autowired constructor(
+		private val customerPreferenceDao: CustomerPreferenceDao) {
+
+		@Autowired
+		private lateinit var movieCatalog: MovieCatalog
+
+		// ...
+	}
+----
+======
+
+[TIP]
+====
+Make sure that your target components (for example, `MovieCatalog` or `CustomerPreferenceDao`)
+are consistently declared by the type that you use for your `@Autowired`-annotated
+injection points. Otherwise, injection may fail due to a "no type match found" error at runtime.
+
+For XML-defined beans or component classes found via classpath scanning, the container
+usually knows the concrete type up front. However, for `@Bean` factory methods, you need
+to make sure that the declared return type is sufficiently expressive. For components
+that implement several interfaces or for components potentially referred to by their
+implementation type, consider declaring the most specific return type on your factory
+method (at least as specific as required by the injection points referring to your bean).
+====
+
+You can also instruct Spring to provide all beans of a particular type from the
+`ApplicationContext` by adding the `@Autowired` annotation to a field or method that
+expects an array of that type, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MovieRecommender {
+
+		@Autowired
+		private MovieCatalog[] movieCatalogs;
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MovieRecommender {
+
+		@Autowired
+		private lateinit var movieCatalogs: Array<MovieCatalog>
+
+		// ...
+	}
+----
+======
+
+The same applies for typed collections, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MovieRecommender {
+
+		private Set<MovieCatalog> movieCatalogs;
+
+		@Autowired
+		public void setMovieCatalogs(Set<MovieCatalog> movieCatalogs) {
+			this.movieCatalogs = movieCatalogs;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MovieRecommender {
+
+		@Autowired
+		lateinit var movieCatalogs: Set<MovieCatalog>
+
+		// ...
+	}
+----
+======
+
+[[beans-factory-ordered]]
+[TIP]
+====
+Your target beans can implement the `org.springframework.core.Ordered` interface or use
+the `@Order` or standard `@Priority` annotation if you want items in the array or list
+to be sorted in a specific order. Otherwise, their order follows the registration
+order of the corresponding target bean definitions in the container.
+
+You can declare the `@Order` annotation at the target class level and on `@Bean` methods,
+potentially for individual bean definitions (in case of multiple definitions that
+use the same bean class). `@Order` values may influence priorities at injection points,
+but be aware that they do not influence singleton startup order, which is an
+orthogonal concern determined by dependency relationships and `@DependsOn` declarations.
+
+Note that the standard `jakarta.annotation.Priority` annotation is not available at the
+`@Bean` level, since it cannot be declared on methods. Its semantics can be modeled
+through `@Order` values in combination with `@Primary` on a single bean for each type.
+====
+
+Even typed `Map` instances can be autowired as long as the expected key type is `String`.
+The map values contain all beans of the expected type, and the keys contain the
+corresponding bean names, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MovieRecommender {
+
+		private Map<String, MovieCatalog> movieCatalogs;
+
+		@Autowired
+		public void setMovieCatalogs(Map<String, MovieCatalog> movieCatalogs) {
+			this.movieCatalogs = movieCatalogs;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MovieRecommender {
+
+		@Autowired
+		lateinit var movieCatalogs: Map<String, MovieCatalog>
+
+		// ...
+	}
+----
+======
+
+By default, autowiring fails when no matching candidate beans are available for a given
+injection point. In the case of a declared array, collection, or map, at least one
+matching element is expected.
+
+The default behavior is to treat annotated methods and fields as indicating required
+dependencies. You can change this behavior as demonstrated in the following example,
+enabling the framework to skip a non-satisfiable injection point through marking it as
+non-required (i.e., by setting the `required` attribute in `@Autowired` to `false`):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SimpleMovieLister {
+
+		private MovieFinder movieFinder;
+
+		@Autowired(required = false)
+		public void setMovieFinder(MovieFinder movieFinder) {
+			this.movieFinder = movieFinder;
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class SimpleMovieLister {
+
+		@Autowired(required = false)
+		var movieFinder: MovieFinder? = null
+
+		// ...
+	}
+----
+======
+
+[NOTE]
+====
+A non-required method will not be called at all if its dependency (or one of its
+dependencies, in case of multiple arguments) is not available. A non-required field will
+not get populated at all in such cases, leaving its default value in place.
+
+In other words, setting the `required` attribute to `false` indicates that the
+corresponding property is _optional_ for autowiring purposes, and the property will be
+ignored if it cannot be autowired. This allows properties to be assigned default values
+that can be optionally overridden via dependency injection.
+====
+
+[[beans-autowired-annotation-constructor-resolution]]
+Injected constructor and factory method arguments are a special case since the `required`
+attribute in `@Autowired` has a somewhat different meaning due to Spring's constructor
+resolution algorithm that may potentially deal with multiple constructors. Constructor
+and factory method arguments are effectively required by default but with a few special
+rules in a single-constructor scenario, such as multi-element injection points (arrays,
+collections, maps) resolving to empty instances if no matching beans are available. This
+allows for a common implementation pattern where all dependencies can be declared in a
+unique multi-argument constructor — for example, declared as a single public constructor
+without an `@Autowired` annotation.
+
+[NOTE]
+====
+Only one constructor of any given bean class may declare `@Autowired` with the `required`
+attribute set to `true`, indicating _the_ constructor to autowire when used as a Spring
+bean. As a consequence, if the `required` attribute is left at its default value `true`,
+only a single constructor may be annotated with `@Autowired`. If multiple constructors
+declare the annotation, they will all have to declare `required=false` in order to be
+considered as candidates for autowiring (analogous to `autowire=constructor` in XML).
+The constructor with the greatest number of dependencies that can be satisfied by matching
+beans in the Spring container will be chosen. If none of the candidates can be satisfied,
+then a primary/default constructor (if present) will be used. Similarly, if a class
+declares multiple constructors but none of them is annotated with `@Autowired`, then a
+primary/default constructor (if present) will be used. If a class only declares a single
+constructor to begin with, it will always be used, even if not annotated. Note that an
+annotated constructor does not have to be public.
+====
+
+Alternatively, you can express the non-required nature of a particular dependency
+through Java 8's `java.util.Optional`, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class SimpleMovieLister {
+
+		@Autowired
+		public void setMovieFinder(Optional<MovieFinder> movieFinder) {
+			...
+		}
+	}
+----
+
+As of Spring Framework 5.0, you can also use a `@Nullable` annotation (of any kind
+in any package -- for example, `javax.annotation.Nullable` from JSR-305) or just leverage
+Kotlin built-in null-safety support:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SimpleMovieLister {
+
+		@Autowired
+		public void setMovieFinder(@Nullable MovieFinder movieFinder) {
+			...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class SimpleMovieLister {
+
+		@Autowired
+		var movieFinder: MovieFinder? = null
+
+		// ...
+	}
+----
+======
+
+You can also use `@Autowired` for interfaces that are well-known resolvable
+dependencies: `BeanFactory`, `ApplicationContext`, `Environment`, `ResourceLoader`,
+`ApplicationEventPublisher`, and `MessageSource`. These interfaces and their extended
+interfaces, such as `ConfigurableApplicationContext` or `ResourcePatternResolver`, are
+automatically resolved, with no special setup necessary. The following example autowires
+an `ApplicationContext` object:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MovieRecommender {
+
+		@Autowired
+		private ApplicationContext context;
+
+		public MovieRecommender() {
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+class MovieRecommender {
+
+	@Autowired
+	lateinit var context: ApplicationContext
+
+	// ...
+}
+----
+======
+
+[NOTE]
+====
+The `@Autowired`, `@Inject`, `@Value`, and `@Resource` annotations are handled by Spring
+`BeanPostProcessor` implementations. This means that you cannot apply these annotations
+within your own `BeanPostProcessor` or `BeanFactoryPostProcessor` types (if any).
+These types must be 'wired up' explicitly by using XML or a Spring `@Bean` method.
+====
+
+
+

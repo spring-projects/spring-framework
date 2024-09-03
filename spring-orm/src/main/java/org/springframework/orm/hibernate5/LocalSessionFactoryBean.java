@@ -66,6 +66,10 @@ import org.springframework.lang.Nullable;
  * {@link HibernateTransactionManager}, this naturally allows for mixing JPA access code
  * with native Hibernate access code within the same transaction.
  *
+ * <p><b>NOTE: Hibernate ORM 6.x is officially only supported as a JPA provider.
+ * Please use {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}
+ * with {@link org.springframework.orm.jpa.JpaTransactionManager} there instead.</b>
+ *
  * @author Juergen Hoeller
  * @since 4.2
  * @see #setDataSource

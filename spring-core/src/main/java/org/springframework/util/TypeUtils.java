@@ -36,6 +36,10 @@ import org.springframework.lang.Nullable;
  */
 public abstract class TypeUtils {
 
+	private static final Type[] IMPLICIT_LOWER_BOUNDS = { null };
+
+	private static final Type[] IMPLICIT_UPPER_BOUNDS = { Object.class };
+
 	/**
 	 * Check if the right-hand side type may be assigned to the left-hand side
 	 * type following the Java generics rules.
@@ -196,20 +200,14 @@ public abstract class TypeUtils {
 		Type[] lowerBounds = wildcardType.getLowerBounds();
 
 		// supply the implicit lower bound if none are specified
-		if (lowerBounds.length == 0) {
-			lowerBounds = new Type[] { null };
-		}
-		return lowerBounds;
+		return (lowerBounds.length == 0 ? IMPLICIT_LOWER_BOUNDS : lowerBounds);
 	}
 
 	private static Type[] getUpperBounds(WildcardType wildcardType) {
 		Type[] upperBounds = wildcardType.getUpperBounds();
 
 		// supply the implicit upper bound if none are specified
-		if (upperBounds.length == 0) {
-			upperBounds = new Type[] { Object.class };
-		}
-		return upperBounds;
+		return (upperBounds.length == 0 ? IMPLICIT_UPPER_BOUNDS : upperBounds);
 	}
 
 	public static boolean isAssignableBound(@Nullable Type lhsType, @Nullable Type rhsType) {

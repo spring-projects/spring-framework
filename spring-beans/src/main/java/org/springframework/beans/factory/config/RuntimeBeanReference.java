@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,14 +132,9 @@ public class RuntimeBeanReference implements BeanReference {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof RuntimeBeanReference that)) {
-			return false;
-		}
-		return (this.beanName.equals(that.beanName) && this.beanType == that.beanType &&
-				this.toParent == that.toParent);
+		return (this == other || (other instanceof RuntimeBeanReference that &&
+				this.beanName.equals(that.beanName) && this.beanType == that.beanType &&
+				this.toParent == that.toParent));
 	}
 
 	@Override

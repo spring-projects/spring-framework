@@ -337,17 +337,17 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		private var name: String? = null
 
 		override suspend fun getName(): String? {
-			delay(10)
+			delay(1)
 			return name
 		}
 
 		override suspend fun setName(name: String?) {
-			delay(10)
+			delay(1)
 			this.name = name
 		}
 
 		override suspend fun exceptional(t: Throwable?) {
-			delay(10)
+			delay(1)
 			if (t != null) {
 				throw t
 			}

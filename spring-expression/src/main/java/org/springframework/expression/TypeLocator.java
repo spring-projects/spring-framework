@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@ package org.springframework.expression;
 
 /**
  * Implementers of this interface are expected to be able to locate types.
- * They may use a custom {@link ClassLoader} and/or deal with common
- * package prefixes (e.g. {@code java.lang}) however they wish.
+ *
+ * <p>They may use a custom {@link ClassLoader} and/or deal with common package
+ * prefixes (for example, {@code java.lang}) however they wish.
  *
  * <p>See {@link org.springframework.expression.spel.support.StandardTypeLocator}
  * for an example implementation.
@@ -31,8 +32,9 @@ package org.springframework.expression;
 public interface TypeLocator {
 
 	/**
-	 * Find a type by name. The name may or may not be fully qualified
-	 * (e.g. {@code String} or {@code java.lang.String}).
+	 * Find a type by name.
+	 * <p>The name may or may not be fully qualified &mdash; for example,
+	 * {@code String} or {@code java.lang.String}.
 	 * @param typeName the type to be located
 	 * @return the {@code Class} object representing that type
 	 * @throws EvaluationException if there is a problem finding the type

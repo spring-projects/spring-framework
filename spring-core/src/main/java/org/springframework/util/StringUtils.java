@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public abstract class StringUtils {
 	 * @see #hasText(CharSequence)
 	 */
 	public static boolean hasLength(@Nullable CharSequence str) {
-		return (str != null && str.length() > 0);
+		return (str != null && !str.isEmpty());  // as of JDK 15
 	}
 
 	/**
@@ -159,7 +159,21 @@ public abstract class StringUtils {
 	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable CharSequence str) {
-		return (str != null && str.length() > 0 && containsText(str));
+		if (str == null) {
+			return false;
+		}
+
+		int strLen = str.length();
+		if (strLen == 0) {
+			return false;
+		}
+
+		for (int i = 0; i < strLen; i++) {
+			if (!Character.isWhitespace(str.charAt(i))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -175,17 +189,7 @@ public abstract class StringUtils {
 	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable String str) {
-		return (str != null && !str.isEmpty() && containsText(str));
-	}
-
-	private static boolean containsText(CharSequence str) {
-		int strLen = str.length();
-		for (int i = 0; i < strLen; i++) {
-			if (!Character.isWhitespace(str.charAt(i))) {
-				return true;
-			}
-		}
-		return false;
+		return (str != null && !str.isBlank());
 	}
 
 	/**
@@ -239,26 +243,26 @@ public abstract class StringUtils {
 	/**
 	 * Trim <em>all</em> whitespace from the given {@code CharSequence}:
 	 * leading, trailing, and in between characters.
-	 * @param text the {@code CharSequence} to check
+	 * @param str the {@code CharSequence} to check
 	 * @return the trimmed {@code CharSequence}
 	 * @since 5.3.22
 	 * @see #trimAllWhitespace(String)
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static CharSequence trimAllWhitespace(CharSequence text) {
-		if (!hasLength(text)) {
-			return text;
+	public static CharSequence trimAllWhitespace(CharSequence str) {
+		if (!hasLength(str)) {
+			return str;
 		}
 
-		int len = text.length();
-		StringBuilder sb = new StringBuilder(text.length());
+		int len = str.length();
+		StringBuilder sb = new StringBuilder(str.length());
 		for (int i = 0; i < len; i++) {
-			char c = text.charAt(i);
+			char c = str.charAt(i);
 			if (!Character.isWhitespace(c)) {
 				sb.append(c);
 			}
 		}
-		return sb.toString();
+		return sb;
 	}
 
 	/**
@@ -270,9 +274,10 @@ public abstract class StringUtils {
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static String trimAllWhitespace(String str) {
-		if (str == null) {
-			return null;
+		if (!hasLength(str)) {
+			return str;
 		}
+
 		return trimAllWhitespace((CharSequence) str).toString();
 	}
 
@@ -514,7 +519,7 @@ public abstract class StringUtils {
 	 */
 	@Nullable
 	public static Object quoteIfString(@Nullable Object obj) {
-		return (obj instanceof String text ? quote(text) : obj);
+		return (obj instanceof String str ? quote(str) : obj);
 	}
 
 	/**
@@ -786,6 +791,7 @@ public abstract class StringUtils {
 	 * and {@code "0"} through {@code "9"} stay the same.</li>
 	 * <li>Special characters {@code "-"}, {@code "_"}, {@code "."}, and {@code "*"} stay the same.</li>
 	 * <li>A sequence "{@code %<i>xy</i>}" is interpreted as a hexadecimal representation of the character.</li>
+	 * <li>For all other characters (including those already decoded), the output is undefined.</li>
 	 * </ul>
 	 * @param source the encoded String
 	 * @param charset the character set
@@ -834,7 +840,7 @@ public abstract class StringUtils {
 	 * the {@link Locale#toString} format as well as BCP 47 language tags as
 	 * specified by {@link Locale#forLanguageTag}.
 	 * @param localeValue the locale value: following either {@code Locale's}
-	 * {@code toString()} format ("en", "en_UK", etc), also accepting spaces as
+	 * {@code toString()} format ("en", "en_UK", etc.), also accepting spaces as
 	 * separators (as an alternative to underscores), or BCP 47 (e.g. "en-UK")
 	 * @return a corresponding {@code Locale} instance, or {@code null} if none
 	 * @throws IllegalArgumentException in case of an invalid locale specification
@@ -847,7 +853,7 @@ public abstract class StringUtils {
 		if (!localeValue.contains("_") && !localeValue.contains(" ")) {
 			validateLocalePart(localeValue);
 			Locale resolved = Locale.forLanguageTag(localeValue);
-			if (resolved.getLanguage().length() > 0) {
+			if (!resolved.getLanguage().isEmpty()) {
 				return resolved;
 			}
 		}
@@ -863,41 +869,45 @@ public abstract class StringUtils {
 	 * <p><b>Note: This delegate does not accept the BCP 47 language tag format.
 	 * Please use {@link #parseLocale} for lenient parsing of both formats.</b>
 	 * @param localeString the locale {@code String}: following {@code Locale's}
-	 * {@code toString()} format ("en", "en_UK", etc), also accepting spaces as
+	 * {@code toString()} format ("en", "en_UK", etc.), also accepting spaces as
 	 * separators (as an alternative to underscores)
 	 * @return a corresponding {@code Locale} instance, or {@code null} if none
 	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 */
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	@Nullable
 	public static Locale parseLocaleString(String localeString) {
-		if (localeString.equals("")) {
+		if (localeString.isEmpty()) {
 			return null;
 		}
+
 		String delimiter = "_";
 		if (!localeString.contains("_") && localeString.contains(" ")) {
 			delimiter = " ";
 		}
-		final String[] tokens = localeString.split(delimiter, -1);
+
+		String[] tokens = localeString.split(delimiter, -1);
 		if (tokens.length == 1) {
-			final String language = tokens[0];
+			String language = tokens[0];
 			validateLocalePart(language);
 			return new Locale(language);
 		}
 		else if (tokens.length == 2) {
-			final String language = tokens[0];
+			String language = tokens[0];
 			validateLocalePart(language);
-			final String country = tokens[1];
+			String country = tokens[1];
 			validateLocalePart(country);
 			return new Locale(language, country);
 		}
 		else if (tokens.length > 2) {
-			final String language = tokens[0];
+			String language = tokens[0];
 			validateLocalePart(language);
-			final String country = tokens[1];
+			String country = tokens[1];
 			validateLocalePart(country);
-			final String variant = Arrays.stream(tokens).skip(2).collect(Collectors.joining(delimiter));
+			String variant = Arrays.stream(tokens).skip(2).collect(Collectors.joining(delimiter));
 			return new Locale(language, country, variant);
 		}
+
 		throw new IllegalArgumentException("Invalid locale format: '" + localeString + "'");
 	}
 
@@ -1172,7 +1182,7 @@ public abstract class StringUtils {
 			if (trimTokens) {
 				token = token.trim();
 			}
-			if (!ignoreEmptyTokens || token.length() > 0) {
+			if (!ignoreEmptyTokens || !token.isEmpty()) {
 				tokens.add(token);
 			}
 		}
@@ -1234,7 +1244,7 @@ public abstract class StringUtils {
 				result.add(deleteAny(str.substring(pos, delPos), charsToDelete));
 				pos = delPos + delimiter.length();
 			}
-			if (str.length() > 0 && pos <= str.length()) {
+			if (!str.isEmpty() && pos <= str.length()) {
 				// Add rest of String, but not in case of empty input.
 				result.add(deleteAny(str.substring(pos), charsToDelete));
 			}

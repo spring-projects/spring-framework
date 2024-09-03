@@ -121,14 +121,14 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public ServerResponse.BodyBuilder allow(HttpMethod... allowedMethods) {
-		Assert.notNull(allowedMethods, "Http allowedMethod must not be null");
+		Assert.notNull(allowedMethods, "Http allowedMethods must not be null");
 		this.headers.setAllow(new LinkedHashSet<>(Arrays.asList(allowedMethods)));
 		return this;
 	}
 
 	@Override
 	public ServerResponse.BodyBuilder allow(Set<HttpMethod> allowedMethods) {
-		Assert.notNull(allowedMethods, "Http allowedMethod must not be null");
+		Assert.notNull(allowedMethods, "Http allowedMethods must not be null");
 		this.headers.setAllow(allowedMethods);
 		return this;
 	}

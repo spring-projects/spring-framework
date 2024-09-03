@@ -227,20 +227,15 @@ public final class ContentDisposition {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof ContentDisposition otherCd)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(this.type, otherCd.type) &&
-				ObjectUtils.nullSafeEquals(this.name, otherCd.name) &&
-				ObjectUtils.nullSafeEquals(this.filename, otherCd.filename) &&
-				ObjectUtils.nullSafeEquals(this.charset, otherCd.charset) &&
-				ObjectUtils.nullSafeEquals(this.size, otherCd.size) &&
-				ObjectUtils.nullSafeEquals(this.creationDate, otherCd.creationDate)&&
-				ObjectUtils.nullSafeEquals(this.modificationDate, otherCd.modificationDate)&&
-				ObjectUtils.nullSafeEquals(this.readDate, otherCd.readDate));
+		return (this == other || (other instanceof ContentDisposition that &&
+				ObjectUtils.nullSafeEquals(this.type, that.type) &&
+				ObjectUtils.nullSafeEquals(this.name, that.name) &&
+				ObjectUtils.nullSafeEquals(this.filename, that.filename) &&
+				ObjectUtils.nullSafeEquals(this.charset, that.charset) &&
+				ObjectUtils.nullSafeEquals(this.size, that.size) &&
+				ObjectUtils.nullSafeEquals(this.creationDate, that.creationDate)&&
+				ObjectUtils.nullSafeEquals(this.modificationDate, that.modificationDate)&&
+				ObjectUtils.nullSafeEquals(this.readDate, that.readDate)));
 	}
 
 	@Override
@@ -704,7 +699,7 @@ public final class ContentDisposition {
 		/**
 		 * Set the value of the {@literal name} parameter.
 		 */
-		Builder name(String name);
+		Builder name(@Nullable String name);
 
 		/**
 		 * Set the value of the {@literal filename} parameter. The given
@@ -713,7 +708,7 @@ public final class ContentDisposition {
 		 * be escaped with a backslash, e.g. {@code "foo\"bar.txt"} becomes
 		 * {@code "foo\\\"bar.txt"}.
 		 */
-		Builder filename(String filename);
+		Builder filename(@Nullable String filename);
 
 		/**
 		 * Set the value of the {@code filename} that will be encoded as
@@ -724,7 +719,7 @@ public final class ContentDisposition {
 		 * <a href="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
 		 * and also RFC 5987 mention it does not apply to multipart requests.
 		 */
-		Builder filename(String filename, Charset charset);
+		Builder filename(@Nullable String filename, @Nullable Charset charset);
 
 		/**
 		 * Set the value of the {@literal size} parameter.
@@ -733,7 +728,7 @@ public final class ContentDisposition {
 		 * to be removed in a future release.
 		 */
 		@Deprecated
-		Builder size(Long size);
+		Builder size(@Nullable Long size);
 
 		/**
 		 * Set the value of the {@literal creation-date} parameter.
@@ -742,7 +737,7 @@ public final class ContentDisposition {
 		 * to be removed in a future release.
 		 */
 		@Deprecated
-		Builder creationDate(ZonedDateTime creationDate);
+		Builder creationDate(@Nullable ZonedDateTime creationDate);
 
 		/**
 		 * Set the value of the {@literal modification-date} parameter.
@@ -751,7 +746,7 @@ public final class ContentDisposition {
 		 * to be removed in a future release.
 		 */
 		@Deprecated
-		Builder modificationDate(ZonedDateTime modificationDate);
+		Builder modificationDate(@Nullable ZonedDateTime modificationDate);
 
 		/**
 		 * Set the value of the {@literal read-date} parameter.
@@ -760,7 +755,7 @@ public final class ContentDisposition {
 		 * to be removed in a future release.
 		 */
 		@Deprecated
-		Builder readDate(ZonedDateTime readDate);
+		Builder readDate(@Nullable ZonedDateTime readDate);
 
 		/**
 		 * Build the content disposition.
@@ -807,14 +802,12 @@ public final class ContentDisposition {
 
 		@Override
 		public Builder filename(String filename) {
-			Assert.hasText(filename, "No filename");
 			this.filename = filename;
 			return this;
 		}
 
 		@Override
 		public Builder filename(String filename, Charset charset) {
-			Assert.hasText(filename, "No filename");
 			this.filename = filename;
 			this.charset = charset;
 			return this;

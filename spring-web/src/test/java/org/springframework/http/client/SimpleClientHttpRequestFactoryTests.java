@@ -32,14 +32,15 @@ import static org.mockito.Mockito.verify;
  */
 public class SimpleClientHttpRequestFactoryTests {
 
-
-	@Test // SPR-13225
+	@Test  // SPR-13225
 	public void headerWithNullValue() {
 		HttpURLConnection urlConnection = mock();
 		given(urlConnection.getRequestMethod()).willReturn("GET");
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("foo", null);
 		SimpleBufferingClientHttpRequest.addHeaders(urlConnection, headers);
+
 		verify(urlConnection, times(1)).addRequestProperty("foo", "");
 	}
 

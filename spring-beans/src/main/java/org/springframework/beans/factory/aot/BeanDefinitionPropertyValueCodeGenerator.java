@@ -69,6 +69,7 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 	BeanDefinitionPropertyValueCodeGenerator(GeneratedMethods generatedMethods,
 			@Nullable BiFunction<Object, ResolvableType, CodeBlock> customValueGenerator) {
+
 		this.generatedMethods = generatedMethods;
 		this.delegates = new ArrayList<>();
 		if (customValueGenerator != null) {
@@ -143,7 +144,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 
 		@Nullable
 		CodeBlock generateCode(Object value, ResolvableType type);
-
 	}
 
 
@@ -162,7 +162,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 				'\'', "\\'",
 				'\\', "\\\\"
 		);
-
 
 		@Override
 		@Nullable
@@ -231,7 +230,6 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			}
 			return null;
 		}
-
 	}
 
 
@@ -321,8 +319,8 @@ class BeanDefinitionPropertyValueCodeGenerator {
 			this.emptyResult = emptyResult;
 		}
 
-		@Override
 		@SuppressWarnings("unchecked")
+		@Override
 		@Nullable
 		public CodeBlock generateCode(Object value, ResolvableType type) {
 			if (this.collectionType.isInstance(value)) {

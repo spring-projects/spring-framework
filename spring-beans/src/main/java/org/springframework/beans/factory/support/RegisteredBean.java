@@ -17,13 +17,16 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Executable;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
@@ -207,6 +210,24 @@ public final class RegisteredBean {
 	public Executable resolveConstructorOrFactoryMethod() {
 		return new ConstructorResolver((AbstractAutowireCapableBeanFactory) getBeanFactory())
 				.resolveConstructorOrFactoryMethod(getBeanName(), getMergedBeanDefinition());
+	}
+
+	/**
+	 * Resolve an autowired argument.
+	 * @param descriptor the descriptor for the dependency (field/method/constructor)
+	 * @param typeConverter the TypeConverter to use for populating arrays and collections
+	 * @param autowiredBeanNames a Set that all names of autowired beans (used for
+	 * resolving the given dependency) are supposed to be added to
+	 * @return the resolved object, or {@code null} if none found
+	 * @since 6.0.9
+	 */
+	@Nullable
+	public Object resolveAutowiredArgument(
+			DependencyDescriptor descriptor, TypeConverter typeConverter, Set<String> autowiredBeanNames) {
+
+		return new ConstructorResolver((AbstractAutowireCapableBeanFactory) getBeanFactory())
+				.resolveAutowiredArgument(descriptor, descriptor.getDependencyType(),
+						getBeanName(), autowiredBeanNames, typeConverter, true);
 	}
 
 

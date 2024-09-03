@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.http.codec.ServerSentEvent
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier.FirstStep
+import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
 
 /**
@@ -93,6 +94,7 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 		val sseType = ResolvableType.forClass(ServerSentEvent::class.java)
 		assertThat(encoder.canEncode(sseType, MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(encoder.canEncode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClass(BigDecimal::class.java), null)).isFalse()
 	}
 
 

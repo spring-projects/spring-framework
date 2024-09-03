@@ -91,25 +91,20 @@ final class MethodName {
 
 
 	@Override
-	public int hashCode() {
-		return this.value.hashCode();
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof MethodName that && this.value.equals(that.value)));
 	}
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if ((obj == null) || (getClass() != obj.getClass())) {
-			return false;
-		}
-		return this.value.equals(((MethodName) obj).value);
+	public int hashCode() {
+		return this.value.hashCode();
 	}
 
 	@Override
 	public String toString() {
 		return (!StringUtils.hasLength(this.value)) ? "$$aot" : this.value ;
 	}
+
 
 	private static String join(String[] parts) {
 		return StringUtils.uncapitalize(Arrays.stream(parts).map(MethodName::clean)

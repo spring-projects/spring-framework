@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http;
 
 import java.io.Serializable;
 
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
@@ -27,8 +26,7 @@ import org.springframework.lang.Nullable;
  * @author Arjen Poutsma
  * @since 6.0
  */
-final class DefaultHttpStatusCode
-		implements HttpStatusCode, Comparable<HttpStatusCode>, Serializable {
+final class DefaultHttpStatusCode implements HttpStatusCode, Comparable<HttpStatusCode>, Serializable {
 
 	private static final long serialVersionUID = 7017664779360718111L;
 
@@ -79,19 +77,20 @@ final class DefaultHttpStatusCode
 		return this.value / 100;
 	}
 
+
 	@Override
-	public int compareTo(@NonNull HttpStatusCode o) {
-		return Integer.compare(this.value, o.value());
+	public int compareTo(HttpStatusCode other) {
+		return Integer.compare(this.value, other.value());
+	}
+
+	@Override
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof HttpStatusCode that && this.value == that.value()));
 	}
 
 	@Override
 	public int hashCode() {
 		return this.value;
-	}
-
-	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj) || (obj instanceof HttpStatusCode that && this.value == that.value());
 	}
 
 	@Override

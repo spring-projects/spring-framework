@@ -1,0 +1,82 @@
+[[mvc-ann-requestparam]]
+= `@RequestParam`
+
+[.small]#xref:web/webflux/controller/ann-methods/requestparam.adoc[See equivalent in the Reactive stack]#
+
+You can use the `@RequestParam` annotation to bind Servlet request parameters (that is,
+query parameters or form data) to a method argument in a controller.
+
+The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	@RequestMapping("/pets")
+	public class EditPetForm {
+
+		// ...
+
+		@GetMapping
+		public String setupForm(@RequestParam("petId") int petId, Model model) { <1>
+			Pet pet = this.clinic.loadPet(petId);
+			model.addAttribute("pet", pet);
+			return "petForm";
+		}
+
+		// ...
+
+	}
+----
+<1> Using `@RequestParam` to bind `petId`.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.ui.set
+
+	@Controller
+	@RequestMapping("/pets")
+	class EditPetForm {
+
+		// ...
+
+		@GetMapping
+		fun setupForm(@RequestParam("petId") petId: Int, model: Model): String { // <1>
+			val pet = this.clinic.loadPet(petId);
+			model["pet"] = pet
+			return "petForm"
+		}
+
+		// ...
+
+	}
+----
+<1> Using `@RequestParam` to bind `petId`.
+======
+
+By default, method parameters that use this annotation are required, but you can specify that
+a method parameter is optional by setting the `@RequestParam` annotation's `required` flag to
+`false` or by declaring the argument with an `java.util.Optional` wrapper.
+
+Type conversion is automatically applied if the target method parameter type is not
+`String`. See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion].
+
+Declaring the argument type as an array or list allows for resolving multiple parameter
+values for the same parameter name.
+
+When an `@RequestParam` annotation is declared as a `Map<String, String>` or
+`MultiValueMap<String, String>`, without a parameter name specified in the annotation,
+then the map is populated with the request parameter values for each given parameter name.
+
+Note that use of `@RequestParam` is optional (for example, to set its attributes).
+By default, any argument that is a simple value type (as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
+and is not resolved by any other argument resolver, is treated as if it were annotated
+with `@RequestParam`.
+
+

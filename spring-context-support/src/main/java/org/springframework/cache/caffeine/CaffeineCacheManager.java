@@ -110,7 +110,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * Set the Caffeine to use for building each individual
 	 * {@link CaffeineCache} instance.
 	 * @see #createNativeCaffeineCache
-	 * @see com.github.benmanes.caffeine.cache.Caffeine#build()
+	 * @see Caffeine#build()
 	 */
 	public void setCaffeine(Caffeine<Object, Object> caffeine) {
 		Assert.notNull(caffeine, "Caffeine must not be null");
@@ -121,7 +121,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * Set the {@link CaffeineSpec} to use for building each individual
 	 * {@link CaffeineCache} instance.
 	 * @see #createNativeCaffeineCache
-	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(CaffeineSpec)
+	 * @see Caffeine#from(CaffeineSpec)
 	 */
 	public void setCaffeineSpec(CaffeineSpec caffeineSpec) {
 		doSetCaffeine(Caffeine.from(caffeineSpec));
@@ -132,7 +132,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * individual {@link CaffeineCache} instance. The given value needs to
 	 * comply with Caffeine's {@link CaffeineSpec} (see its javadoc).
 	 * @see #createNativeCaffeineCache
-	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(String)
+	 * @see Caffeine#from(String)
 	 */
 	public void setCacheSpecification(String cacheSpecification) {
 		doSetCaffeine(Caffeine.from(cacheSpecification));
@@ -149,7 +149,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * Set the Caffeine CacheLoader to use for building each individual
 	 * {@link CaffeineCache} instance, turning it into a LoadingCache.
 	 * @see #createNativeCaffeineCache
-	 * @see com.github.benmanes.caffeine.cache.Caffeine#build(CacheLoader)
+	 * @see Caffeine#build(CacheLoader)
 	 * @see com.github.benmanes.caffeine.cache.LoadingCache
 	 */
 	public void setCacheLoader(CacheLoader<Object, Object> cacheLoader) {
@@ -189,13 +189,11 @@ public class CaffeineCacheManager implements CacheManager {
 	@Override
 	@Nullable
 	public Cache getCache(String name) {
-		if (this.dynamic) {
-			Cache cache = this.cacheMap.get(name);
-			return (cache != null) ? cache : this.cacheMap.computeIfAbsent(name, this::createCaffeineCache);
+		Cache cache = this.cacheMap.get(name);
+		if (cache == null && this.dynamic) {
+			cache = this.cacheMap.computeIfAbsent(name, this::createCaffeineCache);
 		}
-		else {
-			return this.cacheMap.get(name);
-		}
+		return cache;
 	}
 
 
@@ -238,7 +236,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * Build a common {@link CaffeineCache} instance for the specified cache name,
 	 * using the common Caffeine configuration specified on this cache manager.
 	 * <p>Delegates to {@link #adaptCaffeineCache} as the adaptation method to
-	 * Spring's cache abstraction (allowing for centralized decoration etc),
+	 * Spring's cache abstraction (allowing for centralized decoration etc.),
 	 * passing in a freshly built native Caffeine Cache instance.
 	 * @param name the name of the cache
 	 * @return the Spring CaffeineCache adapter (or a decorator thereof)

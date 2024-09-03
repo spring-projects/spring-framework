@@ -64,6 +64,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Creates instances of {@link org.springframework.web.util.UriComponentsBuilder}
@@ -544,10 +545,8 @@ public class MvcUriComponentsBuilder {
 		String typePath = getClassMapping(controllerType);
 		String methodPath = getMethodMapping(method);
 		String path = pathMatcher.combine(typePath, methodPath);
-		if (StringUtils.hasLength(path) && !path.startsWith("/")) {
-			path = "/" + path;
-		}
-		else if (!StringUtils.hasText(prefix + path)) {
+		path = PathPatternParser.defaultInstance.initFullPathPattern(path);
+		if (!StringUtils.hasText(prefix + path)) {
 			path = "/";
 		}
 		builder.path(path);
@@ -745,8 +744,8 @@ public class MvcUriComponentsBuilder {
 
 		@Override
 		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			return intercept(proxy, method, args, null);
+		public Object invoke(Object proxy, Method method, @Nullable Object[] args) {
+			return intercept(proxy, method, (args != null ? args : new Object[0]), null);
 		}
 
 		@Override
@@ -780,10 +779,23 @@ public class MvcUriComponentsBuilder {
 
 			else if (controllerType.isInterface()) {
 				ClassLoader classLoader = controllerType.getClassLoader();
-				if (classLoader == null || classLoader.getParent() == null) {
-					// JDK interface type from bootstrap loader or platform loader ->
-					// use higher-level loader which can see Spring infrastructure classes
+				if (classLoader == null) {
+					// JDK bootstrap loader -> use MethodInvocationInfo ClassLoader instead.
 					classLoader = MethodInvocationInfo.class.getClassLoader();
+				}
+				else if (classLoader.getParent() == null) {
+					// Potentially the JDK platform loader on JDK 9+
+					ClassLoader miiClassLoader = MethodInvocationInfo.class.getClassLoader();
+					ClassLoader miiParent = miiClassLoader.getParent();
+					while (miiParent != null) {
+						if (classLoader == miiParent) {
+							// Suggested ClassLoader is ancestor of MethodInvocationInfo ClassLoader
+							// -> use MethodInvocationInfo ClassLoader itself instead.
+							classLoader = miiClassLoader;
+							break;
+						}
+						miiParent = miiParent.getParent();
+					}
 				}
 				Class<?>[] ifcs = new Class<?>[] {controllerType, MethodInvocationInfo.class};
 				return (T) Proxy.newProxyInstance(classLoader, ifcs, interceptor);

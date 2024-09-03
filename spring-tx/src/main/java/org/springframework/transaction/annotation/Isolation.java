@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public enum Isolation {
 	/**
 	 * A constant indicating that dirty reads, non-repeatable reads, and phantom
 	 * reads are prevented.
-	 * <p>This level includes the prohibitions in {@link #ISOLATION_REPEATABLE_READ}
+	 * <p>This level includes the prohibitions in {@link #REPEATABLE_READ}
 	 * and further prohibits the situation where one transaction reads all rows that
 	 * satisfy a {@code WHERE} condition, a second transaction inserts a row
 	 * that satisfies that {@code WHERE} condition, and the first transaction

@@ -65,13 +65,13 @@ public class UtilNamespaceHandlerTests {
 	@Test
 	void testConstant() {
 		Integer min = (Integer) this.beanFactory.getBean("min");
-		assertThat(min.intValue()).isEqualTo(Integer.MIN_VALUE);
+		assertThat(min).isEqualTo(Integer.MIN_VALUE);
 	}
 
 	@Test
 	void testConstantWithDefaultName() {
 		Integer max = (Integer) this.beanFactory.getBean("java.lang.Integer.MAX_VALUE");
-		assertThat(max.intValue()).isEqualTo(Integer.MAX_VALUE);
+		assertThat(max).isEqualTo(Integer.MAX_VALUE);
 	}
 
 	@Test

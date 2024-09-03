@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,15 +48,16 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 
 	DummyRoutingConnectionFactory connectionFactory;
 
+
 	@BeforeEach
 	public void before() {
 		connectionFactory = new DummyRoutingConnectionFactory();
 		connectionFactory.setDefaultTargetConnectionFactory(defaultConnectionFactory);
 	}
 
+
 	@Test
 	public void shouldDetermineRoutedFactory() {
-
 		connectionFactory.setTargetConnectionFactories(
 				singletonMap("key", routedConnectionFactory));
 		connectionFactory.setConnectionFactoryLookup(new MapConnectionFactoryLookup());
@@ -85,8 +86,8 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 	public void initializationShouldFailUnsupportedLookupKey() {
 		connectionFactory.setTargetConnectionFactories(singletonMap("key", new Object()));
 
-		assertThatThrownBy(() -> connectionFactory.afterPropertiesSet()).isInstanceOf(
-				IllegalArgumentException.class);
+		assertThatThrownBy(() -> connectionFactory.afterPropertiesSet())
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -96,8 +97,7 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 
 		assertThatThrownBy(() -> connectionFactory.afterPropertiesSet())
 				.isInstanceOf(ConnectionFactoryLookupFailureException.class)
-				.hasMessageContaining(
-						"No ConnectionFactory with name 'value' registered");
+				.hasMessageContaining("No ConnectionFactory with name 'value' registered");
 	}
 
 	@Test
@@ -144,12 +144,11 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 
 	@Test
 	public void shouldLookupFromMap() {
-		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup("lookup-key",
-				routedConnectionFactory);
+		MapConnectionFactoryLookup lookup =
+				new MapConnectionFactoryLookup("lookup-key", routedConnectionFactory);
 
 		connectionFactory.setConnectionFactoryLookup(lookup);
-		connectionFactory.setTargetConnectionFactories(
-				singletonMap("my-key", "lookup-key"));
+		connectionFactory.setTargetConnectionFactories(singletonMap("my-key", "lookup-key"));
 		connectionFactory.afterPropertiesSet();
 
 		connectionFactory.determineTargetConnectionFactory()
@@ -182,6 +181,7 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 				.expectNext(routedConnectionFactory)
 				.verifyComplete();
 	}
+
 
 	static class DummyRoutingConnectionFactory extends AbstractRoutingConnectionFactory {
 

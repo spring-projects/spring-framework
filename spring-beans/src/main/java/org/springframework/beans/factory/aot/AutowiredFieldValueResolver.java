@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,8 +179,7 @@ public final class AutowiredFieldValueResolver extends AutowiredElementResolver 
 		DependencyDescriptor descriptor = new DependencyDescriptor(field, this.required);
 		descriptor.setContainingClass(beanClass);
 		if (this.shortcut != null) {
-			descriptor = new ShortcutDependencyDescriptor(descriptor, this.shortcut,
-					field.getType());
+			descriptor = new ShortcutDependencyDescriptor(descriptor, this.shortcut);
 		}
 		Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
 		TypeConverter typeConverter = beanFactory.getTypeConverter();
@@ -192,16 +191,14 @@ public final class AutowiredFieldValueResolver extends AutowiredElementResolver 
 			return value;
 		}
 		catch (BeansException ex) {
-			throw new UnsatisfiedDependencyException(null, beanName,
-					new InjectionPoint(field), ex);
+			throw new UnsatisfiedDependencyException(null, beanName, new InjectionPoint(field), ex);
 		}
 	}
 
 	private Field getField(RegisteredBean registeredBean) {
-		Field field = ReflectionUtils.findField(registeredBean.getBeanClass(),
-				this.fieldName);
-		Assert.notNull(field, () -> "No field '" + this.fieldName + "' found on "
-				+ registeredBean.getBeanClass().getName());
+		Field field = ReflectionUtils.findField(registeredBean.getBeanClass(), this.fieldName);
+		Assert.notNull(field, () -> "No field '" + this.fieldName + "' found on " +
+				registeredBean.getBeanClass().getName());
 		return field;
 	}
 

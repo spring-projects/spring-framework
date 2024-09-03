@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 
 	private int priority;
 
-	private int misfireInstruction;
+	private int misfireInstruction = SimpleTrigger.MISFIRE_INSTRUCTION_SMART_POLICY;
 
 	@Nullable
 	private String description;
@@ -184,22 +184,24 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	}
 
 	/**
-	 * Specify a misfire instruction for this trigger.
+	 * Specify the misfire instruction for this trigger.
 	 */
 	public void setMisfireInstruction(int misfireInstruction) {
 		this.misfireInstruction = misfireInstruction;
 	}
 
 	/**
-	 * Set the misfire instruction via the name of the corresponding
-	 * constant in the {@link org.quartz.SimpleTrigger} class.
-	 * Default is {@code MISFIRE_INSTRUCTION_SMART_POLICY}.
+	 * Set the misfire instruction for this trigger via the name of the corresponding
+	 * constant in the {@link org.quartz.Trigger} and {@link org.quartz.SimpleTrigger}
+	 * classes.
+	 * <p>Default is {@code MISFIRE_INSTRUCTION_SMART_POLICY}.
+	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
+	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_IGNORE_MISFIRE_POLICY
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_FIRE_NOW
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_EXISTING_REPEAT_COUNT
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NOW_WITH_REMAINING_REPEAT_COUNT
-	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
 	 */
 	public void setMisfireInstructionName(String constantName) {
 		this.misfireInstruction = constants.asNumber(constantName).intValue();

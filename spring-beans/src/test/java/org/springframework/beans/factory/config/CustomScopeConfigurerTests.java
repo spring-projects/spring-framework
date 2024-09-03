@@ -66,8 +66,7 @@ public class CustomScopeConfigurerTests {
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
 		figurer.postProcessBeanFactory(factory);
-		boolean condition = factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope;
-		assertThat(condition).isTrue();
+		assertThat(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope).isTrue();
 	}
 
 	@Test
@@ -77,8 +76,7 @@ public class CustomScopeConfigurerTests {
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
 		figurer.postProcessBeanFactory(factory);
-		boolean condition = factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope;
-		assertThat(condition).isTrue();
+		assertThat(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope).isTrue();
 	}
 
 	@Test

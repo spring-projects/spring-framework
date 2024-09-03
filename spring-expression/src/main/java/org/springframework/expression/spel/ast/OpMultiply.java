@@ -123,7 +123,12 @@ public class OpMultiply extends Operator {
 	}
 
 	private void checkRepeatedTextSize(String text, int count) {
-		if (text.length() * count > MAX_REPEATED_TEXT_SIZE) {
+		if (count < 0) {
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.NEGATIVE_REPEATED_TEXT_COUNT, count);
+		}
+		int result = text.length() * count;
+		if (result < 0 || result > MAX_REPEATED_TEXT_SIZE) {
 			throw new SpelEvaluationException(getStartPosition(),
 					SpelMessage.MAX_REPEATED_TEXT_SIZE_EXCEEDED, MAX_REPEATED_TEXT_SIZE);
 		}

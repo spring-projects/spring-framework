@@ -160,7 +160,7 @@ class ApplicationContextExpressionTests {
 			ValueTestBean tb3 = ac.getBean("tb3", ValueTestBean.class);
 			assertThat(tb3.name).isEqualTo("XXXmyNameYYY42ZZZ");
 			assertThat(tb3.age).isEqualTo(42);
-			assertThat(tb3.ageFactory.getObject().intValue()).isEqualTo(42);
+			assertThat(tb3.ageFactory.getObject()).isEqualTo(42);
 			assertThat(tb3.country).isEqualTo("123 UK");
 			assertThat(tb3.countryFactory.getObject()).isEqualTo("123 UK");
 			System.getProperties().put("country", "US");

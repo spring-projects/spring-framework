@@ -217,6 +217,19 @@ public class ProblemDetail {
 	}
 
 	/**
+	 * Setter for the {@link #getProperties() properties map}.
+	 * <p>By default, this is not set.
+	 * <p>When Jackson JSON is present on the classpath, any properties set here
+	 * are rendered as top level key-value pairs in the output JSON. Otherwise,
+	 * they are rendered as a {@code "properties"} sub-map.
+	 * @param properties the properties map
+	 * @since 6.0.14
+	 */
+	public void setProperties(@Nullable Map<String, Object> properties) {
+		this.properties = properties;
+	}
+
+	/**
 	 * Return a generic map of properties that are not known ahead of time,
 	 * possibly {@code null} if no properties have been added. To add a property,
 	 * use {@link #setProperty(String, Object)}.
@@ -233,18 +246,13 @@ public class ProblemDetail {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof ProblemDetail otherDetail)) {
-			return false;
-		}
-		return (getType().equals(otherDetail.getType()) &&
-				ObjectUtils.nullSafeEquals(getTitle(), otherDetail.getTitle()) &&
-				this.status == otherDetail.status &&
-				ObjectUtils.nullSafeEquals(this.detail, otherDetail.detail) &&
-				ObjectUtils.nullSafeEquals(this.instance, otherDetail.instance) &&
-				ObjectUtils.nullSafeEquals(this.properties, otherDetail.properties));
+		return (this == other || (other instanceof ProblemDetail that &&
+				getType().equals(that.getType()) &&
+				ObjectUtils.nullSafeEquals(getTitle(), that.getTitle()) &&
+				this.status == that.status &&
+				ObjectUtils.nullSafeEquals(this.detail, that.detail) &&
+				ObjectUtils.nullSafeEquals(this.instance, that.instance) &&
+				ObjectUtils.nullSafeEquals(this.properties, that.properties)));
 	}
 
 	@Override

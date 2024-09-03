@@ -78,6 +78,26 @@ class EvaluationTests extends AbstractExpressionTests {
 		}
 
 		@Test
+		void maxExpressionLengthIsConfigurable() {
+			int maximumExpressionLength = 20_000;
+
+			String expression = "'%s'".formatted("Y".repeat(19_998));
+			assertThat(expression).hasSize(maximumExpressionLength);
+
+			SpelParserConfiguration configuration =
+					new SpelParserConfiguration(null, null, false, false, 0, maximumExpressionLength);
+			ExpressionParser parser = new SpelExpressionParser(configuration);
+
+			Expression expr = parser.parseExpression(expression);
+			String result = expr.getValue(String.class);
+			assertThat(result).hasSize(19_998);
+
+			expression = "'%s'".formatted("Y".repeat(25_000));
+			assertThat(expression).hasSize(25_002);
+			evaluateAndCheckError(parser, expression, String.class, SpelMessage.MAX_EXPRESSION_LENGTH_EXCEEDED);
+		}
+
+		@Test
 		void createListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 			Expression e = parser.parseExpression("list[0]");
@@ -524,7 +544,7 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			pattern += "?";
 			assertThat(pattern).hasSize(1001);
-			evaluateAndCheckError("'abc' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
+			evaluateAndCheckError("'X' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
 		}
 
 	}
@@ -839,7 +859,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 			Expression e =  parser.parseExpression("#this++");
-			assertThat(i.intValue()).isEqualTo(42);
+			assertThat(i).isEqualTo(42);
 			assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
 			e.getValue(ctx, Integer.class))
 			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
@@ -989,7 +1009,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 			Expression e =  parser.parseExpression("#this--");
-			assertThat(i.intValue()).isEqualTo(42);
+			assertThat(i).isEqualTo(42);
 			assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
 			e.getValue(ctx, Integer.class))
 			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.NOT_ASSIGNABLE));
@@ -1150,13 +1170,13 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			// index1 is 3 intArray[3] is 4
 			e =  parser.parseExpression("intArray[#root.index1++]--");
-			assertThat(e.getValue(ctx, Integer.class).intValue()).isEqualTo(4);
+			assertThat(e.getValue(ctx, Integer.class)).isEqualTo(4);
 			assertThat(helper.index1).isEqualTo(4);
 			assertThat(helper.intArray[3]).isEqualTo(3);
 
 			// index1 is 4, intArray[3] is 3
 			e =  parser.parseExpression("intArray[--#root.index1]++");
-			assertThat(e.getValue(ctx, Integer.class).intValue()).isEqualTo(3);
+			assertThat(e.getValue(ctx, Integer.class)).isEqualTo(3);
 			assertThat(helper.index1).isEqualTo(3);
 			assertThat(helper.intArray[3]).isEqualTo(4);
 		}
@@ -1407,22 +1427,22 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			ctx.setVariable("wobble", 3);
 			e = parser.parseExpression("#wobble++");
-			assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(3);
+			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(3);
 			int r = e.getValue(ctx, Integer.TYPE);
 			assertThat(r).isEqualTo(3);
-			assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(4);
+			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(4);
 
 			e = parser.parseExpression("--#wobble");
-			assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(4);
+			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(4);
 			r = e.getValue(ctx, Integer.TYPE);
 			assertThat(r).isEqualTo(3);
-			assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(3);
+			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(3);
 
 			e = parser.parseExpression("#wobble=34");
-			assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(3);
+			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(3);
 			r = e.getValue(ctx, Integer.TYPE);
 			assertThat(r).isEqualTo(34);
-			assertThat(((Integer) ctx.lookupVariable("wobble")).intValue()).isEqualTo(34);
+			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(34);
 
 			// Projection
 			expectFailNotIncrementable(parser, ctx, "({1,2,3}.![#isEven(#this)])++");  // projection would be {false,true,false}

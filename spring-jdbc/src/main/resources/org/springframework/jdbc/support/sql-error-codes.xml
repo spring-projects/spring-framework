@@ -172,7 +172,7 @@
 			<value>2601,2627</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>544,8114,8115</value>
+			<value>544,2628,8114,8115</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
 			<value>4060</value>

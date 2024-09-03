@@ -1,0 +1,75 @@
+[[spring-testing-annotation-contexthierarchy]]
+= `@ContextHierarchy`
+
+`@ContextHierarchy` is a class-level annotation that is used to define a hierarchy of
+`ApplicationContext` instances for integration tests. `@ContextHierarchy` should be
+declared with a list of one or more `@ContextConfiguration` instances, each of which
+defines a level in the context hierarchy. The following examples demonstrate the use of
+`@ContextHierarchy` within a single test class (`@ContextHierarchy` can also be used
+within a test class hierarchy):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextHierarchy({
+		@ContextConfiguration("/parent-config.xml"),
+		@ContextConfiguration("/child-config.xml")
+	})
+	class ContextHierarchyTests {
+		// class body...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextHierarchy(
+		ContextConfiguration("/parent-config.xml"),
+		ContextConfiguration("/child-config.xml"))
+	class ContextHierarchyTests {
+		// class body...
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@WebAppConfiguration
+	@ContextHierarchy({
+		@ContextConfiguration(classes = AppConfig.class),
+		@ContextConfiguration(classes = WebConfig.class)
+	})
+	class WebIntegrationTests {
+		// class body...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@WebAppConfiguration
+	@ContextHierarchy(
+			ContextConfiguration(classes = [AppConfig::class]),
+			ContextConfiguration(classes = [WebConfig::class]))
+	class WebIntegrationTests {
+		// class body...
+	}
+----
+======
+
+If you need to merge or override the configuration for a given level of the context
+hierarchy within a test class hierarchy, you must explicitly name that level by supplying
+the same value to the `name` attribute in `@ContextConfiguration` at each corresponding
+level in the class hierarchy. See xref:testing/testcontext-framework/ctx-management/hierarchies.adoc[Context Hierarchies] and the
+{api-spring-framework}/test/context/ContextHierarchy.html[`@ContextHierarchy`] javadoc
+for further examples.
+

@@ -1,0 +1,988 @@
+[[aop-using-aspectj]]
+= Using AspectJ with Spring Applications
+
+Everything we have covered so far in this chapter is pure Spring AOP. In this section,
+we look at how you can use the AspectJ compiler or weaver instead of or in
+addition to Spring AOP if your needs go beyond the facilities offered by Spring AOP
+alone.
+
+Spring ships with a small AspectJ aspect library, which is available stand-alone in your
+distribution as `spring-aspects.jar`. You need to add this to your classpath in order
+to use the aspects in it. xref:core/aop/using-aspectj.adoc#aop-atconfigurable[Using AspectJ to Dependency Inject Domain Objects with Spring] and xref:core/aop/using-aspectj.adoc#aop-ajlib-other[Other Spring aspects for AspectJ] discuss the
+content of this library and how you can use it. xref:core/aop/using-aspectj.adoc#aop-aj-configure[Configuring AspectJ Aspects by Using Spring IoC] discusses how to
+dependency inject AspectJ aspects that are woven using the AspectJ compiler. Finally,
+xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework] provides an introduction to load-time weaving for Spring applications
+that use AspectJ.
+
+
+
+[[aop-atconfigurable]]
+== Using AspectJ to Dependency Inject Domain Objects with Spring
+
+The Spring container instantiates and configures beans defined in your application
+context. It is also possible to ask a bean factory to configure a pre-existing
+object, given the name of a bean definition that contains the configuration to be applied.
+`spring-aspects.jar` contains an annotation-driven aspect that exploits this
+capability to allow dependency injection of any object. The support is intended to
+be used for objects created outside of the control of any container. Domain objects
+often fall into this category because they are often created programmatically with the
+`new` operator or by an ORM tool as a result of a database query.
+
+The `@Configurable` annotation marks a class as being eligible for Spring-driven
+configuration. In the simplest case, you can use purely it as a marker annotation, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+----
+	package com.xyz.domain;
+
+	import org.springframework.beans.factory.annotation.Configurable;
+
+	@Configurable
+	public class Account {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+----
+	package com.xyz.domain
+
+	import org.springframework.beans.factory.annotation.Configurable
+
+	@Configurable
+	class Account {
+		// ...
+	}
+----
+======
+
+When used as a marker interface in this way, Spring configures new instances of the
+annotated type (`Account`, in this case) by using a bean definition (typically
+prototype-scoped) with the same name as the fully-qualified type name
+(`com.xyz.domain.Account`). Since the default name for a bean is the
+fully-qualified name of its type, a convenient way to declare the prototype definition
+is to omit the `id` attribute, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<bean class="com.xyz.domain.Account" scope="prototype">
+		<property name="fundsTransferService" ref="fundsTransferService"/>
+	</bean>
+----
+
+If you want to explicitly specify the name of the prototype bean definition to use, you
+can do so directly in the annotation, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+----
+	package com.xyz.domain;
+
+	import org.springframework.beans.factory.annotation.Configurable;
+
+	@Configurable("account")
+	public class Account {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+----
+	package com.xyz.domain
+
+	import org.springframework.beans.factory.annotation.Configurable
+
+	@Configurable("account")
+	class Account {
+		// ...
+	}
+----
+======
+
+Spring now looks for a bean definition named `account` and uses that as the
+definition to configure new `Account` instances.
+
+You can also use autowiring to avoid having to specify a dedicated bean definition at
+all. To have Spring apply autowiring, use the `autowire` property of the `@Configurable`
+annotation. You can specify either `@Configurable(autowire=Autowire.BY_TYPE)` or
+`@Configurable(autowire=Autowire.BY_NAME)` for autowiring by type or by name,
+respectively. As an alternative, it is preferable to specify explicit, annotation-driven
+dependency injection for your `@Configurable` beans through `@Autowired` or `@Inject`
+at the field or method level (see xref:core/beans/annotation-config.adoc[Annotation-based Container Configuration] for further details).
+
+Finally, you can enable Spring dependency checking for the object references in the newly
+created and configured object by using the `dependencyCheck` attribute (for example,
+`@Configurable(autowire=Autowire.BY_NAME,dependencyCheck=true)`). If this attribute is
+set to `true`, Spring validates after configuration that all properties (which
+are not primitives or collections) have been set.
+
+Note that using the annotation on its own does nothing. It is the
+`AnnotationBeanConfigurerAspect` in `spring-aspects.jar` that acts on the presence of
+the annotation. In essence, the aspect says, "after returning from the initialization of
+a new object of a type annotated with `@Configurable`, configure the newly created object
+using Spring in accordance with the properties of the annotation". In this context,
+"initialization" refers to newly instantiated objects (for example, objects instantiated
+with the `new` operator) as well as to `Serializable` objects that are undergoing
+deserialization (for example, through
+https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html[readResolve()]).
+
+[NOTE]
+=====
+One of the key phrases in the above paragraph is "in essence". For most cases, the
+exact semantics of "after returning from the initialization of a new object" are
+fine. In this context, "after initialization" means that the dependencies are
+injected after the object has been constructed. This means that the dependencies
+are not available for use in the constructor bodies of the class. If you want the
+dependencies to be injected before the constructor bodies run and thus be
+available for use in the body of the constructors, you need to define this on the
+`@Configurable` declaration, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Configurable(preConstruction = true)
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Configurable(preConstruction = true)
+----
+======
+
+You can find more information about the language semantics of the various pointcut
+types in AspectJ
+https://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html[in this
+appendix] of the https://www.eclipse.org/aspectj/doc/next/progguide/index.html[AspectJ
+Programming Guide].
+=====
+
+For this to work, the annotated types must be woven with the AspectJ weaver. You can
+either use a build-time Ant or Maven task to do this (see, for example, the
+https://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html[AspectJ Development
+Environment Guide]) or load-time weaving (see xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework]). The
+`AnnotationBeanConfigurerAspect` itself needs to be configured by Spring (in order to obtain
+a reference to the bean factory that is to be used to configure new objects). If you
+use Java-based configuration, you can add `@EnableSpringConfigured` to any
+`@Configuration` class, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Configuration
+	@EnableSpringConfigured
+	public class AppConfig {
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Configuration
+	@EnableSpringConfigured
+	class AppConfig {
+	}
+----
+======
+
+If you prefer XML based configuration, the Spring
+xref:core/appendix/xsd-schemas.adoc#context[`context` namespace]
+defines a convenient `context:spring-configured` element, which you can use as follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<context:spring-configured/>
+----
+
+Instances of `@Configurable` objects created before the aspect has been configured
+result in a message being issued to the debug log and no configuration of the
+object taking place. An example might be a bean in the Spring configuration that creates
+domain objects when it is initialized by Spring. In this case, you can use the
+`depends-on` bean attribute to manually specify that the bean depends on the
+configuration aspect. The following example shows how to use the `depends-on` attribute:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<bean id="myService"
+			class="com.xyz.service.MyService"
+			depends-on="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect">
+
+		<!-- ... -->
+
+	</bean>
+----
+
+NOTE: Do not activate `@Configurable` processing through the bean configurer aspect unless you
+really mean to rely on its semantics at runtime. In particular, make sure that you do
+not use `@Configurable` on bean classes that are registered as regular Spring beans
+with the container. Doing so results in double initialization, once through the
+container and once through the aspect.
+
+
+[[aop-configurable-testing]]
+=== Unit Testing `@Configurable` Objects
+
+One of the goals of the `@Configurable` support is to enable independent unit testing
+of domain objects without the difficulties associated with hard-coded lookups.
+If `@Configurable` types have not been woven by AspectJ, the annotation has no affect
+during unit testing. You can set mock or stub property references in the object under
+test and proceed as normal. If `@Configurable` types have been woven by AspectJ,
+you can still unit test outside of the container as normal, but you see a warning
+message each time that you construct a `@Configurable` object indicating that it has
+not been configured by Spring.
+
+
+[[aop-configurable-container]]
+=== Working with Multiple Application Contexts
+
+The `AnnotationBeanConfigurerAspect` that is used to implement the `@Configurable` support
+is an AspectJ singleton aspect. The scope of a singleton aspect is the same as the scope
+of `static` members: There is one aspect instance per `ClassLoader` that defines the type.
+This means that, if you define multiple application contexts within the same `ClassLoader`
+hierarchy, you need to consider where to define the `@EnableSpringConfigured` bean and
+where to place `spring-aspects.jar` on the classpath.
+
+Consider a typical Spring web application configuration that has a shared parent application
+context that defines common business services, everything needed to support those services,
+and one child application context for each servlet (which contains definitions particular
+to that servlet). All of these contexts co-exist within the same `ClassLoader` hierarchy,
+and so the `AnnotationBeanConfigurerAspect` can hold a reference to only one of them.
+In this case, we recommend defining the `@EnableSpringConfigured` bean in the shared
+(parent) application context. This defines the services that you are likely to want to
+inject into domain objects. A consequence is that you cannot configure domain objects
+with references to beans defined in the child (servlet-specific) contexts by using the
+@Configurable mechanism (which is probably not something you want to do anyway).
+
+When deploying multiple web applications within the same container, ensure that each
+web application loads the types in `spring-aspects.jar` by using its own `ClassLoader`
+(for example, by placing `spring-aspects.jar` in `WEB-INF/lib`). If `spring-aspects.jar`
+is added only to the container-wide classpath (and hence loaded by the shared parent
+`ClassLoader`), all web applications share the same aspect instance (which is probably
+not what you want).
+
+
+
+[[aop-ajlib-other]]
+== Other Spring aspects for AspectJ
+
+In addition to the `@Configurable` aspect, `spring-aspects.jar` contains an AspectJ
+aspect that you can use to drive Spring's transaction management for types and methods
+annotated with the `@Transactional` annotation. This is primarily intended for users who
+want to use the Spring Framework's transaction support outside of the Spring container.
+
+The aspect that interprets `@Transactional` annotations is the
+`AnnotationTransactionAspect`. When you use this aspect, you must annotate the
+implementation class (or methods within that class or both), not the interface (if
+any) that the class implements. AspectJ follows Java's rule that annotations on
+interfaces are not inherited.
+
+A `@Transactional` annotation on a class specifies the default transaction semantics for
+the execution of any public operation in the class.
+
+A `@Transactional` annotation on a method within the class overrides the default
+transaction semantics given by the class annotation (if present). Methods of any
+visibility may be annotated, including private methods. Annotating non-public methods
+directly is the only way to get transaction demarcation for the execution of such methods.
+
+TIP: Since Spring Framework 4.2, `spring-aspects` provides a similar aspect that offers the
+exact same features for the standard `jakarta.transaction.Transactional` annotation. Check
+`JtaAnnotationTransactionAspect` for more details.
+
+For AspectJ programmers who want to use the Spring configuration and transaction
+management support but do not want to (or cannot) use annotations, `spring-aspects.jar`
+also contains `abstract` aspects you can extend to provide your own pointcut
+definitions. See the sources for the `AbstractBeanConfigurerAspect` and
+`AbstractTransactionAspect` aspects for more information. As an example, the following
+excerpt shows how you could write an aspect to configure all instances of objects
+defined in the domain model by using prototype bean definitions that match the
+fully qualified class names:
+
+[source,java,indent=0,subs="verbatim"]
+----
+	public aspect DomainObjectConfiguration extends AbstractBeanConfigurerAspect {
+
+		public DomainObjectConfiguration() {
+			setBeanWiringInfoResolver(new ClassNameBeanWiringInfoResolver());
+		}
+
+		// the creation of a new bean (any object in the domain model)
+		protected pointcut beanCreation(Object beanInstance) :
+			initialization(new(..)) &&
+			CommonPointcuts.inDomainModel() &&
+			this(beanInstance);
+	}
+----
+
+
+
+[[aop-aj-configure]]
+== Configuring AspectJ Aspects by Using Spring IoC
+
+When you use AspectJ aspects with Spring applications, it is natural to both want and
+expect to be able to configure such aspects with Spring. The AspectJ runtime itself is
+responsible for aspect creation, and the means of configuring the AspectJ-created
+aspects through Spring depends on the AspectJ instantiation model (the `per-xxx` clause)
+used by the aspect.
+
+The majority of AspectJ aspects are singleton aspects. Configuration of these
+aspects is easy. You can create a bean definition that references the aspect type as
+normal and include the `factory-method="aspectOf"` bean attribute. This ensures that
+Spring obtains the aspect instance by asking AspectJ for it rather than trying to create
+an instance itself. The following example shows how to use the `factory-method="aspectOf"` attribute:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<bean id="profiler" class="com.xyz.profiler.Profiler"
+			factory-method="aspectOf"> <1>
+
+		<property name="profilingStrategy" ref="jamonProfilingStrategy"/>
+	</bean>
+----
+<1> Note the `factory-method="aspectOf"` attribute
+
+
+Non-singleton aspects are harder to configure. However, it is possible to do so by
+creating prototype bean definitions and using the `@Configurable` support from
+`spring-aspects.jar` to configure the aspect instances once they have bean created by
+the AspectJ runtime.
+
+If you have some @AspectJ aspects that you want to weave with AspectJ (for example,
+using load-time weaving for domain model types) and other @AspectJ aspects that you want
+to use with Spring AOP, and these aspects are all configured in Spring, you
+need to tell the Spring AOP @AspectJ auto-proxying support which exact subset of the
+@AspectJ aspects defined in the configuration should be used for auto-proxying. You can
+do this by using one or more `<include/>` elements inside the `<aop:aspectj-autoproxy/>`
+declaration. Each `<include/>` element specifies a name pattern, and only beans with
+names matched by at least one of the patterns are used for Spring AOP auto-proxy
+configuration. The following example shows how to use `<include/>` elements:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspectj-autoproxy>
+		<aop:include name="thisBean"/>
+		<aop:include name="thatBean"/>
+	</aop:aspectj-autoproxy>
+----
+
+NOTE: Do not be misled by the name of the `<aop:aspectj-autoproxy/>` element. Using it
+results in the creation of Spring AOP proxies. The @AspectJ style of aspect
+declaration is being used here, but the AspectJ runtime is not involved.
+
+
+
+[[aop-aj-ltw]]
+== Load-time Weaving with AspectJ in the Spring Framework
+
+Load-time weaving (LTW) refers to the process of weaving AspectJ aspects into an
+application's class files as they are being loaded into the Java virtual machine (JVM).
+The focus of this section is on configuring and using LTW in the specific context of the
+Spring Framework. This section is not a general introduction to LTW. For full details on
+the specifics of LTW and configuring LTW with only AspectJ (with Spring not being
+involved at all), see the
+https://www.eclipse.org/aspectj/doc/released/devguide/ltw.html[LTW section of the AspectJ
+Development Environment Guide].
+
+The value that the Spring Framework brings to AspectJ LTW is in enabling much
+finer-grained control over the weaving process. 'Vanilla' AspectJ LTW is effected by using
+a Java (5+) agent, which is switched on by specifying a VM argument when starting up a
+JVM. It is, thus, a JVM-wide setting, which may be fine in some situations but is often a
+little too coarse. Spring-enabled LTW lets you switch on LTW on a
+per-`ClassLoader` basis, which is more fine-grained and which can make more
+sense in a 'single-JVM-multiple-application' environment (such as is found in a typical
+application server environment).
+
+Further, xref:core/aop/using-aspectj.adoc#aop-aj-ltw-environments[in certain environments], this support enables
+load-time weaving without making any modifications to the application server's launch
+script that is needed to add `-javaagent:path/to/aspectjweaver.jar` or (as we describe
+later in this section) `-javaagent:path/to/spring-instrument.jar`. Developers configure
+the application context to enable load-time weaving instead of relying on administrators
+who typically are in charge of the deployment configuration, such as the launch script.
+
+Now that the sales pitch is over, let us first walk through a quick example of AspectJ
+LTW that uses Spring, followed by detailed specifics about elements introduced in the
+example. For a complete example, see the
+https://github.com/spring-projects/spring-petclinic[Petclinic sample application].
+
+
+[[aop-aj-ltw-first-example]]
+=== A First Example
+
+Assume that you are an application developer who has been tasked with diagnosing
+the cause of some performance problems in a system. Rather than break out a
+profiling tool, we are going to switch on a simple profiling aspect that lets us
+quickly get some performance metrics. We can then apply a finer-grained profiling
+tool to that specific area immediately afterwards.
+
+NOTE: The example presented here uses XML configuration. You can also configure and
+use @AspectJ with xref:core/beans/java.adoc[Java configuration]. Specifically, you can use the
+`@EnableLoadTimeWeaving` annotation as an alternative to `<context:load-time-weaver/>`
+(see xref:core/aop/using-aspectj.adoc#aop-aj-ltw-spring[below] for details).
+
+The following example shows the profiling aspect, which is not fancy.
+It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+----
+	package com.xyz;
+
+	import org.aspectj.lang.ProceedingJoinPoint;
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.Around;
+	import org.aspectj.lang.annotation.Pointcut;
+	import org.springframework.util.StopWatch;
+	import org.springframework.core.annotation.Order;
+
+	@Aspect
+	public class ProfilingAspect {
+
+		@Around("methodsToBeProfiled()")
+		public Object profile(ProceedingJoinPoint pjp) throws Throwable {
+			StopWatch sw = new StopWatch(getClass().getSimpleName());
+			try {
+				sw.start(pjp.getSignature().getName());
+				return pjp.proceed();
+			} finally {
+				sw.stop();
+				System.out.println(sw.prettyPrint());
+			}
+		}
+
+		@Pointcut("execution(public * com.xyz..*.*(..))")
+		public void methodsToBeProfiled(){}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+----
+	package com.xyz
+
+	import org.aspectj.lang.ProceedingJoinPoint
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.Around
+	import org.aspectj.lang.annotation.Pointcut
+	import org.springframework.util.StopWatch
+	import org.springframework.core.annotation.Order
+
+	@Aspect
+	class ProfilingAspect {
+
+		@Around("methodsToBeProfiled()")
+		fun profile(pjp: ProceedingJoinPoint): Any? {
+			val sw = StopWatch(javaClass.simpleName)
+			try {
+				sw.start(pjp.getSignature().getName())
+				return pjp.proceed()
+			} finally {
+				sw.stop()
+				println(sw.prettyPrint())
+			}
+		}
+
+		@Pointcut("execution(public * com.xyz..*.*(..))")
+		fun methodsToBeProfiled() {
+		}
+	}
+----
+======
+
+We also need to create an `META-INF/aop.xml` file, to inform the AspectJ weaver that
+we want to weave our `ProfilingAspect` into our classes. This file convention, namely
+the presence of a file (or files) on the Java classpath called `META-INF/aop.xml` is
+standard AspectJ. The following example shows the `aop.xml` file:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "https://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+	<aspectj>
+
+		<weaver>
+			<!-- only weave classes in our application-specific packages -->
+			<include within="com.xyz.*"/>
+		</weaver>
+
+		<aspects>
+			<!-- weave in just this aspect -->
+			<aspect name="com.xyz.ProfilingAspect"/>
+		</aspects>
+
+	</aspectj>
+----
+
+Now we can move on to the Spring-specific portion of the configuration. We need
+to configure a `LoadTimeWeaver` (explained later). This load-time weaver is the
+essential component responsible for weaving the aspect configuration in one or
+more `META-INF/aop.xml` files into the classes in your application. The good
+thing is that it does not require a lot of configuration (there are some more
+options that you can specify, but these are detailed later), as can be seen in
+the following example:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			https://www.springframework.org/schema/context/spring-context.xsd">
+
+		<!-- a service object; we will be profiling its methods -->
+		<bean id="entitlementCalculationService"
+				class="com.xyz.StubEntitlementCalculationService"/>
+
+		<!-- this switches on the load-time weaving -->
+		<context:load-time-weaver/>
+	</beans>
+----
+
+Now that all the required artifacts (the aspect, the `META-INF/aop.xml`
+file, and the Spring configuration) are in place, we can create the following
+driver class with a `main(..)` method to demonstrate the LTW in action:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+----
+	package com.xyz;
+
+	// imports
+
+	public class Main {
+
+		public static void main(String[] args) {
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
+
+			EntitlementCalculationService service =
+					ctx.getBean(EntitlementCalculationService.class);
+
+			// the profiling aspect is 'woven' around this method execution
+			service.calculateEntitlement();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+----
+	package com.xyz
+
+	// imports
+
+	fun main() {
+		val ctx = ClassPathXmlApplicationContext("beans.xml")
+
+		val service = ctx.getBean(EntitlementCalculationService.class)
+
+		// the profiling aspect is 'woven' around this method execution
+		service.calculateEntitlement()
+	}
+----
+======
+
+We have one last thing to do. The introduction to this section did say that one could
+switch on LTW selectively on a per-`ClassLoader` basis with Spring, and this is true.
+However, for this example, we use a Java agent (supplied with Spring) to switch on LTW.
+We use the following command to run the `Main` class shown earlier:
+
+[literal,subs="verbatim"]
+----
+java -javaagent:C:/projects/xyz/lib/spring-instrument.jar com.xyz.Main
+----
+
+The `-javaagent` is a flag for specifying and enabling
+https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html[agents
+to instrument programs that run on the JVM]. The Spring Framework ships with such an
+agent, the `InstrumentationSavingAgent`, which is packaged in the
+`spring-instrument.jar` that was supplied as the value of the `-javaagent` argument in
+the preceding example.
+
+The output from the execution of the `Main` program looks something like the next example.
+(I have introduced a `Thread.sleep(..)` statement into the `calculateEntitlement()`
+implementation so that the profiler actually captures something other than 0
+milliseconds (the `01234` milliseconds is not an overhead introduced by the AOP).
+The following listing shows the output we got when we ran our profiler:
+
+[literal,subs="verbatim"]
+----
+Calculating entitlement
+
+StopWatch 'ProfilingAspect': running time (millis) = 1234
+------ ----- ----------------------------
+ms     %     Task name
+------ ----- ----------------------------
+01234  100%  calculateEntitlement
+----
+
+Since this LTW is effected by using full-blown AspectJ, we are not limited only to advising
+Spring beans. The following slight variation on the `Main` program yields the same
+result:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+----
+	package com.xyz;
+
+	// imports
+
+	public class Main {
+
+		public static void main(String[] args) {
+			new ClassPathXmlApplicationContext("beans.xml");
+
+			EntitlementCalculationService service =
+					new StubEntitlementCalculationService();
+
+			// the profiling aspect will be 'woven' around this method execution
+			service.calculateEntitlement();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+----
+	package com.xyz
+
+	// imports
+
+	fun main(args: Array<String>) {
+		ClassPathXmlApplicationContext("beans.xml")
+
+		val service = StubEntitlementCalculationService()
+
+		// the profiling aspect will be 'woven' around this method execution
+		service.calculateEntitlement()
+	}
+----
+======
+
+Notice how, in the preceding program, we bootstrap the Spring container and
+then create a new instance of the `StubEntitlementCalculationService` totally outside
+the context of Spring. The profiling advice still gets woven in.
+
+Admittedly, the example is simplistic. However, the basics of the LTW support in Spring
+have all been introduced in the earlier example, and the rest of this section explains
+the "why" behind each bit of configuration and usage in detail.
+
+NOTE: The `ProfilingAspect` used in this example may be basic, but it is quite useful. It is a
+nice example of a development-time aspect that developers can use during development
+and then easily exclude from builds of the application being deployed
+into UAT or production.
+
+
+[[aop-aj-ltw-the-aspects]]
+=== Aspects
+
+The aspects that you use in LTW have to be AspectJ aspects. You can write them in
+either the AspectJ language itself, or you can write your aspects in the @AspectJ-style.
+Your aspects are then both valid AspectJ and Spring AOP aspects.
+Furthermore, the compiled aspect classes need to be available on the classpath.
+
+
+[[aop-aj-ltw-aop_dot_xml]]
+=== 'META-INF/aop.xml'
+
+The AspectJ LTW infrastructure is configured by using one or more `META-INF/aop.xml`
+files that are on the Java classpath (either directly or, more typically, in jar files).
+
+The structure and contents of this file is detailed in the LTW part of the
+https://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[AspectJ reference
+documentation]. Because the `aop.xml` file is 100% AspectJ, we do not describe it further here.
+
+
+[[aop-aj-ltw-libraries]]
+=== Required libraries (JARS)
+
+At minimum, you need the following libraries to use the Spring Framework's support
+for AspectJ LTW:
+
+* `spring-aop.jar`
+* `aspectjweaver.jar`
+
+If you use the xref:core/aop/using-aspectj.adoc#aop-aj-ltw-environments-generic[Spring-provided agent to enable instrumentation]
+, you also need:
+
+* `spring-instrument.jar`
+
+
+[[aop-aj-ltw-spring]]
+=== Spring Configuration
+
+The key component in Spring's LTW support is the `LoadTimeWeaver` interface (in the
+`org.springframework.instrument.classloading` package), and the numerous implementations
+of it that ship with the Spring distribution. A `LoadTimeWeaver` is responsible for
+adding one or more `java.lang.instrument.ClassFileTransformers` to a `ClassLoader` at
+runtime, which opens the door to all manner of interesting applications, one of which
+happens to be the LTW of aspects.
+
+TIP: If you are unfamiliar with the idea of runtime class file transformation, see the
+javadoc API documentation for the `java.lang.instrument` package before continuing.
+While that documentation is not comprehensive, at least you can see the key interfaces
+and classes (for reference as you read through this section).
+
+Configuring a `LoadTimeWeaver` for a particular `ApplicationContext` can be as easy as
+adding one line. (Note that you almost certainly need to use an
+`ApplicationContext` as your Spring container -- typically, a `BeanFactory` is not
+enough because the LTW support uses `BeanFactoryPostProcessors`.)
+
+To enable the Spring Framework's LTW support, you need to configure a `LoadTimeWeaver`,
+which typically is done by using the `@EnableLoadTimeWeaving` annotation, as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Configuration
+	@EnableLoadTimeWeaving
+	public class AppConfig {
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Configuration
+	@EnableLoadTimeWeaving
+	class AppConfig {
+	}
+----
+======
+
+Alternatively, if you prefer XML-based configuration, use the
+`<context:load-time-weaver/>` element. Note that the element is defined in the
+`context` namespace. The following example shows how to use `<context:load-time-weaver/>`:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			https://www.springframework.org/schema/context/spring-context.xsd">
+
+		<context:load-time-weaver/>
+
+	</beans>
+----
+
+The preceding configuration automatically defines and registers a number of LTW-specific
+infrastructure beans, such as a `LoadTimeWeaver` and an `AspectJWeavingEnabler`, for you.
+The default `LoadTimeWeaver` is the `DefaultContextLoadTimeWeaver` class, which attempts
+to decorate an automatically detected `LoadTimeWeaver`. The exact type of `LoadTimeWeaver`
+that is "automatically detected" is dependent upon your runtime environment.
+The following table summarizes various `LoadTimeWeaver` implementations:
+
+[[aop-aj-ltw-spring-env-impls]]
+.DefaultContextLoadTimeWeaver LoadTimeWeavers
+|===
+| Runtime Environment| `LoadTimeWeaver` implementation
+
+| Running in https://tomcat.apache.org/[Apache Tomcat]
+| `TomcatLoadTimeWeaver`
+
+| Running in https://eclipse-ee4j.github.io/glassfish/[GlassFish] (limited to EAR deployments)
+| `GlassFishLoadTimeWeaver`
+
+| Running in Red Hat's https://www.jboss.org/jbossas/[JBoss AS] or https://www.wildfly.org/[WildFly]
+| `JBossLoadTimeWeaver`
+
+| JVM started with Spring `InstrumentationSavingAgent`
+  (`java -javaagent:path/to/spring-instrument.jar`)
+| `InstrumentationLoadTimeWeaver`
+
+| Fallback, expecting the underlying ClassLoader to follow common conventions
+  (namely `addTransformer` and optionally a `getThrowawayClassLoader` method)
+| `ReflectiveLoadTimeWeaver`
+|===
+
+Note that the table lists only the `LoadTimeWeavers` that are autodetected when you
+use the `DefaultContextLoadTimeWeaver`. You can specify exactly which `LoadTimeWeaver`
+implementation to use.
+
+To specify a specific `LoadTimeWeaver` with Java configuration, implement the
+`LoadTimeWeavingConfigurer` interface and override the `getLoadTimeWeaver()` method.
+The following example specifies a `ReflectiveLoadTimeWeaver`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Configuration
+	@EnableLoadTimeWeaving
+	public class AppConfig implements LoadTimeWeavingConfigurer {
+
+		@Override
+		public LoadTimeWeaver getLoadTimeWeaver() {
+			return new ReflectiveLoadTimeWeaver();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Configuration
+	@EnableLoadTimeWeaving
+	class AppConfig : LoadTimeWeavingConfigurer {
+
+		override fun getLoadTimeWeaver(): LoadTimeWeaver {
+			return ReflectiveLoadTimeWeaver()
+		}
+	}
+----
+======
+
+If you use XML-based configuration, you can specify the fully qualified class name
+as the value of the `weaver-class` attribute on the `<context:load-time-weaver/>`
+element. Again, the following example specifies a `ReflectiveLoadTimeWeaver`:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			https://www.springframework.org/schema/context/spring-context.xsd">
+
+		<context:load-time-weaver
+				weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/>
+
+	</beans>
+----
+
+The `LoadTimeWeaver` that is defined and registered by the configuration can be later
+retrieved from the Spring container by using the well known name, `loadTimeWeaver`.
+Remember that the `LoadTimeWeaver` exists only as a mechanism for Spring's LTW
+infrastructure to add one or more `ClassFileTransformers`. The actual
+`ClassFileTransformer` that does the LTW is the `ClassPreProcessorAgentAdapter` (from
+the `org.aspectj.weaver.loadtime` package) class. See the class-level javadoc of the
+`ClassPreProcessorAgentAdapter` class for further details, because the specifics of how
+the weaving is actually effected is beyond the scope of this document.
+
+There is one final attribute of the configuration left to discuss: the `aspectjWeaving`
+attribute (or `aspectj-weaving` if you use XML). This attribute controls whether LTW
+is enabled or not. It accepts one of three possible values, with the default value being
+`autodetect` if the attribute is not present. The following table summarizes the three
+possible values:
+
+[[aop-aj-ltw-ltw-tag-attrs]]
+.AspectJ weaving attribute values
+|===
+| Annotation Value| XML Value| Explanation
+
+| `ENABLED`
+| `on`
+| AspectJ weaving is on, and aspects are woven at load-time as appropriate.
+
+| `DISABLED`
+| `off`
+| LTW is off. No aspect is woven at load-time.
+
+| `AUTODETECT`
+| `autodetect`
+| If the Spring LTW infrastructure can find at least one `META-INF/aop.xml` file,
+  then AspectJ weaving is on. Otherwise, it is off. This is the default value.
+|===
+
+
+[[aop-aj-ltw-environments]]
+=== Environment-specific Configuration
+
+This last section contains any additional settings and configuration that you need
+when you use Spring's LTW support in environments such as application servers and web
+containers.
+
+[[aop-aj-ltw-environments-tomcat-jboss-etc]]
+==== Tomcat, JBoss, WildFly
+
+Tomcat and JBoss/WildFly provide a general app `ClassLoader` that is capable of local
+instrumentation. Spring's native LTW may leverage those ClassLoader implementations
+to provide AspectJ weaving.
+You can simply enable load-time weaving, as xref:core/aop/using-aspectj.adoc[described earlier].
+Specifically, you do not need to modify the JVM launch script to add
+`-javaagent:path/to/spring-instrument.jar`.
+
+Note that on JBoss, you may need to disable the app server scanning to prevent it from
+loading the classes before the application actually starts. A quick workaround is to add
+to your artifact a file named `WEB-INF/jboss-scanning.xml` with the following content:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<scanning xmlns="urn:jboss:scanning:1.0"/>
+----
+
+[[aop-aj-ltw-environments-generic]]
+==== Generic Java Applications
+
+When class instrumentation is required in environments that are not supported by
+specific `LoadTimeWeaver` implementations, a JVM agent is the general solution.
+For such cases, Spring provides `InstrumentationLoadTimeWeaver` which requires a
+Spring-specific (but very general) JVM agent, `spring-instrument.jar`, autodetected
+by common `@EnableLoadTimeWeaving` and `<context:load-time-weaver/>` setups.
+
+To use it, you must start the virtual machine with the Spring agent by supplying
+the following JVM options:
+
+[literal]
+[subs="verbatim"]
+----
+-javaagent:/path/to/spring-instrument.jar
+----
+
+Note that this requires modification of the JVM launch script, which may prevent you
+from using this in application server environments (depending on your server and your
+operation policies). That said, for one-app-per-JVM deployments such as standalone
+Spring Boot applications, you typically control the entire JVM setup in any case.
+
+
+
+

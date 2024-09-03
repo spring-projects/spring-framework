@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
+import org.springframework.core.SmartClassLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
@@ -123,11 +124,19 @@ class ConfigurationClassEnhancer {
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-		enhancer.setAttemptLoad(true);
+		enhancer.setAttemptLoad(!isClassReloadable(configSuperClass, classLoader));
 		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
 		return enhancer;
+	}
+
+	/**
+	 * Checks whether the given configuration class is reloadable.
+	 */
+	private boolean isClassReloadable(Class<?> configSuperClass, @Nullable ClassLoader classLoader) {
+		return (classLoader instanceof SmartClassLoader smartClassLoader &&
+				smartClassLoader.isClassReloadable(configSuperClass));
 	}
 
 	/**
@@ -225,7 +234,6 @@ class ConfigurationClassEnhancer {
 			};
 			return new TransformingClassGenerator(cg, transformer);
 		}
-
 	}
 
 
@@ -334,6 +342,7 @@ class ConfigurationClassEnhancer {
 			return resolveBeanReference(beanMethod, beanMethodArgs, beanFactory, beanName);
 		}
 
+		@Nullable
 		private Object resolveBeanReference(Method beanMethod, Object[] beanMethodArgs,
 				ConfigurableBeanFactory beanFactory, String beanName) {
 

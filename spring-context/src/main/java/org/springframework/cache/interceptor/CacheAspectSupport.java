@@ -214,7 +214,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	@Override
 	public void afterSingletonsInstantiated() {
 		if (getCacheResolver() == null) {
-			// Lazily initialize cache resolver via default cache manager...
+			// Lazily initialize cache resolver via default cache manager
 			Assert.state(this.beanFactory != null, "CacheResolver or BeanFactory must be set on cache aspect");
 			try {
 				setCacheManager(this.beanFactory.getBean(CacheManager.class));
@@ -307,22 +307,22 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	/**
-	 * Return a bean with the specified name and type. Used to resolve services that
-	 * are referenced by name in a {@link CacheOperation}.
-	 * @param beanName the name of the bean, as defined by the operation
-	 * @param expectedType type for the bean
-	 * @return the bean matching that name
+	 * Retrieve a bean with the specified name and type.
+	 * Used to resolve services that are referenced by name in a {@link CacheOperation}.
+	 * @param name the name of the bean, as defined by the cache operation
+	 * @param serviceType the type expected by the operation's service reference
+	 * @return the bean matching the expected type, qualified by the given name
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if such bean does not exist
 	 * @see CacheOperation#getKeyGenerator()
 	 * @see CacheOperation#getCacheManager()
 	 * @see CacheOperation#getCacheResolver()
 	 */
-	protected <T> T getBean(String beanName, Class<T> expectedType) {
+	protected <T> T getBean(String name, Class<T> serviceType) {
 		if (this.beanFactory == null) {
 			throw new IllegalStateException(
-					"BeanFactory must be set on cache aspect for " + expectedType.getSimpleName() + " retrieval");
+					"BeanFactory must be set on cache aspect for " + serviceType.getSimpleName() + " retrieval");
 		}
-		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, expectedType, beanName);
+		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, serviceType, name);
 	}
 
 	/**
@@ -388,21 +388,20 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 			}
 			else {
-				// No caching required, only call the underlying method
+				// No caching required, just call the underlying method
 				return invokeOperation(invoker);
 			}
 		}
-
 
 		// Process any early evictions
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), true,
 				CacheOperationExpressionEvaluator.NO_RESULT);
 
-		// Check if we have a cached item matching the conditions
+		// Check if we have a cached value matching the conditions
 		Cache.ValueWrapper cacheHit = findCachedItem(contexts.get(CacheableOperation.class));
 
-		// Collect puts from any @Cacheable miss, if no cached item is found
-		List<CachePutRequest> cachePutRequests = new ArrayList<>();
+		// Collect puts from any @Cacheable miss, if no cached value is found
+		List<CachePutRequest> cachePutRequests = new ArrayList<>(1);
 		if (cacheHit == null) {
 			collectPutRequests(contexts.get(CacheableOperation.class),
 					CacheOperationExpressionEvaluator.NO_RESULT, cachePutRequests);
@@ -469,7 +468,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	private boolean hasCachePut(CacheOperationContexts contexts) {
 		// Evaluate the conditions *without* the result object because we don't have it yet...
 		Collection<CacheOperationContext> cachePutContexts = contexts.get(CachePutOperation.class);
-		Collection<CacheOperationContext> excluded = new ArrayList<>();
+		Collection<CacheOperationContext> excluded = new ArrayList<>(1);
 		for (CacheOperationContext context : cachePutContexts) {
 			try {
 				if (!context.isConditionPassing(CacheOperationExpressionEvaluator.RESULT_UNAVAILABLE)) {
@@ -522,9 +521,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	/**
-	 * Find a cached item only for {@link CacheableOperation} that passes the condition.
+	 * Find a cached value only for {@link CacheableOperation} that passes the condition.
 	 * @param contexts the cacheable operations
-	 * @return a {@link Cache.ValueWrapper} holding the cached item,
+	 * @return a {@link Cache.ValueWrapper} holding the cached value,
 	 * or {@code null} if none is found
 	 */
 	@Nullable
@@ -548,10 +547,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	/**
-	 * Collect the {@link CachePutRequest} for all {@link CacheOperation} using
-	 * the specified result item.
+	 * Collect a {@link CachePutRequest} for every {@link CacheOperation}
+	 * using the specified result value.
 	 * @param contexts the contexts to handle
-	 * @param result the result item (never {@code null})
+	 * @param result the result value
 	 * @param putRequests the collection to update
 	 */
 	private void collectPutRequests(Collection<CacheOperationContext> contexts,
@@ -641,21 +640,21 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			if (syncEnabled) {
 				if (this.contexts.size() > 1) {
 					throw new IllegalStateException(
-							"@Cacheable(sync=true) cannot be combined with other cache operations on '" + method + "'");
+							"A sync=true operation cannot be combined with other cache operations on '" + method + "'");
 				}
 				if (cacheOperationContexts.size() > 1) {
 					throw new IllegalStateException(
-							"Only one @Cacheable(sync=true) entry is allowed on '" + method + "'");
+							"Only one sync=true operation is allowed on '" + method + "'");
 				}
 				CacheOperationContext cacheOperationContext = cacheOperationContexts.iterator().next();
-				CacheableOperation operation = (CacheableOperation) cacheOperationContext.getOperation();
+				CacheOperation operation = cacheOperationContext.getOperation();
 				if (cacheOperationContext.getCaches().size() > 1) {
 					throw new IllegalStateException(
-							"@Cacheable(sync=true) only allows a single cache on '" + operation + "'");
+							"A sync=true operation is restricted to a single cache on '" + operation + "'");
 				}
-				if (StringUtils.hasText(operation.getUnless())) {
+				if (operation instanceof CacheableOperation cacheable && StringUtils.hasText(cacheable.getUnless())) {
 					throw new IllegalStateException(
-							"@Cacheable(sync=true) does not support unless attribute on '" + operation + "'");
+							"A sync=true operation does not support the unless attribute on '" + operation + "'");
 				}
 				return true;
 			}
@@ -722,7 +721,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			this.args = extractArgs(metadata.method, args);
 			this.target = target;
 			this.caches = CacheAspectSupport.this.getCaches(this, metadata.cacheResolver);
-			this.cacheNames = createCacheNames(this.caches);
+			this.cacheNames = prepareCacheNames(this.caches);
 		}
 
 		@Override
@@ -810,8 +809,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			return this.cacheNames;
 		}
 
-		private Collection<String> createCacheNames(Collection<? extends Cache> caches) {
-			Collection<String> names = new ArrayList<>();
+		private Collection<String> prepareCacheNames(Collection<? extends Cache> caches) {
+			Collection<String> names = new ArrayList<>(caches.size());
 			for (Cache cache : caches) {
 				names.add(cache.getName());
 			}
@@ -854,14 +853,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof CacheOperationCacheKey otherKey)) {
-				return false;
-			}
-			return (this.cacheOperation.equals(otherKey.cacheOperation) &&
-					this.methodCacheKey.equals(otherKey.methodCacheKey));
+			return (this == other || (other instanceof CacheOperationCacheKey that &&
+					this.cacheOperation.equals(that.cacheOperation) &&
+					this.methodCacheKey.equals(that.methodCacheKey)));
 		}
 
 		@Override
@@ -884,13 +878,13 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 	}
 
+
 	/**
 	 * Internal holder class for recording that a cache method was invoked.
 	 */
 	private static class InvocationAwareResult {
 
 		boolean invoked;
-
 	}
 
 }

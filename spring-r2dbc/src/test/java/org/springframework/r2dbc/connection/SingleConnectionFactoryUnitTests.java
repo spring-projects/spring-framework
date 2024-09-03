@@ -48,8 +48,8 @@ class SingleConnectionFactoryUnitTests {
 
 		Connection c1 = cf1.block();
 		Connection c2 = cf2.block();
-
 		assertThat(c1).isSameAs(c2);
+
 		factory.destroy();
 	}
 
@@ -63,7 +63,6 @@ class SingleConnectionFactoryUnitTests {
 				.verifyComplete();
 
 		factory.setAutoCommit(true);
-
 		factory.create().as(StepVerifier::create)
 				.consumeNextWith(actual -> assertThat(actual.isAutoCommit()).isTrue())
 				.verifyComplete();
@@ -75,7 +74,6 @@ class SingleConnectionFactoryUnitTests {
 	@SuppressWarnings("rawtypes")
 	void shouldSuppressClose() {
 		SingleConnectionFactory factory = new SingleConnectionFactory("r2dbc:h2:mem:///foo", true);
-
 		Connection connection = factory.create().block();
 
 		StepVerifier.create(connection.close()).verifyComplete();
@@ -85,19 +83,19 @@ class SingleConnectionFactoryUnitTests {
 		StepVerifier.create(
 				connection.setTransactionIsolationLevel(IsolationLevel.READ_COMMITTED))
 				.verifyComplete();
+
 		factory.destroy();
 	}
 
 	@Test
 	void shouldNotSuppressClose() {
 		SingleConnectionFactory factory = new SingleConnectionFactory("r2dbc:h2:mem:///foo", false);
-
 		Connection connection = factory.create().block();
 
 		StepVerifier.create(connection.close()).verifyComplete();
-
 		StepVerifier.create(connection.setTransactionIsolationLevel(IsolationLevel.READ_COMMITTED))
 			.verifyError(R2dbcNonTransientResourceException.class);
+
 		factory.destroy();
 	}
 
@@ -107,7 +105,6 @@ class SingleConnectionFactoryUnitTests {
 		ConnectionFactoryMetadata metadata = mock();
 
 		SingleConnectionFactory factory = new SingleConnectionFactory(connectionMock, metadata, true);
-
 		Connection connection = factory.create().block();
 
 		ConnectionFactoryUtils.releaseConnection(connection, factory)
@@ -125,7 +122,6 @@ class SingleConnectionFactoryUnitTests {
 		when(otherConnection.close()).thenReturn(Mono.empty());
 
 		SingleConnectionFactory factory = new SingleConnectionFactory(connectionMock, metadata, false);
-
 		factory.create().as(StepVerifier::create).expectNextCount(1).verifyComplete();
 
 		ConnectionFactoryUtils.releaseConnection(otherConnection, factory)

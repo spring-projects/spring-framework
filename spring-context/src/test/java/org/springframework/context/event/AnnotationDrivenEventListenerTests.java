@@ -517,7 +517,6 @@ class AnnotationDrivenEventListenerTests {
 		ReplyEventListener replyEventListener = this.context.getBean(ReplyEventListener.class);
 		TestEventListener listener = this.context.getBean(TestEventListener.class);
 
-
 		this.eventCollector.assertNoEventReceived(listener);
 		this.eventCollector.assertNoEventReceived(replyEventListener);
 		this.context.publishEvent(event);
@@ -634,6 +633,17 @@ class AnnotationDrivenEventListenerTests {
 		assertThat(listener.order).contains("first", "second", "third");
 	}
 
+	@Test
+	void publicSubclassWithInheritedEventListener() {
+		load(PublicSubclassWithInheritedEventListener.class);
+		TestEventListener listener = this.context.getBean(PublicSubclassWithInheritedEventListener.class);
+
+		this.eventCollector.assertNoEventReceived(listener);
+		this.context.publishEvent("test");
+		this.eventCollector.assertEvent(listener, "test");
+		this.eventCollector.assertTotalEventsCount(1);
+	}
+
 	@Test @Disabled  // SPR-15122
 	void listenersReceiveEarlyEvents() {
 		load(EventOnPostConstruct.class, OrderedTestListener.class);
@@ -646,7 +656,7 @@ class AnnotationDrivenEventListenerTests {
 	void missingListenerBeanIgnored() {
 		load(MissingEventListener.class);
 		context.getBean(UseMissingEventListener.class);
-		context.getBean(ApplicationEventMulticaster.class).multicastEvent(new TestEvent(this));
+		context.publishEvent(new TestEvent(this));
 	}
 
 
@@ -753,7 +763,6 @@ class AnnotationDrivenEventListenerTests {
 		public void handleContextEvent(ApplicationContextEvent event) {
 			collectEvent(event);
 		}
-
 	}
 
 
@@ -979,7 +988,6 @@ class AnnotationDrivenEventListenerTests {
 	}
 
 
-
 	@EventListener
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface ConditionalEvent {
@@ -1031,7 +1039,7 @@ class AnnotationDrivenEventListenerTests {
 	}
 
 
-	@Configuration
+	@Component
 	static class OrderedTestListener extends TestEventListener {
 
 		public final List<String> order = new ArrayList<>();
@@ -1052,6 +1060,11 @@ class AnnotationDrivenEventListenerTests {
 		public void handleSecond(String payload) {
 			this.order.add("second");
 		}
+	}
+
+
+	@Component
+	public static class PublicSubclassWithInheritedEventListener extends TestEventListener {
 	}
 
 

@@ -155,8 +155,7 @@ public class BeanFactoryUtilsTests {
 		assertThat(beans.get("t1")).isEqualTo(t1);
 		assertThat(beans.get("t2")).isEqualTo(t2);
 		assertThat(beans.get("t3")).isEqualTo(t3.getObject());
-		boolean condition = beans.get("t4") instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(beans.get("t4") instanceof TestBean).isTrue();
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, DummyFactory.class, true, true);
 		assertThat(beans).hasSize(2);
@@ -192,8 +191,7 @@ public class BeanFactoryUtilsTests {
 		assertThat(beans.get("t1")).isEqualTo(t1);
 		assertThat(beans.get("t2")).isEqualTo(t2);
 		assertThat(beans.get("t3")).isEqualTo(t3.getObject());
-		boolean condition2 = beans.get("t4") instanceof TestBean;
-		assertThat(condition2).isTrue();
+		assertThat(beans.get("t4") instanceof TestBean).isTrue();
 		// t3 and t4 are found here as of Spring 2.0, since they are pre-registered
 		// singleton instances, while testFactory1 and testFactory are *not* found
 		// because they are FactoryBean definitions that haven't been initialized yet.
@@ -212,13 +210,11 @@ public class BeanFactoryUtilsTests {
 		assertThat(beans.get("test3")).isEqualTo(test3);
 		assertThat(beans.get("test")).isEqualTo(test);
 		assertThat(beans.get("testFactory1")).isEqualTo(testFactory1);
-		boolean condition1 = beans.get("testFactory2") instanceof TestBean;
-		assertThat(condition1).isTrue();
+		assertThat(beans.get("testFactory2") instanceof TestBean).isTrue();
 		assertThat(beans.get("t1")).isEqualTo(t1);
 		assertThat(beans.get("t2")).isEqualTo(t2);
 		assertThat(beans.get("t3")).isEqualTo(t3.getObject());
-		boolean condition = beans.get("t4") instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(beans.get("t4") instanceof TestBean).isTrue();
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, DummyFactory.class, true, true);
 		assertThat(beans).hasSize(4);
@@ -261,8 +257,7 @@ public class BeanFactoryUtilsTests {
 		assertThat(beans.get("test3")).isEqualTo(test3);
 		assertThat(beans.get("test")).isEqualTo(test);
 		assertThat(beans.get("testFactory1")).isEqualTo(testFactory1);
-		boolean condition = beans.get("testFactory2") instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(beans.get("testFactory2") instanceof TestBean).isTrue();
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, DummyFactory.class, true, true);
 		assertThat(beans).hasSize(2);

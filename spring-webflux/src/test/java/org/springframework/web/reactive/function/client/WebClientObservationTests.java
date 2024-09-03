@@ -110,7 +110,8 @@ class WebClientObservationTests {
 		StepVerifier.create(client.get().uri("/path").retrieve().bodyToMono(Void.class))
 				.expectError(IllegalStateException.class)
 				.verify(Duration.ofSeconds(5));
-		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "IllegalStateException")
+		assertThatHttpObservation().hasError()
+				.hasLowCardinalityKeyValue("exception", "IllegalStateException")
 				.hasLowCardinalityKeyValue("status", "CLIENT_ERROR");
 	}
 
@@ -153,6 +154,26 @@ class WebClientObservationTests {
 	}
 
 	@Test
+	void setsCurrentObservationContextAsRequestAttribute() {
+		ExchangeFilterFunction assertionFilter = new ExchangeFilterFunction() {
+			@Override
+			public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction chain) {
+				Optional<ClientRequestObservationContext> observationContext = ClientRequestObservationContext.findCurrent(request);
+				assertThat(observationContext).isPresent();
+				return chain.exchange(request).contextWrite(context -> {
+					Observation currentObservation = context.get(ObservationThreadLocalAccessor.KEY);
+					assertThat(currentObservation.getContext()).isEqualTo(observationContext.get());
+					return context;
+				});
+			}
+		};
+		this.builder.filter(assertionFilter).build().get().uri("/resource/{id}", 42)
+				.retrieve().bodyToMono(Void.class)
+				.block(Duration.ofSeconds(10));
+		verifyAndGetRequest();
+	}
+
+	@Test
 	void recordsObservationWithResponseDetailsWhenFilterFunctionErrors() {
 		ExchangeFilterFunction errorFunction = (req, next) -> next.exchange(req).then(Mono.error(new IllegalStateException()));
 		WebClient client = this.builder.filter(errorFunction).build();
@@ -160,7 +181,7 @@ class WebClientObservationTests {
 		StepVerifier.create(responseMono)
 				.expectError(IllegalStateException.class)
 				.verify(Duration.ofSeconds(5));
-		assertThatHttpObservation()
+		assertThatHttpObservation().hasError()
 				.hasLowCardinalityKeyValue("exception", "IllegalStateException")
 				.hasLowCardinalityKeyValue("status", "200");
 	}

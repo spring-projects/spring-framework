@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,24 +22,24 @@ import org.springframework.beans.PropertyAccessor;
 import org.springframework.lang.Nullable;
 
 /**
- * Stores and exposes information about data-binding and validation
- * errors for a specific object.
+ * Stores and exposes information about data-binding and validation errors
+ * for a specific object.
  *
- * <p>Field names can be properties of the target object (e.g. "name"
- * when binding to a customer object), or nested fields in case of
- * subobjects (e.g. "address.street"). Supports subtree navigation
- * via {@link #setNestedPath(String)}: for example, an
- * {@code AddressValidator} validates "address", not being aware
- * that this is a subobject of customer.
+ * <p>Field names are typically properties of the target object (e.g. "name"
+ * when binding to a customer object). Implementations may also support nested
+ * fields in case of nested objects (e.g. "address.street"), in conjunction
+ * with subtree navigation via {@link #setNestedPath}: for example, an
+ * {@code AddressValidator} may validate "address", not being aware that this
+ * is a nested object of a top-level customer object.
  *
  * <p>Note: {@code Errors} objects are single-threaded.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #setNestedPath
- * @see BindException
- * @see DataBinder
+ * @see Validator
  * @see ValidationUtils
+ * @see BindException
+ * @see BindingResult
  */
 public interface Errors {
 
@@ -66,6 +66,7 @@ public interface Errors {
 	 * @param nestedPath nested path within this object,
 	 * e.g. "address" (defaults to "", {@code null} is also acceptable).
 	 * Can end with a dot: both "address" and "address." are valid.
+	 * @see #getNestedPath()
 	 */
 	void setNestedPath(String nestedPath);
 
@@ -73,6 +74,7 @@ public interface Errors {
 	 * Return the current nested path of this {@link Errors} object.
 	 * <p>Returns a nested path with a dot, i.e. "address.", for easy
 	 * building of concatenated paths. Default is an empty String.
+	 * @see #setNestedPath(String)
 	 */
 	String getNestedPath();
 
@@ -86,14 +88,14 @@ public interface Errors {
 	 * <p>For example: current path "spouse.", pushNestedPath("child") &rarr;
 	 * result path "spouse.child."; popNestedPath() &rarr; "spouse." again.
 	 * @param subPath the sub path to push onto the nested path stack
-	 * @see #popNestedPath
+	 * @see #popNestedPath()
 	 */
 	void pushNestedPath(String subPath);
 
 	/**
 	 * Pop the former nested path from the nested path stack.
 	 * @throws IllegalStateException if there is no former nested path on the stack
-	 * @see #pushNestedPath
+	 * @see #pushNestedPath(String)
 	 */
 	void popNestedPath() throws IllegalStateException;
 
@@ -101,6 +103,7 @@ public interface Errors {
 	 * Register a global error for the entire target object,
 	 * using the given error description.
 	 * @param errorCode error code, interpretable as a message key
+	 * @see #reject(String, Object[], String)
 	 */
 	void reject(String errorCode);
 
@@ -109,6 +112,7 @@ public interface Errors {
 	 * using the given error description.
 	 * @param errorCode error code, interpretable as a message key
 	 * @param defaultMessage fallback default message
+	 * @see #reject(String, Object[], String)
 	 */
 	void reject(String errorCode, String defaultMessage);
 
@@ -119,6 +123,7 @@ public interface Errors {
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
 	 * (can be {@code null})
 	 * @param defaultMessage fallback default message
+	 * @see #rejectValue(String, String, Object[], String)
 	 */
 	void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage);
 
@@ -132,7 +137,7 @@ public interface Errors {
 	 * global error if the current object is the top object.
 	 * @param field the field name (may be {@code null} or empty String)
 	 * @param errorCode error code, interpretable as a message key
-	 * @see #getNestedPath()
+	 * @see #rejectValue(String, String, Object[], String)
 	 */
 	void rejectValue(@Nullable String field, String errorCode);
 
@@ -147,7 +152,7 @@ public interface Errors {
 	 * @param field the field name (may be {@code null} or empty String)
 	 * @param errorCode error code, interpretable as a message key
 	 * @param defaultMessage fallback default message
-	 * @see #getNestedPath()
+	 * @see #rejectValue(String, String, Object[], String)
 	 */
 	void rejectValue(@Nullable String field, String errorCode, String defaultMessage);
 
@@ -164,7 +169,7 @@ public interface Errors {
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
 	 * (can be {@code null})
 	 * @param defaultMessage fallback default message
-	 * @see #getNestedPath()
+	 * @see #reject(String, Object[], String)
 	 */
 	void rejectValue(@Nullable String field, String errorCode,
 			@Nullable Object[] errorArgs, @Nullable String defaultMessage);
@@ -179,35 +184,40 @@ public interface Errors {
 	 * to refer to the same target object, or at least contain compatible errors
 	 * that apply to the target object of this {@code Errors} instance.
 	 * @param errors the {@code Errors} instance to merge in
+	 * @see #getAllErrors()
 	 */
 	void addAllErrors(Errors errors);
 
 	/**
-	 * Return if there were any errors.
+	 * Determine if there were any errors.
+	 * @see #hasGlobalErrors()
+	 * @see #hasFieldErrors()
 	 */
 	boolean hasErrors();
 
 	/**
-	 * Return the total number of errors.
+	 * Determine the total number of errors.
+	 * @see #getGlobalErrorCount()
+	 * @see #getFieldErrorCount()
 	 */
 	int getErrorCount();
 
 	/**
 	 * Get all errors, both global and field ones.
-	 * @return a list of {@link ObjectError} instances
+	 * @return a list of {@link ObjectError}/{@link FieldError} instances
+	 * @see #getGlobalErrors()
+	 * @see #getFieldErrors()
 	 */
 	List<ObjectError> getAllErrors();
 
 	/**
-	 * Are there any global errors?
-	 * @return {@code true} if there are any global errors
+	 * Determine if there were any global errors.
 	 * @see #hasFieldErrors()
 	 */
 	boolean hasGlobalErrors();
 
 	/**
-	 * Return the number of global errors.
-	 * @return the number of global errors
+	 * Determine the number of global errors.
 	 * @see #getFieldErrorCount()
 	 */
 	int getGlobalErrorCount();
@@ -215,26 +225,26 @@ public interface Errors {
 	/**
 	 * Get all global errors.
 	 * @return a list of {@link ObjectError} instances
+	 * @see #getFieldErrors()
 	 */
 	List<ObjectError> getGlobalErrors();
 
 	/**
 	 * Get the <i>first</i> global error, if any.
 	 * @return the global error, or {@code null}
+	 * @see #getFieldError()
 	 */
 	@Nullable
 	ObjectError getGlobalError();
 
 	/**
-	 * Are there any field errors?
-	 * @return {@code true} if there are any errors associated with a field
+	 * Determine if there were any errors associated with a field.
 	 * @see #hasGlobalErrors()
 	 */
 	boolean hasFieldErrors();
 
 	/**
-	 * Return the number of errors associated with a field.
-	 * @return the number of errors associated with a field
+	 * Determine the number of errors associated with a field.
 	 * @see #getGlobalErrorCount()
 	 */
 	int getFieldErrorCount();
@@ -242,36 +252,39 @@ public interface Errors {
 	/**
 	 * Get all errors associated with a field.
 	 * @return a List of {@link FieldError} instances
+	 * @see #getGlobalErrors()
 	 */
 	List<FieldError> getFieldErrors();
 
 	/**
 	 * Get the <i>first</i> error associated with a field, if any.
 	 * @return the field-specific error, or {@code null}
+	 * @see #getGlobalError()
 	 */
 	@Nullable
 	FieldError getFieldError();
 
 	/**
-	 * Are there any errors associated with the given field?
+	 * Determine if there were any errors associated with the given field.
 	 * @param field the field name
-	 * @return {@code true} if there were any errors associated with the given field
+	 * @see #hasFieldErrors()
 	 */
 	boolean hasFieldErrors(String field);
 
 	/**
-	 * Return the number of errors associated with the given field.
+	 * Determine the number of errors associated with the given field.
 	 * @param field the field name
-	 * @return the number of errors associated with the given field
+	 * @see #getFieldErrorCount()
 	 */
 	int getFieldErrorCount(String field);
 
 	/**
 	 * Get all errors associated with the given field.
-	 * <p>Implementations should support not only full field names like
-	 * "name" but also pattern matches like "na*" or "address.*".
+	 * <p>Implementations may support not only full field names like
+	 * "address.street" but also pattern matches like "address.*".
 	 * @param field the field name
 	 * @return a List of {@link FieldError} instances
+	 * @see #getFieldErrors()
 	 */
 	List<FieldError> getFieldErrors(String field);
 
@@ -279,6 +292,7 @@ public interface Errors {
 	 * Get the first error associated with the given field, if any.
 	 * @param field the field name
 	 * @return the field-specific error, or {@code null}
+	 * @see #getFieldError()
 	 */
 	@Nullable
 	FieldError getFieldError(String field);
@@ -290,17 +304,19 @@ public interface Errors {
 	 * even if there were type mismatches.
 	 * @param field the field name
 	 * @return the current value of the given field
+	 * @see #getFieldType(String)
 	 */
 	@Nullable
 	Object getFieldValue(String field);
 
 	/**
-	 * Return the type of a given field.
+	 * Determine the type of the given field, as far as possible.
 	 * <p>Implementations should be able to determine the type even
 	 * when the field value is {@code null}, for example from some
 	 * associated descriptor.
 	 * @param field the field name
 	 * @return the type of the field, or {@code null} if not determinable
+	 * @see #getFieldValue(String)
 	 */
 	@Nullable
 	Class<?> getFieldType(String field);

@@ -34,6 +34,7 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -44,26 +45,29 @@ import org.springframework.util.ReflectionUtils;
  * single {@link PropertySource} rather than creating dedicated ones.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  * @see PropertySourceDescriptor
  */
 public class PropertySourceProcessor {
 
-	private static final PropertySourceFactory DEFAULT_PROPERTY_SOURCE_FACTORY = new DefaultPropertySourceFactory();
+	private static final PropertySourceFactory defaultPropertySourceFactory = new DefaultPropertySourceFactory();
 
 	private static final Log logger = LogFactory.getLog(PropertySourceProcessor.class);
+
 
 	private final ConfigurableEnvironment environment;
 
 	private final ResourceLoader resourceLoader;
 
-	private final List<String> propertySourceNames;
+	private final List<String> propertySourceNames = new ArrayList<>();
+
 
 	public PropertySourceProcessor(ConfigurableEnvironment environment, ResourceLoader resourceLoader) {
 		this.environment = environment;
 		this.resourceLoader = resourceLoader;
-		this.propertySourceNames = new ArrayList<>();
 	}
+
 
 	/**
 	 * Process the specified {@link PropertySourceDescriptor} against the
@@ -78,7 +82,7 @@ public class PropertySourceProcessor {
 		Assert.isTrue(locations.size() > 0, "At least one @PropertySource(value) location is required");
 		boolean ignoreResourceNotFound = descriptor.ignoreResourceNotFound();
 		PropertySourceFactory factory = (descriptor.propertySourceFactory() != null ?
-				instantiateClass(descriptor.propertySourceFactory()) : DEFAULT_PROPERTY_SOURCE_FACTORY);
+				instantiateClass(descriptor.propertySourceFactory()) : defaultPropertySourceFactory);
 
 		for (String location : locations) {
 			try {
@@ -86,9 +90,10 @@ public class PropertySourceProcessor {
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
 				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
 			}
-			catch (IllegalArgumentException | FileNotFoundException | UnknownHostException | SocketException ex) {
-				// Placeholders not resolvable or resource not found when trying to open it
-				if (ignoreResourceNotFound) {
+			catch (RuntimeException | IOException ex) {
+				// Placeholders not resolvable (IllegalArgumentException) or resource not found when trying to open it
+				if (ignoreResourceNotFound && (ex instanceof IllegalArgumentException || isIgnorableException(ex) ||
+						isIgnorableException(ex.getCause()))) {
 					if (logger.isInfoEnabled()) {
 						logger.info("Properties location [" + location + "] not resolvable: " + ex.getMessage());
 					}
@@ -100,13 +105,13 @@ public class PropertySourceProcessor {
 		}
 	}
 
-	private void addPropertySource(org.springframework.core.env.PropertySource<?> propertySource) {
+	private void addPropertySource(PropertySource<?> propertySource) {
 		String name = propertySource.getName();
 		MutablePropertySources propertySources = this.environment.getPropertySources();
 
 		if (this.propertySourceNames.contains(name)) {
 			// We've already added a version, we need to extend it
-			org.springframework.core.env.PropertySource<?> existing = propertySources.get(name);
+			PropertySource<?> existing = propertySources.get(name);
 			if (existing != null) {
 				PropertySource<?> newSource = (propertySource instanceof ResourcePropertySource rps ?
 						rps.withResourceName() : propertySource);
@@ -136,7 +141,8 @@ public class PropertySourceProcessor {
 		this.propertySourceNames.add(name);
 	}
 
-	private PropertySourceFactory instantiateClass(Class<? extends PropertySourceFactory> type) {
+
+	private static PropertySourceFactory instantiateClass(Class<? extends PropertySourceFactory> type) {
 		try {
 			Constructor<? extends PropertySourceFactory> constructor = type.getDeclaredConstructor();
 			ReflectionUtils.makeAccessible(constructor);
@@ -145,6 +151,16 @@ public class PropertySourceProcessor {
 		catch (Exception ex) {
 			throw new IllegalStateException("Failed to instantiate " + type, ex);
 		}
+	}
+
+	/**
+	 * Determine if the supplied exception can be ignored according to
+	 * {@code ignoreResourceNotFound} semantics.
+	 */
+	private static boolean isIgnorableException(@Nullable Throwable ex) {
+		return (ex instanceof FileNotFoundException ||
+				ex instanceof UnknownHostException ||
+				ex instanceof SocketException);
 	}
 
 }

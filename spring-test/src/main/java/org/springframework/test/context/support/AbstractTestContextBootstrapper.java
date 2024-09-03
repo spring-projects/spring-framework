@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -494,13 +494,13 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * interaction with the {@code ContextCache}.
 	 * <p>The default implementation delegates to
 	 * {@code getBootstrapContext().getCacheAwareContextLoaderDelegate()} and
-	 * supplies the returned delegate the configured
-	 * {@link #getApplicationContextFailureProcessor() ApplicationContextFailureProcessor}.
+	 * the default one will load {@link org.springframework.test.context.ApplicationContextFailureProcessor}
+	 * via the service loading mechanism.
 	 * <p>Concrete subclasses may choose to override this method to return a custom
 	 * {@code CacheAwareContextLoaderDelegate} implementation with custom
 	 * {@link org.springframework.test.context.cache.ContextCache ContextCache} support.
 	 * @return the context loader delegate (never {@code null})
-	 * @see #getApplicationContextFailureProcessor()
+	 * @see org.springframework.test.context.ApplicationContextFailureProcessor
 	 */
 	protected CacheAwareContextLoaderDelegate getCacheAwareContextLoaderDelegate() {
 		return getBootstrapContext().getCacheAwareContextLoaderDelegate();

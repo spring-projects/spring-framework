@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.lang.Nullable;
  * of a given task.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 3.0
  */
 public interface TriggerContext {
@@ -78,6 +79,7 @@ public interface TriggerContext {
 	/**
 	 * Return the last <i>actual</i> execution time of the task,
 	 * or {@code null} if not scheduled before.
+	 * @since 6.0
 	 */
 	@Nullable
 	Instant lastActualExecution();
@@ -98,6 +100,7 @@ public interface TriggerContext {
 	/**
 	 * Return the last completion time of the task,
 	 * or {@code null} if not scheduled before.
+	 * @since 6.0
 	 */
 	@Nullable
 	Instant lastCompletion();

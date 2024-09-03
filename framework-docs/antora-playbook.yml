@@ -1,0 +1,39 @@
+antora:
+  extensions:
+  - require: '@springio/antora-extensions'
+    root_component_name: 'framework'
+site:
+  title: Spring Framework
+  url: https://docs.spring.io/spring-framework/reference
+  robots: allow
+git:
+  ensure_git_suffix: false
+content:
+  sources:
+  - url: https://github.com/spring-projects/spring-framework
+    # Refname matching:
+    # https://docs.antora.org/antora/latest/playbook/content-refname-matching/
+    branches: ['main', '{6..9}.+({0..9}).x']
+    tags: ['v{6..9}.+({0..9}).+({0..9})?(-{RC,M}*)', '!(v6.0.{0..8})', '!(v6.0.0-{RC,M}{0..9})']
+    start_path: framework-docs
+asciidoc:
+  extensions:
+    - '@asciidoctor/tabs'
+    - '@springio/asciidoctor-extensions'
+    - '@springio/asciidoctor-extensions/include-code-extension'
+  attributes:
+    page-stackoverflow-url: https://stackoverflow.com/questions/tagged/spring
+    page-pagination: ''
+    hide-uri-scheme: '@'
+    tabs-sync-option: '@'
+    include-java: 'example$docs-src/main/java/org/springframework/docs'
+urls:
+  latest_version_segment_strategy: redirect:to
+  latest_version_segment: ''
+  redirect_facility: httpd
+runtime:
+  log:
+    failure_level: warn
+ui:
+  bundle:
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.16/ui-bundle.zip

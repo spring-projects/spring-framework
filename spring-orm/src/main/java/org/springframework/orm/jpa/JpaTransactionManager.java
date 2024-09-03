@@ -110,7 +110,7 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+ * @see org.springframework.jdbc.support.JdbcTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 @SuppressWarnings("serial")

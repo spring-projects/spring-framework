@@ -1,0 +1,280 @@
+[[mvc-ann-exceptionhandler]]
+= Exceptions
+
+[.small]#xref:web/webflux/controller/ann-exceptions.adoc[See equivalent in the Reactive stack]#
+
+`@Controller` and xref:web/webmvc/mvc-controller/ann-advice.adoc[@ControllerAdvice] classes can have
+`@ExceptionHandler` methods to handle exceptions from controller methods, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	public class SimpleController {
+
+		// ...
+
+		@ExceptionHandler
+		public ResponseEntity<String> handle(IOException ex) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Controller
+	class SimpleController {
+
+		// ...
+
+		@ExceptionHandler
+		fun handle(ex: IOException): ResponseEntity<String> {
+			// ...
+		}
+	}
+----
+======
+
+The exception may match against a top-level exception being propagated (e.g. a direct
+`IOException` being thrown) or against a nested cause within a wrapper exception (e.g.
+an `IOException` wrapped inside an `IllegalStateException`). As of 5.3, this can match
+at arbitrary cause levels, whereas previously only an immediate cause was considered.
+
+For matching exception types, preferably declare the target exception as a method argument,
+as the preceding example shows. When multiple exception methods match, a root exception match is
+generally preferred to a cause exception match. More specifically, the `ExceptionDepthComparator`
+is used to sort exceptions based on their depth from the thrown exception type.
+
+Alternatively, the annotation declaration may narrow the exception types to match,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExceptionHandler({FileSystemException.class, RemoteException.class})
+	public ResponseEntity<String> handle(IOException ex) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExceptionHandler(FileSystemException::class, RemoteException::class)
+	fun handle(ex: IOException): ResponseEntity<String> {
+		// ...
+	}
+----
+======
+
+You can even use a list of specific exception types with a very generic argument signature,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExceptionHandler({FileSystemException.class, RemoteException.class})
+	public ResponseEntity<String> handle(Exception ex) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExceptionHandler(FileSystemException::class, RemoteException::class)
+	fun handle(ex: Exception): ResponseEntity<String> {
+		// ...
+	}
+----
+======
+
+[NOTE]
+====
+The distinction between root and cause exception matching can be surprising.
+
+In the `IOException` variant shown earlier, the method is typically called with
+the actual `FileSystemException` or `RemoteException` instance as the argument,
+since both of them extend from `IOException`. However, if any such matching
+exception is propagated within a wrapper exception which is itself an `IOException`,
+the passed-in exception instance is that wrapper exception.
+
+The behavior is even simpler in the `handle(Exception)` variant. This is
+always invoked with the wrapper exception in a wrapping scenario, with the
+actually matching exception to be found through `ex.getCause()` in that case.
+The passed-in exception is the actual `FileSystemException` or
+`RemoteException` instance only when these are thrown as top-level exceptions.
+====
+
+We generally recommend that you be as specific as possible in the argument signature,
+reducing the potential for mismatches between root and cause exception types.
+Consider breaking a multi-matching method into individual `@ExceptionHandler`
+methods, each matching a single specific exception type through its signature.
+
+In a multi-`@ControllerAdvice` arrangement, we recommend declaring your primary root exception
+mappings on a `@ControllerAdvice` prioritized with a corresponding order. While a root
+exception match is preferred to a cause, this is defined among the methods of a given
+controller or `@ControllerAdvice` class. This means a cause match on a higher-priority
+`@ControllerAdvice` bean is preferred to any match (for example, root) on a lower-priority
+`@ControllerAdvice` bean.
+
+Last but not least, an `@ExceptionHandler` method implementation can choose to back
+out of dealing with a given exception instance by rethrowing it in its original form.
+This is useful in scenarios where you are interested only in root-level matches or in
+matches within a specific context that cannot be statically determined. A rethrown
+exception is propagated through the remaining resolution chain, as though
+the given `@ExceptionHandler` method would not have matched in the first place.
+
+Support for `@ExceptionHandler` methods in Spring MVC is built on the `DispatcherServlet`
+level, xref:web/webmvc/mvc-servlet/exceptionhandlers.adoc[HandlerExceptionResolver] mechanism.
+
+
+[[mvc-ann-exceptionhandler-args]]
+== Method Arguments
+[.small]#xref:web/webflux/controller/ann-exceptions.adoc#webflux-ann-exceptionhandler-args[See equivalent in the Reactive stack]#
+
+`@ExceptionHandler` methods support the following arguments:
+
+[cols="1,2", options="header"]
+|===
+| Method argument | Description
+
+| Exception type
+| For access to the raised exception.
+
+| `HandlerMethod`
+| For access to the controller method that raised the exception.
+
+| `WebRequest`, `NativeWebRequest`
+| Generic access to request parameters and request and session attributes without direct
+  use of the Servlet API.
+
+| `jakarta.servlet.ServletRequest`, `jakarta.servlet.ServletResponse`
+| Choose any specific request or response type (for example, `ServletRequest` or
+  `HttpServletRequest` or Spring's `MultipartRequest` or `MultipartHttpServletRequest`).
+
+| `jakarta.servlet.http.HttpSession`
+| Enforces the presence of a session. As a consequence, such an argument is never `null`. +
+  Note that session access is not thread-safe. Consider setting the
+  `RequestMappingHandlerAdapter` instance's `synchronizeOnSession` flag to `true` if multiple
+  requests are allowed to access a session concurrently.
+
+| `java.security.Principal`
+| Currently authenticated user -- possibly a specific `Principal` implementation class if known.
+
+| `HttpMethod`
+| The HTTP method of the request.
+
+| `java.util.Locale`
+| The current request locale, determined by the most specific `LocaleResolver` available -- in
+  effect, the configured `LocaleResolver` or `LocaleContextResolver`.
+
+| `java.util.TimeZone`, `java.time.ZoneId`
+| The time zone associated with the current request, as determined by a `LocaleContextResolver`.
+
+| `java.io.OutputStream`, `java.io.Writer`
+| For access to the raw response body, as exposed by the Servlet API.
+
+| `java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
+| For access to the model for an error response. Always empty.
+
+| `RedirectAttributes`
+| Specify attributes to use in case of a redirect -- (that is to be appended to the query
+  string) and flash attributes to be stored temporarily until the request after the redirect.
+  See xref:web/webmvc/mvc-controller/ann-methods/redirecting-passing-data.adoc[Redirect Attributes] and xref:web/webmvc/mvc-controller/ann-methods/flash-attributes.adoc[Flash Attributes].
+
+| `@SessionAttribute`
+| For access to any session attribute, in contrast to model attributes stored in the
+  session as a result of a class-level `@SessionAttributes` declaration.
+  See xref:web/webmvc/mvc-controller/ann-methods/sessionattribute.adoc[`@SessionAttribute`] for more details.
+
+| `@RequestAttribute`
+| For access to request attributes. See xref:web/webmvc/mvc-controller/ann-methods/requestattrib.adoc[`@RequestAttribute`] for more details.
+
+|===
+
+
+[[mvc-ann-exceptionhandler-return-values]]
+== Return Values
+[.small]#xref:web/webflux/controller/ann-exceptions.adoc#webflux-ann-exceptionhandler-return-values[See equivalent in the Reactive stack]#
+
+`@ExceptionHandler` methods support the following return values:
+
+[cols="1,2", options="header"]
+|===
+| Return value | Description
+
+| `@ResponseBody`
+| The return value is converted through `HttpMessageConverter` instances and written to the
+  response. See xref:web/webmvc/mvc-controller/ann-methods/responsebody.adoc[`@ResponseBody`].
+
+| `HttpEntity<B>`, `ResponseEntity<B>`
+| The return value specifies that the full response (including the HTTP headers and the body)
+  be converted through `HttpMessageConverter` instances and written to the response.
+  See xref:web/webmvc/mvc-controller/ann-methods/responseentity.adoc[ResponseEntity].
+
+| `ErrorResponse`
+| To render an RFC 7807 error response with details in the body,
+see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
+
+| `ProblemDetail`
+| To render an RFC 7807 error response with details in the body,
+see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
+
+| `String`
+| A view name to be resolved with `ViewResolver` implementations and used together with the
+  implicit model -- determined through command objects and `@ModelAttribute` methods.
+  The handler method can also programmatically enrich the model by declaring a `Model`
+  argument (described earlier).
+
+| `View`
+| A `View` instance to use for rendering together with the implicit model -- determined
+  through command objects and `@ModelAttribute` methods. The handler method may also
+  programmatically enrich the model by declaring a `Model` argument (descried earlier).
+
+| `java.util.Map`, `org.springframework.ui.Model`
+| Attributes to be added to the implicit model with the view name implicitly determined
+  through a `RequestToViewNameTranslator`.
+
+| `@ModelAttribute`
+| An attribute to be added to the model with the view name implicitly determined through
+  a `RequestToViewNameTranslator`.
+
+  Note that `@ModelAttribute` is optional. See "`Any other return value`" at the end of
+  this table.
+
+| `ModelAndView` object
+| The view and model attributes to use and, optionally, a response status.
+
+| `void`
+| A method with a `void` return type (or `null` return value) is considered to have fully
+  handled the response if it also has a `ServletResponse` an `OutputStream` argument, or
+  a `@ResponseStatus` annotation. The same is also true if the controller has made a positive
+  `ETag` or `lastModified` timestamp check (see xref:web/webmvc/mvc-caching.adoc#mvc-caching-etag-lastmodified[Controllers] for details).
+
+  If none of the above is true, a `void` return type can also indicate "`no response body`" for
+  REST controllers or default view name selection for HTML controllers.
+
+| Any other return value
+| If a return value is not matched to any of the above and is not a simple type (as determined by
+  {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]),
+  by default, it is treated as a model attribute to be added to the model. If it is a simple type,
+  it remains unresolved.
+|===
+
+
+

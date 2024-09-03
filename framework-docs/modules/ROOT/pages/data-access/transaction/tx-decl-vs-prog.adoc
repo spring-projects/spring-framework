@@ -1,0 +1,20 @@
+[[tx-decl-vs-prog]]
+= Choosing Between Programmatic and Declarative Transaction Management
+:page-section-summary-toc: 1
+
+Programmatic transaction management is usually a good idea only if you have a small
+number of transactional operations. For example, if you have a web application that
+requires transactions only for certain update operations, you may not want to set up
+transactional proxies by using Spring or any other technology. In this case, using the
+`TransactionTemplate` may be a good approach. Being able to set the transaction name
+explicitly is also something that can be done only by using the programmatic approach
+to transaction management.
+
+On the other hand, if your application has numerous transactional operations,
+declarative transaction management is usually worthwhile. It keeps transaction
+management out of business logic and is not difficult to configure. When using the
+Spring Framework, rather than EJB CMT, the configuration cost of declarative transaction
+management is greatly reduced.
+
+
+

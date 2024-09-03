@@ -337,16 +337,14 @@ public class FactoryMethodTests {
 		// Check that listInstance is not considered a bean of type FactoryMethods.
 		assertThat(List.class.isAssignableFrom(xbf.getType("listInstance"))).isTrue();
 		String[] names = xbf.getBeanNamesForType(FactoryMethods.class);
-		boolean condition1 = !Arrays.asList(names).contains("listInstance");
-		assertThat(condition1).isTrue();
+		assertThat(Arrays.asList(names).contains("listInstance")).isFalse();
 		names = xbf.getBeanNamesForType(List.class);
 		assertThat(Arrays.asList(names).contains("listInstance")).isTrue();
 
 		xbf.preInstantiateSingletons();
 		assertThat(List.class.isAssignableFrom(xbf.getType("listInstance"))).isTrue();
 		names = xbf.getBeanNamesForType(FactoryMethods.class);
-		boolean condition = !Arrays.asList(names).contains("listInstance");
-		assertThat(condition).isTrue();
+		assertThat(Arrays.asList(names).contains("listInstance")).isFalse();
 		names = xbf.getBeanNamesForType(List.class);
 		assertThat(Arrays.asList(names).contains("listInstance")).isTrue();
 		List<?> list = (List<?>) xbf.getBean("listInstance");

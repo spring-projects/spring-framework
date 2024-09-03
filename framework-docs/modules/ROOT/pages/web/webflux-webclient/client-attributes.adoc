@@ -1,0 +1,52 @@
+[[webflux-client-attributes]]
+= Attributes
+
+You can add attributes to a request. This is convenient if you want to pass information
+through the filter chain and influence the behavior of filters for a given request.
+For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	WebClient client = WebClient.builder()
+			.filter((request, next) -> {
+				Optional<Object> usr = request.attribute("myAttribute");
+				// ...
+			})
+			.build();
+
+	client.get().uri("https://example.org/")
+			.attribute("myAttribute", "...")
+			.retrieve()
+			.bodyToMono(Void.class);
+
+		}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val client = WebClient.builder()
+			.filter { request, _ ->
+				val usr = request.attributes()["myAttribute"];
+				// ...
+			}
+			.build()
+
+		client.get().uri("https://example.org/")
+				.attribute("myAttribute", "...")
+				.retrieve()
+				.awaitBody<Unit>()
+----
+======
+
+Note that you can configure a `defaultRequest` callback globally at the
+`WebClient.Builder` level which lets you insert attributes into all requests,
+which could be used for example in a Spring MVC application to populate
+request attributes based on `ThreadLocal` data.
+
+

@@ -52,6 +52,7 @@ class CompositeDatabasePopulatorTests {
 		when(mockedDatabasePopulator2.populate(mockedConnection)).thenReturn(Mono.empty());
 	}
 
+
 	@Test
 	void addPopulators() {
 		CompositeDatabasePopulator populator = new CompositeDatabasePopulator();

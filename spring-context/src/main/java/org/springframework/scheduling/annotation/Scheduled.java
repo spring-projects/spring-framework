@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 /**
  * Annotation that marks a method to be scheduled. Exactly one of the
- * {@link #cron}, {@link #fixedDelay}, or {@link #fixedRate} attributes must be
- * specified.
+ * {@link #cron}, {@link #fixedDelay}, or {@link #fixedRate} attributes
+ * must be specified.
  *
  * <p>The annotated method must expect no arguments. It will typically have
  * a {@code void} return type; if not, the returned value will be ignored
@@ -42,7 +42,10 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * XML element or {@link EnableScheduling @EnableScheduling} annotation.
  *
  * <p>This annotation can be used as a <em>{@linkplain Repeatable repeatable}</em>
- * annotation.
+ * annotation. If several scheduled declarations are found on the same method,
+ * each of them will be processed independently, with a separate trigger firing
+ * for each of them. As a consequence, such co-located schedules may overlap
+ * and execute multiple times in parallel or in immediate succession.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.
@@ -99,9 +102,9 @@ public @interface Scheduled {
 
 	/**
 	 * A time zone for which the cron expression will be resolved. By default, this
-	 * attribute is the empty String (i.e. the server's local time zone will be used).
+	 * attribute is the empty String (i.e. the scheduler's time zone will be used).
 	 * @return a zone id accepted by {@link java.util.TimeZone#getTimeZone(String)},
-	 * or an empty String to indicate the server's default time zone
+	 * or an empty String to indicate the scheduler's default time zone
 	 * @since 4.0
 	 * @see org.springframework.scheduling.support.CronTrigger#CronTrigger(String, java.util.TimeZone)
 	 * @see java.util.TimeZone
@@ -122,9 +125,12 @@ public @interface Scheduled {
 	 * last invocation and the start of the next.
 	 * <p>The time unit is milliseconds by default but can be overridden via
 	 * {@link #timeUnit}.
+	 * <p>This attribute variant supports Spring-style "${...}" placeholders
+	 * as well as SpEL expressions.
 	 * @return the delay as a String value &mdash; for example, a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
+	 * @see #fixedDelay()
 	 */
 	String fixedDelayString() default "";
 
@@ -140,9 +146,12 @@ public @interface Scheduled {
 	 * Execute the annotated method with a fixed period between invocations.
 	 * <p>The time unit is milliseconds by default but can be overridden via
 	 * {@link #timeUnit}.
+	 * <p>This attribute variant supports Spring-style "${...}" placeholders
+	 * as well as SpEL expressions.
 	 * @return the period as a String value &mdash; for example, a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
+	 * @see #fixedRate()
 	 */
 	String fixedRateString() default "";
 
@@ -161,9 +170,12 @@ public @interface Scheduled {
 	 * {@link #fixedRate} or {@link #fixedDelay} task.
 	 * <p>The time unit is milliseconds by default but can be overridden via
 	 * {@link #timeUnit}.
+	 * <p>This attribute variant supports Spring-style "${...}" placeholders
+	 * as well as SpEL expressions.
 	 * @return the initial delay as a String value &mdash; for example, a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
+	 * @see #initialDelay()
 	 */
 	String initialDelayString() default "";
 

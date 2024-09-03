@@ -1,0 +1,113 @@
+[[mvc-servlet-context-hierarchy]]
+= Context Hierarchy
+
+`DispatcherServlet` expects a `WebApplicationContext` (an extension of a plain
+`ApplicationContext`) for its own configuration. `WebApplicationContext` has a link to the
+`ServletContext` and the `Servlet` with which it is associated. It is also bound to the `ServletContext`
+such that applications can use static methods on `RequestContextUtils` to look up the
+`WebApplicationContext` if they need access to it.
+
+For many applications, having a single `WebApplicationContext` is simple and suffices.
+It is also possible to have a context hierarchy where one root `WebApplicationContext`
+is shared across multiple `DispatcherServlet` (or other `Servlet`) instances, each with
+its own child `WebApplicationContext` configuration.
+See xref:core/beans/context-introduction.adoc[Additional Capabilities of the `ApplicationContext`]
+for more on the context hierarchy feature.
+
+The root `WebApplicationContext` typically contains infrastructure beans, such as data repositories and
+business services that need to be shared across multiple `Servlet` instances. Those beans
+are effectively inherited and can be overridden (that is, re-declared) in the Servlet-specific
+child `WebApplicationContext`, which typically contains beans local to the given `Servlet`.
+The following image shows this relationship:
+
+image::mvc-context-hierarchy.png[]
+
+The following example configures a `WebApplicationContext` hierarchy:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+		@Override
+		protected Class<?>[] getRootConfigClasses() {
+			return new Class<?>[] { RootConfig.class };
+		}
+
+		@Override
+		protected Class<?>[] getServletConfigClasses() {
+			return new Class<?>[] { App1Config.class };
+		}
+
+		@Override
+		protected String[] getServletMappings() {
+			return new String[] { "/app1/*" };
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyWebAppInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
+
+		override fun getRootConfigClasses(): Array<Class<*>> {
+			return arrayOf(RootConfig::class.java)
+		}
+
+		override fun getServletConfigClasses(): Array<Class<*>> {
+			return arrayOf(App1Config::class.java)
+		}
+
+		override fun getServletMappings(): Array<String> {
+			return arrayOf("/app1/*")
+		}
+	}
+----
+======
+
+TIP: If an application context hierarchy is not required, applications can return all
+configuration through `getRootConfigClasses()` and `null` from `getServletConfigClasses()`.
+
+The following example shows the `web.xml` equivalent:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+<web-app>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/root-context.xml</param-value>
+	</context-param>
+
+	<servlet>
+		<servlet-name>app1</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/app1-context.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>app1</servlet-name>
+		<url-pattern>/app1/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>
+----
+
+TIP: If an application context hierarchy is not required, applications may configure a
+"`root`" context only and leave the `contextConfigLocation` Servlet parameter empty.
+
+
+

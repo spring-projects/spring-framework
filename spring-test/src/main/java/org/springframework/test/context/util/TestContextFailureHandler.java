@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.NativeDetector;
 import org.springframework.core.io.support.SpringFactoriesLoader.FailureHandler;
 
 /**
@@ -42,7 +43,7 @@ class TestContextFailureHandler implements FailureHandler {
 				logger.debug("""
 						Skipping candidate %1$s [%2$s] due to a missing dependency. \
 						Specify custom %1$s classes or make the default %1$s classes \
-						and their required dependencies available. Offending class: [%3$s]"""
+						and their required dependencies available. Offending class: %3$s"""
 							.formatted(factoryType.getSimpleName(), factoryImplementationName, ex.getMessage()));
 			}
 		}
@@ -51,6 +52,13 @@ class TestContextFailureHandler implements FailureHandler {
 				logger.debug("""
 						Could not load %1$s [%2$s]. Specify custom %1$s classes or make the default %1$s classes \
 						available.""".formatted(factoryType.getSimpleName(), factoryImplementationName), ex);
+			}
+		}
+		// Workaround for https://github.com/oracle/graal/issues/6691
+		else if (NativeDetector.inNativeImage() && ex instanceof IllegalStateException) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Skipping candidate %1$s [%2$s] due to an error when loading it in a native image."
+						.formatted(factoryType.getSimpleName(), factoryImplementationName));
 			}
 		}
 		else {

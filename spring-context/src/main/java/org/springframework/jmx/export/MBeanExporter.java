@@ -53,7 +53,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.core.Constants;
 import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
@@ -92,6 +91,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rick Evans
  * @author Mark Fisher
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 1.2
  * @see #setBeans
  * @see #setAutodetect
@@ -134,12 +134,17 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	/** Constant for the JMX {@code mr_type} "ObjectReference". */
 	private static final String MR_TYPE_OBJECT_REFERENCE = "ObjectReference";
 
-	/** Prefix for the autodetect constants defined in this class. */
-	private static final String CONSTANT_PREFIX_AUTODETECT = "AUTODETECT_";
+	/**
+	 * Map of constant names to constant values for the autodetect constants defined
+	 * in this class.
+	 */
+	private static final Map<String, Integer> constants = Map.of(
+			"AUTODETECT_NONE", AUTODETECT_NONE,
+			"AUTODETECT_MBEAN", AUTODETECT_MBEAN,
+			"AUTODETECT_ASSEMBLER", AUTODETECT_ASSEMBLER,
+			"AUTODETECT_ALL", AUTODETECT_ALL
+		);
 
-
-	/** Constants instance for this class. */
-	private static final Constants constants = new Constants(MBeanExporter.class);
 
 	/** The beans to be exposed as JMX managed resources, with JMX names as keys. */
 	@Nullable
@@ -147,7 +152,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 	/** The autodetect mode to use for this MBeanExporter. */
 	@Nullable
-	private Integer autodetectMode;
+	Integer autodetectMode;
 
 	/** Whether to eagerly initialize candidate beans when autodetecting MBeans. */
 	private boolean allowEagerInit = false;
@@ -223,23 +228,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	}
 
 	/**
-	 * Set the autodetection mode to use.
-	 * @throws IllegalArgumentException if the supplied value is not
-	 * one of the {@code AUTODETECT_} constants
-	 * @see #setAutodetectModeName(String)
-	 * @see #AUTODETECT_ALL
-	 * @see #AUTODETECT_ASSEMBLER
-	 * @see #AUTODETECT_MBEAN
-	 * @see #AUTODETECT_NONE
-	 */
-	public void setAutodetectMode(int autodetectMode) {
-		if (!constants.getValues(CONSTANT_PREFIX_AUTODETECT).contains(autodetectMode)) {
-			throw new IllegalArgumentException("Only values of autodetect constants allowed");
-		}
-		this.autodetectMode = autodetectMode;
-	}
-
-	/**
 	 * Set the autodetection mode to use by name.
 	 * @throws IllegalArgumentException if the supplied value is not resolvable
 	 * to one of the {@code AUTODETECT_} constants or is {@code null}
@@ -250,10 +238,26 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @see #AUTODETECT_NONE
 	 */
 	public void setAutodetectModeName(String constantName) {
-		if (!constantName.startsWith(CONSTANT_PREFIX_AUTODETECT)) {
-			throw new IllegalArgumentException("Only autodetect constants allowed");
-		}
-		this.autodetectMode = (Integer) constants.asNumber(constantName);
+		Assert.hasText(constantName, "'constantName' must not be null or blank");
+		Integer mode = constants.get(constantName);
+		Assert.notNull(mode, "Only autodetect constants allowed");
+		this.autodetectMode = mode;
+	}
+
+	/**
+	 * Set the autodetection mode to use.
+	 * @throws IllegalArgumentException if the supplied value is not
+	 * one of the {@code AUTODETECT_} constants
+	 * @see #setAutodetectModeName(String)
+	 * @see #AUTODETECT_ALL
+	 * @see #AUTODETECT_ASSEMBLER
+	 * @see #AUTODETECT_MBEAN
+	 * @see #AUTODETECT_NONE
+	 */
+	public void setAutodetectMode(int autodetectMode) {
+		Assert.isTrue(constants.containsValue(autodetectMode),
+				"Only values of autodetect constants allowed");
+		this.autodetectMode = autodetectMode;
 	}
 
 	/**

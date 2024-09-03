@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,17 @@ package org.springframework.cglib.core;
  * in the classpath.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.2.8 / 6.0
  */
 public final class SpringNamingPolicy implements NamingPolicy {
 
 	public static final SpringNamingPolicy INSTANCE = new SpringNamingPolicy();
 
-	private static final String LABEL = "$$SpringCGLIB$$";
+	private static final String SPRING_LABEL = "$$SpringCGLIB$$";
+
+	private static final String FAST_CLASS_SUFFIX = "FastClass$$";
+
 
 	private SpringNamingPolicy() {
 	}
@@ -46,12 +50,19 @@ public final class SpringNamingPolicy implements NamingPolicy {
 		}
 
 		String base;
-		int existingLabel = prefix.indexOf(LABEL);
+		int existingLabel = prefix.indexOf(SPRING_LABEL);
 		if (existingLabel >= 0) {
-			base = prefix.substring(0, existingLabel + LABEL.length());
+			base = prefix.substring(0, existingLabel + SPRING_LABEL.length());
 		}
 		else {
-			base = prefix + LABEL;
+			base = prefix + SPRING_LABEL;
+		}
+
+		// When the generated class name is for a FastClass, the source is
+		// "org.springframework.cglib.reflect.FastClass".
+		boolean isFastClass = (source != null && source.endsWith(".FastClass"));
+		if (isFastClass && !prefix.contains(FAST_CLASS_SUFFIX)) {
+			base += FAST_CLASS_SUFFIX;
 		}
 
 		int index = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,12 @@ public class InstantFormatter implements Formatter<Instant> {
 
 	@Override
 	public Instant parse(String text, Locale locale) throws ParseException {
-		if (text.length() > 0 && Character.isAlphabetic(text.charAt(0))) {
+		if (!text.isEmpty() && Character.isAlphabetic(text.charAt(0))) {
 			// assuming RFC-1123 value a la "Tue, 3 Jun 2008 11:05:30 GMT"
 			return Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(text));
 		}
 		else {
-			// assuming UTC instant a la "2007-12-03T10:15:30.00Z"
+			// assuming UTC instant a la "2007-12-03T10:15:30.000Z"
 			return Instant.parse(text);
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,9 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
- * Implementation of Spring's {@link TaskScheduler} interface, wrapping
- * a native {@link java.util.concurrent.ScheduledThreadPoolExecutor}.
+ * A standard implementation of Spring's {@link TaskScheduler} interface, wrapping
+ * a native {@link java.util.concurrent.ScheduledThreadPoolExecutor} and providing
+ * all applicable configuration options for it.
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -62,6 +63,9 @@ import org.springframework.util.concurrent.ListenableFutureTask;
 @SuppressWarnings({"serial", "deprecation"})
 public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, TaskScheduler {
+
+	private static final TimeUnit NANO = TimeUnit.NANOSECONDS;
+
 
 	private volatile int poolSize = 1;
 
@@ -155,6 +159,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 * @see Clock#systemDefaultZone()
 	 */
 	public void setClock(Clock clock) {
+		Assert.notNull(clock, "Clock must not be null");
 		this.clock = clock;
 	}
 
@@ -380,9 +385,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	@Override
 	public ScheduledFuture<?> schedule(Runnable task, Instant startTime) {
 		ScheduledExecutorService executor = getScheduledExecutor();
-		Duration initialDelay = Duration.between(this.clock.instant(), startTime);
+		Duration delay = Duration.between(this.clock.instant(), startTime);
 		try {
-			return executor.schedule(errorHandlingTask(task, false), initialDelay.toMillis(), TimeUnit.MILLISECONDS);
+			return executor.schedule(errorHandlingTask(task, false), NANO.convert(delay), NANO);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -394,7 +399,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		ScheduledExecutorService executor = getScheduledExecutor();
 		Duration initialDelay = Duration.between(this.clock.instant(), startTime);
 		try {
-			return executor.scheduleAtFixedRate(errorHandlingTask(task, true), initialDelay.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS);
+			return executor.scheduleAtFixedRate(errorHandlingTask(task, true),
+					NANO.convert(initialDelay), NANO.convert(period), NANO);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -405,7 +411,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Duration period) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
-			return executor.scheduleAtFixedRate(errorHandlingTask(task, true), 0, period.toMillis(), TimeUnit.MILLISECONDS);
+			return executor.scheduleAtFixedRate(errorHandlingTask(task, true),
+					0, NANO.convert(period), NANO);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -417,7 +424,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		ScheduledExecutorService executor = getScheduledExecutor();
 		Duration initialDelay = Duration.between(this.clock.instant(), startTime);
 		try {
-			return executor.scheduleWithFixedDelay(errorHandlingTask(task, true), initialDelay.toMillis(), delay.toMillis(), TimeUnit.MILLISECONDS);
+			return executor.scheduleWithFixedDelay(errorHandlingTask(task, true),
+					NANO.convert(initialDelay), NANO.convert(delay), NANO);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -428,7 +436,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
-			return executor.scheduleWithFixedDelay(errorHandlingTask(task, true), 0, delay.toMillis(), TimeUnit.MILLISECONDS);
+			return executor.scheduleWithFixedDelay(errorHandlingTask(task, true),
+					0, NANO.convert(delay), NANO);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);

@@ -35,6 +35,7 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
@@ -158,9 +159,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 		}
 		Set<String> result = new LinkedHashSet<>(patterns.length);
 		for (String pattern : patterns) {
-			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
-				pattern = "/" + pattern;
-			}
+			pattern = PathPatternParser.defaultInstance.initFullPathPattern(pattern);
 			result.add(pattern);
 		}
 		return result;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.nio.charset.Charset;
 
 import org.springframework.lang.Nullable;
@@ -133,9 +131,8 @@ public abstract class StreamUtils {
 		Assert.notNull(charset, "No Charset specified");
 		Assert.notNull(out, "No OutputStream specified");
 
-		Writer writer = new OutputStreamWriter(out, charset);
-		writer.write(in);
-		writer.flush();
+		out.write(in.getBytes(charset));
+		out.flush();
 	}
 
 	/**

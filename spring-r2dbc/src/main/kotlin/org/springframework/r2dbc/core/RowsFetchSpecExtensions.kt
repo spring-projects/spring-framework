@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.dao.EmptyResultDataAccessException
+import reactor.core.publisher.Mono
 
 /**
  * Non-nullable Coroutines variant of [RowsFetchSpec.one].
  *
+ * @throws EmptyResultDataAccessException if the underlying [Mono] does not emit any value
  * @author Sebastien Deleuze
  */
 @Suppress("DEPRECATION")
@@ -42,6 +44,7 @@ suspend fun <T> RowsFetchSpec<T>.awaitOneOrNull(): T? =
 /**
  * Non-nullable Coroutines variant of [RowsFetchSpec.first].
  *
+ * @throws EmptyResultDataAccessException if the underlying [Mono] does not emit any value
  * @author Sebastien Deleuze
  */
 @Suppress("DEPRECATION")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,8 +109,8 @@ public abstract class ClassFilters {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			return (this == obj || (obj instanceof UnionClassFilter that &&
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof UnionClassFilter that &&
 					ObjectUtils.nullSafeEquals(this.filters, that.filters)));
 		}
 
@@ -123,7 +123,6 @@ public abstract class ClassFilters {
 		public String toString() {
 			return getClass().getName() + ": " + Arrays.toString(this.filters);
 		}
-
 	}
 
 
@@ -150,8 +149,8 @@ public abstract class ClassFilters {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			return (this == obj || (obj instanceof IntersectionClassFilter that &&
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other instanceof IntersectionClassFilter that &&
 					ObjectUtils.nullSafeEquals(this.filters, that.filters)));
 		}
 
@@ -164,7 +163,6 @@ public abstract class ClassFilters {
 		public String toString() {
 			return getClass().getName() + ": " + Arrays.toString(this.filters);
 		}
-
 	}
 
 }

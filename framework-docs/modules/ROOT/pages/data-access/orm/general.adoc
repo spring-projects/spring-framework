@@ -1,0 +1,114 @@
+[[orm-general]]
+= General ORM Integration Considerations
+
+This section highlights considerations that apply to all ORM technologies.
+The xref:data-access/orm/hibernate.adoc[Hibernate] section provides more details and also show these features and
+configurations in a concrete context.
+
+The major goal of Spring's ORM integration is clear application layering (with any data
+access and transaction technology) and for loose coupling of application objects -- no
+more business service dependencies on the data access or transaction strategy, no more
+hard-coded resource lookups, no more hard-to-replace singletons, no more custom service
+registries. The goal is to have one simple and consistent approach to wiring up application objects, keeping
+them as reusable and free from container dependencies as possible. All the individual
+data access features are usable on their own but integrate nicely with Spring's
+application context concept, providing XML-based configuration and cross-referencing of
+plain JavaBean instances that need not be Spring-aware. In a typical Spring application,
+many important objects are JavaBeans: data access templates, data access objects,
+transaction managers, business services that use the data access objects and transaction
+managers, web view resolvers, web controllers that use the business services, and so on.
+
+
+[[orm-resource-mngmnt]]
+== Resource and Transaction Management
+
+Typical business applications are cluttered with repetitive resource management code.
+Many projects try to invent their own solutions, sometimes sacrificing proper handling
+of failures for programming convenience. Spring advocates simple solutions for proper
+resource handling, namely IoC through templating in the case of JDBC and applying AOP
+interceptors for the ORM technologies.
+
+The infrastructure provides proper resource handling and appropriate conversion of
+specific API exceptions to an unchecked infrastructure exception hierarchy. Spring
+introduces a DAO exception hierarchy, applicable to any data access strategy. For direct
+JDBC, the `JdbcTemplate` class mentioned in a xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate[previous section]
+provides connection handling and proper conversion of `SQLException` to the
+`DataAccessException` hierarchy, including translation of database-specific SQL error
+codes to meaningful exception classes. For ORM technologies, see the
+xref:data-access/orm/general.adoc#orm-exception-translation[next section] for how to get the same exception
+translation benefits.
+
+When it comes to transaction management, the `JdbcTemplate` class hooks in to the Spring
+transaction support and supports both JTA and JDBC transactions, through respective
+Spring transaction managers. For the supported ORM technologies, Spring offers Hibernate
+and JPA support through the Hibernate and JPA transaction managers as well as JTA support.
+For details on transaction support, see the xref:data-access/transaction.adoc[Transaction Management] chapter.
+
+
+[[orm-exception-translation]]
+== Exception Translation
+
+When you use Hibernate or JPA in a DAO, you must decide how to handle the persistence
+technology's native exception classes. The DAO throws a subclass of a `HibernateException`
+or `PersistenceException`, depending on the technology. These exceptions are all runtime
+exceptions and do not have to be declared or caught. You may also have to deal with
+`IllegalArgumentException` and `IllegalStateException`. This means that callers can only
+treat exceptions as being generally fatal, unless they want to depend on the persistence
+technology's own exception structure. Catching specific causes (such as an optimistic
+locking failure) is not possible without tying the caller to the implementation strategy.
+This trade-off might be acceptable to applications that are strongly ORM-based or
+do not need any special exception treatment (or both). However, Spring lets exception
+translation be applied transparently through the `@Repository` annotation. The following
+examples (one for Java configuration and one for XML configuration) show how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Repository
+	public class ProductDaoImpl implements ProductDao {
+
+		// class body here...
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Repository
+	class ProductDaoImpl : ProductDao {
+
+		// class body here...
+
+	}
+----
+======
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+
+		<!-- Exception translation bean post processor -->
+		<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
+
+		<bean id="myProductDao" class="product.ProductDaoImpl"/>
+
+	</beans>
+----
+
+The postprocessor automatically looks for all exception translators (implementations of
+the `PersistenceExceptionTranslator` interface) and advises all beans marked with the
+`@Repository` annotation so that the discovered translators can intercept and apply the
+appropriate translation on the thrown exceptions.
+
+In summary, you can implement DAOs based on the plain persistence technology's API and
+annotations while still benefiting from Spring-managed transactions, dependency
+injection, and transparent exception conversion (if desired) to Spring's custom
+exception hierarchies.
+
+
+

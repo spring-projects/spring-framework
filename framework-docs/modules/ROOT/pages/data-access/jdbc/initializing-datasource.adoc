@@ -1,0 +1,146 @@
+[[jdbc-initializing-datasource]]
+= Initializing a `DataSource`
+
+The `org.springframework.jdbc.datasource.init` package provides support for initializing
+an existing `DataSource`. The embedded database support provides one option for creating
+and initializing a `DataSource` for an application. However, you may sometimes need to initialize
+an instance that runs on a server somewhere.
+
+
+[[jdbc-initializing-datasource-xml]]
+== Initializing a Database by Using Spring XML
+
+If you want to initialize a database and you can provide a reference to a `DataSource`
+bean, you can use the `initialize-database` tag in the `spring-jdbc` namespace:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<jdbc:initialize-database data-source="dataSource">
+		<jdbc:script location="classpath:com/foo/sql/db-schema.sql"/>
+		<jdbc:script location="classpath:com/foo/sql/db-test-data.sql"/>
+	</jdbc:initialize-database>
+----
+
+The preceding example runs the two specified scripts against the database. The first
+script creates a schema, and the second populates tables with a test data set. The script
+locations can also be patterns with wildcards in the usual Ant style used for resources
+in Spring (for example,
+`classpath{asterisk}:/com/foo/{asterisk}{asterisk}/sql/{asterisk}-data.sql`). If you use a
+pattern, the scripts are run in the lexical order of their URL or filename.
+
+The default behavior of the database initializer is to unconditionally run the provided
+scripts. This may not always be what you want -- for instance, if you run
+the scripts against a database that already has test data in it. The likelihood
+of accidentally deleting data is reduced by following the common pattern (shown earlier)
+of creating the tables first and then inserting the data. The first step fails if
+the tables already exist.
+
+However, to gain more control over the creation and deletion of existing data, the XML
+namespace provides a few additional options. The first is a flag to switch the
+initialization on and off. You can set this according to the environment (such as pulling a
+boolean value from system properties or from an environment bean). The following example gets a value from a system property:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<jdbc:initialize-database data-source="dataSource"
+		enabled="#{systemProperties.INITIALIZE_DATABASE}"> <1>
+		<jdbc:script location="..."/>
+	</jdbc:initialize-database>
+----
+<1> Get the value for `enabled` from a system property called `INITIALIZE_DATABASE`.
+
+
+The second option to control what happens with existing data is to be more tolerant of
+failures. To this end, you can control the ability of the initializer to ignore certain
+errors in the SQL it runs from the scripts, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<jdbc:initialize-database data-source="dataSource" ignore-failures="DROPS">
+		<jdbc:script location="..."/>
+	</jdbc:initialize-database>
+----
+
+In the preceding example, we are saying that we expect that, sometimes, the scripts are run
+against an empty database, and there are some `DROP` statements in the scripts that
+would, therefore, fail. So failed SQL `DROP` statements will be ignored, but other failures
+will cause an exception. This is useful if your SQL dialect doesn't support `DROP ... IF
+EXISTS` (or similar) but you want to unconditionally remove all test data before
+re-creating it. In that case the first script is usually a set of `DROP` statements,
+followed by a set of `CREATE` statements.
+
+The `ignore-failures` option can be set to `NONE` (the default), `DROPS` (ignore failed
+drops), or `ALL` (ignore all failures).
+
+Each statement should be separated by `;` or a new line if the `;` character is not
+present at all in the script. You can control that globally or script by script, as the
+following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<jdbc:initialize-database data-source="dataSource" separator="@@"> <1>
+		<jdbc:script location="classpath:com/myapp/sql/db-schema.sql" separator=";"/> <2>
+		<jdbc:script location="classpath:com/myapp/sql/db-test-data-1.sql"/>
+		<jdbc:script location="classpath:com/myapp/sql/db-test-data-2.sql"/>
+	</jdbc:initialize-database>
+----
+<1> Set the separator scripts to `@@`.
+<2> Set the separator for `db-schema.sql` to `;`.
+
+In this example, the two `test-data` scripts use `@@` as statement separator and only
+the `db-schema.sql` uses `;`. This configuration specifies that the default separator
+is `@@` and overrides that default for the `db-schema` script.
+
+If you need more control than you get from the XML namespace, you can use the
+`DataSourceInitializer` directly and define it as a component in your application.
+
+[[jdbc-client-component-initialization]]
+=== Initialization of Other Components that Depend on the Database
+
+A large class of applications (those that do not use the database until after the Spring context has
+started) can use the database initializer with no further
+complications. If your application is not one of those, you might need to read the rest
+of this section.
+
+The database initializer depends on a `DataSource` instance and runs the scripts
+provided in its initialization callback (analogous to an `init-method` in an XML bean
+definition, a `@PostConstruct` method in a component, or the `afterPropertiesSet()`
+method in a component that implements `InitializingBean`). If other beans depend on the
+same data source and use the data source in an initialization callback, there
+might be a problem because the data has not yet been initialized. A common example of
+this is a cache that initializes eagerly and loads data from the database on application
+startup.
+
+To get around this issue, you have two options: change your cache initialization strategy
+to a later phase or ensure that the database initializer is initialized first.
+
+Changing your cache initialization strategy might be easy if the application is in your control and not otherwise.
+Some suggestions for how to implement this include:
+
+* Make the cache initialize lazily on first usage, which improves application startup
+  time.
+* Have your cache or a separate component that initializes the cache implement
+  `Lifecycle` or `SmartLifecycle`. When the application context starts, you can
+  automatically start a `SmartLifecycle` by setting its `autoStartup` flag, and you can
+  manually start a `Lifecycle` by calling `ConfigurableApplicationContext.start()`
+  on the enclosing context.
+* Use a Spring `ApplicationEvent` or similar custom observer mechanism to trigger the
+  cache initialization. `ContextRefreshedEvent` is always published by the context when
+  it is ready for use (after all beans have been initialized), so that is often a useful
+  hook (this is how the `SmartLifecycle` works by default).
+
+Ensuring that the database initializer is initialized first can also be easy. Some suggestions on how to implement this include:
+
+* Rely on the default behavior of the Spring `BeanFactory`, which is that beans are
+  initialized in registration order. You can easily arrange that by adopting the common
+  practice of a set of `<import/>` elements in XML configuration that order your
+  application modules and ensuring that the database and database initialization are
+  listed first.
+* Separate the `DataSource` and the business components that use it and control their
+  startup order by putting them in separate `ApplicationContext` instances (for example, the
+  parent context contains the `DataSource`, and the child context contains the business
+  components). This structure is common in Spring web applications but can be more
+  generally applied.
+
+
+

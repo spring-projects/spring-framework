@@ -25,6 +25,7 @@ import java.sql.Clob;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -84,7 +85,7 @@ public abstract class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
-	private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<>(32);
+	private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<>(64);
 
 	static {
 		javaTypeToSqlTypeMap.put(boolean.class, Types.BOOLEAN);
@@ -106,8 +107,8 @@ public abstract class StatementCreatorUtils {
 		javaTypeToSqlTypeMap.put(LocalDate.class, Types.DATE);
 		javaTypeToSqlTypeMap.put(LocalTime.class, Types.TIME);
 		javaTypeToSqlTypeMap.put(LocalDateTime.class, Types.TIMESTAMP);
-		javaTypeToSqlTypeMap.put(OffsetDateTime.class, Types.TIMESTAMP_WITH_TIMEZONE);
 		javaTypeToSqlTypeMap.put(OffsetTime.class, Types.TIME_WITH_TIMEZONE);
+		javaTypeToSqlTypeMap.put(OffsetDateTime.class, Types.TIMESTAMP_WITH_TIMEZONE);
 		javaTypeToSqlTypeMap.put(java.sql.Date.class, Types.DATE);
 		javaTypeToSqlTypeMap.put(java.sql.Time.class, Types.TIME);
 		javaTypeToSqlTypeMap.put(java.sql.Timestamp.class, Types.TIMESTAMP);
@@ -290,7 +291,19 @@ public abstract class StatementCreatorUtils {
 			ps.setNull(paramIndex, sqlType, typeName);
 		}
 		else {
-			ps.setNull(paramIndex, sqlType);
+			// Fall back to generic setNull call.
+			try {
+				// Try generic setNull call with SQL type specified.
+				ps.setNull(paramIndex, sqlType);
+			}
+			catch (SQLFeatureNotSupportedException ex) {
+				if (sqlType == Types.NULL) {
+					throw ex;
+				}
+				// Fall back to generic setNull call without SQL type specified
+				// (e.g. for MySQL TIME_WITH_TIMEZONE / TIMESTAMP_WITH_TIMEZONE).
+				ps.setNull(paramIndex, Types.NULL);
+			}
 		}
 	}
 
@@ -415,8 +428,16 @@ public abstract class StatementCreatorUtils {
 			}
 		}
 		else {
-			// Fall back to generic setObject call with SQL type specified.
-			ps.setObject(paramIndex, inValue, sqlType);
+			// Fall back to generic setObject call.
+			try {
+				// Try generic setObject call with SQL type specified.
+				ps.setObject(paramIndex, inValue, sqlType);
+			}
+			catch (SQLFeatureNotSupportedException ex) {
+				// Fall back to generic setObject call without SQL type specified
+				// (e.g. for MySQL TIME_WITH_TIMEZONE / TIMESTAMP_WITH_TIMEZONE).
+				ps.setObject(paramIndex, inValue);
+			}
 		}
 	}
 

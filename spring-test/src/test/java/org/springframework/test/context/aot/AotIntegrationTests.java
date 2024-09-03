@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.opentest4j.MultipleFailuresError;
 import org.springframework.aot.AotDetector;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.test.generate.CompilerFiles;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.TestCompiler;
@@ -86,7 +87,7 @@ class AotIntegrationTests extends AbstractAotTests {
 
 		// AOT BUILD-TIME: PROCESSING
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
+		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints(), true);
 		generator.processAheadOfTime(testClasses);
 
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();

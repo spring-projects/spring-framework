@@ -1,0 +1,169 @@
+[[testcontext-web-scoped-beans]]
+= Testing Request- and Session-scoped Beans
+
+Spring has supported xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other[Request- and session-scoped beans]
+ since the early years, and you can test your request-scoped and session-scoped
+beans by following these steps:
+
+* Ensure that a `WebApplicationContext` is loaded for your test by annotating your test
+  class with `@WebAppConfiguration`.
+* Inject the mock request or session into your test instance and prepare your test
+  fixture as appropriate.
+* Invoke your web component that you retrieved from the configured
+  `WebApplicationContext` (with dependency injection).
+* Perform assertions against the mocks.
+
+The next code snippet shows the XML configuration for a login use case. Note that the
+`userService` bean has a dependency on a request-scoped `loginAction` bean. Also, the
+`LoginAction` is instantiated by using xref:core/expressions.adoc[SpEL expressions] that
+retrieve the username and password from the current HTTP request. In our test, we want to
+configure these request parameters through the mock managed by the TestContext framework.
+The following listing shows the configuration for this use case:
+
+.Request-scoped bean configuration
+[source,xml,indent=0]
+----
+	<beans>
+
+		<bean id="userService" class="com.example.SimpleUserService"
+				c:loginAction-ref="loginAction"/>
+
+		<bean id="loginAction" class="com.example.LoginAction"
+				c:username="#{request.getParameter('user')}"
+				c:password="#{request.getParameter('pswd')}"
+				scope="request">
+			<aop:scoped-proxy/>
+		</bean>
+
+	</beans>
+----
+
+In `RequestScopedBeanTests`, we inject both the `UserService` (that is, the subject under
+test) and the `MockHttpServletRequest` into our test instance. Within our
+`requestScope()` test method, we set up our test fixture by setting request parameters in
+the provided `MockHttpServletRequest`. When the `loginUser()` method is invoked on our
+`userService`, we are assured that the user service has access to the request-scoped
+`loginAction` for the current `MockHttpServletRequest` (that is, the one in which we just
+set parameters). We can then perform assertions against the results based on the known
+inputs for the username and password. The following listing shows how to do so:
+
+[tabs]
+======
+Request-scoped bean test::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitWebConfig
+	class RequestScopedBeanTests {
+
+		@Autowired UserService userService;
+		@Autowired MockHttpServletRequest request;
+
+		@Test
+		void requestScope() {
+			request.setParameter("user", "enigma");
+			request.setParameter("pswd", "$pr!ng");
+
+			LoginResults results = userService.loginUser();
+			// assert results
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitWebConfig
+	class RequestScopedBeanTests {
+
+		@Autowired lateinit var userService: UserService
+		@Autowired lateinit var request: MockHttpServletRequest
+
+		@Test
+		fun requestScope() {
+			request.setParameter("user", "enigma")
+			request.setParameter("pswd", "\$pr!ng")
+
+			val results = userService.loginUser()
+			// assert results
+		}
+	}
+----
+======
+
+The following code snippet is similar to the one we saw earlier for a request-scoped
+bean. However, this time, the `userService` bean has a dependency on a session-scoped
+`userPreferences` bean. Note that the `UserPreferences` bean is instantiated by using a
+SpEL expression that retrieves the theme from the current HTTP session. In our test, we
+need to configure a theme in the mock session managed by the TestContext framework. The
+following example shows how to do so:
+
+.Session-scoped bean configuration
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+
+		<bean id="userService" class="com.example.SimpleUserService"
+				c:userPreferences-ref="userPreferences" />
+
+		<bean id="userPreferences" class="com.example.UserPreferences"
+				c:theme="#{session.getAttribute('theme')}"
+				scope="session">
+			<aop:scoped-proxy/>
+		</bean>
+
+	</beans>
+----
+
+In `SessionScopedBeanTests`, we inject the `UserService` and the `MockHttpSession` into
+our test instance. Within our `sessionScope()` test method, we set up our test fixture by
+setting the expected `theme` attribute in the provided `MockHttpSession`. When the
+`processUserPreferences()` method is invoked on our `userService`, we are assured that
+the user service has access to the session-scoped `userPreferences` for the current
+`MockHttpSession`, and we can perform assertions against the results based on the
+configured theme. The following example shows how to do so:
+
+[tabs]
+======
+Session-scoped bean test::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitWebConfig
+	class SessionScopedBeanTests {
+
+		@Autowired UserService userService;
+		@Autowired MockHttpSession session;
+
+		@Test
+		void sessionScope() throws Exception {
+			session.setAttribute("theme", "blue");
+
+			Results results = userService.processUserPreferences();
+			// assert results
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitWebConfig
+	class SessionScopedBeanTests {
+
+		@Autowired lateinit var userService: UserService
+		@Autowired lateinit var session: MockHttpSession
+
+		@Test
+		fun sessionScope() {
+			session.setAttribute("theme", "blue")
+
+			val results = userService.processUserPreferences()
+			// assert results
+		}
+	}
+----
+======
+

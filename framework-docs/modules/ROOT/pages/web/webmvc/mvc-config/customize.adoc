@@ -1,0 +1,43 @@
+[[mvc-config-customize]]
+= MVC Config API
+
+[.small]#xref:web/webflux/config.adoc#webflux-config-customize[See equivalent in the Reactive stack]#
+
+In Java configuration, you can implement the `WebMvcConfigurer` interface, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig implements WebMvcConfigurer {
+
+		// Implement configuration methods...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebMvc
+	class WebConfig : WebMvcConfigurer {
+
+		// Implement configuration methods...
+	}
+----
+======
+
+
+In XML, you can check attributes and sub-elements of `<mvc:annotation-driven/>`. You can
+view the https://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use
+the code completion feature of your IDE to discover what attributes and
+sub-elements are available.
+
+
+

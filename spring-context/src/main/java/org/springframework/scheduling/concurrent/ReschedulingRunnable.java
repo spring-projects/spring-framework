@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,8 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 			if (this.scheduledExecutionTime == null) {
 				return null;
 			}
-			Duration initialDelay = Duration.between(this.triggerContext.getClock().instant(), this.scheduledExecutionTime);
-			this.currentFuture = this.executor.schedule(this, initialDelay.toMillis(), TimeUnit.MILLISECONDS);
+			Duration delay = Duration.between(this.triggerContext.getClock().instant(), this.scheduledExecutionTime);
+			this.currentFuture = this.executor.schedule(this, delay.toNanos(), TimeUnit.NANOSECONDS);
 			return this;
 		}
 	}
@@ -158,8 +158,8 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 		if (this == other) {
 			return 0;
 		}
-		long diff = getDelay(TimeUnit.MILLISECONDS) - other.getDelay(TimeUnit.MILLISECONDS);
-		return (diff == 0 ? 0 : ((diff < 0)? -1 : 1));
+		long diff = getDelay(TimeUnit.NANOSECONDS) - other.getDelay(TimeUnit.NANOSECONDS);
+		return (diff == 0 ? 0 : (diff < 0 ? -1 : 1));
 	}
 
 }
