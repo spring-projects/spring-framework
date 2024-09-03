@@ -73,8 +73,8 @@ public class MethodMapTransactionAttributeSource
 
 
 	/**
-	 * Set a name/attribute map, consisting of "FQCN.method" method names
-	 * (e.g. "com.mycompany.mycode.MyClass.myMethod") and
+	 * Set a name/attribute map, consisting of "{@code <fully-qualified class name>.<method-name>}"
+	 * method names (e.g. "com.mycompany.mycode.MyClass.myMethod") and
 	 * {@link TransactionAttribute} instances (or Strings to be converted
 	 * to {@code TransactionAttribute} instances).
 	 * <p>Intended for configuration via setter injection, typically within
@@ -134,7 +134,7 @@ public class MethodMapTransactionAttributeSource
 		Assert.notNull(name, "Name must not be null");
 		int lastDotIndex = name.lastIndexOf('.');
 		if (lastDotIndex == -1) {
-			throw new IllegalArgumentException("'" + name + "' is not a valid method name: format is FQN.methodName");
+			throw new IllegalArgumentException("'" + name + "' is not a valid method name: format is <fully-qualified class name>.<method-name>");
 		}
 		String className = name.substring(0, lastDotIndex);
 		String methodName = name.substring(lastDotIndex + 1);

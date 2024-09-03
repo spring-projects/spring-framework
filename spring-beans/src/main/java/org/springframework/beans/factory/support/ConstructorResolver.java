@@ -1242,7 +1242,7 @@ class ConstructorResolver {
 	 * Return a {@link Predicate} for a parameter type that checks if its target
 	 * value is a {@link Class} and the value type is a {@link String}. This is
 	 * a regular use cases where a {@link Class} is defined in the bean
-	 * definition as an FQN.
+	 * definition as fully-qualified class name.
 	 * @param valueType the type of the value
 	 * @return a predicate to indicate a fallback match for a String to Class
 	 * parameter

@@ -451,8 +451,8 @@
 
 <!--
 	Specification of the type of an overloaded method argument as a String.
-	For convenience, this may be a substring of the FQN. E.g. all the
-	following would match "java.lang.String":
+	For convenience, this may be a substring of the fully-qualified class name.
+	E.g. all the following would match "java.lang.String":
 	- java.lang.String
 	- String
 	- Str
