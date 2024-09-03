@@ -28,6 +28,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.RestrictedTransactionalEventListenerFactory;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalApplicationListenerMethodAdapterTests.SampleEvents.SampleEventsWithTransactionalAnnotation;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ClassUtils;
@@ -157,6 +158,34 @@ class TransactionalApplicationListenerMethodAdapterTests {
 		assertThatNoException().isThrownBy(() -> factory.createApplicationListener("test", SampleEvents.class, m));
 	}
 
+	@Test
+	void withTransactionalAnnotationOnEnclosingClass() {
+		RestrictedTransactionalEventListenerFactory factory = new RestrictedTransactionalEventListenerFactory();
+		Method m = ReflectionUtils.findMethod(SampleEvents.SampleEventsWithTransactionalAnnotation.class, "defaultPhase", String.class);
+		assertThatIllegalStateException().isThrownBy(() -> factory.createApplicationListener("test", SampleEvents.SampleEventsWithTransactionalAnnotation.class, m));
+	}
+
+	@Test
+	void withTransactionalRequiresNewAnnotationAndTransactionalAnnotationOnEnclosingClass() {
+		RestrictedTransactionalEventListenerFactory factory = new RestrictedTransactionalEventListenerFactory();
+		Method m = ReflectionUtils.findMethod(SampleEvents.SampleEventsWithTransactionalAnnotation.class, "withTransactionalRequiresNewAnnotation", String.class);
+		assertThatNoException().isThrownBy(() -> factory.createApplicationListener("test", SampleEvents.SampleEventsWithTransactionalAnnotation.class, m));
+	}
+
+	@Test
+	void withTransactionalNotSupportedAnnotationAndTransactionalAnnotationOnEnclosingClass() {
+		RestrictedTransactionalEventListenerFactory factory = new RestrictedTransactionalEventListenerFactory();
+		Method m = ReflectionUtils.findMethod(SampleEvents.SampleEventsWithTransactionalAnnotation.class, "withTransactionalNotSupportedAnnotation", String.class);
+		assertThatNoException().isThrownBy(() -> factory.createApplicationListener("test", SampleEvents.SampleEventsWithTransactionalAnnotation.class, m));
+	}
+
+	@Test
+	void withAsyncTransactionalAnnotationAndTransactionalAnnotationOnEnclosingClass() {
+		RestrictedTransactionalEventListenerFactory factory = new RestrictedTransactionalEventListenerFactory();
+		Method m = ReflectionUtils.findMethod(SampleEvents.SampleEventsWithTransactionalAnnotation.class, "withAsyncTransactionalAnnotation", String.class);
+		assertThatNoException().isThrownBy(() -> factory.createApplicationListener("test", SampleEvents.SampleEventsWithTransactionalAnnotation.class, m));
+	}
+
 
 	private static void assertPhase(Method method, TransactionPhase expected) {
 		assertThat(method).as("Method must not be null").isNotNull();
@@ -247,6 +276,29 @@ class TransactionalApplicationListenerMethodAdapterTests {
 		@TransactionalEventListener
 		@Async @Transactional(propagation = Propagation.REQUIRES_NEW)
 		public void withAsyncTransactionalAnnotation(String data) {
+		}
+
+		@Transactional
+		static class SampleEventsWithTransactionalAnnotation {
+
+			@TransactionalEventListener
+			public void defaultPhase(String data) {
+			}
+
+			@TransactionalEventListener
+			@Transactional(propagation = Propagation.REQUIRES_NEW)
+			public void withTransactionalRequiresNewAnnotation(String data) {
+			}
+
+			@TransactionalEventListener
+			@Transactional(propagation = Propagation.NOT_SUPPORTED)
+			public void withTransactionalNotSupportedAnnotation(String data) {
+			}
+
+			@TransactionalEventListener
+			@Async @Transactional(propagation = Propagation.REQUIRES_NEW)
+			public void withAsyncTransactionalAnnotation(String data) {
+			}
 		}
 	}
 
