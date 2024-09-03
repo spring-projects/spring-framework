@@ -38,6 +38,11 @@ public class RestrictedTransactionalEventListenerFactory extends TransactionalEv
 	@Override
 	public ApplicationListener<?> createApplicationListener(String beanName, Class<?> type, Method method) {
 		Transactional txAnn = AnnotatedElementUtils.findMergedAnnotation(method, Transactional.class);
+
+		if (txAnn == null) {
+			txAnn = AnnotatedElementUtils.findMergedAnnotation(type, Transactional.class);
+		}
+
 		if (txAnn != null) {
 			Propagation propagation = txAnn.propagation();
 			if (propagation != Propagation.REQUIRES_NEW && propagation != Propagation.NOT_SUPPORTED) {
