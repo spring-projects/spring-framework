@@ -244,7 +244,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 */
 	protected void logException(Exception ex, HttpServletRequest request) {
 		if (this.warnLogger != null && this.warnLogger.isWarnEnabled()) {
-			this.warnLogger.warn(buildLogMessage(ex, request));
+			this.warnLogger.warn(buildLogMessage(ex, request), ex);
 		}
 	}
 
