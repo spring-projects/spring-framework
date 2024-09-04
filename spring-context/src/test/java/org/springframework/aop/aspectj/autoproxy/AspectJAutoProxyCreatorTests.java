@@ -609,7 +609,7 @@ abstract class AbstractProxyTargetClassConfig {
 	@Aspect
 	static class SupplierAdvice {
 
-		@Around("execution(public * org.springframework.aop.aspectj.autoproxy..*.*(..))")
+		@Around("execution(* java.util.function.Supplier+.get())")
 		Object aroundSupplier(ProceedingJoinPoint joinPoint) throws Throwable {
 			return "advised: " + joinPoint.proceed();
 		}

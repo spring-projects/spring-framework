@@ -61,7 +61,7 @@ Kotlin::
 
 By default, method parameters that use this annotation are required, but you can specify that
 a method parameter is optional by setting the `@RequestParam` annotation's `required` flag to
-`false` or by declaring the argument with an `java.util.Optional` wrapper.
+`false` or by declaring the argument with a `java.util.Optional` wrapper.
 
 Type conversion is automatically applied if the target method parameter type is not
 `String`. See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion].
@@ -86,7 +86,7 @@ Java::
 
 		// ...
 
-		@PostMapping(value = "/process", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+		@PostMapping(path = "/process", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 		public String processForm(@RequestParam MultiValueMap<String, String> params) {
 			// ...
 		}
