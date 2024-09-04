@@ -549,9 +549,14 @@ public class ResolvableType implements Serializable {
 		ResolvableType[] interfaces = this.interfaces;
 		if (interfaces == null) {
 			Type[] genericIfcs = resolved.getGenericInterfaces();
-			interfaces = new ResolvableType[genericIfcs.length];
-			for (int i = 0; i < genericIfcs.length; i++) {
-				interfaces[i] = forType(genericIfcs[i], this);
+			if (genericIfcs.length > 0) {
+				interfaces = new ResolvableType[genericIfcs.length];
+				for (int i = 0; i < genericIfcs.length; i++) {
+					interfaces[i] = forType(genericIfcs[i], this);
+				}
+			}
+			else {
+				interfaces = EMPTY_TYPES_ARRAY;
 			}
 			this.interfaces = interfaces;
 		}
@@ -789,16 +794,26 @@ public class ResolvableType implements Serializable {
 		if (generics == null) {
 			if (this.type instanceof Class<?> clazz) {
 				Type[] typeParams = clazz.getTypeParameters();
-				generics = new ResolvableType[typeParams.length];
-				for (int i = 0; i < generics.length; i++) {
-					generics[i] = ResolvableType.forType(typeParams[i], this);
+				if (typeParams.length > 0) {
+					generics = new ResolvableType[typeParams.length];
+					for (int i = 0; i < generics.length; i++) {
+						generics[i] = ResolvableType.forType(typeParams[i], this);
+					}
+				}
+				else {
+					generics = EMPTY_TYPES_ARRAY;
 				}
 			}
 			else if (this.type instanceof ParameterizedType parameterizedType) {
 				Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-				generics = new ResolvableType[actualTypeArguments.length];
-				for (int i = 0; i < actualTypeArguments.length; i++) {
-					generics[i] = forType(actualTypeArguments[i], this.variableResolver);
+				if (actualTypeArguments.length > 0) {
+					generics = new ResolvableType[actualTypeArguments.length];
+					for (int i = 0; i < actualTypeArguments.length; i++) {
+						generics[i] = forType(actualTypeArguments[i], this.variableResolver);
+					}
+				}
+				else {
+					generics = EMPTY_TYPES_ARRAY;
 				}
 			}
 			else {
