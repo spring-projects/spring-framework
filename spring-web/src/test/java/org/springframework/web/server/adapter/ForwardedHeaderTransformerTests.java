@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link ForwardedHeaderTransformer}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 class ForwardedHeaderTransformerTests {
 
@@ -167,6 +168,17 @@ class ForwardedHeaderTransformerTests {
 
 		assertThat(request.getURI()).isEqualTo(URI.create("https://example.com/first/second/path"));
 		assertThat(request.getPath().value()).isEqualTo("/first/second/path");
+		assertForwardedHeadersRemoved(request);
+	}
+
+	@Test // gh-33465
+	void shouldRemoveSingleTrailingSlash() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Forwarded-Prefix", "/prefix,/");
+		ServerHttpRequest request = this.requestMutator.apply(getRequest(headers));
+
+		assertThat(request.getURI()).isEqualTo(URI.create("https://example.com/prefix/path"));
+		assertThat(request.getPath().value()).isEqualTo("/prefix/path");
 		assertForwardedHeadersRemoved(request);
 	}
 

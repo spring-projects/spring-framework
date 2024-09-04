@@ -48,6 +48,7 @@ import static org.mockito.Mockito.mock;
  * @author Eddú Meléndez
  * @author Rob Winch
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 class ForwardedHeaderFilterTests {
 
@@ -440,6 +441,15 @@ class ForwardedHeaderFilterTests {
 
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 			assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost/first/second/mvc-showcase");
+		}
+
+		@Test
+		void shouldRemoveSingleTrailingSlash() throws Exception {
+			request.addHeader(X_FORWARDED_PREFIX, "/prefix,/");
+			request.setRequestURI("/mvc-showcase");
+
+			HttpServletRequest actual = filterAndGetWrappedRequest();
+			assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost/prefix/mvc-showcase");
 		}
 
 		@Test
