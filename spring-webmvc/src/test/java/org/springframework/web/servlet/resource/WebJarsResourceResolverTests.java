@@ -17,9 +17,12 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.webjars.WebJarAssetLocator;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -38,100 +41,111 @@ import static org.mockito.Mockito.verify;
  * @author Brian Clozel
  * @author Sam Brannen
  */
-@SuppressWarnings("removal")
 class WebJarsResourceResolverTests {
 
 	private List<Resource> locations = List.of(new ClassPathResource("/META-INF/resources/webjars"));
-
-	// for this to work, an actual WebJar must be on the test classpath
-	private WebJarsResourceResolver resolver = new WebJarsResourceResolver();
 
 	private ResourceResolverChain chain = mock();
 
 	private HttpServletRequest request = new MockHttpServletRequest();
 
 
-	@Test
-	void resolveUrlExisting() {
+	@SuppressWarnings("removal")
+	private static Stream<WebJarsResourceResolver> webJarsResourceResolvers() {
+		return Stream.of(
+				new WebJarsResourceResolver(),
+				new WebJarsResourceResolver(new WebJarAssetLocator())
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("webJarsResourceResolvers")
+	void resolveUrlExisting(WebJarsResourceResolver resolver) {
 		String file = "/foo/2.3/foo.txt";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(file);
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
+		String actual = resolver.resolveUrlPath(file, this.locations, this.chain);
 
 		assertThat(actual).isEqualTo(file);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
 	}
 
-	@Test
-	void resolveUrlExistingNotInJarFile() {
+	@ParameterizedTest
+	@MethodSource("webJarsResourceResolvers")
+	void resolveUrlExistingNotInJarFile(WebJarsResourceResolver resolver) {
 		String file = "foo/foo.txt";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
+		String actual = resolver.resolveUrlPath(file, this.locations, this.chain);
 
 		assertThat(actual).isNull();
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
 		verify(this.chain, never()).resolveUrlPath("foo/2.3/foo.txt", this.locations);
 	}
 
-	@Test
-	void resolveUrlWebJarResource() {
+	@ParameterizedTest
+	@MethodSource("webJarsResourceResolvers")
+	void resolveUrlWebJarResource(WebJarsResourceResolver resolver) {
 		String file = "underscorejs/underscore.js";
 		String expected = "underscorejs/1.8.3/underscore.js";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
 		given(this.chain.resolveUrlPath(expected, this.locations)).willReturn(expected);
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
+		String actual = resolver.resolveUrlPath(file, this.locations, this.chain);
 
 		assertThat(actual).isEqualTo(expected);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
 		verify(this.chain, times(1)).resolveUrlPath(expected, this.locations);
 	}
 
-	@Test
-	void resolveUrlWebJarResourceNotFound() {
+	@ParameterizedTest
+	@MethodSource("webJarsResourceResolvers")
+	void resolveUrlWebJarResourceNotFound(WebJarsResourceResolver resolver) {
 		String file = "something/something.js";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
 
-		String actual = this.resolver.resolveUrlPath(file, this.locations, this.chain);
+		String actual = resolver.resolveUrlPath(file, this.locations, this.chain);
 
 		assertThat(actual).isNull();
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
 		verify(this.chain, never()).resolveUrlPath(null, this.locations);
 	}
 
-	@Test
-	void resolveResourceExisting() {
+	@ParameterizedTest
+	@MethodSource("webJarsResourceResolvers")
+	void resolveResourceExisting(WebJarsResourceResolver resolver) {
 		Resource expected = mock();
 		String file = "foo/2.3/foo.txt";
 		given(this.chain.resolveResource(this.request, file, this.locations)).willReturn(expected);
 
-		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
+		Resource actual = resolver.resolveResource(this.request, file, this.locations, this.chain);
 
 		assertThat(actual).isEqualTo(expected);
 		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
 	}
 
-	@Test
-	void resolveResourceNotFound() {
+	@ParameterizedTest
+	@MethodSource("webJarsResourceResolvers")
+	void resolveResourceNotFound(WebJarsResourceResolver resolver) {
 		String file = "something/something.js";
 		given(this.chain.resolveUrlPath(file, this.locations)).willReturn(null);
 
-		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
+		Resource actual = resolver.resolveResource(this.request, file, this.locations, this.chain);
 
 		assertThat(actual).isNull();
 		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);
 		verify(this.chain, never()).resolveResource(this.request, null, this.locations);
 	}
 
-	@Test
-	void resolveResourceWebJar() {
+	@ParameterizedTest
+	@MethodSource("webJarsResourceResolvers")
+	void resolveResourceWebJar(WebJarsResourceResolver resolver) {
 		Resource expected = mock();
 		String file = "underscorejs/underscore.js";
 		String expectedPath = "underscorejs/1.8.3/underscore.js";
 		given(this.chain.resolveResource(this.request, expectedPath, this.locations)).willReturn(expected);
 
-		Resource actual = this.resolver.resolveResource(this.request, file, this.locations, this.chain);
+		Resource actual = resolver.resolveResource(this.request, file, this.locations, this.chain);
 
 		assertThat(actual).isEqualTo(expected);
 		verify(this.chain, times(1)).resolveResource(this.request, file, this.locations);

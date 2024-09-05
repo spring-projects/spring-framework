@@ -17,9 +17,11 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.List;
+import java.util.function.BiFunction;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.webjars.WebJarAssetLocator;
+import org.webjars.WebJarVersionLocator;
 
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
@@ -46,34 +48,38 @@ import org.springframework.lang.Nullable;
  * @since 4.2
  * @see org.springframework.web.servlet.config.annotation.ResourceChainRegistration
  * @see <a href="https://www.webjars.org">webjars.org</a>
- * @see LiteWebJarsResourceResolver
- * @deprecated as of Spring Framework 6.2 in favor of {@link LiteWebJarsResourceResolver}
  */
-@Deprecated(forRemoval = true)
 public class WebJarsResourceResolver extends AbstractResourceResolver {
 
-	private static final String WEBJARS_LOCATION = "META-INF/resources/webjars/";
+	private static final int WEBJARS_LOCATION_LENGTH = "META-INF/resources/webjars/".length();
 
-	private static final int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
-
-
-	private final WebJarAssetLocator webJarAssetLocator;
+	private final BiFunction<String, String, String> webJarVersionLocator;
 
 
 	/**
-	 * Create a {@code WebJarsResourceResolver} with a default {@code WebJarAssetLocator} instance.
+	 * Create a {@code WebJarsResourceResolver} with a default {@code WebJarVersionLocator} instance.
 	 */
 	public WebJarsResourceResolver() {
-		this(new WebJarAssetLocator());
+		this(new WebJarVersionLocator());
+	}
+
+	/**
+	 * Create a {@code WebJarsResourceResolver} with a custom {@code WebJarVersionLocator} instance,
+	 * e.g. with a custom cache implementation.
+	 */
+	public WebJarsResourceResolver(WebJarVersionLocator webJarVersionLocator) {
+		this.webJarVersionLocator = webJarVersionLocator::fullPath;
 	}
 
 	/**
 	 * Create a {@code WebJarsResourceResolver} with a custom {@code WebJarAssetLocator} instance,
 	 * e.g. with a custom index.
 	 * @since 4.3
+	 * @deprecated as of Spring Framework 6.2
 	 */
+	@Deprecated(forRemoval = true)
 	public WebJarsResourceResolver(WebJarAssetLocator webJarAssetLocator) {
-		this.webJarAssetLocator = webJarAssetLocator;
+		this.webJarVersionLocator = webJarAssetLocator::getFullPathExact;
 	}
 
 
@@ -109,12 +115,12 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 	@Nullable
 	protected String findWebJarResourcePath(String path) {
-		int startOffset = (path.startsWith("/") ? 1 : 0);
 		int endOffset = path.indexOf('/', 1);
 		if (endOffset != -1) {
+			int startOffset = (path.startsWith("/") ? 1 : 0);
 			String webjar = path.substring(startOffset, endOffset);
 			String partialPath = path.substring(endOffset + 1);
-			String webJarPath = this.webJarAssetLocator.getFullPathExact(webjar, partialPath);
+			String webJarPath = this.webJarVersionLocator.apply(webjar, partialPath);
 			if (webJarPath != null) {
 				return webJarPath.substring(WEBJARS_LOCATION_LENGTH);
 			}

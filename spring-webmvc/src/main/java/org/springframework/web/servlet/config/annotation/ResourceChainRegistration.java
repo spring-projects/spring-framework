@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.resource.CachingResourceResolver;
 import org.springframework.web.servlet.resource.CachingResourceTransformer;
 import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
-import org.springframework.web.servlet.resource.LiteWebJarsResourceResolver;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
@@ -83,7 +82,6 @@ public class ResourceChainRegistration {
 	 * @param resolver the resolver to add
 	 * @return the current instance for chained method invocation
 	 */
-	@SuppressWarnings("removal")
 	public ResourceChainRegistration addResolver(ResourceResolver resolver) {
 		Assert.notNull(resolver, "The provided ResourceResolver should not be null");
 		this.resolvers.add(resolver);
@@ -93,7 +91,7 @@ public class ResourceChainRegistration {
 		else if (resolver instanceof PathResourceResolver) {
 			this.hasPathResolver = true;
 		}
-		else if (resolver instanceof WebJarsResourceResolver || resolver instanceof LiteWebJarsResourceResolver) {
+		else if (resolver instanceof WebJarsResourceResolver) {
 			this.hasWebjarsResolver = true;
 		}
 		return this;
@@ -118,10 +116,10 @@ public class ResourceChainRegistration {
 		if (!this.hasPathResolver) {
 			List<ResourceResolver> result = new ArrayList<>(this.resolvers);
 			if (isWebJarVersionLocatorPresent && !this.hasWebjarsResolver) {
-				result.add(new LiteWebJarsResourceResolver());
+				result.add(new WebJarsResourceResolver());
 			}
 			else if (isWebJarAssetLocatorPresent && !this.hasWebjarsResolver) {
-				result.add(new WebJarsResourceResolver());
+				result.add(new WebJarsResourceResolver(new org.webjars.WebJarAssetLocator()));
 			}
 			result.add(new PathResourceResolver());
 			return result;

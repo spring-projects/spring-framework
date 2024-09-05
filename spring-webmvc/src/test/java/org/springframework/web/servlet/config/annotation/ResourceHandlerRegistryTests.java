@@ -31,12 +31,12 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.CachingResourceResolver;
 import org.springframework.web.servlet.resource.CachingResourceTransformer;
 import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
-import org.springframework.web.servlet.resource.LiteWebJarsResourceResolver;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
+import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletContext;
@@ -140,7 +140,7 @@ class ResourceHandlerRegistryTests {
 				zero -> assertThat(zero).isInstanceOfSatisfying(CachingResourceResolver.class,
 						cachingResolver -> assertThat(cachingResolver.getCache()).isInstanceOf(ConcurrentMapCache.class)),
 				one -> assertThat(one).isEqualTo(mockResolver),
-				two -> assertThat(two).isInstanceOf(LiteWebJarsResourceResolver.class),
+				two -> assertThat(two).isInstanceOf(WebJarsResourceResolver.class),
 				three -> assertThat(three).isInstanceOf(PathResourceResolver.class));
 		assertThat(handler.getResourceTransformers()).satisfiesExactly(
 				zero -> assertThat(zero).isInstanceOf(CachingResourceTransformer.class),
@@ -153,7 +153,7 @@ class ResourceHandlerRegistryTests {
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		assertThat(handler.getResourceResolvers()).hasExactlyElementsOfTypes(
-				LiteWebJarsResourceResolver.class, PathResourceResolver.class);
+				WebJarsResourceResolver.class, PathResourceResolver.class);
 		assertThat(handler.getResourceTransformers()).isEmpty();
 	}
 
@@ -169,7 +169,7 @@ class ResourceHandlerRegistryTests {
 		assertThat(handler.getResourceResolvers()).satisfiesExactly(
 				zero -> assertThat(zero).isInstanceOf(CachingResourceResolver.class),
 				one -> assertThat(one).isSameAs(versionResolver),
-				two -> assertThat(two).isInstanceOf(LiteWebJarsResourceResolver.class),
+				two -> assertThat(two).isInstanceOf(WebJarsResourceResolver.class),
 				three -> assertThat(three).isInstanceOf(PathResourceResolver.class));
 		assertThat(handler.getResourceTransformers()).hasExactlyElementsOfTypes(
 				CachingResourceTransformer.class, CssLinkResourceTransformer.class);
@@ -179,7 +179,7 @@ class ResourceHandlerRegistryTests {
 	void resourceChainWithOverrides() {
 		CachingResourceResolver cachingResolver = mock();
 		VersionResourceResolver versionResolver = mock();
-		LiteWebJarsResourceResolver webjarsResolver = mock();
+		WebJarsResourceResolver webjarsResolver = mock();
 		PathResourceResolver pathResourceResolver = new PathResourceResolver();
 		CachingResourceTransformer cachingTransformer = mock();
 		CssLinkResourceTransformer cssLinkTransformer = new CssLinkResourceTransformer();
