@@ -50,6 +50,9 @@ The variants that Spring provides are as follows:
   for each invocation. However, it does support a concurrency limit that blocks
   any invocations that are over the limit until a slot has been freed up. If you
   are looking for true pooling, see `ThreadPoolTaskExecutor`, later in this list.
+  This will use JDK 21's Virtual Threads, when the "virtualThreads"
+  option is enabled. This implementation also supports graceful shutdown through
+  Spring's lifecycle management.
 * `ConcurrentTaskExecutor`:
   This implementation is an adapter for a `java.util.concurrent.Executor` instance.
   There is an alternative (`ThreadPoolTaskExecutor`) that exposes the `Executor`
@@ -61,15 +64,13 @@ The variants that Spring provides are as follows:
   a `java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
   If you need to adapt to a different kind of `java.util.concurrent.Executor`,
   we recommend that you use a `ConcurrentTaskExecutor` instead.
+  It also provides a pause/resume capability and graceful shutdown through
+  Spring's lifecycle management.
 * `DefaultManagedTaskExecutor`:
   This implementation uses a JNDI-obtained `ManagedExecutorService` in a JSR-236
   compatible runtime environment (such as a Jakarta EE application server),
   replacing a CommonJ WorkManager for that purpose.
 
-As of 6.1, `ThreadPoolTaskExecutor` provides a pause/resume capability and graceful
-shutdown through Spring's lifecycle management. There is also a new "virtualThreads"
-option on `SimpleAsyncTaskExecutor` which is aligned with JDK 21's Virtual Threads,
-as well as a graceful shutdown capability for `SimpleAsyncTaskExecutor` as well.
 
 
 [[scheduling-task-executor-usage]]
@@ -88,6 +89,22 @@ decide when the task gets run.
 To configure the rules that the `TaskExecutor` uses, we expose simple bean properties:
 
 include-code::./TaskExecutorConfiguration[tag=snippet,indent=0]
+
+Most `TaskExecutor` implementations provide a way to automatically wrap tasks submitted
+with a `TaskDecorator`. Decorators should delegate to the task it is wrapping, possibly
+implementing custom behavior before/after the execution of the task.
+
+Let's consider a simple implementation that will log messages before and after the execution
+or our tasks:
+
+include-code::./LoggingTaskDecorator[indent=0]
+
+We can then configure our decorator on a `TaskExecutor` instance:
+
+include-code::./TaskExecutorConfiguration[tag=decorator,indent=0]
+
+In case multiple decorators are needed, the `org.springframework.core.task.support.CompositeTaskDecorator`
+can be used to execute sequentially multiple decorators.
 
 
 [[scheduling-task-scheduler]]

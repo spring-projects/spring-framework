@@ -16,29 +16,23 @@
 
 package org.springframework.docs.integration.schedulingtaskexecutorusage
 
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.springframework.core.task.TaskDecorator
 
-@Configuration
-class TaskExecutorConfiguration {
+class LoggingTaskDecorator : TaskDecorator {
 
-	// tag::snippet[]
-	@Bean
-	fun taskExecutor() = ThreadPoolTaskExecutor().apply {
-		corePoolSize = 5
-		maxPoolSize = 10
-		queueCapacity = 25
+	override fun decorate(runnable: Runnable): Runnable {
+		return Runnable {
+			logger.debug("Before execution of $runnable")
+			runnable.run()
+			logger.debug("After execution of $runnable")
+		}
 	}
 
-	@Bean
-	fun taskExecutorExample(taskExecutor: ThreadPoolTaskExecutor) = TaskExecutorExample(taskExecutor)
-	// end::snippet[]
-
-	// tag::decorator[]
-	@Bean
-	fun decoratedTaskExecutor() = ThreadPoolTaskExecutor().apply {
-		setTaskDecorator(LoggingTaskDecorator())
+	companion object {
+		private val logger: Log = LogFactory.getLog(
+			LoggingTaskDecorator::class.java
+		)
 	}
-	// end::decorator[]
 }

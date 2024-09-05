@@ -38,4 +38,13 @@ public class TaskExecutorConfiguration {
 		return new TaskExecutorExample(taskExecutor);
 	}
 	// end::snippet[]
+
+	// tag::decorator[]
+	@Bean
+	ThreadPoolTaskExecutor decoratedTaskExecutor() {
+		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+		taskExecutor.setTaskDecorator(new LoggingTaskDecorator());
+		return taskExecutor;
+	}
+	// end::decorator[]
 }

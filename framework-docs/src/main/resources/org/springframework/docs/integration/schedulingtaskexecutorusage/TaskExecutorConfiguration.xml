@@ -15,4 +15,13 @@
 	</bean>
 	<!-- end::snippet[] -->
 
+	<!-- tag::decorator[] -->
+	<bean id="decoratedTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="taskDecorator" ref="loggingTaskDecorator"/>
+	</bean>
+	<!-- end::decorator[] -->
+
+	<bean id="loggingTaskDecorator" class="org.springframework.docs.integration.schedulingtaskexecutorusage.LoggingTaskDecorator">
+	</bean>
+
 </beans>
