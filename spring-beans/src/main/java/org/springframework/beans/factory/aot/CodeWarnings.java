@@ -82,6 +82,7 @@ public class CodeWarnings {
 	 * specified {@link ResolvableType}.
 	 * @param resolvableType a type signature
 	 * @return {@code this} instance
+	 * @since 6.1.8
 	 */
 	public CodeWarnings detectDeprecation(ResolvableType resolvableType) {
 		if (ResolvableType.NONE.equals(resolvableType)) {
