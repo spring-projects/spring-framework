@@ -22,14 +22,12 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
-import org.springframework.core.io.buffer.DataBuffer
-import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.testfixture.codec.AbstractEncoderTests
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.test.StepVerifier.FirstStep
+import reactor.test.StepVerifier
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
 import kotlin.reflect.jvm.javaMethod
@@ -72,13 +70,30 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 			Pojo("foofoofoo", "barbarbar")
 		)
 		testEncode(input, Pojo::class.java) {
-			it.consumeNextWith(expectString("[" +
-						"{\"foo\":\"foo\",\"bar\":\"bar\"}," +
-						"{\"foo\":\"foofoo\",\"bar\":\"barbar\"}," +
-						"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}]")
-				.andThen { dataBuffer -> DataBufferUtils.release(dataBuffer) })
+			it.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.consumeNextWith(expectString(",{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
+				.consumeNextWith(expectString(",{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
+				.consumeNextWith(expectString("]"))
 				.verifyComplete()
 		}
+	}
+
+	@Test
+	fun encodeEmpty() {
+		testEncode(Flux.empty(), Pojo::class.java) {
+			it
+				.consumeNextWith(expectString("["))
+				.consumeNextWith(expectString("]"))
+				.verifyComplete()
+		}
+	}
+
+	@Test
+	fun encodeWithErrorAsFirstSignal() {
+		val message = "I'm a teapot"
+		val input = Flux.error<Any>(IllegalStateException(message))
+		val output = encoder.encode(input, this.bufferFactory, ResolvableType.forClass(Pojo::class.java), null, null)
+		StepVerifier.create(output).expectErrorMessage(message).verify()
 	}
 
 	@Test
@@ -105,9 +120,8 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 	fun encodeMono() {
 		val input = Mono.just(Pojo("foo", "bar"))
 		testEncode(input, Pojo::class.java) {
-			it.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}")
-				.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
-			.verifyComplete()
+			it.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.verifyComplete()
 		}
 	}
 
@@ -116,8 +130,7 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 		val input = Mono.just(mapOf("value" to null))
 		val methodParameter = MethodParameter.forExecutable(::handleMapWithNullable::javaMethod.get()!!, -1)
 		testEncode(input, ResolvableType.forMethodParameter(methodParameter), null, null) {
-			it.consumeNextWith(expectString("{\"value\":null}")
-				.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
+			it.consumeNextWith(expectString("{\"value\":null}"))
 				.verifyComplete()
 		}
 	}

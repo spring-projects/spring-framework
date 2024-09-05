@@ -16,13 +16,13 @@
 
 package org.springframework.http.codec;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import kotlin.text.Charsets;
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.StringFormat;
 import org.reactivestreams.Publisher;
@@ -51,6 +51,11 @@ import org.springframework.util.MimeType;
  */
 public abstract class KotlinSerializationStringEncoder<T extends StringFormat> extends KotlinSerializationSupport<T>
 	implements Encoder<Object> {
+
+	private static final byte[] NEWLINE_SEPARATOR = {'\n'};
+
+	protected static final byte[] EMPTY_BYTES = new byte[0];
+
 
 	// CharSequence encoding needed for now, see https://github.com/Kotlin/kotlinx.serialization/issues/204 for more details
 	private final CharSequenceEncoder charSequenceEncoder = CharSequenceEncoder.allMimeTypes();
@@ -85,22 +90,40 @@ public abstract class KotlinSerializationStringEncoder<T extends StringFormat> e
 		return supportedMimeTypes();
 	}
 
-
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-		if (inputStream instanceof Mono) {
-			return Mono.from(inputStream)
+			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		if (inputStream instanceof Mono<?> mono) {
+			return mono
 					.map(value -> encodeValue(value, bufferFactory, elementType, mimeType, hints))
 					.flux();
 		}
-
 		if (mimeType != null && this.streamingMediaTypes.contains(mimeType)) {
 			return Flux.from(inputStream)
-					.map(list -> encodeValue(list, bufferFactory, elementType, mimeType, hints)
-							.write("\n", Charsets.UTF_8));
+					.map(value -> encodeStreamingValue(value, bufferFactory, elementType, mimeType, hints, EMPTY_BYTES,
+							NEWLINE_SEPARATOR));
 		}
+		return encodeNonStream(inputStream, bufferFactory, elementType, mimeType, hints);
+	}
+
+	protected DataBuffer encodeStreamingValue(Object value, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType,
+			@Nullable Map<String, Object> hints, byte[] prefix, byte[] suffix) {
+
+		List<DataBuffer> buffers = new ArrayList<>(3);
+		if (prefix.length > 0) {
+			buffers.add(bufferFactory.allocateBuffer(prefix.length).write(prefix));
+		}
+		buffers.add(encodeValue(value, bufferFactory, valueType, mimeType, hints));
+		if (suffix.length > 0) {
+			buffers.add(bufferFactory.allocateBuffer(suffix.length).write(suffix));
+		}
+		return bufferFactory.join(buffers);
+	}
+
+	protected Flux<DataBuffer> encodeNonStream(Publisher<?> inputStream, DataBufferFactory bufferFactory,
+			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
 		return Flux.from(inputStream)
@@ -108,7 +131,6 @@ public abstract class KotlinSerializationStringEncoder<T extends StringFormat> e
 				.map(list -> encodeValue(list, bufferFactory, listType, mimeType, hints))
 				.flux();
 	}
-
 
 	@Override
 	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,

@@ -17,11 +17,20 @@
 package org.springframework.http.codec.json;
 
 import java.util.List;
+import java.util.Map;
 
 import kotlinx.serialization.json.Json;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.KotlinSerializationStringEncoder;
+import org.springframework.lang.Nullable;
+import org.springframework.util.MimeType;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects using
@@ -47,6 +56,40 @@ public class KotlinSerializationJsonEncoder extends KotlinSerializationStringEnc
 		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"),
 				MediaType.APPLICATION_NDJSON);
 		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
+	}
+
+	@Override
+	public Flux<DataBuffer> encodeNonStream(Publisher<?> inputStream, DataBufferFactory bufferFactory,
+			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		JsonArrayJoinHelper helper = new JsonArrayJoinHelper();
+		return Flux.from(inputStream)
+				.map(value -> encodeStreamingValue(value, bufferFactory, elementType, mimeType, hints,
+						helper.getPrefix(), EMPTY_BYTES))
+				.switchIfEmpty(Mono.fromCallable(() -> bufferFactory.wrap(helper.getPrefix())))
+				.concatWith(Mono.fromCallable(() -> bufferFactory.wrap(helper.getSuffix())));
+	}
+
+
+	private static class JsonArrayJoinHelper {
+
+		private static final byte[] COMMA_SEPARATOR = {','};
+
+		private static final byte[] OPEN_BRACKET = {'['};
+
+		private static final byte[] CLOSE_BRACKET = {']'};
+
+		private boolean firstItemEmitted;
+
+		public byte[] getPrefix() {
+			byte[] prefix = (this.firstItemEmitted ? COMMA_SEPARATOR : OPEN_BRACKET);
+			this.firstItemEmitted = true;
+			return prefix;
+		}
+
+		public byte[] getSuffix() {
+			return CLOSE_BRACKET;
+		}
 	}
 
 }
