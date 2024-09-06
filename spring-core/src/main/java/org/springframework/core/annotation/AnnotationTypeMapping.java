@@ -69,6 +69,8 @@ final class AnnotationTypeMapping {
 
 	private static final MirrorSet[] EMPTY_MIRROR_SETS = new MirrorSet[0];
 
+	private static final int[] EMPTY_INT_ARRAY = new int[0];
+
 
 	@Nullable
 	private final AnnotationTypeMapping source;
@@ -606,6 +608,9 @@ final class AnnotationTypeMapping {
 
 
 	private static int[] filledIntArray(int size) {
+		if (size == 0) {
+			return EMPTY_INT_ARRAY;
+		}
 		int[] array = new int[size];
 		Arrays.fill(array, -1);
 		return array;
@@ -684,7 +689,7 @@ final class AnnotationTypeMapping {
 		private final MirrorSet[] assigned;
 
 		MirrorSets() {
-			this.assigned = new MirrorSet[attributes.size()];
+			this.assigned = attributes.size() > 0 ? new MirrorSet[attributes.size()] : EMPTY_MIRROR_SETS;
 			this.mirrorSets = EMPTY_MIRROR_SETS;
 		}
 
@@ -728,6 +733,9 @@ final class AnnotationTypeMapping {
 		}
 
 		int[] resolve(@Nullable Object source, @Nullable Object annotation, ValueExtractor valueExtractor) {
+			if (attributes.size() == 0) {
+				return EMPTY_INT_ARRAY;
+			}
 			int[] result = new int[attributes.size()];
 			for (int i = 0; i < result.length; i++) {
 				result[i] = i;
