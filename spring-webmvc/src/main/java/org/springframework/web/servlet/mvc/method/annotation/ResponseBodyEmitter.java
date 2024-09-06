@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -59,6 +61,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 4.2
  */
 public class ResponseBodyEmitter {
@@ -271,19 +274,21 @@ public class ResponseBodyEmitter {
 	/**
 	 * Register code to invoke when the async request times out. This method is
 	 * called from a container thread when an async request times out.
+	 * <p>As of 6.2, one can register multiple callbacks for this event.
 	 */
 	public synchronized void onTimeout(Runnable callback) {
-		this.timeoutCallback.setDelegate(callback);
+		this.timeoutCallback.addDelegate(callback);
 	}
 
 	/**
 	 * Register code to invoke for an error during async request processing.
 	 * This method is called from a container thread when an error occurred
 	 * while processing an async request.
+	 * <p>As of 6.2, one can register multiple callbacks for this event.
 	 * @since 5.0
 	 */
 	public synchronized void onError(Consumer<Throwable> callback) {
-		this.errorCallback.setDelegate(callback);
+		this.errorCallback.addDelegate(callback);
 	}
 
 	/**
@@ -291,9 +296,10 @@ public class ResponseBodyEmitter {
 	 * called from a container thread when an async request completed for any
 	 * reason including timeout and network error. This method is useful for
 	 * detecting that a {@code ResponseBodyEmitter} instance is no longer usable.
+	 * <p>As of 6.2, one can register multiple callbacks for this event.
 	 */
 	public synchronized void onCompletion(Runnable callback) {
-		this.completionCallback.setDelegate(callback);
+		this.completionCallback.addDelegate(callback);
 	}
 
 
@@ -363,18 +369,17 @@ public class ResponseBodyEmitter {
 
 	private class DefaultCallback implements Runnable {
 
-		@Nullable
-		private Runnable delegate;
+		private List<Runnable> delegates = new ArrayList<>(1);
 
-		public void setDelegate(Runnable delegate) {
-			this.delegate = delegate;
+		public void addDelegate(Runnable delegate) {
+			this.delegates.add(delegate);
 		}
 
 		@Override
 		public void run() {
 			ResponseBodyEmitter.this.complete = true;
-			if (this.delegate != null) {
-				this.delegate.run();
+			for (Runnable delegate : this.delegates) {
+				delegate.run();
 			}
 		}
 	}
@@ -382,18 +387,17 @@ public class ResponseBodyEmitter {
 
 	private class ErrorCallback implements Consumer<Throwable> {
 
-		@Nullable
-		private Consumer<Throwable> delegate;
+		private List<Consumer<Throwable>> delegates = new ArrayList<>(1);
 
-		public void setDelegate(Consumer<Throwable> callback) {
-			this.delegate = callback;
+		public void addDelegate(Consumer<Throwable> callback) {
+			this.delegates.add(callback);
 		}
 
 		@Override
 		public void accept(Throwable t) {
 			ResponseBodyEmitter.this.complete = true;
-			if (this.delegate != null) {
-				this.delegate.accept(t);
+			for(Consumer<Throwable> delegate : this.delegates) {
+				delegate.accept(t);
 			}
 		}
 	}
