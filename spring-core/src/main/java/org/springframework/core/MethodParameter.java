@@ -647,7 +647,7 @@ public class MethodParameter {
 				// for inner classes, so access it with the actual parameter index lowered by 1
 				index = this.parameterIndex - 1;
 			}
-			paramAnns = (index >= 0 && index < annotationArray.length ?
+			paramAnns = (index >= 0 && index < annotationArray.length && annotationArray[index].length > 0 ?
 					adaptAnnotationArray(annotationArray[index]) : EMPTY_ANNOTATION_ARRAY);
 			this.parameterAnnotations = paramAnns;
 		}
@@ -916,7 +916,7 @@ public class MethodParameter {
 								merged.add(fieldAnn);
 							}
 						}
-						anns = merged.toArray(new Annotation[0]);
+						anns = merged.toArray(EMPTY_ANNOTATION_ARRAY);
 					}
 				}
 				catch (NoSuchFieldException | SecurityException ex) {
