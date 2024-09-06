@@ -264,15 +264,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 										"\" holds singleton lock for other beans " + this.singletonsCurrentlyInCreation);
 							}
 						}
-						else {
-							// Singleton lock currently held by some other registration method -> wait.
-							this.singletonLock.lock();
-							locked = true;
-							// Singleton object might have possibly appeared in the meantime.
-							singletonObject = this.singletonObjects.get(beanName);
-							if (singletonObject != null) {
-								return singletonObject;
-							}
+						// Singleton lock currently held by some other registration method -> wait.
+						this.singletonLock.lock();
+						locked = true;
+						// Singleton object might have possibly appeared in the meantime.
+						singletonObject = this.singletonObjects.get(beanName);
+						if (singletonObject != null) {
+							return singletonObject;
 						}
 					}
 				}
