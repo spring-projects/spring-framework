@@ -255,7 +255,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @return the log message to use
 	 */
 	protected String buildLogMessage(Exception ex, HttpServletRequest request) {
-		return "Resolved [" + LogFormatUtils.formatValue(ex, -1, true) + "] :" + ex.getMessage();
+		return "Resolved [" + LogFormatUtils.formatValue(ex + "] :" + ex.getMessage(), -1, true);
 	}
 
 	/**
