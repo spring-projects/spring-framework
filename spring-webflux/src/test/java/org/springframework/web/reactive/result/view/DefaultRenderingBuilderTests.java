@@ -23,6 +23,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -126,13 +127,14 @@ class DefaultRenderingBuilderTests {
 		assertThat(((RedirectView) view).isPropagateQuery()).isTrue();
 	}
 
-	@Test
+	@Test // gh-33498
 	void redirectWithCustomStatus() {
-		Rendering rendering = Rendering.redirectTo("foo").status(HttpStatus.MOVED_PERMANENTLY).build();
+		HttpStatus status = HttpStatus.MOVED_PERMANENTLY;
+		Rendering rendering = Rendering.redirectTo("foo").status(status).build();
 
 		Object view = rendering.view();
 		assertThat(view.getClass()).isEqualTo(RedirectView.class);
-		assertThat(((RedirectView) view).statusCode()).isEqualTo(HttpStatus.MOVED_PERMANENTLY);
+		assertThat(((RedirectView) view).getStatusCode()).isEqualTo(status);
 	}
 
 
