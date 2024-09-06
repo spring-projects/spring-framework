@@ -126,6 +126,15 @@ class DefaultRenderingBuilderTests {
 		assertThat(((RedirectView) view).isPropagateQuery()).isTrue();
 	}
 
+	@Test
+	void redirectWithCustomStatus() {
+		Rendering rendering = Rendering.redirectTo("foo").status(HttpStatus.MOVED_PERMANENTLY).build();
+
+		Object view = rendering.view();
+		assertThat(view.getClass()).isEqualTo(RedirectView.class);
+		assertThat(((RedirectView) view).statusCode()).isEqualTo(HttpStatus.MOVED_PERMANENTLY);
+	}
+
 
 	private static class Foo {}
 
