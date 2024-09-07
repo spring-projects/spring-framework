@@ -31,7 +31,7 @@ import static org.mockito.Mockito.mock;
  */
 class DefaultScopedObjectTests {
 
-	private static final String GOOD_BEAN_NAME = "foo";
+	private static final String GOOD_BEAN_NAME = "foo-bar";
 
 
 	@Test
