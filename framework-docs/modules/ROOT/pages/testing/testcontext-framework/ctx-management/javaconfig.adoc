@@ -10,7 +10,7 @@ that contains references to component classes. The following example shows how t
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from AppConfig and TestConfig
@@ -23,7 +23,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from AppConfig and TestConfig
@@ -73,7 +73,7 @@ class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig <1>
 	// ApplicationContext will be loaded from the static nested Config class
@@ -105,7 +105,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig <1>
 	// ApplicationContext will be loaded from the nested Config class

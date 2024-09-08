@@ -144,7 +144,7 @@ a serialization error occurs while populating the buffer with data. For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	DataBuffer buffer = factory.allocateBuffer();
 	boolean release = true;
@@ -162,7 +162,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val buffer = factory.allocateBuffer()
 	var release = true

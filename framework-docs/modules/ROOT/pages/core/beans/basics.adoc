@@ -110,14 +110,14 @@ as the local file system, the Java `CLASSPATH`, and so on.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", "daos.xml");
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
     val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
 ----
@@ -294,7 +294,7 @@ example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// create and configure beans
 	ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", "daos.xml");
@@ -308,7 +308,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
     import org.springframework.beans.factory.getBean
 
@@ -331,14 +331,14 @@ The following example shows Groovy configuration:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext context = new GenericGroovyApplicationContext("services.groovy", "daos.groovy");
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val context = GenericGroovyApplicationContext("services.groovy", "daos.groovy")
 ----
@@ -352,7 +352,7 @@ example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	GenericApplicationContext context = new GenericApplicationContext();
 	new XmlBeanDefinitionReader(context).loadBeanDefinitions("services.xml", "daos.xml");
@@ -361,7 +361,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val context = GenericApplicationContext()
 	XmlBeanDefinitionReader(context).loadBeanDefinitions("services.xml", "daos.xml")
@@ -376,7 +376,7 @@ example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	GenericApplicationContext context = new GenericApplicationContext();
 	new GroovyBeanDefinitionReader(context).loadBeanDefinitions("services.groovy", "daos.groovy");
@@ -385,7 +385,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val context = GenericApplicationContext()
 	GroovyBeanDefinitionReader(context).loadBeanDefinitions("services.groovy", "daos.groovy")

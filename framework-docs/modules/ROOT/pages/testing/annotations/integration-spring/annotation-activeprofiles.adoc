@@ -11,7 +11,7 @@ The following example indicates that the `dev` profile should be active:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@ActiveProfiles("dev") // <1>
@@ -23,7 +23,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@ActiveProfiles("dev") // <1>
@@ -42,7 +42,7 @@ be active:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@ActiveProfiles({"dev", "integration"}) // <1>
@@ -54,7 +54,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@ActiveProfiles(["dev", "integration"]) // <1>

@@ -12,7 +12,7 @@ expression, `Hello World`.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	Expression exp = parser.parseExpression("'Hello World'"); // <1>
@@ -22,7 +22,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 	val exp = parser.parseExpression("'Hello World'") // <1>
@@ -51,7 +51,7 @@ literal, `Hello World`.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	Expression exp = parser.parseExpression("'Hello World'.concat('!')"); // <1>
@@ -61,7 +61,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 	val exp = parser.parseExpression("'Hello World'.concat('!')") // <1>
@@ -77,7 +77,7 @@ string literal, `Hello World`.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
@@ -89,7 +89,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 
@@ -110,7 +110,7 @@ The following example shows how to use dot notation to get the length of a strin
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
@@ -122,7 +122,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 
@@ -140,7 +140,7 @@ example shows.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	Expression exp = parser.parseExpression("new String('hello world').toUpperCase()"); // <1>
@@ -150,7 +150,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 	val exp = parser.parseExpression("new String('hello world').toUpperCase()")  // <1>
@@ -173,7 +173,7 @@ reference the `name` property in a boolean expression.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Create and set a calendar
 	GregorianCalendar c = new GregorianCalendar();
@@ -195,7 +195,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Create and set a calendar
 	val c = GregorianCalendar()
@@ -275,7 +275,7 @@ being placed in it. The following example shows how to do so.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class Simple {
 		public List<Boolean> booleanList = new ArrayList<>();
@@ -296,7 +296,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class Simple {
 		var booleanList: MutableList<Boolean> = ArrayList()
@@ -339,7 +339,7 @@ automatically grow a `List`.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class Demo {
 		public List<String> list;
@@ -364,7 +364,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class Demo {
 		var list: List<String>? = null
@@ -470,7 +470,7 @@ following example shows how to do so.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
 			this.getClass().getClassLoader());
@@ -486,7 +486,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val config = SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
 			this.javaClass.classLoader)

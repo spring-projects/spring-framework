@@ -50,7 +50,7 @@ The following example uses a test properties file:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") // <1>
@@ -62,7 +62,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") // <1>
@@ -106,7 +106,7 @@ The following example sets two inlined properties:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = {"timezone = GMT", "port = 4242"}) // <1>
@@ -118,7 +118,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = ["timezone = GMT", "port = 4242"]) // <1>
@@ -137,7 +137,7 @@ a text block:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = """
@@ -152,7 +152,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = ["""
@@ -218,7 +218,7 @@ to specify properties both in a file and inline:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource(
@@ -232,7 +232,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties",
@@ -275,7 +275,7 @@ properties in both a subclass and its superclass by using `properties` files:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@TestPropertySource("base.properties")
 	@ContextConfiguration
@@ -292,7 +292,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@TestPropertySource("base.properties")
 	@ContextConfiguration
@@ -317,7 +317,7 @@ to define properties in both a subclass and its superclass by using inline prope
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@TestPropertySource(properties = "key1 = value1")
 	@ContextConfiguration
@@ -334,7 +334,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@TestPropertySource(properties = ["key1 = value1"])
 	@ContextConfiguration

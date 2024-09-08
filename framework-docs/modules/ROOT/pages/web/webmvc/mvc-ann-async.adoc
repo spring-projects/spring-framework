@@ -25,7 +25,7 @@ return value with `DeferredResult`, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/quotes")
 	@ResponseBody
@@ -41,7 +41,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/quotes")
 	@ResponseBody
@@ -71,7 +71,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping
 	public Callable<String> processUpload(final MultipartFile file) {
@@ -81,7 +81,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping
 	fun processUpload(file: MultipartFile) = Callable<String> {
@@ -227,7 +227,7 @@ response, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/events")
 	public ResponseBodyEmitter handle() {
@@ -248,7 +248,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/events")
 	fun handle() = ResponseBodyEmitter().apply {
@@ -289,7 +289,7 @@ stream from a controller, return `SseEmitter`, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping(path="/events", produces=MediaType.TEXT_EVENT_STREAM_VALUE)
 	public SseEmitter handle() {
@@ -310,7 +310,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/events", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
 	fun handle() = SseEmitter().apply {
@@ -348,7 +348,7 @@ return value type to do so, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/download")
 	public StreamingResponseBody handle() {
@@ -363,7 +363,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/download")
 	fun handle() = StreamingResponseBody {

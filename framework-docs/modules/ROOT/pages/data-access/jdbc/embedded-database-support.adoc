@@ -76,7 +76,7 @@ to customize them if necessary. The following example uses H2 with a custom driv
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
     @Configuration
     public class DataSourceConfig {
@@ -104,7 +104,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	class DataSourceConfig {
@@ -150,7 +150,7 @@ The following listing shows the test template:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DataAccessIntegrationTestTemplate {
 
@@ -182,7 +182,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class DataAccessIntegrationTestTemplate {
 

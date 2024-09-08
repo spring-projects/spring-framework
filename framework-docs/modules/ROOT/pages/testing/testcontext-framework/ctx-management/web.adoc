@@ -34,7 +34,7 @@ framework's support for convention over configuration:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
 
@@ -51,7 +51,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension::class)
 
@@ -82,7 +82,7 @@ The following example shows how to explicitly declare a resource base path with
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
 
@@ -98,7 +98,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension::class)
 
@@ -125,7 +125,7 @@ annotations by specifying a Spring resource prefix:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
 
@@ -141,7 +141,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension::class)
 

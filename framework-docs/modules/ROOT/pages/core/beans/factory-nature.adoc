@@ -72,7 +72,7 @@ no-argument signature. With Java configuration, you can use the `initMethod` att
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ExampleBean {
 
@@ -84,7 +84,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class ExampleBean {
 
@@ -107,7 +107,7 @@ The preceding example has almost exactly the same effect as the following exampl
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class AnotherExampleBean implements InitializingBean {
 
@@ -120,7 +120,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class AnotherExampleBean : InitializingBean {
 
@@ -187,7 +187,7 @@ xref:core/beans/java/bean-annotation.adoc#beans-java-lifecycle-callbacks[Receivi
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ExampleBean {
 
@@ -199,7 +199,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class ExampleBean {
 
@@ -221,7 +221,7 @@ The preceding definition has almost exactly the same effect as the following def
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class AnotherExampleBean implements DisposableBean {
 
@@ -234,7 +234,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class AnotherExampleBean : DisposableBean {
 
@@ -295,7 +295,7 @@ following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultBlogService implements BlogService {
 
@@ -316,7 +316,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class DefaultBlogService : BlogService {
 
@@ -551,7 +551,7 @@ declared on the `ConfigurableApplicationContext` interface, as the following exa
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.context.ConfigurableApplicationContext;
 	import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -573,7 +573,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.context.support.ClassPathXmlApplicationContext
 

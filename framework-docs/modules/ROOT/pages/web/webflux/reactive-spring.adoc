@@ -88,7 +88,7 @@ The code snippets below show using the `HttpHandler` adapters with each server A
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HttpHandler handler = ...
 	ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
@@ -97,7 +97,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val handler: HttpHandler = ...
 	val adapter = ReactorHttpHandlerAdapter(handler)
@@ -110,7 +110,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HttpHandler handler = ...
 	UndertowHttpHandlerAdapter adapter = new UndertowHttpHandlerAdapter(handler);
@@ -120,7 +120,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val handler: HttpHandler = ...
 	val adapter = UndertowHttpHandlerAdapter(handler)
@@ -134,7 +134,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HttpHandler handler = ...
 	Servlet servlet = new TomcatHttpHandlerAdapter(handler);
@@ -151,7 +151,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val handler: HttpHandler = ...
 	val servlet = TomcatHttpHandlerAdapter(handler)
@@ -173,7 +173,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HttpHandler handler = ...
 	Servlet servlet = new JettyHttpHandlerAdapter(handler);
@@ -192,7 +192,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val handler: HttpHandler = ...
 	val servlet = JettyHttpHandlerAdapter(handler)
@@ -305,14 +305,14 @@ Spring ApplicationContext, or that can be registered directly with it:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<MultiValueMap<String, String>> getFormData();
 ----
 
 Kotlin::
 +
-[source,Kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,Kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	suspend fun getFormData(): MultiValueMap<String, String>
 ----
@@ -334,14 +334,14 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 ----
 
 Kotlin::
 +
-[source,Kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,Kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	suspend fun getMultipartData(): MultiValueMap<String, Part>
 ----
@@ -676,7 +676,7 @@ The following example shows how to do so for server-side requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -691,7 +691,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -710,7 +710,7 @@ The following example shows how to do so for client-side requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Consumer<ClientCodecConfigurer> consumer = configurer ->
 			configurer.defaultCodecs().enableLoggingRequestDetails(true);
@@ -722,7 +722,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val consumer: (ClientCodecConfigurer) -> Unit  = { configurer -> configurer.defaultCodecs().enableLoggingRequestDetails(true) }
 
@@ -760,7 +760,7 @@ The following example shows how to do so for client-side requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient webClient = WebClient.builder()
 			.codecs(configurer -> {
@@ -772,7 +772,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val webClient = WebClient.builder()
 			.codecs({ configurer ->

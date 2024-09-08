@@ -30,7 +30,7 @@ Here's an example of how to use Vavr's Try with a transactional method:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Transactional
 	public Try<String> myTransactionalMethod() {
@@ -54,7 +54,7 @@ preferring exposure in the returned handle rather than rethrowing an exception:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Transactional @Async
 	public CompletableFuture<String> myTransactionalMethod() {
@@ -172,7 +172,7 @@ rollback:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public void resolvePosition() {
 		try {
@@ -186,7 +186,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	fun resolvePosition() {
 		try {

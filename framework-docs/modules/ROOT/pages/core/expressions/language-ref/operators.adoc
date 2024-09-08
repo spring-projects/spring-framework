@@ -24,7 +24,7 @@ The following listing shows a few examples of relational operators:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to true
 	boolean trueValue = parser.parseExpression("2 == 2").getValue(Boolean.class);
@@ -41,7 +41,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to true
 	val trueValue = parser.parseExpression("2 == 2").getValue(Boolean::class.java)
@@ -89,7 +89,7 @@ shows examples of all three:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	boolean result;
 
@@ -128,7 +128,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to true
 	var result = parser.parseExpression(
@@ -195,7 +195,7 @@ The following example shows how to use the logical operators:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// -- AND --
 
@@ -228,7 +228,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// -- AND --
 
@@ -277,7 +277,7 @@ The following example shows the `String` operators in use:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// -- Concatenation --
 
@@ -300,7 +300,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// -- Concatenation --
 
@@ -358,7 +358,7 @@ The following example shows the mathematical operators in use:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Inventor inventor = new Inventor();
 	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
@@ -424,7 +424,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val inventor = Inventor()
 	val context = SimpleEvaluationContext.forReadWriteDataBinding().build()
@@ -501,7 +501,7 @@ listing shows both ways to use the assignment operator:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Inventor inventor = new Inventor();
 	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
@@ -515,7 +515,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val inventor = Inventor()
 	val context = SimpleEvaluationContext.forReadWriteDataBinding().build()
@@ -541,7 +541,7 @@ For example, if we want to overload the `ADD` operator to allow two lists to be
 concatenated using the `+` sign, we can implement a custom `OperatorOverloader` as
 follows.
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	pubic class ListConcatenation implements OperatorOverloader {
 
@@ -576,7 +576,7 @@ as demonstrated in the following example.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	StandardEvaluationContext context = new StandardEvaluationContext();
 	context.setOperatorOverloader(new ListConcatenation());
@@ -587,7 +587,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	StandardEvaluationContext context = StandardEvaluationContext()
 	context.setOperatorOverloader(ListConcatenation())

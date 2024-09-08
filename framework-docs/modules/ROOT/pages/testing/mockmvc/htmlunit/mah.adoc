@@ -17,7 +17,7 @@ We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by usi
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient webClient;
 
@@ -31,7 +31,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	lateinit var webClient: WebClient
 
@@ -63,14 +63,14 @@ message with the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HtmlPage createMsgFormPage = webClient.getPage("http://localhost/messages/form");
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val createMsgFormPage = webClient.getPage("http://localhost/messages/form")
 ----
@@ -86,7 +86,7 @@ to create a message, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HtmlForm form = createMsgFormPage.getHtmlElementById("messageForm");
 	HtmlTextInput summaryInput = createMsgFormPage.getHtmlElementById("summary");
@@ -99,7 +99,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val form = createMsgFormPage.getHtmlElementById("messageForm")
 	val summaryInput = createMsgFormPage.getHtmlElementById("summary")
@@ -118,7 +118,7 @@ assertions use the {assertj-docs}[AssertJ] library:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	assertThat(newMessagePage.getUrl().toString()).endsWith("/messages/123");
 	String id = newMessagePage.getHtmlElementById("id").getTextContent();
@@ -131,7 +131,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	assertThat(newMessagePage.getUrl().toString()).endsWith("/messages/123")
 	val id = newMessagePage.getHtmlElementById("id").getTextContent()
@@ -167,7 +167,7 @@ the Spring TestContext Framework. This approach is repeated in the following exa
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient webClient;
 
@@ -181,7 +181,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	lateinit var webClient: WebClient
 
@@ -200,7 +200,7 @@ We can also specify additional configuration options, as the following example s
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient webClient;
 
@@ -220,7 +220,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	lateinit var webClient: WebClient
 
@@ -246,7 +246,7 @@ instance separately and supplying it to the `MockMvcWebClientBuilder`, as follow
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	MockMvc mockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
@@ -265,7 +265,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
 ----

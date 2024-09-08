@@ -19,7 +19,7 @@ matches the execution of any method named `transfer`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Pointcut("execution(* transfer(..))") // the pointcut expression
 	private void anyOldTransfer() {} // the pointcut signature
@@ -27,7 +27,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Pointcut("execution(* transfer(..))") // the pointcut expression
 	private fun anyOldTransfer() {} // the pointcut signature
@@ -150,7 +150,7 @@ pointcut expressions by name. The following example shows three pointcut express
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim",chomp="-packages"]
 ----
 	package com.xyz;
 
@@ -174,7 +174,7 @@ trading module.
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim",chomp="-packages"]
 ----
 	package com.xyz
 
@@ -217,7 +217,7 @@ expressions for this purpose. Such a class typically resembles the following
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages",fold="none"]
+[source,java,indent=0,subs="verbatim",chomp="-packages",fold="none"]
 ----
 	package com.xyz;
 
@@ -279,7 +279,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages",fold="none"]
+[source,kotlin,indent=0,subs="verbatim",chomp="-packages",fold="none"]
 ----
 	package com.xyz
 

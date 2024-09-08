@@ -19,7 +19,7 @@ file:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration("/test-config.xml") // <1>
 	class XmlApplicationContextTests {
@@ -30,7 +30,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration("/test-config.xml") // <1>
 	class XmlApplicationContextTests {
@@ -47,7 +47,7 @@ The following example shows a `@ContextConfiguration` annotation that refers to 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration(classes = TestConfig.class) // <1>
 	class ConfigClassApplicationContextTests {
@@ -58,7 +58,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration(classes = [TestConfig::class]) // <1>
 	class ConfigClassApplicationContextTests {
@@ -77,7 +77,7 @@ The following example shows such a case:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration(initializers = CustomContextInitializer.class) // <1>
 	class ContextInitializerTests {
@@ -88,7 +88,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration(initializers = [CustomContextInitializer::class]) // <1>
 	class ContextInitializerTests {
@@ -110,7 +110,7 @@ The following example uses both a location and a loader:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration(locations = "/test-context.xml", loader = CustomContextLoader.class) // <1>
 	class CustomLoaderXmlApplicationContextTests {
@@ -121,7 +121,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration("/test-context.xml", loader = CustomContextLoader::class) // <1>
 	class CustomLoaderXmlApplicationContextTests {

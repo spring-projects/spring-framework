@@ -11,7 +11,7 @@ To perform requests that use any HTTP method, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// static import of MockMvcRequestBuilders.*
 
@@ -20,7 +20,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.test.web.servlet.post
 
@@ -38,14 +38,14 @@ request. Rather, you have to set it up to be similar to the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	mockMvc.perform(multipart("/doc").file("a1", "ABC".getBytes("UTF-8")));
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.test.web.servlet.multipart
 
@@ -61,14 +61,14 @@ You can specify query parameters in URI template style, as the following example
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/hotels?thing={thing}", "somewhere"));
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	mockMvc.get("/hotels?thing={thing}", "somewhere")
 ----
@@ -81,14 +81,14 @@ parameters, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/hotels").param("thing", "somewhere"));
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.test.web.servlet.get
 
@@ -113,14 +113,14 @@ shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/app/main/hotels/{id}").contextPath("/app").servletPath("/main"))
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.test.web.servlet.get
 
@@ -139,7 +139,7 @@ properties, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class MyWebTests {
 
@@ -157,7 +157,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
 ----

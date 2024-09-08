@@ -30,7 +30,7 @@ following repeated in multiple places within our tests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
 	summaryInput.setValueAttribute(summary);
@@ -38,7 +38,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val summaryInput = currentPage.getHtmlElementById("summary")
 	summaryInput.setValueAttribute(summary)
@@ -53,7 +53,7 @@ ideally extract this code into its own method, as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public HtmlPage createMessage(HtmlPage currentPage, String summary, String text) {
 		setSummary(currentPage, summary);
@@ -68,7 +68,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	fun createMessage(currentPage: HtmlPage, summary:String, text:String) :HtmlPage{
 		setSummary(currentPage, summary);
@@ -91,7 +91,7 @@ represents the `HtmlPage` we are currently on, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class CreateMessagePage {
 
@@ -128,7 +128,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class CreateMessagePage(private val currentPage: HtmlPage) {
 
@@ -175,7 +175,7 @@ We can easily create a Selenium WebDriver that integrates with MockMvc by using 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebDriver driver;
 
@@ -189,7 +189,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	lateinit var driver: WebDriver
 
@@ -222,14 +222,14 @@ message with the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	CreateMessagePage page = CreateMessagePage.to(driver);
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val page = CreateMessagePage.to(driver)
 ----
@@ -243,7 +243,7 @@ We can then fill out the form and submit it to create a message, as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ViewMessagePage viewMessagePage =
 			page.createMessage(ViewMessagePage.class, expectedSummary, expectedText);
@@ -251,7 +251,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val viewMessagePage =
 		page.createMessage(ViewMessagePage::class, expectedSummary, expectedText)
@@ -270,7 +270,7 @@ with HtmlUnit, but it is much easier with WebDriver. Consider the following
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class CreateMessagePage extends AbstractPage { // <1>
 
@@ -317,7 +317,7 @@ annotation to look up our submit button with a `css` selector (`input[type=submi
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class CreateMessagePage(private val driver: WebDriver) : AbstractPage(driver) { // <1>
 
@@ -369,7 +369,7 @@ assertions use the {assertj-docs}[AssertJ] assertion library:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	assertThat(viewMessagePage.getMessage()).isEqualTo(expectedMessage);
 	assertThat(viewMessagePage.getSuccess()).isEqualTo("Successfully created a new message");
@@ -377,7 +377,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	assertThat(viewMessagePage.message).isEqualTo(expectedMessage)
 	assertThat(viewMessagePage.success).isEqualTo("Successfully created a new message")
@@ -393,7 +393,7 @@ example, it exposes a method that returns a `Message` object:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public Message getMessage() throws ParseException {
 		Message message = new Message();
@@ -407,7 +407,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	fun getMessage() = Message(getId(), getCreated(), getSummary(), getText())
 ----
@@ -424,7 +424,7 @@ as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@AfterEach
 	void destroy() {
@@ -436,7 +436,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@AfterEach
 	fun destroy() {
@@ -462,7 +462,7 @@ the Spring TestContext Framework. This approach is repeated here, as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebDriver driver;
 
@@ -476,7 +476,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	lateinit var driver: WebDriver
 
@@ -495,7 +495,7 @@ We can also specify additional configuration options, as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebDriver driver;
 
@@ -515,7 +515,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	lateinit var driver: WebDriver
 
@@ -541,7 +541,7 @@ instance separately and supplying it to the `MockMvcHtmlUnitDriverBuilder`, as f
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	MockMvc mockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
@@ -560,7 +560,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
 ----

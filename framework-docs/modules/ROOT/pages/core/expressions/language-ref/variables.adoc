@@ -42,7 +42,7 @@ The following example shows how to use variables.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 
@@ -55,7 +55,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val tesla = Inventor("Nikola Tesla", "Serbian")
 
@@ -83,7 +83,7 @@ xref:core/expressions/language-ref/collection-selection.adoc[collection selectio
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Create a list of prime integers.
 	List<Integer> primes = List.of(2, 3, 5, 7, 11, 13, 17);
@@ -103,7 +103,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Create a list of prime integers.
 	val primes = listOf(2, 3, 5, 7, 11, 13, 17)
@@ -130,7 +130,7 @@ xref:core/expressions/language-ref/collection-projection.adoc[collection project
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Create parser and evaluation context.
 	ExpressionParser parser = new SpelExpressionParser();
@@ -154,7 +154,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Create parser and evaluation context.
 	val parser = SpelExpressionParser()

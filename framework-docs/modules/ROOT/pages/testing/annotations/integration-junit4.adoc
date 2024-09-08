@@ -31,7 +31,7 @@ The following example shows a test that has an `@IfProfileValue` annotation:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@IfProfileValue(name="java.vendor", value="Oracle Corporation") // <1>
 	@Test
@@ -43,7 +43,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@IfProfileValue(name="java.vendor", value="Oracle Corporation") // <1>
 	@Test
@@ -63,7 +63,7 @@ Consider the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"}) // <1>
 	@Test
@@ -75,7 +75,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@IfProfileValue(name="test-groups", values=["unit-tests", "integration-tests"]) // <1>
 	@Test
@@ -101,7 +101,7 @@ is used by default. The following example shows how to use
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ProfileValueSourceConfiguration(CustomProfileValueSource.class) // <1>
 	public class CustomProfileValueSourceTests {
@@ -112,7 +112,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ProfileValueSourceConfiguration(CustomProfileValueSource::class) // <1>
 	class CustomProfileValueSourceTests {
@@ -138,7 +138,7 @@ example shows how to use it:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Timed(millis = 1000) // <1>
 	public void testProcessWithOneSecondTimeout() {
@@ -149,7 +149,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Timed(millis = 1000) // <1>
 	fun testProcessWithOneSecondTimeout() {
@@ -183,7 +183,7 @@ following example shows how to use the `@Repeat` annotation:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Repeat(10) // <1>
 	@Test
@@ -195,7 +195,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Repeat(10) // <1>
 	@Test

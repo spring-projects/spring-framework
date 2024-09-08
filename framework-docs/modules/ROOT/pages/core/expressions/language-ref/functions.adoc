@@ -26,7 +26,7 @@ reflection using a `java.lang.reflect.Method`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Method method = ...;
 
@@ -36,7 +36,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val method: Method = ...
 
@@ -51,7 +51,7 @@ For example, consider the following utility method that reverses a string:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public abstract class StringUtils {
 
@@ -63,7 +63,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	fun reverseString(input: String): String {
 		return StringBuilder(input).reverse().toString()
@@ -77,7 +77,7 @@ You can register and use the preceding method, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
@@ -92,7 +92,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 
@@ -120,7 +120,7 @@ example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
@@ -136,7 +136,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
@@ -160,7 +160,7 @@ following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
@@ -180,7 +180,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()

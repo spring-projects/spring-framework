@@ -22,7 +22,7 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyWebApplicationInitializer implements WebApplicationInitializer {
 
@@ -44,7 +44,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyWebApplicationInitializer : WebApplicationInitializer {
 

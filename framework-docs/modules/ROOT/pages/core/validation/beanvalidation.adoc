@@ -20,7 +20,7 @@ Consider the following example, which shows a simple `PersonForm` model with two
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class PersonForm {
 		private String name;
@@ -30,7 +30,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class PersonForm(
 			private val name: String,
@@ -45,7 +45,7 @@ Bean Validation lets you declare constraints as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class PersonForm {
 
@@ -60,7 +60,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class PersonForm(
 		@get:NotNull @get:Size(max=64)
@@ -94,7 +94,7 @@ bean, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
@@ -110,7 +110,7 @@ Java::
 
 XML::
 +
-[source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="validator"
 		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
@@ -134,7 +134,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import jakarta.validation.Validator;
 
@@ -148,7 +148,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import jakarta.validation.Validator;
 
@@ -171,7 +171,7 @@ For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.validation.Validator;
 
@@ -185,7 +185,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.validation.Validator
 
@@ -226,7 +226,7 @@ The following example shows a custom `@Constraint` declaration followed by an as
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Target({ElementType.METHOD, ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -237,7 +237,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.FIELD)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -250,7 +250,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import jakarta.validation.ConstraintValidator;
 
@@ -265,7 +265,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import jakarta.validation.ConstraintValidator
 
@@ -344,7 +344,7 @@ Given the following class declarations:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	record Person(@Size(min = 1, max = 10) String name) {
 	}
@@ -360,7 +360,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@JvmRecord
 	internal data class Person(@Size(min = 1, max = 10) val name: String)
@@ -389,7 +389,7 @@ message argument `"name"` is itself a `MessageSourceResolvable` with error codes
 
 Properties::
 +
-[source,properties,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,properties,indent=0,subs="verbatim,quotes"]
 ----
 Size.person.name=Please, provide a {0} that is between {2} and {1} characters long
 person.name=username
@@ -406,7 +406,7 @@ To customize the above default message, you can add a property such as:
 
 Properties::
 +
-[source,properties,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,properties,indent=0,subs="verbatim,quotes"]
 ----
 Max.degrees=You cannot provide more than {1} {0}
 ----
@@ -437,7 +437,7 @@ logic after binding to a target object:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Foo target = new Foo();
 	DataBinder binder = new DataBinder(target);
@@ -455,7 +455,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val target = Foo()
 	val binder = DataBinder(target)

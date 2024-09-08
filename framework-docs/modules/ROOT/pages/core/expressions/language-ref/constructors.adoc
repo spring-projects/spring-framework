@@ -10,7 +10,7 @@ qualified class name for all types except those located in the `java.lang` packa
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Inventor einstein = p.parseExpression(
 			"new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')")
@@ -24,7 +24,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val einstein = p.parseExpression(
 			"new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')")

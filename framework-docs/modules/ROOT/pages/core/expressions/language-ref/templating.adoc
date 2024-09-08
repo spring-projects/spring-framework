@@ -10,7 +10,7 @@ shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	String randomPhrase = parser.parseExpression(
 			"random number is #{T(java.lang.Math).random()}",
@@ -21,7 +21,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val randomPhrase = parser.parseExpression(
 			"random number is #{T(java.lang.Math).random()}",

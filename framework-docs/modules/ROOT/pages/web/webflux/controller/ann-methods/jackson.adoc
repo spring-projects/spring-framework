@@ -17,7 +17,7 @@ which allows rendering only a subset of all fields in an `Object`. To use it wit
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@RestController
 	public class UserController {
@@ -59,7 +59,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@RestController
 	class UserController {

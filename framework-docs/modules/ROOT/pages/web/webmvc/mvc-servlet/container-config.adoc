@@ -9,7 +9,7 @@ The following example registers a `DispatcherServlet`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.WebApplicationInitializer;
 
@@ -29,7 +29,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.WebApplicationInitializer
 
@@ -62,7 +62,7 @@ following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -85,7 +85,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyWebAppInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
 
@@ -111,7 +111,7 @@ If you use XML-based Spring configuration, you should extend directly from
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyWebAppInitializer extends AbstractDispatcherServletInitializer {
 
@@ -136,7 +136,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyWebAppInitializer : AbstractDispatcherServletInitializer() {
 
@@ -165,7 +165,7 @@ following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyWebAppInitializer extends AbstractDispatcherServletInitializer {
 
@@ -181,7 +181,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyWebAppInitializer : AbstractDispatcherServletInitializer() {
 

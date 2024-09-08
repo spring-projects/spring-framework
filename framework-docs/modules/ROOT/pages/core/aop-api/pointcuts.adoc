@@ -187,7 +187,7 @@ following example shows how to subclass `StaticMethodMatcherPointcut`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class TestStaticPointcut extends StaticMethodMatcherPointcut {
 
@@ -199,7 +199,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class TestStaticPointcut : StaticMethodMatcherPointcut() {
 

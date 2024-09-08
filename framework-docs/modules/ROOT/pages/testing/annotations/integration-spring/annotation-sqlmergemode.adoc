@@ -15,7 +15,7 @@ The following example shows how to use `@SqlMergeMode` at the class level.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	@Sql("/test-schema.sql")
@@ -33,7 +33,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	@Sql("/test-schema.sql")
@@ -56,7 +56,7 @@ The following example shows how to use `@SqlMergeMode` at the method level.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	@Sql("/test-schema.sql")
@@ -74,7 +74,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	@Sql("/test-schema.sql")

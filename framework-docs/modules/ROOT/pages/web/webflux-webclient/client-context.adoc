@@ -13,7 +13,7 @@ apply to all operations. For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient client = WebClient.builder()
 			.filter((request, next) ->

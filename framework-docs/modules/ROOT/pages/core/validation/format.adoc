@@ -83,7 +83,7 @@ The following `DateFormatter` is an example `Formatter` implementation:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.format.datetime;
 
@@ -119,7 +119,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	class DateFormatter(private val pattern: String) : Formatter<Date> {
 
@@ -180,7 +180,7 @@ annotation to a formatter to let a number style or pattern be specified:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public final class NumberFormatAnnotationFormatterFactory
 			implements AnnotationFormatterFactory<NumberFormat> {
@@ -217,7 +217,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class NumberFormatAnnotationFormatterFactory : AnnotationFormatterFactory<NumberFormat> {
 
@@ -256,7 +256,7 @@ example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyModel {
 
@@ -267,7 +267,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyModel(
 		@field:NumberFormat(style = Style.CURRENCY) private val decimal: BigDecimal
@@ -292,7 +292,7 @@ The following example uses `@DateTimeFormat` to format a `java.util.Date` as an 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyModel {
 
@@ -303,7 +303,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyModel(
 		@DateTimeFormat(iso=ISO.DATE) private val date: Date

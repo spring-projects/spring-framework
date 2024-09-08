@@ -34,7 +34,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import static org.springframework.http.MediaType.APPLICATION_JSON;
 	import static org.springframework.web.servlet.function.RequestPredicates.*;
@@ -71,7 +71,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.servlet.function.router
 
@@ -134,14 +134,14 @@ The following example extracts the request body to a `String`:
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 String string = request.body(String.class);
 ----
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val string = request.body<String>()
 ----
@@ -155,14 +155,14 @@ where `Person` objects are decoded from a serialized form, such as JSON or XML:
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 List<Person> people = request.body(new ParameterizedTypeReference<List<Person>>() {});
 ----
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val people = request.body<Person>()
 ----
@@ -174,14 +174,14 @@ The following example shows how to access parameters:
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 MultiValueMap<String, String> params = request.params();
 ----
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val map = request.params()
 ----
@@ -200,7 +200,7 @@ content:
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 Person person = ...
 ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
@@ -208,7 +208,7 @@ ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val person: Person = ...
 ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person)
@@ -221,7 +221,7 @@ The following example shows how to build a 201 (CREATED) response with a `Locati
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 URI location = ...
 ServerResponse.created(location).build();
@@ -229,7 +229,7 @@ ServerResponse.created(location).build();
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val location: URI = ...
 ServerResponse.created(location).build()
@@ -243,7 +243,7 @@ You can also use an asynchronous result as the body, in the form of a `Completab
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 Mono<Person> person = webClient.get().retrieve().bodyToMono(Person.class);
 ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
@@ -251,7 +251,7 @@ ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val person = webClient.get().retrieve().awaitBody<Person>()
 ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person)
@@ -267,7 +267,7 @@ any other asynchronous type supported by the `ReactiveAdapterRegistry`. For inst
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 Mono<ServerResponse> asyncResponse = webClient.get().retrieve().bodyToMono(Person.class)
   .map(p -> ServerResponse.ok().header("Name", p.name()).body(p));
@@ -283,7 +283,7 @@ allows you to send Strings, or other objects as JSON. For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public RouterFunction<ServerResponse> sse() {
 		return route(GET("/sse"), request -> ServerResponse.sse(sseBuilder -> {
@@ -309,7 +309,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	fun sse(): RouterFunction<ServerResponse> = router {
 		GET("/sse") { request -> ServerResponse.sse { sseBuilder ->
@@ -346,7 +346,7 @@ We can write a handler function as a lambda, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 HandlerFunction<ServerResponse> helloWorld =
   request -> ServerResponse.ok().body("Hello World");
@@ -354,7 +354,7 @@ HandlerFunction<ServerResponse> helloWorld =
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val helloWorld: (ServerRequest) -> ServerResponse =
   { ServerResponse.ok().body("Hello World") }
@@ -373,7 +373,7 @@ For example, the following class exposes a reactive `Person` repository:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
@@ -419,7 +419,7 @@ found. If it is not found, we return a 404 Not Found response.
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class PersonHandler(private val repository: PersonRepository) {
 
@@ -463,7 +463,7 @@ xref:web/webmvc/mvc-config/validation.adoc[Validator] implementation for a `Pers
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class PersonHandler {
 
@@ -493,7 +493,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class PersonHandler(private val repository: PersonRepository) {
 
@@ -563,7 +563,7 @@ header:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RouterFunction<ServerResponse> route = RouterFunctions.route()
 		.GET("/hello-world", accept(MediaType.TEXT_PLAIN),
@@ -572,7 +572,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.servlet.function.router
 
@@ -624,7 +624,7 @@ The following example shows the composition of four routes:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import static org.springframework.http.MediaType.APPLICATION_JSON;
 	import static org.springframework.web.servlet.function.RequestPredicates.*;
@@ -651,7 +651,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.http.MediaType.APPLICATION_JSON
 	import org.springframework.web.servlet.function.router
@@ -693,7 +693,7 @@ For instance, the last few lines of the example above can be improved in the fol
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 RouterFunction<ServerResponse> route = route()
 	.path("/person", builder -> builder // <1>
@@ -706,7 +706,7 @@ RouterFunction<ServerResponse> route = route()
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.servlet.function.router
 
@@ -730,7 +730,7 @@ We can further improve by using the `nest` method together with `accept`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RouterFunction<ServerResponse> route = route()
 		.path("/person", b1 -> b1
@@ -743,7 +743,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.servlet.function.router
 
@@ -778,7 +778,7 @@ for handling redirects in Single Page Applications.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
     ClassPathResource index = new ClassPathResource("static/index.html");
 	List<String> extensions = List.of("js", "css", "ico", "png", "jpg", "gif");
@@ -790,7 +790,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
     val redirectToIndex = router {
 		val index = ClassPathResource("static/index.html")
@@ -811,7 +811,7 @@ It is also possible to route requests that match a given pattern to resources re
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
     Resource location = new FileSystemResource("public-resources/");
     RouterFunction<ServerResponse> resources = RouterFunctions.resources("/resources/**", location);
@@ -819,7 +819,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
     val location = FileSystemResource("public-resources/")
     val resources = router { resources("/resources/**", location) }
@@ -853,7 +853,7 @@ The following example shows a WebFlux Java configuration:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableMvc
@@ -890,7 +890,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableMvc
@@ -941,7 +941,7 @@ For instance, consider the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RouterFunction<ServerResponse> route = route()
 		.path("/person", b1 -> b1
@@ -960,7 +960,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.servlet.function.router
 
@@ -998,7 +998,7 @@ The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	SecurityManager securityManager = ...
 
@@ -1021,7 +1021,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.servlet.function.router
 

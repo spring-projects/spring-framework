@@ -140,7 +140,7 @@ Taking our previous example, let's assume that `DataSourceConfiguration` is as f
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration(proxyBeanMethods = false)
 	public class DataSourceConfiguration {
@@ -155,7 +155,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration(proxyBeanMethods = false)
 	class DataSourceConfiguration {
@@ -176,7 +176,7 @@ The AOT engine will convert the configuration class above to code similar to the
 ======
 Java::
 +
-[source,java,indent=0,role="primary"]
+[source,java,indent=0]
 ----
 	/**
 	 * Bean definitions for {@link DataSourceConfiguration}
@@ -278,7 +278,7 @@ Consider the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration(proxyBeanMethods = false)
 	public class UserConfiguration {
@@ -302,7 +302,7 @@ The example above should be rewritten as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration(proxyBeanMethods = false)
 	public class UserConfiguration {
@@ -365,7 +365,7 @@ Consider the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ClientFactoryBean<T extends AbstractClient> implements FactoryBean<T> {
 		// ...
@@ -379,7 +379,7 @@ A concrete client declaration should provide a resolved generic for the client, 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration(proxyBeanMethods = false)
 	public class UserConfiguration {
@@ -405,7 +405,7 @@ The following example showcases a basic definition:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
     RootBeanDefinition beanDefinition = new RootBeanDefinition(ClientFactoryBean.class);
     beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(ClientFactoryBean.class, MyClient.class));
@@ -423,7 +423,7 @@ The JPA persistence unit has to be known upfront for certain optimizations to ap
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Bean
 	LocalContainerEntityManagerFactoryBean customDBEntityManagerFactory(DataSource dataSource) {
@@ -442,7 +442,7 @@ factory bean definition, as shown by the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Bean
 	PersistenceManagedTypes persistenceManagedTypes(ResourceLoader resourceLoader) {
@@ -475,7 +475,7 @@ The following example makes sure that `config/app.properties` can be loaded from
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	runtimeHints.resources().registerPattern("config/app.properties");
 ----

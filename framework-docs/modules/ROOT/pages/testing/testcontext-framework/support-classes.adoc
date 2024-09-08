@@ -24,7 +24,7 @@ run with the custom Spring `Runner`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@RunWith(SpringRunner.class)
 	@TestExecutionListeners({})
@@ -39,7 +39,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@RunWith(SpringRunner::class)
 	@TestExecutionListeners
@@ -83,7 +83,7 @@ to declare these rules in an integration test:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Optionally specify a non-Spring Runner via @RunWith(...)
 	@ContextConfiguration
@@ -104,7 +104,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Optionally specify a non-Spring Runner via @RunWith(...)
 	@ContextConfiguration
@@ -193,7 +193,7 @@ The following code listing shows how to configure a test class to use the
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Instructs JUnit Jupiter to extend the test with Spring support.
 	@ExtendWith(SpringExtension.class)
@@ -210,7 +210,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Instructs JUnit Jupiter to extend the test with Spring support.
 	@ExtendWith(SpringExtension::class)
@@ -237,7 +237,7 @@ used in the previous example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Instructs Spring to register the SpringExtension with JUnit
 	// Jupiter and load an ApplicationContext from TestConfig.class
@@ -253,7 +253,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Instructs Spring to register the SpringExtension with JUnit
 	// Jupiter and load an ApplicationContext from TestConfig.class
@@ -275,7 +275,7 @@ Similarly, the following example uses `@SpringJUnitWebConfig` to create a
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Instructs Spring to register the SpringExtension with JUnit
 	// Jupiter and load a WebApplicationContext from TestWebConfig.class
@@ -291,7 +291,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Instructs Spring to register the SpringExtension with JUnit
 	// Jupiter and load a WebApplicationContext from TestWebConfig::class
@@ -376,7 +376,7 @@ In the following example, Spring injects the `OrderService` bean from the
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	class OrderServiceIntegrationTests {
@@ -394,7 +394,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	class OrderServiceIntegrationTests @Autowired constructor(private val orderService: OrderService){
@@ -414,7 +414,7 @@ xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-anno
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	class OrderServiceIntegrationTests {
@@ -431,7 +431,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	class OrderServiceIntegrationTests(val orderService:OrderService) {
@@ -455,7 +455,7 @@ loaded from `TestConfig.class` into the `deleteOrder()` test method:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	class OrderServiceIntegrationTests {
@@ -469,7 +469,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	class OrderServiceIntegrationTests {
@@ -493,7 +493,7 @@ into the `placeOrderRepeatedly()` test method simultaneously.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	class OrderServiceIntegrationTests {
@@ -510,7 +510,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	class OrderServiceIntegrationTests {
@@ -561,7 +561,7 @@ which annotations can be inherited in `@Nested` test classes.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	class GreetingServiceTests {
@@ -590,7 +590,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	class GreetingServiceTests {

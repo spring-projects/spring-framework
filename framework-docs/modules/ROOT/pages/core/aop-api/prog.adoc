@@ -12,7 +12,7 @@ interceptor and one advisor:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ProxyFactory factory = new ProxyFactory(myBusinessInterfaceImpl);
 	factory.addAdvice(myMethodInterceptor);
@@ -22,7 +22,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val factory = ProxyFactory(myBusinessInterfaceImpl)
 	factory.addAdvice(myMethodInterceptor)

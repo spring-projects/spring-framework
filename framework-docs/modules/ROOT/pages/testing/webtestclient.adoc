@@ -33,7 +33,7 @@ to handle requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebTestClient client =
 			WebTestClient.bindToController(new TestController()).build();
@@ -41,7 +41,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val client = WebTestClient.bindToController(TestController()).build()
 ----
@@ -57,7 +57,7 @@ xref:testing/mockmvc.adoc[MockMvc] to handle requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebTestClient client =
 			MockMvcWebTestClient.bindToController(new TestController()).build();
@@ -65,7 +65,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val client = MockMvcWebTestClient.bindToController(TestController()).build()
 ----
@@ -89,7 +89,7 @@ requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(WebConfig.class) // <1>
 	class MyTests {
@@ -108,7 +108,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitConfig(WebConfig::class) // <1>
 	class MyTests {
@@ -135,7 +135,7 @@ requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
 	@WebAppConfiguration("classpath:META-INF/web-resources") // <1>
@@ -162,7 +162,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
 	@WebAppConfiguration("classpath:META-INF/web-resources") // <1>
@@ -203,7 +203,7 @@ create a server setup to handle requests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RouterFunction<?> route = ...
 	client = WebTestClient.bindToRouterFunction(route).build();
@@ -211,7 +211,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val route: RouterFunction<*> = ...
 	val client = WebTestClient.bindToRouterFunction(route).build()
@@ -232,14 +232,14 @@ This setup connects to a running server to perform full, end-to-end HTTP tests:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client = WebTestClient.bindToServer().baseUrl("http://localhost:8080").build();
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client = WebTestClient.bindToServer().baseUrl("http://localhost:8080").build()
 ----
@@ -260,7 +260,7 @@ follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client = WebTestClient.bindToController(new TestController())
 			.configureClient()
@@ -270,7 +270,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client = WebTestClient.bindToController(TestController())
 			.configureClient()
@@ -299,7 +299,7 @@ To assert the response status and headers, use the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/1")
 		.accept(MediaType.APPLICATION_JSON)
@@ -310,7 +310,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/1")
 		.accept(MediaType.APPLICATION_JSON)
@@ -329,7 +329,7 @@ JUnit Jupiter.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/1")
 		.accept(MediaType.APPLICATION_JSON)
@@ -342,7 +342,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/1")
 		.accept(MediaType.APPLICATION_JSON)
@@ -366,7 +366,7 @@ And perform assertions on the resulting higher level Object(s):
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons")
 			.exchange()
@@ -376,7 +376,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.test.web.reactive.server.expectBodyList
 
@@ -394,7 +394,7 @@ perform any other assertions:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
     import org.springframework.test.web.reactive.server.expectBody
 
@@ -409,7 +409,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/1")
 			.exchange()
@@ -427,7 +427,7 @@ Or you can exit the workflow and obtain an `EntityExchangeResult`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	EntityExchangeResult<Person> result = client.get().uri("/persons/1")
 			.exchange()
@@ -438,7 +438,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.test.web.reactive.server.expectBody
 
@@ -466,7 +466,7 @@ If the response is not expected to have content, you can assert that as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client.post().uri("/persons")
 			.body(personMono, Person.class)
@@ -477,7 +477,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client.post().uri("/persons")
 			.bodyValue(person)
@@ -494,7 +494,7 @@ any assertions:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/123")
 			.exchange()
@@ -504,7 +504,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/123")
 			.exchange()
@@ -527,7 +527,7 @@ To verify the full JSON content with https://jsonassert.skyscreamer.org[JSONAsse
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/1")
 			.exchange()
@@ -538,7 +538,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/1")
 			.exchange()
@@ -554,7 +554,7 @@ To verify JSON content with https://github.com/jayway/JsonPath[JSONPath]:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons")
 			.exchange()
@@ -566,7 +566,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons")
 			.exchange()
@@ -590,7 +590,7 @@ obtain a `FluxExchangeResult`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	FluxExchangeResult<MyEvent> result = client.get().uri("/events")
 			.accept(TEXT_EVENT_STREAM)
@@ -602,7 +602,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.test.web.reactive.server.returnResult
 
@@ -620,7 +620,7 @@ Now you're ready to consume the response stream with `StepVerifier` from `reacto
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Flux<Event> eventFlux = result.getResponseBody();
 
@@ -634,7 +634,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val eventFlux = result.getResponseBody()
 
@@ -662,7 +662,7 @@ obtaining an `ExchangeResult` after asserting the body:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// For a response with a body
 	EntityExchangeResult<Person> result = client.get().uri("/persons/1")
@@ -679,7 +679,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// For a response with a body
 	val result = client.get().uri("/persons/1")
@@ -701,7 +701,7 @@ Then switch to MockMvc server response assertions:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	MockMvcWebTestClient.resultActionsFor(result)
 			.andExpect(model().attribute("integer", 3))
@@ -710,7 +710,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	MockMvcWebTestClient.resultActionsFor(result)
 			.andExpect(model().attribute("integer", 3))

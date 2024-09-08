@@ -10,7 +10,7 @@ following methods:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Advisor[] getAdvisors();
 
@@ -35,7 +35,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	fun getAdvisors(): Array<Advisor>
 
@@ -90,7 +90,7 @@ manipulating its advice:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Advised advised = (Advised) myObject;
 	Advisor[] advisors = advised.getAdvisors();
@@ -110,7 +110,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val advised = myObject as Advised
 	val advisors = advised.advisors

@@ -28,7 +28,7 @@ The following sample shows how to create a default `RestClient`, and how to buil
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 RestClient defaultClient = RestClient.create();
 
@@ -45,7 +45,7 @@ RestClient customClient = RestClient.builder()
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 val defaultClient = RestClient.create()
 
@@ -77,7 +77,7 @@ The following example configures a GET request to `https://example.com/orders/42
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 int id = 42;
 restClient.get()
@@ -87,7 +87,7 @@ restClient.get()
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val id = 42
 restClient.get()
@@ -125,7 +125,7 @@ This sample shows how `RestClient` can be used to perform a simple `GET` request
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 String result = restClient.get() <1>
   .uri("https://example.com") <2>
@@ -142,7 +142,7 @@ System.out.println(result); <5>
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val result= restClient.get() <1>
   .uri("https://example.com") <2>
@@ -164,7 +164,7 @@ Access to the response status code and headers is provided through `ResponseEnti
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 ResponseEntity<String> result = restClient.get() <1>
   .uri("https://example.com") <1>
@@ -181,7 +181,7 @@ System.out.println("Contents: " + result.getBody()); <3>
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val result = restClient.get() <1>
   .uri("https://example.com") <1>
@@ -204,7 +204,7 @@ Note the usage of URI variables in this sample and that the `Accept` header is s
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 int id = ...;
 Pet pet = restClient.get()
@@ -219,7 +219,7 @@ Pet pet = restClient.get()
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val id = ...
 val pet = restClient.get()
@@ -239,7 +239,7 @@ In the next sample, `RestClient` is used to perform a POST request that contains
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 Pet pet = ... <1>
 ResponseEntity<Void> response = restClient.post() <2>
@@ -257,7 +257,7 @@ ResponseEntity<Void> response = restClient.post() <2>
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val pet: Pet = ... <1>
 val response = restClient.post() <2>
@@ -283,7 +283,7 @@ This behavior can be overridden using `onStatus`.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 String result = restClient.get() <1>
   .uri("https://example.com/this-url-does-not-exist") <1>
@@ -299,7 +299,7 @@ String result = restClient.get() <1>
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val result = restClient.get() <1>
   .uri("https://example.com/this-url-does-not-exist") <1>
@@ -322,7 +322,7 @@ Status handlers are not applied when use `exchange()`, because the exchange func
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 Pet result = restClient.get()
   .uri("https://petclinic.example.com/pets/{id}", id)
@@ -343,7 +343,7 @@ Pet result = restClient.get()
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val result = restClient.get()
   .uri("https://petclinic.example.com/pets/{id}", id)

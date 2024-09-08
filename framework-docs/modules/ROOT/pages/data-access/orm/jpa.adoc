@@ -299,7 +299,7 @@ shows a plain JPA DAO implementation that uses the `@PersistenceUnit` annotation
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ProductDaoImpl implements ProductDao {
 
@@ -328,7 +328,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class ProductDaoImpl : ProductDao {
 
@@ -394,7 +394,7 @@ EntityManager) to be injected instead of the factory. The following example show
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ProductDaoImpl implements ProductDao {
 
@@ -411,7 +411,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class ProductDaoImpl : ProductDao {
 

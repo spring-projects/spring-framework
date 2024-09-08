@@ -7,7 +7,7 @@ The `retrieve()` method can be used to declare how to extract the response. For 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient client = WebClient.create("https://example.org");
 
@@ -19,7 +19,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val client = WebClient.create("https://example.org")
 
@@ -36,7 +36,7 @@ Or to get only the body:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient client = WebClient.create("https://example.org");
 
@@ -48,7 +48,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val client = WebClient.create("https://example.org")
 
@@ -65,7 +65,7 @@ To get a stream of decoded objects:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Flux<Quote> result = client.get()
 			.uri("/quotes").accept(MediaType.TEXT_EVENT_STREAM)
@@ -75,7 +75,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val result = client.get()
 			.uri("/quotes").accept(MediaType.TEXT_EVENT_STREAM)
@@ -92,7 +92,7 @@ responses, use `onStatus` handlers as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<Person> result = client.get()
 			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
@@ -104,7 +104,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val result = client.get()
 			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)

@@ -9,7 +9,7 @@ invoke methods:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// string literal, evaluates to "bc"
 	String bc = parser.parseExpression("'abc'.substring(1, 3)").getValue(String.class);
@@ -21,7 +21,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// string literal, evaluates to "bc"
 	val bc = parser.parseExpression("'abc'.substring(1, 3)").getValue(String::class.java)

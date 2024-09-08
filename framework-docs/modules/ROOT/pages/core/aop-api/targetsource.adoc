@@ -38,7 +38,7 @@ You can change the target by using the `swap()` method on HotSwappableTargetSour
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 	Object oldTarget = swapper.swap(newTarget);
@@ -46,7 +46,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val swapper = beanFactory.getBean("swapper") as HotSwappableTargetSource
 	val oldTarget = swapper.swap(newTarget)
@@ -152,7 +152,7 @@ The cast is defined as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
 	System.out.println("Max pool size is " + conf.getMaxSize());
@@ -160,7 +160,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val conf = beanFactory.getBean("businessObject") as PoolingConfig
 	println("Max pool size is " + conf.maxSize)

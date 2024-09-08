@@ -34,7 +34,7 @@ as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import static org.springframework.http.MediaType.APPLICATION_JSON;
 	import static org.springframework.web.reactive.function.server.RequestPredicates.*;
@@ -71,7 +71,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val repository: PersonRepository = ...
 	val handler = PersonHandler(repository)
@@ -142,14 +142,14 @@ The following example extracts the request body to a `Mono<String>`:
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 Mono<String> string = request.bodyToMono(String.class);
 ----
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val string = request.awaitBody<String>()
 ----
@@ -163,14 +163,14 @@ where `Person` objects are decoded from some serialized form, such as JSON or XM
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 Flux<Person> people = request.bodyToFlux(Person.class);
 ----
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val people = request.bodyToFlow<Person>()
 ----
@@ -185,7 +185,7 @@ also be written as follows:
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 Mono<String> string = request.body(BodyExtractors.toMono(String.class));
 Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class));
@@ -193,7 +193,7 @@ Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class));
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 	val string = request.body(BodyExtractors.toMono(String::class.java)).awaitSingle()
 	val people = request.body(BodyExtractors.toFlux(Person::class.java)).asFlow()
@@ -206,14 +206,14 @@ The following example shows how to access form data:
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 Mono<MultiValueMap<String, String>> map = request.formData();
 ----
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val map = request.awaitFormData()
 ----
@@ -225,14 +225,14 @@ The following example shows how to access multipart data as a map:
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 Mono<MultiValueMap<String, Part>> map = request.multipartData();
 ----
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val map = request.awaitMultipartData()
 ----
@@ -244,7 +244,7 @@ The following example shows how to access multipart data, one at a time, in stre
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 Flux<PartEvent> allPartEvents = request.bodyToFlux(PartEvent.class);
 allPartsEvents.windowUntil(PartEvent::isLast)
@@ -272,7 +272,7 @@ allPartsEvents.windowUntil(PartEvent::isLast)
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val parts = request.bodyToFlux<PartEvent>()
 allPartsEvents.windowUntil(PartEvent::isLast)
@@ -313,7 +313,7 @@ content:
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 Mono<Person> person = ...
 ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person, Person.class);
@@ -321,7 +321,7 @@ ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person, Person.
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val person: Person = ...
 ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(person)
@@ -334,7 +334,7 @@ The following example shows how to build a 201 (CREATED) response with a `Locati
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 URI location = ...
 ServerResponse.created(location).build();
@@ -342,7 +342,7 @@ ServerResponse.created(location).build();
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 val location: URI = ...
 ServerResponse.created(location).build()
@@ -356,14 +356,14 @@ body is serialized or deserialized. For example, to specify a {baeldung-blog}/ja
 ======
 Java::
 +
-[source,java,role="primary"]
+[source,java]
 ----
 ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView.class).body(...);
 ----
 
 Kotlin::
 +
-[source,kotlin,role="secondary"]
+[source,kotlin]
 ----
 ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView::class.java).body(...)
 ----
@@ -380,7 +380,7 @@ We can write a handler function as a lambda, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 HandlerFunction<ServerResponse> helloWorld =
   request -> ServerResponse.ok().bodyValue("Hello World");
@@ -388,7 +388,7 @@ HandlerFunction<ServerResponse> helloWorld =
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 val helloWorld = HandlerFunction<ServerResponse> { ServerResponse.ok().bodyValue("Hello World") }
 ----
@@ -406,7 +406,7 @@ For example, the following class exposes a reactive `Person` repository:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
@@ -450,7 +450,7 @@ found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not F
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class PersonHandler(private val repository: PersonRepository) {
 
@@ -495,7 +495,7 @@ xref:web/webmvc/mvc-config/validation.adoc[Validator] implementation for a `Pers
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class PersonHandler {
 
@@ -523,7 +523,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class PersonHandler(private val repository: PersonRepository) {
 
@@ -593,7 +593,7 @@ header:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RouterFunction<ServerResponse> route = RouterFunctions.route()
 		.GET("/hello-world", accept(MediaType.TEXT_PLAIN),
@@ -602,7 +602,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val route = coRouter {
 		GET("/hello-world", accept(TEXT_PLAIN)) {
@@ -652,7 +652,7 @@ The following example shows the composition of four routes:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
@@ -679,7 +679,7 @@ RouterFunction<ServerResponse> route = route()
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.http.MediaType.APPLICATION_JSON
 
@@ -719,7 +719,7 @@ improved in the following way by using nested routes:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 RouterFunction<ServerResponse> route = route()
 	.path("/person", builder -> builder // <1>
@@ -732,7 +732,7 @@ RouterFunction<ServerResponse> route = route()
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val route = coRouter { // <1>
 		"/person".nest {
@@ -754,7 +754,7 @@ We can further improve by using the `nest` method together with `accept`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RouterFunction<ServerResponse> route = route()
 		.path("/person", b1 -> b1
@@ -767,7 +767,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val route = coRouter {
 		"/person".nest {
@@ -800,7 +800,7 @@ for handling redirects in Single Page Applications.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ClassPathResource index = new ClassPathResource("static/index.html");
 	List<String> extensions = List.of("js", "css", "ico", "png", "jpg", "gif");
@@ -812,7 +812,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val redirectToIndex = router {
 		val index = ClassPathResource("static/index.html")
@@ -833,7 +833,7 @@ It is also possible to route requests that match a given pattern to resources re
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
     Resource location = new FileSystemResource("public-resources/");
     RouterFunction<ServerResponse> resources = RouterFunctions.resources("/resources/**", location);
@@ -841,7 +841,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
     val location = FileSystemResource("public-resources/")
     val resources = router { resources("/resources/**", location) }
@@ -888,7 +888,7 @@ xref:web/webflux/dispatcher-handler.adoc[DispatcherHandler] for how to run it):
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -925,7 +925,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebFlux
@@ -976,7 +976,7 @@ For instance, consider the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RouterFunction<ServerResponse> route = route()
 		.path("/person", b1 -> b1
@@ -995,7 +995,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val route = router {
 		"/person".nest {
@@ -1031,7 +1031,7 @@ The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	SecurityManager securityManager = ...
 
@@ -1054,7 +1054,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val securityManager: SecurityManager = ...
 

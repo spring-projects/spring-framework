@@ -90,7 +90,7 @@ you need to programmatically call `addBeanPostProcessor`, as the following examp
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 	// populate the factory with bean definitions
@@ -104,7 +104,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val factory = DefaultListableBeanFactory()
 	// populate the factory with bean definitions
@@ -124,7 +124,7 @@ you need to call its `postProcessBeanFactory` method, as the following example s
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 	XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
@@ -140,7 +140,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val factory = DefaultListableBeanFactory()
 	val reader = XmlBeanDefinitionReader(factory)

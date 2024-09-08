@@ -25,7 +25,7 @@ we use the following expressions:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to 1856
 	int year = (Integer) parser.parseExpression("birthdate.year + 1900").getValue(context);
@@ -36,7 +36,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to 1856
 	val year = parser.parseExpression("birthdate.year + 1900").getValue(context) as Int
@@ -74,7 +74,7 @@ the collection using its `Iterator` and returning the n^th^ element encountered.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
@@ -100,7 +100,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
@@ -138,7 +138,7 @@ NOTE: The n^th^ character of a string will evaluate to a `java.lang.String`, not
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to "T" (8th letter of "Nikola Tesla")
 	String character = parser.parseExpression("members[0].name[7]")
@@ -147,7 +147,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to "T" (8th letter of "Nikola Tesla")
 	val character = parser.parseExpression("members[0].name[7]")
@@ -166,7 +166,7 @@ string literals such as `'president'`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Officer's Map
 
@@ -191,7 +191,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Officer's Map
 
@@ -227,7 +227,7 @@ property.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Create an inventor to use as the root context object.
 	Inventor tesla = new Inventor("Nikola Tesla");
@@ -239,7 +239,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Create an inventor to use as the root context object.
 	val tesla = Inventor("Nikola Tesla")
@@ -325,7 +325,7 @@ into a `FruitMap` and then index into the `FruitMap` within a SpEL expression.
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// Create a ReflectiveIndexAccessor for FruitMap
 	IndexAccessor fruitMapAccessor = new ReflectiveIndexAccessor(
@@ -344,7 +344,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// Create a ReflectiveIndexAccessor for FruitMap
 	val fruitMapAccessor = ReflectiveIndexAccessor(

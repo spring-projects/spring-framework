@@ -67,7 +67,7 @@ The following example shows how to create and insert a BLOB:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	final File blobIn = new File("spring2004.jpg");
 	final InputStream blobIs = new FileInputStream(blobIn);
@@ -95,7 +95,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val blobIn = File("spring2004.jpg")
 	val blobIs = FileInputStream(blobIn)
@@ -142,7 +142,7 @@ The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	List<Map<String, Object>> l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
 		new RowMapper<Map<String, Object>>() {
@@ -161,7 +161,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table") { rs, _ ->
 		val clobText = lobHandler.getClobAsString(rs, "a_clob")  // <1>

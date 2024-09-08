@@ -43,7 +43,7 @@ Consider the first use case in a practical application that requires a
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Bean
 	public DataSource dataSource() {
@@ -57,7 +57,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Bean
 	fun dataSource(): DataSource {
@@ -79,7 +79,7 @@ now looks like the following listing:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Bean(destroyMethod = "")
 	public DataSource dataSource() throws Exception {
@@ -90,7 +90,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Bean(destroyMethod = "")
 	fun dataSource(): DataSource {
@@ -128,7 +128,7 @@ can rewrite the `dataSource` configuration as follows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@Profile("development")
@@ -147,7 +147,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@Profile("development")
@@ -171,7 +171,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@Profile("production")
@@ -188,7 +188,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@Profile("production")
@@ -233,7 +233,7 @@ of creating a custom composed annotation. The following example defines a custom
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -244,7 +244,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Target(AnnotationTarget.CLASS)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -272,7 +272,7 @@ the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	public class AppConfig {
@@ -300,7 +300,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	class AppConfig {
@@ -454,7 +454,7 @@ it programmatically against the `Environment` API which is available through an
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 	ctx.getEnvironment().setActiveProfiles("development");
@@ -464,7 +464,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx = AnnotationConfigApplicationContext().apply {
 		environment.setActiveProfiles("development")
@@ -491,14 +491,14 @@ activates multiple profiles:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ctx.getEnvironment().setActiveProfiles("profile1", "profile2");
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	ctx.getEnvironment().setActiveProfiles("profile1", "profile2")
 ----
@@ -523,7 +523,7 @@ the following example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@Profile("default")
@@ -541,7 +541,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@Profile("default")
@@ -578,7 +578,7 @@ hierarchy of property sources. Consider the following listing:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ApplicationContext ctx = new GenericApplicationContext();
 	Environment env = ctx.getEnvironment();
@@ -588,7 +588,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx = GenericApplicationContext()
 	val env = ctx.environment
@@ -643,7 +643,7 @@ current `Environment`. The following example shows how to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 ConfigurableApplicationContext ctx = new GenericApplicationContext();
 MutablePropertySources sources = ctx.getEnvironment().getPropertySources();
@@ -652,7 +652,7 @@ sources.addFirst(new MyPropertySource());
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val ctx = GenericApplicationContext()
 	val sources = ctx.environment.propertySources
@@ -684,7 +684,7 @@ a call to `testBean.getName()` returns `myTestBean`:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
    @Configuration
    @PropertySource("classpath:/com/myco/app.properties")
@@ -704,7 +704,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@PropertySource("classpath:/com/myco/app.properties")
@@ -729,7 +729,7 @@ environment, as the following example shows:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
    @Configuration
    @PropertySource("classpath:/com/${my.placeholder:default/path}/app.properties")
@@ -749,7 +749,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@PropertySource("classpath:/com/\${my.placeholder:default/path}/app.properties")

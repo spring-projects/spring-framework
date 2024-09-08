@@ -19,7 +19,7 @@ The following example shows how to use the Elvis operator:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
@@ -29,7 +29,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 
@@ -48,7 +48,7 @@ The following listing shows a more complex example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
@@ -64,7 +64,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val parser = SpelExpressionParser()
 	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()

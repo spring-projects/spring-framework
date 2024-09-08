@@ -11,7 +11,7 @@ you can use the `@SessionAttribute` annotation on a method parameter, as the fol
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/")
 	public String handle(@SessionAttribute User user) { // <1>
@@ -22,7 +22,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/")
 	fun handle(@SessionAttribute user: User): String { // <1>

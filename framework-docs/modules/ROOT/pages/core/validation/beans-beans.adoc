@@ -115,7 +115,7 @@ properties:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class Company {
 
@@ -142,7 +142,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class Company {
 		var name: String? = null
@@ -155,7 +155,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class Employee {
 
@@ -183,7 +183,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class Employee {
 		var name: String? = null
@@ -199,7 +199,7 @@ the properties of instantiated ``Company``s and ``Employee``s:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	BeanWrapper company = new BeanWrapperImpl(new Company());
 	// setting the company name..
@@ -219,7 +219,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val company = BeanWrapperImpl(Company())
 	// setting the company name..
@@ -379,7 +379,7 @@ associates a `CustomNumberEditor` with the `age` property of the `Something` cla
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SomethingBeanInfo extends SimpleBeanInfo {
 
@@ -403,7 +403,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class SomethingBeanInfo : SimpleBeanInfo() {
 
@@ -467,7 +467,7 @@ another class called `DependsOnExoticType`, which needs `ExoticType` set as a pr
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package example;
 
@@ -492,7 +492,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package example
 
@@ -522,7 +522,7 @@ The `PropertyEditor` implementation could look similar to the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package example;
 
@@ -539,7 +539,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package example
 
@@ -593,7 +593,7 @@ The following example shows how to create your own `PropertyEditorRegistrar` imp
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package com.foo.editors.spring;
 
@@ -611,7 +611,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package com.foo.editors.spring
 
@@ -661,7 +661,7 @@ example uses a `PropertyEditorRegistrar` in the implementation of an `@InitBinde
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	public class RegisterUserController {
@@ -683,7 +683,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	class RegisterUserController(

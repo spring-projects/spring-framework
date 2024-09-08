@@ -12,7 +12,7 @@ With Spring MVC Test, we can easily test if we are able to create a `Message`, a
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	MockHttpServletRequestBuilder createMessage = post("/messages/")
 			.param("summary", "Spring Rocks")
@@ -25,7 +25,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Test
 	fun test() {
@@ -67,7 +67,7 @@ naive attempt might resemble the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/messages/form"))
 			.andExpect(xpath("//input[@name='summary']").exists())
@@ -76,7 +76,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	mockMvc.get("/messages/form").andExpect {
 		xpath("//input[@name='summary']") { exists() }
@@ -95,7 +95,7 @@ follows:
 Java::
 +
 [[mockmvc-server-htmlunit-mock-mvc-test]]
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	String summaryParamName = "summary";
 	String textParamName = "text";
@@ -114,7 +114,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val summaryParamName = "summary";
 	val textParamName = "text";

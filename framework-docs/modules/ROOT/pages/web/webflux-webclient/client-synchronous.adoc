@@ -7,7 +7,7 @@
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Person person = client.get().uri("/person/{id}", i).retrieve()
 		.bodyToMono(Person.class)
@@ -21,7 +21,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val person = runBlocking {
 		client.get().uri("/person/{id}", i).retrieve()
@@ -43,7 +43,7 @@ response individually, and instead wait for the combined result:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<Person> personMono = client.get().uri("/person/{id}", personId)
 			.retrieve().bodyToMono(Person.class);
@@ -62,7 +62,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val data = runBlocking {
 			val personDeferred = async {

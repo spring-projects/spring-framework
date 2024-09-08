@@ -21,7 +21,7 @@ and the entire list is used as the batch:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -53,7 +53,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -104,7 +104,7 @@ The following example shows a batch update using named parameters:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -126,7 +126,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -155,7 +155,7 @@ JDBC `?` placeholders:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -183,7 +183,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -254,7 +254,7 @@ The following example shows a batch update that uses a batch size of 100:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -283,7 +283,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 

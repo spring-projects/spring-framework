@@ -298,7 +298,7 @@ The following example shows a class that would work with the preceding bean defi
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ClientService {
 		private static ClientService clientService = new ClientService();
@@ -312,7 +312,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class ClientService private constructor() {
 		companion object {
@@ -378,7 +378,7 @@ The following example shows the corresponding class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultServiceLocator {
 
@@ -392,7 +392,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class DefaultServiceLocator {
 		companion object {
@@ -428,7 +428,7 @@ The following example shows the corresponding class:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultServiceLocator {
 
@@ -448,7 +448,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class DefaultServiceLocator {
 		companion object {

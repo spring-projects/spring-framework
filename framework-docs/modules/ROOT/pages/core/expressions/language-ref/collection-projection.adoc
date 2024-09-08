@@ -11,7 +11,7 @@ list. The following example uses projection to do so:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to ["Smiljan", "Idvor"]
 	List placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]")
@@ -20,7 +20,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// evaluates to ["Smiljan", "Idvor"]
 	val placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]")

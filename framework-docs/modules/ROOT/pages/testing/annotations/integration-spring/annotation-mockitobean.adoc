@@ -42,7 +42,7 @@ The following example shows how to use the default behavior of the `@MockitoBean
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class OverrideBeanTests {
 		@MockitoBean // <1>
@@ -66,7 +66,7 @@ The following example uses a by-name lookup, rather than a by-type lookup:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class OverrideBeanTests {
 		@MockitoBean(name = "service") // <1>
@@ -87,7 +87,7 @@ The following example shows how to use the default behavior of the `@MockitoSpyB
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class OverrideBeanTests {
 		@MockitoSpyBean // <1>
@@ -110,7 +110,7 @@ The following example uses a by-name lookup, rather than a by-type lookup:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class OverrideBeanTests {
 		@MockitoSpyBean(name = "service") // <1>

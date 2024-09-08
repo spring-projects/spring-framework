@@ -32,7 +32,7 @@ published while invoking a method in a Spring-managed component:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@SpringJUnitConfig(/* ... */)
 	@RecordApplicationEvents // <1>
@@ -60,7 +60,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@SpringJUnitConfig(/* ... */)
 	@RecordApplicationEvents // <1>

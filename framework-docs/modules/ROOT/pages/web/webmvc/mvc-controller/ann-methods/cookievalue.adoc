@@ -19,7 +19,7 @@ The following example shows how to get the cookie value:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/demo")
 	public void handle(@CookieValue("JSESSIONID") String cookie) { <1>
@@ -30,7 +30,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@GetMapping("/demo")
 	fun handle(@CookieValue("JSESSIONID") cookie: String) { // <1>

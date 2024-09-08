@@ -10,7 +10,7 @@ and request headers onto a model object. For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(@ModelAttribute Pet pet) { // <1>
@@ -21,7 +21,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 @PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 fun processSubmit(@ModelAttribute pet: Pet): String { // <1>
@@ -58,7 +58,7 @@ registered `Converter<String, Account>` that perhaps retrieves it from a persist
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@PutMapping("/accounts/{account}")
 	public String save(@ModelAttribute("account") Account account) { // <1>
@@ -68,7 +68,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PutMapping("/accounts/{account}")
 	fun save(@ModelAttribute("account") account: Account): String { // <1>
@@ -93,7 +93,7 @@ When using constructor binding, you can customize request parameter names throug
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class Account {
 
@@ -106,7 +106,7 @@ Java::
 ----
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class Account(@BindParam("first-name") val firstName: String)
 ----
@@ -128,7 +128,7 @@ alternatively, set `@ModelAttribute(binding=false)`, as the following example sh
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ModelAttribute
 	public AccountForm setUpForm() {
@@ -150,7 +150,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ModelAttribute
 	fun setUpForm(): AccountForm {
@@ -179,7 +179,7 @@ in order to handle such errors in the controller method. For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result) { // <1>
@@ -193,7 +193,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	fun processSubmit(@ModelAttribute("pet") pet: Pet, result: BindingResult): String { // <1>
@@ -215,7 +215,7 @@ xref:web/webmvc/mvc-config/validation.adoc[Spring validation]. For example:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 		@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 		public String processSubmit(@Valid @ModelAttribute("pet") Pet pet, BindingResult result) { // <1>
@@ -229,7 +229,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	fun processSubmit(@Valid @ModelAttribute("pet") pet: Pet, result: BindingResult): String { // <1>

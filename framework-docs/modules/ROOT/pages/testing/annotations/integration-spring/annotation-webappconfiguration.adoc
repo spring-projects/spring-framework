@@ -17,7 +17,7 @@ The following example shows how to use the `@WebAppConfiguration` annotation:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@WebAppConfiguration // <1>
@@ -29,7 +29,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@WebAppConfiguration // <1>
@@ -52,7 +52,7 @@ resource. The following example shows how to specify a classpath resource:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@WebAppConfiguration("classpath:test-web-resources") // <1>
@@ -64,7 +64,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@WebAppConfiguration("classpath:test-web-resources") // <1>

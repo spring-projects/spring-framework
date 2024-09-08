@@ -12,7 +12,7 @@ The following example demonstrates how to declare a properties file from the cla
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") // <1>
@@ -24,7 +24,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") // <1>
@@ -42,7 +42,7 @@ The following example demonstrates how to declare inlined properties:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = { "timezone = GMT", "port: 4242" }) // <1>
@@ -54,7 +54,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = ["timezone = GMT", "port: 4242"]) // <1>

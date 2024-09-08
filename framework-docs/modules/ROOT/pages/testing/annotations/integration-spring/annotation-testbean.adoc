@@ -32,7 +32,7 @@ The following example shows how to use the default behavior of the `@TestBean` a
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class OverrideBeanTests {
 		@TestBean // <1>
@@ -60,7 +60,7 @@ The following example uses a by-name lookup, rather than a by-type lookup:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class OverrideBeanTests {
 		@TestBean(name = "service", methodName = "createCustomService") // <1>

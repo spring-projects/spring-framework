@@ -29,7 +29,7 @@ The following example shows how to do so by using Java configuration:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 public class MyInitializer
 		extends AbstractAnnotationConfigDispatcherServletInitializer {
@@ -59,7 +59,7 @@ public class MyInitializer
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
 

@@ -12,7 +12,7 @@ used within a test class hierarchy):
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextHierarchy({
 		@ContextConfiguration("/parent-config.xml"),
@@ -25,7 +25,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ContextHierarchy(
 		ContextConfiguration("/parent-config.xml"),
@@ -40,7 +40,7 @@ Kotlin::
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@WebAppConfiguration
 	@ContextHierarchy({
@@ -54,7 +54,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@WebAppConfiguration
 	@ContextHierarchy(

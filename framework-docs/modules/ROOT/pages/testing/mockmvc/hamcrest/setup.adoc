@@ -13,7 +13,7 @@ To set up MockMvc for testing a specific controller, use the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class MyWebTests {
 
@@ -31,7 +31,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyWebTests {
 
@@ -58,7 +58,7 @@ To set up MockMvc through Spring configuration, use the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitWebConfig(locations = "my-servlet-context.xml")
 	class MyWebTests {
@@ -77,7 +77,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@SpringJUnitWebConfig(locations = ["my-servlet-context.xml"])
 	class MyWebTests {

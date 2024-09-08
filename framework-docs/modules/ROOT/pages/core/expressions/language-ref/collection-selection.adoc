@@ -12,7 +12,7 @@ selection lets us easily get a list of Serbian inventors, as the following examp
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	List<Inventor> list = (List<Inventor>) parser.parseExpression(
 			"members.?[nationality == 'Serbian']").getValue(societyContext);
@@ -20,7 +20,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val list = parser.parseExpression(
 			"members.?[nationality == 'Serbian']").getValue(societyContext) as List<Inventor>
@@ -41,14 +41,14 @@ than 27:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Map newMap = parser.parseExpression("#map.?[value < 27]").getValue(Map.class);
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val newMap = parser.parseExpression("#map.?[value < 27]").getValue() as Map
 ----

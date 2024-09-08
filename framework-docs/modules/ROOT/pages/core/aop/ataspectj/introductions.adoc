@@ -15,7 +15,7 @@ interfaces also implement the `UsageTracked` interface (e.g. for statistics via 
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	@Aspect
 	public class UsageTracking {
@@ -33,7 +33,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Aspect
 	class UsageTracking {
@@ -63,14 +63,14 @@ you would write the following:
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim"]
 ----
 	UsageTracked usageTracked = context.getBean("myService", UsageTracked.class);
 ----
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim"]
 ----
 	val usageTracked = context.getBean<UsageTracked>("myService")
 ----
