@@ -2,7 +2,7 @@
 = Further Examples
 :page-section-summary-toc: 1
 
-The framework's own tests include
+The framework's own test suite includes
 {spring-framework-code}/spring-test/src/test/java/org/springframework/test/web/servlet/samples[
 many sample tests] intended to show how to use MockMvc on its own or through the
 {spring-framework-code}/spring-test/src/test/java/org/springframework/test/web/servlet/samples/client[
