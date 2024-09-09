@@ -209,6 +209,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.build();
 	}
 
+	@Override
+	public ServerResponse stream(Consumer<ServerResponse.StreamBuilder> streamConsumer) {
+		return StreamingServerResponse.create(this.statusCode, this.headers, this.cookies, streamConsumer, null);
+	}
 
 	private static class WriteFunctionResponse extends AbstractServerResponse {
 
