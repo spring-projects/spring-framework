@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.view;
 
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Arrays;
@@ -200,6 +201,20 @@ class ViewResolutionResultHandlerTests {
 		ServerWebExchange exchange = testHandle("/path", returnType, returnValue, expected, resolver);
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(status);
 		assertThat(exchange.getResponse().getHeaders().getFirst("h")).isEqualTo("h1");
+	}
+
+	@Test // gh-33498
+	void handleRedirect() {
+		HttpStatus status = HttpStatus.MOVED_PERMANENTLY;
+		Rendering returnValue = Rendering.redirectTo("foo").status(status).build();
+		MethodParameter returnType = on(Handler.class).resolveReturnType(Rendering.class);
+		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.bindingContext);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		resultHandler(new UrlBasedViewResolver()).handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(status);
+		assertThat(exchange.getResponse().getHeaders().getLocation()).isEqualTo(URI.create("foo"));
 	}
 
 	@Test
