@@ -84,8 +84,8 @@ class DefaultRenderingBuilder implements Rendering.RedirectBuilder {
 
 	@Override
 	public DefaultRenderingBuilder status(HttpStatusCode status) {
-		if (this.view instanceof RedirectView) {
-			((RedirectView) this.view).setStatusCode(status);
+		if (this.view instanceof RedirectView redirectView) {
+			redirectView.setStatusCode(status);
 		}
 		else {
 			this.status = status;
