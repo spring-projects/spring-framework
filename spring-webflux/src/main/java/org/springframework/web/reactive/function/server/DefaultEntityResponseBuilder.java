@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.springframework.http.*;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.codec.Hints;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ETag;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -141,9 +148,9 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	}
 
 	@Override
-	public EntityResponse.Builder<T> eTag(String etag) {
-		etag = ETag.format(etag);
-		this.headers.setETag(etag);
+	public EntityResponse.Builder<T> eTag(String eTag) {
+		eTag = ETag.quoteETagIfNecessary(eTag);
+		this.headers.setETag(eTag);
 		return this;
 	}
 

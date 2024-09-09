@@ -134,15 +134,26 @@ public record ETag(String tag, boolean weak) {
 		return result;
 	}
 
-	public static String format(String etag) {
-		if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
-			etag = "\"" + etag;
+	/**
+	 * Add quotes around the ETag value if not present already.
+	 * @param tag the ETag value
+	 * @return the resulting, quoted value
+	 * @since 6.2
+	 */
+	public static String quoteETagIfNecessary(String tag) {
+		if (tag.startsWith("W/\"")) {
+			if (tag.length() > 3 && tag.endsWith("\"")) {
+				return tag;
+			}
 		}
-		if (!etag.endsWith("\"")) {
-			etag = etag + "\"";
+		else if (tag.startsWith("\"")) {
+			if (tag.length() > 1 && tag.endsWith("\"")) {
+				return tag;
+			}
 		}
-		return etag;
+		return ("\"" + tag + "\"");
 	}
+
 
 	private enum State {
 
