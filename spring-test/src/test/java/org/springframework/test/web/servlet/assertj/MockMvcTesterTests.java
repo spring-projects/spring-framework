@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet.assertj;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,6 +35,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.json.AbstractJsonContentAssert;
@@ -148,51 +150,57 @@ class MockMvcTesterTests {
 
 	@Test
 	void getConfiguresBuilder() {
-		assertThat(createMockHttpServletRequest(tester -> tester.get().uri("/hello")))
-				.satisfies(hasSettings(HttpMethod.GET, "/hello"));
+		assertThat(createMockHttpServletRequest(tester -> tester.get().uri("/hello/{id}", "world")))
+				.satisfies(hasSettings(HttpMethod.GET, "/hello/{id}", "/hello/world"));
 	}
 
 	@Test
 	void headConfiguresBuilder() {
-		assertThat(createMockHttpServletRequest(tester -> tester.head().uri("/download")))
-				.satisfies(hasSettings(HttpMethod.HEAD, "/download"));
+		assertThat(createMockHttpServletRequest(tester -> tester.head().uri("/download/{file}", "test.json")))
+				.satisfies(hasSettings(HttpMethod.HEAD, "/download/{file}", "/download/test.json"));
 	}
 
 	@Test
 	void postConfiguresBuilder() {
-		assertThat(createMockHttpServletRequest(tester -> tester.post().uri("/save")))
-				.satisfies(hasSettings(HttpMethod.POST, "/save"));
+		assertThat(createMockHttpServletRequest(tester -> tester.post().uri("/save/{id}", 123)))
+				.satisfies(hasSettings(HttpMethod.POST, "/save/{id}", "/save/123"));
 	}
 
 	@Test
 	void putConfiguresBuilder() {
-		assertThat(createMockHttpServletRequest(tester -> tester.put().uri("/save")))
-				.satisfies(hasSettings(HttpMethod.PUT, "/save"));
+		assertThat(createMockHttpServletRequest(tester -> tester.put().uri("/save/{id}", 123)))
+				.satisfies(hasSettings(HttpMethod.PUT, "/save/{id}", "/save/123"));
 	}
 
 	@Test
 	void patchConfiguresBuilder() {
-		assertThat(createMockHttpServletRequest(tester -> tester.patch().uri("/update")))
-				.satisfies(hasSettings(HttpMethod.PATCH, "/update"));
+		assertThat(createMockHttpServletRequest(tester -> tester.patch().uri("/update/{id}", 123)))
+				.satisfies(hasSettings(HttpMethod.PATCH, "/update/{id}", "/update/123"));
 	}
 
 	@Test
 	void deleteConfiguresBuilder() {
-		assertThat(createMockHttpServletRequest(tester -> tester.delete().uri("/users/42")))
-				.satisfies(hasSettings(HttpMethod.DELETE, "/users/42"));
+		assertThat(createMockHttpServletRequest(tester -> tester.delete().uri("/users/{id}", 42)))
+				.satisfies(hasSettings(HttpMethod.DELETE, "/users/{id}", "/users/42"));
 	}
 
 	@Test
 	void optionsConfiguresBuilder() {
-		assertThat(createMockHttpServletRequest(tester -> tester.options().uri("/users")))
-				.satisfies(hasSettings(HttpMethod.OPTIONS, "/users"));
+		assertThat(createMockHttpServletRequest(tester -> tester.options().uri("/users/{id}", 42)))
+				.satisfies(hasSettings(HttpMethod.OPTIONS, "/users/{id}", "/users/42"));
 	}
 
 	@Test
 	void methodConfiguresBuilderWithCustomMethod() {
 		HttpMethod customMethod = HttpMethod.valueOf("CUSTOM");
 		assertThat(createMockHttpServletRequest(tester -> tester.method(customMethod).uri("/hello")))
-				.satisfies(hasSettings(customMethod, "/hello"));
+				.satisfies(hasSettings(customMethod, "/hello", "/hello"));
+	}
+
+	@Test
+	void methodConfiguresBuilderWithFullURI() {
+		assertThat(createMockHttpServletRequest(tester -> tester.get().uri(URI.create("/hello/world"))))
+				.satisfies(hasSettings(HttpMethod.GET, null, "/hello/world"));
 	}
 
 	private MockHttpServletRequest createMockHttpServletRequest(Function<MockMvcTester, MockMvcRequestBuilder> builder) {
@@ -200,9 +208,10 @@ class MockMvcTesterTests {
 		return builder.apply(mockMvcTester).buildRequest(this.servletContext);
 	}
 
-	private Consumer<MockHttpServletRequest> hasSettings(HttpMethod method, String uri) {
+	private Consumer<MockHttpServletRequest> hasSettings(HttpMethod method, @Nullable String uriTemplate, String uri) {
 		return request -> {
 			assertThat(request.getMethod()).isEqualTo(method.name());
+			assertThat(request.getUriTemplate()).isEqualTo(uriTemplate);
 			assertThat(request.getRequestURI()).isEqualTo(uri);
 		};
 	}

@@ -257,6 +257,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private String requestedSessionId;
 
 	@Nullable
+	private String uriTemplate;
+
+	@Nullable
 	private String requestURI;
 
 	private String servletPath = "";
@@ -1282,6 +1285,24 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Nullable
 	public String getRequestedSessionId() {
 		return this.requestedSessionId;
+	}
+
+	/**
+	 * Set the original URI template used to prepare the request, if any.
+	 * @param uriTemplate the URI template used to set up the request, if any
+	 * @since 6.2
+	 */
+	public void setUriTemplate(@Nullable String uriTemplate) {
+		this.uriTemplate = uriTemplate;
+	}
+
+	/**
+	 * Return the original URI template used to prepare the request, if any.
+	 * @since 6.2
+	 */
+	@Nullable
+	public String getUriTemplate() {
+		return this.uriTemplate;
 	}
 
 	public void setRequestURI(@Nullable String requestURI) {

@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.servlet.request;
 
+import java.net.URI;
+
 import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.Test;
 
@@ -34,16 +36,53 @@ class AbstractMockHttpServletRequestBuilderTests {
 
 	private final ServletContext servletContext = new MockServletContext();
 
+	@Test
+	void uriTemplateSetsRequestsUrlAndTemplateConsistently() {
+		MockHttpServletRequest request = buildRequest(new TestRequestBuilder(HttpMethod.GET).uri("/hotels/{id}", 42));
+		assertThat(request.getRequestURL().toString()).isEqualTo("http://localhost/hotels/42");
+		assertThat(request.getUriTemplate()).isEqualTo("/hotels/{id}");
+	}
 
 	@Test
-	void mergeUriWhenUriIsNotSet() {
-		TestRequestBuilder parentBuilder = new TestRequestBuilder(HttpMethod.GET).uri("/test");
+	void uriSetsRequestsUrlAndTemplateConsistently() {
+		MockHttpServletRequest request = buildRequest(new TestRequestBuilder(HttpMethod.GET).uri("/hotels/{id}", 42)
+				.uri(URI.create("/hotels/25")));
+		assertThat(request.getRequestURL().toString()).isEqualTo("http://localhost/hotels/25");
+		assertThat(request.getUriTemplate()).isNull();
+	}
+
+	@Test
+	void mergeUriTemplateWhenUriTemplateIsNotSet() {
+		TestRequestBuilder parentBuilder = new TestRequestBuilder(HttpMethod.GET).uri("/hotels/{id}", 42);
 		TestRequestBuilder builder = new TestRequestBuilder(HttpMethod.POST);
 		builder.merge(parentBuilder);
 
 		MockHttpServletRequest request = buildRequest(builder);
-		assertThat(request.getRequestURI()).isEqualTo("/test");
-		assertThat(request.getMethod()).isEqualTo(HttpMethod.POST.name());
+		assertThat(request.getUriTemplate()).isEqualTo("/hotels/{id}");
+		assertThat(request.getRequestURL().toString()).isEqualTo("http://localhost/hotels/42");
+	}
+
+
+	@Test
+	void mergeUriTemplateWhenUriIsSetDoesNotMergeUriTemplate() {
+		TestRequestBuilder parentBuilder = new TestRequestBuilder(HttpMethod.GET).uri("/hotels/{id}", 42);
+		TestRequestBuilder builder = new TestRequestBuilder(HttpMethod.POST).uri(URI.create("/hotels/35"));
+		builder.merge(parentBuilder);
+
+		MockHttpServletRequest request = buildRequest(builder);
+		assertThat(request.getUriTemplate()).isNull();
+		assertThat(request.getRequestURL().toString()).isEqualTo("http://localhost/hotels/35");
+	}
+
+	@Test
+	void mergeUriTemplateWhenUriTemplateIsSetDoesNotMergeUriTemplate() {
+		TestRequestBuilder parentBuilder = new TestRequestBuilder(HttpMethod.GET).uri("/hotels/{id}", 42);
+		TestRequestBuilder builder = new TestRequestBuilder(HttpMethod.POST).uri("/users/{id}", 25);
+		builder.merge(parentBuilder);
+
+		MockHttpServletRequest request = buildRequest(builder);
+		assertThat(request.getUriTemplate()).isEqualTo("/users/{id}");
+		assertThat(request.getRequestURL().toString()).isEqualTo("http://localhost/users/25");
 	}
 
 	@Test
