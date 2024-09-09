@@ -11,7 +11,7 @@
 # Internet media types should be registered as described in RFC 4288.
 # The registry is at <https://www.iana.org/assignments/media-types/>.
 #
-# This file was retrieved from https://svn.apache.org/viewvc/httpd/httpd/trunk/docs/conf/mime.types?revision=1752884&view=co
+# This file was retrieved from https://svn.apache.org/viewvc/httpd/httpd/trunk/docs/conf/mime.types?revision=1918129&view=co
 #
 # MIME type (lowercased)			Extensions
 # ============================================	==========
@@ -36,7 +36,6 @@ application/emma+xml				emma
 application/epub+zip				epub
 application/exi					exi
 application/font-tdpfr				pfr
-application/font-woff				woff
 application/gml+xml				gml
 application/gpx+xml				gpx
 application/gxf					gxf
@@ -221,6 +220,7 @@ application/vnd.fujixerox.docuworks.binder	xbd
 application/vnd.fuzzysheet			fzs
 application/vnd.genomatix.tuxedo		txd
 application/vnd.geogebra.file			ggb
+application/vnd.geogebra.slides		ggs
 application/vnd.geogebra.tool			ggt
 application/vnd.geometry-explorer		gex gre
 application/vnd.geonext				gxt
@@ -481,6 +481,7 @@ application/vnd.yellowriver-custom-menu		cmp
 application/vnd.zul				zir zirz
 application/vnd.zzazz.deck+xml			zaz
 application/voicexml+xml			vxml
+application/wasm				wasm
 application/widget				wgt
 application/winhlp				hlp
 application/wsdl+xml				wsdl
@@ -518,10 +519,8 @@ application/x-eva				eva
 application/x-font-bdf				bdf
 application/x-font-ghostscript			gsf
 application/x-font-linux-psf			psf
-application/x-font-otf				otf
 application/x-font-pcf				pcf
 application/x-font-snf				snf
-application/x-font-ttf				ttf ttc
 application/x-font-type1			pfa pfb pfm afm
 application/x-freearc				arc
 application/x-futuresplash			spl
@@ -607,7 +606,7 @@ audio/basic					au snd
 audio/midi					mid midi kar rmi
 audio/mp4					m4a mp4a
 audio/mpeg					mpga mp2 mp2a mp3 m2a m3a
-audio/ogg					oga ogg spx
+audio/ogg					oga ogg spx opus
 audio/s3m					s3m
 audio/silk					sil
 audio/vnd.dece.audio				uva uvva
@@ -640,6 +639,12 @@ chemical/x-cmdf					cmdf
 chemical/x-cml					cml
 chemical/x-csml					csml
 chemical/x-xyz					xyz
+font/collection					ttc
+font/otf					otf
+font/ttf					ttf
+font/woff					woff
+font/woff2					woff2
+image/avif					avif
 image/bmp					bmp
 image/cgm					cgm
 image/g3fax					g3
@@ -693,7 +698,6 @@ model/vnd.collada+xml				dae
 model/vnd.dwf					dwf
 model/vnd.gdl					gdl
 model/vnd.gtw					gtw
-model/vnd.mts					mts
 model/vnd.vtu					vtu
 model/vrml					wrl vrml
 model/x3d+binary				x3db x3dbz
@@ -704,7 +708,7 @@ text/calendar					ics ifb
 text/css					css
 text/csv					csv
 text/html					html htm
-text/javascript				js
+text/javascript					js mjs
 text/n3						n3
 text/plain					txt text conf def list log in
 text/prs.lines.tag				dsc
@@ -748,6 +752,7 @@ video/h264					h264
 video/jpeg					jpgv
 video/jpm					jpm jpgm
 video/mj2					mj2 mjp2
+video/mp2t					ts m2t m2ts mts
 video/mp4					mp4 mp4v mpg4
 video/mpeg					mpeg mpg mpe m1v m2v
 video/ogg					ogv
