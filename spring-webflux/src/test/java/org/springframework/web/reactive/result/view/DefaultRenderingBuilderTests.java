@@ -49,16 +49,17 @@ class DefaultRenderingBuilderTests {
 		Rendering rendering = Rendering.redirectTo("abc").build();
 
 		Object view = rendering.view();
-		assertThat(view.getClass()).isEqualTo(RedirectView.class);
-		assertThat(((RedirectView) view).getUrl()).isEqualTo("abc");
-		assertThat(((RedirectView) view).isContextRelative()).isTrue();
-		assertThat(((RedirectView) view).isPropagateQuery()).isFalse();
+		assertThat(view).isExactlyInstanceOf(RedirectView.class);
+		RedirectView redirectView = (RedirectView) view;
+		assertThat(redirectView.getUrl()).isEqualTo("abc");
+		assertThat(redirectView.isContextRelative()).isTrue();
+		assertThat(redirectView.isPropagateQuery()).isFalse();
 	}
-
 
 	@Test
 	void viewName() {
 		Rendering rendering = Rendering.view("foo").build();
+
 		assertThat(rendering.view()).isEqualTo("foo");
 	}
 
@@ -114,7 +115,7 @@ class DefaultRenderingBuilderTests {
 		Rendering rendering = Rendering.redirectTo("foo").contextRelative(false).build();
 
 		Object view = rendering.view();
-		assertThat(view.getClass()).isEqualTo(RedirectView.class);
+		assertThat(view).isExactlyInstanceOf(RedirectView.class);
 		assertThat(((RedirectView) view).isContextRelative()).isFalse();
 	}
 
@@ -123,17 +124,17 @@ class DefaultRenderingBuilderTests {
 		Rendering rendering = Rendering.redirectTo("foo").propagateQuery(true).build();
 
 		Object view = rendering.view();
-		assertThat(view.getClass()).isEqualTo(RedirectView.class);
+		assertThat(view).isExactlyInstanceOf(RedirectView.class);
 		assertThat(((RedirectView) view).isPropagateQuery()).isTrue();
 	}
 
-	@Test // gh-33498
+	@Test  // gh-33498
 	void redirectWithCustomStatus() {
 		HttpStatus status = HttpStatus.MOVED_PERMANENTLY;
 		Rendering rendering = Rendering.redirectTo("foo").status(status).build();
 
 		Object view = rendering.view();
-		assertThat(view.getClass()).isEqualTo(RedirectView.class);
+		assertThat(view).isExactlyInstanceOf(RedirectView.class);
 		assertThat(((RedirectView) view).getStatusCode()).isEqualTo(status);
 	}
 
