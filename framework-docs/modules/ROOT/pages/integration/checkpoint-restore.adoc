@@ -19,6 +19,8 @@ A checkpoint can be created on demand, for example using a command like `jcmd ap
 
 WARNING: Leveraging checkpoint/restore of a running application typically requires additional lifecycle management to gracefully stop and start using resources like files or sockets and stop active threads.
 
+WARNING: Be aware that when defining scheduling tasks at a fixed rate, for example with an annotation like `@Scheduled(fixedRate = 5000)`, all missed executions between checkpoint and restore will be performed when the JVM is restored with on-demand checkpoint/restore. If this is not the behavior you want, it is recommended to schedule tasks at a fixed delay (for example with `@Scheduled(fixedDelay = 5000)`) or with a cron expression as those are calculated after every task execution.
+
 NOTE: If the checkpoint is created on a warmed-up JVM, the restored JVM will be equally warmed-up, allowing potentially peak performance immediately. This method typically requires access to remote services, and thus requires some level of platform integration.
 
 == Automatic checkpoint/restore at startup
