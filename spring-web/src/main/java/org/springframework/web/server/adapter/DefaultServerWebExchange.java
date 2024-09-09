@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
+import org.springframework.http.ETag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -341,7 +342,9 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	private boolean matchRequestedETags(List<String> requestedETags, @Nullable String eTag, boolean weakCompare) {
-		eTag = padEtagIfNecessary(eTag);
+		if (StringUtils.hasLength(eTag)) {
+			eTag = ETag.quoteETagIfNecessary(eTag);
+		}
 		for (String clientEtag : requestedETags) {
 			// only consider "lost updates" checks for unsafe HTTP methods
 			if ("*".equals(clientEtag) && StringUtils.hasLength(eTag)
@@ -361,17 +364,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			}
 		}
 		return true;
-	}
-
-	@Nullable
-	private String padEtagIfNecessary(@Nullable String etag) {
-		if (!StringUtils.hasLength(etag)) {
-			return etag;
-		}
-		if ((etag.startsWith("\"") || etag.startsWith("W/\"")) && etag.endsWith("\"")) {
-			return etag;
-		}
-		return "\"" + etag + "\"";
 	}
 
 	private boolean eTagStrongMatch(@Nullable String first, @Nullable String second) {
@@ -431,7 +423,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 				getResponseHeaders().setLastModified(lastModified.toEpochMilli());
 			}
 			if (StringUtils.hasLength(eTag) && getResponseHeaders().getETag() == null) {
-				getResponseHeaders().setETag(padEtagIfNecessary(eTag));
+				getResponseHeaders().setETag(ETag.quoteETagIfNecessary(eTag));
 			}
 		}
 	}

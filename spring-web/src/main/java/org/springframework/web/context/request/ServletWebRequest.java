@@ -247,40 +247,31 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return true;
 	}
 
-	private boolean matchRequestedETags(Enumeration<String> requestedETags, @Nullable String etag, boolean weakCompare) {
-		etag = padEtagIfNecessary(etag);
+	private boolean matchRequestedETags(Enumeration<String> requestedETags, @Nullable String eTag, boolean weakCompare) {
+		if (StringUtils.hasLength(eTag)) {
+			eTag = ETag.quoteETagIfNecessary(eTag);
+		}
 		while (requestedETags.hasMoreElements()) {
 			// Compare weak/strong ETags as per https://datatracker.ietf.org/doc/html/rfc9110#section-8.8.3
 			for (ETag requestedETag : ETag.parse(requestedETags.nextElement())) {
 				// only consider "lost updates" checks for unsafe HTTP methods
-				if (requestedETag.isWildcard() && StringUtils.hasLength(etag)
+				if (requestedETag.isWildcard() && StringUtils.hasLength(eTag)
 						&& !SAFE_METHODS.contains(getRequest().getMethod())) {
 					return false;
 				}
 				if (weakCompare) {
-					if (etagWeakMatch(etag, requestedETag.formattedTag())) {
+					if (etagWeakMatch(eTag, requestedETag.formattedTag())) {
 						return false;
 					}
 				}
 				else {
-					if (etagStrongMatch(etag, requestedETag.formattedTag())) {
+					if (etagStrongMatch(eTag, requestedETag.formattedTag())) {
 						return false;
 					}
 				}
 			}
 		}
 		return true;
-	}
-
-	@Nullable
-	private String padEtagIfNecessary(@Nullable String etag) {
-		if (!StringUtils.hasLength(etag)) {
-			return etag;
-		}
-		if ((etag.startsWith("\"") || etag.startsWith("W/\"")) && etag.endsWith("\"")) {
-			return etag;
-		}
-		return "\"" + etag + "\"";
 	}
 
 	private boolean etagStrongMatch(@Nullable String first, @Nullable String second) {
@@ -346,13 +337,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		}
 	}
 
-	private void addCachingResponseHeaders(@Nullable String etag, long lastModifiedTimestamp) {
+	private void addCachingResponseHeaders(@Nullable String eTag, long lastModifiedTimestamp) {
 		if (getResponse() != null && SAFE_METHODS.contains(getRequest().getMethod())) {
 			if (lastModifiedTimestamp > 0 && parseDateValue(getResponse().getHeader(HttpHeaders.LAST_MODIFIED)) == -1) {
 				getResponse().setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
 			}
-			if (StringUtils.hasLength(etag) && getResponse().getHeader(HttpHeaders.ETAG) == null) {
-				getResponse().setHeader(HttpHeaders.ETAG, padEtagIfNecessary(etag));
+			if (StringUtils.hasLength(eTag) && getResponse().getHeader(HttpHeaders.ETAG) == null) {
+				getResponse().setHeader(HttpHeaders.ETAG, ETag.quoteETagIfNecessary(eTag));
 			}
 		}
 	}
