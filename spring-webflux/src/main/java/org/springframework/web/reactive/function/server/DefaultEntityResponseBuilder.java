@@ -148,9 +148,8 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	}
 
 	@Override
-	public EntityResponse.Builder<T> eTag(String eTag) {
-		eTag = ETag.quoteETagIfNecessary(eTag);
-		this.headers.setETag(eTag);
+	public EntityResponse.Builder<T> eTag(String tag) {
+		this.headers.setETag(tag);
 		return this;
 	}
 

@@ -568,9 +568,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder eTag(@Nullable String eTag) {
-			eTag = (eTag != null ? ETag.quoteETagIfNecessary(eTag) : eTag);
-			this.headers.setETag(eTag);
+		public BodyBuilder eTag(@Nullable String tag) {
+			this.headers.setETag(tag);
 			return this;
 		}
 

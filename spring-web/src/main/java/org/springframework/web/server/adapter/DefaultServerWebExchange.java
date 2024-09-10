@@ -417,13 +417,13 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		addCachingResponseHeaders(eTag, lastModified);
 	}
 
-	private void addCachingResponseHeaders(@Nullable String eTag, Instant lastModified) {
+	private void addCachingResponseHeaders(@Nullable String tag, Instant lastModified) {
 		if (SAFE_METHODS.contains(getRequest().getMethod())) {
 			if (lastModified.isAfter(Instant.EPOCH) && getResponseHeaders().getLastModified() == -1) {
 				getResponseHeaders().setLastModified(lastModified.toEpochMilli());
 			}
-			if (StringUtils.hasLength(eTag) && getResponseHeaders().getETag() == null) {
-				getResponseHeaders().setETag(ETag.quoteETagIfNecessary(eTag));
+			if (StringUtils.hasLength(tag) && getResponseHeaders().getETag() == null) {
+				getResponseHeaders().setETag(tag);
 			}
 		}
 	}

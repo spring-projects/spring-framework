@@ -147,10 +147,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public ServerResponse.BodyBuilder eTag(String eTag) {
-		Assert.notNull(eTag, "etag must not be null");
-		eTag = ETag.quoteETagIfNecessary(eTag);
-		this.headers.setETag(eTag);
+	public ServerResponse.BodyBuilder eTag(String tag) {
+		this.headers.setETag(tag);
 		return this;
 	}
 
