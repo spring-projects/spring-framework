@@ -29,60 +29,77 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
- * Integration tests for {@link DynamicPropertyRegistry} bean support.
+ * Integration tests for {@link DynamicPropertyRegistrar} bean support.
  *
  * @author Sam Brannen
  * @since 6.2
  * @see DynamicPropertySourceIntegrationTests
  */
 @SpringJUnitConfig
-@TestPropertySource(properties = "api.url: https://example.com/test")
-class DynamicPropertyRegistryIntegrationTests {
+@TestPropertySource(properties = "api.url.1: https://example.com/test")
+class DynamicPropertyRegistrarIntegrationTests {
 
-	private static final String API_URL = "api.url";
+	private static final String API_URL_1 = "api.url.1";
+	private static final String API_URL_2 = "api.url.2";
 
 
 	@Test
+	void customDynamicPropertyRegistryCanExistInApplicationContext(
+			@Autowired DynamicPropertyRegistry dynamicPropertyRegistry) {
+
+		assertThatRuntimeException()
+				.isThrownBy(() -> dynamicPropertyRegistry.add("test", () -> "test"))
+				.withMessage("Boom!");
+	}
+
+	@Test
 	void dynamicPropertySourceOverridesTestPropertySource(@Autowired ConfigurableEnvironment env) {
-		assertApiUrlIsDynamic(env.getProperty(API_URL));
+		assertApiUrlIsDynamic1(env.getProperty(API_URL_1));
 
 		MutablePropertySources propertySources = env.getPropertySources();
 		assertThat(propertySources.size()).isGreaterThanOrEqualTo(4);
 		assertThat(propertySources.contains("Inlined Test Properties")).isTrue();
 		assertThat(propertySources.contains("Dynamic Test Properties")).isTrue();
-		assertThat(propertySources.get("Inlined Test Properties").getProperty(API_URL)).isEqualTo("https://example.com/test");
-		assertThat(propertySources.get("Dynamic Test Properties").getProperty(API_URL)).isEqualTo("https://example.com/dynamic");
+		assertThat(propertySources.get("Inlined Test Properties").getProperty(API_URL_1)).isEqualTo("https://example.com/test");
+		assertThat(propertySources.get("Dynamic Test Properties").getProperty(API_URL_1)).isEqualTo("https://example.com/dynamic/1");
+		assertThat(propertySources.get("Dynamic Test Properties").getProperty(API_URL_2)).isEqualTo("https://example.com/dynamic/2");
 	}
 
 	@Test
-	void testReceivesDynamicProperty(@Value("${api.url}") String apiUrl) {
-		assertApiUrlIsDynamic(apiUrl);
+	void testReceivesDynamicProperties(@Value("${api.url.1}") String apiUrl1, @Value("${api.url.2}") String apiUrl2) {
+		assertApiUrlIsDynamic1(apiUrl1);
+		assertApiUrlIsDynamic2(apiUrl2);
 	}
 
 	@Test
 	void environmentInjectedServiceCanRetrieveDynamicProperty(@Autowired EnvironmentInjectedService service) {
-		assertApiUrlIsDynamic(service);
+		assertApiUrlIsDynamic1(service);
 	}
 
 	@Test
 	void constructorInjectedServiceReceivesDynamicProperty(@Autowired ConstructorInjectedService service) {
-		assertApiUrlIsDynamic(service);
+		assertApiUrlIsDynamic1(service);
 	}
 
 	@Test
 	void setterInjectedServiceReceivesDynamicProperty(@Autowired SetterInjectedService service) {
-		assertApiUrlIsDynamic(service);
+		assertApiUrlIsDynamic1(service);
 	}
 
 
-	private static void assertApiUrlIsDynamic(ApiUrlClient service) {
-		assertApiUrlIsDynamic(service.getApiUrl());
+	private static void assertApiUrlIsDynamic1(ApiUrlClient service) {
+		assertApiUrlIsDynamic1(service.getApiUrl());
 	}
 
-	private static void assertApiUrlIsDynamic(String apiUrl) {
-		assertThat(apiUrl).isEqualTo("https://example.com/dynamic");
+	private static void assertApiUrlIsDynamic1(String apiUrl) {
+		assertThat(apiUrl).isEqualTo("https://example.com/dynamic/1");
+	}
+
+	private static void assertApiUrlIsDynamic2(String apiUrl) {
+		assertThat(apiUrl).isEqualTo("https://example.com/dynamic/2");
 	}
 
 
@@ -90,16 +107,30 @@ class DynamicPropertyRegistryIntegrationTests {
 	@Import({ EnvironmentInjectedService.class, ConstructorInjectedService.class, SetterInjectedService.class })
 	static class Config {
 
-		// Annotating this @Bean method with @DynamicPropertySource ensures that
-		// this bean will be instantiated before any other singleton beans in the
+		@Bean
+		ApiServer apiServer() {
+			return new ApiServer();
+		}
+
+		// Accepting ApiServer as a method argument ensures that the apiServer
+		// bean will be instantiated before any other singleton beans in the
 		// context which further ensures that the dynamic "api.url" property is
 		// available to all standard singleton beans.
 		@Bean
-		@DynamicPropertySource
-		ApiServer apiServer(DynamicPropertyRegistry registry) {
-			ApiServer apiServer = new ApiServer();
-			registry.add(API_URL, apiServer::getUrl);
-			return apiServer;
+		DynamicPropertyRegistrar apiServerProperties1(ApiServer apiServer) {
+			return registry -> registry.add(API_URL_1, () -> apiServer.getUrl() + "/1");
+		}
+
+		@Bean
+		DynamicPropertyRegistrar apiServerProperties2(ApiServer apiServer) {
+			return registry -> registry.add(API_URL_2, () -> apiServer.getUrl() + "/2");
+		}
+
+		@Bean
+		DynamicPropertyRegistry dynamicPropertyRegistry() {
+			return (name, valueSupplier) -> {
+				throw new RuntimeException("Boom!");
+			};
 		}
 
 	}
@@ -120,7 +151,7 @@ class DynamicPropertyRegistryIntegrationTests {
 
 		@Override
 		public String getApiUrl() {
-			return this.env.getProperty(API_URL);
+			return this.env.getProperty(API_URL_1);
 		}
 	}
 
@@ -129,7 +160,7 @@ class DynamicPropertyRegistryIntegrationTests {
 		private final String apiUrl;
 
 
-		ConstructorInjectedService(@Value("${api.url}") String apiUrl) {
+		ConstructorInjectedService(@Value("${api.url.1}") String apiUrl) {
 			this.apiUrl = apiUrl;
 		}
 
@@ -145,7 +176,7 @@ class DynamicPropertyRegistryIntegrationTests {
 
 
 		@Autowired
-		void setApiUrl(@Value("${api.url}") String apiUrl) {
+		void setApiUrl(@Value("${api.url.1}") String apiUrl) {
 			this.apiUrl = apiUrl;
 		}
 

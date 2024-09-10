@@ -41,7 +41,7 @@ import org.junit.platform.suite.api.Suite;
 @Suite
 @SelectClasses(
 	value = {
-		DynamicPropertyRegistryIntegrationTests.class,
+		DynamicPropertyRegistrarIntegrationTests.class,
 		DynamicPropertySourceIntegrationTests.class
 	},
 	names = {

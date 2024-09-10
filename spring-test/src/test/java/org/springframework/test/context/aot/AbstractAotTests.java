@@ -40,7 +40,7 @@ abstract class AbstractAotTests {
 		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterImportedConfigTests__TestContext001_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterImportedConfigTests__TestContext001_BeanFactoryRegistrations.java",
 		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext001_BeanDefinitions.java",
-		"org/springframework/test/context/support/DynamicPropertySourceBeanInitializer__TestContext001_BeanDefinitions.java",
+		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext001_BeanDefinitions.java",
 		// BasicSpringJupiterSharedConfigTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext002_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext002_BeanDefinitions.java",
@@ -51,7 +51,7 @@ abstract class AbstractAotTests {
 		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext002_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/management/ManagementConfiguration__TestContext002_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/management/ManagementMessageService__TestContext002_ManagementBeanDefinitions.java",
-		"org/springframework/test/context/support/DynamicPropertySourceBeanInitializer__TestContext002_BeanDefinitions.java",
+		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext002_BeanDefinitions.java",
 		// BasicSpringJupiterTests -- not generated b/c already generated for BasicSpringJupiterSharedConfigTests.
 		// BasicSpringJupiterTests.NestedTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext003_BeanDefinitions.java",
@@ -63,28 +63,28 @@ abstract class AbstractAotTests {
 		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext003_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/management/ManagementConfiguration__TestContext003_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/management/ManagementMessageService__TestContext003_ManagementBeanDefinitions.java",
-		"org/springframework/test/context/support/DynamicPropertySourceBeanInitializer__TestContext003_BeanDefinitions.java",
+		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext003_BeanDefinitions.java",
 		// BasicSpringTestNGTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext004_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext004_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext004_ApplicationContextInitializer.java",
 		"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext004_BeanFactoryRegistrations.java",
 		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext004_BeanDefinitions.java",
-		"org/springframework/test/context/support/DynamicPropertySourceBeanInitializer__TestContext004_BeanDefinitions.java",
+		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext004_BeanDefinitions.java",
 		// BasicSpringVintageTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext005_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext005_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext005_ApplicationContextInitializer.java",
 		"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext005_BeanFactoryRegistrations.java",
 		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext005_BeanDefinitions.java",
-		"org/springframework/test/context/support/DynamicPropertySourceBeanInitializer__TestContext005_BeanDefinitions.java",
+		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext005_BeanDefinitions.java",
 		// DisabledInAotRuntimeMethodLevelTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext006_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext006_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext006_ApplicationContextInitializer.java",
 		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext006_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext006_BeanFactoryRegistrations.java",
-		"org/springframework/test/context/support/DynamicPropertySourceBeanInitializer__TestContext006_BeanDefinitions.java"
+		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext006_BeanDefinitions.java"
 	};
 
 	Stream<Class<?>> scan() {

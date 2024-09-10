@@ -27,22 +27,18 @@ import java.util.function.Supplier;
  * test classes.
  *
  * <p>As of Spring Framework 6.2, a {@code DynamicPropertyRegistry} is also
- * registered as a singleton bean in the test's {@code ApplicationContext}. This
- * allows a {@code DynamicPropertyRegistry} to be autowired into a
- * {@code @Configuration} class or supplied to a {@code @Bean} method as an
- * argument, making it possible to register a dynamic property from within a test's
- * {@code ApplicationContext}. For example, a {@code @Bean} method can register
- * a property whose value is dynamically sourced from the bean that the method
- * returns. Note that such a {@code @Bean} method can optionally be annotated
- * with {@code @DynamicPropertySource} to enforce eager initialization of the
- * bean within the context, thereby ensuring that any dynamic properties sourced
- * from that bean are available to other singleton beans within the context.
- * See {@link DynamicPropertySource @DynamicPropertySource} for an example.
+ * supplied to {@link DynamicPropertyRegistrar} beans in the test's
+ * {@code ApplicationContext}, making it possible to register dynamic properties
+ * based on beans in the context. For example, a {@code @Bean} method can return
+ * a {@code DynamicPropertyRegistrar} that registers a property whose value is
+ * dynamically sourced from another bean in the context. See the documentation
+ * for {@code DynamicPropertyRegistrar} for an example.
  *
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 5.2.5
  * @see DynamicPropertySource
+ * @see DynamicPropertyRegistrar
  */
 public interface DynamicPropertyRegistry {
 

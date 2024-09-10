@@ -27,15 +27,14 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizerFactory;
-import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestContextAnnotationUtils;
 
 /**
  * {@link ContextCustomizerFactory} which supports
- * {@link DynamicPropertySource @DynamicPropertySource} methods and the
- * registration of a {@link DynamicPropertyRegistry} as a singleton bean in the
- * container for use in {@code @Configuration} classes and {@code @Bean} methods.
+ * {@link DynamicPropertySource @DynamicPropertySource} methods in test classes
+ * and {@link org.springframework.test.context.DynamicPropertyRegistrar
+ * DynamicPropertyRegistrar} beans in the container.
  *
  * @author Phillip Webb
  * @author Sam Brannen
