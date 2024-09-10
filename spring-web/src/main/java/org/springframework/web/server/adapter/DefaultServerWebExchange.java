@@ -330,10 +330,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			if (SAFE_METHODS.contains(getRequest().getMethod())) {
 				return false;
 			}
-			if (CollectionUtils.isEmpty(getRequestHeaders().get(HttpHeaders.IF_MATCH))) {
+			List<String> values = getRequestHeaders().getOrEmpty(HttpHeaders.IF_MATCH);
+			if (CollectionUtils.isEmpty(values)) {
 				return false;
 			}
-			this.notModified = matchRequestedETags(getRequestHeaders().getIfMatch(), eTag, false);
+			this.notModified = matchRequestedETags(values, eTag, false);
 		}
 		catch (IllegalArgumentException ex) {
 			return false;
@@ -341,49 +342,23 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return true;
 	}
 
-	private boolean matchRequestedETags(List<String> requestedETags, @Nullable String eTag, boolean weakCompare) {
-		if (StringUtils.hasLength(eTag)) {
-			eTag = ETag.quoteETagIfNecessary(eTag);
-		}
-		for (String clientEtag : requestedETags) {
-			// only consider "lost updates" checks for unsafe HTTP methods
-			if ("*".equals(clientEtag) && StringUtils.hasLength(eTag)
-					&& !SAFE_METHODS.contains(getRequest().getMethod())) {
-				return false;
-			}
-			// Compare weak/strong ETags as per https://datatracker.ietf.org/doc/html/rfc9110#section-8.8.3
-			if (weakCompare) {
-				if (eTagWeakMatch(eTag, clientEtag)) {
-					return false;
-				}
-			}
-			else {
-				if (eTagStrongMatch(eTag, clientEtag)) {
-					return false;
+	private boolean matchRequestedETags(List<String> requestedETagValues, @Nullable String tag, boolean weakCompare) {
+		if (StringUtils.hasLength(tag)) {
+			ETag eTag = ETag.create(tag);
+			boolean isNotSafeMethod = !SAFE_METHODS.contains(getRequest().getMethod());
+			for (String eTagValue : requestedETagValues) {
+				for (ETag requestedETag : ETag.parse(eTagValue)) {
+					// only consider "lost updates" checks for unsafe HTTP methods
+					if (requestedETag.isWildcard() && isNotSafeMethod) {
+						return false;
+					}
+					if (requestedETag.compare(eTag, !weakCompare)) {
+						return false;
+					}
 				}
 			}
 		}
 		return true;
-	}
-
-	private boolean eTagStrongMatch(@Nullable String first, @Nullable String second) {
-		if (!StringUtils.hasLength(first) || first.startsWith("W/")) {
-			return false;
-		}
-		return first.equals(second);
-	}
-
-	private boolean eTagWeakMatch(@Nullable String first, @Nullable String second) {
-		if (!StringUtils.hasLength(first) || !StringUtils.hasLength(second)) {
-			return false;
-		}
-		if (first.startsWith("W/")) {
-			first = first.substring(2);
-		}
-		if (second.startsWith("W/")) {
-			second = second.substring(2);
-		}
-		return first.equals(second);
 	}
 
 	private void updateResponseStateChanging(@Nullable String eTag, Instant lastModified) {
@@ -400,7 +375,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			if (CollectionUtils.isEmpty(getRequestHeaders().get(HttpHeaders.IF_NONE_MATCH))) {
 				return false;
 			}
-			this.notModified = !matchRequestedETags(getRequestHeaders().getIfNoneMatch(), eTag, true);
+			List<String> values = getRequestHeaders().getOrEmpty(HttpHeaders.IF_NONE_MATCH);
+			this.notModified = !matchRequestedETags(values, eTag, true);
 		}
 		catch (IllegalArgumentException ex) {
 			return false;

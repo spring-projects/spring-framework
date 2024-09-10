@@ -48,6 +48,44 @@ public record ETag(String tag, boolean weak) {
 	}
 
 	/**
+	 * Perform a strong or weak comparison to another {@link ETag}.
+	 * @param other the ETag to compare to
+	 * @param strong whether to perform strong or weak comparison
+	 * @return whether there is a match or not
+	 * @since 6.2
+	 * @see <a href="https://datatracker.ietf.org/doc/html/rfc9110#section-8.8.3.2">RFC 9110, Section 8.8.3.2</a>
+	 */
+	public boolean compare(ETag other, boolean strong) {
+		if (!StringUtils.hasLength(tag()) || !StringUtils.hasLength(other.tag())) {
+			return false;
+		}
+
+		if (strong && (weak() || other.weak())) {
+			return false;
+		}
+
+		return tag().equals(other.tag());
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other ||
+				(other instanceof ETag oet && this.tag.equals(oet.tag) && this.weak == oet.weak));
+	}
+
+	@Override
+	public int hashCode() {
+		int result = this.tag.hashCode();
+		result = 31 * result + Boolean.hashCode(this.weak);
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return formattedTag();
+	}
+
+	/**
 	 * Return the fully formatted tag including "W/" prefix and quotes.
 	 */
 	public String formattedTag() {
@@ -57,11 +95,23 @@ public record ETag(String tag, boolean weak) {
 		return (this.weak ? "W/" : "") + "\"" + this.tag + "\"";
 	}
 
-	@Override
-	public String toString() {
-		return formattedTag();
-	}
 
+	/**
+	 * Create an {@link ETag} instance from a String representation.
+	 * @param rawValue the formatted ETag value
+	 * @return the created instance
+	 * @since 6.2
+	 */
+	public static ETag create(String rawValue) {
+		boolean weak = rawValue.startsWith("W/");
+		if (weak) {
+			rawValue = rawValue.substring(2);
+		}
+		if (rawValue.length() > 2 && rawValue.startsWith("\"") && rawValue.endsWith("\"")) {
+			rawValue = rawValue.substring(1, rawValue.length() - 1);
+		}
+		return new ETag(rawValue, weak);
+	}
 
 	/**
 	 * Parse entity tags from an "If-Match" or "If-None-Match" header.

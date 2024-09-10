@@ -247,51 +247,24 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return true;
 	}
 
-	private boolean matchRequestedETags(Enumeration<String> requestedETags, @Nullable String eTag, boolean weakCompare) {
-		if (StringUtils.hasLength(eTag)) {
-			eTag = ETag.quoteETagIfNecessary(eTag);
-		}
-		while (requestedETags.hasMoreElements()) {
-			// Compare weak/strong ETags as per https://datatracker.ietf.org/doc/html/rfc9110#section-8.8.3
-			for (ETag requestedETag : ETag.parse(requestedETags.nextElement())) {
-				// only consider "lost updates" checks for unsafe HTTP methods
-				if (requestedETag.isWildcard() && StringUtils.hasLength(eTag)
-						&& !SAFE_METHODS.contains(getRequest().getMethod())) {
-					return false;
-				}
-				if (weakCompare) {
-					if (etagWeakMatch(eTag, requestedETag.formattedTag())) {
+	private boolean matchRequestedETags(Enumeration<String> requestedETags, @Nullable String tag, boolean weakCompare) {
+		if (StringUtils.hasLength(tag)) {
+			ETag eTag = ETag.create(tag);
+			boolean isNotSafeMethod = !SAFE_METHODS.contains(getRequest().getMethod());
+			while (requestedETags.hasMoreElements()) {
+				// Compare weak/strong ETags as per https://datatracker.ietf.org/doc/html/rfc9110#section-8.8.3
+				for (ETag requestedETag : ETag.parse(requestedETags.nextElement())) {
+					// only consider "lost updates" checks for unsafe HTTP methods
+					if (requestedETag.isWildcard() && isNotSafeMethod) {
 						return false;
 					}
-				}
-				else {
-					if (etagStrongMatch(eTag, requestedETag.formattedTag())) {
+					if (requestedETag.compare(eTag, !weakCompare)) {
 						return false;
 					}
 				}
 			}
 		}
 		return true;
-	}
-
-	private boolean etagStrongMatch(@Nullable String first, @Nullable String second) {
-		if (!StringUtils.hasLength(first) || first.startsWith("W/")) {
-			return false;
-		}
-		return first.equals(second);
-	}
-
-	private boolean etagWeakMatch(@Nullable String first, @Nullable String second) {
-		if (!StringUtils.hasLength(first) || !StringUtils.hasLength(second)) {
-			return false;
-		}
-		if (first.startsWith("W/")) {
-			first = first.substring(2);
-		}
-		if (second.startsWith("W/")) {
-			second = second.substring(2);
-		}
-		return first.equals(second);
 	}
 
 	private void updateResponseStateChanging(@Nullable String etag, long lastModifiedTimestamp) {
