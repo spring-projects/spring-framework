@@ -474,7 +474,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			else {
 				Throwable cause = ex.getTargetException();
 				if (cause instanceof UndeclaredThrowableException) {
-					// May happen e.g. with Groovy-generated methods
+					// May happen, for example, with Groovy-generated methods
 					cause = cause.getCause();
 				}
 				throw new MethodInvocationException(propertyChangeEvent, cause);

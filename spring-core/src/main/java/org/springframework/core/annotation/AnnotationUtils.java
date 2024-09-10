@@ -48,9 +48,9 @@ import org.springframework.util.StringUtils;
  * <p>Note that most of the features of this class are not provided by the
  * JDK's introspection facilities themselves.
  *
- * <p>As a general rule for runtime-retained application annotations (e.g. for
+ * <p>As a general rule for runtime-retained application annotations (for example, for
  * transaction control, authorization, or service exposure), always use the
- * lookup methods on this class (e.g. {@link #findAnnotation(Method, Class)} or
+ * lookup methods on this class (for example, {@link #findAnnotation(Method, Class)} or
  * {@link #getAnnotation(Method, Class)}) instead of the plain annotation lookup
  * methods in the JDK. You can still explicitly choose between a <em>get</em>
  * lookup on the given class level only ({@link #getAnnotation(Method, Class)})
@@ -259,7 +259,7 @@ public abstract class AnnotationUtils {
 	 * <p>Meta-annotations will <em>not</em> be searched.
 	 * @param annotatedElement the Method, Constructor or Field to retrieve annotations from
 	 * @return the annotations found, an empty array, or {@code null} if not
-	 * resolvable (e.g. because nested Class values in annotation attributes
+	 * resolvable (for example, because nested Class values in annotation attributes
 	 * failed to resolve at runtime)
 	 * @since 4.0.8
 	 * @see AnnotatedElement#getAnnotations()
@@ -284,7 +284,7 @@ public abstract class AnnotationUtils {
 	 * <p>Meta-annotations will <em>not</em> be searched.
 	 * @param method the Method to retrieve annotations from
 	 * @return the annotations found, an empty array, or {@code null} if not
-	 * resolvable (e.g. because nested Class values in annotation attributes
+	 * resolvable (for example, because nested Class values in annotation attributes
 	 * failed to resolve at runtime)
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 * @see AnnotatedElement#getAnnotations()
@@ -569,7 +569,7 @@ public abstract class AnnotationUtils {
 				return annotation;
 			}
 			// For backwards compatibility, perform a superclass search with plain annotations
-			// even if not marked as @Inherited: e.g. a findAnnotation search for @Deprecated
+			// even if not marked as @Inherited: for example, a findAnnotation search for @Deprecated
 			Class<?> superclass = clazz.getSuperclass();
 			if (superclass == null || superclass == Object.class) {
 				return null;

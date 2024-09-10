@@ -63,7 +63,7 @@ import org.springframework.util.StringUtils;
  * other than "-1" (caching forever) might not work reliably in this case.
  *
  * <p>For a typical web application, message files could be placed in {@code WEB-INF}:
- * e.g. a "WEB-INF/messages" basename would find a "WEB-INF/messages.properties",
+ * for example, a "WEB-INF/messages" basename would find a "WEB-INF/messages.properties",
  * "WEB-INF/messages_en.properties" etc arrangement as well as "WEB-INF/messages.xml",
  * "WEB-INF/messages_en.xml" etc. Note that message definitions in a <i>previous</i>
  * resource bundle will override ones in a later bundle, due to sequential lookup.
@@ -137,7 +137,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @param fileEncodings a Properties with filenames as keys and charset
 	 * names as values. Filenames have to match the basename syntax,
-	 * with optional locale-specific components: e.g. "WEB-INF/messages"
+	 * with optional locale-specific components: for example, "WEB-INF/messages"
 	 * or "WEB-INF/messages_en".
 	 * @see #setBasenames
 	 * @see org.springframework.util.PropertiesPersister#load

@@ -91,7 +91,7 @@ import org.springframework.util.Assert;
  * <p>This transaction manager can be used as a replacement for the
  * {@link org.springframework.transaction.jta.JtaTransactionManager} in the single
  * resource case, as it does not require a container that supports JTA, typically
- * in combination with a locally defined JDBC {@code DataSource} (e.g. a Hikari
+ * in combination with a locally defined JDBC {@code DataSource} (for example, a Hikari
  * connection pool). Switching between this local strategy and a JTA environment
  * is just a matter of configuration!
  *
@@ -99,7 +99,7 @@ import org.springframework.util.Assert;
  * transaction synchronizations (if synchronization is generally active), assuming
  * resources operating on the underlying JDBC {@code Connection}. This allows for
  * setup analogous to {@code JtaTransactionManager}, in particular with respect to
- * lazily registered ORM resources (e.g. a Hibernate {@code Session}).
+ * lazily registered ORM resources (for example, a Hibernate {@code Session}).
  *
  * <p><b>NOTE: As of 5.3, {@link org.springframework.jdbc.support.JdbcTransactionManager}
  * is available as an extended subclass which includes commit/rollback exception
@@ -211,7 +211,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 * this read-only mode provides read consistency for the entire transaction.
 	 * <p>Note that older Oracle JDBC drivers (9i, 10g) used to enforce this read-only
 	 * mode even for {@code Connection.setReadOnly(true}. However, with recent drivers,
-	 * this strong enforcement needs to be applied explicitly, e.g. through this flag.
+	 * this strong enforcement needs to be applied explicitly, for example, through this flag.
 	 * @since 4.3.7
 	 * @see #prepareTransactionalConnection
 	 */

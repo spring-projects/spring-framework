@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * JMS-specific implementation of the JCA 1.7
  * {@link jakarta.resource.spi.endpoint.MessageEndpointFactory} interface,
  * providing transaction management capabilities for a JMS listener object
- * (e.g. a {@link jakarta.jms.MessageListener} object).
+ * (for example, a {@link jakarta.jms.MessageListener} object).
  *
  * <p>Uses a static endpoint implementation, simply wrapping the
  * specified message listener object and exposing all of its implemented

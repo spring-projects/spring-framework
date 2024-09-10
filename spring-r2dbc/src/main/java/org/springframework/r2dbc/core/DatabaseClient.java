@@ -71,7 +71,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 	/**
 	 * Specify a static {@code sql} statement to run. Contract for specifying an
 	 * SQL call along with options leading to the execution. The SQL string can
-	 * contain either native parameter bind markers or named parameters (e.g.
+	 * contain either native parameter bind markers or named parameters (for example,
 	 * {@literal :foo, :bar}) when {@link NamedParameterExpander} is enabled.
 	 * @param sql the SQL statement
 	 * @return a new {@link GenericExecuteSpec}
@@ -84,7 +84,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 	 * Specify an {@linkplain Supplier SQL supplier} that provides SQL to run.
 	 * Contract for specifying an SQL call along with options leading to
 	 * the execution. The SQL string can contain either native parameter
-	 * bind markers or named parameters (e.g. {@literal :foo, :bar}) when
+	 * bind markers or named parameters (for example, {@literal :foo, :bar}) when
 	 * {@link NamedParameterExpander} is enabled.
 	 * <p>Accepts {@link PreparedOperation} as SQL and binding {@link Supplier}.
 	 * <p>{@code DatabaseClient} implementations should defer the resolution of

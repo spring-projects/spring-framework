@@ -102,7 +102,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	 * <p>Default is "false", using the common JDBC 2.0 {@code setBinaryStream}
 	 * / {@code setCharacterStream} method for setting the content. Switch this
 	 * to "true" for explicit Blob / Clob wrapping against JDBC drivers that
-	 * are known to require such wrapping (e.g. PostgreSQL's for access to OID
+	 * are known to require such wrapping (for example, PostgreSQL's for access to OID
 	 * columns, whereas BYTEA columns need to be accessed the standard way).
 	 * <p>This setting affects byte array / String arguments as well as stream
 	 * arguments, unless {@link #setStreamAsLob "streamAsLob"} overrides this
@@ -121,7 +121,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	 * <p>Default is "false", using the common JDBC 2.0 {@code setBinaryStream}
 	 * / {@code setCharacterStream} method for setting the content.
 	 * Switch this to "true" for explicit JDBC 4.0 streaming, provided that your
-	 * JDBC driver actually supports those JDBC 4.0 operations (e.g. Derby's).
+	 * JDBC driver actually supports those JDBC 4.0 operations (for example, Derby's).
 	 * <p>This setting affects stream arguments as well as byte array / String
 	 * arguments, requiring JDBC 4.0 support. For supporting LOB content against
 	 * JDBC 3.0, check out the {@link #setWrapAsLob "wrapAsLob"} setting.

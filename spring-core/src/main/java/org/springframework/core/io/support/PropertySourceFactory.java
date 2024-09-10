@@ -36,7 +36,7 @@ public interface PropertySourceFactory {
 	 * <p>Implementations will typically create {@link ResourcePropertySource}
 	 * instances, with {@link PropertySourceProcessor} automatically adapting
 	 * property source names via {@link ResourcePropertySource#withResourceName()}
-	 * if necessary, e.g. when combining multiple sources for the same name
+	 * if necessary, for example, when combining multiple sources for the same name
 	 * into a {@link org.springframework.core.env.CompositePropertySource}.
 	 * Custom implementations with custom {@link PropertySource} types need
 	 * to make sure to expose distinct enough names, possibly deriving from

@@ -42,7 +42,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Base class for {@link WebSocketSession} implementations that bridge between
- * event-listener WebSocket APIs (e.g. Jakarta WebSocket API (JSR-356), Jetty,
+ * event-listener WebSocket APIs (for example, Jakarta WebSocket API (JSR-356), Jetty,
  * Undertow) and Reactive Streams.
  *
  * <p>Also implements {@code Subscriber<Void>} so it can be used to subscribe to

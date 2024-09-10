@@ -78,14 +78,14 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * <p>A String-based view name is resolved through the configured
  * {@link ViewResolver} instances into a {@link View} to use for rendering.
- * If a view is left unspecified (e.g. by returning {@code null} or a
+ * If a view is left unspecified (for example, by returning {@code null} or a
  * model-related return value), a default view name is selected.
  *
  * <p>By default this resolver is ordered at {@link Ordered#LOWEST_PRECEDENCE}
  * and generally needs to be late in the order since it interprets any String
  * return value as a view name or any non-simple value type as a model attribute
  * while other result handlers may interpret the same otherwise based on the
- * presence of annotations, e.g. for {@code @ResponseBody}.
+ * presence of annotations, for example, for {@code @ResponseBody}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -491,7 +491,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 		boolean supports(ServerHttpRequest request);
 
 		/**
-		 * Update the response before streaming, e.g. to set the content-type.
+		 * Update the response before streaming, for example, to set the content-type.
 		 */
 		void updateResponse(ServerWebExchange exchange);
 

@@ -113,7 +113,7 @@ import org.springframework.util.StringUtils;
  * with the bean name used as fallback unit name if no deployed name found.
  * Typically, Spring's {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}
  * will be used for setting up such EntityManagerFactory beans. Alternatively,
- * such beans may also be obtained from JNDI, e.g. using the {@code jee:jndi-lookup}
+ * such beans may also be obtained from JNDI, for example, using the {@code jee:jndi-lookup}
  * XML configuration element (with the bean name matching the requested unit name).
  * In both cases, the post-processor definition will look as simple as this:
  *

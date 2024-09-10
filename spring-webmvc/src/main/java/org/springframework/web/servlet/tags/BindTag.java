@@ -108,8 +108,8 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 
 
 	/**
-	 * Set the path that this tag should apply. Can be a bean (e.g. "person")
-	 * to get global errors, or a bean property (e.g. "person.name") to get
+	 * Set the path that this tag should apply. Can be a bean (for example, "person")
+	 * to get global errors, or a bean property (for example, "person.name") to get
 	 * field errors (also supporting nested fields and "person.na*" mappings).
 	 * "person.*" will return all errors for the specified bean, both global
 	 * and field errors.

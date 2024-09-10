@@ -117,7 +117,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	}
 
 	/**
-	 * Create a model attribute from a String request value (e.g. URI template
+	 * Create a model attribute from a String request value (for example, URI template
 	 * variable, request parameter) using type conversion.
 	 * <p>The default implementation converts only if there is a registered
 	 * {@link Converter} that can perform the conversion.

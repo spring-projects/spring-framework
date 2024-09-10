@@ -90,7 +90,7 @@ public abstract class TestPropertySourceUtils {
 
 		TestPropertySourceAttributes previousAttributes = null;
 		// Iterate over all aggregate levels, where each level is represented by
-		// a list of merged annotations found at that level (e.g., on a test
+		// a list of merged annotations found at that level (for example, on a test
 		// class in the class hierarchy).
 		for (List<MergedAnnotation<TestPropertySource>> aggregatedAnnotations :
 				findRepeatableAnnotations(testClass, TestPropertySource.class)) {

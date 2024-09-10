@@ -701,7 +701,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 	/**
 	 * A reference to an {@link Entry} contained in the map. Implementations are usually
-	 * wrappers around specific Java reference implementations (e.g., {@link SoftReference}).
+	 * wrappers around specific Java reference implementations (for example, {@link SoftReference}).
 	 * @param <K> the key type
 	 * @param <V> the value type
 	 */

@@ -92,7 +92,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * </pre>
  *
  * <p>The code example differs from the XML example in that it actually instantiates the
- * {@code MyLoadTimeWeaver} type, meaning that it can also configure the instance, e.g.
+ * {@code MyLoadTimeWeaver} type, meaning that it can also configure the instance, for example,
  * calling the {@code #addClassTransformer} method. This demonstrates how the code-based
  * configuration approach is more flexible through direct programmatic access.
  *

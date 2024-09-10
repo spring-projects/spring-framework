@@ -822,7 +822,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * Whether the given String is a single URI variable that can be
 		 * expanded. It must have '{' and '}' surrounding non-empty text and no
 		 * nested placeholders unless it is a variable with regex syntax,
-		 * e.g. {@code "/{year:\d{1,4}}"}.
+		 * for example, {@code "/{year:\d{1,4}}"}.
 		 */
 		private boolean isUriVariable(CharSequence source) {
 			if (source.length() < 2 || source.charAt(0) != '{' || source.charAt(source.length() -1) != '}') {

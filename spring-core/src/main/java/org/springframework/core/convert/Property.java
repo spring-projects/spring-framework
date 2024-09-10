@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
 /**
  * A description of a JavaBeans Property that allows us to avoid a dependency on
  * {@code java.beans.PropertyDescriptor}. The {@code java.beans} package
- * is not available in a number of environments (e.g. Android, Java ME), so this is
+ * is not available in a number of environments (for example, Android, Java ME), so this is
  * desirable for portability of Spring's core conversion facility.
  *
  * <p>Used to build a {@link TypeDescriptor} from a property location. The built
@@ -89,21 +89,21 @@ public final class Property {
 	}
 
 	/**
-	 * The name of the property: e.g. 'foo'
+	 * The name of the property: for example, 'foo'.
 	 */
 	public String getName() {
 		return this.name;
 	}
 
 	/**
-	 * The property type: e.g. {@code java.lang.String}
+	 * The property type: for example, {@code java.lang.String}.
 	 */
 	public Class<?> getType() {
 		return this.methodParameter.getParameterType();
 	}
 
 	/**
-	 * The property getter method: e.g. {@code getFoo()}
+	 * The property getter method: for example, {@code getFoo()}.
 	 */
 	@Nullable
 	public Method getReadMethod() {
@@ -111,7 +111,7 @@ public final class Property {
 	}
 
 	/**
-	 * The property setter method: e.g. {@code setFoo(String)}
+	 * The property setter method: for example, {@code setFoo(String)}.
 	 */
 	@Nullable
 	public Method getWriteMethod() {
@@ -147,7 +147,7 @@ public final class Property {
 					index += 2;
 				}
 				else {
-					// Record-style plain accessor method, e.g. name()
+					// Record-style plain accessor method, for example, name()
 					index = 0;
 				}
 			}

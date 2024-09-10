@@ -118,7 +118,7 @@ public interface TransactionSynchronization extends Ordered, Flushable {
 
 	/**
 	 * Invoked before transaction commit (before "beforeCompletion").
-	 * Can e.g. flush transactional O/R Mapping sessions to the database.
+	 * Can, for example, flush transactional O/R Mapping sessions to the database.
 	 * <p>This callback does <i>not</i> mean that the transaction will actually be committed.
 	 * A rollback decision can still occur after this method has been called. This callback
 	 * is rather meant to perform work that's only relevant if a commit still has a chance
@@ -150,7 +150,7 @@ public interface TransactionSynchronization extends Ordered, Flushable {
 	/**
 	 * Invoked after transaction commit. Can perform further operations right
 	 * <i>after</i> the main transaction has <i>successfully</i> committed.
-	 * <p>Can e.g. commit further operations that are supposed to follow on a successful
+	 * <p>Can, for example, commit further operations that are supposed to follow on a successful
 	 * commit of the main transaction, like confirmation messages or emails.
 	 * <p><b>NOTE:</b> The transaction will have been committed already, but the
 	 * transactional resources might still be active and accessible. As a consequence,

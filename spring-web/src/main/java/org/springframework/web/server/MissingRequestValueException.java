@@ -46,7 +46,7 @@ public class MissingRequestValueException extends ServerWebInputException {
 
 
 	/**
-	 * Return the name of the missing value, e.g. the name of the missing request
+	 * Return the name of the missing value, for example, the name of the missing request
 	 * header, or cookie, etc.
 	 */
 	public String getName() {
@@ -61,7 +61,7 @@ public class MissingRequestValueException extends ServerWebInputException {
 	}
 
 	/**
-	 * Return a label that describes the request value, e.g. "request header",
+	 * Return a label that describes the request value, for example, "request header",
 	 * "cookie value", etc. Use this to create a custom message.
 	 */
 	public String getLabel() {

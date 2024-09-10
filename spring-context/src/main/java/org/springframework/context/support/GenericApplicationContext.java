@@ -510,7 +510,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @param beanClass the class of the bean (resolving a public constructor
 	 * to be autowired, possibly simply the default constructor)
 	 * @param customizers one or more callbacks for customizing the factory's
-	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * {@link BeanDefinition}, for example, setting a lazy-init or primary flag
 	 * @since 5.0
 	 * @see #registerBean(String, Class, Supplier, BeanDefinitionCustomizer...)
 	 */
@@ -525,7 +525,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @param beanClass the class of the bean (resolving a public constructor
 	 * to be autowired, possibly simply the default constructor)
 	 * @param customizers one or more callbacks for customizing the factory's
-	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * {@link BeanDefinition}, for example, setting a lazy-init or primary flag
 	 * @since 5.0
 	 * @see #registerBean(String, Class, Supplier, BeanDefinitionCustomizer...)
 	 */
@@ -543,7 +543,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @param beanClass the class of the bean
 	 * @param supplier a callback for creating an instance of the bean
 	 * @param customizers one or more callbacks for customizing the factory's
-	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * {@link BeanDefinition}, for example, setting a lazy-init or primary flag
 	 * @since 5.0
 	 * @see #registerBean(String, Class, Supplier, BeanDefinitionCustomizer...)
 	 */
@@ -565,7 +565,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @param supplier a callback for creating an instance of the bean (in case
 	 * of {@code null}, resolving a public constructor to be autowired instead)
 	 * @param customizers one or more callbacks for customizing the factory's
-	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * {@link BeanDefinition}, for example, setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
 	public <T> void registerBean(@Nullable String beanName, Class<T> beanClass,

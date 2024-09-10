@@ -38,13 +38,13 @@ import org.springframework.util.StringUtils;
 /**
  * Editor for {@link org.springframework.core.io.Resource} arrays, to
  * automatically convert {@code String} location patterns
- * (e.g. {@code "file:C:/my*.txt"} or {@code "classpath*:myfile.txt"})
+ * (for example, {@code "file:C:/my*.txt"} or {@code "classpath*:myfile.txt"})
  * to {@code Resource} array properties. Can also translate a collection
  * or array of location patterns into a merged Resource array.
  *
  * <p>A path may contain {@code ${...}} placeholders, to be
  * resolved as {@link org.springframework.core.env.Environment} properties:
- * e.g. {@code ${user.dir}}. Unresolvable placeholders are ignored by default.
+ * for example, {@code ${user.dir}}. Unresolvable placeholders are ignored by default.
  *
  * <p>Delegates to a {@link ResourcePatternResolver},
  * by default using a {@link PathMatchingResourcePatternResolver}.

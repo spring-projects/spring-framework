@@ -36,7 +36,7 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>Note that at shutdown, someone should close the underlying Connection
  * via the {@code close()} method. Client code will never call close
- * on the Connection handle if it is SmartDataSource-aware (e.g. uses
+ * on the Connection handle if it is SmartDataSource-aware (for example, uses
  * {@code DataSourceUtils.releaseConnection}).
  *
  * <p>If client code will call {@code close()} in the assumption of a pooled

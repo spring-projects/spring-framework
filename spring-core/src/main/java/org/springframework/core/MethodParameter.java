@@ -121,7 +121,7 @@ public class MethodParameter {
 	 * return type; 0 for the first method parameter; 1 for the second method
 	 * parameter, etc.
 	 * @param nestingLevel the nesting level of the target type
-	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * (typically 1; for example, in case of a List of Lists, 1 would indicate the
 	 * nested List, whereas 2 would indicate the element of the nested List)
 	 */
 	public MethodParameter(Method method, int parameterIndex, int nestingLevel) {
@@ -145,7 +145,7 @@ public class MethodParameter {
 	 * @param constructor the Constructor to specify a parameter for
 	 * @param parameterIndex the index of the parameter
 	 * @param nestingLevel the nesting level of the target type
-	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * (typically 1; for example, in case of a List of Lists, 1 would indicate the
 	 * nested List, whereas 2 would indicate the element of the nested List)
 	 */
 	public MethodParameter(Constructor<?> constructor, int parameterIndex, int nestingLevel) {
@@ -296,7 +296,7 @@ public class MethodParameter {
 
 	/**
 	 * Return the nesting level of the target type
-	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * (typically 1; for example, in case of a List of Lists, 1 would indicate the
 	 * nested List, whereas 2 would indicate the element of the nested List).
 	 */
 	public int getNestingLevel() {
@@ -415,7 +415,7 @@ public class MethodParameter {
 
 	/**
 	 * Check whether this method parameter is annotated with any variant of a
-	 * {@code Nullable} annotation, e.g. {@code jakarta.annotation.Nullable} or
+	 * {@code Nullable} annotation, for example, {@code jakarta.annotation.Nullable} or
 	 * {@code edu.umd.cs.findbugs.annotations.Nullable}.
 	 */
 	private boolean hasNullableAnnotation() {
@@ -443,7 +443,7 @@ public class MethodParameter {
 	 * Return a variant of this {@code MethodParameter} which refers to the
 	 * given containing class.
 	 * @param containingClass a specific containing class (potentially a
-	 * subclass of the declaring class, e.g. substituting a type variable)
+	 * subclass of the declaring class, for example, substituting a type variable)
 	 * @since 5.2
 	 * @see #getParameterType()
 	 */
@@ -862,7 +862,7 @@ public class MethodParameter {
 
 	/**
 	 * Create a new MethodParameter for the given field-aware constructor,
-	 * e.g. on a data class or record type.
+	 * for example, on a data class or record type.
 	 * <p>A field-aware method parameter will detect field annotations as well,
 	 * as long as the field name matches the parameter name.
 	 * @param ctor the Constructor to specify a parameter for

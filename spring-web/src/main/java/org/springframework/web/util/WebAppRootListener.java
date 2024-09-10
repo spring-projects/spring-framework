@@ -33,7 +33,7 @@ import jakarta.servlet.ServletContextListener;
  * at least when used for log4j. Log4jConfigListener sets the system property
  * implicitly, so there's no need for this listener in addition to it.
  *
- * <p><b>WARNING</b>: Some containers, e.g. Tomcat, do NOT keep system properties separate
+ * <p><b>WARNING</b>: Some containers, for example, Tomcat, do NOT keep system properties separate
  * per web app. You have to use unique "webAppRootKey" context-params per web app
  * then, to avoid clashes. Other containers like Resin do isolate each web app's
  * system properties: Here you can use the default key (i.e. no "webAppRootKey"

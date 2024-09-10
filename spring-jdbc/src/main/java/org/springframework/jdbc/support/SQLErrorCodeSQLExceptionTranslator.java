@@ -57,7 +57,7 @@ import org.springframework.util.function.SupplierUtils;
  *
  * <p>The configuration file named "sql-error-codes.xml" is by default read from
  * this package. It can be overridden through a file of the same name in the root
- * of the class path (e.g. in the "/WEB-INF/classes" directory), as long as the
+ * of the class path (for example, in the "/WEB-INF/classes" directory), as long as the
  * Spring JDBC package is loaded from the same ClassLoader.
  *
  * <p>This translator is commonly used by default if a user-provided `sql-error-codes.xml`
@@ -217,7 +217,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 			}
 			else {
 				// Try to find SQLException with actual error code, looping through the causes.
-				// E.g. applicable to java.sql.DataTruncation as of JDK 1.6.
+				// For example, applicable to java.sql.DataTruncation as of JDK 1.6.
 				SQLException current = sqlEx;
 				while (current.getErrorCode() == 0 && current.getCause() instanceof SQLException sqlException) {
 					current = sqlException;

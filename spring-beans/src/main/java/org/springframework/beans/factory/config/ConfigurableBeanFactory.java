@@ -241,7 +241,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	boolean hasEmbeddedValueResolver();
 
 	/**
-	 * Resolve the given embedded value, e.g. an annotation attribute.
+	 * Resolve the given embedded value, for example, an annotation attribute.
 	 * @param value the value to resolve
 	 * @return the resolved value (may be the original value as-is)
 	 * @since 3.0
@@ -255,7 +255,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <p>Note: Post-processors submitted here will be applied in the order of
 	 * registration; any ordering semantics expressed through implementing the
 	 * {@link org.springframework.core.Ordered} interface will be ignored. Note
-	 * that autodetected post-processors (e.g. as beans in an ApplicationContext)
+	 * that autodetected post-processors (for example, as beans in an ApplicationContext)
 	 * will always be applied after programmatically registered ones.
 	 * @param beanPostProcessor the post-processor to register
 	 */

@@ -44,7 +44,7 @@ public abstract class Hints {
 	/**
 	 * Name of boolean hint whether to avoid logging data either because it's
 	 * potentially sensitive, or because it has been logged by a composite
-	 * encoder, e.g. for multipart requests.
+	 * encoder, for example, for multipart requests.
 	 */
 	public static final String SUPPRESS_LOGGING_HINT = Log.class.getName() + ".SUPPRESS_LOGGING";
 

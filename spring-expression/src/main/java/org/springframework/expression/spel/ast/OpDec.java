@@ -119,7 +119,7 @@ public class OpDec extends Operator {
 			lvalue.setValue(newValue.getValue());
 		}
 		catch (SpelEvaluationException see) {
-			// if unable to set the value the operand is not writable (e.g. 1-- )
+			// if unable to set the value the operand is not writable (for example, 1-- )
 			if (see.getMessageCode() == SpelMessage.SETVALUE_NOT_SUPPORTED) {
 				throw new SpelEvaluationException(operand.getStartPosition(),
 						SpelMessage.OPERAND_NOT_DECREMENTABLE);

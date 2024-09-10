@@ -251,7 +251,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 						while (ds != null) {
 							if (TransactionSynchronizationManager.hasResource(ds)) {
 								// IllegalStateException from sharing the underlying JDBC Connection
-								// which typically gets committed first, e.g. with Oracle AQ --> ignore
+								// which typically gets committed first, for example, with Oracle AQ --> ignore
 								return;
 							}
 							try {

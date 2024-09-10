@@ -68,7 +68,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Uses the <b>Strategy</b> design pattern. A {@link PlatformTransactionManager} or
  * {@link ReactiveTransactionManager} implementation will perform the actual transaction
- * management, and a {@link TransactionAttributeSource} (e.g. annotation-based) is used
+ * management, and a {@link TransactionAttributeSource} (for example, annotation-based) is used
  * for determining transaction definitions for a particular class or method.
  *
  * <p>A transaction aspect is serializable if its {@code TransactionManager} and
@@ -116,7 +116,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Holder to support the {@code currentTransactionStatus()} method,
 	 * and to support communication between different cooperating advices
-	 * (e.g. before and after advice) if the aspect involves more than a
+	 * (for example, before and after advice) if the aspect involves more than a
 	 * single method (as will be the case for around advice).
 	 */
 	private static final ThreadLocal<TransactionInfo> transactionInfoHolder =
@@ -245,7 +245,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Set properties with method names as keys and transaction attribute
 	 * descriptors (parsed via TransactionAttributeEditor) as values:
-	 * e.g. key = "myMethod", value = "PROPAGATION_REQUIRED,readOnly".
+	 * for example, key = "myMethod", value = "PROPAGATION_REQUIRED,readOnly".
 	 * <p>Note: Method names are always applied to the target class,
 	 * no matter if defined in an interface or the class itself.
 	 * <p>Internally, a NameMatchTransactionAttributeSource will be

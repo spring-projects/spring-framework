@@ -295,7 +295,7 @@ public class CodeFlow implements Opcodes {
 		}
 		// Check if we need to check-cast
 		else if (!requiredTypeDesc.equals(lastDesc)) {
-			// This would be unnecessary in the case of subtyping (e.g. method takes Number but Integer passed in)
+			// This would be unnecessary in the case of subtyping (for example, method takes Number but Integer passed in)
 			insertCheckCast(methodVisitor, requiredTypeDesc);
 		}
 		exitCompilationScope();
@@ -474,7 +474,7 @@ public class CodeFlow implements Opcodes {
 	 * unlike the other descriptor forms the compiler is using which do not include the
 	 * trailing semicolon.
 	 * @param method the method
-	 * @return a String signature descriptor (e.g. "(ILjava/lang/String;)V")
+	 * @return a String signature descriptor (for example, "(ILjava/lang/String;)V")
 	 */
 	public static String createSignatureDescriptor(Method method) {
 		Class<?>[] params = method.getParameterTypes();
@@ -495,7 +495,7 @@ public class CodeFlow implements Opcodes {
 	 * descriptors here are JVM descriptors, unlike the other descriptor forms the
 	 * compiler is using which do not include the trailing semicolon.
 	 * @param ctor the constructor
-	 * @return a String signature descriptor (e.g. "(ILjava/lang/String;)V")
+	 * @return a String signature descriptor (for example, "(ILjava/lang/String;)V")
 	 */
 	public static String createSignatureDescriptor(Constructor<?> ctor) {
 		Class<?>[] params = ctor.getParameterTypes();
@@ -511,7 +511,7 @@ public class CodeFlow implements Opcodes {
 	/**
 	 * Determine the JVM descriptor for a specified class. Unlike the other descriptors
 	 * used in the compilation process, this is the one the JVM wants, so this one
-	 * includes any necessary trailing semicolon (e.g. Ljava/lang/String; rather than
+	 * includes any necessary trailing semicolon (for example, Ljava/lang/String; rather than
 	 * Ljava/lang/String)
 	 * @param clazz a class
 	 * @return the JVM descriptor for the class
@@ -597,7 +597,7 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
-	 * Determine whether the descriptor is for a primitive array (e.g. "[[I").
+	 * Determine whether the descriptor is for a primitive array (for example, "[[I").
 	 * @param descriptor the descriptor for a possible primitive array
 	 * @return {@code true} if the descriptor a primitive array
 	 */

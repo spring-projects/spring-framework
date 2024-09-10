@@ -164,7 +164,7 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	A value that should be treated as 'null' when resolved as a placeholder value:
-	e.g. "" (empty String) or "null". By default, no such null value is defined.
+	for example, "" (empty String) or "null". By default, no such null value is defined.
 				]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>

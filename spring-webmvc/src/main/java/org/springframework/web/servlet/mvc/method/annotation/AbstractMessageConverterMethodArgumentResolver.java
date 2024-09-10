@@ -139,7 +139,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @param inputMessage the HTTP input message representing the current request
 	 * @param parameter the method parameter descriptor
 	 * @param targetType the target type, not necessarily the same as the method
-	 * parameter type, e.g. for {@code HttpEntity<String>}.
+	 * parameter type, for example, for {@code HttpEntity<String>}.
 	 * @return the created method argument value
 	 * @throws IOException if the reading from the request fails
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
@@ -347,7 +347,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 	/**
 	 * Allow for closing the body stream if necessary,
-	 * e.g. for part streams in a multipart request.
+	 * for example, for part streams in a multipart request.
 	 */
 	void closeStreamIfNecessary(InputStream body) {
 		// No-op by default: A standard HttpInputMessage exposes the HTTP request stream

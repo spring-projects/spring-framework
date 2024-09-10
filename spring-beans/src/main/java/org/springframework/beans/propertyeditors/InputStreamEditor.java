@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 /**
  * One-way PropertyEditor which can convert from a text String to a
  * {@code java.io.InputStream}, interpreting the given String as a
- * Spring resource location (e.g. a URL String).
+ * Spring resource location (for example, a URL String).
  *
  * <p>Supports Spring-style URL notation: any fully qualified standard URL
  * ("file:", "http:", etc.) and Spring's special "classpath:" pseudo-URL.

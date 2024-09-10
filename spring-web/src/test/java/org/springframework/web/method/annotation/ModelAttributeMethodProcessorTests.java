@@ -196,7 +196,7 @@ class ModelAttributeMethodProcessorTests {
 		Object target = new TestBean();
 		this.container.addAttribute(name, target);
 
-		// Declare binding disabled (e.g. via @ModelAttribute method)
+		// Declare binding disabled (for example, via @ModelAttribute method)
 		this.container.setBindingDisabled(name);
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);

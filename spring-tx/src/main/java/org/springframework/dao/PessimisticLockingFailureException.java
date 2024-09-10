@@ -23,7 +23,7 @@ import org.springframework.lang.Nullable;
  * Thrown by Spring's SQLException translation mechanism
  * if a corresponding database error is encountered.
  *
- * <p>Serves as a superclass for more specific exceptions, e.g.
+ * <p>Serves as a superclass for more specific exceptions, for example,
  * {@link CannotAcquireLockException}. However, it is generally
  * recommended to handle {@code PessimisticLockingFailureException}
  * itself instead of relying on specific exception subclasses.

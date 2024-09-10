@@ -64,7 +64,7 @@ public class RequestParamArgumentResolver extends AbstractNamedValueArgumentReso
 
 
 	/**
-	 * Whether to format multiple values (e.g. collection, array) as a single
+	 * Whether to format multiple values (for example, collection, array) as a single
 	 * String value through the configured {@link ConversionService} unless the
 	 * content type is form data, or it is a multipart request.
 	 * <p>By default, this is {@code false} in which case formatting is not applied,

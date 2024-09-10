@@ -53,7 +53,7 @@ import org.springframework.util.ClassUtils;
  * EntityManager interface, and adapts {@link AbstractJpaVendorAdapter}'s common
  * configuration settings. Also supports the detection of annotated packages (through
  * {@link org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo#getManagedPackages()}),
- * e.g. containing Hibernate {@link org.hibernate.annotations.FilterDef} annotations,
+ * for example, containing Hibernate {@link org.hibernate.annotations.FilterDef} annotations,
  * along with Spring-driven entity scanning which requires no {@code persistence.xml}
  * ({@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean#setPackagesToScan}).
  *
@@ -103,7 +103,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * new connection handling mode {@code DELAYED_ACQUISITION_AND_HOLD} in that case
 	 * unless a user-specified connection handling mode property indicates otherwise;
 	 * switch this flag to {@code false} to avoid that interference.
-	 * <p><b>NOTE: For a persistence unit with transaction type JTA e.g. on WebLogic,
+	 * <p><b>NOTE: For a persistence unit with transaction type JTA, for example, on WebLogic,
 	 * the connection release mode will never be altered from its provider default,
 	 * i.e. not be forced to {@code DELAYED_ACQUISITION_AND_HOLD} by this flag.</b>
 	 * Alternatively, set Hibernate's "hibernate.connection.handling_mode"

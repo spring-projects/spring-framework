@@ -312,7 +312,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 	/**
 	 * Register the specified bean with the given registry.
-	 * <p>Can be overridden in subclasses, e.g. to adapt the registration
+	 * <p>Can be overridden in subclasses, for example, to adapt the registration
 	 * process or to register further bean definitions for each scanned bean.
 	 * @param definitionHolder the bean definition plus bean name for the bean
 	 * @param registry the BeanDefinitionRegistry to register the bean with

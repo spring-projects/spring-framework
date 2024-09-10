@@ -1460,7 +1460,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Best effort to detect a Servlet path mapping, e.g. {@code "/foo/*"}, by
+	 * Best effort to detect a Servlet path mapping, for example, {@code "/foo/*"}, by
 	 * checking whether the length of requestURI > contextPath + servletPath.
 	 * This helps {@link org.springframework.web.util.ServletRequestPathUtils}
 	 * to take into account the Servlet path when parsing the requestURI.

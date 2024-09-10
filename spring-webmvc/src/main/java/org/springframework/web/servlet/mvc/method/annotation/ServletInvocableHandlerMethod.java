@@ -80,7 +80,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	/**
 	 * Variant of {@link #ServletInvocableHandlerMethod(Object, Method)} that
-	 * also accepts a {@link MessageSource}, e.g. to resolve
+	 * also accepts a {@link MessageSource}, for example, to resolve
 	 * {@code @ResponseStatus} messages with.
 	 * @since 5.3.10
 	 */
@@ -198,7 +198,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * Create a nested ServletInvocableHandlerMethod subclass that returns the
 	 * given value (or raises an Exception if the value is one) rather than
 	 * actually invoking the controller method. This is useful when processing
-	 * async return values (e.g. Callable, DeferredResult, ListenableFuture).
+	 * async return values (for example, Callable, DeferredResult, ListenableFuture).
 	 */
 	ServletInvocableHandlerMethod wrapConcurrentResult(@Nullable Object result) {
 		return new ConcurrentResultHandlerMethod(result, new ConcurrentResultMethodParameter(result));
@@ -242,7 +242,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		/**
 		 * Bridge to actual return value or generic type within the declared
-		 * async return type, e.g. Foo instead of {@code DeferredResult<Foo>}.
+		 * async return type, for example, Foo instead of {@code DeferredResult<Foo>}.
 		 */
 		@Override
 		public MethodParameter getReturnValueType(@Nullable Object returnValue) {
@@ -271,7 +271,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	/**
 	 * MethodParameter subclass based on the actual return value type or if
 	 * that's null falling back on the generic type within the declared async
-	 * return type, e.g. Foo instead of {@code DeferredResult<Foo>}.
+	 * return type, for example, Foo instead of {@code DeferredResult<Foo>}.
 	 */
 	private class ConcurrentResultMethodParameter extends AnnotatedMethodParameter {
 

@@ -96,7 +96,7 @@ public class GsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
 	protected void writeInternal(Object object, @Nullable Type type, Writer writer) throws Exception {
 		// In Gson, toJson with a type argument will exclusively use that given type,
 		// ignoring the actual type of the object... which might be more specific,
-		// e.g. a subclass of the specified type which includes additional fields.
+		// for example, a subclass of the specified type which includes additional fields.
 		// As a consequence, we're only passing in parameterized type declarations
 		// which might contain extra generics that the object instance doesn't retain.
 		if (type instanceof ParameterizedType) {

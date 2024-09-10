@@ -413,7 +413,7 @@ public abstract class ResourceUtils {
 		}
 		catch (URISyntaxException | IllegalArgumentException ex) {
 			// Lenient fallback to deprecated (on JDK 20) URL constructor,
-			// e.g. for decoded location Strings with percent characters.
+			// for example, for decoded location Strings with percent characters.
 			return new URL(location);
 		}
 	}

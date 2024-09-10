@@ -48,7 +48,7 @@ import org.springframework.lang.Nullable;
  * should be meaningfully restricted. Examples include but are not limited to
  * data binding expressions, property-based filters, and others. To that effect,
  * {@code SimpleEvaluationContext} is tailored to support only a subset of the
- * SpEL language syntax, e.g. excluding references to Java types, constructors,
+ * SpEL language syntax, for example, excluding references to Java types, constructors,
  * and bean references.
  *
  * <p>When creating a {@code SimpleEvaluationContext} you need to choose the level of

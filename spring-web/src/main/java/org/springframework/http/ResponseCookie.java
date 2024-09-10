@@ -229,7 +229,7 @@ public final class ResponseCookie extends HttpCookie {
 	/**
 	 * Factory method to obtain a builder for a server-defined cookie. Unlike
 	 * {@link #from(String, String)} this option assumes input from a remote
-	 * server, which can be handled more leniently, e.g. ignoring an empty domain
+	 * server, which can be handled more leniently, for example, ignoring an empty domain
 	 * name with double quotes.
 	 * @param name the cookie name
 	 * @param value the cookie value

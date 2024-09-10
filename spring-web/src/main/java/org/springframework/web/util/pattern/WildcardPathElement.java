@@ -73,7 +73,7 @@ class WildcardPathElement extends PathElement {
 			}
 		}
 		else {
-			// Within a path (e.g. /aa/*/bb) there must be at least one character to match the wildcard
+			// Within a path (for example, /aa/*/bb) there must be at least one character to match the wildcard
 			if (segmentData == null || segmentData.length() == 0) {
 				return false;
 			}

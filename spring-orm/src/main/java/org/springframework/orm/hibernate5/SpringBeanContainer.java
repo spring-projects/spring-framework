@@ -41,7 +41,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * <p>Auto-configured by {@link LocalSessionFactoryBean#setBeanFactory},
  * programmatically supported via {@link LocalSessionFactoryBuilder#setBeanContainer},
  * and manually configurable through a "hibernate.resource.beans.container" entry
- * in JPA properties, e.g.:
+ * in JPA properties, for example:
  *
  * <pre class="code">
  * &lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;

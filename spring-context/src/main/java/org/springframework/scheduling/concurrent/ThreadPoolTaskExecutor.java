@@ -44,7 +44,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * JavaBean that allows for configuring a {@link java.util.concurrent.ThreadPoolExecutor}
  * in bean style (through its "corePoolSize", "maxPoolSize", "keepAliveSeconds", "queueCapacity"
  * properties) and exposing it as a Spring {@link org.springframework.core.task.TaskExecutor}.
- * This class is also well suited for management and monitoring (e.g. through JMX),
+ * This class is also well suited for management and monitoring (for example, through JMX),
  * providing several useful attributes: "corePoolSize", "maxPoolSize", "keepAliveSeconds"
  * (all supporting updates at runtime); "poolSize", "activeCount" (for introspection only).
  *

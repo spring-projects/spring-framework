@@ -159,7 +159,7 @@ public class CustomizableThreadCreator implements Serializable {
 	/**
 	 * Return the thread name to use for a newly created {@link Thread}.
 	 * <p>The default implementation returns the specified thread name prefix
-	 * with an increasing thread count appended: e.g. "SimpleAsyncTaskExecutor-0".
+	 * with an increasing thread count appended: for example, "SimpleAsyncTaskExecutor-0".
 	 * @see #getThreadNamePrefix()
 	 */
 	protected String nextThreadName() {

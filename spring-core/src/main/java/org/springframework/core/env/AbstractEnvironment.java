@@ -58,7 +58,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * System property that instructs Spring to ignore system environment variables,
 	 * i.e. to never attempt to retrieve such a variable via {@link System#getenv()}.
 	 * <p>The default is "false", falling back to system environment variable checks if a
-	 * Spring environment property (e.g. a placeholder in a configuration String) isn't
+	 * Spring environment property (for example, a placeholder in a configuration String) isn't
 	 * resolvable otherwise. Consider switching this flag to "true" if you experience
 	 * log warnings from {@code getenv} calls coming from Spring.
 	 * @see #suppressGetenvAccess()

@@ -485,7 +485,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * <p>Note that the given handlers do not need to have any stereotype
 	 * annotations such as {@code @Controller} which helps to avoid overlap with
 	 * server side handlers that may be used in the same application. However,
-	 * for more advanced scenarios, e.g. discovering handlers through a custom
+	 * for more advanced scenarios, for example, discovering handlers through a custom
 	 * stereotype annotation, consider declaring {@code RSocketMessageHandler}
 	 * as a bean, and then obtain the responder from it.
 	 * @param strategies the strategies to set on the created

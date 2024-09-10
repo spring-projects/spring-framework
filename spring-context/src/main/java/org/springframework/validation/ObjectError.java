@@ -94,7 +94,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	 * (typically {@link org.springframework.beans.PropertyAccessException})
 	 * or a Bean Validation {@link jakarta.validation.ConstraintViolation}.
 	 * <p>The cause of the outermost exception will be introspected as well,
-	 * e.g. the underlying conversion exception or exception thrown from a setter
+	 * for example, the underlying conversion exception or exception thrown from a setter
 	 * (instead of having to unwrap the {@code PropertyAccessException} in turn).
 	 * @return the source object of the given type
 	 * @throws IllegalArgumentException if no such source object is available
@@ -119,7 +119,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	 * (typically {@link org.springframework.beans.PropertyAccessException})
 	 * or a Bean Validation {@link jakarta.validation.ConstraintViolation}.
 	 * <p>The cause of the outermost exception will be introspected as well,
-	 * e.g. the underlying conversion exception or exception thrown from a setter
+	 * for example, the underlying conversion exception or exception thrown from a setter
 	 * (instead of having to unwrap the {@code PropertyAccessException} in turn).
 	 * @return whether this error has been caused by a source object of the given type
 	 * @since 5.0.4

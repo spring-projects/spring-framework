@@ -34,7 +34,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 
 /**
- * Common base class for plain JSON converters, e.g. Gson and JSON-B.
+ * Common base class for plain JSON converters, for example, Gson and JSON-B.
  *
  * @author Juergen Hoeller
  * @since 5.3

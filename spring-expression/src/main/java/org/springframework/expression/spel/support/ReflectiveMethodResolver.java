@@ -228,7 +228,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	private Set<Method> getMethods(Class<?> type, Object targetObject) {
 		if (targetObject instanceof Class) {
 			Set<Method> result = new LinkedHashSet<>();
-			// Add these so that static methods are invocable on the type: e.g. Float.valueOf(..)
+			// Add these so that static methods are invocable on the type: for example, Float.valueOf(..)
 			for (Method method : getMethods(type)) {
 				if (Modifier.isStatic(method.getModifiers())) {
 					result.add(method);
@@ -270,7 +270,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	/**
 	 * Return the set of methods for this type. The default implementation returns the
 	 * result of {@link Class#getMethods()} for the given {@code type}, but subclasses
-	 * may override in order to alter the results, e.g. specifying static methods
+	 * may override in order to alter the results, for example, specifying static methods
 	 * declared elsewhere.
 	 * @param type the class for which to return the methods
 	 * @since 3.1.1

@@ -59,7 +59,7 @@ import org.springframework.web.util.WebUtils;
  *
  * <b>Example:</b> myDispatcher-servlet.xml, in turn forwarding "/myservlet" to your
  * servlet (identified by servlet name). All such requests will go through the
- * configured HandlerInterceptor chain (e.g. an OpenSessionInViewInterceptor).
+ * configured HandlerInterceptor chain (for example, an OpenSessionInViewInterceptor).
  * From the servlet point of view, everything will work as usual.
  *
  * <pre class="code">

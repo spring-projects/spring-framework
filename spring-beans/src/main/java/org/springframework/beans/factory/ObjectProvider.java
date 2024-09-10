@@ -38,10 +38,10 @@ import org.springframework.lang.Nullable;
  * iteration and allows for collection-style {@link #stream} access.
  *
  * <p>As of 6.2, this interface declares default implementations for all methods.
- * This makes it easier to implement in a custom fashion, e.g. for unit tests.
+ * This makes it easier to implement in a custom fashion, for example, for unit tests.
  * For typical purposes, implement {@link #stream()} to enable all other methods.
  * Alternatively, you may implement the specific methods that your callers expect,
- * e.g. just {@link #getObject()} or {@link #getIfAvailable()}.
+ * for example, just {@link #getObject()} or {@link #getIfAvailable()}.
  *
  * @author Juergen Hoeller
  * @since 4.3

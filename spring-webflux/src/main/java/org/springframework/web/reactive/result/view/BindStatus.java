@@ -87,7 +87,7 @@ public class BindStatus {
 	 * Create a new BindStatus instance, representing a field or object status.
 	 * @param requestContext the current RequestContext
 	 * @param path the bean and property path for which values and errors
-	 * will be resolved (e.g. "customer.address.street")
+	 * will be resolved (for example, "customer.address.street")
 	 * @param htmlEscape whether to HTML-escape error messages and string values
 	 * @throws IllegalStateException if no corresponding Errors object found
 	 */
@@ -182,7 +182,7 @@ public class BindStatus {
 
 	/**
 	 * Return the bean and property path for which values and errors
-	 * will be resolved (e.g. "customer.address.street").
+	 * will be resolved (for example, "customer.address.street").
 	 */
 	public String getPath() {
 		return this.path;
@@ -191,7 +191,7 @@ public class BindStatus {
 	/**
 	 * Return a bind expression that can be used in HTML forms as input name
 	 * for the respective field, or {@code null} if not field-specific.
-	 * <p>Returns a bind path appropriate for resubmission, e.g. "address.street".
+	 * <p>Returns a bind path appropriate for resubmission, for example, "address.street".
 	 * Note that the complete bind path as required by the bind tag is
 	 * "customer.address.street", if bound to a "customer" bean.
 	 */
@@ -289,7 +289,7 @@ public class BindStatus {
 	/**
 	 * Return an error message string, concatenating all messages
 	 * separated by the given delimiter.
-	 * @param delimiter separator string, e.g. ", " or "<br>"
+	 * @param delimiter separator string, for example, ", " or "<br>"
 	 * @return the error message string
 	 */
 	public String getErrorMessagesAsString(String delimiter) {

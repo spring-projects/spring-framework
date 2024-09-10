@@ -54,7 +54,7 @@ public class SchedulerAccessorBean extends SchedulerAccessor implements BeanFact
 	 * Specify the Quartz {@link Scheduler} to operate on via its scheduler name in the Spring
 	 * application context or also in the Quartz {@link org.quartz.impl.SchedulerRepository}.
 	 * <p>Schedulers can be registered in the repository through custom bootstrapping,
-	 * e.g. via the {@link org.quartz.impl.StdSchedulerFactory} or
+	 * for example, via the {@link org.quartz.impl.StdSchedulerFactory} or
 	 * {@link org.quartz.impl.DirectSchedulerFactory} factory classes.
 	 * However, in general, it's preferable to use Spring's {@link SchedulerFactoryBean}
 	 * which includes the job/trigger/listener capabilities of this accessor as well.

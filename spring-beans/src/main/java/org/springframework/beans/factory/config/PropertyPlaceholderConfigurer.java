@@ -93,7 +93,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 
 	/**
 	 * Set the system property mode by the name of the corresponding constant,
-	 * e.g. "SYSTEM_PROPERTIES_MODE_OVERRIDE".
+	 * for example, "SYSTEM_PROPERTIES_MODE_OVERRIDE".
 	 * @param constantName name of the constant
 	 * @see #setSystemPropertiesMode
 	 */

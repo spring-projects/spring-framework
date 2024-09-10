@@ -51,7 +51,7 @@ public class AsyncSupportConfigurer {
 	 * <ol>
 	 * <li>Handle {@link Callable} controller method return values.
 	 * <li>Perform blocking writes when streaming to the response
-	 * through a reactive (e.g. Reactor, RxJava) controller method return value.
+	 * through a reactive (for example, Reactor, RxJava) controller method return value.
 	 * </ol>
 	 * <p>If your application has controllers with such return types, please
 	 * configure an {@link AsyncTaskExecutor} as the one used by default is not

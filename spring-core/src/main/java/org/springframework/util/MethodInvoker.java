@@ -123,7 +123,7 @@ public class MethodInvoker {
 
 	/**
 	 * Set a fully qualified static method name to invoke,
-	 * e.g. "example.MyExampleClass.myExampleMethod". This is a
+	 * for example, "example.MyExampleClass.myExampleMethod". This is a
 	 * convenient alternative to specifying targetClass and targetMethod.
 	 * @see #setTargetClass
 	 * @see #setTargetMethod
@@ -160,7 +160,7 @@ public class MethodInvoker {
 			if (lastDotIndex == -1 || lastDotIndex == this.staticMethod.length() - 1) {
 				throw new IllegalArgumentException(
 						"staticMethod must be a fully qualified class plus method name: " +
-						"e.g. 'example.MyExampleClass.myExampleMethod'");
+						"for example, 'example.MyExampleClass.myExampleMethod'");
 			}
 			String className = this.staticMethod.substring(0, lastDotIndex);
 			String methodName = this.staticMethod.substring(lastDotIndex + 1);

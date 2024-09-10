@@ -1075,7 +1075,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Specify whether the configured initializer method is the default.
 	 * <p>The default value is {@code true} for a locally specified init method
 	 * but switched to {@code false} for a shared setting in a defaults section
-	 * (e.g. {@code bean init-method} versus {@code beans default-init-method}
+	 * (for example, {@code bean init-method} versus {@code beans default-init-method}
 	 * level in XML) which might not apply to all contained bean definitions.
 	 * @see #setInitMethodName
 	 * @see #applyDefaults
@@ -1135,7 +1135,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Specify whether the configured destroy method is the default.
 	 * <p>The default value is {@code true} for a locally specified destroy method
 	 * but switched to {@code false} for a shared setting in a defaults section
-	 * (e.g. {@code bean destroy-method} versus {@code beans default-destroy-method}
+	 * (for example, {@code bean destroy-method} versus {@code beans default-destroy-method}
 	 * level in XML) which might not apply to all contained bean definitions.
 	 * @see #setDestroyMethodName
 	 * @see #applyDefaults
@@ -1241,7 +1241,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Set the originating (e.g. decorated) BeanDefinition, if any.
+	 * Set the originating (for example, decorated) BeanDefinition, if any.
 	 */
 	public void setOriginatingBeanDefinition(BeanDefinition originatingBd) {
 		this.resource = new BeanDefinitionResource(originatingBd);

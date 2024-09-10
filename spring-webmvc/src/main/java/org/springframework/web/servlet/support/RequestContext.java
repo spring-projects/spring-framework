@@ -716,7 +716,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance), using the "defaultHtmlEscape" setting.
+	 * Retrieve the given MessageSourceResolvable (for example, an ObjectError instance), using the "defaultHtmlEscape" setting.
 	 * @param resolvable the MessageSourceResolvable
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -726,7 +726,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance).
+	 * Retrieve the given MessageSourceResolvable (for example, an ObjectError instance).
 	 * @param resolvable the MessageSourceResolvable
 	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
@@ -909,7 +909,7 @@ public class RequestContext {
 
 	/**
 	 * Create a BindStatus for the given bind object, using the "defaultHtmlEscape" setting.
-	 * @param path the bean and property path for which values and errors will be resolved (e.g. "person.age")
+	 * @param path the bean and property path for which values and errors will be resolved (for example, "person.age")
 	 * @return the new BindStatus instance
 	 * @throws IllegalStateException if no corresponding Errors object found
 	 */
@@ -919,7 +919,7 @@ public class RequestContext {
 
 	/**
 	 * Create a BindStatus for the given bind object, using the "defaultHtmlEscape" setting.
-	 * @param path the bean and property path for which values and errors will be resolved (e.g. "person.age")
+	 * @param path the bean and property path for which values and errors will be resolved (for example, "person.age")
 	 * @param htmlEscape create a BindStatus with automatic HTML escaping?
 	 * @return the new BindStatus instance
 	 * @throws IllegalStateException if no corresponding Errors object found

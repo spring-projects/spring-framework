@@ -46,7 +46,7 @@ A complete introduction of how WebSockets work is beyond the scope of this docum
 See RFC 6455, the WebSocket chapter of HTML5, or any of the many introductions and
 tutorials on the Web.
 
-Note that, if a WebSocket server is running behind a web server (e.g. nginx), you
+Note that, if a WebSocket server is running behind a web server (for example, nginx), you
 likely need to configure it to pass WebSocket upgrade requests on to the WebSocket
 server. Likewise, if the application runs in a cloud environment, check the
 instructions of the cloud provider related to WebSocket support.

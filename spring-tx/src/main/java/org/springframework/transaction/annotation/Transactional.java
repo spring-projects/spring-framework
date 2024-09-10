@@ -108,7 +108,7 @@ import org.springframework.transaction.TransactionDefinition;
  * <p><b>Note: When configured with a {@code ReactiveTransactionManager}, all
  * transaction-demarcated methods are expected to return a reactive pipeline.</b>
  * Void methods or regular return types need to be associated with a regular
- * {@code PlatformTransactionManager}, e.g. through {@link #transactionManager()}.
+ * {@code PlatformTransactionManager}, for example, through {@link #transactionManager()}.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
@@ -205,7 +205,7 @@ public @interface Transactional {
 	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
 	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
 	 * transactions.
-	 * @return the timeout in seconds as a String value, e.g. a placeholder
+	 * @return the timeout in seconds as a String value, for example, a placeholder
 	 * @since 5.3
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
 	 */

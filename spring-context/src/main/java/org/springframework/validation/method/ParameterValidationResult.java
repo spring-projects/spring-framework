@@ -136,9 +136,9 @@ public class ParameterValidationResult {
 	 * <ul>
 	 * <li>For a constraints directly on a method parameter, error codes are
 	 * based on the names of the constraint annotation, the object, the method,
-	 * the parameter, and parameter type, e.g.
+	 * the parameter, and parameter type, for example,
 	 * {@code ["Max.myObject#myMethod.myParameter", "Max.myParameter", "Max.int", "Max"]}.
-	 * Arguments include the parameter itself as a {@link MessageSourceResolvable}, e.g.
+	 * Arguments include the parameter itself as a {@link MessageSourceResolvable}, for example,
 	 * {@code ["myObject#myMethod.myParameter", "myParameter"]}, followed by actual
 	 * constraint annotation attributes (i.e. excluding "message", "groups" and
 	 * "payload") in alphabetical order of attribute names.

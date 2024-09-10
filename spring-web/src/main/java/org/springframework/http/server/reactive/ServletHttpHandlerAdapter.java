@@ -148,7 +148,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		throw new IllegalArgumentException("Expected a single Servlet mapping: " +
 				"either the default Servlet mapping (i.e. '/'), " +
-				"or a path based mapping (e.g. '/*', '/foo/*'). " +
+				"or a path based mapping (for example, '/*', '/foo/*'). " +
 				"Actual mappings: " + mappings + " for Servlet '" + name + "'");
 	}
 
@@ -237,7 +237,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		}
 		catch (IllegalStateException ex) {
 			// Ignore: AsyncContext recycled and should not be used
-			// e.g. TIMEOUT_LISTENER (above) may have completed the AsyncContext
+			// for example, TIMEOUT_LISTENER (above) may have completed the AsyncContext
 		}
 	}
 

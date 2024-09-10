@@ -28,7 +28,7 @@ import org.springframework.beans.factory.config.BeanReference;
  * it is now possible for a single logical configuration entity, in this case an XML tag, to
  * create multiple {@link BeanDefinition BeanDefinitions} and {@link BeanReference RuntimeBeanReferences}
  * in order to provide more succinct configuration and greater convenience to end users. As such, it can
- * no longer be assumed that each configuration entity (e.g. XML tag) maps to one {@link BeanDefinition}.
+ * no longer be assumed that each configuration entity (for example, XML tag) maps to one {@link BeanDefinition}.
  * For tool vendors and other users who wish to present visualization or support for configuring Spring
  * applications it is important that there is some mechanism in place to tie the {@link BeanDefinition BeanDefinitions}
  * in the {@link org.springframework.beans.factory.BeanFactory} back to the configuration data in a way

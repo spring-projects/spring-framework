@@ -102,9 +102,9 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * Set the factory for concrete JCA 1.5 ActivationSpec objects,
 	 * creating JCA ActivationSpecs based on
 	 * {@link #setActivationSpecConfig JmsActivationSpecConfig} objects.
-	 * <p>This factory is dependent on the concrete JMS provider, e.g. on ActiveMQ.
+	 * <p>This factory is dependent on the concrete JMS provider, for example, on ActiveMQ.
 	 * The default implementation simply guesses the ActivationSpec class name
-	 * from the provider's class name (e.g. "ActiveMQResourceAdapter" &rarr;
+	 * from the provider's class name (for example, "ActiveMQResourceAdapter" &rarr;
 	 * "ActiveMQActivationSpec" in the same package), and populates the
 	 * ActivationSpec properties as suggested by the JCA 1.5 specification
 	 * (plus a couple of autodetected vendor-specific properties).

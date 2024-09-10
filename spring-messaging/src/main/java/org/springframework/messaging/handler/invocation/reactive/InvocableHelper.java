@@ -114,7 +114,7 @@ class InvocableHelper {
 	}
 
 	/**
-	 * Method to populate the MessagingAdviceBean cache (e.g. to support "global"
+	 * Method to populate the MessagingAdviceBean cache (for example, to support "global"
 	 * {@code @MessageExceptionHandler}).
 	 */
 	public void registerExceptionHandlerAdvice(

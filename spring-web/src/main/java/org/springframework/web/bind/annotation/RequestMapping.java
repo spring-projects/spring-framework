@@ -61,7 +61,7 @@ import org.springframework.core.annotation.AliasFor;
  * mapping will be used. This also applies to composed {@code @RequestMapping}
  * annotations such as {@code @GetMapping}, {@code @PostMapping}, etc.
  *
- * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
+ * <p><b>NOTE:</b> When using controller interfaces (for example, for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations &mdash; such
  * as {@code @RequestMapping} and {@code @SessionAttributes} &mdash; on
  * the controller <i>interface</i> rather than on the implementation class.
@@ -105,10 +105,10 @@ public @interface RequestMapping {
 
 	/**
 	 * The path mapping URIs &mdash; for example, {@code "/profile"}.
-	 * <p>Ant-style path patterns are also supported (e.g. {@code "/profile/**"}).
-	 * At the method level, relative paths (e.g. {@code "edit"}) are supported
+	 * <p>Ant-style path patterns are also supported (for example, {@code "/profile/**"}).
+	 * At the method level, relative paths (for example, {@code "edit"}) are supported
 	 * within the primary mapping expressed at the type level.
-	 * Path mapping URIs may contain placeholders (e.g. <code>"/${profile_path}"</code>).
+	 * Path mapping URIs may contain placeholders (for example, <code>"/${profile_path}"</code>).
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
@@ -202,7 +202,7 @@ public @interface RequestMapping {
 	 * produces = MediaType.TEXT_PLAIN_VALUE
 	 * produces = "text/plain;charset=UTF-8"
 	 * </pre>
-	 * <p>If a declared media type contains a parameter (e.g. "charset=UTF-8",
+	 * <p>If a declared media type contains a parameter (for example, "charset=UTF-8",
 	 * "type=feed", "type=entry") and if a compatible media type from the request
 	 * has that parameter too, then the parameter values must match. Otherwise,
 	 * if the media type from the request does not contain the parameter, it is

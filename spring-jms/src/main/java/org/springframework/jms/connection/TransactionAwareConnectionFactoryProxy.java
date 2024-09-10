@@ -70,7 +70,7 @@ import org.springframework.util.ClassUtils;
  * <p>Returned transactional Session proxies will implement the {@link SessionProxy}
  * interface to allow for access to the underlying target Session. This is only
  * intended for accessing vendor-specific Session API or for testing purposes
- * (e.g. to perform manual transaction control). For typical application purposes,
+ * (for example, to perform manual transaction control). For typical application purposes,
  * simply use the standard JMS Session interface.
  *
  * <p>As of Spring Framework 5, this class delegates JMS 2.0 {@code JMSContext}

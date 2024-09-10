@@ -49,7 +49,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 /**
  * An XHR transport based on Jetty's {@link org.eclipse.jetty.client.HttpClient}.
  *
- * <p>When used for testing purposes (e.g. load testing) the {@code HttpClient}
+ * <p>When used for testing purposes (for example, load testing) the {@code HttpClient}
  * properties must be set to allow a larger than usual number of connections and
  * threads. For example:
  *

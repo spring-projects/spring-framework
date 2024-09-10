@@ -32,7 +32,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Utility methods for {@link SmartContextLoader SmartContextLoaders} that deal
- * with component classes (e.g., {@link Configuration @Configuration} classes).
+ * with component classes (for example, {@link Configuration @Configuration} classes).
  *
  * @author Sam Brannen
  * @since 3.2

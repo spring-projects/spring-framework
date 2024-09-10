@@ -66,7 +66,7 @@ public class WebDataBinder extends DataBinder {
 
 	/**
 	 * Default prefix that field marker parameters start with, followed by the field
-	 * name: e.g. "_subscribeToNewsletter" for a field "subscribeToNewsletter".
+	 * name: for example, "_subscribeToNewsletter" for a field "subscribeToNewsletter".
 	 * <p>Such a marker parameter indicates that the field was visible, that is,
 	 * existed in the form that caused the submission. If no corresponding field
 	 * value parameter was found, the field will be reset. The value of the field
@@ -78,7 +78,7 @@ public class WebDataBinder extends DataBinder {
 
 	/**
 	 * Default prefix that field default parameters start with, followed by the field
-	 * name: e.g. "!subscribeToNewsletter" for a field "subscribeToNewsletter".
+	 * name: for example, "!subscribeToNewsletter" for a field "subscribeToNewsletter".
 	 * <p>Default parameters differ from field markers in that they provide a default
 	 * value instead of an empty value.
 	 * @see #setFieldDefaultPrefix
@@ -120,7 +120,7 @@ public class WebDataBinder extends DataBinder {
 	 * empty fields, having "prefix + field" as name. Such a marker parameter is
 	 * checked by existence: You can send any value for it, for example "visible".
 	 * This is particularly useful for HTML checkboxes and select options.
-	 * <p>Default is "_", for "_FIELD" parameters (e.g. "_subscribeToNewsletter").
+	 * <p>Default is "_", for "_FIELD" parameters (for example, "_subscribeToNewsletter").
 	 * Set this to null if you want to turn off the empty field check completely.
 	 * <p>HTML checkboxes only send a value when they're checked, so it is not
 	 * possible to detect that a formerly checked box has just been unchecked,
@@ -152,7 +152,7 @@ public class WebDataBinder extends DataBinder {
 	 * Specify a prefix that can be used for parameters that indicate default
 	 * value fields, having "prefix + field" as name. The value of the default
 	 * field is used when the field is not provided.
-	 * <p>Default is "!", for "!FIELD" parameters (e.g. "!subscribeToNewsletter").
+	 * <p>Default is "!", for "!FIELD" parameters (for example, "!subscribeToNewsletter").
 	 * Set this to null if you want to turn off the field defaults completely.
 	 * <p>HTML checkboxes only send a value when they're checked, so it is not
 	 * possible to detect that a formerly checked box has just been unchecked,

@@ -142,7 +142,7 @@ public @interface EventListener {
 
 	/**
 	 * An optional identifier for the listener, defaulting to the fully-qualified
-	 * signature of the declaring method (e.g. "mypackage.MyClass.myMethod()").
+	 * signature of the declaring method (for example, "mypackage.MyClass.myMethod()").
 	 * @since 5.3.5
 	 * @see SmartApplicationListener#getListenerId()
 	 * @see ApplicationEventMulticaster#removeApplicationListeners(Predicate)

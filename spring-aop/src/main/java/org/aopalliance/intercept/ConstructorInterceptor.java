@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
  *
  * <p>The user should implement the {@link
  * #construct(ConstructorInvocation)} method to modify the original
- * behavior. E.g. the following class implements a singleton
+ * behavior. For example, the following class implements a singleton
  * interceptor (allows only one unique instance for the intercepted
  * class):
  *

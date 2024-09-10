@@ -61,7 +61,7 @@ public abstract class AbstractMessageCondition<T extends AbstractMessageConditio
 
 	/**
 	 * Return the collection of objects the message condition is composed of
-	 * (e.g. destination patterns), never {@code null}.
+	 * (for example, destination patterns), never {@code null}.
 	 */
 	protected abstract Collection<?> getContent();
 

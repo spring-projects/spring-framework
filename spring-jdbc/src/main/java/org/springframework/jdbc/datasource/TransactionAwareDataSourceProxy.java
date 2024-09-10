@@ -237,7 +237,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
 			if (this.target == null) {
 				if (method.getName().equals("getWarnings") || method.getName().equals("clearWarnings")) {
-					// Avoid creation of target Connection on pre-close cleanup (e.g. Hibernate Session)
+					// Avoid creation of target Connection on pre-close cleanup (for example, Hibernate Session)
 					return null;
 				}
 				if (this.closed) {

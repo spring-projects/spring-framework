@@ -44,7 +44,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Resolver for {@code @RequestPart} arguments where the named part is decoded
  * much like an {@code @RequestBody} argument but based on the content of an
  * individual part instead. The arguments may be wrapped with a reactive type
- * for a single value (e.g. Reactor {@code Mono}, RxJava {@code Single}).
+ * for a single value (for example, Reactor {@code Mono}, RxJava {@code Single}).
  *
  * <p>This resolver also supports arguments of type {@link Part} which may be
  * wrapped with a reactive type for a single value or multiple values.

@@ -170,7 +170,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 	/**
 	 * Configure a {@link ConversionService} to use for type conversion of
-	 * String based values, e.g. in destination variables or headers.
+	 * String based values, for example, in destination variables or headers.
 	 * <p>By default {@link DefaultFormattingConversionService} is used.
 	 * @param conversionService the conversion service to use
 	 */

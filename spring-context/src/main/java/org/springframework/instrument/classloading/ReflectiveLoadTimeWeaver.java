@@ -53,7 +53,7 @@ import org.springframework.util.ReflectionUtils;
  * web application). There is no direct API dependency between this LoadTimeWeaver
  * adapter and the underlying ClassLoader, just a 'loose' method contract.
  *
- * <p>This is the LoadTimeWeaver to use e.g. with the Resin application server
+ * <p>This is the LoadTimeWeaver to use, for example, with the Resin application server
  * version 3.1+.
  *
  * @author Costin Leau

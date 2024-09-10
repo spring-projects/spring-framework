@@ -343,7 +343,7 @@ You can declare a shared `produces` attribute at the class level. Unlike most ot
 mapping attributes, however, when used at the class level, a method-level `produces` attribute
 overrides rather than extend the class level declaration.
 
-TIP: `MediaType` provides constants for commonly used media types -- e.g.
+TIP: `MediaType` provides constants for commonly used media types -- for example,
 `APPLICATION_JSON_VALUE`, `APPLICATION_XML_VALUE`.
 
 

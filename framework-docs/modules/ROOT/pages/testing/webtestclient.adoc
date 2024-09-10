@@ -403,7 +403,7 @@ Java::
 			.expectStatus().isOk()
 			.expectBody(Person.class)
 			.consumeWith(result -> {
-				// custom assertions (e.g. AssertJ)...
+				// custom assertions (for example, AssertJ)...
 			});
 ----
 
@@ -416,7 +416,7 @@ Kotlin::
 			.expectStatus().isOk()
 			.expectBody<Person>()
 			.consumeWith {
-				// custom assertions (e.g. AssertJ)...
+				// custom assertions (for example, AssertJ)...
 			}
 ----
 ======

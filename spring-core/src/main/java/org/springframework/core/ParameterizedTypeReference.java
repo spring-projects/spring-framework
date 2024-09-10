@@ -84,7 +84,7 @@ public abstract class ParameterizedTypeReference<T> {
 	/**
 	 * Build a {@code ParameterizedTypeReference} wrapping the given type.
 	 * @param type a generic type (possibly obtained via reflection,
-	 * e.g. from {@link java.lang.reflect.Method#getGenericReturnType()})
+	 * for example, from {@link java.lang.reflect.Method#getGenericReturnType()})
 	 * @return a corresponding reference which may be passed into
 	 * {@code ParameterizedTypeReference}-accepting methods
 	 * @since 4.3.12

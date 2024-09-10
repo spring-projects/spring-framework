@@ -122,7 +122,7 @@ public abstract class BodyExtractors {
 	/**
 	 * Extractor to read form data into {@code MultiValueMap<String, String>}.
 	 * <p>As of 5.1 this method can also be used on the client side to read form
-	 * data from a server response (e.g. OAuth).
+	 * data from a server response (for example, OAuth).
 	 * @return {@code BodyExtractor} for form data
 	 */
 	public static BodyExtractor<Mono<MultiValueMap<String, String>>, ReactiveHttpInputMessage> toFormData() {

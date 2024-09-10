@@ -40,7 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ParameterContentTypeResolver implements RequestedContentTypeResolver {
 
-	/** Primary lookup for media types by key (e.g. "json" -> "application/json") */
+	/** Primary lookup for media types by key (for example, "json" -> "application/json"). */
 	private final Map<String, MediaType> mediaTypes = new ConcurrentHashMap<>(64);
 
 	private String parameterName = "format";

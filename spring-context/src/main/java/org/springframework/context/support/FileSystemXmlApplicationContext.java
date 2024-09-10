@@ -25,7 +25,7 @@ import org.springframework.lang.Nullable;
 /**
  * Standalone XML application context, taking the context definition files
  * from the file system or from URLs, interpreting plain paths as relative
- * file system locations (e.g. "mydir/myfile.txt"). Useful for test harnesses
+ * file system locations (for example, "mydir/myfile.txt"). Useful for test harnesses
  * as well as for standalone environments.
  *
  * <p><b>NOTE:</b> Plain paths will always be interpreted as relative

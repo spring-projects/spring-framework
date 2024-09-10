@@ -115,8 +115,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	}
 
 	/**
-	 * Specify concurrency limits via a "lower-upper" String, e.g. "5-10", or a simple
-	 * upper limit String, e.g. "10".
+	 * Specify concurrency limits via a "lower-upper" String, for example, "5-10", or a simple
+	 * upper limit String, for example, "10".
 	 * <p>This listener container will always hold on to the maximum number of
 	 * consumers {@link #setConcurrentConsumers} since it is unable to scale.
 	 * <p>This property is primarily supported for configuration compatibility with
@@ -136,7 +136,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		}
 		catch (NumberFormatException ex) {
 			throw new IllegalArgumentException("Invalid concurrency value [" + concurrency + "]: only " +
-					"single maximum integer (e.g. \"5\") and minimum-maximum combo (e.g. \"3-5\") supported. " +
+					"single maximum integer (for example, \"5\") and minimum-maximum combo (for example, \"3-5\") supported. " +
 					"Note that SimpleMessageListenerContainer will effectively ignore the minimum value and " +
 					"always keep a fixed number of consumers according to the maximum value.");
 		}

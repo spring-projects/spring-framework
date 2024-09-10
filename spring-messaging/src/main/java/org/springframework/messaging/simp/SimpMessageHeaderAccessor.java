@@ -32,7 +32,7 @@ import org.springframework.util.CollectionUtils;
 /**
  * A base class for working with message headers in simple messaging protocols that
  * support basic messaging patterns. Provides uniform access to specific values common
- * across protocols such as a destination, message type (e.g. publish, subscribe, etc),
+ * across protocols such as a destination, message type (for example, publish, subscribe, etc),
  * session ID, and others.
  *
  * <p>Use one of the static factory methods in this class, then call getters and setters,

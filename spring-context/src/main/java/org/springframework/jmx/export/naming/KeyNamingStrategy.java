@@ -82,7 +82,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 
 
 	/**
-	 * Set local properties, containing object name mappings, e.g. via
+	 * Set local properties, containing object name mappings, for example, via
 	 * the "props" tag in XML bean definitions. These can be considered
 	 * defaults, to be overridden by properties loaded from files.
 	 */

@@ -61,7 +61,7 @@ public abstract class PropertiesLoaderSupport {
 
 
 	/**
-	 * Set local properties, e.g. via the "props" tag in XML bean definitions.
+	 * Set local properties, for example, via the "props" tag in XML bean definitions.
 	 * These can be considered defaults, to be overridden by properties
 	 * loaded from files.
 	 */
@@ -70,7 +70,7 @@ public abstract class PropertiesLoaderSupport {
 	}
 
 	/**
-	 * Set local properties, e.g. via the "props" tag in XML bean definitions,
+	 * Set local properties, for example, via the "props" tag in XML bean definitions,
 	 * allowing for merging multiple properties sets into one.
 	 */
 	public void setPropertiesArray(Properties... propertiesArray) {

@@ -45,7 +45,7 @@ import org.springframework.validation.method.MethodValidationResult;
  *
  * <p>Applicable methods have JSR-303 constraint annotations on their parameters
  * and/or on their return value (in the latter case specified at the method level,
- * typically as inline annotation), e.g.:
+ * typically as inline annotation), for example:
  *
  * <pre class="code">
  * public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)

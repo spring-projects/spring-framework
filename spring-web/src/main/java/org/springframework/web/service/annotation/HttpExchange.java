@@ -109,7 +109,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * <td>{@link org.springframework.web.bind.annotation.RequestPart @RequestPart}</td>
  * <td>Add a request part, which may be a String (form field),
  * {@link org.springframework.core.io.Resource} (file part), Object (entity to be
- * encoded, e.g. as JSON), {@link HttpEntity} (part content and headers), a
+ * encoded, for example, as JSON), {@link HttpEntity} (part content and headers), a
  * {@link org.springframework.http.codec.multipart.Part}, or a
  * {@link org.reactivestreams.Publisher} of any of the above.
  * (</td>

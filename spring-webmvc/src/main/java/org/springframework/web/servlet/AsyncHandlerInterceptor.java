@@ -28,7 +28,7 @@ import org.springframework.web.method.HandlerMethod;
  * <p>When a handler starts an asynchronous request, the {@link DispatcherServlet}
  * exits without invoking {@code postHandle} and {@code afterCompletion} as it
  * normally does for a synchronous request, since the result of request handling
- * (e.g. ModelAndView) is likely not yet ready and will be produced concurrently
+ * (for example, ModelAndView) is likely not yet ready and will be produced concurrently
  * from another thread. In such scenarios, {@link #afterConcurrentHandlingStarted}
  * is invoked instead, allowing implementations to perform tasks such as cleaning
  * up thread-bound attributes before releasing the thread to the Servlet container.

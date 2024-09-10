@@ -111,7 +111,7 @@ public @interface Sql {
 	 * test class is defined. A path starting with a slash will be treated as an
 	 * <em>absolute</em> classpath resource, for example:
 	 * {@code "/org/example/schema.sql"}. A path which references a
-	 * URL (e.g., a path prefixed with
+	 * URL (for example, a path prefixed with
 	 * {@link org.springframework.util.ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link org.springframework.util.ResourceUtils#FILE_URL_PREFIX file:},
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.

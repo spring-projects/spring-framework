@@ -23,7 +23,7 @@ import org.springframework.messaging.Message;
 
 /**
  * Event raised when a new WebSocket client using a Simple Messaging Protocol
- * (e.g. STOMP) as the WebSocket sub-protocol issues a connect request.
+ * (for example, STOMP) as the WebSocket sub-protocol issues a connect request.
  *
  * <p>Note that this is not the same as the WebSocket session getting established
  * but rather the client's first attempt to connect within the sub-protocol,

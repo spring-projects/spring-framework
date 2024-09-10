@@ -66,7 +66,7 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	public static final RSocketFrameTypeMessageCondition REQUEST_CHANNEL_CONDITION =
 			new RSocketFrameTypeMessageCondition(FrameType.REQUEST_CHANNEL);
 
-	/** Empty condition that does not match to any RSocket frames (e.g. for type-level mappings) */
+	/** Empty condition that does not match to any RSocket frames (for example, for type-level mappings). */
 	public static final RSocketFrameTypeMessageCondition EMPTY_CONDITION = new RSocketFrameTypeMessageCondition();
 
 

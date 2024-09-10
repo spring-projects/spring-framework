@@ -42,7 +42,7 @@ import org.springframework.messaging.Message;
  * handled otherwise. </li>
  * <li>{@link DestinationVariable @DestinationVariable} method argument for
  * access to template variable values extracted from the message destination,
- * e.g. {@code /hotels/{hotel}}. Variable values may also be converted from
+ * for example, {@code /hotels/{hotel}}. Variable values may also be converted from
  * String to the declared method argument type, if needed.</li>
  * <li>{@link Header @Header} method argument to extract a specific message
  * header value and have a
@@ -77,9 +77,9 @@ import org.springframework.messaging.Message;
  *
  * <p>Specializations of this annotation include
  * {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping}
- * (e.g. STOMP subscriptions) and
+ * (for example, STOMP subscriptions) and
  * {@link org.springframework.messaging.rsocket.annotation.ConnectMapping @ConnectMapping}
- * (e.g. RSocket connections). Both narrow the primary mapping further and also match
+ * (for example, RSocket connections). Both narrow the primary mapping further and also match
  * against the message type. Both can be combined with a type-level
  * {@code @MessageMapping} that declares a common pattern prefix (or prefixes).
  *
@@ -94,7 +94,7 @@ import org.springframework.messaging.Message;
  * "Annotated Responders"</a>.
  * </ul>
  *
- * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
+ * <p><b>NOTE:</b> When using controller interfaces (for example, for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations - such as
  * {@code @MessageMapping} and {@code @SubscribeMapping} - on
  * the controller <i>interface</i> rather than on the implementation class.

@@ -74,7 +74,7 @@ public @interface NumberFormat {
 
 		/**
 		 * The default format for the annotated type: typically 'number' but possibly
-		 * 'currency' for a money type (e.g. {@code javax.money.MonetaryAmount}).
+		 * 'currency' for a money type (for example, {@code javax.money.MonetaryAmount}).
 		 * @since 4.2
 		 */
 		DEFAULT,

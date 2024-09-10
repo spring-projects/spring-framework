@@ -526,7 +526,7 @@ public class AntPathMatcher implements PathMatcher {
 	/**
 	 * Combine two patterns into a new pattern.
 	 * <p>This implementation simply concatenates the two patterns, unless
-	 * the first pattern contains a file extension match (e.g., {@code *.html}).
+	 * the first pattern contains a file extension match (for example, {@code *.html}).
 	 * In that case, the second pattern will be merged into the first. Otherwise,
 	 * an {@code IllegalArgumentException} will be thrown.
 	 * <h4>Examples</h4>
@@ -851,7 +851,7 @@ public class AntPathMatcher implements PathMatcher {
 
 
 		/**
-		 * Value class that holds information about the pattern, e.g. number of
+		 * Value class that holds information about the pattern, for example, number of
 		 * occurrences of "*", "**", and "{" pattern elements.
 		 */
 		private static class PatternInfo {

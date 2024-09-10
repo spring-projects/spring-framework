@@ -66,13 +66,13 @@ final class MockMvcFilterDecorator implements Filter {
 
 	private final boolean hasPatterns;
 
-	/** Patterns that require an exact match, e.g. "/test" */
+	/** Patterns that require an exact match, for example, "/test". */
 	private final List<String> exactMatches = new ArrayList<>();
 
-	/** Patterns that require the URL to have a specific prefix, e.g. "/test/*" */
+	/** Patterns that require the URL to have a specific prefix, for example, "/test/*". */
 	private final List<String> startsWithMatches = new ArrayList<>();
 
-	/** Patterns that require the request URL to have a specific suffix, e.g. "*.html" */
+	/** Patterns that require the request URL to have a specific suffix, for example, "*.html". */
 	private final List<String> endsWithMatches = new ArrayList<>();
 
 

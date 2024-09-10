@@ -84,9 +84,9 @@ public class ResourceHandlerRegistration {
 	 * {@code /META-INF/public-web-resources/} directory, with resources in the
 	 * web application root taking precedence.
 	 * <p>For {@link org.springframework.core.io.UrlResource URL-based resources}
-	 * (e.g. files, HTTP URLs, etc) this method supports a special prefix to
+	 * (for example, files, HTTP URLs, etc) this method supports a special prefix to
 	 * indicate the charset associated with the URL so that relative paths
-	 * appended to it can be encoded correctly, e.g.
+	 * appended to it can be encoded correctly, for example,
 	 * {@code [charset=Windows-31J]https://example.org/path}.
 	 * @return the same {@link ResourceHandlerRegistration} instance, for
 	 * chained method invocation

@@ -213,7 +213,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			return;
 		}
 
-		// Resolve system properties: e.g. "${user.dir}"
+		// Resolve system properties: for example, "${user.dir}"
 		location = getReaderContext().getEnvironment().resolveRequiredPlaceholders(location);
 
 		Set<Resource> actualResources = new LinkedHashSet<>(4);

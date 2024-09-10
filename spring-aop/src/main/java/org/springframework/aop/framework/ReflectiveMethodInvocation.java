@@ -47,7 +47,7 @@ import org.springframework.lang.Nullable;
  *
  * <p><b>NOTE:</b> This class is considered internal and should not be
  * directly accessed. The sole reason for it being public is compatibility
- * with existing framework integrations (e.g. Pitchfork). For any other
+ * with existing framework integrations (for example, Pitchfork). For any other
  * purposes, use the {@link ProxyMethodInvocation} interface instead.
  *
  * @author Rod Johnson

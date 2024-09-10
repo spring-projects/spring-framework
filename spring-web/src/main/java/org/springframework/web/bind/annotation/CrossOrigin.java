@@ -38,7 +38,7 @@ import org.springframework.web.cors.CorsConfiguration;
  * {@link CorsConfiguration#applyPermitDefaultValues()}.
  *
  * <p>The rules for combining global and local configuration are generally
- * additive -- e.g. all global and all local origins. For those attributes
+ * additive -- for example, all global and all local origins. For those attributes
  * where only a single value can be accepted such as {@code allowCredentials}
  * and {@code maxAge}, the local overrides the global value.
  * See {@link CorsConfiguration#combine(CorsConfiguration)} for more details.

@@ -263,7 +263,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Indicates whether the {@linkplain #getSubtype() subtype} is the wildcard
 	 * character <code>&#42;</code> or the wildcard character followed by a suffix
-	 * (e.g. <code>&#42;+xml</code>).
+	 * (for example, <code>&#42;+xml</code>).
 	 * @return whether the subtype is a wildcard
 	 */
 	public boolean isWildcardSubtype() {
@@ -357,7 +357,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 				return true;
 			}
 			if (isWildcardSubtype()) {
-				// Wildcard with suffix, e.g. application/*+xml
+				// Wildcard with suffix, for example, application/*+xml
 				int thisPlusIdx = getSubtype().lastIndexOf('+');
 				if (thisPlusIdx == -1) {
 					return true;

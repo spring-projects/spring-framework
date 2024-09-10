@@ -257,7 +257,7 @@
 			<variable-class>java.lang.String</variable-class>
 		</variable>
 		<attribute>
-			<description>Set the path that this tag should apply. E.g. 'customer'
+			<description>Set the path that this tag should apply. For example, 'customer'
 			to allow bind paths like 'address.street' rather than
 			'customer.address.street'.</description>
 			<name>path</name>

@@ -42,7 +42,7 @@ content of the provided resource to the response `OutputStream`. Note that the
 `InputStream` should be lazily retrieved by the `Resource` handle in order to reliably
 close it after it has been copied to the response. If you are using `InputStreamResource`
 for such a purpose, make sure to construct it with an on-demand `InputStreamSource`
-(e.g. through a lambda expression that retrieves the actual `InputStream`).
+(for example, through a lambda expression that retrieves the actual `InputStream`).
 
 You can use `@ResponseBody` with reactive types.
 See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types] for more details.

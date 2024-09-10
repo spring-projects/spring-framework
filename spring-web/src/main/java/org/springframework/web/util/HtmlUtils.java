@@ -51,7 +51,7 @@ public abstract class HtmlUtils {
 	 * Turn special characters into HTML character references.
 	 * <p>Handles the complete character set defined in the HTML 4.01 recommendation.
 	 * <p>Escapes all special characters to their corresponding
-	 * entity reference (e.g. {@code &lt;}).
+	 * entity reference (for example, {@code &lt;}).
 	 * <p>Reference:
 	 * <a href="https://www.w3.org/TR/html4/sgml/entities.html">
 	 * https://www.w3.org/TR/html4/sgml/entities.html
@@ -67,7 +67,7 @@ public abstract class HtmlUtils {
 	 * Turn special characters into HTML character references.
 	 * <p>Handles the complete character set defined in the HTML 4.01 recommendation.
 	 * <p>Escapes all special characters to their corresponding
-	 * entity reference (e.g. {@code &lt;}) at least as required by the
+	 * entity reference (for example, {@code &lt;}) at least as required by the
 	 * specified encoding. In other words, if a special character does
 	 * not have to be escaped for the given encoding, it may not be.
 	 * <p>Reference:

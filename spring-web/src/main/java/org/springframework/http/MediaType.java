@@ -286,7 +286,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @deprecated as of 5.3 since it originates from the W3C Activity Streams
 	 * specification which has a more specific purpose and has been since
 	 * replaced with a different mime type. Use {@link #APPLICATION_NDJSON} as
-	 * a replacement or any other line-delimited JSON format (e.g. JSON Lines,
+	 * a replacement or any other line-delimited JSON format (for example, JSON Lines,
 	 * JSON Text Sequences).
 	 */
 	@Deprecated

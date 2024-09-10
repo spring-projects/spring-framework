@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
  * Helper class for resolving placeholders in texts. Usually applied to file paths.
  *
  * <p>A text may contain {@code ${...}} placeholders, to be resolved as system properties:
- * e.g. {@code ${user.dir}}. Default values can be supplied using the ":" separator
+ * for example, {@code ${user.dir}}. Default values can be supplied using the ":" separator
  * between key and value.
  *
  * @author Juergen Hoeller

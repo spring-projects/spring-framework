@@ -35,7 +35,7 @@ import org.springframework.lang.Nullable;
  * interface and a convenient base class for other exceptions to use.
  *
  * <p>{@code ErrorResponse} is supported as a return value from
- * {@code @ExceptionHandler} methods that render directly to the response, e.g.
+ * {@code @ExceptionHandler} methods that render directly to the response, for example,
  * by being marked {@code @ResponseBody}, or declared in an
  * {@code @RestController} or {@code RestControllerAdvice} class.
  *
@@ -62,7 +62,7 @@ public interface ErrorResponse {
 	 * {@link ProblemDetail} whose {@link ProblemDetail#getStatus() status}
 	 * should match the response status.
 	 * <p><strong>Note:</strong> The returned {@code ProblemDetail} may be
-	 * updated before the response is rendered, e.g. via
+	 * updated before the response is rendered, for example, via
 	 * {@link #updateAndGetBody(MessageSource, Locale)}. Therefore, implementing
 	 * methods should use an instance field, and should not re-create the
 	 * {@code ProblemDetail} on every call, nor use a static variable.
@@ -107,7 +107,7 @@ public interface ErrorResponse {
 	 * Return arguments to use along with a {@link #getDetailMessageCode()
 	 * message code} to resolve the problem "detail" for this exception
 	 * through a {@link MessageSource}. The arguments are expanded
-	 * into placeholders of the message value, e.g. "Invalid content type {0}".
+	 * into placeholders of the message value, for example, "Invalid content type {0}".
 	 */
 	@Nullable
 	default Object[] getDetailMessageArguments() {
@@ -180,7 +180,7 @@ public interface ErrorResponse {
 	/**
 	 * Build a message code for the "detail" field, for the given exception type.
 	 * @param exceptionType the exception type associated with the problem
-	 * @param suffix an optional suffix, e.g. for exceptions that may have multiple
+	 * @param suffix an optional suffix, for example, for exceptions that may have multiple
 	 * error message with different arguments
 	 * @return {@code "problemDetail."} followed by the fully qualified
 	 * {@link Class#getName() class name} and an optional suffix

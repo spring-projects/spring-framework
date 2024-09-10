@@ -32,13 +32,13 @@ import org.springframework.util.StringUtils;
 /**
  * Simple implementation of {@link JmsHeaderMapper}.
  *
- * <p>This implementation copies JMS API headers (e.g. JMSReplyTo) to and from
+ * <p>This implementation copies JMS API headers (for example, JMSReplyTo) to and from
  * {@link org.springframework.messaging.Message Messages}. Any user-defined
  * properties will also be copied from a JMS Message to a Message, and any
  * other headers on a Message (beyond the JMS API headers) will likewise
  * be copied to a JMS Message. Those other headers will be copied to the
  * general properties of a JMS Message whereas the JMS API headers are passed
- * to the appropriate setter methods (e.g. setJMSReplyTo).
+ * to the appropriate setter methods (for example, setJMSReplyTo).
  *
  * <p>Constants for the JMS API headers are defined in {@link JmsHeaders}.
  * Note that most of the JMS headers are read-only: the JMSDestination,

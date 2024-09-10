@@ -65,7 +65,7 @@ public class TransactionalEventPublisher {
 	 * Publish an event created through the given function which maps the transaction
 	 * source object (the {@link TransactionContext}) to the event instance.
 	 * @param eventCreationFunction a function mapping the source object to the event instance,
-	 * e.g. {@code source -> new PayloadApplicationEvent&lt;&gt;(source, "myPayload")}
+	 * for example, {@code source -> new PayloadApplicationEvent&lt;&gt;(source, "myPayload")}
 	 * @return the Reactor {@link Mono} for the transactional event publication
 	 */
 	public Mono<Void> publishEvent(Function<TransactionContext, ApplicationEvent> eventCreationFunction) {

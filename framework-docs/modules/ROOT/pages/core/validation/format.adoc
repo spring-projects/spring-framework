@@ -318,7 +318,7 @@ Kotlin::
 The `FormatterRegistry` is an SPI for registering formatters and converters.
 `FormattingConversionService` is an implementation of `FormatterRegistry` suitable for
 most environments. You can programmatically or declaratively configure this variant
-as a Spring bean, e.g. by using `FormattingConversionServiceFactoryBean`. Because this
+as a Spring bean, for example, by using `FormattingConversionServiceFactoryBean`. Because this
 implementation also implements `ConversionService`, you can directly configure it
 for use with Spring's `DataBinder` and the Spring Expression Language (SpEL).
 

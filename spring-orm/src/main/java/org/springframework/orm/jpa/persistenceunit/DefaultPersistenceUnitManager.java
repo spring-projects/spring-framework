@@ -219,7 +219,7 @@ public class DefaultPersistenceUnitManager
 	 * In particular, JPA providers may pick up annotated packages for provider-specific
 	 * annotations only when driven by {@code persistence.xml}. As of 4.1, Spring's
 	 * scan can detect annotated packages as well if supported by the given
-	 * {@link org.springframework.orm.jpa.JpaVendorAdapter} (e.g. for Hibernate).
+	 * {@link org.springframework.orm.jpa.JpaVendorAdapter} (for example, for Hibernate).
 	 * <p>If no explicit {@link #setMappingResources mapping resources} have been
 	 * specified in addition to these packages, this manager looks for a default
 	 * {@code META-INF/orm.xml} file in the classpath, registering it as a mapping
@@ -251,7 +251,7 @@ public class DefaultPersistenceUnitManager
 	 * Can be used on its own or in combination with entity scanning in the classpath,
 	 * in both cases avoiding {@code persistence.xml}.
 	 * <p>Note that mapping resources must be relative to the classpath root,
-	 * e.g. "META-INF/mappings.xml" or "com/mycompany/repository/mappings.xml",
+	 * for example, "META-INF/mappings.xml" or "com/mycompany/repository/mappings.xml",
 	 * so that they can be loaded through {@code ClassLoader.getResource}.
 	 * <p>If no explicit mapping resources have been specified next to
 	 * {@link #setPackagesToScan packages to scan}, this manager looks for a default

@@ -219,7 +219,7 @@ parameter-based injection, as in the preceding example.
 Avoid access to locally defined beans within a `@PostConstruct` method on the same configuration
 class. This effectively leads to a circular reference since non-static `@Bean` methods semantically
 require a fully initialized configuration class instance to be called on. With circular references
-disallowed (e.g. in Spring Boot 2.6+), this may trigger a `BeanCurrentlyInCreationException`.
+disallowed (for example, in Spring Boot 2.6+), this may trigger a `BeanCurrentlyInCreationException`.
 
 Also, be particularly careful with `BeanPostProcessor` and `BeanFactoryPostProcessor` definitions
 through `@Bean`. Those should usually be declared as `static @Bean` methods, not triggering the

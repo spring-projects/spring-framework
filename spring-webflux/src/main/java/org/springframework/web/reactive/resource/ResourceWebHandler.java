@@ -65,7 +65,7 @@ import org.springframework.web.util.pattern.PathPattern;
  * <p>The {@linkplain #setLocations "locations"} property takes a list of Spring
  * {@link Resource} locations from which static resources are allowed to
  * be served by this handler. Resources could be served from a classpath location,
- * e.g. "classpath:/META-INF/public-web-resources/", allowing convenient packaging
+ * for example, "classpath:/META-INF/public-web-resources/", allowing convenient packaging
  * and serving of resources such as .js, .css, and others in jar files.
  *
  * <p>This request handler may also be configured with a
@@ -602,7 +602,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * valid URL} or would represent one after the leading slash is removed.
 	 * </ul>
 	 * <p><strong>Note:</strong> this method assumes that leading, duplicate '/'
-	 * or control characters (e.g. white space) have been trimmed so that the
+	 * or control characters (for example, white space) have been trimmed so that the
 	 * path starts predictably with a single '/' or does not have one.
 	 * @param path the path to validate
 	 * @return {@code true} if the path is invalid, {@code false} otherwise

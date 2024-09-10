@@ -129,7 +129,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 
 	/**
 	 * Extension point to further initialize the created data binder instance
-	 * (e.g. with {@code @InitBinder} methods) after "global" initialization
+	 * (for example, with {@code @InitBinder} methods) after "global" initialization
 	 * via {@link WebBindingInitializer}.
 	 * @param dataBinder the data binder instance to customize
 	 * @param webRequest the current request

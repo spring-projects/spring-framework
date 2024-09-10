@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 /**
  * Builder for a composite {@link RequestedContentTypeResolver} that delegates
  * to other resolvers each implementing a different strategy to determine the
- * requested content type -- e.g. Accept header, query parameter, or other.
+ * requested content type -- for example, Accept header, query parameter, or other.
  *
  * <p>Use builder methods to add resolvers in the desired order. For a given
  * request he first resolver to return a list that is not empty and does not

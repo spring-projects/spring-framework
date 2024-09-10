@@ -300,7 +300,7 @@ public @interface Bean {
 	 * method (i.e., detection occurs reflectively against the bean instance itself at
 	 * creation time).
 	 * <p>To disable destroy method inference for a particular {@code @Bean}, specify an
-	 * empty string as the value, e.g. {@code @Bean(destroyMethod="")}. Note that the
+	 * empty string as the value, for example, {@code @Bean(destroyMethod="")}. Note that the
 	 * {@link org.springframework.beans.factory.DisposableBean} callback interface will
 	 * nevertheless get detected and the corresponding destroy method invoked: In other
 	 * words, {@code destroyMethod=""} only affects custom close/shutdown methods and

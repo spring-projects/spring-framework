@@ -36,7 +36,7 @@ import org.springframework.util.ClassUtils;
  * method annotations, etc.
  *
  * <p>The class may be created with a bean instance or with a bean name
- * (e.g. lazy-init bean, prototype bean). Use {@link #createWithResolvedBean()}
+ * (for example, lazy-init bean, prototype bean). Use {@link #createWithResolvedBean()}
  * to obtain a {@code HandlerMethod} instance with a bean instance resolved
  * through the associated {@link BeanFactory}.
  *
@@ -222,7 +222,7 @@ public class HandlerMethod extends AnnotatedMethod {
 			String text = "The mapped handler method class '" + methodDeclaringClass.getName() +
 					"' is not an instance of the actual endpoint bean class '" +
 					targetBeanClass.getName() + "'. If the endpoint requires proxying " +
-					"(e.g. due to @Transactional), please use class-based proxying.";
+					"(for example, due to @Transactional), please use class-based proxying.";
 			throw new IllegalStateException(formatInvokeError(text, args));
 		}
 	}

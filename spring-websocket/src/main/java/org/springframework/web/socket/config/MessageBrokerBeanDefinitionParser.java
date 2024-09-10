@@ -83,8 +83,8 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
  *
  * <p>Registers the following {@link org.springframework.messaging.MessageChannel MessageChannels}:
  * <ul>
- * <li>"clientInboundChannel" for receiving messages from clients (e.g. WebSocket clients)
- * <li>"clientOutboundChannel" for sending messages to clients (e.g. WebSocket clients)
+ * <li>"clientInboundChannel" for receiving messages from clients (for example, WebSocket clients)
+ * <li>"clientOutboundChannel" for sending messages to clients (for example, WebSocket clients)
  * <li>"brokerChannel" for sending messages from within the application to the message broker
  * </ul>
  *

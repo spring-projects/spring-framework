@@ -146,7 +146,7 @@ public abstract class AbstractResource implements Resource {
 	/**
 	 * This method reads the entire InputStream to determine the content length.
 	 * <p>For a custom subclass of {@code InputStreamResource}, we strongly
-	 * recommend overriding this method with a more optimal implementation, e.g.
+	 * recommend overriding this method with a more optimal implementation, for example,
 	 * checking File length, or possibly simply returning -1 if the stream can
 	 * only be read once.
 	 * @see #getInputStream()

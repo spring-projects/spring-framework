@@ -180,7 +180,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 
 	/**
 	 * Set a value that should be treated as {@code null} when resolved
-	 * as a placeholder value: e.g. "" (empty String) or "null".
+	 * as a placeholder value: for example, "" (empty String) or "null".
 	 * <p>Note that this will only apply to full property values,
 	 * not to parts of concatenated values.
 	 * <p>By default, no such null value is defined. This means that

@@ -23,7 +23,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for creating {@link BeanInfo} instances for Spring beans.
- * Can be used to plug in custom bean property resolution strategies (e.g. for other
+ * Can be used to plug in custom bean property resolution strategies (for example, for other
  * languages on the JVM) or more efficient {@link BeanInfo} retrieval algorithms.
  *
  * <p>BeanInfoFactories are instantiated by the {@link CachedIntrospectionResults},

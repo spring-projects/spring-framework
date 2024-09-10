@@ -36,7 +36,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * and Spring's {@link org.springframework.web.servlet.DispatcherServlet} also expose
  * the same request context to the current thread.
  *
- * <p>This filter is mainly for use with third-party servlets, e.g. the JSF FacesServlet.
+ * <p>This filter is mainly for use with third-party servlets, for example, the JSF FacesServlet.
  * Within Spring's own web support, DispatcherServlet's processing is perfectly sufficient.
  *
  * @author Juergen Hoeller
@@ -62,7 +62,7 @@ public class RequestContextFilter extends OncePerRequestFilter {
 	 * (that is, ending after their initial task, without reuse of the thread).
 	 * <p><b>WARNING:</b> Do not use inheritance for child threads if you are
 	 * accessing a thread pool which is configured to potentially add new threads
-	 * on demand (e.g. a JDK {@link java.util.concurrent.ThreadPoolExecutor}),
+	 * on demand (for example, a JDK {@link java.util.concurrent.ThreadPoolExecutor}),
 	 * since this will expose the inherited context to such a pooled thread.
 	 */
 	public void setThreadContextInheritable(boolean threadContextInheritable) {

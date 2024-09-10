@@ -319,7 +319,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * It is therefore strongly recommended to perform all operations on
 	 * the Scheduler within Spring-managed (or plain JTA) transactions.
 	 * Else, database locking will not properly work and might even break
-	 * (e.g. if trying to obtain a lock on Oracle without a transaction).
+	 * (for example, if trying to obtain a lock on Oracle without a transaction).
 	 * <p>Supports both transactional and non-transactional DataSource access.
 	 * With a non-XA DataSource and local Spring transactions, a single DataSource
 	 * argument is sufficient. In case of an XA DataSource and global JTA transactions,

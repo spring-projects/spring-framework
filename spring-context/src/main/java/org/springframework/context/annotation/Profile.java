@@ -63,7 +63,7 @@ import org.springframework.core.env.Profiles;
  * details about supported formats.
  *
  * <p>This is analogous to the behavior in Spring XML: if the {@code profile} attribute of
- * the {@code beans} element is supplied e.g., {@code <beans profile="p1,p2">}, the
+ * the {@code beans} element is supplied, for example, {@code <beans profile="p1,p2">}, the
  * {@code beans} element will not be parsed unless at least profile 'p1' or 'p2' has been
  * activated. Likewise, if a {@code @Component} or {@code @Configuration} class is marked
  * with {@code @Profile({"p1", "p2"})}, that class will not be registered or processed unless

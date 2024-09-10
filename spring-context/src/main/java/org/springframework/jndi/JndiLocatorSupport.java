@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * by Jakarta EE applications when accessing a locally mapped (ENC - Environmental
  * Naming Context) resource. If it doesn't, the "java:comp/env/" prefix will
  * be prepended if the "resourceRef" property is true (the default is
- * <strong>false</strong>) and no other scheme (e.g. "java:") is given.
+ * <strong>false</strong>) and no other scheme (for example, "java:") is given.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -51,7 +51,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * Set whether the lookup occurs in a Jakarta EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. Default is "false".
-	 * <p>Note: Will only get applied if no other scheme (e.g. "java:") is given.
+	 * <p>Note: Will only get applied if no other scheme (for example, "java:") is given.
 	 */
 	public void setResourceRef(boolean resourceRef) {
 		this.resourceRef = resourceRef;
@@ -117,7 +117,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	/**
 	 * Convert the given JNDI name into the actual JNDI name to use.
 	 * <p>The default implementation applies the "java:comp/env/" prefix if
-	 * "resourceRef" is "true" and no other scheme (e.g. "java:") is given.
+	 * "resourceRef" is "true" and no other scheme (for example, "java:") is given.
 	 * @param jndiName the original JNDI name
 	 * @return the JNDI name to use
 	 * @see #CONTAINER_PREFIX

@@ -41,7 +41,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>Mainly targeted at test environments, where each test case can
  * configure JNDI appropriately, so that {@code new InitialContext()}
  * will expose the required objects. Also usable for standalone applications,
- * e.g. for binding a JDBC DataSource to a well-known JNDI location, to be
+ * for example, for binding a JDBC DataSource to a well-known JNDI location, to be
  * able to use traditional Jakarta EE data access code outside a Jakarta EE
  * container.
  *
@@ -165,7 +165,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 * (if configured) instead of exposing its own bound objects.
 	 * <p>Call {@code activate()} again in order to expose this context builder's own
 	 * bound objects again. Such activate/deactivate sequences can be applied any number
-	 * of times (e.g. within a larger integration test suite running in the same VM).
+	 * of times (for example, within a larger integration test suite running in the same VM).
 	 * @see #activate()
 	 */
 	public void deactivate() {
@@ -183,8 +183,8 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	/**
 	 * Bind the given object under the given name, for all naming contexts
 	 * that this context builder will generate.
-	 * @param name the JNDI name of the object (e.g. "java:comp/env/jdbc/myds")
-	 * @param obj the object to bind (e.g. a DataSource implementation)
+	 * @param name the JNDI name of the object (for example, "java:comp/env/jdbc/myds")
+	 * @param obj the object to bind (for example, a DataSource implementation)
 	 */
 	public void bind(String name, Object obj) {
 		if (logger.isInfoEnabled()) {

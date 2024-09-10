@@ -101,7 +101,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler, or {@code null} if none chosen at the
-	 * time of the exception, e.g. if multipart resolution failed
+	 * time of the exception, for example, if multipart resolution failed
 	 * @param ex the exception
 	 * @return an empty ModelAndView, i.e. exception resolved
 	 */
@@ -123,7 +123,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler, or {@code null} if none chosen at the
-	 * time of the exception, e.g. if multipart resolution failed
+	 * time of the exception, for example, if multipart resolution failed
 	 * @return an empty ModelAndView, i.e. exception resolved
 	 * @since 5.0
 	 */

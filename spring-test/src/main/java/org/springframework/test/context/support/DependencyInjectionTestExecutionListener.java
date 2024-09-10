@@ -47,7 +47,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * dependencies will be injected in
 	 * {@link #prepareTestInstance(TestContext) prepareTestInstance()} in any
 	 * case.
-	 * <p>Clients of a {@link TestContext} (e.g., other
+	 * <p>Clients of a {@link TestContext} (for example, other
 	 * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners})
 	 * may therefore choose to set this attribute to signal that dependencies
 	 * should be reinjected <em>between</em> execution of individual test

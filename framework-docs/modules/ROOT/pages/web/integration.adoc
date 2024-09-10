@@ -103,7 +103,7 @@ on its specific integration strategies.
 
 JavaServer Faces (JSF) is the JCP's standard component-based, event-driven web
 user interface framework. It is an official part of the Jakarta EE umbrella but also
-individually usable, e.g. through embedding Mojarra or MyFaces within Tomcat.
+individually usable, for example, through embedding Mojarra or MyFaces within Tomcat.
 
 Please note that recent versions of JSF became closely tied to CDI infrastructure
 in application servers, with some new JSF functionality only working in such an

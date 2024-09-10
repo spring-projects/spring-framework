@@ -222,7 +222,7 @@ public @interface PropertySource {
 	boolean ignoreResourceNotFound() default false;
 
 	/**
-	 * A specific character encoding for the given resources, e.g. "UTF-8".
+	 * A specific character encoding for the given resources, for example, "UTF-8".
 	 * @since 4.3
 	 */
 	String encoding() default "";

@@ -42,7 +42,7 @@ import org.springframework.core.type.filter.TypeFilter;
  * <p>Note that the {@code <context:component-scan>} element has an
  * {@code annotation-config} attribute; however, this annotation does not. This is because
  * in almost all cases when using {@code @ComponentScan}, default annotation config
- * processing (e.g. processing {@code @Autowired} and friends) is assumed. Furthermore,
+ * processing (for example, processing {@code @Autowired} and friends) is assumed. Furthermore,
  * when using {@link AnnotationConfigApplicationContext}, annotation config processors are
  * always registered, meaning that any attempt to disable them at the
  * {@code @ComponentScan} level would be ignored.
@@ -103,7 +103,7 @@ public @interface ComponentScan {
 	 * within the Spring container.
 	 * <p>The default value of the {@link BeanNameGenerator} interface itself indicates
 	 * that the scanner used to process this {@code @ComponentScan} annotation should
-	 * use its inherited bean name generator, e.g. the default
+	 * use its inherited bean name generator, for example, the default
 	 * {@link AnnotationBeanNameGenerator} or any custom instance supplied to the
 	 * application context at bootstrap time.
 	 * @see AnnotationConfigApplicationContext#setBeanNameGenerator(BeanNameGenerator)

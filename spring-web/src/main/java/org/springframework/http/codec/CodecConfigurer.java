@@ -39,9 +39,9 @@ import org.springframework.lang.Nullable;
  * <p>HTTP message readers and writers are divided into 3 categories that are
  * ordered as follows:
  * <ol>
- * <li>Typed readers and writers that support specific types, e.g. byte[], String.
- * <li>Object readers and writers, e.g. JSON, XML.
- * <li>Catch-all readers or writers, e.g. String with any media type.
+ * <li>Typed readers and writers that support specific types, for example, byte[], String.
+ * <li>Object readers and writers, for example, JSON, XML.
+ * <li>Catch-all readers or writers, for example, String with any media type.
  * </ol>
  *
  * <p>Typed and object readers are further subdivided and ordered as follows:
@@ -241,7 +241,7 @@ public interface CodecConfigurer {
 		 * decoding to a single {@code DataBuffer},
 		 * {@link java.nio.ByteBuffer ByteBuffer}, {@code byte[]},
 		 * {@link org.springframework.core.io.Resource Resource}, {@code String}, etc.
-		 * It can also occur when splitting the input stream, e.g. delimited text,
+		 * It can also occur when splitting the input stream, for example, delimited text,
 		 * in which case the limit applies to data buffered between delimiters.
 		 * <p>By default this is not set, in which case individual codec defaults
 		 * apply. All codecs are limited to 256K by default.

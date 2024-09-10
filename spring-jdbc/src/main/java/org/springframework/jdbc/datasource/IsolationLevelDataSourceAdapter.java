@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  *
  * <p>Inherits the capability to apply specific user credentials from its superclass
  * {@link UserCredentialsDataSourceAdapter}; see the latter's javadoc for details
- * on that functionality (e.g. {@link #setCredentialsForCurrentThread}).
+ * on that functionality (for example, {@link #setCredentialsForCurrentThread}).
  *
  * <p><b>WARNING:</b> This adapter simply calls
  * {@link java.sql.Connection#setTransactionIsolation} and/or

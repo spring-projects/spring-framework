@@ -360,7 +360,7 @@ public class HttpRequestValues {
 		 * <ul>
 		 * <li>String -- form field
 		 * <li>{@link org.springframework.core.io.Resource Resource} -- file part
-		 * <li>Object -- content to be encoded (e.g. to JSON)
+		 * <li>Object -- content to be encoded (for example, to JSON)
 		 * <li>{@link HttpEntity} -- part content and headers although generally it's
 		 * easier to add headers through the returned builder
 		 * </ul>

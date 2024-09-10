@@ -47,7 +47,7 @@ The following table provides more details on the `ViewResolver` hierarchy:
 | Implementation of the `ViewResolver` interface that interprets a view name as a
   bean name in the current application context. This is a very flexible variant which
   allows for mixing and matching different view types based on distinct view names.
-  Each such `View` can be defined as a bean e.g. in XML or in configuration classes.
+  Each such `View` can be defined as a bean, for example, in XML or in configuration classes.
 |===
 
 

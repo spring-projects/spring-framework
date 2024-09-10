@@ -50,7 +50,7 @@ public interface AutowireCandidateResolver {
 	 * <p>The default implementation checks {@link DependencyDescriptor#isRequired()}.
 	 * @param descriptor the descriptor for the target method parameter or field
 	 * @return whether the descriptor is marked as required or possibly indicating
-	 * non-required status some other way (e.g. through a parameter annotation)
+	 * non-required status some other way (for example, through a parameter annotation)
 	 * @since 5.0
 	 * @see DependencyDescriptor#isRequired()
 	 */

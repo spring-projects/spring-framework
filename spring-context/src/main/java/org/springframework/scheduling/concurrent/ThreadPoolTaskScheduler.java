@@ -59,7 +59,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * <p>This is Spring's traditional scheduler variant, staying as close as possible to
  * {@link java.util.concurrent.ScheduledExecutorService} semantics. Task execution happens
  * on the scheduler thread(s) rather than on separate execution threads. As a consequence,
- * a {@link ScheduledFuture} handle (e.g. from {@link #schedule(Runnable, Instant)})
+ * a {@link ScheduledFuture} handle (for example, from {@link #schedule(Runnable, Instant)})
  * represents the actual completion of the provided task (or series of repeated tasks).
  *
  * @author Juergen Hoeller

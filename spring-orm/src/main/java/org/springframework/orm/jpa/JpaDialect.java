@@ -87,7 +87,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	/**
 	 * Prepare a JPA transaction, applying the specified semantics. Called by
 	 * EntityManagerFactoryUtils when enlisting an EntityManager in a JTA transaction
-	 * or a locally joined transaction (e.g. after upgrading an unsynchronized
+	 * or a locally joined transaction (for example, after upgrading an unsynchronized
 	 * EntityManager to a synchronized one).
 	 * <p>An implementation can apply the read-only flag as flush mode. In that case,
 	 * a transaction data object can be returned that holds the previous flush mode

@@ -90,7 +90,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 	/**
 	 * Set a descriptor for this transaction attribute,
-	 * e.g. indicating where the attribute is applying.
+	 * for example, indicating where the attribute is applying.
 	 * @since 4.3.4
 	 */
 	public void setDescriptor(@Nullable String descriptor) {

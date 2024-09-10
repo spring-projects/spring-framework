@@ -54,9 +54,9 @@ import org.springframework.util.StringUtils;
  *
  * <p>Processes a {@link #CONFIG_LOCATION_PARAM "contextConfigLocation"} context-param
  * and passes its value to the context instance, parsing it into potentially multiple
- * file paths which can be separated by any number of commas and spaces, e.g.
+ * file paths which can be separated by any number of commas and spaces, for example,
  * "WEB-INF/applicationContext1.xml, WEB-INF/applicationContext2.xml".
- * Ant-style path patterns are supported as well, e.g.
+ * Ant-style path patterns are supported as well, for example,
  * "WEB-INF/*Context.xml,WEB-INF/spring*.xml" or "WEB-INF/&#42;&#42;/*Context.xml".
  * If not explicitly specified, the context implementation is supposed to use a
  * default location (with XmlWebApplicationContext: "/WEB-INF/applicationContext.xml").

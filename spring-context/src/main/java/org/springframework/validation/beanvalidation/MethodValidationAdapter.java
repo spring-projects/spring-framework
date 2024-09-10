@@ -195,7 +195,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	 * <li>{@link Conventions#getVariableNameForReturnType(Method, Class, Object)}
 	 * for a return type
 	 * </ul>
-	 * If a name cannot be determined, e.g. a return value with insufficient
+	 * If a name cannot be determined, for example, a return value with insufficient
 	 * type information, then it defaults to one of:
 	 * <ul>
 	 * <li>{@code "{methodName}.arg{index}"} for input parameters

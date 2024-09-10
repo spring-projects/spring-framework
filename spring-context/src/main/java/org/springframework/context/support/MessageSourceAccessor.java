@@ -170,7 +170,7 @@ public class MessageSourceAccessor {
 	}
 
 	/**
-	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance)
+	 * Retrieve the given MessageSourceResolvable (for example, an ObjectError instance)
 	 * in the default Locale.
 	 * @param resolvable the MessageSourceResolvable
 	 * @return the message
@@ -181,7 +181,7 @@ public class MessageSourceAccessor {
 	}
 
 	/**
-	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance)
+	 * Retrieve the given MessageSourceResolvable (for example, an ObjectError instance)
 	 * in the given Locale.
 	 * @param resolvable the MessageSourceResolvable
 	 * @param locale the Locale in which to do lookup

@@ -484,7 +484,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	/**
 	 * Obtain a Transport object from the given JavaMail Session,
 	 * using the configured protocol.
-	 * <p>Can be overridden in subclasses, e.g. to return a mock Transport object.
+	 * <p>Can be overridden in subclasses, for example, to return a mock Transport object.
 	 * @see jakarta.mail.Session#getTransport(String)
 	 * @see #getSession()
 	 * @see #getProtocol()

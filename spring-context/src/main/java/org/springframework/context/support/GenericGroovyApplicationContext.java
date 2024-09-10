@@ -66,7 +66,7 @@ import org.springframework.lang.Nullable;
  * </pre>
  *
  * <p>Alternatively, load a Groovy bean definition script like the following
- * from an external resource (e.g. an "applicationContext.groovy" file):
+ * from an external resource (for example, an "applicationContext.groovy" file):
  *
  * <pre class="code">
  * import org.hibernate.SessionFactory

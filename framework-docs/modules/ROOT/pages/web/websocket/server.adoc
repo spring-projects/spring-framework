@@ -29,7 +29,7 @@ WebSocket support does not depend on Spring MVC. It is relatively simple to
 integrate a `WebSocketHandler` into other HTTP-serving environments with the help of
 {spring-framework-api}/web/socket/server/support/WebSocketHttpRequestHandler.html[`WebSocketHttpRequestHandler`].
 
-When using the `WebSocketHandler` API directly vs indirectly, e.g. through the
+When using the `WebSocketHandler` API directly vs indirectly, for example, through the
 xref:web/websocket/stomp.adoc[STOMP] messaging, the application must synchronize the sending of messages
 since the underlying standard WebSocket session (JSR-356) does not allow concurrent
 sending. One option is to wrap the `WebSocketSession` with

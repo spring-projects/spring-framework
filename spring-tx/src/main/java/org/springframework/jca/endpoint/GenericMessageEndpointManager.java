@@ -87,7 +87,7 @@ import org.springframework.util.Assert;
  * <p>For a different target resource, the configuration would simply point to a
  * different ResourceAdapter and a different ActivationSpec object (which are
  * both specific to the resource provider), and possibly a different message
- * listener (e.g. a CCI {@link jakarta.resource.cci.MessageListener} for a
+ * listener (for example, a CCI {@link jakarta.resource.cci.MessageListener} for a
  * resource adapter which is based on the JCA Common Client Interface).
  *
  * <p>The asynchronous execution strategy can be customized through the
@@ -123,7 +123,7 @@ import org.springframework.util.Assert;
  *
  * <p>Alternatively, check out your resource provider's ActivationSpec object,
  * which should support local transactions through a provider-specific config flag,
- * e.g. ActiveMQActivationSpec's "useRAManagedTransaction" bean property.
+ * for example, ActiveMQActivationSpec's "useRAManagedTransaction" bean property.
  *
  * <pre class="code">
  * &lt;bean class="org.springframework.jca.endpoint.GenericMessageEndpointManager"&gt;

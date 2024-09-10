@@ -64,7 +64,7 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * <p>Hint: Set the {@link #setExposeContextBeansAsAttributes} flag to "true"
  * in order to make all Spring beans in the application context accessible
- * within JSTL expressions (e.g. in a {@code c:out} value expression).
+ * within JSTL expressions (for example, in a {@code c:out} value expression).
  * This will also make all such beans accessible in plain {@code ${...}}
  * expressions in a JSP 2.0 page.
  *

@@ -59,7 +59,7 @@ public class ScheduledMethodRunnable implements SchedulingAwareRunnable {
 	 * @param target the target instance to call the method on
 	 * @param method the target method to call
 	 * @param qualifier a qualifier associated with this Runnable,
-	 * e.g. for determining a scheduler to run this scheduled method on
+	 * for example, for determining a scheduler to run this scheduled method on
 	 * @param observationRegistrySupplier a supplier for the observation registry to use
 	 * @since 6.1
 	 */

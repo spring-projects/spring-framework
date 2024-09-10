@@ -73,7 +73,7 @@ developers may choose to use instead of the Spring-specific mechanisms provided
 by the Spring Framework. Originally, those were based on common `javax` packages.
 
 As of Spring Framework 6.0, Spring has been upgraded to the Jakarta EE 9 level
-(e.g. Servlet 5.0+, JPA 3.0+), based on the `jakarta` namespace instead of the
+(for example, Servlet 5.0+, JPA 3.0+), based on the `jakarta` namespace instead of the
 traditional `javax` packages. With EE 9 as the minimum and EE 10 supported already,
 Spring is prepared to provide out-of-the-box support for the further evolution of
 the Jakarta EE APIs. Spring Framework 6.0 is fully compatible with Tomcat 10.1,

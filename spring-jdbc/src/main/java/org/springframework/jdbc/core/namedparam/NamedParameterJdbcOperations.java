@@ -241,7 +241,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param paramSource container of arguments to bind to the query
 	 * @param rowMapper object that will map one object per row
 	 * @return the result Stream, containing mapped objects, needing to be
-	 * closed once fully processed (e.g. through a try-with-resources clause)
+	 * closed once fully processed (for example, through a try-with-resources clause)
 	 * @throws DataAccessException if the query fails
 	 * @since 5.3
 	 */
@@ -257,7 +257,7 @@ public interface NamedParameterJdbcOperations {
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param rowMapper object that will map one object per row
 	 * @return the result Stream, containing mapped objects, needing to be
-	 * closed once fully processed (e.g. through a try-with-resources clause)
+	 * closed once fully processed (for example, through a try-with-resources clause)
 	 * @throws DataAccessException if the query fails
 	 * @since 5.3
 	 */

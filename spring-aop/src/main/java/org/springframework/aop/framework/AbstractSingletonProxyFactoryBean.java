@@ -91,7 +91,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 	/**
 	 * Set additional interceptors (or advisors) to be applied before the
-	 * implicit transaction interceptor, e.g. a PerformanceMonitorInterceptor.
+	 * implicit transaction interceptor, for example, a PerformanceMonitorInterceptor.
 	 * <p>You may specify any AOP Alliance MethodInterceptors or other
 	 * Spring AOP Advices, as well as Spring AOP Advisors.
 	 * @see org.springframework.aop.interceptor.PerformanceMonitorInterceptor

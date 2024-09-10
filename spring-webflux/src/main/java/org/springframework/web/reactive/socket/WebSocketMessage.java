@@ -126,7 +126,7 @@ public class WebSocketMessage {
 
 	/**
 	 * Retain the data buffer for the message payload, which is useful on
-	 * runtimes (e.g. Netty) with pooled buffers. A shortcut for:
+	 * runtimes (for example, Netty) with pooled buffers. A shortcut for:
 	 * <pre>
 	 * DataBuffer payload = message.getPayload();
 	 * DataBufferUtils.retain(payload);
@@ -143,7 +143,7 @@ public class WebSocketMessage {
 
 	/**
 	 * Release the payload {@code DataBuffer} which is useful on runtimes
-	 * (e.g. Netty) with pooled buffers such as Netty. A shortcut for:
+	 * (for example, Netty) with pooled buffers such as Netty. A shortcut for:
 	 * <pre>
 	 * DataBuffer payload = message.getPayload();
 	 * DataBufferUtils.release(payload);

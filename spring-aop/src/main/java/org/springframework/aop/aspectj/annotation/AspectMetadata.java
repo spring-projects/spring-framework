@@ -160,7 +160,7 @@ public class AspectMetadata implements Serializable {
 
 	/**
 	 * Return a Spring pointcut expression for a singleton aspect.
-	 * (e.g. {@code Pointcut.TRUE} if it's a singleton).
+	 * (for example, {@code Pointcut.TRUE} if it's a singleton).
 	 */
 	public Pointcut getPerClausePointcut() {
 		return this.perClausePointcut;

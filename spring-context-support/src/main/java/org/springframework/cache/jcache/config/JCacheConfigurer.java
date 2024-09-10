@@ -42,7 +42,7 @@ public interface JCacheConfigurer extends CachingConfigurer {
 	/**
 	 * Return the {@link CacheResolver} bean to use to resolve exception caches for
 	 * annotation-driven cache management. Implementations must explicitly declare
-	 * {@link org.springframework.context.annotation.Bean @Bean}, e.g.
+	 * {@link org.springframework.context.annotation.Bean @Bean}, for example,
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableCaching

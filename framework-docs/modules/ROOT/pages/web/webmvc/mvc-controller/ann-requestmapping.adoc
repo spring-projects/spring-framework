@@ -105,7 +105,7 @@ default from version 6.0. See xref:web/webmvc/mvc-config/path-matching.adoc[MVC 
 customizations of path matching options.
 
 `PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition, it also
-supports the capturing pattern, e.g. `+{*spring}+`, for matching 0 or more path segments
+supports the capturing pattern, for example, `+{*spring}+`, for matching 0 or more path segments
 at the end of a path. `PathPattern` also restricts the use of `+**+` for matching multiple
 path segments such that it's only allowed at the end of a pattern. This eliminates many
 cases of ambiguity when choosing the best matching pattern for a given request.
@@ -272,7 +272,7 @@ To completely disable the use of path extensions in versions prior to 5.3, set t
 * `favorPathExtension(false)`, see xref:web/webmvc/mvc-config/content-negotiation.adoc[ContentNegotiationConfigurer]
 
 Having a way to request content types other than through the `"Accept"` header can still
-be useful, e.g. when typing a URL in a browser. A safe alternative to path extensions is
+be useful, for example, when typing a URL in a browser. A safe alternative to path extensions is
 to use the query parameter strategy. If you must use file extensions, consider restricting
 them to a list of explicitly registered extensions through the `mediaTypes` property of
 xref:web/webmvc/mvc-config/content-negotiation.adoc[ContentNegotiationConfigurer].

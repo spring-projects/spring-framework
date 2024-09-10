@@ -70,7 +70,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
  *
  * <p>Requires Undertow 1.3 or 1.4, including XNIO.
  *
- * <p>When used for testing purposes (e.g. load testing) or for specific use cases
+ * <p>When used for testing purposes (for example, load testing) or for specific use cases
  * (like HTTPS configuration), a custom {@link OptionMap} should be provided:
  *
  * <pre class="code">

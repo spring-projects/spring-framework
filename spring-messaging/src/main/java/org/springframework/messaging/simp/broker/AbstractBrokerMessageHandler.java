@@ -87,8 +87,8 @@ public abstract class AbstractBrokerMessageHandler
 
 	/**
 	 * Constructor with no destination prefixes (matches all destinations).
-	 * @param inboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param outboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param inboundChannel the channel for receiving messages from clients (for example, WebSocket clients)
+	 * @param outboundChannel the channel for sending messages to clients (for example, WebSocket clients)
 	 * @param brokerChannel the channel for the application to send messages to the broker
 	 */
 	public AbstractBrokerMessageHandler(SubscribableChannel inboundChannel, MessageChannel outboundChannel,
@@ -99,8 +99,8 @@ public abstract class AbstractBrokerMessageHandler
 
 	/**
 	 * Constructor with destination prefixes to match to destinations of messages.
-	 * @param inboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param outboundChannel the channel for sending messages to clients (e.g. WebSocket clients)
+	 * @param inboundChannel the channel for receiving messages from clients (for example, WebSocket clients)
+	 * @param outboundChannel the channel for sending messages to clients (for example, WebSocket clients)
 	 * @param brokerChannel the channel for the application to send messages to the broker
 	 * @param destinationPrefixes prefixes to use to filter out messages
 	 */

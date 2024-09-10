@@ -105,7 +105,7 @@ public final class ReactiveTypeDescriptor {
 
 	/**
 	 * Whether the underlying operation is deferred and needs to be started
-	 * explicitly, e.g. via subscribing (or similar), or whether it is triggered
+	 * explicitly, for example, via subscribing (or similar), or whether it is triggered
 	 * without the consumer having any control.
 	 * @since 5.2.7
 	 */

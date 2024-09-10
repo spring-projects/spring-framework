@@ -91,7 +91,7 @@ import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBea
  * into any application component to send messages.
  *
  * <p>Subclasses are responsible for the parts of the configuration that feed messages
- * to and from the client inbound/outbound channels (e.g. STOMP over WebSocket).
+ * to and from the client inbound/outbound channels (for example, STOMP over WebSocket).
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel

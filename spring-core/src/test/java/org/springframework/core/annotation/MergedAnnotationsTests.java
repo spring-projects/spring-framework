@@ -2100,7 +2100,7 @@ class MergedAnnotationsTests {
 	/**
 	 * Fully reflection-based test that verifies support for synthesizing
 	 * annotations across packages with non-public visibility of user types
-	 * (e.g., a non-public annotation that uses {@code @AliasFor}).
+	 * (for example, a non-public annotation that uses {@code @AliasFor}).
 	 */
 	@Test
 	@SuppressWarnings("unchecked")

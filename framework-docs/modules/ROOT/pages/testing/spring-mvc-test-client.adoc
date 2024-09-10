@@ -193,7 +193,7 @@ Then we define expectations with two kinds of responses:
  * a response obtained through a call to the `/quoteOfTheDay` endpoint
 
 In the second case, the request is executed through the `ClientHttpRequestFactory` that was
-captured earlier. This generates a response that could e.g. come from an actual remote server,
+captured earlier. This generates a response that could, for example, come from an actual remote server,
 depending on how the `RestTemplate` was originally configured.
 
 [[spring-mvc-test-client-static-imports]]

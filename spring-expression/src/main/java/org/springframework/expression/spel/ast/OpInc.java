@@ -115,7 +115,7 @@ public class OpInc extends Operator {
 			valueRef.setValue(newValue.getValue());
 		}
 		catch (SpelEvaluationException see) {
-			// If unable to set the value the operand is not writable (e.g. 1++ )
+			// If unable to set the value the operand is not writable (for example, 1++ )
 			if (see.getMessageCode() == SpelMessage.SETVALUE_NOT_SUPPORTED) {
 				throw new SpelEvaluationException(operand.getStartPosition(), SpelMessage.OPERAND_NOT_INCREMENTABLE);
 			}

@@ -9,7 +9,7 @@ You can make an introduction by using the `@DeclareParents` annotation. This ann
 is used to declare that matching types have a new parent (hence the name). For example,
 given an interface named `UsageTracked` and an implementation of that interface named
 `DefaultUsageTracked`, the following aspect declares that all implementors of service
-interfaces also implement the `UsageTracked` interface (e.g. for statistics via JMX):
+interfaces also implement the `UsageTracked` interface (for example, for statistics via JMX):
 
 [tabs]
 ======

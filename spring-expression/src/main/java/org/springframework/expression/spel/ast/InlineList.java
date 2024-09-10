@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Represent a list in an expression, e.g. '{1,2,3}'
+ * Represent a list in an expression, for example, '{1,2,3}'.
  *
  * @author Andy Clement
  * @author Sam Brannen

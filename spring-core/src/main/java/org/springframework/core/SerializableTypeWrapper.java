@@ -105,12 +105,12 @@ final class SerializableTypeWrapper {
 	static Type forTypeProvider(TypeProvider provider) {
 		Type providedType = provider.getType();
 		if (providedType == null || providedType instanceof Serializable) {
-			// No serializable type wrapping necessary (e.g. for java.lang.Class)
+			// No serializable type wrapping necessary (for example, for java.lang.Class)
 			return providedType;
 		}
 		if (NativeDetector.inNativeImage() || !Serializable.class.isAssignableFrom(Class.class)) {
 			// Let's skip any wrapping attempts if types are generally not serializable in
-			// the current runtime environment (even java.lang.Class itself, e.g. on GraalVM native images)
+			// the current runtime environment (even java.lang.Class itself, for example, on GraalVM native images)
 			return providedType;
 		}
 

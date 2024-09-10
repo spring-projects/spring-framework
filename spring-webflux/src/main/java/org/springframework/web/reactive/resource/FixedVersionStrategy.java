@@ -22,7 +22,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * A {@code VersionStrategy} that relies on a fixed version applied as a request
- * path prefix, e.g. reduced SHA, version name, release date, etc.
+ * path prefix, for example, reduced SHA, version name, release date, etc.
  *
  * <p>This is useful for example when {@link ContentVersionStrategy} cannot be
  * used such as when using JavaScript module loaders which are in charge of

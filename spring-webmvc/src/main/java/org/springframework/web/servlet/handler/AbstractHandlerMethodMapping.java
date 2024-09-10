@@ -126,7 +126,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * Configure the naming strategy to use for assigning a default name to every
 	 * mapped handler method.
 	 * <p>The default naming strategy is based on the capital letters of the
-	 * class name followed by "#" and then the method name, e.g. "TC#getFoo"
+	 * class name followed by "#" and then the method name, for example, "TC#getFoo"
 	 * for a class named TestController with method getFoo.
 	 */
 	public void setHandlerMethodMappingNamingStrategy(HandlerMethodMappingNamingStrategy<T> namingStrategy) {

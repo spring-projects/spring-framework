@@ -60,7 +60,7 @@ public interface TransactionExecution {
 	 * <p>This is primarily here for transaction manager state handling.
 	 * Prefer the use of {@link #hasTransaction()} for application purposes
 	 * since this is usually semantically appropriate.
-	 * <p>The "new" status can be transaction manager specific, e.g. returning
+	 * <p>The "new" status can be transaction manager specific, for example, returning
 	 * {@code true} for an actual nested transaction but potentially {@code false}
 	 * for a savepoint-based nested transaction scope if the savepoint management
 	 * is explicitly exposed (such as on {@link TransactionStatus}). A combined

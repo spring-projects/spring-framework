@@ -43,7 +43,7 @@ public interface RequestBodyAdvice {
 	 * Invoked first to determine if this interceptor applies.
 	 * @param methodParameter the method parameter
 	 * @param targetType the target type, not necessarily the same as the method
-	 * parameter type, e.g. for {@code HttpEntity<String>}.
+	 * parameter type, for example, for {@code HttpEntity<String>}.
 	 * @param converterType the selected converter type
 	 * @return whether this interceptor should be invoked or not
 	 */
@@ -55,7 +55,7 @@ public interface RequestBodyAdvice {
 	 * @param inputMessage the request
 	 * @param parameter the target method parameter
 	 * @param targetType the target type, not necessarily the same as the method
-	 * parameter type, e.g. for {@code HttpEntity<String>}.
+	 * parameter type, for example, for {@code HttpEntity<String>}.
 	 * @param converterType the converter used to deserialize the body
 	 * @return the input request or a new instance (never {@code null})
 	 */
@@ -68,7 +68,7 @@ public interface RequestBodyAdvice {
 	 * @param inputMessage the request
 	 * @param parameter the target method parameter
 	 * @param targetType the target type, not necessarily the same as the method
-	 * parameter type, e.g. for {@code HttpEntity<String>}.
+	 * parameter type, for example, for {@code HttpEntity<String>}.
 	 * @param converterType the converter used to deserialize the body
 	 * @return the same body or a new instance
 	 */
@@ -81,7 +81,7 @@ public interface RequestBodyAdvice {
 	 * @param inputMessage the request
 	 * @param parameter the method parameter
 	 * @param targetType the target type, not necessarily the same as the method
-	 * parameter type, e.g. for {@code HttpEntity<String>}.
+	 * parameter type, for example, for {@code HttpEntity<String>}.
 	 * @param converterType the selected converter type
 	 * @return the value to use, or {@code null} which may then raise an
 	 * {@code HttpMessageNotReadableException} if the argument is required

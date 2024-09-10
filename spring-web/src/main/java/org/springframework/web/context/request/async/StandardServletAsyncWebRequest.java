@@ -224,7 +224,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 			return 0;
 		}
 
-		// Do not wait indefinitely, stop if we moved on from ASYNC state (e.g. to ERROR),
+		// Do not wait indefinitely, stop if we moved on from ASYNC state (for example, to ERROR),
 		// helps to avoid ABBA deadlock with onError callback
 
 		while (this.state == State.ASYNC) {

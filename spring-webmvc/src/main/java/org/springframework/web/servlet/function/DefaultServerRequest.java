@@ -113,7 +113,7 @@ class DefaultServerRequest implements ServerRequest {
 		this.params = CollectionUtils.toMultiValueMap(new ServletParametersMap(servletRequest));
 		this.attributes = new ServletAttributesMap(servletRequest);
 
-		// DispatcherServlet parses the path but for other scenarios (e.g. tests) we might need to
+		// DispatcherServlet parses the path but for other scenarios (for example, tests) we might need to
 
 		this.requestPath = (ServletRequestPathUtils.hasParsedRequestPath(servletRequest) ?
 				ServletRequestPathUtils.getParsedRequestPath(servletRequest) :

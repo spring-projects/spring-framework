@@ -105,7 +105,7 @@ final class AnnotationWriter extends AnnotationVisitor {
    *     the structure except the last one (the element_value_pairs array).
    * @param previousAnnotation the previously visited annotation of the
    *     Runtime[In]Visible[Type]Annotations attribute to which this annotation belongs, or
-   *     {@literal null} in other cases (e.g. nested or array annotations).
+   *     {@literal null} in other cases (for example, nested or array annotations).
    */
   AnnotationWriter(
       final SymbolTable symbolTable,
@@ -131,7 +131,7 @@ final class AnnotationWriter extends AnnotationVisitor {
    * @param descriptor the class descriptor of the annotation class.
    * @param previousAnnotation the previously visited annotation of the
    *     Runtime[In]Visible[Type]Annotations attribute to which this annotation belongs, or
-   *     {@literal null} in other cases (e.g. nested or array annotations).
+   *     {@literal null} in other cases (for example, nested or array annotations).
    * @return a new {@link AnnotationWriter} for the given annotation descriptor.
    */
   static AnnotationWriter create(
@@ -161,7 +161,7 @@ final class AnnotationWriter extends AnnotationVisitor {
    * @param descriptor the class descriptor of the annotation class.
    * @param previousAnnotation the previously visited annotation of the
    *     Runtime[In]Visible[Type]Annotations attribute to which this annotation belongs, or
-   *     {@literal null} in other cases (e.g. nested or array annotations).
+   *     {@literal null} in other cases (for example, nested or array annotations).
    * @return a new {@link AnnotationWriter} for the given type annotation reference and descriptor.
    */
   static AnnotationWriter create(

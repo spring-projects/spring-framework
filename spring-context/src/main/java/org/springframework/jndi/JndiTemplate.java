@@ -127,7 +127,7 @@ public class JndiTemplate {
 	/**
 	 * Create a new JNDI initial context. Invoked by {@link #getContext}.
 	 * <p>The default implementation use this template's environment settings.
-	 * Can be subclassed for custom contexts, e.g. for testing.
+	 * Can be subclassed for custom contexts, for example, for testing.
 	 * @return the initial Context instance
 	 * @throws NamingException in case of initialization errors
 	 */

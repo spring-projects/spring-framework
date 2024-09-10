@@ -129,7 +129,7 @@
 		<xsd:attribute name="client-library-url" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
-	Transports with no native cross-domain communication (e.g. "eventsource",
+	Transports with no native cross-domain communication (for example, "eventsource",
 	"htmlfile") must get a simple page from the "foreign" domain in an invisible
 	iframe so that code in the iframe can run from  a domain local to the SockJS
 	server. Since the iframe needs to load the SockJS javascript client library,
@@ -161,7 +161,7 @@
 				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	The "cookie_needed" value in the response from the SockJs "/info" endpoint.
 	This property indicates whether the use of a JSESSIONID cookie is required for the application to function correctly,
-	e.g. for load balancing or in Java Servlet containers for the use of an HTTP session.
+	for example, for load balancing or in Java Servlet containers for the use of an HTTP session.
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -280,7 +280,7 @@
 				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
 	The login for the shared "system" connection used to send messages to
 	the STOMP broker from within the application, i.e. messages not associated
-	with a specific client session (e.g. REST/HTTP request handling method).
+	with a specific client session (for example, REST/HTTP request handling method).
 	By default this is set to "guest".
                 ]]></xsd:documentation>
 			</xsd:annotation>
@@ -290,7 +290,7 @@
 				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
 	The passcode for the shared "system" connection used to send messages to
 	the STOMP broker from within the application, i.e. messages not associated
-	with a specific client session (e.g. REST/HTTP request handling method).
+	with a specific client session (for example, REST/HTTP request handling method).
 	By default this is set to "guest".
                 ]]></xsd:documentation>
 			</xsd:annotation>
@@ -545,7 +545,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	Alternative to allowed-origins that supports origins declared via patterns,
-	e.g. "*.domain1.com".
+	for example, "*.domain1.com".
 
 	By default this is not set.
 					]]></xsd:documentation>
@@ -702,7 +702,7 @@
 
 	 This handler is for WebSocket connections that use a sub-protocol.
 	 Therefore, we expect the client to send at least one sub-protocol message
-	 in the beginning, or else we assume the connection isn't doing well, e.g.
+	 in the beginning, or else we assume the connection isn't doing well, for example,
 	 proxy issue, slow network, and can be closed.
 
 	 By default this is set to 60,000 (1 minute).
@@ -753,7 +753,7 @@
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
 	Alternative to allowed-origins that supports origins declared via patterns,
-	e.g. "*.domain1.com".
+	for example, "*.domain1.com".
 
 	By default this is not set.
 					]]></xsd:documentation>
@@ -849,7 +849,7 @@
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Configure the message converters to use when extracting the payload of messages in annotated methods
-	and when sending messages (e.g. through the "broker" SimpMessagingTemplate.
+	and when sending messages (for example, through the "broker" SimpMessagingTemplate.
 	MessageConverter registrations provided here will take precedence over MessageConverter types registered by default.
 	Also see the register-defaults attribute if you want to turn off default registrations entirely.
 						]]></xsd:documentation>
@@ -885,14 +885,14 @@
 				<xsd:element name="client-inbound-channel" type="channel" minOccurs="0" maxOccurs="1">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-	The channel for receiving messages from clients (e.g. WebSocket clients).
+	The channel for receiving messages from clients (for example, WebSocket clients).
                 ]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:element>
 				<xsd:element name="client-outbound-channel" type="channel" minOccurs="0" maxOccurs="1">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-	The channel for sending messages to clients (e.g. WebSocket clients).
+	The channel for sending messages to clients (for example, WebSocket clients).
                 ]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:element>

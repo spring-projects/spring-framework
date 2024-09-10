@@ -501,12 +501,12 @@ Placing this annotation on the class does not turn on any caching operation.
 An operation-level customization always overrides a customization set on `@CacheConfig`.
 Therefore, this gives three levels of customizations for each cache operation:
 
-* Globally configured, e.g. through `CachingConfigurer`: see next section.
+* Globally configured, for example, through `CachingConfigurer`: see next section.
 * At the class level, using `@CacheConfig`.
 * At the operation level.
 
 NOTE: Provider-specific settings are typically available on the `CacheManager` bean,
-e.g. on `CaffeineCacheManager`. These are effectively also global.
+for example, on `CaffeineCacheManager`. These are effectively also global.
 
 
 [[cache-annotation-enable]]

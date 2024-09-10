@@ -82,7 +82,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	 * Configure the {@link Clock} to use to set lastAccessTime on every created
 	 * session and to calculate if it is expired.
 	 * <p>This may be useful to align to different timezone or to set the clock
-	 * back in a test, e.g. {@code Clock.offset(clock, Duration.ofMinutes(-31))}
+	 * back in a test, for example, {@code Clock.offset(clock, Duration.ofMinutes(-31))}
 	 * in order to simulate session expiration.
 	 * <p>By default this is {@code Clock.system(ZoneId.of("GMT"))}.
 	 * @param clock the clock to use

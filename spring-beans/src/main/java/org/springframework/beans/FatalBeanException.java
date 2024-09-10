@@ -20,7 +20,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Thrown on an unrecoverable problem encountered in the
- * beans packages or sub-packages, e.g. bad class or field.
+ * beans packages or sub-packages, for example, bad class or field.
  *
  * @author Rod Johnson
  */

@@ -468,7 +468,7 @@ to encode and decode HTTP message content.
 * An `Encoder` can be wrapped with `EncoderHttpMessageWriter` to adapt it for use in a web
 application, while a `Decoder` can be wrapped with `DecoderHttpMessageReader`.
 * {spring-framework-api}/core/io/buffer/DataBuffer.html[`DataBuffer`] abstracts different
-byte buffer representations (e.g. Netty `ByteBuf`, `java.nio.ByteBuffer`, etc.) and is
+byte buffer representations (for example, Netty `ByteBuf`, `java.nio.ByteBuffer`, etc.) and is
 what all codecs work on. See xref:core/databuffer-codec.adoc[Data Buffers and Codecs] in the
 "Spring Core" section for more on this topic.
 
@@ -493,8 +493,8 @@ The `Jackson2Decoder` works as follows:
 * Jackson's asynchronous, non-blocking parser is used to aggregate a stream of byte chunks
 into ``TokenBuffer``'s each representing a JSON object.
 * Each `TokenBuffer` is passed to Jackson's `ObjectMapper` to create a higher level object.
-* When decoding to a single-value publisher (e.g. `Mono`), there is one `TokenBuffer`.
-* When decoding to a multi-value publisher (e.g. `Flux`), each `TokenBuffer` is passed to
+* When decoding to a single-value publisher (for example, `Mono`), there is one `TokenBuffer`.
+* When decoding to a multi-value publisher (for example, `Flux`), each `TokenBuffer` is passed to
 the `ObjectMapper` as soon as enough bytes are received for a fully formed object. The
 input content can be a JSON array, or any
 https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] format such as NDJSON,
@@ -502,7 +502,7 @@ JSON Lines, or JSON Text Sequences.
 
 The `Jackson2Encoder` works as follows:
 
-* For a single value publisher (e.g. `Mono`), simply serialize it through the
+* For a single value publisher (for example, `Mono`), simply serialize it through the
 `ObjectMapper`.
 * For a multi-value publisher with `application/json`, by default collect the values with
 `Flux#collectToList()` and then serialize the resulting collection.

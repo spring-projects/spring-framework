@@ -13,8 +13,8 @@ include-code::./SimpleController[indent=0]
 [[mvc-ann-exceptionhandler-exc]]
 == Exception Mapping
 
-The exception may match against a top-level exception being propagated (e.g. a direct
-`IOException` being thrown) or against a nested cause within a wrapper exception (e.g.
+The exception may match against a top-level exception being propagated (for example, a direct
+`IOException` being thrown) or against a nested cause within a wrapper exception (for example,
 an `IOException` wrapped inside an `IllegalStateException`). As of 5.3, this can match
 at arbitrary cause levels, whereas previously only an immediate cause was considered.
 

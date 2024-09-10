@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
 
 /**
  * Resolver that delegates to the chain, and if a resource is found, it then
- * attempts to find an encoded (e.g. gzip, brotli) variant that is acceptable
+ * attempts to find an encoded (for example, gzip, brotli) variant that is acceptable
  * based on the "Accept-Encoding" request header.
  *
  * <p>The list of supported {@link #setContentCodings(List) contentCodings} can

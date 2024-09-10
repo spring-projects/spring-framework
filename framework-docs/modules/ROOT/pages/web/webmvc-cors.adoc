@@ -88,7 +88,7 @@ class- or method-level `@CrossOrigin` annotations (other handlers can implement
 
 The rules for combining global and local configuration are generally additive -- for example,
 all global and all local origins. For those attributes where only a single value can be
-accepted, e.g. `allowCredentials` and `maxAge`, the local overrides the global value. See
+accepted, for example, `allowCredentials` and `maxAge`, the local overrides the global value. See
 {spring-framework-api}/web/cors/CorsConfiguration.html#combine-org.springframework.web.cors.CorsConfiguration-[`CorsConfiguration#combine(CorsConfiguration)`]
 for more details.
 

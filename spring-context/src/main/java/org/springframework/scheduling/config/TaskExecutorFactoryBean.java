@@ -137,7 +137,7 @@ public class TaskExecutorFactoryBean implements
 			}
 			catch (NumberFormatException ex) {
 				throw new IllegalArgumentException("Invalid pool-size value [" + this.poolSize + "]: only single " +
-						"maximum integer (e.g. \"5\") and minimum-maximum range (e.g. \"3-5\") are supported", ex);
+						"maximum integer (for example, \"5\") and minimum-maximum range (for example, \"3-5\") are supported", ex);
 			}
 		}
 	}

@@ -39,7 +39,7 @@ class Token {
 
 	/**
 	 * Constructor for use when there is no particular data for the token
-	 * (e.g. TRUE or '+').
+	 * (for example, TRUE or '+').
 	 * @param tokenKind the kind of token
 	 * @param startPos the exact start position
 	 * @param endPos the index of the last character

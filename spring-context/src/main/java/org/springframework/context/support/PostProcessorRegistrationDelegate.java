@@ -204,7 +204,7 @@ final class PostProcessorRegistrationDelegate {
 		invokeBeanFactoryPostProcessors(nonOrderedPostProcessors, beanFactory);
 
 		// Clear cached merged bean definitions since the post-processors might have
-		// modified the original metadata, e.g. replacing placeholders in values...
+		// modified the original metadata, for example, replacing placeholders in values...
 		beanFactory.clearMetadataCache();
 	}
 

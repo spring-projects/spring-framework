@@ -104,7 +104,7 @@
 		<xsd:attribute name="name" type="xsd:string" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Defines the name of a custom bean scope that the annotated type registers, e.g. "conversation".
+	Defines the name of a custom bean scope that the annotated type registers, for example, "conversation".
 	Such a scope will be available in addition to the standard "singleton" and "prototype" scopes
 	(plus "request", "session" and "globalSession" in a web application environment).
 		]]></xsd:documentation>

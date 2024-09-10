@@ -90,7 +90,7 @@ public interface RSocketRequester extends Disposable {
 
 	/**
 	 * Begin to specify a new request with the given route to a remote handler.
-	 * <p>The route can be a template with placeholders, e.g.
+	 * <p>The route can be a template with placeholders, for example,
 	 * {@code "flight.{code}"} in which case the supplied route variables are
 	 * formatted via {@code toString()} and expanded into the template.
 	 * If a formatted variable contains a "." it is replaced with the escape

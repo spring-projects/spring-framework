@@ -148,7 +148,7 @@ public interface JdbcOperations {
 	 * @param sql the SQL query to execute
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the result Stream, containing mapped objects, needing to be
-	 * closed once fully processed (e.g. through a try-with-resources clause)
+	 * closed once fully processed (for example, through a try-with-resources clause)
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @since 5.3
 	 * @see #queryForStream(String, RowMapper, Object...)
@@ -554,7 +554,7 @@ public interface JdbcOperations {
 	 * @param psc a callback that creates a PreparedStatement given a Connection
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the result Stream, containing mapped objects, needing to be
-	 * closed once fully processed (e.g. through a try-with-resources clause)
+	 * closed once fully processed (for example, through a try-with-resources clause)
 	 * @throws DataAccessException if there is any problem
 	 * @see PreparedStatementCreatorFactory
 	 * @since 5.3
@@ -573,7 +573,7 @@ public interface JdbcOperations {
 	 * fetch size and other performance options.
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the result Stream, containing mapped objects, needing to be
-	 * closed once fully processed (e.g. through a try-with-resources clause)
+	 * closed once fully processed (for example, through a try-with-resources clause)
 	 * @throws DataAccessException if the query fails
 	 * @since 5.3
 	 */
@@ -591,7 +591,7 @@ public interface JdbcOperations {
 	 * may also contain {@link SqlParameterValue} objects which indicate not
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @return the result Stream, containing mapped objects, needing to be
-	 * closed once fully processed (e.g. through a try-with-resources clause)
+	 * closed once fully processed (for example, through a try-with-resources clause)
 	 * @throws DataAccessException if the query fails
 	 * @since 5.3
 	 */

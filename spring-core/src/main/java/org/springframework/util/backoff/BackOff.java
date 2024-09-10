@@ -31,7 +31,7 @@ package org.springframework.util.backoff;
  *     // do not retry operation
  * }
  * else {
- *     // sleep, e.g. Thread.sleep(waitInterval)
+ *     // sleep, for example, Thread.sleep(waitInterval)
  *     // retry operation
  * }</pre>
  *

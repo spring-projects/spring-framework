@@ -27,7 +27,7 @@ import org.springframework.web.servlet.RequestToViewNameTranslator;
 /**
  * Handles return values of types {@code void} and {@code String} interpreting them
  * as view name reference. As of 4.2, it also handles general {@code CharSequence}
- * types, e.g. {@code StringBuilder} or Groovy's {@code GString}, as view names.
+ * types, for example, {@code StringBuilder} or Groovy's {@code GString}, as view names.
  *
  * <p>A {@code null} return value, either due to a {@code void} return type or
  * as the actual return value is left as-is allowing the configured

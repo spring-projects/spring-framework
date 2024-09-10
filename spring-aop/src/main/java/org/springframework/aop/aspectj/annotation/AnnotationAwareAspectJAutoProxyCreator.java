@@ -103,7 +103,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 		// broad an impact. Instead we now override isInfrastructureClass to avoid proxying
 		// aspects. I'm not entirely happy with that as there is no good reason not
 		// to advise aspects, except that it causes advice invocation to go through a
-		// proxy, and if the aspect implements e.g the Ordered interface it will be
+		// proxy, and if the aspect implements, for example, the Ordered interface it will be
 		// proxied by that interface and fail at runtime as the advice method is not
 		// defined on the interface. We could potentially relax the restriction about
 		// not advising aspects in the future.

@@ -80,7 +80,7 @@ public class ExchangeResult {
 	@Nullable
 	private final Object mockServerResult;
 
-	/** Ensure single logging, e.g. for expectAll. */
+	/** Ensure single logging, for example, for expectAll. */
 	private boolean diagnosticsLogged;
 
 

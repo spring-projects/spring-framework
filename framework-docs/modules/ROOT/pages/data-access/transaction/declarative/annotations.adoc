@@ -250,7 +250,7 @@ the proxy are intercepted. This means that self-invocation (in effect, a method 
 the target object calling another method of the target object) does not lead to an actual
 transaction at runtime even if the invoked method is marked with `@Transactional`. Also,
 the proxy must be fully initialized to provide the expected behavior, so you should not
-rely on this feature in your initialization code -- e.g. in a `@PostConstruct` method.
+rely on this feature in your initialization code -- for example, in a `@PostConstruct` method.
 
 Consider using AspectJ mode (see the `mode` attribute in the following table) if you
 expect self-invocations to be wrapped with transactions as well. In this case, there is
@@ -564,7 +564,7 @@ transaction definitions from a base class as well. This effectively overrides
 the default transaction manager choice for any unqualified base class methods.
 
 Last but not least, such a type-level bean qualifier can serve multiple purposes,
-e.g. with a value of "order" it can be used for autowiring purposes (identifying
+for example, with a value of "order" it can be used for autowiring purposes (identifying
 the order repository) as well as transaction manager selection, as long as the
 target beans for autowiring as well as the associated transaction manager
 definitions declare the same qualifier value. Such a qualifier value only needs

@@ -188,7 +188,7 @@ public class ControllerAdviceBean implements Ordered {
 	public Object resolveBean() {
 		if (this.resolvedBean == null) {
 			Object resolvedBean = this.beanFactory.getBean(this.beanName);
-			// Don't cache non-singletons (e.g., prototypes).
+			// Don't cache non-singletons (for example, prototypes).
 			if (!this.isSingleton) {
 				return resolvedBean;
 			}

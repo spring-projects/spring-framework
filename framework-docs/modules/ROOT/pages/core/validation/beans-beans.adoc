@@ -38,7 +38,7 @@ manner, but through a nested property path. That means constructor binding creat
 the target object and any objects it contains.
 
 Constructor binding supports `List`, `Map`, and array arguments either converted from
-a single string, e.g. comma-separated list, or based on indexed keys such as
+a single string, for example, comma-separated list, or based on indexed keys such as
 `accounts[2].name` or `account[KEY].name`.
 
 Binding and conversion errors are reflected in the `BindingResult` of the `DataBinder`.

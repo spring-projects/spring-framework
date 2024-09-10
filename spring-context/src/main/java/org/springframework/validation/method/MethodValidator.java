@@ -57,7 +57,7 @@ public interface MethodValidator {
 	/**
 	 * Delegate to {@link #validateArguments} and handle the validation result,
 	 * by default raising {@link MethodValidationException} in case of errors.
-	 * Implementations may provide alternative handling, e.g. injecting
+	 * Implementations may provide alternative handling, for example, injecting
 	 * {@link org.springframework.validation.Errors} into the method.
 	 * @throws MethodValidationException in case of unhandled errors.
 	 */

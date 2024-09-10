@@ -343,14 +343,14 @@
 <!--
 	The constructor-arg tag can have an optional index attribute,
 	to specify the exact index in the constructor argument list. Only needed
-	to avoid ambiguities, e.g. in case of 2 arguments of the same type.
+	to avoid ambiguities, for example, in case of 2 arguments of the same type.
 -->
 <!ATTLIST constructor-arg index CDATA #IMPLIED>
 
 <!--
 	The constructor-arg tag can have an optional type attribute,
 	to specify the exact type of the constructor argument. Only needed
-	to avoid ambiguities, e.g. in case of 2 single argument constructors
+	to avoid ambiguities, for example, in case of 2 single argument constructors
 	that can both be converted from a String.
 -->
 <!ATTLIST constructor-arg type CDATA #IMPLIED>
