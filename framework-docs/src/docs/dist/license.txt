@@ -263,10 +263,10 @@ JavaPoet 1.13.0 is licensed under the Apache License, version 2.0, the text of
 which is included above.
 
 
->>> Objenesis 3.2 (org.objenesis:objenesis:3.2):
+>>> Objenesis 3.4 (org.objenesis:objenesis:3.4):
 
 Per the LICENSE file in the Objenesis ZIP distribution downloaded from
-http://objenesis.org/download.html, Objenesis 3.2 is licensed under the
+http://objenesis.org/download.html, Objenesis 3.4 is licensed under the
 Apache License, version 2.0, the text of which is included above.
 
 Per the NOTICE file in the Objenesis ZIP distribution downloaded from
