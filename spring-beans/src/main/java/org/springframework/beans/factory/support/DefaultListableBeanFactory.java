@@ -199,6 +199,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Whether bean definition metadata may be cached for all beans. */
 	private volatile boolean configurationFrozen;
 
+	private volatile boolean preInstantiationPhase;
+
 	private final NamedThreadLocal<PreInstantiation> preInstantiationThread =
 			new NamedThreadLocal<>("Pre-instantiation thread marker");
 
@@ -1001,8 +1003,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
-	protected boolean isCurrentThreadAllowedToHoldSingletonLock() {
-		return (this.preInstantiationThread.get() != PreInstantiation.BACKGROUND);
+	@Nullable
+	protected Boolean isCurrentThreadAllowedToHoldSingletonLock() {
+		return (this.preInstantiationPhase ? this.preInstantiationThread.get() != PreInstantiation.BACKGROUND : null);
 	}
 
 	@Override
@@ -1017,6 +1020,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Trigger initialization of all non-lazy singleton beans...
 		List<CompletableFuture<?>> futures = new ArrayList<>();
+
+		this.preInstantiationPhase = true;
 		this.preInstantiationThread.set(PreInstantiation.MAIN);
 		try {
 			for (String beanName : beanNames) {
@@ -1031,7 +1036,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		finally {
 			this.preInstantiationThread.remove();
+			this.preInstantiationPhase = false;
 		}
+
 		if (!futures.isEmpty()) {
 			try {
 				CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0])).join();

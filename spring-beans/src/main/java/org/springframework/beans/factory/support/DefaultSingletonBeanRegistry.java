@@ -99,9 +99,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Names of beans currently excluded from in creation checks. */
 	private final Set<String> inCreationCheckExclusions = ConcurrentHashMap.newKeySet(16);
 
-	@Nullable
-	private volatile Thread singletonCreationThread;
-
 	/** Flag that indicates whether we're currently within destroySingletons. */
 	private volatile boolean singletonsCurrentlyInDestruction = false;
 
@@ -242,37 +239,33 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(beanName, "Bean name must not be null");
 
-		boolean acquireLock = isCurrentThreadAllowedToHoldSingletonLock();
+		Boolean lockFlag = isCurrentThreadAllowedToHoldSingletonLock();
+		boolean acquireLock = !Boolean.FALSE.equals(lockFlag);
 		boolean locked = (acquireLock && this.singletonLock.tryLock());
 		try {
 			Object singletonObject = this.singletonObjects.get(beanName);
 			if (singletonObject == null) {
-				if (acquireLock) {
-					if (locked) {
-						this.singletonCreationThread = Thread.currentThread();
+				if (acquireLock && !locked) {
+					if (Boolean.TRUE.equals(lockFlag)) {
+						// Another thread is busy in a singleton factory callback, potentially blocked.
+						// Fallback as of 6.2: process given singleton bean outside of singleton lock.
+						// Thread-safe exposure is still guaranteed, there is just a risk of collisions
+						// when triggering creation of other beans as dependencies of the current bean.
+						if (logger.isInfoEnabled()) {
+							logger.info("Creating singleton bean '" + beanName + "' in thread \"" +
+									Thread.currentThread().getName() + "\" while other thread holds " +
+									"singleton lock for other beans " + this.singletonsCurrentlyInCreation);
+						}
 					}
 					else {
-						Thread threadWithLock = this.singletonCreationThread;
-						if (threadWithLock != null) {
-							// Another thread is busy in a singleton factory callback, potentially blocked.
-							// Fallback as of 6.2: process given singleton bean outside of singleton lock.
-							// Thread-safe exposure is still guaranteed, there is just a risk of collisions
-							// when triggering creation of other beans as dependencies of the current bean.
-							if (logger.isInfoEnabled()) {
-								logger.info("Creating singleton bean '" + beanName + "' in thread \"" +
-										Thread.currentThread().getName() + "\" while thread \"" + threadWithLock.getName() +
-										"\" holds singleton lock for other beans " + this.singletonsCurrentlyInCreation);
-							}
-						}
-						else {
-							// Singleton lock currently held by some other registration method -> wait.
-							this.singletonLock.lock();
-							locked = true;
-							// Singleton object might have possibly appeared in the meantime.
-							singletonObject = this.singletonObjects.get(beanName);
-							if (singletonObject != null) {
-								return singletonObject;
-							}
+						// No specific locking indication (outside a coordinated bootstrap) and
+						// singleton lock currently held by some other creation method -> wait.
+						this.singletonLock.lock();
+						locked = true;
+						// Singleton object might have possibly appeared in the meantime.
+						singletonObject = this.singletonObjects.get(beanName);
+						if (singletonObject != null) {
+							return singletonObject;
 						}
 					}
 				}
@@ -291,7 +284,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				if (recordSuppressedExceptions) {
 					this.suppressedExceptions = new LinkedHashSet<>();
 				}
-				this.singletonCreationThread = Thread.currentThread();
 				try {
 					singletonObject = singletonFactory.getObject();
 					newSingleton = true;
@@ -313,7 +305,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					throw ex;
 				}
 				finally {
-					this.singletonCreationThread = null;
 					if (recordSuppressedExceptions) {
 						this.suppressedExceptions = null;
 					}
@@ -336,10 +327,15 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * Determine whether the current thread is allowed to hold the singleton lock.
 	 * <p>By default, any thread may acquire and hold the singleton lock, except
 	 * background threads from {@link DefaultListableBeanFactory#setBootstrapExecutor}.
+	 * @return {@code false} if the current thread is explicitly not allowed to hold
+	 * the lock, {@code true} if it is explicitly allowed to hold the lock but also
+	 * accepts lenient fallback behavior, or {@code null} if there is no specific
+	 * indication (traditional behavior: always holding a full lock)
 	 * @since 6.2
 	 */
-	protected boolean isCurrentThreadAllowedToHoldSingletonLock() {
-		return true;
+	@Nullable
+	protected Boolean isCurrentThreadAllowedToHoldSingletonLock() {
+		return null;
 	}
 
 	/**

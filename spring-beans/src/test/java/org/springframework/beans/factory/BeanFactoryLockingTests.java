@@ -38,7 +38,7 @@ class BeanFactoryLockingTests {
 				new RootBeanDefinition(ThreadDuringInitialization.class));
 		beanFactory.registerBeanDefinition("bean2",
 				new RootBeanDefinition(TestBean.class, () -> new TestBean("tb")));
-		beanFactory.getBean(ThreadDuringInitialization.class);
+		beanFactory.preInstantiateSingletons();
 	}
 
 
