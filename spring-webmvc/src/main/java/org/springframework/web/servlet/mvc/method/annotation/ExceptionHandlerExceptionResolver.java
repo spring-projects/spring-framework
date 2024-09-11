@@ -60,6 +60,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
@@ -419,8 +420,13 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	@Override
 	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
-		return (handler instanceof ResourceHttpRequestHandler ?
-				hasGlobalExceptionHandlers() : super.shouldApplyTo(request, handler));
+		if ((handler instanceof ResourceHttpRequestHandler || handler instanceof HandlerFunction) &&
+				hasGlobalExceptionHandlers() && !hasHandlerMappings()) {
+			return true;  // apply to ResourceHttpRequestHandler and HandlerFunction by default
+		}
+		else {
+			return super.shouldApplyTo(request, handler);
+		}
 	}
 
 	/**

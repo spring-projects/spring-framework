@@ -22,7 +22,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.function.HandlerFunction;
 
 /**
  * Abstract base class for
@@ -30,28 +29,24 @@ import org.springframework.web.servlet.function.HandlerFunction;
  * implementations that support handling exceptions from handlers of type {@link HandlerMethod}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	/**
-	 * Checks if the handler is a {@link HandlerMethod} or a {@link HandlerFunction}
-	 * and then delegates to the base class implementation of {@code #shouldApplyTo(HttpServletRequest, Object)}
-	 * passing the bean of the {@code HandlerMethod}. Otherwise, returns {@code false}.
+	 * Checks if the handler is a {@link HandlerMethod} or the resolver has global exception
+	 * handlers and then delegates to the base class implementation of {@code #shouldApplyTo}
+	 * passing the bean of the {@code HandlerMethod} if necessary. Otherwise, returns {@code false}.
+	 * @see HandlerMethod
+	 * @see #hasGlobalExceptionHandlers()
 	 */
 	@Override
 	protected boolean shouldApplyTo(HttpServletRequest request, @Nullable Object handler) {
-		if (handler == null) {
-			return super.shouldApplyTo(request, null);
+		if (handler instanceof HandlerMethod handlerMethod) {
+			return super.shouldApplyTo(request, handlerMethod.getBean());
 		}
-		else if (handler instanceof HandlerMethod handlerMethod) {
-			handler = handlerMethod.getBean();
-			return super.shouldApplyTo(request, handler);
-		}
-		else if (handler instanceof HandlerFunction<?> handlerFunction) {
-			return super.shouldApplyTo(request, handlerFunction);
-		}
-		else if (hasGlobalExceptionHandlers() && hasHandlerMappings()) {
+		else if (handler == null || (hasGlobalExceptionHandlers() && hasHandlerMappings())) {
 			return super.shouldApplyTo(request, handler);
 		}
 		else {
