@@ -30,11 +30,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sebastien Deleuze
  * @since 6.1
  */
-class ReactorNettyClientRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+class ReactorClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
-		return new ReactorNettyClientRequestFactory();
+		return new ReactorClientHttpRequestFactory();
 	}
 
 	@Override
@@ -46,7 +46,7 @@ class ReactorNettyClientRequestFactoryTests extends AbstractHttpRequestFactoryTe
 
 	@Test
 	void restartWithDefaultConstructor() {
-		ReactorNettyClientRequestFactory requestFactory = new ReactorNettyClientRequestFactory();
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory();
 		assertThat(requestFactory.isRunning()).isTrue();
 		requestFactory.start();
 		assertThat(requestFactory.isRunning()).isTrue();
@@ -59,7 +59,7 @@ class ReactorNettyClientRequestFactoryTests extends AbstractHttpRequestFactoryTe
 	@Test
 	void restartWithHttpClient() {
 		HttpClient httpClient = HttpClient.create();
-		ReactorNettyClientRequestFactory requestFactory = new ReactorNettyClientRequestFactory(httpClient);
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(httpClient);
 		assertThat(requestFactory.isRunning()).isTrue();
 		requestFactory.start();
 		assertThat(requestFactory.isRunning()).isTrue();
@@ -74,7 +74,7 @@ class ReactorNettyClientRequestFactoryTests extends AbstractHttpRequestFactoryTe
 		ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
 		resourceFactory.afterPropertiesSet();
 		Function<HttpClient, HttpClient> mapper = Function.identity();
-		ReactorNettyClientRequestFactory requestFactory = new ReactorNettyClientRequestFactory(resourceFactory, mapper);
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(resourceFactory, mapper);
 		assertThat(requestFactory.isRunning()).isTrue();
 		requestFactory.start();
 		assertThat(requestFactory.isRunning()).isTrue();
@@ -88,7 +88,7 @@ class ReactorNettyClientRequestFactoryTests extends AbstractHttpRequestFactoryTe
 	void lateStartWithExternalResourceFactory() {
 		ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
 		Function<HttpClient, HttpClient> mapper = Function.identity();
-		ReactorNettyClientRequestFactory requestFactory = new ReactorNettyClientRequestFactory(resourceFactory, mapper);
+		ReactorClientHttpRequestFactory requestFactory = new ReactorClientHttpRequestFactory(resourceFactory, mapper);
 		assertThat(requestFactory.isRunning()).isFalse();
 		resourceFactory.start();
 		requestFactory.start();

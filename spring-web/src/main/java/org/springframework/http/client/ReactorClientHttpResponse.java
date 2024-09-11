@@ -36,7 +36,7 @@ import org.springframework.util.StreamUtils;
  * @author Juergen Hoeller
  * @since 6.1
  */
-final class ReactorNettyClientResponse implements ClientHttpResponse {
+final class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final HttpClientResponse response;
 
@@ -50,7 +50,7 @@ final class ReactorNettyClientResponse implements ClientHttpResponse {
 	private volatile InputStream body;
 
 
-	public ReactorNettyClientResponse(HttpClientResponse response, Connection connection, Duration readTimeout) {
+	public ReactorClientHttpResponse(HttpClientResponse response, Connection connection, Duration readTimeout) {
 		this.response = response;
 		this.connection = connection;
 		this.readTimeout = readTimeout;
@@ -84,7 +84,7 @@ final class ReactorNettyClientResponse implements ClientHttpResponse {
 			body = this.connection.inbound().receive().aggregate().asInputStream().block(this.readTimeout);
 		}
 		catch (RuntimeException ex) {
-			throw ReactorNettyClientRequest.convertException(ex);
+			throw ReactorClientHttpRequest.convertException(ex);
 		}
 
 		if (body == null) {

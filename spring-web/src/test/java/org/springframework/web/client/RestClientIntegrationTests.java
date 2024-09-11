@@ -49,7 +49,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
-import org.springframework.http.client.ReactorNettyClientRequestFactory;
+import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -84,7 +84,7 @@ class RestClientIntegrationTests {
 			argumentSet("OkHttp", new org.springframework.http.client.OkHttp3ClientHttpRequestFactory()),
 			argumentSet("Jetty", new JettyClientHttpRequestFactory()),
 			argumentSet("JDK HttpClient", new JdkClientHttpRequestFactory()),
-			argumentSet("Reactor Netty", new ReactorNettyClientRequestFactory())
+			argumentSet("Reactor Netty", new ReactorClientHttpRequestFactory())
 		);
 	}
 
