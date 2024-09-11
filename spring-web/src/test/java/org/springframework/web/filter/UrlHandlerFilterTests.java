@@ -40,14 +40,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UrlHandlerFilterTests {
 
 	@Test
-	void trailingSlashWithRequestWrapping() throws Exception {
-		testTrailingSlashWithRequestWrapping("/path/**", "/path/123", null);
-		testTrailingSlashWithRequestWrapping("/path/*", "/path", "/123");
-		testTrailingSlashWithRequestWrapping("/path/*", "", "/path/123");
+	void requestWrapping() throws Exception {
+		testRequestWrapping("/path/**", "/path/123", null);
+		testRequestWrapping("/path/*", "/path", "/123");
+		testRequestWrapping("/path/*", "", "/path/123");
 	}
 
-	void testTrailingSlashWithRequestWrapping(
-			String pattern, String servletPath, @Nullable String pathInfo) throws Exception {
+	void testRequestWrapping(String pattern, String servletPath, @Nullable String pathInfo) throws Exception {
 
 		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler(pattern).wrapRequest().build();
 
@@ -70,43 +69,7 @@ public class UrlHandlerFilterTests {
 	}
 
 	@Test
-	void shouldNotSkipTrailingSlashForRootPath() throws Exception {
-		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/**").wrapRequest().build();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
-		request.setPathInfo("/");
-
-		MockFilterChain chain = new MockFilterChain();
-		filter.doFilterInternal(request, new MockHttpServletResponse(), chain);
-
-		HttpServletRequest actual = (HttpServletRequest) chain.getRequest();
-		assertThat(actual).isNotNull().isSameAs(request);
-		assertThat(actual.getRequestURI()).isEqualTo("/");
-		assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost/");
-		assertThat(actual.getServletPath()).isEqualTo("");
-		assertThat(actual.getPathInfo()).isEqualTo("/");
-	}
-
-	@Test
-	void noTrailingSlashWithRequestWrapping() throws Exception {
-		testNoTrailingSlashWithRequestWrapping("/path/**", "/path/123");
-		testNoTrailingSlashWithRequestWrapping("/path/*", "/path/123");
-	}
-
-	private static void testNoTrailingSlashWithRequestWrapping(
-			String pattern, String requestURI) throws ServletException, IOException {
-
-		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler(pattern).wrapRequest().build();
-
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", requestURI);
-		MockFilterChain chain = new MockFilterChain();
-		filter.doFilterInternal(request, new MockHttpServletResponse(), chain);
-
-		HttpServletRequest actual = (HttpServletRequest) chain.getRequest();
-		assertThat(actual).as("Request should not be wrapped").isSameAs(request);
-	}
-
-	@Test
-	void trailingSlashHandlerWithRedirect() throws Exception {
+	void redirect() throws Exception {
 		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
 		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").redirect(status).build();
 
@@ -123,14 +86,32 @@ public class UrlHandlerFilterTests {
 	}
 
 	@Test
-	void noTrailingSlashWithRedirect() throws Exception {
-		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
-		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").redirect(status).build();
+	void noUrlHandling() throws Exception {
+		testNoUrlHandling("/path/**", "/path/123");
+		testNoUrlHandling("/path/*", "/path/123");
+		testNoUrlHandling("/**", "/"); // gh-33444
+	}
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path/123");
+	private static void testNoUrlHandling(String pattern, String requestURI) throws ServletException, IOException {
+
+		// No request wrapping
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler(pattern).wrapRequest().build();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", requestURI);
+		MockFilterChain chain = new MockFilterChain();
+		filter.doFilterInternal(request, new MockHttpServletResponse(), chain);
+
+		HttpServletRequest actual = (HttpServletRequest) chain.getRequest();
+		assertThat(actual).as("Request should not be wrapped").isSameAs(request);
+
+		// No redirect
+		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
+		filter = UrlHandlerFilter.trailingSlashHandler(pattern).redirect(status).build();
+
+		request = new MockHttpServletRequest("GET", requestURI);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		MockFilterChain chain = new MockFilterChain();
+		chain = new MockFilterChain();
 		filter.doFilterInternal(request, response, chain);
 
 		assertThat(chain.getRequest()).isSameAs(request);
