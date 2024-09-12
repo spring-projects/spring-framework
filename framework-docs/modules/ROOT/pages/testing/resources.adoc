@@ -11,8 +11,6 @@ See the following resources for more information about testing:
 * {assertj-docs}[AssertJ]: "Fluent assertions for Java",
   including support for Java 8 lambdas, streams, and numerous other features.
 * https://en.wikipedia.org/wiki/Mock_Object[Mock Objects]: Article in Wikipedia.
-* http://www.mockobjects.com/[MockObjects.com]: Web site dedicated to mock objects, a
-  technique for improving the design of code within test-driven development.
 * https://mockito.github.io[Mockito]: Java mock library based on the
   http://xunitpatterns.com/Test%20Spy.html[Test Spy] pattern. Used by the Spring Framework
   in its test suite.
