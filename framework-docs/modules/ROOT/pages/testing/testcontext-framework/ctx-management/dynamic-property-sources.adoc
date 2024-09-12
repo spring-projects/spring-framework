@@ -162,7 +162,7 @@ Java::
 		}
 
 		@Bean
-		DynamicPropertyRegistrar apiServerProperties(ApiServer apiServer) {
+		DynamicPropertyRegistrar apiPropertiesRegistrar(ApiServer apiServer) {
 			return registry -> registry.add("api.url", apiServer::getUrl);
 		}
 	}
@@ -181,7 +181,7 @@ Kotlin::
 		}
 
 		@Bean
-		fun apiServerProperties(apiServer: ApiServer): DynamicPropertyRegistrar {
+		fun apiPropertiesRegistrar(apiServer: ApiServer): DynamicPropertyRegistrar {
 			return registry -> registry.add("api.url", apiServer::getUrl)
 		}
 	}

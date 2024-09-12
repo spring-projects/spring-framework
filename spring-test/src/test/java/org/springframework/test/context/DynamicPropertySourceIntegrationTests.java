@@ -112,7 +112,7 @@ class DynamicPropertySourceIntegrationTests {
 	static class Config {
 
 		@Bean
-		DynamicPropertyRegistrar magicWordProperties() {
+		DynamicPropertyRegistrar magicPropertiesRegistrar() {
 			return registry -> registry.add(MAGIC_WORD, () -> "enigma");
 		}
 

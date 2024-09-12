@@ -117,12 +117,12 @@ class DynamicPropertyRegistrarIntegrationTests {
 		// context which further ensures that the dynamic "api.url" property is
 		// available to all standard singleton beans.
 		@Bean
-		DynamicPropertyRegistrar apiServerProperties1(ApiServer apiServer) {
+		DynamicPropertyRegistrar apiPropertiesRegistrar1(ApiServer apiServer) {
 			return registry -> registry.add(API_URL_1, () -> apiServer.getUrl() + "/1");
 		}
 
 		@Bean
-		DynamicPropertyRegistrar apiServerProperties2(ApiServer apiServer) {
+		DynamicPropertyRegistrar apiPropertiesRegistrar2(ApiServer apiServer) {
 			return registry -> registry.add(API_URL_2, () -> apiServer.getUrl() + "/2");
 		}
 

@@ -67,7 +67,7 @@ package org.springframework.test.context;
  *     }
  *
  *     &#064;Bean
- *     DynamicPropertyRegistrar apiServerProperties(ApiServer apiServer) {
+ *     DynamicPropertyRegistrar apiPropertiesRegistrar(ApiServer apiServer) {
  *         return registry -> registry.add("api.url", apiServer::getUrl);
  *     }
  *
@@ -82,6 +82,9 @@ package org.springframework.test.context;
 @FunctionalInterface
 public interface DynamicPropertyRegistrar {
 
+	/**
+	 * Register dynamic properties in the supplied registry.
+	 */
 	void accept(DynamicPropertyRegistry registry);
 
 }
