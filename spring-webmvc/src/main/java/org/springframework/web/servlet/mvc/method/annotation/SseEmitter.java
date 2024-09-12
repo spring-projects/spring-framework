@@ -46,6 +46,8 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 	private static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
+	private static final MediaType TEXT_EVENT_STREAM = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
+
 	/**
 	 * Guards access to write operations on the response.
 	 */
@@ -76,7 +78,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
-			headers.setContentType(MediaType.TEXT_EVENT_STREAM);
+			headers.setContentType(TEXT_EVENT_STREAM);
 		}
 	}
 
