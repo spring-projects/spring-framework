@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.server;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
@@ -30,6 +31,7 @@ import org.springframework.http.server.PathContainer;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -63,11 +65,15 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 
 		pathContainer = this.pattern.extractPathWithinPattern(pathContainer);
 		String path = processPath(pathContainer.value());
-		if (path.contains("%")) {
-			path = StringUtils.uriDecode(path, StandardCharsets.UTF_8);
-		}
-		if (!StringUtils.hasLength(path) || isInvalidPath(path)) {
+		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			return Mono.empty();
+		}
+		if (isInvalidEncodedInputPath(path)) {
+			return Mono.empty();
+		}
+
+		if (!(this.location instanceof UrlResource)) {
+			path = UriUtils.decode(path, StandardCharsets.UTF_8);
 		}
 
 		try {
@@ -84,7 +90,47 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 		}
 	}
 
-	private String processPath(String path) {
+	/**
+	 * Process the given resource path.
+	 * <p>The default implementation replaces:
+	 * <ul>
+	 * <li>Backslash with forward slash.
+	 * <li>Duplicate occurrences of slash with a single slash.
+	 * <li>Any combination of leading slash and control characters (00-1F and 7F)
+	 * with a single "/" or "". For example {@code "  / // foo/bar"}
+	 * becomes {@code "/foo/bar"}.
+	 * </ul>
+	 */
+	protected String processPath(String path) {
+		path = StringUtils.replace(path, "\\", "/");
+		path = cleanDuplicateSlashes(path);
+		return cleanLeadingSlash(path);
+	}
+
+	private String cleanDuplicateSlashes(String path) {
+		StringBuilder sb = null;
+		char prev = 0;
+		for (int i = 0; i < path.length(); i++) {
+			char curr = path.charAt(i);
+			try {
+				if (curr == '/' && prev == '/') {
+					if (sb == null) {
+						sb = new StringBuilder(path.substring(0, i));
+					}
+					continue;
+				}
+				if (sb != null) {
+					sb.append(path.charAt(i));
+				}
+			}
+			finally {
+				prev = curr;
+			}
+		}
+		return (sb != null ? sb.toString() : path);
+	}
+
+	private String cleanLeadingSlash(String path) {
 		boolean slash = false;
 		for (int i = 0; i < path.length(); i++) {
 			if (path.charAt(i) == '/') {
@@ -94,8 +140,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 				if (i == 0 || (i == 1 && slash)) {
 					return path;
 				}
-				path = slash ? "/" + path.substring(i) : path.substring(i);
-				return path;
+				return (slash ? "/" + path.substring(i) : path.substring(i));
 			}
 		}
 		return (slash ? "/" : "");
@@ -113,6 +158,31 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 		}
 		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
 			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Check whether the given path contains invalid escape sequences.
+	 * @param path the path to validate
+	 * @return {@code true} if the path is invalid, {@code false} otherwise
+	 */
+	private boolean isInvalidEncodedInputPath(String path) {
+		if (path.contains("%")) {
+			try {
+				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
+				String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+				if (isInvalidPath(decodedPath)) {
+					return true;
+				}
+				decodedPath = processPath(decodedPath);
+				if (isInvalidPath(decodedPath)) {
+					return true;
+				}
+			}
+			catch (IllegalArgumentException ex) {
+				// May not be possible to decode...
+			}
 		}
 		return false;
 	}
@@ -142,15 +212,24 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 			return true;
 		}
 		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
-		if (!resourcePath.startsWith(locationPath)) {
-			return false;
-		}
-		if (resourcePath.contains("%") && StringUtils.uriDecode(resourcePath, StandardCharsets.UTF_8).contains("../")) {
-			return false;
-		}
-		return true;
+		return (resourcePath.startsWith(locationPath) && !isInvalidEncodedInputPath(resourcePath));
 	}
 
+	private boolean isInvalidEncodedResourcePath(String resourcePath) {
+		if (resourcePath.contains("%")) {
+			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
+			try {
+				String decodedPath = URLDecoder.decode(resourcePath, StandardCharsets.UTF_8);
+				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
+					return true;
+				}
+			}
+			catch (IllegalArgumentException ex) {
+				// May not be possible to decode...
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public String toString() {

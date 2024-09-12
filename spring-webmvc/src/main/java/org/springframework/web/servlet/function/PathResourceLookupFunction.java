@@ -18,6 +18,7 @@ package org.springframework.web.servlet.function;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Function;
@@ -29,6 +30,8 @@ import org.springframework.http.server.PathContainer;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.support.ServletContextResource;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -36,6 +39,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * Lookup function used by {@link RouterFunctions#resources(String, Resource)}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.2
  */
 class PathResourceLookupFunction implements Function<ServerRequest, Optional<Resource>> {
@@ -62,11 +66,15 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 
 		pathContainer = this.pattern.extractPathWithinPattern(pathContainer);
 		String path = processPath(pathContainer.value());
-		if (path.contains("%")) {
-			path = StringUtils.uriDecode(path, StandardCharsets.UTF_8);
-		}
-		if (!StringUtils.hasLength(path) || isInvalidPath(path)) {
+		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			return Optional.empty();
+		}
+		if (isInvalidEncodedInputPath(path)) {
+			return Optional.empty();
+		}
+
+		if (!(this.location instanceof UrlResource)) {
+			path = UriUtils.decode(path, StandardCharsets.UTF_8);
 		}
 
 		try {
@@ -83,7 +91,47 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 		}
 	}
 
-	private String processPath(String path) {
+	/**
+	 * Process the given resource path.
+	 * <p>The default implementation replaces:
+	 * <ul>
+	 * <li>Backslash with forward slash.
+	 * <li>Duplicate occurrences of slash with a single slash.
+	 * <li>Any combination of leading slash and control characters (00-1F and 7F)
+	 * with a single "/" or "". For example {@code "  / // foo/bar"}
+	 * becomes {@code "/foo/bar"}.
+	 * </ul>
+	 */
+	protected String processPath(String path) {
+		path = StringUtils.replace(path, "\\", "/");
+		path = cleanDuplicateSlashes(path);
+		return cleanLeadingSlash(path);
+	}
+
+	private String cleanDuplicateSlashes(String path) {
+		StringBuilder sb = null;
+		char prev = 0;
+		for (int i = 0; i < path.length(); i++) {
+			char curr = path.charAt(i);
+			try {
+				if ((curr == '/') && (prev == '/')) {
+					if (sb == null) {
+						sb = new StringBuilder(path.substring(0, i));
+					}
+					continue;
+				}
+				if (sb != null) {
+					sb.append(path.charAt(i));
+				}
+			}
+			finally {
+				prev = curr;
+			}
+		}
+		return sb != null ? sb.toString() : path;
+	}
+
+	private String cleanLeadingSlash(String path) {
 		boolean slash = false;
 		for (int i = 0; i < path.length(); i++) {
 			if (path.charAt(i) == '/') {
@@ -93,8 +141,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 				if (i == 0 || (i == 1 && slash)) {
 					return path;
 				}
-				path = slash ? "/" + path.substring(i) : path.substring(i);
-				return path;
+				return (slash ? "/" + path.substring(i) : path.substring(i));
 			}
 		}
 		return (slash ? "/" : "");
@@ -113,6 +160,26 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 		return path.contains("..") && StringUtils.cleanPath(path).contains("../");
 	}
 
+	private boolean isInvalidEncodedInputPath(String path) {
+		if (path.contains("%")) {
+			try {
+				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
+				String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+				if (isInvalidPath(decodedPath)) {
+					return true;
+				}
+				decodedPath = processPath(decodedPath);
+				if (isInvalidPath(decodedPath)) {
+					return true;
+				}
+			}
+			catch (IllegalArgumentException ex) {
+				// May not be possible to decode...
+			}
+		}
+		return false;
+	}
+
 	private boolean isResourceUnderLocation(Resource resource) throws IOException {
 		if (resource.getClass() != this.location.getClass()) {
 			return false;
@@ -129,6 +196,10 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 			resourcePath = classPathResource.getPath();
 			locationPath = StringUtils.cleanPath(((ClassPathResource) this.location).getPath());
 		}
+		else if (resource instanceof ServletContextResource servletContextResource) {
+			resourcePath = servletContextResource.getPath();
+			locationPath = StringUtils.cleanPath(((ServletContextResource) this.location).getPath());
+		}
 		else {
 			resourcePath = resource.getURL().getPath();
 			locationPath = StringUtils.cleanPath(this.location.getURL().getPath());
@@ -138,13 +209,24 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 			return true;
 		}
 		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
-		if (!resourcePath.startsWith(locationPath)) {
-			return false;
-		}
-		return !resourcePath.contains("%") ||
-				!StringUtils.uriDecode(resourcePath, StandardCharsets.UTF_8).contains("../");
+		return (resourcePath.startsWith(locationPath) && !isInvalidEncodedResourcePath(resourcePath));
 	}
 
+	private boolean isInvalidEncodedResourcePath(String resourcePath) {
+		if (resourcePath.contains("%")) {
+			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
+			try {
+				String decodedPath = URLDecoder.decode(resourcePath, StandardCharsets.UTF_8);
+				if (decodedPath.contains("../") || decodedPath.contains("..\\")) {
+					return true;
+				}
+			}
+			catch (IllegalArgumentException ex) {
+				// May not be possible to decode...
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public String toString() {
