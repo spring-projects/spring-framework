@@ -45,9 +45,7 @@ class SimpleUrlHandlerMappingTests {
 
 	@Test
 	void handlerMappingJavaConfig() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(WebConfig.class);
-		wac.refresh();
+		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext(WebConfig.class);
 
 		HandlerMapping handlerMapping = (HandlerMapping) wac.getBean("handlerMapping");
 		Object mainController = wac.getBean("mainController");
@@ -62,7 +60,6 @@ class SimpleUrlHandlerMappingTests {
 	@Test
 	void handlerMappingXmlConfig() {
 		ClassPathXmlApplicationContext wac = new ClassPathXmlApplicationContext("map.xml", getClass());
-		wac.refresh();
 
 		HandlerMapping handlerMapping = wac.getBean("mapping", HandlerMapping.class);
 		Object mainController = wac.getBean("mainController");
