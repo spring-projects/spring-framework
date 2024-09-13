@@ -17,6 +17,10 @@
 package org.springframework.http.client.reactive;
 
 import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import org.apache.hc.client5.http.cookie.Cookie;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
@@ -70,9 +74,22 @@ class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
 	}
 
 	private static long getMaxAgeSeconds(Cookie cookie) {
+		String expiresAttribute = cookie.getAttribute(Cookie.EXPIRES_ATTR);
 		String maxAgeAttribute = cookie.getAttribute(Cookie.MAX_AGE_ATTR);
-		return (maxAgeAttribute != null ? Long.parseLong(maxAgeAttribute) : -1);
+		if (maxAgeAttribute != null) {
+			return Long.parseLong(maxAgeAttribute);
+		}
+		// only consider expires if max-age is not present
+		else if (expiresAttribute != null) {
+			try {
+				ZonedDateTime expiresDate = ZonedDateTime.parse(expiresAttribute, DateTimeFormatter.RFC_1123_DATE_TIME);
+				return Duration.between(ZonedDateTime.now(expiresDate.getZone()), expiresDate).toSeconds();
+			}
+			catch (DateTimeParseException ex) {
+				// ignore
+			}
+		}
+		return -1;
 	}
-
 
 }
