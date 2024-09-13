@@ -95,4 +95,11 @@ public @interface RequestParam {
 	 */
 	String defaultValue() default ValueConstants.DEFAULT_NONE;
 
+	/**
+	 * How to handle capitalization.
+	 * <p>Defaults to how value is received. Can be to convert case to all
+	 * upper or lower.
+	 */
+	Capitalization capitalization() default Capitalization.ORIGINAL;
+
 }

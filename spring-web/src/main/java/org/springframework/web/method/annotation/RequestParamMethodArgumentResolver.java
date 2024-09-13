@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.Capitalization;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -184,6 +185,12 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			}
 			if (paramValues != null) {
 				arg = (paramValues.length == 1 ? paramValues[0] : paramValues);
+			}
+		}
+		if (arg != null) {
+			var rp = parameter.getParameterAnnotation(RequestParam.class);
+			if (rp != null) {
+				arg = rp.capitalization().capitalize(arg);
 			}
 		}
 		return arg;
