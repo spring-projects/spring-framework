@@ -16,6 +16,11 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -40,12 +45,15 @@ import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE;
 import static org.springframework.web.servlet.HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 
 /**
  * Tests for {@link SimpleUrlHandlerMapping}.
+ *
  * @author Brian Clozel
  */
 class SimpleUrlHandlerMappingTests {
@@ -73,8 +81,7 @@ class SimpleUrlHandlerMappingTests {
 		assertThat(hec.getHandler()).isSameAs(controller);
 	}
 
-	@ParameterizedTest
-	@MethodSource("handlerMappings")
+	@HandlerMappingsTest
 	void resolveFromMap(SimpleUrlHandlerMapping handlerMapping) throws Exception {
 		StaticApplicationContext applicationContext = new StaticApplicationContext();
 		applicationContext.registerSingleton("mainController", Object.class);
@@ -91,8 +98,7 @@ class SimpleUrlHandlerMappingTests {
 		assertThat(request.getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(mainController);
 	}
 
-	@ParameterizedTest
-	@MethodSource("handlerMappings")
+	@HandlerMappingsTest
 	void resolvePatternFromMap(SimpleUrlHandlerMapping handlerMapping) throws Exception {
 		StaticApplicationContext applicationContext = new StaticApplicationContext();
 		applicationContext.registerSingleton("mainController", Object.class);
@@ -109,8 +115,7 @@ class SimpleUrlHandlerMappingTests {
 		assertThat(request.getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(mainController);
 	}
 
-	@ParameterizedTest
-	@MethodSource("handlerMappings")
+	@HandlerMappingsTest
 	void resolvePathWithParamFromMap(SimpleUrlHandlerMapping handlerMapping) throws Exception {
 		StaticApplicationContext applicationContext = new StaticApplicationContext();
 		applicationContext.registerSingleton("mainController", Object.class);
@@ -127,8 +132,7 @@ class SimpleUrlHandlerMappingTests {
 		assertThat(request.getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(mainController);
 	}
 
-	@ParameterizedTest
-	@MethodSource("handlerMappings")
+	@HandlerMappingsTest
 	void resolvePathWithContextFromMap(SimpleUrlHandlerMapping handlerMapping) throws Exception {
 		StaticApplicationContext applicationContext = new StaticApplicationContext();
 		applicationContext.registerSingleton("mainController", Object.class);
@@ -145,8 +149,7 @@ class SimpleUrlHandlerMappingTests {
 		assertThat(request.getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(mainController);
 	}
 
-	@ParameterizedTest
-	@MethodSource("handlerMappings")
+	@HandlerMappingsTest
 	void resolvePathWithIncludeFromMap(SimpleUrlHandlerMapping handlerMapping) throws Exception {
 		StaticApplicationContext applicationContext = new StaticApplicationContext();
 		applicationContext.registerSingleton("mainController", Object.class);
@@ -164,8 +167,7 @@ class SimpleUrlHandlerMappingTests {
 		assertThat(request.getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(mainController);
 	}
 
-	@ParameterizedTest
-	@MethodSource("handlerMappings")
+	@HandlerMappingsTest
 	void resolveDefaultPathFromMap(SimpleUrlHandlerMapping handlerMapping) throws Exception {
 		StaticApplicationContext applicationContext = new StaticApplicationContext();
 		applicationContext.registerSingleton("mainController", Object.class);
@@ -182,8 +184,7 @@ class SimpleUrlHandlerMappingTests {
 		assertThat(request.getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(mainController);
 	}
 
-	@ParameterizedTest
-	@MethodSource("handlerMappings")
+	@HandlerMappingsTest
 	void resolveParameterizedControllerFromMap(SimpleUrlHandlerMapping handlerMapping) throws Exception {
 		ParameterizableViewController viewController = new ParameterizableViewController();
 		viewController.setView(new RedirectView("/after/{variable}"));
@@ -196,16 +197,10 @@ class SimpleUrlHandlerMappingTests {
 		HandlerExecutionChain chain = getHandler(handlerMapping, request);
 
 		assertThat(chain.getHandler()).isSameAs(viewController);
+		@SuppressWarnings("unchecked")
 		Map<String, String> variables = (Map<String, String>) request.getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 		assertThat(variables).containsEntry("variable", "test");
 		assertThat(request.getAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(viewController);
-	}
-
-	static Stream<Arguments> handlerMappings() {
-		SimpleUrlHandlerMapping defaultConfig = new SimpleUrlHandlerMapping();
-		SimpleUrlHandlerMapping antPatternConfig = new SimpleUrlHandlerMapping();
-		antPatternConfig.setPatternParser(null);
-		return Stream.of(Arguments.of(defaultConfig, "with PathPattern"), Arguments.of(antPatternConfig, "with AntPathMatcher"));
 	}
 
 	private HandlerExecutionChain getHandler(HandlerMapping mapping, MockHttpServletRequest request) throws Exception {
@@ -215,6 +210,25 @@ class SimpleUrlHandlerMappingTests {
 			interceptor.preHandle(request, null, chain.getHandler());
 		}
 		return chain;
+	}
+
+
+	@Target(ElementType.METHOD)
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@ParameterizedTest(name="[{index}] {0}")
+	@MethodSource("handlerMappings")
+	@interface HandlerMappingsTest {
+	}
+
+	static Stream<Arguments> handlerMappings() {
+		SimpleUrlHandlerMapping defaultConfig = new SimpleUrlHandlerMapping();
+		SimpleUrlHandlerMapping antPatternConfig = new SimpleUrlHandlerMapping();
+		antPatternConfig.setPatternParser(null);
+		return Stream.of(
+				arguments(named("with PathPattern", defaultConfig)),
+				arguments(named("with AntPathMatcher", antPatternConfig))
+			);
 	}
 
 }
