@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
  * @author Chris Beams
  * @author Sam Brannen
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 3.0
  * @see AnnotationConfigApplicationContext#register
  */
@@ -265,6 +266,9 @@ public class AnnotatedBeanDefinitionReader {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {
 					abd.setPrimary(true);
+				}
+				else if (Fallback.class == qualifier) {
+					abd.setFallback(true);
 				}
 				else if (Lazy.class == qualifier) {
 					abd.setLazyInit(true);
