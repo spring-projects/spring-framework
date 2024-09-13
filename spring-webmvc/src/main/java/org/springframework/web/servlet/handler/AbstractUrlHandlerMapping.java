@@ -219,7 +219,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		validateHandler(handler, request);
 		String pathWithinMapping = pattern.extractPathWithinPattern(path.pathWithinApplication()).value();
 		pathWithinMapping = UrlPathHelper.defaultInstance.removeSemicolonContent(pathWithinMapping);
-		return buildPathExposingHandler(handler, pattern.getPatternString(), pathWithinMapping, null);
+		PathPattern.PathMatchInfo pathMatchInfo = pattern.matchAndExtract(path);
+		Map<String, String> uriVariables = (pathMatchInfo != null ? pathMatchInfo.getUriVariables(): null);
+		return buildPathExposingHandler(handler, pattern.getPatternString(), pathWithinMapping, uriVariables);
 	}
 
 	/**
