@@ -73,6 +73,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * </ul>
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 6.1
  */
 public interface RestClient {
@@ -399,10 +400,21 @@ public interface RestClient {
 
 		/**
 		 * Configure the message converters for the {@code RestClient} to use.
-		 * @param configurer the configurer to apply
+		 * @param configurer the configurer to apply on the list of default
+		 * {@link HttpMessageConverter} pre-initialized
 		 * @return this builder
+		 * @see #messageConverters(List)
 		 */
 		Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer);
+
+		/**
+		 * Set the message converters for the {@code RestClient} to use.
+		 * @param messageConverters the list of {@link HttpMessageConverter} to use
+		 * @return this builder
+		 * @since 6.2
+		 * @see #messageConverters(Consumer)
+		 */
+		Builder messageConverters(List<HttpMessageConverter<?>> messageConverters);
 
 		/**
 		 * Configure the {@link io.micrometer.observation.ObservationRegistry} to use

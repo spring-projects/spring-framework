@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,7 @@ import org.springframework.web.util.UriTemplateHandler;
  *
  * @author Arjen Poutsma
  * @author Hyoungjune Kim
+ * @author Sebastien Deleuze
  * @since 6.1
  */
 final class DefaultRestClientBuilder implements RestClient.Builder {
@@ -358,6 +360,14 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	@Override
 	public RestClient.Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer) {
 		configurer.accept(initMessageConverters());
+		validateConverters(this.messageConverters);
+		return this;
+	}
+
+	@Override
+	public RestClient.Builder messageConverters(List<HttpMessageConverter<?>> messageConverters) {
+		validateConverters(messageConverters);
+		this.messageConverters = Collections.unmodifiableList(messageConverters);
 		return this;
 	}
 
@@ -411,6 +421,11 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			}
 		}
 		return this.messageConverters;
+	}
+
+	private void validateConverters(@Nullable List<HttpMessageConverter<?>> messageConverters) {
+		Assert.notEmpty(messageConverters, "At least one HttpMessageConverter is required");
+		Assert.noNullElements(messageConverters, "The HttpMessageConverter list must not contain null elements");
 	}
 
 

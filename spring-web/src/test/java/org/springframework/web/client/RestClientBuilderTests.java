@@ -18,8 +18,11 @@ package org.springframework.web.client;
 
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.client.ClientHttpRequestInitializer;
@@ -32,11 +35,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.fail;
 
 
 /**
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 public class RestClientBuilderTests {
 
@@ -101,6 +106,35 @@ public class RestClientBuilderTests {
 		DefaultRestClientBuilder defaultBuilder = (DefaultRestClientBuilder) builder;
 
 		assertThat(fieldValue("baseUrl", defaultBuilder)).isEqualTo(baseUrl.toString());
+	}
+
+	@Test
+	void messageConvertersList() {
+		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
+		RestClient.Builder builder = RestClient.builder();
+		builder.messageConverters(List.of(stringConverter));
+
+		assertThat(builder).isInstanceOf(DefaultRestClientBuilder.class);
+		DefaultRestClientBuilder defaultBuilder = (DefaultRestClientBuilder) builder;
+
+		assertThat(fieldValue("messageConverters", defaultBuilder))
+				.asInstanceOf(InstanceOfAssertFactories.LIST)
+				.containsExactly(stringConverter);
+	}
+
+	@Test
+	void messageConvertersListEmpty() {
+		RestClient.Builder builder = RestClient.builder();
+		List<HttpMessageConverter<?>> converters = Collections.emptyList();
+		assertThatIllegalArgumentException().isThrownBy(() -> builder.messageConverters(converters));
+	}
+
+	@Test
+	void messageConvertersListWithNullElement() {
+		RestClient.Builder builder = RestClient.builder();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(null);
+		assertThatIllegalArgumentException().isThrownBy(() -> builder.messageConverters(converters));
 	}
 
 	@Nullable
