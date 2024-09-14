@@ -389,7 +389,7 @@ who typically are in charge of the deployment configuration, such as the launch 
 Now that the sales pitch is over, let us first walk through a quick example of AspectJ
 LTW that uses Spring, followed by detailed specifics about elements introduced in the
 example. For a complete example, see the
-{spring-github-org}/spring-petclinic[Petclinic sample application].
+{petclinic-github-org}/spring-framework-petclinic[Petclinic sample application based on Spring Framework].
 
 
 [[aop-aj-ltw-first-example]]
