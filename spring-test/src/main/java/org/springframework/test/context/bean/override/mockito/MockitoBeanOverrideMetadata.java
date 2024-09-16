@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.mockito.Answers;
 import org.mockito.MockSettings;
+import org.mockito.Mockito;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.ResolvableType;
@@ -36,8 +37,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-
-import static org.mockito.Mockito.mock;
 
 /**
  * {@link OverrideMetadata} implementation for Mockito {@code mock} support.
@@ -97,7 +96,7 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 
 	/**
 	 * Return if the mock is serializable.
-	 * @return if the mock is serializable
+	 * @return {@code true} if the mock is serializable
 	 */
 	boolean isSerializable() {
 		return this.serializable;
@@ -122,7 +121,7 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 			settings.serializable();
 		}
 		Class<?> targetType = getBeanType().resolve();
-		return (T) mock(targetType, settings);
+		return (T) Mockito.mock(targetType, settings);
 	}
 
 	@Override

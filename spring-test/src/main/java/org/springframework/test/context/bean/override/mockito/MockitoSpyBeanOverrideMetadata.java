@@ -35,8 +35,6 @@ import org.springframework.test.util.AopTestUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import static org.mockito.Mockito.mock;
-
 /**
  * {@link OverrideMetadata} implementation for Mockito {@code spy} support.
  *
@@ -95,7 +93,7 @@ class MockitoSpyBeanOverrideMetadata extends MockitoOverrideMetadata {
 			settings.spiedInstance(instance);
 			toSpy = instance.getClass();
 		}
-		return (T) mock(toSpy, settings);
+		return (T) Mockito.mock(toSpy, settings);
 	}
 
 	@Override
