@@ -88,7 +88,7 @@ class TestBeanForByTypeLookupIntegrationTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class Config {
 
 		@Bean("example")

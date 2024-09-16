@@ -104,7 +104,7 @@ public class MockitoSpyBeanWithResetIntegrationTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class Config {
 
 		@Bean("service")

@@ -98,7 +98,7 @@ public class MockitoSpyBeanForByNameLookupIntegrationTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class Config {
 
 		@Bean("field")

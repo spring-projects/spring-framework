@@ -103,7 +103,7 @@ public class MockitoSpyBeanForByTypeLookupIntegrationTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class Config {
 
 		@Bean("example")

@@ -104,7 +104,7 @@ class TestBeanForMultipleNestingLevelsIntegrationTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class Config {
 
 		@Bean
