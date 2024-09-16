@@ -281,11 +281,10 @@ public class WebSocketMessageBrokerStats implements SmartInitializingSingleton {
 	}
 
 	@Override
-	@SuppressWarnings("removal")
 	public String toString() {
-		return "WebSocketSession[" + getWebSocketSessionStatsInfo() + "]" +
-				", stompSubProtocol[" + getStompSubProtocolStatsInfo() + "]" +
-				", stompBrokerRelay[" + getStompBrokerRelayStatsInfo() + "]" +
+		return "WebSocketSession[" + getWebSocketSessionStats() + "]" +
+				", stompSubProtocol[" + getStompSubProtocolStats() + "]" +
+				", stompBrokerRelay[" + getStompBrokerRelayStats() + "]" +
 				", inboundChannel[" + getClientInboundExecutorStatsInfo() + "]" +
 				", outboundChannel[" + getClientOutboundExecutorStatsInfo() + "]" +
 				", sockJsScheduler[" + getSockJsTaskSchedulerStatsInfo() + "]";
