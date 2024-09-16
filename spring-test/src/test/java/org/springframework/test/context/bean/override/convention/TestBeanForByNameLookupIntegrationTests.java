@@ -106,7 +106,7 @@ public class TestBeanForByNameLookupIntegrationTests {
 
 		@Nested
 		@DisplayName("With @TestBean in the enclosing class of the enclosing class")
-		class TestBeanFieldInEnclosingClassLevel2Tests {
+		public class TestBeanFieldInEnclosingClassLevel2Tests {
 
 			@Test
 			void fieldHasOverride(ApplicationContext ctx) {
@@ -130,7 +130,7 @@ public class TestBeanForByNameLookupIntegrationTests {
 
 	@Nested
 	@DisplayName("With factory method in enclosing class")
-	class TestBeanFactoryMethodInEnclosingClassTests {
+	public class TestBeanFactoryMethodInEnclosingClassTests {
 
 		@TestBean(methodName = "nestedField", name = "nestedField")
 		String nestedField2;
@@ -143,7 +143,7 @@ public class TestBeanForByNameLookupIntegrationTests {
 
 		@Nested
 		@DisplayName("With factory method in the enclosing class of the enclosing class")
-		class TestBeanFactoryMethodInEnclosingClassLevel2Tests {
+		public class TestBeanFactoryMethodInEnclosingClassLevel2Tests {
 
 			@TestBean(methodName = "nestedField", name = "nestedField")
 			String nestedField2;
