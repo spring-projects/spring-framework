@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Nicholas Williams
  * @author Sam Brannen
+ * @author Ngoc Nhan
  * @since 4.0
  * @see java.time.ZoneId
  * @see TimeZoneEditor
@@ -38,7 +39,13 @@ public class ZoneIdEditor extends PropertyEditorSupport {
 		if (StringUtils.hasText(text)) {
 			text = text.trim();
 		}
-		setValue(ZoneId.of(text));
+		try {
+
+			setValue(ZoneId.of(text));
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException("Failed to convert ZoneId for " + text, ex);
+		}
 	}
 
 	@Override

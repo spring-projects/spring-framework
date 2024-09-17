@@ -23,10 +23,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Nicholas Williams
  * @author Sam Brannen
+ * @author Ngoc Nhan
  */
 class ZoneIdEditorTests {
 
@@ -67,6 +69,11 @@ class ZoneIdEditorTests {
 	void getValueAsText() {
 		editor.setValue(ZoneId.of("America/New_York"));
 		assertThat(editor.getAsText()).as("The text version is not correct.").isEqualTo("America/New_York");
+	}
+
+	@Test
+	void throwIllegalArgumentException() {
+		assertThatIllegalArgumentException().isThrownBy(() -> editor.setAsText("Hello, World!"));
 	}
 
 }
