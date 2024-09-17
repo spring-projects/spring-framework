@@ -73,6 +73,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	private long connectionRequestTimeout = -1;
 
+	
+	private long readTimeout = -1;
 
 	/**
 	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
@@ -136,7 +138,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * handshakes or CONNECT requests; for that, it is required to
 	 * use the {@link SocketConfig} on the
 	 * {@link HttpClient} itself.
-	 * @param connectTimeout the timeout value in milliseconds
+	 * @param connectTimeout the timeout as {@code Duration}.
 	 * @since 6.1
 	 * @see RequestConfig#getConnectTimeout()
 	 * @see SocketConfig#getSoTimeout
@@ -167,7 +169,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
-	 * @param connectionRequestTimeout the timeout value to request a connection in milliseconds
+	 * @param connectionRequestTimeout the timeout value to request a connection as {@code Duration}.
 	 * @since 6.1
 	 * @see RequestConfig#getConnectionRequestTimeout()
 	 */
@@ -175,6 +177,43 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		Assert.notNull(connectionRequestTimeout, "ConnectionRequestTimeout must not be null");
 		Assert.isTrue(!connectionRequestTimeout.isNegative(), "Timeout must be a non-negative value");
 		this.connectionRequestTimeout = connectionRequestTimeout.toMillis();
+	}
+
+	/**
+	 * Set the response timeout for the underlying {@link RequestConfig}.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 * <p>This options does not affect connection timeouts for SSL
+	 * handshakes or CONNECT requests; for that, it is required to
+	 * use the {@link SocketConfig} on the
+	 * {@link HttpClient} itself.
+	 * @param readTimeout the timeout value in milliseconds
+	 * @since 6.2
+	 * @see RequestConfig#getResponseTimeout()
+	 */
+	public void setReadTimeout(int readTimeout) {
+		Assert.isTrue(readTimeout >= 0, "Timeout must be a non-negative value");
+		this.readTimeout = readTimeout;
+	}
+
+	/**
+	 * Set the response timeout for the underlying {@link RequestConfig}.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 * <p>This options does not affect connection timeouts for SSL
+	 * handshakes or CONNECT requests; for that, it is required to
+	 * use the {@link SocketConfig} on the
+	 * {@link HttpClient} itself.
+	 * @param readTimeout the timeout as {@code Duration}.
+	 * @since 6.2
+	 * @see RequestConfig#getResponseTimeout()
+	 */
+	public void setReadTimeout(Duration readTimeout) {
+		Assert.notNull(readTimeout, "ReadTimeout must not be null");
+		Assert.isTrue(!readTimeout.isNegative(), "Timeout must be a non-negative value");
+		this.readTimeout = readTimeout.toMillis();
 	}
 
 	/**
@@ -262,7 +301,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	@SuppressWarnings("deprecation")  // setConnectTimeout
 	protected RequestConfig mergeRequestConfig(RequestConfig clientConfig) {
-		if (this.connectTimeout == -1 && this.connectionRequestTimeout == -1) {  // nothing to merge
+		if (this.connectTimeout == -1 && this.connectionRequestTimeout == -1 && this.readTimeout == -1) {  // nothing to merge
 			return clientConfig;
 		}
 
@@ -272,6 +311,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		}
 		if (this.connectionRequestTimeout >= 0) {
 			builder.setConnectionRequestTimeout(this.connectionRequestTimeout, TimeUnit.MILLISECONDS);
+		}
+		if (this.readTimeout >= 0) {
+			builder.setResponseTimeout(this.readTimeout, TimeUnit.MILLISECONDS);
 		}
 		return builder.build();
 	}
