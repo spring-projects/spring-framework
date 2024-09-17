@@ -18,6 +18,8 @@ package org.springframework.orm.jpa.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
@@ -29,6 +31,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Eclipse
@@ -55,6 +58,11 @@ import org.springframework.transaction.TransactionException;
  */
 @SuppressWarnings("serial")
 public class EclipseLinkJpaDialect extends DefaultJpaDialect {
+
+	/**
+	 * Locks for virtual thread friendly "synchronization" on the {@link DatabaseLogin} instance.
+	 */
+	private static final Map<DatabaseLogin, ReentrantLock> LOCKS = new ConcurrentReferenceHashMap<>(16, ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
 	private boolean lazyDatabaseTransaction = false;
 
@@ -100,7 +108,9 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 			DatabaseLogin databaseLogin = uow.getLogin();
 			// Synchronize on shared DatabaseLogin instance for consistent isolation level
 			// set and reset in case of concurrent transactions with different isolation.
-			synchronized (databaseLogin) {
+			ReentrantLock lock = LOCKS.computeIfAbsent(databaseLogin, k -> new ReentrantLock());
+			lock.lock();
+			try {
 				int originalIsolationLevel = databaseLogin.getTransactionIsolation();
 				// Apply current isolation level value, if necessary.
 				if (currentIsolationLevel != originalIsolationLevel) {
@@ -115,6 +125,8 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 				if (currentIsolationLevel != originalIsolationLevel) {
 					databaseLogin.setTransactionIsolation(originalIsolationLevel);
 				}
+			} finally {
+				lock.unlock();
 			}
 		}
 		else if (!definition.isReadOnly() && !this.lazyDatabaseTransaction) {
@@ -125,10 +137,14 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 			// Synchronize on shared DatabaseLogin instance for consistently picking up
 			// the default isolation level even in case of concurrent transactions with
 			// a custom isolation level (see above), as of 6.0.10
-			synchronized (databaseLogin) {
+			ReentrantLock lock = LOCKS.computeIfAbsent(databaseLogin, k -> new ReentrantLock());
+			lock.lock();
+			try {
 				entityManager.getTransaction().begin();
 				uow.beginEarlyTransaction();
 				entityManager.unwrap(Connection.class);
+			} finally {
+				lock.unlock();
 			}
 		}
 		else {
