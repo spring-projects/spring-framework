@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function.client
 
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
