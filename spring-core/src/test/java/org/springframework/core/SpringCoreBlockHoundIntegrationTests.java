@@ -66,7 +66,7 @@ class SpringCoreBlockHoundIntegrationTests {
 	}
 
 	@Test
-	void concurrentReferenceHashMap() {
+	void concurrentReferenceHashMapSegmentDoTask() {
 		int size = 10000;
 		Map<String, String> map = new ConcurrentReferenceHashMap<>(size);
 
@@ -86,6 +86,29 @@ class SpringCoreBlockHoundIntegrationTests {
 
 		CompletableFuture.allOf(future1, future2).join();
 		assertThat(map).hasSize(size);
+	}
+
+	@Test
+	void concurrentReferenceHashMapSegmentClear() {
+		int size = 10000;
+		Map<String, String> map = new ConcurrentReferenceHashMap<>(size);
+
+		CompletableFuture<Object> future1 = new CompletableFuture<>();
+		testNonBlockingTask(() -> {
+			for (int i = 0; i < size / 2; i++) {
+				map.put("a" + i, "bar");
+			}
+		}, future1);
+
+		CompletableFuture<Object> future2 = new CompletableFuture<>();
+		testNonBlockingTask(() -> {
+			for (int i = 0; i < size; i++) {
+				map.clear();
+			}
+		}, future2);
+
+		CompletableFuture.allOf(future1, future2).join();
+		assertThat(map).isEmpty();
 	}
 
 	private void testNonBlockingTask(NonBlockingTask task) {
