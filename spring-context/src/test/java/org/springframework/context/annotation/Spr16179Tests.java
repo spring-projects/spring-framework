@@ -38,6 +38,7 @@ class Spr16179Tests {
 			assertThat(bf.getBean(AssemblerInjection.class).assembler4).isSameAs(bf.getBean("pageAssembler"));
 			assertThat(bf.getBean(AssemblerInjection.class).assembler5).isSameAs(bf.getBean("pageAssembler"));
 			assertThat(bf.getBean(AssemblerInjection.class).assembler6).isSameAs(bf.getBean("pageAssembler"));
+			assertThat(bf.getBean(AssemblerInjection.class).assembler7).isSameAs(bf.getBean("pageAssembler"));
 		}
 	}
 
@@ -80,6 +81,9 @@ class Spr16179Tests {
 
 		@Autowired(required = false)
 		PageAssembler<String> assembler6;
+
+		@Autowired(required = false)
+		PageAssembler<String[]> assembler7;
 	}
 
 

@@ -319,17 +319,18 @@ public class ResolvableType implements Serializable {
 			}
 		}
 
+		if (upUntilUnresolvable && (other.isUnresolvableTypeVariable() || other.isWildcardWithoutBounds())) {
+			return true;
+		}
+
 		// Deal with array by delegating to the component type
 		if (isArray()) {
 			return (other.isArray() && getComponentType().isAssignableFrom(
 					other.getComponentType(), true, matchedBefore, upUntilUnresolvable));
 		}
 
-		if (upUntilUnresolvable && (other.isUnresolvableTypeVariable() || other.isWildcardWithoutBounds())) {
-			return true;
-		}
-
-		boolean exactMatch = (strict && matchedBefore != null);  // We're checking nested generic variables now...
+		// We're checking nested generic variables now...
+		boolean exactMatch = (strict && matchedBefore != null);
 
 		// Deal with wildcard bounds
 		WildcardBounds ourBounds = WildcardBounds.get(this);
