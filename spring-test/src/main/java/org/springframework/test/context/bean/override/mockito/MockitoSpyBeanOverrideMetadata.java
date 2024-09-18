@@ -27,7 +27,6 @@ import org.mockito.listeners.VerificationStartedListener;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
 import org.springframework.test.context.bean.override.OverrideMetadata;
@@ -68,8 +67,7 @@ class MockitoSpyBeanOverrideMetadata extends MockitoOverrideMetadata {
 	}
 
 	@SuppressWarnings("unchecked")
-	<T> T createSpy(String name, Object instance) {
-		Assert.notNull(instance, "Instance must not be null");
+	private <T> T createSpy(String name, Object instance) {
 		Class<?> resolvedTypeToOverride = getBeanType().resolve();
 		Assert.notNull(resolvedTypeToOverride, "Failed to resolve type to override");
 		Assert.isInstanceOf(resolvedTypeToOverride, instance);
@@ -94,15 +92,6 @@ class MockitoSpyBeanOverrideMetadata extends MockitoOverrideMetadata {
 			toSpy = instance.getClass();
 		}
 		return (T) Mockito.mock(toSpy, settings);
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringCreator(this)
-				.append("beanName", getBeanName())
-				.append("beanType", getBeanType())
-				.append("reset", getReset())
-				.toString();
 	}
 
 

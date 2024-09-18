@@ -87,12 +87,7 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 			}
 		}
 		try {
-			MockitoBeans mockedBeans = beanFactory.getBean(MockitoBeans.class);
-			for (Object mockedBean : mockedBeans) {
-				if (reset.equals(MockReset.get(mockedBean))) {
-					Mockito.reset(mockedBean);
-				}
-			}
+			beanFactory.getBean(MockitoBeans.class).resetAll();
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Continue

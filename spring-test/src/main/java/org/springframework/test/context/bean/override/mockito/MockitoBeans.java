@@ -17,16 +17,18 @@
 package org.springframework.test.context.bean.override.mockito;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+
+import org.mockito.Mockito;
 
 /**
  * Beans created using Mockito.
  *
  * @author Andy Wilkinson
+ * @author Sam Brannen
  * @since 6.2
  */
-class MockitoBeans implements Iterable<Object> {
+class MockitoBeans {
 
 	private final List<Object> beans = new ArrayList<>();
 
@@ -35,9 +37,8 @@ class MockitoBeans implements Iterable<Object> {
 		this.beans.add(bean);
 	}
 
-	@Override
-	public Iterator<Object> iterator() {
-		return this.beans.iterator();
+	void resetAll() {
+		this.beans.forEach(Mockito::reset);
 	}
 
 }

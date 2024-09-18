@@ -35,7 +35,6 @@ import org.springframework.test.context.bean.override.BeanOverrideStrategy;
 import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -43,13 +42,14 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  */
 class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 
 	private final Set<Class<?>> extraInterfaces;
 
-	private final Answers answer;
+	private final Answers answers;
 
 	private final boolean serializable;
 
@@ -59,21 +59,22 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 				annotation.reset(), annotation.extraInterfaces(), annotation.answers(), annotation.serializable());
 	}
 
-	MockitoBeanOverrideMetadata(Field field, ResolvableType typeToMock, @Nullable String beanName, MockReset reset,
-			Class<?>[] extraInterfaces, @Nullable Answers answer, boolean serializable) {
+	private MockitoBeanOverrideMetadata(Field field, ResolvableType typeToMock, @Nullable String beanName, MockReset reset,
+			Class<?>[] extraInterfaces, @Nullable Answers answers, boolean serializable) {
 
 		super(field, typeToMock, beanName, BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION, reset, false);
 		Assert.notNull(typeToMock, "'typeToMock' must not be null");
 		this.extraInterfaces = asClassSet(extraInterfaces);
-		this.answer = (answer != null) ? answer : Answers.RETURNS_DEFAULTS;
+		this.answers = (answers != null ? answers : Answers.RETURNS_DEFAULTS);
 		this.serializable = serializable;
 	}
 
-	private static Set<Class<?>> asClassSet(@Nullable Class<?>[] classes) {
-		Set<Class<?>> classSet = new LinkedHashSet<>();
-		if (classes != null) {
-			classSet.addAll(Arrays.asList(classes));
+
+	private static Set<Class<?>> asClassSet(Class<?>[] classes) {
+		if (classes.length == 0) {
+			return Collections.emptySet();
 		}
+		Set<Class<?>> classSet = new LinkedHashSet<>(Arrays.asList(classes));
 		return Collections.unmodifiableSet(classSet);
 	}
 
@@ -90,12 +91,12 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 	 * Return the {@link Answers}.
 	 * @return the answers mode
 	 */
-	Answers getAnswer() {
-		return this.answer;
+	Answers getAnswers() {
+		return this.answers;
 	}
 
 	/**
-	 * Return if the mock is serializable.
+	 * Determine if the mock is serializable.
 	 * @return {@code true} if the mock is serializable
 	 */
 	boolean isSerializable() {
@@ -108,7 +109,7 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 	}
 
 	@SuppressWarnings("unchecked")
-	<T> T createMock(String name) {
+	private <T> T createMock(String name) {
 		MockSettings settings = MockReset.withSettings(getReset());
 		if (StringUtils.hasLength(name)) {
 			settings.name(name);
@@ -116,7 +117,7 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 		if (!this.extraInterfaces.isEmpty()) {
 			settings.extraInterfaces(ClassUtils.toClassArray(this.extraInterfaces));
 		}
-		settings.defaultAnswer(this.answer);
+		settings.defaultAnswer(this.answers);
 		if (this.serializable) {
 			settings.serializable();
 		}
@@ -132,27 +133,26 @@ class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
 		if (other == null || other.getClass() != getClass()) {
 			return false;
 		}
-		MockitoBeanOverrideMetadata that = (MockitoBeanOverrideMetadata) other;
-		boolean result = super.equals(that);
-		result = result && ObjectUtils.nullSafeEquals(this.extraInterfaces, that.extraInterfaces);
-		result = result && ObjectUtils.nullSafeEquals(this.answer, that.answer);
-		result = result && this.serializable == that.serializable;
-		return result;
+		return (other instanceof MockitoBeanOverrideMetadata that && super.equals(that) &&
+				(this.serializable == that.serializable) && (this.answers == that.answers) &&
+				Objects.equals(this.extraInterfaces, that.extraInterfaces));
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.extraInterfaces, this.answer, this.serializable) + super.hashCode();
+		return super.hashCode() + Objects.hash(this.extraInterfaces, this.answers, this.serializable);
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)
+				.append("field", getField())
 				.append("beanType", getBeanType())
 				.append("beanName", getBeanName())
+				.append("strategy", getStrategy())
 				.append("reset", getReset())
 				.append("extraInterfaces", getExtraInterfaces())
-				.append("answer", getAnswer())
+				.append("answers", getAnswers())
 				.append("serializable", isSerializable())
 				.toString();
 	}
