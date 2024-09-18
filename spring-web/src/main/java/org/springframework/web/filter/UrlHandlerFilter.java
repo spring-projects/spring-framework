@@ -95,7 +95,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 				path = ServletRequestPathUtils.parseAndCache(request);
 			}
 			for (Map.Entry<Handler, List<PathPattern>> entry : this.handlers.entrySet()) {
-				if (!entry.getKey().canHandle(request, path)) {
+				if (!entry.getKey().supports(request, path)) {
 					continue;
 				}
 				for (PathPattern pattern : entry.getValue()) {
@@ -248,7 +248,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		/**
 		 * Whether the handler handles the given request.
 		 */
-		boolean canHandle(HttpServletRequest request, RequestPath path);
+		boolean supports(HttpServletRequest request, RequestPath path);
 
 		/**
 		 * Handle the request, possibly delegating to the rest of the filter chain.
@@ -277,7 +277,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		}
 
 		@Override
-		public boolean canHandle(HttpServletRequest request, RequestPath path) {
+		public boolean supports(HttpServletRequest request, RequestPath path) {
 			List<PathContainer.Element> elements = path.pathWithinApplication().elements();
 			return (elements.size() > 1 && elements.get(elements.size() - 1).value().equals("/"));
 		}
