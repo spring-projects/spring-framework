@@ -76,17 +76,18 @@ public class UrlHandlerFilterTests {
 
 	@Test
 	void noUrlHandling() {
-		testNoUrlHandling("/path/**", "/path/123");
-		testNoUrlHandling("/path/*", "/path/123");
-		testNoUrlHandling("/**", "/"); // gh-33444
+		testNoUrlHandling("/path/**", "", "/path/123");
+		testNoUrlHandling("/path/*", "", "/path/123");
+		testNoUrlHandling("/**", "", "/"); // gh-33444
+		testNoUrlHandling("/**", "/myApp", "/myApp/"); // gh-33565
 	}
 
-	private static void testNoUrlHandling(String pattern, String path) {
+	private static void testNoUrlHandling(String pattern, String contextPath, String path) {
 
 		// No request mutation
 		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler(pattern).mutateRequest().build();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get(path).build();
+		MockServerHttpRequest request = MockServerHttpRequest.get(path).contextPath(contextPath).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		ServerHttpRequest actual = invokeFilter(filter, exchange);
@@ -98,7 +99,7 @@ public class UrlHandlerFilterTests {
 		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
 		filter = UrlHandlerFilter.trailingSlashHandler(pattern).redirect(status).build();
 
-		request = MockServerHttpRequest.get(path).build();
+		request = MockServerHttpRequest.get(path).contextPath(contextPath).build();
 		exchange = MockServerWebExchange.from(request);
 
 		actual = invokeFilter(filter, exchange);

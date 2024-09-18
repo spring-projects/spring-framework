@@ -253,7 +253,8 @@ public final class UrlHandlerFilter implements WebFilter {
 
 		@Override
 		public boolean canHandle(ServerWebExchange exchange) {
-			List<PathContainer.Element> elements = exchange.getRequest().getPath().elements();
+			ServerHttpRequest request = exchange.getRequest();
+			List<PathContainer.Element> elements = request.getPath().pathWithinApplication().elements();
 			return (elements.size() > 1 && elements.get(elements.size() - 1).value().equals("/"));
 		}
 
