@@ -463,8 +463,9 @@ final class DefaultWebClient implements WebClient {
 				ClientRequest request = requestBuilder.build();
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
 				observationContext.setRequest(request);
-				Mono<ClientResponse> responseMono = filterFunction.apply(exchangeFunction)
-						.exchange(request)
+				final ExchangeFilterFunction finalFilterFunction = filterFunction;
+				Mono<ClientResponse> responseMono = Mono.defer(
+								() -> finalFilterFunction.apply(exchangeFunction).exchange(request))
 						.checkpoint("Request to " +
 								WebClientUtils.getRequestDescription(request.method(), request.url()) +
 								" [DefaultWebClient]")

@@ -40,6 +40,7 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-web")))
 	testImplementation("com.fasterxml:aalto-xml")
 	testImplementation("com.squareup.okhttp3:mockwebserver")
+	testImplementation("io.micrometer:context-propagation")
 	testImplementation("io.micrometer:micrometer-observation-test")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.reactivex.rxjava3:rxjava")
