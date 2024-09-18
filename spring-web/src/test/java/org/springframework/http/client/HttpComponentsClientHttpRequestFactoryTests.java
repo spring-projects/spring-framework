@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.time.Duration;
 import java.util.stream.Stream;
 
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -66,6 +67,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(httpClient);
 		hrf.setConnectTimeout(1234);
 		hrf.setConnectionRequestTimeout(4321);
+		hrf.setReadTimeout(5678);
 
 		URI uri = URI.create(baseUrl + "/status/ok");
 		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest) hrf.createRequest(uri, HttpMethod.GET);
@@ -76,6 +78,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		RequestConfig requestConfig = (RequestConfig) config;
 		assertThat(requestConfig.getConnectTimeout()).as("Wrong custom connection timeout").isEqualTo(Timeout.of(1234, MILLISECONDS));
 		assertThat(requestConfig.getConnectionRequestTimeout()).as("Wrong custom connection request timeout").isEqualTo(Timeout.of(4321, MILLISECONDS));
+		assertThat(requestConfig.getResponseTimeout()).as("Wrong custom response timeout").isEqualTo(Timeout.of(5678, MILLISECONDS));
 	}
 
 	@Test
@@ -105,6 +108,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		RequestConfig defaultConfig = RequestConfig.custom()
 				.setConnectTimeout(1234, MILLISECONDS)
 				.setConnectionRequestTimeout(6789, MILLISECONDS)
+				.setResponseTimeout(4321, MILLISECONDS)
 				.build();
 		CloseableHttpClient client = mock(CloseableHttpClient.class,
 				withSettings().extraInterfaces(Configurable.class));
@@ -113,10 +117,12 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 
 		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(client);
 		hrf.setConnectTimeout(5000);
+		hrf.setReadTimeout(Duration.ofMillis(4000));
 
 		RequestConfig requestConfig = retrieveRequestConfig(hrf);
 		assertThat(requestConfig.getConnectTimeout()).isEqualTo(Timeout.of(5000, MILLISECONDS));
 		assertThat(requestConfig.getConnectionRequestTimeout()).isEqualTo(Timeout.of(6789, MILLISECONDS));
+		assertThat(requestConfig.getResponseTimeout()).isEqualTo(Timeout.of(4000, MILLISECONDS));
 	}
 
 	@Test
@@ -141,15 +147,18 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		RequestConfig requestConfig = retrieveRequestConfig(hrf);
 		assertThat(requestConfig.getConnectionRequestTimeout()).isEqualTo(Timeout.of(5000, MILLISECONDS));
 		assertThat(requestConfig.getConnectTimeout()).isEqualTo(RequestConfig.DEFAULT.getConnectTimeout());
+		assertThat(requestConfig.getResponseTimeout()).isEqualTo(RequestConfig.DEFAULT.getResponseTimeout());
 
 		// Update the Http client so that it returns an updated config
 		RequestConfig updatedDefaultConfig = RequestConfig.custom()
 				.setConnectTimeout(1234, MILLISECONDS).build();
 		given(configurable.getConfig()).willReturn(updatedDefaultConfig);
 		hrf.setConnectionRequestTimeout(7000);
+		hrf.setReadTimeout(4000);
 		RequestConfig requestConfig2 = retrieveRequestConfig(hrf);
 		assertThat(requestConfig2.getConnectTimeout()).isEqualTo(Timeout.of(1234, MILLISECONDS));
 		assertThat(requestConfig2.getConnectionRequestTimeout()).isEqualTo(Timeout.of(7000, MILLISECONDS));
+		assertThat(requestConfig2.getResponseTimeout()).isEqualTo(Timeout.of(4000, MILLISECONDS));
 	}
 
 	@ParameterizedTest

@@ -73,7 +73,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	private long connectionRequestTimeout = -1;
 
-	
 	private long readTimeout = -1;
 
 	/**
@@ -138,7 +137,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * handshakes or CONNECT requests; for that, it is required to
 	 * use the {@link SocketConfig} on the
 	 * {@link HttpClient} itself.
-	 * @param connectTimeout the timeout as {@code Duration}.
+	 * @param connectTimeout the timeout as a {@code Duration}.
 	 * @since 6.1
 	 * @see RequestConfig#getConnectTimeout()
 	 * @see SocketConfig#getSoTimeout
@@ -155,7 +154,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
-	 * @param connectionRequestTimeout the timeout value to request a connection in milliseconds
+	 * @param connectionRequestTimeout the timeout value to request a connection
+	 * in milliseconds
 	 * @see RequestConfig#getConnectionRequestTimeout()
 	 */
 	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
@@ -169,7 +169,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
-	 * @param connectionRequestTimeout the timeout value to request a connection as {@code Duration}.
+	 * @param connectionRequestTimeout the timeout value to request a connection
+	 * as a {@code Duration}.
 	 * @since 6.1
 	 * @see RequestConfig#getConnectionRequestTimeout()
 	 */
@@ -184,10 +185,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
-	 * <p>This options does not affect connection timeouts for SSL
-	 * handshakes or CONNECT requests; for that, it is required to
-	 * use the {@link SocketConfig} on the
-	 * {@link HttpClient} itself.
 	 * @param readTimeout the timeout value in milliseconds
 	 * @since 6.2
 	 * @see RequestConfig#getResponseTimeout()
@@ -202,11 +199,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
-	 * <p>This options does not affect connection timeouts for SSL
-	 * handshakes or CONNECT requests; for that, it is required to
-	 * use the {@link SocketConfig} on the
-	 * {@link HttpClient} itself.
-	 * @param readTimeout the timeout as {@code Duration}.
+	 * @param readTimeout the timeout as a {@code Duration}.
 	 * @since 6.2
 	 * @see RequestConfig#getResponseTimeout()
 	 */
