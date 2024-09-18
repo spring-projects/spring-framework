@@ -1,0 +1,80 @@
+/*
+ * Copyright 2002-2024 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.test.context.bean.override.easymock;
+
+import java.lang.reflect.Field;
+
+import org.easymock.EasyMock;
+import org.easymock.MockType;
+
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.SingletonBeanRegistry;
+import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
+import org.springframework.test.context.bean.override.OverrideMetadata;
+
+import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION;
+
+/**
+ * {@link OverrideMetadata} that provides support for {@link EasyMockBean @EasyMockBean}.
+ *
+ * @author Sam Brannen
+ * @since 6.2
+ */
+class EasyMockBeanOverrideMetadata extends OverrideMetadata {
+
+	private final MockType mockType;
+
+
+	EasyMockBeanOverrideMetadata(Field field, Class<?> typeToOverride, @Nullable String beanName,
+			MockType mockType) {
+
+		super(field, ResolvableType.forClass(typeToOverride), beanName, REPLACE_OR_CREATE_DEFINITION);
+		this.mockType = mockType;
+	}
+
+
+	@Override
+	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
+			@Nullable Object existingBeanInstance) {
+
+		Class<?> typeToMock = getBeanType().getRawClass();
+		return EasyMock.mock(beanName, this.mockType, typeToMock);
+	}
+
+	@Override
+	protected void track(Object mock, SingletonBeanRegistry singletonBeanRegistry) {
+		getEasyMockBeans(singletonBeanRegistry).add(mock);
+	}
+
+	private EasyMockBeans getEasyMockBeans(SingletonBeanRegistry singletonBeanRegistry) {
+		String className = EasyMockBeans.class.getName();
+		EasyMockBeans easyMockBeans = null;
+		try {
+			easyMockBeans = (EasyMockBeans) singletonBeanRegistry.getSingleton(className);
+		}
+		catch (NoSuchBeanDefinitionException ignored) {
+		}
+		if (easyMockBeans == null) {
+			easyMockBeans = new EasyMockBeans();
+			singletonBeanRegistry.registerSingleton(className, easyMockBeans);
+		}
+		return easyMockBeans;
+	}
+
+}
