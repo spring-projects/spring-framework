@@ -27,10 +27,12 @@ import io.micrometer.observation.ObservationHandler;
 import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -63,6 +65,7 @@ class WebClientObservationTests {
 
 	@BeforeEach
 	void setup() {
+		Hooks.enableAutomaticContextPropagation();
 		ClientResponse mockResponse = mock();
 		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.headers()).thenReturn(new MockClientHeaders());
@@ -72,6 +75,11 @@ class WebClientObservationTests {
 		given(this.exchangeFunction.exchange(this.request.capture())).willReturn(Mono.just(mockResponse));
 		this.builder = WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction).observationRegistry(this.observationRegistry);
 		this.observationRegistry.observationConfig().observationHandler(new HeaderInjectingHandler());
+	}
+
+	@AfterEach
+	void cleanUp() {
+		Hooks.disableAutomaticContextPropagation();
 	}
 
 	@Test
@@ -145,6 +153,19 @@ class WebClientObservationTests {
 		this.builder.filter(assertionFilter).build().get().uri("/resource/{id}", 42)
 				.retrieve().bodyToMono(Void.class)
 				.block(Duration.ofSeconds(10));
+		verifyAndGetRequest();
+	}
+
+	@Test
+	void setsCurrentObservationInScope() {
+		ExchangeFilterFunction assertionFilter = (request, chain) -> {
+			Observation currentObservation = observationRegistry.getCurrentObservation();
+			assertThat(currentObservation).isNotNull();
+			assertThat(currentObservation.getContext()).isInstanceOf(ClientRequestObservationContext.class);
+			return chain.exchange(request);
+		};
+		this.builder.filter(assertionFilter).build().get().uri("/resource/{id}", 42)
+				.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(5));
 		verifyAndGetRequest();
 	}
 
