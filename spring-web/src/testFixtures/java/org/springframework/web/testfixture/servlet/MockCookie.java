@@ -45,6 +45,7 @@ public class MockCookie extends Cookie {
 
 	private static final String SAME_SITE = "SameSite";
 	private static final String EXPIRES = "Expires";
+	private static final String PARTITIONED = "Partitioned";
 
 	@Nullable
 	private ZonedDateTime expires;
@@ -105,10 +106,10 @@ public class MockCookie extends Cookie {
 	 */
 	public void setPartitioned(boolean partitioned) {
 		if (partitioned) {
-			setAttribute("Partitioned", "");
+			setAttribute(PARTITIONED, "");
 		}
 		else {
-			setAttribute("Partitioned", null);
+			setAttribute(PARTITIONED, null);
 		}
 	}
 
@@ -118,7 +119,7 @@ public class MockCookie extends Cookie {
 	 * @see <a href="https://datatracker.ietf.org/doc/html/draft-cutler-httpbis-partitioned-cookies#section-2.1">The Partitioned attribute spec</a>
 	 */
 	public boolean isPartitioned() {
-		return getAttribute("Partitioned") != null;
+		return getAttribute(PARTITIONED) != null;
 	}
 
 	/**
@@ -202,7 +203,7 @@ public class MockCookie extends Cookie {
 				.append("Comment", getComment())
 				.append("Secure", getSecure())
 				.append("HttpOnly", isHttpOnly())
-				.append("Partitioned", isPartitioned())
+				.append(PARTITIONED, isPartitioned())
 				.append(SAME_SITE, getSameSite())
 				.append("Max-Age", getMaxAge())
 				.append(EXPIRES, getAttribute(EXPIRES))

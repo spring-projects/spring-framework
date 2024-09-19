@@ -23,7 +23,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class for URL-based views. Provides a consistent way of
- * holding the URL that a View wraps, in the form of an "url" bean property.
+ * holding the URL that a View wraps, in the form of a "url" bean property.
  *
  * @author Juergen Hoeller
  * @since 13.12.2003

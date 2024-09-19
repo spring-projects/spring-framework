@@ -59,7 +59,7 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 	private final HttpRequest.Builder builder;
 
 
-	public JdkClientHttpRequest(HttpMethod httpMethod, URI uri, DataBufferFactory bufferFactory,
+	JdkClientHttpRequest(HttpMethod httpMethod, URI uri, DataBufferFactory bufferFactory,
 								@Nullable Duration readTimeout) {
 		Assert.notNull(httpMethod, "HttpMethod is required");
 		Assert.notNull(uri, "URI is required");
