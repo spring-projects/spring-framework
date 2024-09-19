@@ -212,7 +212,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 			return true;
 		}
 		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
-		return (resourcePath.startsWith(locationPath) && !isInvalidEncodedInputPath(resourcePath));
+		return (resourcePath.startsWith(locationPath) && !isInvalidEncodedResourcePath(resourcePath));
 	}
 
 	private boolean isInvalidEncodedResourcePath(String resourcePath) {
