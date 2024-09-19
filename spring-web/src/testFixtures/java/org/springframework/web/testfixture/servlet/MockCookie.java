@@ -45,6 +45,7 @@ public class MockCookie extends Cookie {
 
 	private static final String SAME_SITE = "SameSite";
 	private static final String EXPIRES = "Expires";
+	public static final String EMPTY_STRING = "";
 
 	@Nullable
 	private ZonedDateTime expires;
@@ -105,7 +106,7 @@ public class MockCookie extends Cookie {
 	 */
 	public void setPartitioned(boolean partitioned) {
 		if (partitioned) {
-			setAttribute("Partitioned", "");
+			setAttribute("Partitioned", EMPTY_STRING);
 		}
 		else {
 			setAttribute("Partitioned", null);
