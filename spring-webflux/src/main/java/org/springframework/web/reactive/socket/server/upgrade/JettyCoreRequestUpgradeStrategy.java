@@ -49,7 +49,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @author Greg Wilkins
- * @since 5.3.4
+ * @since 6.2
  */
 public class JettyCoreRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
@@ -62,7 +62,6 @@ public class JettyCoreRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	/**
 	 * Add a callback to configure WebSocket server parameters on
 	 * {@link JettyWebSocketServerContainer}.
-	 * @since 6.1
 	 */
 	public void addWebSocketConfigurer(Consumer<Configurable> webSocketConfigurer) {
 		this.webSocketConfigurer = (this.webSocketConfigurer != null ?
