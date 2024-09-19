@@ -385,7 +385,7 @@ To customize the default message, you can add properties to
 xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
 resource bundles using any of the above errors codes and message arguments. Note also that the
 message argument `"name"` is itself a `MessageSourceResolvable` with error codes
-`"person.name"` and `"name"` and can customized too. For example:
+`"person.name"` and `"name"` and can be customized too. For example:
 
 Properties::
 +

@@ -17,15 +17,12 @@
 package org.springframework.web.util;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.util.FastByteArrayOutputStream;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -95,13 +92,7 @@ class ContentCachingRequestWrapperTests {
 	@Test
 	void shouldNotAllocateMoreThanCacheLimit() throws Exception {
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(createGetRequest("Hello World"), CONTENT_CACHE_LIMIT);
-		Field field = ReflectionUtils.findField(ContentCachingRequestWrapper.class, "cachedContent");
-		ReflectionUtils.makeAccessible(field);
-		FastByteArrayOutputStream cachedContent = (FastByteArrayOutputStream) ReflectionUtils.getField(field, wrapper);
-		field = ReflectionUtils.findField(FastByteArrayOutputStream.class, "initialBlockSize");
-		ReflectionUtils.makeAccessible(field);
-		int blockSize = (int) ReflectionUtils.getField(field, cachedContent);
-		assertThat(blockSize).isEqualTo(CONTENT_CACHE_LIMIT);
+		assertThat(wrapper).extracting("cachedContent.initialBlockSize").isEqualTo(CONTENT_CACHE_LIMIT);
 	}
 
 

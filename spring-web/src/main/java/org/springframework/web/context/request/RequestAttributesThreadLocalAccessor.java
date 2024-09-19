@@ -70,10 +70,10 @@ public class RequestAttributesThreadLocalAccessor implements ThreadLocalAccessor
 
 	/**
 	 * ServletRequestAttributes that takes another instance, and makes a copy of the
-	 * request attributes at present to provides extended read access during async
+	 * request attributes at present to provide extended read access during async
 	 * handling when the DispatcherServlet has exited from the initial REQUEST dispatch
 	 * and marked the request {@link ServletRequestAttributes#requestCompleted()}.
-	 * <p>Note that beyond access to request attributes, here is no attempt to support
+	 * <p>Note that beyond access to request attributes, there is no attempt to support
 	 * setting or removing request attributes, nor to access session attributes after
 	 * the initial REQUEST dispatch has exited.
 	 */

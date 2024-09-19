@@ -99,7 +99,7 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		 * The write subscriber has subscribed, and cached signals have been
 		 * emitted to it; we're ready to switch to a simple pass-through mode
 		 * for all remaining signals.
-		 **/
+		 */
 		READY_TO_WRITE
 
 	}

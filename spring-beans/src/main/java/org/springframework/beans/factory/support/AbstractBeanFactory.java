@@ -160,7 +160,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/** Map from scope identifier String to corresponding Scope. */
 	private final Map<String, Scope> scopes = new LinkedHashMap<>(8);
 
-	/** Application startup metrics. **/
+	/** Application startup metrics. */
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
 	/** Map from bean name to merged RootBeanDefinition. */

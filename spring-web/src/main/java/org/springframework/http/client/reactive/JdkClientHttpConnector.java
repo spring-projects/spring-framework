@@ -51,7 +51,7 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	private DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
 
 	@Nullable
-	private Duration readTimeout = null;
+	private Duration readTimeout;
 
 
 	/**
