@@ -166,12 +166,7 @@ public abstract class StringUtils {
 	 */
 	@Contract("null -> false")
 	public static boolean hasText(@Nullable CharSequence str) {
-		if (str == null) {
-			return false;
-		}
-
-		int strLen = str.length();
-		if (strLen == 0) {
+		if (isEmpty(str)) {
 			return false;
 		}
 
