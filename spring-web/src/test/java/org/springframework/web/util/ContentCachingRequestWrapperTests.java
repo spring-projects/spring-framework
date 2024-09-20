@@ -106,8 +106,8 @@ class ContentCachingRequestWrapperTests {
 			}
 		};
 
-		assertThatIllegalStateException().isThrownBy(() ->
-						wrapper.getInputStream().readAllBytes())
+		assertThatIllegalStateException()
+				.isThrownBy(() -> wrapper.getInputStream().readAllBytes())
 				.withMessage("3");
 	}
 

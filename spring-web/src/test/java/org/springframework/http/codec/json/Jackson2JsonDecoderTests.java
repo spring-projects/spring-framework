@@ -394,7 +394,7 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 
 		private static final long serialVersionUID = 1L;
 
-		protected Deserializer() {
+		Deserializer() {
 			super(TestObject.class);
 		}
 
