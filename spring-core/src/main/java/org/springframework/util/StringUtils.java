@@ -170,7 +170,7 @@ public abstract class StringUtils {
 			return false;
 		}
 
-		for (int i = 0; i < strLen; i++) {
+		for (int i = 0; i < str.length(); i++) {
 			if (!Character.isWhitespace(str.charAt(i))) {
 				return true;
 			}
