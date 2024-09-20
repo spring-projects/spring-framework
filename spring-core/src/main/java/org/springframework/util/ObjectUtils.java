@@ -191,7 +191,7 @@ public abstract class ObjectUtils {
 	 * @return whether the element has been found in the given array
 	 */
 	public static boolean containsElement(@Nullable Object[] array, Object element) {
-		if (array == null) {
+		if (isEmpty(array)) {
 			return false;
 		}
 		for (Object arrayEle : array) {
