@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -343,11 +343,25 @@ public interface JdbcClient {
 
 		/**
 		 * Retrieve a single value result.
-		 * @return the single row represented as its single column value
+		 * <p>Note: As of 6.2, this will enforce non-null result values
+		 * as originally designed (just accidentally not enforced before).
+		 * (never {@code null})
+		 * @see #optionalValue()
 		 * @see DataAccessUtils#requiredSingleResult(Collection)
 		 */
 		default Object singleValue() {
 			return DataAccessUtils.requiredSingleResult(singleColumn());
+		}
+
+		/**
+		 * Retrieve a single value result, if available, as an {@link Optional} handle.
+		 * @return an Optional handle with the single column value from the single row
+		 * @since 6.2
+		 * @see #singleValue()
+		 * @see DataAccessUtils#optionalResult(Collection)
+		 */
+		default Optional<Object> optionalValue() {
+			return DataAccessUtils.optionalResult(singleColumn());
 		}
 	}
 
@@ -385,23 +399,25 @@ public interface JdbcClient {
 		}
 
 		/**
-		 * Retrieve a single result, if available, as an {@link Optional} handle.
-		 * @return an Optional handle with a single result object or none
-		 * @see #list()
-		 * @see DataAccessUtils#optionalResult(Collection)
-		 */
-		default Optional<T> optional() {
-			return DataAccessUtils.optionalResult(list());
-		}
-
-		/**
 		 * Retrieve a single result as a required object instance.
+		 * <p>Note: As of 6.2, this will enforce non-null result values
+		 * as originally designed (just accidentally not enforced before).
 		 * @return the single result object (never {@code null})
-		 * @see #list()
+		 * @see #optional()
 		 * @see DataAccessUtils#requiredSingleResult(Collection)
 		 */
 		default T single() {
 			return DataAccessUtils.requiredSingleResult(list());
+		}
+
+		/**
+		 * Retrieve a single result, if available, as an {@link Optional} handle.
+		 * @return an Optional handle with a single result object or none
+		 * @see #single()
+		 * @see DataAccessUtils#optionalResult(Collection)
+		 */
+		default Optional<T> optional() {
+			return DataAccessUtils.optionalResult(list());
 		}
 	}
 

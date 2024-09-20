@@ -175,6 +175,40 @@ class JdbcClientQueryTests {
 	}
 
 	@Test
+	void queryForIntegerWithIndexedParamAndOptionalValue() throws Exception {
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getObject(1)).willReturn(22);
+
+		Optional<Object> value = client.sql("SELECT AGE FROM CUSTMR WHERE ID = ?")
+				.param(1, 3)
+				.query().optionalValue();
+
+		assertThat(value.isPresent()).isTrue();
+		assertThat(value.get()).isEqualTo(22);
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
+		verify(preparedStatement).setObject(1, 3);
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
+	void queryForIntegerWithIndexedParamAndNonExistingValue() throws Exception {
+		given(resultSet.next()).willReturn(false);
+
+		Optional<Object> value = client.sql("SELECT AGE FROM CUSTMR WHERE ID = ?")
+				.param(1, 3)
+				.query().optionalValue();
+
+		assertThat(value.isPresent()).isFalse();
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
+		verify(preparedStatement).setObject(1, 3);
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
 	void queryForIntegerWithIndexedParamAndRowMapper() throws Exception {
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt(1)).willReturn(22);
