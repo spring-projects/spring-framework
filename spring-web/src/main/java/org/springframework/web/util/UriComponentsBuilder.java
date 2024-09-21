@@ -877,7 +877,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		@Override
 		@Nullable
 		public PathComponent build() {
-			if (this.path.length() == 0) {
+			if (this.path.isEmpty()) {
 				return null;
 			}
 			String sanitized = getSanitizedPath(this.path);

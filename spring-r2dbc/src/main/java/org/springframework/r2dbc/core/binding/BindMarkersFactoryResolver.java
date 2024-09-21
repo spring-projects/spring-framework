@@ -153,7 +153,7 @@ public final class BindMarkersFactoryResolver {
 					builder.append(ch);
 				}
 			}
-			if (builder.length() == 0) {
+			if (builder.isEmpty()) {
 				return "";
 			}
 			return "_" + builder.toString();

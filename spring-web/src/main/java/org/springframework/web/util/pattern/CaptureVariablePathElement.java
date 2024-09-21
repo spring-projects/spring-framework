@@ -73,7 +73,7 @@ class CaptureVariablePathElement extends PathElement {
 			return false;
 		}
 		String candidateCapture = matchingContext.pathElementValue(pathIndex);
-		if (candidateCapture.length() == 0) {
+		if (candidateCapture.isEmpty()) {
 			return false;
 		}
 
