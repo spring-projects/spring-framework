@@ -137,6 +137,45 @@ class SseEmitterTests {
 		this.handler.assertWriteCount(1);
 	}
 
+	@Test
+	void heartbeatIsSent() throws Exception {
+		this.emitter = new SseEmitter(0L, 100L);
+		this.emitter.initialize(this.handler);
+		Thread.sleep(250);
+		int heartbeatCount = 0;
+		for (int i = 0; i < this.handler.objects.size(); i++) {
+			Object data = this.handler.objects.get(i);
+			if (data.equals(":heartbeat\n\n")) {
+				heartbeatCount++;
+			}
+		}
+		assertThat(heartbeatCount).isGreaterThanOrEqualTo(2);
+	}
+
+	@Test
+	void heartbeatStopsAfterCompletion() throws Exception {
+		this.emitter = new SseEmitter(0L, 100L);
+		this.emitter.initialize(this.handler);
+
+		Thread.sleep(150);
+		this.emitter.complete();
+
+		int heartbeatCountBeforeCompletion = 0;
+		for (Object data : this.handler.objects) {
+			if (data.equals(":heartbeat\n\n")) {
+				heartbeatCountBeforeCompletion++;
+			}
+		}
+		Thread.sleep(150);
+		int totalHeartbeatCount = 0;
+		for (Object data : this.handler.objects) {
+			if (data.equals(":heartbeat\n\n")) {
+				totalHeartbeatCount++;
+			}
+		}
+		assertThat(totalHeartbeatCount).isEqualTo(heartbeatCountBeforeCompletion);
+	}
+
 
 	private static class TestHandler implements ResponseBodyEmitter.Handler {
 
