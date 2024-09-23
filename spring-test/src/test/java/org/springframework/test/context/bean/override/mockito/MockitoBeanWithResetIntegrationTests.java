@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -110,7 +109,6 @@ public class MockitoBeanWithResetIntegrationTests {
 		}
 
 		@Bean("factory")
-		@Qualifier("factory")
 		FailingExampleServiceFactory factory() {
 			return new FailingExampleServiceFactory();
 		}

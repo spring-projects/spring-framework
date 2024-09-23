@@ -53,7 +53,7 @@ import org.springframework.util.StringUtils;
  * of the test class.
  *
  * <p>This processor does not work against a particular test class, it only prepares
- * the bean factory for the identified, unique, set of bean overrides.
+ * the bean factory for the identified, unique set of bean overrides.
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
