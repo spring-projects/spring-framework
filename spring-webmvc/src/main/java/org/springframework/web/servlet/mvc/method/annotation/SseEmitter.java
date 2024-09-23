@@ -21,6 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -52,14 +56,33 @@ public class SseEmitter extends ResponseBodyEmitter {
 	private final Lock writeLock = new ReentrantLock();
 
 	/**
-	 * Create a new SseEmitter instance.
+	 * The interval (in milliseconds) at which heartbeat messages are sent to the client.
+	 * A value of 0 means no heartbeat messages will be sent.
+	 */
+	private final long heartbeatInterval;
+
+	/**
+	 * The scheduled future for the heartbeat task. Used to cancel the task when needed.
+	 */
+	@Nullable
+	private ScheduledFuture<?> heartbeatFuture;
+
+	@Nullable
+	private ScheduledExecutorService scheduler;
+
+	/**
+	 * Create a new {@code SseEmitter} instance.
+	 * <p>By default, the timeout is not set (i.e., it depends on the MVC configuration),
+	 * and no heartbeat messages are sent.
 	 */
 	public SseEmitter() {
+		this.heartbeatInterval = 0;
 	}
 
 	/**
 	 * Create a SseEmitter with a custom timeout value.
 	 * <p>By default not set in which case the default configured in the MVC
+	 * <p>No heartbeat messages will be sent unless specified.
 	 * Java Config or the MVC namespace is used, or if that's not set, then the
 	 * timeout depends on the default of the underlying server.
 	 * @param timeout the timeout value in milliseconds
@@ -67,6 +90,24 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 */
 	public SseEmitter(Long timeout) {
 		super(timeout);
+		heartbeatInterval = 0;
+	}
+
+	/**
+	 * Create a new {@code SseEmitter} instance with a custom timeout and heartbeat interval.
+	 * @param timeout the timeout value in milliseconds
+	 * @param heartbeatInterval the interval (in milliseconds) at which heartbeat messages are sent.
+	 * A value of 0 means no heartbeat messages will be sent.
+	 */
+	public SseEmitter(Long timeout, long heartbeatInterval) {
+		super(timeout);
+		this.heartbeatInterval = heartbeatInterval;
+		if (heartbeatInterval > 0) {
+			startHeartbeat();
+			onCompletion(this::stopHeartbeat);
+			onTimeout(this::stopHeartbeat);
+			onError(ex -> stopHeartbeat());
+		}
 	}
 
 
@@ -136,6 +177,40 @@ public class SseEmitter extends ResponseBodyEmitter {
 		}
 		finally {
 			this.writeLock.unlock();
+		}
+	}
+
+	/**
+	 * Start sending heartbeat messages at the specified interval.
+	 * <p>Heartbeat messages are sent as comments (":heartbeat") to keep the connection alive
+	 * and to detect client disconnects.
+	 */
+	private void startHeartbeat() {
+		if (heartbeatInterval > 0) {
+			this.scheduler = Executors.newSingleThreadScheduledExecutor();
+			this.heartbeatFuture = this.scheduler.scheduleAtFixedRate(() -> {
+				try {
+					send(SseEmitter.event().comment("heartbeat"));
+				} catch (IOException ex) {
+					completeWithError(ex);
+					stopHeartbeat();
+				}
+			}, heartbeatInterval, heartbeatInterval, TimeUnit.MILLISECONDS);
+		}
+	}
+
+	/**
+	 * Stop sending heartbeat messages.
+	 * <p>Cancels the scheduled heartbeat task and shuts down the scheduler to release resources.
+	 */
+	private void stopHeartbeat() {
+		if (heartbeatFuture != null) {
+			heartbeatFuture.cancel(true);
+			this.heartbeatFuture = null;
+		}
+		if (this.scheduler != null) {
+			this.scheduler.shutdown();
+			this.scheduler = null;
 		}
 	}
 
