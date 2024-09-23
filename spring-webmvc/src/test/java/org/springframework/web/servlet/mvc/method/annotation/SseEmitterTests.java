@@ -142,13 +142,11 @@ class SseEmitterTests {
 		this.emitter = new SseEmitter(0L, 100L);
 		this.emitter.initialize(this.handler);
 		Thread.sleep(250);
-		int heartbeatCount = 0;
-		for (int i = 0; i < this.handler.objects.size(); i++) {
-			Object data = this.handler.objects.get(i);
-			if (data.equals(":heartbeat\n\n")) {
-				heartbeatCount++;
-			}
-		}
+
+		long heartbeatCount = this.handler.objects.stream()
+				.filter(data -> data.equals(":heartbeat\n\n"))
+				.count();
+
 		assertThat(heartbeatCount).isGreaterThanOrEqualTo(2);
 	}
 
@@ -156,23 +154,18 @@ class SseEmitterTests {
 	void heartbeatStopsAfterCompletion() throws Exception {
 		this.emitter = new SseEmitter(0L, 100L);
 		this.emitter.initialize(this.handler);
-
 		Thread.sleep(150);
 		this.emitter.complete();
 
-		int heartbeatCountBeforeCompletion = 0;
-		for (Object data : this.handler.objects) {
-			if (data.equals(":heartbeat\n\n")) {
-				heartbeatCountBeforeCompletion++;
-			}
-		}
+		long heartbeatCountBeforeCompletion = this.handler.objects.stream()
+				.filter(data -> data.equals(":heartbeat\n\n"))
+				.count();
+
 		Thread.sleep(150);
-		int totalHeartbeatCount = 0;
-		for (Object data : this.handler.objects) {
-			if (data.equals(":heartbeat\n\n")) {
-				totalHeartbeatCount++;
-			}
-		}
+		long totalHeartbeatCount = this.handler.objects.stream()
+				.filter(data -> data.equals(":heartbeat\n\n"))
+				.count();
+
 		assertThat(totalHeartbeatCount).isEqualTo(heartbeatCountBeforeCompletion);
 	}
 
