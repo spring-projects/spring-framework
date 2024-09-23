@@ -67,6 +67,10 @@ public class SseEmitter extends ResponseBodyEmitter {
 	@Nullable
 	private ScheduledFuture<?> heartbeatFuture;
 
+	/**
+	 * The scheduler used to execute the heartbeat task at fixed intervals.
+	 * Used to schedule and manage the periodic heartbeat messages.
+	 */
 	@Nullable
 	private ScheduledExecutorService scheduler;
 
