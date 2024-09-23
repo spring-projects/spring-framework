@@ -40,14 +40,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 6.2
  */
-class TestBeanForInheritanceIntegrationTests {
+public class TestBeanForInheritanceIntegrationTests {
 
 	static Pojo enclosingClassBeanOverride() {
 		return new FakePojo("in enclosing test class");
 	}
 
 	@SpringJUnitConfig
-	abstract static class AbstractTestBeanIntegrationTestCase {
+	public abstract static class AbstractTestBeanIntegrationTestCase {
 
 		@TestBean(name = "someBean")
 		Pojo someBean;
@@ -70,7 +70,7 @@ class TestBeanForInheritanceIntegrationTests {
 			return new FakePojo("in superclass");
 		}
 
-		interface Pojo {
+		public interface Pojo {
 
 			default String getValue() {
 				return "Prod";

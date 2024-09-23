@@ -123,7 +123,7 @@ public class MockitoBeanForByTypeLookupIntegrationTests {
 	}
 
 
-	interface AnotherService {
+	public interface AnotherService {
 
 		String hello();
 
