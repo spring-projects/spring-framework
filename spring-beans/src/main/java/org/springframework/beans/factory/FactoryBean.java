@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ import org.springframework.lang.Nullable;
  *
  * <p><b>{@code FactoryBean} is a programmatic contract. Implementations are not
  * supposed to rely on annotation-driven injection or other reflective facilities.</b>
- * {@link #getObjectType()} {@link #getObject()} invocations may arrive early in the
- * bootstrap process, even ahead of any post-processor setup. If you need access to
- * other beans, implement {@link BeanFactoryAware} and obtain them programmatically.
+ * Invocations of {@link #getObjectType()} and {@link #getObject()} may arrive early
+ * in the bootstrap process, even ahead of any post-processor setup. If you need access
+ * to other beans, implement {@link BeanFactoryAware} and obtain them programmatically.
  *
  * <p><b>The container is only responsible for managing the lifecycle of the FactoryBean
  * instance, not the lifecycle of the objects created by the FactoryBean.</b> Therefore,
@@ -50,7 +50,7 @@ import org.springframework.lang.Nullable;
  * {@link DisposableBean} and delegate any such close call to the underlying object.
  *
  * <p>Finally, FactoryBean objects participate in the containing BeanFactory's
- * synchronization of bean creation. There is usually no need for internal
+ * synchronization of bean creation. Thus, there is usually no need for internal
  * synchronization other than for purposes of lazy initialization within the
  * FactoryBean itself (or the like).
  *
@@ -68,7 +68,7 @@ public interface FactoryBean<T> {
 	 * The name of an attribute that can be
 	 * {@link org.springframework.core.AttributeAccessor#setAttribute set} on a
 	 * {@link org.springframework.beans.factory.config.BeanDefinition} so that
-	 * factory beans can signal their object type when it can't be deduced from
+	 * factory beans can signal their object type when it cannot be deduced from
 	 * the factory bean class.
 	 * @since 5.2
 	 */
@@ -79,15 +79,15 @@ public interface FactoryBean<T> {
 	 * Return an instance (possibly shared or independent) of the object
 	 * managed by this factory.
 	 * <p>As with a {@link BeanFactory}, this allows support for both the
-	 * Singleton and Prototype design pattern.
+	 * Singleton and Prototype design patterns.
 	 * <p>If this FactoryBean is not fully initialized yet at the time of
 	 * the call (for example because it is involved in a circular reference),
 	 * throw a corresponding {@link FactoryBeanNotInitializedException}.
-	 * <p>As of Spring 2.0, FactoryBeans are allowed to return {@code null}
-	 * objects. The factory will consider this as normal value to be used; it
-	 * will not throw a FactoryBeanNotInitializedException in this case anymore.
+	 * <p>FactoryBeans are allowed to return {@code null} objects. The bean
+	 * factory will consider this as a normal value to be used and will not throw
+	 * a {@code FactoryBeanNotInitializedException} in this case. However,
 	 * FactoryBean implementations are encouraged to throw
-	 * FactoryBeanNotInitializedException themselves now, as appropriate.
+	 * {@code FactoryBeanNotInitializedException} themselves, as appropriate.
 	 * @return an instance of the bean (can be {@code null})
 	 * @throws Exception in case of creation errors
 	 * @see FactoryBeanNotInitializedException
@@ -100,7 +100,7 @@ public interface FactoryBean<T> {
 	 * or {@code null} if not known in advance.
 	 * <p>This allows one to check for specific types of beans without
 	 * instantiating objects, for example on autowiring.
-	 * <p>In the case of implementations that are creating a singleton object,
+	 * <p>In the case of implementations that create a singleton object,
 	 * this method should try to avoid singleton creation as far as possible;
 	 * it should rather estimate the type in advance.
 	 * For prototypes, returning a meaningful type here is advisable too.
@@ -121,8 +121,8 @@ public interface FactoryBean<T> {
 	 * Is the object managed by this factory a singleton? That is,
 	 * will {@link #getObject()} always return the same object
 	 * (a reference that can be cached)?
-	 * <p><b>NOTE:</b> If a FactoryBean indicates to hold a singleton object,
-	 * the object returned from {@code getObject()} might get cached
+	 * <p><b>NOTE:</b> If a FactoryBean indicates that it holds a singleton
+	 * object, the object returned from {@code getObject()} might get cached
 	 * by the owning BeanFactory. Hence, do not return {@code true}
 	 * unless the FactoryBean always exposes the same reference.
 	 * <p>The singleton status of the FactoryBean itself will generally
