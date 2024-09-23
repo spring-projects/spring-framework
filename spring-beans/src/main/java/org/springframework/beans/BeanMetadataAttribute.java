@@ -96,7 +96,7 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 
 	@Override
 	public String toString() {
-		return "metadata attribute '" + this.name + "'";
+		return "metadata attribute: name='" + this.name + "'; value=" + this.value;
 	}
 
 }
