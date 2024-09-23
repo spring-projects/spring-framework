@@ -79,7 +79,7 @@ public class ConcurrentMapCacheFactoryBean
 
 	@Override
 	public void setBeanName(String beanName) {
-		if (!StringUtils.hasLength(this.name)) {
+		if (!StringUtils.hasText(this.name)) {
 			setName(beanName);
 		}
 	}
