@@ -273,6 +273,7 @@ public class ResponseBodyEmitterTests {
 	void multipleOnErrorCallbacks() throws Exception {
 		this.emitter.initialize(this.handler);
 
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		ArgumentCaptor<Consumer<Throwable>> captor = ArgumentCaptor.<Consumer<Throwable>, Consumer>forClass(Consumer.class);
 		verify(this.handler).onError(captor.capture());
 
