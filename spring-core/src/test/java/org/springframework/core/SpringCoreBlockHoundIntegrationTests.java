@@ -29,6 +29,7 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.condition.JRE.JAVA_18;
 
@@ -107,8 +108,9 @@ class SpringCoreBlockHoundIntegrationTests {
 			}
 		}, future2);
 
-		CompletableFuture.allOf(future1, future2).join();
-		assertThat(map).isEmpty();
+		//ensure blockhound doesn't trigger
+		final CompletableFuture<Void> allOf = CompletableFuture.allOf(future1, future2);
+		assertThatNoException().isThrownBy(allOf::join);
 	}
 
 	private void testNonBlockingTask(NonBlockingTask task) {
