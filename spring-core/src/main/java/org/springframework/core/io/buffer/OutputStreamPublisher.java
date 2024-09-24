@@ -54,7 +54,8 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 	private final int chunkSize;
 
 
-	OutputStreamPublisher(Consumer<OutputStream> outputStreamConsumer, DataBufferFactory bufferFactory,
+	OutputStreamPublisher(
+			Consumer<OutputStream> outputStreamConsumer, DataBufferFactory bufferFactory,
 			Executor executor, int chunkSize) {
 
 		this.outputStreamConsumer = outputStreamConsumer;
@@ -99,8 +100,9 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 
 		private long produced;
 
-		OutputStreamSubscription(Subscriber<? super DataBuffer> actual,
-				Consumer<OutputStream> outputStreamConsumer, DataBufferFactory bufferFactory, int chunkSize) {
+		OutputStreamSubscription(
+				Subscriber<? super DataBuffer> actual, Consumer<OutputStream> outputStreamConsumer,
+				DataBufferFactory bufferFactory, int chunkSize) {
 
 			this.actual = actual;
 			this.outputStreamHandler = outputStreamConsumer;
