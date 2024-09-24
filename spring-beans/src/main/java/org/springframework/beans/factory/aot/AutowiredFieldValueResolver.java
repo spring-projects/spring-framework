@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,16 +58,14 @@ public final class AutowiredFieldValueResolver extends AutowiredElementResolver 
 	private final boolean required;
 
 	@Nullable
-	private final String shortcut;
+	private final String shortcutBeanName;
 
 
-	private AutowiredFieldValueResolver(String fieldName, boolean required,
-			@Nullable String shortcut) {
-
+	private AutowiredFieldValueResolver(String fieldName, boolean required, @Nullable String shortcut) {
 		Assert.hasText(fieldName, "'fieldName' must not be empty");
 		this.fieldName = fieldName;
 		this.required = required;
-		this.shortcut = shortcut;
+		this.shortcutBeanName = shortcut;
 	}
 
 
@@ -97,7 +95,7 @@ public final class AutowiredFieldValueResolver extends AutowiredElementResolver 
 	 * direct bean name injection shortcut.
 	 * @param beanName the bean name to use as a shortcut
 	 * @return a new {@link AutowiredFieldValueResolver} instance that uses the
-	 * shortcuts
+	 * given shortcut bean name
 	 */
 	public AutowiredFieldValueResolver withShortcut(String beanName) {
 		return new AutowiredFieldValueResolver(this.fieldName, this.required, beanName);
@@ -178,8 +176,8 @@ public final class AutowiredFieldValueResolver extends AutowiredElementResolver 
 		ConfigurableBeanFactory beanFactory = registeredBean.getBeanFactory();
 		DependencyDescriptor descriptor = new DependencyDescriptor(field, this.required);
 		descriptor.setContainingClass(beanClass);
-		if (this.shortcut != null) {
-			descriptor = new ShortcutDependencyDescriptor(descriptor, this.shortcut);
+		if (this.shortcutBeanName != null) {
+			descriptor = new ShortcutDependencyDescriptor(descriptor, this.shortcutBeanName);
 		}
 		Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
 		TypeConverter typeConverter = beanFactory.getTypeConverter();

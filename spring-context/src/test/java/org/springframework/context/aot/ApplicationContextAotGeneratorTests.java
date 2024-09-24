@@ -644,18 +644,21 @@ class ApplicationContextAotGeneratorTests {
 
 	private static void testCompiledResult(GenericApplicationContext applicationContext,
 			BiConsumer<ApplicationContextInitializer<GenericApplicationContext>, Compiled> result) {
+
 		testCompiledResult(processAheadOfTime(applicationContext), result);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
 	private static void testCompiledResult(TestGenerationContext generationContext,
 			BiConsumer<ApplicationContextInitializer<GenericApplicationContext>, Compiled> result) {
+
 		TestCompiler.forSystem().with(generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(ApplicationContextInitializer.class), compiled));
 	}
 
 	private static GenericApplicationContext toFreshApplicationContext(
 			ApplicationContextInitializer<GenericApplicationContext> initializer) {
+
 		GenericApplicationContext freshApplicationContext = createFreshApplicationContext(initializer);
 		freshApplicationContext.refresh();
 		return freshApplicationContext;
@@ -663,6 +666,7 @@ class ApplicationContextAotGeneratorTests {
 
 	private static GenericApplicationContext createFreshApplicationContext(
 			ApplicationContextInitializer<GenericApplicationContext> initializer) {
+
 		GenericApplicationContext freshApplicationContext = new GenericApplicationContext();
 		initializer.initialize(freshApplicationContext);
 		return freshApplicationContext;
