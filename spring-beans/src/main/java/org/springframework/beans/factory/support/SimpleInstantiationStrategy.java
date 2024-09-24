@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
@@ -27,7 +28,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.function.ThrowingSupplier;
 
 /**
  * Simple object instantiation strategy for use in a BeanFactory.
@@ -60,7 +60,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * the  current value, if any.
 	 * @param method the factory method currently being invoked or {@code null}
 	 * @since 6.0
-	 * @deprecated in favor of {@link #instantiateWithFactoryMethod(Method, ThrowingSupplier)}
+	 * @deprecated in favor of {@link #instantiateWithFactoryMethod(Method, Supplier)}
 	 */
 	@Deprecated(since = "6.2", forRemoval = true)
 	public static void setCurrentlyInvokedFactoryMethod(@Nullable Method method) {
@@ -81,7 +81,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * @return the result of the instance supplier
 	 * @since 6.2
 	 */
-	public static <T> T instantiateWithFactoryMethod(Method method, ThrowingSupplier<T> instanceSupplier) {
+	public static <T> T instantiateWithFactoryMethod(Method method, Supplier<T> instanceSupplier) {
 		Method priorInvokedFactoryMethod = currentlyInvokedFactoryMethod.get();
 		try {
 			currentlyInvokedFactoryMethod.set(method);

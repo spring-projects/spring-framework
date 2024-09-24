@@ -122,7 +122,7 @@ class InstanceSupplierCodeGeneratorTests {
 			NoDependencyComponent bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(NoDependencyComponent.class);
 			assertThat(compiled.getSourceFile()).contains(
-					"getBeanFactory().getBean(InnerComponentConfiguration.class).new NoDependencyComponent()");
+					"InstanceSupplier.using(InnerComponentConfiguration.NoDependencyComponent::new");
 		});
 		assertThat(getReflectionHints().getTypeHint(NoDependencyComponent.class))
 				.satisfies(hasConstructorWithMode(ExecutableMode.INTROSPECT));
@@ -137,7 +137,7 @@ class InstanceSupplierCodeGeneratorTests {
 			EnvironmentAwareComponent bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(EnvironmentAwareComponent.class);
 			assertThat(compiled.getSourceFile()).contains(
-					"getBeanFactory().getBean(InnerComponentConfiguration.class).new EnvironmentAwareComponent(");
+					"new InnerComponentConfiguration.EnvironmentAwareComponent(");
 		});
 		assertThat(getReflectionHints().getTypeHint(EnvironmentAwareComponent.class))
 				.satisfies(hasConstructorWithMode(ExecutableMode.INTROSPECT));
@@ -182,7 +182,7 @@ class InstanceSupplierCodeGeneratorTests {
 			assertThat(bean).isInstanceOf(String.class);
 			assertThat(bean).isEqualTo("Hello");
 			assertThat(compiled.getSourceFile()).contains(
-					"getBeanFactory().getBean(SimpleConfiguration.class).stringBean()");
+					"getBeanFactory().getBean(\"config\", SimpleConfiguration.class).stringBean()");
 		});
 		assertThat(getReflectionHints().getTypeHint(SimpleConfiguration.class))
 				.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT));
@@ -199,7 +199,7 @@ class InstanceSupplierCodeGeneratorTests {
 			Object bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(SimpleBean.class);
 			assertThat(compiled.getSourceFile()).contains(
-					"getBeanFactory().getBean(DefaultSimpleBeanContract.class).simpleBean()");
+					"getBeanFactory().getBean(\"config\", DefaultSimpleBeanContract.class).simpleBean()");
 		});
 		assertThat(getReflectionHints().getTypeHint(SimpleBeanContract.class))
 				.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT));
@@ -228,10 +228,8 @@ class InstanceSupplierCodeGeneratorTests {
 	@Test
 	void generateWhenHasStaticFactoryMethodWithNoArg() {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
-				.rootBeanDefinition(Integer.class)
-				.setFactoryMethodOnBean("integerBean", "config").getBeanDefinition();
-		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
-				.genericBeanDefinition(SimpleConfiguration.class).getBeanDefinition());
+				.rootBeanDefinition(SimpleConfiguration.class)
+				.setFactoryMethod("integerBean").getBeanDefinition();
 		compile(beanDefinition, (instanceSupplier, compiled) -> {
 			Integer bean = getBean(beanDefinition, instanceSupplier);
 			assertThat(bean).isInstanceOf(Integer.class);
@@ -246,12 +244,10 @@ class InstanceSupplierCodeGeneratorTests {
 	@Test
 	void generateWhenHasStaticFactoryMethodWithArg() {
 		RootBeanDefinition beanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
-				.rootBeanDefinition(String.class)
-				.setFactoryMethodOnBean("create", "config").getBeanDefinition();
+				.rootBeanDefinition(SimpleConfiguration.class)
+				.setFactoryMethod("create").getBeanDefinition();
 		beanDefinition.setResolvedFactoryMethod(ReflectionUtils
 				.findMethod(SampleFactory.class, "create", Number.class, String.class));
-		this.beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
-				.genericBeanDefinition(SampleFactory.class).getBeanDefinition());
 		this.beanFactory.registerSingleton("number", 42);
 		this.beanFactory.registerSingleton("string", "test");
 		compile(beanDefinition, (instanceSupplier, compiled) -> {
@@ -265,7 +261,7 @@ class InstanceSupplierCodeGeneratorTests {
 	}
 
 	@Test
-	void generateWhenHasStaticFactoryMethodCheckedException() {
+	void generateWhenHasFactoryMethodCheckedException() {
 		BeanDefinition beanDefinition = BeanDefinitionBuilder
 				.rootBeanDefinition(Integer.class)
 				.setFactoryMethodOnBean("throwingIntegerBean", "config")
@@ -281,6 +277,62 @@ class InstanceSupplierCodeGeneratorTests {
 		assertThat(getReflectionHints().getTypeHint(SimpleConfiguration.class))
 				.satisfies(hasMethodWithMode(ExecutableMode.INTROSPECT));
 	}
+
+
+	private ReflectionHints getReflectionHints() {
+		return this.generationContext.getRuntimeHints().reflection();
+	}
+
+	private ThrowingConsumer<TypeHint> hasConstructorWithMode(ExecutableMode mode) {
+		return hint -> assertThat(hint.constructors()).anySatisfy(hasMode(mode));
+	}
+
+	private ThrowingConsumer<TypeHint> hasMethodWithMode(ExecutableMode mode) {
+		return hint -> assertThat(hint.methods()).anySatisfy(hasMode(mode));
+	}
+
+	private ThrowingConsumer<ExecutableHint> hasMode(ExecutableMode mode) {
+		return hint -> assertThat(hint.getMode()).isEqualTo(mode);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T getBean(BeanDefinition beanDefinition, InstanceSupplier<?> instanceSupplier) {
+		((RootBeanDefinition) beanDefinition).setInstanceSupplier(instanceSupplier);
+		this.beanFactory.registerBeanDefinition("testBean", beanDefinition);
+		return (T) this.beanFactory.getBean("testBean");
+	}
+
+	private void compile(BeanDefinition beanDefinition, BiConsumer<InstanceSupplier<?>, Compiled> result) {
+		compile(TestCompiler.forSystem(), beanDefinition, result);
+	}
+
+	private void compile(TestCompiler testCompiler, BeanDefinition beanDefinition,
+			BiConsumer<InstanceSupplier<?>, Compiled> result) {
+
+		DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory(this.beanFactory);
+		freshBeanFactory.registerBeanDefinition("testBean", beanDefinition);
+		RegisteredBean registeredBean = RegisteredBean.of(freshBeanFactory, "testBean");
+		DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
+		GeneratedClass generateClass = this.generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
+		InstanceSupplierCodeGenerator generator = new InstanceSupplierCodeGenerator(
+				this.generationContext, generateClass.getName(),
+				generateClass.getMethods(), false);
+		InstantiationDescriptor instantiationDescriptor = registeredBean.resolveInstantiationDescriptor();
+		assertThat(instantiationDescriptor).isNotNull();
+		CodeBlock generatedCode = generator.generateCode(registeredBean, instantiationDescriptor);
+		typeBuilder.set(type -> {
+			type.addModifiers(Modifier.PUBLIC);
+			type.addSuperinterface(ParameterizedTypeName.get(Supplier.class, InstanceSupplier.class));
+			type.addMethod(MethodSpec.methodBuilder("get")
+					.addModifiers(Modifier.PUBLIC)
+					.returns(InstanceSupplier.class)
+					.addStatement("return $L", generatedCode).build());
+		});
+		this.generationContext.writeGeneratedContent();
+		testCompiler.with(this.generationContext).compile(compiled -> result.accept(
+				(InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
+	}
+
 
 	@Nested
 	@SuppressWarnings("deprecation")
@@ -335,8 +387,8 @@ class InstanceSupplierCodeGeneratorTests {
 			assertThatNoException().isThrownBy(() -> compile(TEST_COMPILER, beanDefinition,
 					((instanceSupplier, compiled) -> {})));
 		}
-
 	}
+
 
 	@Nested
 	@SuppressWarnings("removal")
@@ -381,61 +433,6 @@ class InstanceSupplierCodeGeneratorTests {
 			assertThatNoException().isThrownBy(() -> compile(TEST_COMPILER, beanDefinition,
 					((instanceSupplier, compiled) -> {})));
 		}
-
-	}
-
-	private ReflectionHints getReflectionHints() {
-		return this.generationContext.getRuntimeHints().reflection();
-	}
-
-	private ThrowingConsumer<TypeHint> hasConstructorWithMode(ExecutableMode mode) {
-		return hint -> assertThat(hint.constructors()).anySatisfy(hasMode(mode));
-	}
-
-	private ThrowingConsumer<TypeHint> hasMethodWithMode(ExecutableMode mode) {
-		return hint -> assertThat(hint.methods()).anySatisfy(hasMode(mode));
-	}
-
-	private ThrowingConsumer<ExecutableHint> hasMode(ExecutableMode mode) {
-		return hint -> assertThat(hint.getMode()).isEqualTo(mode);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> T getBean(BeanDefinition beanDefinition, InstanceSupplier<?> instanceSupplier) {
-		((RootBeanDefinition) beanDefinition).setInstanceSupplier(instanceSupplier);
-		this.beanFactory.registerBeanDefinition("testBean", beanDefinition);
-		return (T) this.beanFactory.getBean("testBean");
-	}
-
-	private void compile(BeanDefinition beanDefinition, BiConsumer<InstanceSupplier<?>, Compiled> result) {
-		compile(TestCompiler.forSystem(), beanDefinition, result);
-	}
-
-	private void compile(TestCompiler testCompiler, BeanDefinition beanDefinition,
-			BiConsumer<InstanceSupplier<?>, Compiled> result) {
-
-		DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory(this.beanFactory);
-		freshBeanFactory.registerBeanDefinition("testBean", beanDefinition);
-		RegisteredBean registeredBean = RegisteredBean.of(freshBeanFactory, "testBean");
-		DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
-		GeneratedClass generateClass = this.generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
-		InstanceSupplierCodeGenerator generator = new InstanceSupplierCodeGenerator(
-				this.generationContext, generateClass.getName(),
-				generateClass.getMethods(), false);
-		InstantiationDescriptor instantiationDescriptor = registeredBean.resolveInstantiationDescriptor();
-		assertThat(instantiationDescriptor).isNotNull();
-		CodeBlock generatedCode = generator.generateCode(registeredBean, instantiationDescriptor);
-		typeBuilder.set(type -> {
-			type.addModifiers(Modifier.PUBLIC);
-			type.addSuperinterface(ParameterizedTypeName.get(Supplier.class, InstanceSupplier.class));
-			type.addMethod(MethodSpec.methodBuilder("get")
-					.addModifiers(Modifier.PUBLIC)
-					.returns(InstanceSupplier.class)
-					.addStatement("return $L", generatedCode).build());
-		});
-		this.generationContext.writeGeneratedContent();
-		testCompiler.with(this.generationContext).compile(compiled -> result.accept(
-				(InstanceSupplier<?>) compiled.getInstance(Supplier.class).get(), compiled));
 	}
 
 }

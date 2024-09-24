@@ -53,6 +53,8 @@ import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
@@ -79,26 +81,24 @@ class BeanInstanceSupplierTests {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
+
 	@Test
 	void forConstructorWhenParameterTypesIsNullThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> BeanInstanceSupplier
-						.forConstructor((Class<?>[]) null))
+				.isThrownBy(() -> BeanInstanceSupplier.forConstructor((Class<?>[]) null))
 				.withMessage("'parameterTypes' must not be null");
 	}
 
 	@Test
 	void forConstructorWhenParameterTypesContainsNullThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> BeanInstanceSupplier
-						.forConstructor(String.class, null))
+				.isThrownBy(() -> BeanInstanceSupplier.forConstructor(String.class, null))
 				.withMessage("'parameterTypes' must not contain null elements");
 	}
 
 	@Test
 	void forConstructorWhenNotFoundThrowsException() {
-		BeanInstanceSupplier<InputStream> resolver = BeanInstanceSupplier
-				.forConstructor(InputStream.class);
+		BeanInstanceSupplier<InputStream> resolver = BeanInstanceSupplier.forConstructor(InputStream.class);
 		Source source = new Source(SingleArgConstructor.class, resolver);
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
 		assertThatIllegalArgumentException()
@@ -116,41 +116,37 @@ class BeanInstanceSupplierTests {
 	@Test
 	void forFactoryMethodWhenDeclaringClassIsNullThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> BeanInstanceSupplier
-						.forFactoryMethod(null, "test"))
+				.isThrownBy(() -> BeanInstanceSupplier.forFactoryMethod(null, "test"))
 				.withMessage("'declaringClass' must not be null");
 	}
 
 	@Test
 	void forFactoryMethodWhenNameIsEmptyThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> BeanInstanceSupplier
-						.forFactoryMethod(SingleArgFactory.class, ""))
+				.isThrownBy(() -> BeanInstanceSupplier.forFactoryMethod(SingleArgFactory.class, ""))
 				.withMessage("'methodName' must not be empty");
 	}
 
 	@Test
 	void forFactoryMethodWhenParameterTypesIsNullThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(
-						() -> BeanInstanceSupplier.forFactoryMethod(
-								SingleArgFactory.class, "single", (Class<?>[]) null))
+				.isThrownBy(() -> BeanInstanceSupplier.forFactoryMethod(
+						SingleArgFactory.class, "single", (Class<?>[]) null))
 				.withMessage("'parameterTypes' must not be null");
 	}
 
 	@Test
 	void forFactoryMethodWhenParameterTypesContainsNullThrowsException() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(
-						() -> BeanInstanceSupplier.forFactoryMethod(
-								SingleArgFactory.class, "single", String.class, null))
+				.isThrownBy(() -> BeanInstanceSupplier.forFactoryMethod(
+						SingleArgFactory.class, "single", String.class, null))
 				.withMessage("'parameterTypes' must not contain null elements");
 	}
 
 	@Test
 	void forFactoryMethodWhenNotFoundThrowsException() {
-		BeanInstanceSupplier<InputStream> resolver = BeanInstanceSupplier
-				.forFactoryMethod(SingleArgFactory.class, "single", InputStream.class);
+		BeanInstanceSupplier<InputStream> resolver = BeanInstanceSupplier.forFactoryMethod(
+				SingleArgFactory.class, "single", InputStream.class);
 		Source source = new Source(String.class, resolver);
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
 		assertThatIllegalArgumentException()
@@ -161,8 +157,8 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void forFactoryMethodReturnsFactoryMethod() {
-		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier
-				.forFactoryMethod(SingleArgFactory.class, "single", String.class);
+		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier.forFactoryMethod(
+				SingleArgFactory.class, "single", String.class);
 		Method factoryMethod = ReflectionUtils.findMethod(SingleArgFactory.class, "single", String.class);
 		assertThat(factoryMethod).isNotNull();
 		assertThat(resolver.getFactoryMethod()).isEqualTo(factoryMethod);
@@ -170,21 +166,17 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void withGeneratorWhenBiFunctionIsNullThrowsException() {
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
-				.forConstructor();
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor();
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> resolver.withGenerator(
-						(ThrowingBiFunction<RegisteredBean, AutowiredArguments, Object>) null))
+				.isThrownBy(() -> resolver.withGenerator((ThrowingBiFunction<RegisteredBean, AutowiredArguments, Object>) null))
 				.withMessage("'generator' must not be null");
 	}
 
 	@Test
 	void withGeneratorWhenFunctionIsNullThrowsException() {
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
-				.forConstructor();
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor();
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> resolver.withGenerator(
-						(ThrowingFunction<RegisteredBean, Object>) null))
+				.isThrownBy(() -> resolver.withGenerator((ThrowingFunction<RegisteredBean, Object>) null))
 				.withMessage("'generator' must not be null");
 	}
 
@@ -192,23 +184,20 @@ class BeanInstanceSupplierTests {
 	@Deprecated
 	@SuppressWarnings("removal")
 	void withGeneratorWhenSupplierIsNullThrowsException() {
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
-				.forConstructor();
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor();
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> resolver.withGenerator(
-						(ThrowingSupplier<Object>) null))
+				.isThrownBy(() -> resolver.withGenerator((ThrowingSupplier<Object>) null))
 				.withMessage("'generator' must not be null");
 	}
 
 	@Test
-	void getWithConstructorDoesNotSetResolvedFactoryMethod() throws Exception {
-		BeanInstanceSupplier<SingleArgConstructor> resolver = BeanInstanceSupplier
-				.forConstructor(String.class);
+	void getWithConstructorDoesNotSetResolvedFactoryMethod() {
+		BeanInstanceSupplier<SingleArgConstructor> resolver = BeanInstanceSupplier.forConstructor(String.class);
 		this.beanFactory.registerSingleton("one", "1");
 		Source source = new Source(SingleArgConstructor.class, resolver);
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
 		assertThat(registerBean.getMergedBeanDefinition().getResolvedFactoryMethod()).isNull();
-		source.getResolver().get(registerBean);
+		source.getSupplier().get(registerBean);
 		assertThat(registerBean.getMergedBeanDefinition().getResolvedFactoryMethod()).isNull();
 	}
 
@@ -218,20 +207,19 @@ class BeanInstanceSupplierTests {
 		assertThat(factoryMethod).isNotNull();
 		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier
 				.forFactoryMethod(SingleArgFactory.class, "single", String.class);
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);
-		assertThat(beanDefinition.getResolvedFactoryMethod()).isNull();
-		beanDefinition.setInstanceSupplier(resolver);
-		assertThat(beanDefinition.getResolvedFactoryMethod()).isEqualTo(factoryMethod);
+		RootBeanDefinition bd = new RootBeanDefinition(String.class);
+		assertThat(bd.getResolvedFactoryMethod()).isNull();
+		bd.setInstanceSupplier(resolver);
+		assertThat(bd.getResolvedFactoryMethod()).isEqualTo(factoryMethod);
 	}
 
 	@Test
-	void getWithGeneratorCallsBiFunction() throws Exception {
+	void getWithGeneratorCallsBiFunction() {
 		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
 		List<Object> result = new ArrayList<>();
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
-				.forConstructor(String.class)
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class)
 				.withGenerator((registeredBean, args) -> result.add(args));
 		resolver.get(registerBean);
 		assertThat(result).hasSize(1);
@@ -239,12 +227,11 @@ class BeanInstanceSupplierTests {
 	}
 
 	@Test
-	void getWithGeneratorCallsFunction() throws Exception {
+	void getWithGeneratorCallsFunction() {
 		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
-		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier
-				.<String>forConstructor(String.class)
+		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier.<String>forConstructor(String.class)
 				.withGenerator(registeredBean -> "1");
 		assertThat(resolver.get(registerBean)).isInstanceOf(String.class).isEqualTo("1");
 	}
@@ -252,30 +239,28 @@ class BeanInstanceSupplierTests {
 	@Test
 	@Deprecated
 	@SuppressWarnings("removal")
-	void getWithGeneratorCallsSupplier() throws Exception {
+	void getWithGeneratorCallsSupplier() {
 		BeanRegistrar registrar = new BeanRegistrar(SingleArgConstructor.class);
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registerBean = registrar.registerBean(this.beanFactory);
-		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier
-				.<String>forConstructor(String.class)
+		BeanInstanceSupplier<String> resolver = BeanInstanceSupplier.<String>forConstructor(String.class)
 				.withGenerator(() -> "1");
 		assertThat(resolver.get(registerBean)).isInstanceOf(String.class).isEqualTo("1");
 	}
 
 	@Test
 	void getWhenRegisteredBeanIsNullThrowsException() {
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
-				.forConstructor(String.class);
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class);
 		assertThatIllegalArgumentException().isThrownBy(() -> resolver.get((RegisteredBean) null))
 				.withMessage("'registeredBean' must not be null");
 	}
 
 	@ParameterizedResolverTest(Sources.SINGLE_ARG)
-	void getWithNoGeneratorUsesReflection(Source source) throws Exception {
+	void getWithNoGeneratorUsesReflection(Source source) {
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("testFactory", new SingleArgFactory());
-		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		Object instance = source.getResolver().get(registerBean);
+		RegisteredBean registerBean = source.registerBean(this.beanFactory, bd -> bd.setFactoryBeanName("testFactory"));
+		Object instance = source.getSupplier().get(registerBean);
 		if (instance instanceof SingleArgConstructor singleArgConstructor) {
 			instance = singleArgConstructor.getString();
 		}
@@ -283,32 +268,38 @@ class BeanInstanceSupplierTests {
 	}
 
 	@ParameterizedResolverTest(Sources.INNER_CLASS_SINGLE_ARG)
-	void getNestedWithNoGeneratorUsesReflection(Source source) throws Exception {
+	void getNestedWithNoGeneratorUsesReflection(Source source) {
 		this.beanFactory.registerSingleton("one", "1");
-		this.beanFactory.registerSingleton("testFactory",
-				new Enclosing().new InnerSingleArgFactory());
-		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		Object instance = source.getResolver().get(registerBean);
+		this.beanFactory.registerSingleton("testFactory", new Enclosing.InnerSingleArgFactory());
+		RegisteredBean registerBean = source.registerBean(this.beanFactory, bd -> bd.setFactoryBeanName("testFactory"));
+		Object instance = source.getSupplier().get(registerBean);
 		if (instance instanceof InnerSingleArgConstructor innerSingleArgConstructor) {
 			instance = innerSingleArgConstructor.getString();
 		}
 		assertThat(instance).isEqualTo("1");
 	}
 
-	@Test // gh-33180
-	void getWithNestedInvocationRetainsFactoryMethod() throws Exception {
+	@Test  // gh-33180
+	void getWithNestedInvocationRetainsFactoryMethod() {
 		AtomicReference<Method> testMethodReference = new AtomicReference<>();
 		AtomicReference<Method> anotherMethodReference = new AtomicReference<>();
 
+		Enhancer enhancer = new Enhancer();
+		enhancer.setCallbackType(NoOp.class);
+		enhancer.setSuperclass(AnotherTestStringFactory.class);
+		Class<?> nestedSupplierClass = enhancer.createClass();
+		enhancer.setSuperclass(TestStringFactory.class);
+		Class<?> supplierClass = enhancer.createClass();
+
 		BeanInstanceSupplier<Object> nestedInstanceSupplier = BeanInstanceSupplier
-				.forFactoryMethod(AnotherTestStringFactory.class, "another")
+				.forFactoryMethod(nestedSupplierClass, "another")
 				.withGenerator(registeredBean -> {
 					anotherMethodReference.set(SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod());
 					return "Another";
 				});
 		RegisteredBean nestedRegisteredBean = new Source(String.class, nestedInstanceSupplier).registerBean(this.beanFactory);
 		BeanInstanceSupplier<Object> instanceSupplier = BeanInstanceSupplier
-				.forFactoryMethod(TestStringFactory.class, "test")
+				.forFactoryMethod(supplierClass, "test")
 				.withGenerator(registeredBean -> {
 					Object nested = nestedInstanceSupplier.get(nestedRegisteredBean);
 					testMethodReference.set(SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod());
@@ -324,12 +315,10 @@ class BeanInstanceSupplierTests {
 
 	@Test
 	void resolveArgumentsWithNoArgConstructor() {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(
-				NoArgConstructor.class);
-		this.beanFactory.registerBeanDefinition("test", beanDefinition);
+		RootBeanDefinition bd = new RootBeanDefinition(NoArgConstructor.class);
+		this.beanFactory.registerBeanDefinition("test", bd);
 		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, "test");
-		AutowiredArguments resolved = BeanInstanceSupplier
-				.forConstructor().resolveArguments(registeredBean);
+		AutowiredArguments resolved = BeanInstanceSupplier.forConstructor().resolveArguments(registeredBean);
 		assertThat(resolved.toArray()).isEmpty();
 	}
 
@@ -337,7 +326,7 @@ class BeanInstanceSupplierTests {
 	void resolveArgumentsWithSingleArgConstructor(Source source) {
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registeredBean = source.registerBean(this.beanFactory);
-		assertThat(source.getResolver().resolveArguments(registeredBean).toArray())
+		assertThat(source.getSupplier().resolveArguments(registeredBean).toArray())
 				.containsExactly("1");
 	}
 
@@ -345,16 +334,15 @@ class BeanInstanceSupplierTests {
 	void resolveArgumentsWithNestedSingleArgConstructor(Source source) {
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registeredBean = source.registerBean(this.beanFactory);
-		assertThat(source.getResolver().resolveArguments(registeredBean).toArray())
+		assertThat(source.getSupplier().resolveArguments(registeredBean).toArray())
 				.containsExactly("1");
 	}
 
 	@ParameterizedResolverTest(Sources.SINGLE_ARG)
-	void resolveArgumentsWithRequiredDependencyNotPresentThrowsUnsatisfiedDependencyException(
-			Source source) {
+	void resolveArgumentsWithRequiredDependencyNotPresentThrowsUnsatisfiedDependencyException(Source source) {
 		RegisteredBean registeredBean = source.registerBean(this.beanFactory);
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
-				.isThrownBy(() -> source.getResolver().resolveArguments(registeredBean))
+				.isThrownBy(() -> source.getSupplier().resolveArguments(registeredBean))
 				.satisfies(ex -> {
 					assertThat(ex.getBeanName()).isEqualTo("testBean");
 					assertThat(ex.getInjectionPoint()).isNotNull();
@@ -368,14 +356,14 @@ class BeanInstanceSupplierTests {
 		// SingleArgFactory.single(...) expects a String to be injected
 		// and our own bean is a String, so it's a valid candidate
 		this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);
-		beanDefinition.setInstanceSupplier(InstanceSupplier.of(registeredBean -> {
+		RootBeanDefinition bd = new RootBeanDefinition(String.class);
+		bd.setInstanceSupplier(InstanceSupplier.of(registeredBean -> {
 			AutowiredArguments args = BeanInstanceSupplier
 					.forFactoryMethod(SingleArgFactory.class, "single", String.class)
 					.resolveArguments(registeredBean);
 			return new SingleArgFactory().single(args.get(0));
 		}));
-		this.beanFactory.registerBeanDefinition("test", beanDefinition);
+		this.beanFactory.registerBeanDefinition("test", bd);
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
 				.isThrownBy(() -> this.beanFactory.getBean("test"));
 	}
@@ -385,7 +373,7 @@ class BeanInstanceSupplierTests {
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat((Object[]) arguments.get(0)).containsExactly("1", "2");
 	}
@@ -393,7 +381,7 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.ARRAY_OF_BEANS)
 	void resolveArgumentsWithRequiredArrayOfBeansInjectEmptyArray(Source source) {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat((Object[]) arguments.get(0)).isEmpty();
 	}
@@ -403,7 +391,7 @@ class BeanInstanceSupplierTests {
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat(arguments.getObject(0)).isInstanceOf(List.class).asInstanceOf(LIST)
 				.containsExactly("1", "2");
@@ -412,7 +400,7 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.LIST_OF_BEANS)
 	void resolveArgumentsWithRequiredListOfBeansInjectEmptyList(Source source) {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat((List<?>) arguments.get(0)).isEmpty();
 	}
@@ -423,7 +411,7 @@ class BeanInstanceSupplierTests {
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat((Set<String>) arguments.get(0)).containsExactly("1", "2");
 	}
@@ -431,7 +419,7 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.SET_OF_BEANS)
 	void resolveArgumentsWithRequiredSetOfBeansInjectEmptySet(Source source) {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat((Set<?>) arguments.get(0)).isEmpty();
 	}
@@ -442,7 +430,7 @@ class BeanInstanceSupplierTests {
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat((Map<String, String>) arguments.get(0))
 				.containsExactly(entry("one", "1"), entry("two", "2"));
@@ -451,7 +439,7 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.MAP_OF_BEANS)
 	void resolveArgumentsWithRequiredMapOfBeansInjectEmptySet(Source source) {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat((Map<?, ?>) arguments.get(0)).isEmpty();
 	}
@@ -460,17 +448,15 @@ class BeanInstanceSupplierTests {
 	void resolveArgumentsWithMultiArgsConstructor(Source source) {
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
 		Environment environment = mock();
-		this.beanFactory.registerResolvableDependency(ResourceLoader.class,
-				resourceLoader);
+		this.beanFactory.registerResolvableDependency(ResourceLoader.class, resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(3);
 		assertThat(arguments.getObject(0)).isEqualTo(resourceLoader);
 		assertThat(arguments.getObject(1)).isEqualTo(environment);
-		assertThat(((ObjectProvider<?>) arguments.get(2)).getIfAvailable())
-				.isEqualTo("1");
+		assertThat(((ObjectProvider<?>) arguments.get(2)).getIfAvailable()).isEqualTo("1");
 	}
 
 	@ParameterizedResolverTest(Sources.MIXED_ARGS)
@@ -481,13 +467,11 @@ class BeanInstanceSupplierTests {
 				resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);
 		RegisteredBean registerBean = source.registerBean(this.beanFactory,
-				beanDefinition -> {
-					beanDefinition
-							.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-					beanDefinition.getConstructorArgumentValues()
-							.addIndexedArgumentValue(1, "user-value");
+				bd -> {
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+					bd.getConstructorArgumentValues().addIndexedArgumentValue(1, "user-value");
 				});
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(3);
 		assertThat(arguments.getObject(0)).isEqualTo(resourceLoader);
 		assertThat(arguments.getObject(1)).isEqualTo("user-value");
@@ -502,13 +486,11 @@ class BeanInstanceSupplierTests {
 				resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);
 		RegisteredBean registerBean = source.registerBean(this.beanFactory,
-				beanDefinition -> {
-					beanDefinition
-							.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-					beanDefinition.getConstructorArgumentValues()
-							.addGenericArgumentValue("user-value");
+				bd -> {
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+					bd.getConstructorArgumentValues().addGenericArgumentValue("user-value");
 				});
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(3);
 		assertThat(arguments.getObject(0)).isEqualTo(resourceLoader);
 		assertThat(arguments.getObject(1)).isEqualTo("user-value");
@@ -519,19 +501,17 @@ class BeanInstanceSupplierTests {
 	void resolveArgumentsWithMixedArgsConstructorAndIndexedUserBeanReference(Source source) {
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
 		Environment environment = mock();
-		this.beanFactory.registerResolvableDependency(ResourceLoader.class,
-				resourceLoader);
+		this.beanFactory.registerResolvableDependency(ResourceLoader.class, resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registerBean = source.registerBean(this.beanFactory,
-				beanDefinition -> {
-					beanDefinition
-							.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-					beanDefinition.getConstructorArgumentValues()
-							.addIndexedArgumentValue(1, new RuntimeBeanReference("two"));
+				bd -> {
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+					bd.getConstructorArgumentValues().addIndexedArgumentValue(
+							1, new RuntimeBeanReference("two"));
 				});
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(3);
 		assertThat(arguments.getObject(0)).isEqualTo(resourceLoader);
 		assertThat(arguments.getObject(1)).isEqualTo("2");
@@ -542,19 +522,16 @@ class BeanInstanceSupplierTests {
 	void resolveArgumentsWithMixedArgsConstructorAndGenericUserBeanReference(Source source) {
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
 		Environment environment = mock();
-		this.beanFactory.registerResolvableDependency(ResourceLoader.class,
-				resourceLoader);
+		this.beanFactory.registerResolvableDependency(ResourceLoader.class, resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registerBean = source.registerBean(this.beanFactory,
-				beanDefinition -> {
-					beanDefinition
-							.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-					beanDefinition.getConstructorArgumentValues()
-							.addGenericArgumentValue(new RuntimeBeanReference("two"));
+				bd -> {
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+					bd.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference("two"));
 				});
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(3);
 		assertThat(arguments.getObject(0)).isEqualTo(resourceLoader);
 		assertThat(arguments.getObject(1)).isEqualTo("2");
@@ -566,13 +543,11 @@ class BeanInstanceSupplierTests {
 		Source source = new Source(CharDependency.class,
 				BeanInstanceSupplier.forConstructor(char.class));
 		RegisteredBean registerBean = source.registerBean(this.beanFactory,
-				beanDefinition -> {
-					beanDefinition
-							.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-					beanDefinition.getConstructorArgumentValues()
-							.addIndexedArgumentValue(0, "\\");
+				bd -> {
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+					bd.getConstructorArgumentValues().addIndexedArgumentValue(0, "\\");
 				});
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat(arguments.getObject(0)).isInstanceOf(Character.class).isEqualTo('\\');
 	}
@@ -582,13 +557,11 @@ class BeanInstanceSupplierTests {
 		Source source = new Source(CharDependency.class,
 				BeanInstanceSupplier.forConstructor(char.class));
 		RegisteredBean registerBean = source.registerBean(this.beanFactory,
-				beanDefinition -> {
-					beanDefinition
-							.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-					beanDefinition.getConstructorArgumentValues()
-							.addGenericArgumentValue("\\", char.class.getName());
+				bd -> {
+					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+					bd.getConstructorArgumentValues().addGenericArgumentValue("\\", char.class.getName());
 				});
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat(arguments.getObject(0)).isInstanceOf(Character.class).isEqualTo('\\');
 	}
@@ -597,10 +570,9 @@ class BeanInstanceSupplierTests {
 	void resolveIndexedArgumentsWithUserValueWithBeanReference(Source source) {
 		this.beanFactory.registerSingleton("stringBean", "string");
 		RegisteredBean registerBean = source.registerBean(this.beanFactory,
-				beanDefinition -> beanDefinition.getConstructorArgumentValues()
-						.addIndexedArgumentValue(0,
-								new RuntimeBeanReference("stringBean")));
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+				bd -> bd.getConstructorArgumentValues()
+						.addIndexedArgumentValue(0, new RuntimeBeanReference("stringBean")));
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat(arguments.getObject(0)).isEqualTo("string");
 	}
@@ -609,33 +581,31 @@ class BeanInstanceSupplierTests {
 	void resolveGenericArgumentsWithUserValueWithBeanReference(Source source) {
 		this.beanFactory.registerSingleton("stringBean", "string");
 		RegisteredBean registerBean = source.registerBean(this.beanFactory,
-				beanDefinition -> beanDefinition.getConstructorArgumentValues()
+				bd -> bd.getConstructorArgumentValues()
 						.addGenericArgumentValue(new RuntimeBeanReference("stringBean")));
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat(arguments.getObject(0)).isEqualTo("string");
 	}
 
 	@ParameterizedResolverTest(Sources.SINGLE_ARG)
 	void resolveIndexedArgumentsWithUserValueWithBeanDefinition(Source source) {
-		AbstractBeanDefinition userValue = BeanDefinitionBuilder
-				.rootBeanDefinition(String.class, () -> "string").getBeanDefinition();
+		AbstractBeanDefinition userValue = BeanDefinitionBuilder.rootBeanDefinition(
+				String.class, () -> "string").getBeanDefinition();
 		RegisteredBean registerBean = source.registerBean(this.beanFactory,
-				beanDefinition -> beanDefinition.getConstructorArgumentValues()
-						.addIndexedArgumentValue(0, userValue));
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+				bd -> bd.getConstructorArgumentValues().addIndexedArgumentValue(0, userValue));
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat(arguments.getObject(0)).isEqualTo("string");
 	}
 
 	@ParameterizedResolverTest(Sources.SINGLE_ARG)
 	void resolveGenericArgumentsWithUserValueWithBeanDefinition(Source source) {
-		AbstractBeanDefinition userValue = BeanDefinitionBuilder
-				.rootBeanDefinition(String.class, () -> "string").getBeanDefinition();
+		AbstractBeanDefinition userValue = BeanDefinitionBuilder.rootBeanDefinition(
+				String.class, () -> "string").getBeanDefinition();
 		RegisteredBean registerBean = source.registerBean(this.beanFactory,
-				beanDefinition -> beanDefinition.getConstructorArgumentValues()
-						.addGenericArgumentValue(userValue));
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+				bd -> bd.getConstructorArgumentValues().addGenericArgumentValue(userValue));
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat(arguments.getObject(0)).isEqualTo("string");
 	}
@@ -643,13 +613,11 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.SINGLE_ARG)
 	void resolveIndexedArgumentsWithUserValueThatIsAlreadyResolved(Source source) {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		BeanDefinition mergedBeanDefinition = this.beanFactory
-				.getMergedBeanDefinition("testBean");
+		BeanDefinition mergedBeanDefinition = this.beanFactory.getMergedBeanDefinition("testBean");
 		ValueHolder valueHolder = new ValueHolder("a");
 		valueHolder.setConvertedValue("this is an a");
-		mergedBeanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0,
-				valueHolder);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		mergedBeanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, valueHolder);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat(arguments.getObject(0)).isEqualTo("this is an a");
 	}
@@ -657,12 +625,11 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.SINGLE_ARG)
 	void resolveGenericArgumentsWithUserValueThatIsAlreadyResolved(Source source) {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
-		BeanDefinition mergedBeanDefinition = this.beanFactory
-				.getMergedBeanDefinition("testBean");
+		BeanDefinition mergedBeanDefinition = this.beanFactory.getMergedBeanDefinition("testBean");
 		ValueHolder valueHolder = new ValueHolder("a");
 		valueHolder.setConvertedValue("this is an a");
 		mergedBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(valueHolder);
-		AutowiredArguments arguments = source.getResolver().resolveArguments(registerBean);
+		AutowiredArguments arguments = source.getSupplier().resolveArguments(registerBean);
 		assertThat(arguments.toArray()).hasSize(1);
 		assertThat(arguments.getObject(0)).isEqualTo("this is an a");
 	}
@@ -678,27 +645,26 @@ class BeanInstanceSupplierTests {
 			}
 
 		};
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
-				.forConstructor(String.class);
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class);
 		Source source = new Source(String.class, resolver);
 		beanFactory.registerSingleton("one", "1");
 		RegisteredBean registeredBean = source.registerBean(beanFactory);
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> resolver.resolveArguments(registeredBean));
-		assertThat(resolver.withShortcuts("one").resolveArguments(registeredBean).toArray())
+		assertThat(resolver.withShortcut("one").resolveArguments(registeredBean).toArray())
 				.containsExactly("1");
 	}
 
 	@Test
 	void resolveArgumentsRegistersDependantBeans() {
-		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier
-				.forConstructor(String.class);
+		BeanInstanceSupplier<Object> resolver = BeanInstanceSupplier.forConstructor(String.class);
 		Source source = new Source(SingleArgConstructor.class, resolver);
 		this.beanFactory.registerSingleton("one", "1");
 		RegisteredBean registeredBean = source.registerBean(this.beanFactory);
 		resolver.resolveArguments(registeredBean);
 		assertThat(this.beanFactory.getDependentBeans("one")).containsExactly("testBean");
 	}
+
 
 	/**
 	 * Parameterized test backed by a {@link Sources}.
@@ -709,14 +675,13 @@ class BeanInstanceSupplierTests {
 	@interface ParameterizedResolverTest {
 
 		Sources value();
-
 	}
+
 
 	/**
 	 * {@link ArgumentsProvider} delegating to the {@link Sources}.
 	 */
-	static class SourcesArguments
-			implements ArgumentsProvider, AnnotationConsumer<ParameterizedResolverTest> {
+	static class SourcesArguments implements ArgumentsProvider, AnnotationConsumer<ParameterizedResolverTest> {
 
 		private Sources source;
 
@@ -729,8 +694,8 @@ class BeanInstanceSupplierTests {
 		public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
 			return this.source.provideArguments(context);
 		}
-
 	}
+
 
 	/**
 	 * Sources for parameterized tests.
@@ -740,11 +705,9 @@ class BeanInstanceSupplierTests {
 		SINGLE_ARG {
 			@Override
 			protected void setup() {
-				add(SingleArgConstructor.class, BeanInstanceSupplier
-						.forConstructor(String.class));
-				add(String.class,
-						BeanInstanceSupplier.forFactoryMethod(
-								SingleArgFactory.class, "single", String.class));
+				add(SingleArgConstructor.class, BeanInstanceSupplier.forConstructor(String.class));
+				add(String.class, BeanInstanceSupplier.forFactoryMethod(
+						SingleArgFactory.class, "single", String.class));
 			}
 
 		},
@@ -752,13 +715,9 @@ class BeanInstanceSupplierTests {
 		INNER_CLASS_SINGLE_ARG {
 			@Override
 			protected void setup() {
-				add(Enclosing.InnerSingleArgConstructor.class,
-						BeanInstanceSupplier
-								.forConstructor(String.class));
-				add(String.class,
-						BeanInstanceSupplier.forFactoryMethod(
-								Enclosing.InnerSingleArgFactory.class, "single",
-								String.class));
+				add(Enclosing.InnerSingleArgConstructor.class, BeanInstanceSupplier.forConstructor(String.class));
+				add(String.class, BeanInstanceSupplier.forFactoryMethod(
+						Enclosing.InnerSingleArgFactory.class, "single", String.class));
 			}
 
 		},
@@ -766,12 +725,9 @@ class BeanInstanceSupplierTests {
 		ARRAY_OF_BEANS {
 			@Override
 			protected void setup() {
-				add(BeansCollectionConstructor.class,
-						BeanInstanceSupplier
-								.forConstructor(String[].class));
-				add(String.class,
-						BeanInstanceSupplier.forFactoryMethod(
-								BeansCollectionFactory.class, "array", String[].class));
+				add(BeansCollectionConstructor.class, BeanInstanceSupplier.forConstructor(String[].class));
+				add(String.class, BeanInstanceSupplier.forFactoryMethod(
+						BeansCollectionFactory.class, "array", String[].class));
 			}
 
 		},
@@ -779,12 +735,9 @@ class BeanInstanceSupplierTests {
 		LIST_OF_BEANS {
 			@Override
 			protected void setup() {
-				add(BeansCollectionConstructor.class,
-						BeanInstanceSupplier
-								.forConstructor(List.class));
-				add(String.class,
-						BeanInstanceSupplier.forFactoryMethod(
-								BeansCollectionFactory.class, "list", List.class));
+				add(BeansCollectionConstructor.class, BeanInstanceSupplier.forConstructor(List.class));
+				add(String.class, BeanInstanceSupplier.forFactoryMethod(
+						BeansCollectionFactory.class, "list", List.class));
 			}
 
 		},
@@ -792,12 +745,9 @@ class BeanInstanceSupplierTests {
 		SET_OF_BEANS {
 			@Override
 			protected void setup() {
-				add(BeansCollectionConstructor.class,
-						BeanInstanceSupplier
-								.forConstructor(Set.class));
-				add(String.class,
-						BeanInstanceSupplier.forFactoryMethod(
-								BeansCollectionFactory.class, "set", Set.class));
+				add(BeansCollectionConstructor.class, BeanInstanceSupplier.forConstructor(Set.class));
+				add(String.class, BeanInstanceSupplier.forFactoryMethod(
+						BeansCollectionFactory.class, "set", Set.class));
 			}
 
 		},
@@ -805,12 +755,9 @@ class BeanInstanceSupplierTests {
 		MAP_OF_BEANS {
 			@Override
 			protected void setup() {
-				add(BeansCollectionConstructor.class,
-						BeanInstanceSupplier
-								.forConstructor(Map.class));
-				add(String.class,
-						BeanInstanceSupplier.forFactoryMethod(
-								BeansCollectionFactory.class, "map", Map.class));
+				add(BeansCollectionConstructor.class, BeanInstanceSupplier.forConstructor(Map.class));
+				add(String.class, BeanInstanceSupplier.forFactoryMethod(
+						BeansCollectionFactory.class, "map", Map.class));
 			}
 
 		},
@@ -818,14 +765,11 @@ class BeanInstanceSupplierTests {
 		MULTI_ARGS {
 			@Override
 			protected void setup() {
-				add(MultiArgsConstructor.class,
-						BeanInstanceSupplier.forConstructor(
-								ResourceLoader.class, Environment.class,
-								ObjectProvider.class));
-				add(String.class,
-						BeanInstanceSupplier.forFactoryMethod(
-								MultiArgsFactory.class, "multiArgs", ResourceLoader.class,
-								Environment.class, ObjectProvider.class));
+				add(MultiArgsConstructor.class, BeanInstanceSupplier.forConstructor(
+						ResourceLoader.class, Environment.class, ObjectProvider.class));
+				add(String.class, BeanInstanceSupplier.forFactoryMethod(
+						MultiArgsFactory.class, "multiArgs", ResourceLoader.class,
+						Environment.class, ObjectProvider.class));
 			}
 
 		},
@@ -833,13 +777,10 @@ class BeanInstanceSupplierTests {
 		MIXED_ARGS {
 			@Override
 			protected void setup() {
-				add(MixedArgsConstructor.class,
-						BeanInstanceSupplier.forConstructor(
-								ResourceLoader.class, String.class, Environment.class));
-				add(String.class,
-						BeanInstanceSupplier.forFactoryMethod(
-								MixedArgsFactory.class, "mixedArgs", ResourceLoader.class,
-								String.class, Environment.class));
+				add(MixedArgsConstructor.class, BeanInstanceSupplier.forConstructor(
+						ResourceLoader.class, String.class, Environment.class));
+				add(String.class, BeanInstanceSupplier.forFactoryMethod(
+						MixedArgsFactory.class, "mixedArgs", ResourceLoader.class, String.class, Environment.class));
 			}
 
 		};
@@ -853,16 +794,15 @@ class BeanInstanceSupplierTests {
 
 		protected abstract void setup();
 
-		protected final void add(Class<?> beanClass,
-				BeanInstanceSupplier<?> resolver) {
-			this.arguments.add(Arguments.of(new Source(beanClass, resolver)));
+		protected final void add(Class<?> beanClass, BeanInstanceSupplier<?> supplier) {
+			this.arguments.add(Arguments.of(new Source(beanClass, supplier)));
 		}
 
 		final Stream<Arguments> provideArguments(ExtensionContext context) {
 			return this.arguments.stream();
 		}
-
 	}
+
 
 	static class BeanRegistrar {
 
@@ -873,52 +813,49 @@ class BeanInstanceSupplierTests {
 		}
 
 		RegisteredBean registerBean(DefaultListableBeanFactory beanFactory) {
-			return registerBean(beanFactory, beanDefinition -> {
-			});
+			return registerBean(beanFactory, bd -> {});
 		}
 
-		RegisteredBean registerBean(DefaultListableBeanFactory beanFactory,
-				Consumer<RootBeanDefinition> beanDefinitionCustomizer) {
+		RegisteredBean registerBean(DefaultListableBeanFactory beanFactory, Consumer<RootBeanDefinition> bdCustomizer) {
 			String beanName = "testBean";
-			RootBeanDefinition beanDefinition = new RootBeanDefinition(this.beanClass);
-			beanDefinition.setInstanceSupplier(() -> {
+			RootBeanDefinition bd = new RootBeanDefinition(this.beanClass);
+			bd.setInstanceSupplier(() -> {
 				throw new BeanCurrentlyInCreationException(beanName);
 			});
-			beanDefinitionCustomizer.accept(beanDefinition);
-			beanFactory.registerBeanDefinition(beanName, beanDefinition);
+			bdCustomizer.accept(bd);
+			beanFactory.registerBeanDefinition(beanName, bd);
 			return RegisteredBean.of(beanFactory, beanName);
 		}
 	}
 
+
 	static class Source extends BeanRegistrar {
 
-		private final BeanInstanceSupplier<?> resolver;
+		private final BeanInstanceSupplier<?> supplier;
 
-		public Source(Class<?> beanClass,
-				BeanInstanceSupplier<?> resolver) {
+		public Source(Class<?> beanClass, BeanInstanceSupplier<?> supplier) {
 			super(beanClass);
-			this.resolver = resolver;
+			this.supplier = supplier;
 		}
 
-		BeanInstanceSupplier<?> getResolver() {
-			return this.resolver;
+		BeanInstanceSupplier<?> getSupplier() {
+			return this.supplier;
 		}
 
 		Executable lookupExecutable(RegisteredBean registeredBean) {
-			return this.resolver.getLookup().get(registeredBean);
+			return this.supplier.getLookup().get(registeredBean);
 		}
 
 		@Override
 		public String toString() {
-			return this.resolver.getLookup() + " with bean class "
-					+ ClassUtils.getShortName(this.beanClass);
+			return this.supplier.getLookup() + " with bean class " + ClassUtils.getShortName(this.beanClass);
 		}
-
 	}
+
 
 	static class NoArgConstructor {
-
 	}
+
 
 	static class SingleArgConstructor {
 
@@ -931,20 +868,20 @@ class BeanInstanceSupplierTests {
 		String getString() {
 			return this.string;
 		}
-
 	}
+
 
 	static class SingleArgFactory {
 
 		String single(String s) {
 			return s;
 		}
-
 	}
+
 
 	static class Enclosing {
 
-		class InnerSingleArgConstructor {
+		static class InnerSingleArgConstructor {
 
 			private final String string;
 
@@ -955,38 +892,32 @@ class BeanInstanceSupplierTests {
 			String getString() {
 				return this.string;
 			}
-
 		}
 
-		class InnerSingleArgFactory {
+		static class InnerSingleArgFactory {
 
 			String single(String s) {
 				return s;
 			}
-
 		}
-
 	}
+
 
 	static class BeansCollectionConstructor {
 
 		public BeansCollectionConstructor(String[] beans) {
-
 		}
 
 		public BeansCollectionConstructor(List<String> beans) {
-
 		}
 
 		public BeansCollectionConstructor(Set<String> beans) {
-
 		}
 
 		public BeansCollectionConstructor(Map<String, String> beans) {
-
 		}
-
 	}
+
 
 	static class BeansCollectionFactory {
 
@@ -1008,6 +939,7 @@ class BeanInstanceSupplierTests {
 
 	}
 
+
 	static class MultiArgsConstructor {
 
 		public MultiArgsConstructor(ResourceLoader resourceLoader,
@@ -1015,22 +947,21 @@ class BeanInstanceSupplierTests {
 		}
 	}
 
+
 	static class MultiArgsFactory {
 
-		String multiArgs(ResourceLoader resourceLoader, Environment environment,
-				ObjectProvider<String> provider) {
+		String multiArgs(ResourceLoader resourceLoader, Environment environment, ObjectProvider<String> provider) {
 			return "test";
 		}
 	}
 
+
 	static class MixedArgsConstructor {
 
-		public MixedArgsConstructor(ResourceLoader resourceLoader, String test,
-				Environment environment) {
-
+		public MixedArgsConstructor(ResourceLoader resourceLoader, String test, Environment environment) {
 		}
-
 	}
+
 
 	static class MixedArgsFactory {
 
@@ -1038,27 +969,27 @@ class BeanInstanceSupplierTests {
 				Environment environment) {
 			return "test";
 		}
-
 	}
+
 
 	static class CharDependency {
 
 		CharDependency(char escapeChar) {
 		}
-
 	}
+
 
 	interface MethodOnInterface {
 
 		default String test() {
 			return "Test";
 		}
-
 	}
+
 
 	static class MethodOnInterfaceImpl implements MethodOnInterface {
-
 	}
+
 
 	static class TestStringFactory {
 
@@ -1066,6 +997,7 @@ class BeanInstanceSupplierTests {
 			return "test";
 		}
 	}
+
 
 	static class AnotherTestStringFactory {
 

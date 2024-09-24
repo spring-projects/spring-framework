@@ -375,7 +375,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (returnType != null) {
 			return returnType;
 		}
-		Method factoryMethod = this.factoryMethodToIntrospect;
+		Method factoryMethod = getResolvedFactoryMethod();
 		if (factoryMethod != null) {
 			return ResolvableType.forMethodReturnType(factoryMethod);
 		}
@@ -453,17 +453,12 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	@Nullable
 	public Method getResolvedFactoryMethod() {
-		return this.factoryMethodToIntrospect;
-	}
-
-	@Override
-	public void setInstanceSupplier(@Nullable Supplier<?> supplier) {
-		super.setInstanceSupplier(supplier);
-		Method factoryMethod = (supplier instanceof InstanceSupplier<?> instanceSupplier ?
-				instanceSupplier.getFactoryMethod() : null);
-		if (factoryMethod != null) {
-			setResolvedFactoryMethod(factoryMethod);
+		Method factoryMethod = this.factoryMethodToIntrospect;
+		if (factoryMethod == null &&
+				getInstanceSupplier() instanceof InstanceSupplier<?> instanceSupplier) {
+			factoryMethod = instanceSupplier.getFactoryMethod();
 		}
+		return factoryMethod;
 	}
 
 	/**

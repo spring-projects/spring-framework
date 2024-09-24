@@ -87,7 +87,7 @@ class InstanceSupplierCodeGeneratorKotlinTests {
 			Assertions.assertThat(bean).isInstanceOf(String::class.java)
 			Assertions.assertThat(bean).isEqualTo("Hello")
 			Assertions.assertThat(compiled.sourceFile).contains(
-				"getBeanFactory().getBean(KotlinConfiguration.class).stringBean()"
+				"getBeanFactory().getBean(\"config\", KotlinConfiguration.class).stringBean()"
 			)
 		}
 		Assertions.assertThat<TypeHint?>(getReflectionHints().getTypeHint(KotlinConfiguration::class.java))
