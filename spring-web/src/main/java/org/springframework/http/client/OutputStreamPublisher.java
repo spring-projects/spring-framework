@@ -30,8 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Bridges between {@link OutputStream} and
- * {@link Flow.Publisher Flow.Publisher&lt;T&gt;}.
+ * Bridges between {@link OutputStream} and {@link Flow.Publisher Flow.Publisher&lt;T&gt;}.
  *
  * <p>Note that this class has a near duplicate in
  * {@link org.springframework.core.io.buffer.OutputStreamPublisher}.
@@ -39,8 +38,7 @@ import org.springframework.util.Assert;
  * @author Oleh Dokuka
  * @author Arjen Poutsma
  * @since 6.1
- * @param <T> the published item type
- * @see #create(OutputStreamHandler, ByteMapper, Executor)
+ * @param <T> the published byte buffer type
  */
 final class OutputStreamPublisher<T> implements Flow.Publisher<T> {
 
@@ -56,98 +54,26 @@ final class OutputStreamPublisher<T> implements Flow.Publisher<T> {
 	private final int chunkSize;
 
 
-	private OutputStreamPublisher(
+	/**
+	 * Create an instance.
+	 * @param outputStreamHandler invoked when the first buffer is requested
+	 * @param byteMapper maps written bytes to {@code T}
+	 * @param executor used to invoke the {@code outputStreamHandler}
+	 * @param chunkSize the chunk sizes to be produced by the publisher
+	 */
+	OutputStreamPublisher(
 			OutputStreamHandler outputStreamHandler, ByteMapper<T> byteMapper,
-			Executor executor, int chunkSize) {
+			Executor executor, @Nullable Integer chunkSize) {
+
+		Assert.notNull(outputStreamHandler, "OutputStreamHandler must not be null");
+		Assert.notNull(byteMapper, "ByteMapper must not be null");
+		Assert.notNull(executor, "Executor must not be null");
+		Assert.isTrue(chunkSize == null || chunkSize > 0, "ChunkSize must be larger than 0");
 
 		this.outputStreamHandler = outputStreamHandler;
 		this.byteMapper = byteMapper;
 		this.executor = executor;
-		this.chunkSize = chunkSize;
-	}
-
-
-	/**
-	 * Creates a new {@code Publisher<T>} based on bytes written to a
-	 * {@code OutputStream}. The parameter {@code byteMapper} is used to map
-	 * from written bytes to the published type.
-	 * <ul>
-	 * <li>The parameter {@code outputStreamHandler} is invoked once per
-	 * subscription of the returned {@code Publisher}, when the first
-	 * item is
-	 * {@linkplain Flow.Subscription#request(long) requested}.</li>
-	 * <li>{@link OutputStream#write(byte[], int, int) OutputStream.write()}
-	 * invocations made by {@code outputStreamHandler} are buffered until they
-	 * exceed the default chunk size of 1024, and then result in a
-	 * {@linkplain Flow.Subscriber#onNext(Object) published} item
-	 * if there is {@linkplain Flow.Subscription#request(long) demand}.</li>
-	 * <li>If there is <em>no demand</em>, {@code OutputStream.write()} will block
-	 * until there is.</li>
-	 * <li>If the subscription is {@linkplain Flow.Subscription#cancel() cancelled},
-	 * {@code OutputStream.write()} will throw a {@code IOException}.</li>
-	 * <li>The subscription is
-	 * {@linkplain Flow.Subscriber#onComplete() completed} when
-	 * {@code outputStreamHandler} completes.</li>
-	 * <li>Any {@code IOException}s thrown from {@code outputStreamHandler} will
-	 * be dispatched to the {@linkplain Flow.Subscriber#onError(Throwable) Subscriber}.
-	 * </ul>
-	 * @param outputStreamHandler invoked when the first buffer is requested
-	 * @param byteMapper maps written bytes to {@code T}
-	 * @param executor used to invoke the {@code outputStreamHandler}
-	 * @param <T> the publisher type
-	 * @return a {@code Publisher<T>} based on bytes written by
-	 * {@code outputStreamHandler} mapped by {@code byteMapper}
-	 */
-	public static <T> Flow.Publisher<T> create(OutputStreamHandler outputStreamHandler, ByteMapper<T> byteMapper,
-			Executor executor) {
-
-		Assert.notNull(outputStreamHandler, "OutputStreamHandler must not be null");
-		Assert.notNull(byteMapper, "ByteMapper must not be null");
-		Assert.notNull(executor, "Executor must not be null");
-
-		return new OutputStreamPublisher<>(outputStreamHandler, byteMapper, executor, DEFAULT_CHUNK_SIZE);
-	}
-
-	/**
-	 * Creates a new {@code Publisher<T>} based on bytes written to a
-	 * {@code OutputStream}. The parameter {@code byteMapper} is used to map
-	 * from written bytes to the published type.
-	 * <ul>
-	 * <li>The parameter {@code outputStreamHandler} is invoked once per
-	 * subscription of the returned {@code Publisher}, when the first
-	 * item is
-	 * {@linkplain Flow.Subscription#request(long) requested}.</li>
-	 * <li>{@link OutputStream#write(byte[], int, int) OutputStream.write()}
-	 * invocations made by {@code outputStreamHandler} are buffered until they
-	 * exceed {@code chunkSize}, and then result in a
-	 * {@linkplain Flow.Subscriber#onNext(Object) published} item
-	 * if there is {@linkplain Flow.Subscription#request(long) demand}.</li>
-	 * <li>If there is <em>no demand</em>, {@code OutputStream.write()} will block
-	 * until there is.</li>
-	 * <li>If the subscription is {@linkplain Flow.Subscription#cancel() cancelled},
-	 * {@code OutputStream.write()} will throw a {@code IOException}.</li>
-	 * <li>The subscription is
-	 * {@linkplain Flow.Subscriber#onComplete() completed} when
-	 * {@code outputStreamHandler} completes.</li>
-	 * <li>Any {@code IOException}s thrown from {@code outputStreamHandler} will
-	 * be dispatched to the {@linkplain Flow.Subscriber#onError(Throwable) Subscriber}.
-	 * </ul>
-	 * @param outputStreamHandler invoked when the first buffer is requested
-	 * @param byteMapper maps written bytes to {@code T}
-	 * @param executor used to invoke the {@code outputStreamHandler}
-	 * @param <T> the publisher type
-	 * @return a {@code Publisher<T>} based on bytes written by
-	 * {@code outputStreamHandler} mapped by {@code byteMapper}
-	 */
-	public static <T> Flow.Publisher<T> create(OutputStreamHandler outputStreamHandler, ByteMapper<T> byteMapper,
-			Executor executor, int chunkSize) {
-
-		Assert.notNull(outputStreamHandler, "OutputStreamHandler must not be null");
-		Assert.notNull(byteMapper, "ByteMapper must not be null");
-		Assert.notNull(executor, "Executor must not be null");
-		Assert.isTrue(chunkSize > 0, "ChunkSize must be larger than 0");
-
-		return new OutputStreamPublisher<>(outputStreamHandler, byteMapper, executor, chunkSize);
+		this.chunkSize = (chunkSize != null ? chunkSize : DEFAULT_CHUNK_SIZE);
 	}
 
 

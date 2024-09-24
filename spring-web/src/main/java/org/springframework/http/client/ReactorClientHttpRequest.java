@@ -113,14 +113,14 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 		headers.forEach((key, value) -> reactorRequest.requestHeaders().set(key, value));
 
 		if (body != null) {
+			ByteBufMapper byteMapper = new ByteBufMapper(nettyOutbound.alloc());
 			AtomicReference<Executor> executor = new AtomicReference<>();
 
 			return nettyOutbound
 					.withConnection(connection -> executor.set(connection.channel().eventLoop()))
-					.send(FlowAdapters.toPublisher(OutputStreamPublisher.create(
-							outputStream -> body.writeTo(StreamUtils.nonClosing(outputStream)),
-							new ByteBufMapper(nettyOutbound.alloc()),
-							executor.getAndSet(null))));
+					.send(FlowAdapters.toPublisher(new OutputStreamPublisher<>(
+							os -> body.writeTo(StreamUtils.nonClosing(os)), byteMapper,
+							executor.getAndSet(null), null)));
 		}
 		else {
 			return nettyOutbound;

@@ -153,19 +153,18 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private HttpRequest.BodyPublisher bodyPublisher(HttpHeaders headers, @Nullable Body body) {
 		if (body != null) {
-			Flow.Publisher<ByteBuffer> outputStreamPublisher = OutputStreamPublisher.create(
-					outputStream -> body.writeTo(StreamUtils.nonClosing(outputStream)),
-					BYTE_MAPPER, this.executor);
+			Flow.Publisher<ByteBuffer> publisher = new OutputStreamPublisher<>(
+					os -> body.writeTo(StreamUtils.nonClosing(os)), BYTE_MAPPER, this.executor, null);
 
 			long contentLength = headers.getContentLength();
 			if (contentLength > 0) {
-				return HttpRequest.BodyPublishers.fromPublisher(outputStreamPublisher, contentLength);
+				return HttpRequest.BodyPublishers.fromPublisher(publisher, contentLength);
 			}
 			else if (contentLength == 0) {
 				return HttpRequest.BodyPublishers.noBody();
 			}
 			else {
-				return HttpRequest.BodyPublishers.fromPublisher(outputStreamPublisher);
+				return HttpRequest.BodyPublishers.fromPublisher(publisher);
 			}
 		}
 		else {

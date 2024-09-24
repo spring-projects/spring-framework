@@ -31,10 +31,10 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
- * Bridges between {@link OutputStream} and
- * {@link Publisher Publisher&lt;DataBuffer&gt;}.
+ * Bridges between {@link OutputStream} and {@link Publisher Publisher&lt;DataBuffer&gt;}.
  *
  * <p>Note that this class has a near duplicate in
  * {@link org.springframework.http.client.OutputStreamPublisher}.
@@ -45,6 +45,9 @@ import org.springframework.lang.Nullable;
  */
 final class OutputStreamPublisher implements Publisher<DataBuffer> {
 
+	private static final int DEFAULT_CHUNK_SIZE = 1024;
+
+
 	private final Consumer<OutputStream> outputStreamConsumer;
 
 	private final DataBufferFactory bufferFactory;
@@ -54,14 +57,26 @@ final class OutputStreamPublisher implements Publisher<DataBuffer> {
 	private final int chunkSize;
 
 
+	/**
+	 * Create an instance.
+	 * @param outputStreamConsumer invoked when the first buffer is requested
+	 * @param bufferFactory to create data buffers with
+	 * @param executor used to invoke the {@code outputStreamHandler}
+	 * @param chunkSize the chunk sizes to be produced by the publisher
+	 */
 	OutputStreamPublisher(
 			Consumer<OutputStream> outputStreamConsumer, DataBufferFactory bufferFactory,
-			Executor executor, int chunkSize) {
+			Executor executor, @Nullable Integer chunkSize) {
+
+		Assert.notNull(outputStreamConsumer, "OutputStreamConsumer must not be null");
+		Assert.notNull(bufferFactory, "BufferFactory must not be null");
+		Assert.notNull(executor, "Executor must not be null");
+		Assert.isTrue(chunkSize == null || chunkSize > 0, "ChunkSize must be larger than 0");
 
 		this.outputStreamConsumer = outputStreamConsumer;
 		this.bufferFactory = bufferFactory;
 		this.executor = executor;
-		this.chunkSize = chunkSize;
+		this.chunkSize = (chunkSize != null ? chunkSize : DEFAULT_CHUNK_SIZE);
 	}
 
 
