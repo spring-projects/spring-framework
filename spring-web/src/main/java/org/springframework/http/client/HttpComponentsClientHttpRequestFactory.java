@@ -237,6 +237,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpClient client = getHttpClient();
 
