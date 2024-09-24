@@ -542,6 +542,14 @@ any of its subclasses and nested classes. Thus, you may annotate a top-level tes
 with `@NestedTestConfiguration`, and that will apply to all of its nested test classes
 recursively.
 
+[TIP]
+====
+If you are developing a component that integrates with the Spring TestContext Framework
+and needs to support annotation inheritance within enclosing class hierarchies, you must
+use the annotation search utilities provided in `TestContextAnnotationUtils` in order to
+honor `@NestedTestConfiguration` semantics.
+====
+
 In order to allow development teams to change the default to `OVERRIDE` – for example,
 for compatibility with Spring Framework 5.0 through 5.2 – the default mode can be changed
 globally via a JVM system property or a `spring.properties` file in the root of the

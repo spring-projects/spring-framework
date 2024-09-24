@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,8 @@ import org.springframework.util.ObjectUtils;
  * and {@link AnnotatedElementUtils}, while transparently honoring
  * {@link NestedTestConfiguration @NestedTestConfiguration} semantics.
  *
- * <p>Mainly for internal use within the <em>Spring TestContext Framework</em>.
+ * <p>Mainly for internal use within the <em>Spring TestContext Framework</em>
+ * but also supported for third-party integrations with the TestContext framework.
  *
  * <p>Whereas {@code AnnotationUtils} and {@code AnnotatedElementUtils} provide
  * utilities for <em>getting</em> or <em>finding</em> annotations,
@@ -70,6 +71,7 @@ import org.springframework.util.ObjectUtils;
  * @see AnnotationUtils
  * @see AnnotatedElementUtils
  * @see AnnotationDescriptor
+ * @see NestedTestConfiguration
  */
 public abstract class TestContextAnnotationUtils {
 
