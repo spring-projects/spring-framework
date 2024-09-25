@@ -405,14 +405,14 @@ public abstract class ResourceUtils {
 	 * @see java.net.URI#toURL()
 	 * @see #toURI(String)
 	 */
-	@SuppressWarnings("deprecation")  // on JDK 20
+	@SuppressWarnings("deprecation")  // on JDK 20 (deprecated URL constructor)
 	public static URL toURL(String location) throws MalformedURLException {
 		try {
 			// Prefer URI construction with toURL conversion (as of 6.1)
 			return toURI(StringUtils.cleanPath(location)).toURL();
 		}
 		catch (URISyntaxException | IllegalArgumentException ex) {
-			// Lenient fallback to deprecated (on JDK 20) URL constructor,
+			// Lenient fallback to deprecated URL constructor,
 			// e.g. for decoded location Strings with percent characters.
 			return new URL(location);
 		}
@@ -429,11 +429,13 @@ public abstract class ResourceUtils {
 	 * @see #toURL(String)
 	 * @see StringUtils#applyRelativePath
 	 */
+	@SuppressWarnings("deprecation")  // on JDK 20 (deprecated URL constructor)
 	public static URL toRelativeURL(URL root, String relativePath) throws MalformedURLException {
 		// # can appear in filenames, java.net.URL should not treat it as a fragment
 		relativePath = StringUtils.replace(relativePath, "#", "%23");
 
-		return toURL(StringUtils.applyRelativePath(root.toString(), relativePath));
+		// Retain original URL instance, potentially including custom URLStreamHandler.
+		return new URL(root, StringUtils.cleanPath(StringUtils.applyRelativePath(root.toString(), relativePath)));
 	}
 
 	/**

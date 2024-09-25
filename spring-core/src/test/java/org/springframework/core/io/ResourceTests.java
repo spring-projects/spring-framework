@@ -377,6 +377,13 @@ class ResourceTests {
 		}
 
 		@Test
+		void unusualRelativeResourcesAreEqual() throws Exception {
+			Resource resource = new UrlResource("file:dir/");
+			Resource relative = resource.createRelative("http://spring.io");
+			assertThat(relative).isEqualTo(new UrlResource("file:dir/http://spring.io"));
+		}
+
+		@Test
 		void missingRemoteResourceDoesNotExist() throws Exception {
 			String baseUrl = startServer();
 			UrlResource resource = new UrlResource(baseUrl + "/missing");

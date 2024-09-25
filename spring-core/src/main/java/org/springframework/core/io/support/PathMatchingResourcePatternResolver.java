@@ -429,6 +429,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see #doFindAllClassPathResources
 	 * @see #doFindPathMatchingFileResources
 	 */
+	@SuppressWarnings("deprecation")  // on JDK 20 (deprecated URL constructor)
 	protected Resource convertClassLoaderURL(URL url) {
 		if (ResourceUtils.URL_PROTOCOL_FILE.equals(url.getProtocol())) {
 			try {
@@ -446,14 +447,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			if (!cleanedPath.equals(urlString)) {
 				// Prefer cleaned URL, aligned with UrlResource#createRelative(String)
 				try {
-					// Cannot test for URLStreamHandler directly: URL equality for same String
-					// in order to find out whether original URL uses default URLStreamHandler.
-					if (ResourceUtils.toURL(urlString).equals(url)) {
-						// Plain URL with default URLStreamHandler -> replace with cleaned path.
-						return new UrlResource(ResourceUtils.toURI(cleanedPath));
-					}
+					// Retain original URL instance, potentially including custom URLStreamHandler.
+					return new UrlResource(new URL(url, cleanedPath));
 				}
-				catch (URISyntaxException | MalformedURLException ex) {
+				catch (MalformedURLException ex) {
 					// Fallback to regular URL construction below...
 				}
 			}
