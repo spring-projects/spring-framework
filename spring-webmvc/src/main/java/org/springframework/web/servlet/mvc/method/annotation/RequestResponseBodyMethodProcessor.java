@@ -169,7 +169,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	@Override
 	@Nullable
-	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter,
+	protected Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter,
 			Type paramType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
