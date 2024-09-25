@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,6 +27,7 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
@@ -40,21 +42,21 @@ import org.springframework.util.StreamUtils;
  */
 class JdkClientHttpResponse implements ClientHttpResponse {
 
-	private final int statusCode;
+	private final HttpResponse<InputStream> response;
 
 	private final HttpHeaders headers;
 
 	private final InputStream body;
 
 
-	public JdkClientHttpResponse(int statusCode, java.net.http.HttpHeaders headers, InputStream body) {
-        this.statusCode = statusCode;
-        this.headers = adaptHeaders(headers);
-		this.body = body != null ? body : InputStream.nullInputStream();
+	public JdkClientHttpResponse(HttpResponse<InputStream> response, @Nullable InputStream body) {
+		this.response = response;
+		this.headers = adaptHeaders(response);
+		this.body = (body != null ? body : InputStream.nullInputStream());
 	}
 
-	private static HttpHeaders adaptHeaders(java.net.http.HttpHeaders headers) {
-		Map<String, List<String>> rawHeaders = headers.map();
+	private static HttpHeaders adaptHeaders(HttpResponse<?> response) {
+		Map<String, List<String>> rawHeaders = response.headers().map();
 		Map<String, List<String>> map = new LinkedCaseInsensitiveMap<>(rawHeaders.size(), Locale.ENGLISH);
 		MultiValueMap<String, String> multiValueMap = CollectionUtils.toMultiValueMap(map);
 		multiValueMap.putAll(rawHeaders);
@@ -64,7 +66,7 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpStatusCode getStatusCode() {
-		return HttpStatusCode.valueOf(statusCode);
+		return HttpStatusCode.valueOf(this.response.statusCode());
 	}
 
 	@Override

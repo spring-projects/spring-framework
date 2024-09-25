@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
@@ -94,38 +95,25 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	@Override
 	@SuppressWarnings("NullAway")
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
-		HttpRequest request = buildRequest(headers, body);
-		CompletableFuture<HttpResponse<InputStream>> responsefuture =
-				this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+		CompletableFuture<HttpResponse<InputStream>> responseFuture = null;
 		try {
+			HttpRequest request = buildRequest(headers, body);
+			responseFuture = this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+
 			if (this.timeout != null) {
-				CompletableFuture<Void> timeoutFuture = new CompletableFuture<Void>()
-						.completeOnTimeout(null, this.timeout.toMillis(), TimeUnit.MILLISECONDS);
-				timeoutFuture.thenRun(() -> {
-					if (!responsefuture.cancel(true) && !responsefuture.isCompletedExceptionally()) {
-						try {
-							responsefuture.resultNow().body().close();
-						} catch (IOException ignored) {}
-					}
-				});
-				var response = responsefuture.get();
-				return new JdkClientHttpResponse(response.statusCode(), response.headers(), new FilterInputStream(response.body()) {
-
-					@Override
-					public void close() throws IOException {
-						timeoutFuture.cancel(false);
-						super.close();
-					}
-				});
-
-			} else {
-				var response = responsefuture.get();
-				return new JdkClientHttpResponse(response.statusCode(), response.headers(), response.body());
+				TimeoutHandler timeoutHandler = new TimeoutHandler(responseFuture, this.timeout);
+				HttpResponse<InputStream> response = responseFuture.get();
+				InputStream inputStream = timeoutHandler.wrapInputStream(response);
+				return new JdkClientHttpResponse(response, inputStream);
+			}
+			else {
+				HttpResponse<InputStream> response = responseFuture.get();
+				return new JdkClientHttpResponse(response, response.body());
 			}
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
-			responsefuture.cancel(true);
+			responseFuture.cancel(true);
 			throw new IOException("Request was interrupted: " + ex.getMessage(), ex);
 		}
 		catch (ExecutionException ex) {
@@ -148,7 +136,6 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			}
 		}
 	}
-
 
 	private HttpRequest buildRequest(HttpHeaders headers, @Nullable Body body) {
 		HttpRequest.Builder builder = HttpRequest.newBuilder().uri(this.uri);
@@ -222,6 +209,54 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			byteBuffer.put(b, off, len);
 			byteBuffer.flip();
 			return byteBuffer;
+		}
+	}
+
+
+	/**
+	 * Temporary workaround to use instead of {@link HttpRequest.Builder#timeout(Duration)}
+	 * until <a href="https://bugs.openjdk.org/browse/JDK-8258397">JDK-8258397</a>
+	 * is fixed. Essentially, create a future wiht a timeout handler, and use it
+	 * to close the response.
+	 * @see <a href="https://mail.openjdk.org/pipermail/net-dev/2021-October/016672.html">OpenJDK discussion thread</a>
+	 */
+	private static final class TimeoutHandler {
+
+		private final CompletableFuture<Void> timeoutFuture;
+
+		private TimeoutHandler(CompletableFuture<HttpResponse<InputStream>> future, Duration timeout) {
+
+			this.timeoutFuture = new CompletableFuture<Void>()
+					.completeOnTimeout(null, timeout.toMillis(), TimeUnit.MILLISECONDS);
+
+			this.timeoutFuture.thenRun(() -> {
+				if (future.cancel(true) || future.isCompletedExceptionally() || !future.isDone()) {
+					return;
+				}
+				try {
+					future.get().body().close();
+				}
+				catch (Exception ex) {
+					// ignore
+				}
+			});
+
+		}
+
+		@Nullable
+		public InputStream wrapInputStream(HttpResponse<InputStream> response) {
+			InputStream body = response.body();
+			if (body == null) {
+				return body;
+			}
+			return new FilterInputStream(body) {
+
+				@Override
+				public void close() throws IOException {
+					TimeoutHandler.this.timeoutFuture.cancel(false);
+					super.close();
+				}
+			};
 		}
 	}
 
