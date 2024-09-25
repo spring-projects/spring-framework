@@ -32,6 +32,11 @@ import org.springframework.util.Assert;
 /**
  * Bridges between {@link OutputStream} and {@link Flow.Publisher Flow.Publisher&lt;T&gt;}.
  *
+ * <p>When there is demand on the Reactive Streams subscription, any write to
+ * the OutputStream is mapped to a buffer and published to the subscriber.
+ * If there is no demand, writes block until demand materializes.
+ * If the subscription is cancelled, further writes raise {@code IOException}.
+ *
  * <p>Note that this class has a near duplicate in
  * {@link org.springframework.core.io.buffer.OutputStreamPublisher}.
  *
@@ -92,53 +97,24 @@ final class OutputStreamPublisher<T> implements Flow.Publisher<T> {
 
 
 	/**
-	 * Defines the contract for handling the {@code OutputStream} provided by
-	 * the {@code OutputStreamPublisher}.
+	 * Contract to provide callback access to the {@link OutputStream}.
 	 */
 	@FunctionalInterface
 	public interface OutputStreamHandler {
 
-		/**
-		 * Use the given stream for writing.
-		 * <ul>
-		 * <li>If the linked subscription has
-		 * {@linkplain Flow.Subscription#request(long) demand}, any
-		 * {@linkplain OutputStream#write(byte[], int, int) written} bytes
-		 * will be {@linkplain ByteMapper#map(byte[], int, int) mapped}
-		 * and {@linkplain Flow.Subscriber#onNext(Object) published} to the
-		 * {@link Flow.Subscriber Subscriber}.</li>
-		 * <li>If there is no demand, any
-		 * {@link OutputStream#write(byte[], int, int) write()} invocations will
-		 * block until there is demand.</li>
-		 * <li>If the linked subscription is
-		 * {@linkplain Flow.Subscription#cancel() cancelled},
-		 * {@link OutputStream#write(byte[], int, int) write()} invocations will
-		 * result in a {@code IOException}.</li>
-		 * </ul>
-		 * @param outputStream the stream to write to
-		 * @throws IOException any thrown I/O errors will be dispatched to the
-		 * {@linkplain Flow.Subscriber#onError(Throwable) Subscriber}
-		 */
-		void handle(OutputStream outputStream) throws IOException;
+		void handle(OutputStream outputStream) throws Exception;
 
 	}
 
 
 	/**
-	 * Maps bytes written to in {@link OutputStreamHandler#handle(OutputStream)}
-	 * to published items.
-	 * @param <T> the type to map to
+	 * Maps from bytes to byte buffers.
+	 * @param <T> the type of byte buffer to map to
 	 */
 	public interface ByteMapper<T> {
 
-		/**
-		 * Maps a single byte to {@code T}.
-		 */
 		T map(int b);
 
-		/**
-		 * Maps a byte array to {@code T}.
-		 */
 		T map(byte[] b, int off, int len);
 
 	}
@@ -146,7 +122,7 @@ final class OutputStreamPublisher<T> implements Flow.Publisher<T> {
 
 	private static final class OutputStreamSubscription<T> extends OutputStream implements Flow.Subscription {
 
-		static final Object READY = new Object();
+		private static final Object READY = new Object();
 
 		private final Flow.Subscriber<? super T> actual;
 
@@ -178,11 +154,8 @@ final class OutputStreamPublisher<T> implements Flow.Publisher<T> {
 		@Override
 		public void write(int b) throws IOException {
 			checkDemandAndAwaitIfNeeded();
-
 			T next = this.byteMapper.map(b);
-
 			this.actual.onNext(next);
-
 			this.produced++;
 		}
 
@@ -194,11 +167,8 @@ final class OutputStreamPublisher<T> implements Flow.Publisher<T> {
 		@Override
 		public void write(byte[] b, int off, int len) throws IOException {
 			checkDemandAndAwaitIfNeeded();
-
 			T next = this.byteMapper.map(b, off, len);
-
 			this.actual.onNext(next);
-
 			this.produced++;
 		}
 
@@ -240,7 +210,7 @@ final class OutputStreamPublisher<T> implements Flow.Publisher<T> {
 			try (OutputStream outputStream = new BufferedOutputStream(this, this.chunkSize)) {
 				this.outputStreamHandler.handle(outputStream);
 			}
-			catch (IOException ex) {
+			catch (Exception ex) {
 				long previousState = tryTerminate();
 				if (isCancelled(previousState)) {
 					return;

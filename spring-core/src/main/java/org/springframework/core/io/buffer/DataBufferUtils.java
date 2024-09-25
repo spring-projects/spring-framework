@@ -431,16 +431,17 @@ public abstract class DataBufferUtils {
 	 * <li>Any exceptions thrown from {@code outputStreamHandler} will
 	 * be dispatched to the {@linkplain Subscriber#onError(Throwable) Subscriber}.
 	 * </ul>
-	 * @param outputStreamConsumer invoked when the first buffer is requested
+	 * @param consumer invoked when the first buffer is requested
 	 * @param executor used to invoke the {@code outputStreamHandler}
 	 * @return a {@code Publisher<DataBuffer>} based on bytes written by
 	 * {@code outputStreamHandler}
 	 * @since 6.1
 	 */
-	public static Publisher<DataBuffer> outputStreamPublisher(Consumer<OutputStream> outputStreamConsumer,
-			DataBufferFactory bufferFactory, Executor executor) {
+	public static Publisher<DataBuffer> outputStreamPublisher(
+			Consumer<OutputStream> consumer, DataBufferFactory bufferFactory, Executor executor) {
 
-		return new OutputStreamPublisher(outputStreamConsumer, bufferFactory, executor, null);
+		return new OutputStreamPublisher<>(
+				consumer::accept, new DataBufferMapper(bufferFactory), executor, null);
 	}
 
 	/**
@@ -448,10 +449,11 @@ public abstract class DataBufferUtils {
 	 * providing control over the chunk sizes to be produced by the publisher.
 	 * @since 6.1
 	 */
-	public static Publisher<DataBuffer> outputStreamPublisher(Consumer<OutputStream> outputStreamConsumer,
-			DataBufferFactory bufferFactory, Executor executor, int chunkSize) {
+	public static Publisher<DataBuffer> outputStreamPublisher(
+			Consumer<OutputStream> consumer, DataBufferFactory bufferFactory, Executor executor, int chunkSize) {
 
-		return new OutputStreamPublisher(outputStreamConsumer, bufferFactory, executor, chunkSize);
+		return new OutputStreamPublisher<>(
+				consumer::accept, new DataBufferMapper(bufferFactory), executor, chunkSize);
 	}
 
 
@@ -1254,6 +1256,31 @@ public abstract class DataBufferUtils {
 		}
 
 		private record Attachment(ByteBuffer byteBuffer, DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator) {}
+	}
+
+
+	private static final class DataBufferMapper implements OutputStreamPublisher.ByteMapper<DataBuffer> {
+
+		private final DataBufferFactory bufferFactory;
+
+		private DataBufferMapper(DataBufferFactory bufferFactory) {
+			this.bufferFactory = bufferFactory;
+		}
+
+		@Override
+		public DataBuffer map(int b) {
+			DataBuffer buffer = this.bufferFactory.allocateBuffer(1);
+			buffer.write((byte) b);
+			return buffer;
+		}
+
+		@Override
+		public DataBuffer map(byte[] b, int off, int len) {
+			DataBuffer buffer = this.bufferFactory.allocateBuffer(len);
+			buffer.write(b, off, len);
+			return buffer;
+		}
+
 	}
 
 }
