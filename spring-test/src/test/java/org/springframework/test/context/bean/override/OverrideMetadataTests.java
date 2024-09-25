@@ -44,12 +44,12 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Stephane Nicoll
  * @since 6.2
  */
-public class OverrideMetadataTests {
+class OverrideMetadataTests {
 
 	@Test
 	void forTestClassWithSingleField() {
 		List<OverrideMetadata> overrideMetadata = OverrideMetadata.forTestClass(SingleAnnotation.class);
-		assertThat(overrideMetadata).singleElement().satisfies(hasTestBeanMetadata(
+		assertThat(overrideMetadata).singleElement().satisfies(hasOverrideMetadata(
 				field(SingleAnnotation.class, "message"), String.class, null));
 	}
 
@@ -57,25 +57,25 @@ public class OverrideMetadataTests {
 	void forTestClassWithMultipleFields() {
 		List<OverrideMetadata> overrideMetadata = OverrideMetadata.forTestClass(MultipleAnnotations.class);
 		assertThat(overrideMetadata).hasSize(2)
-				.anySatisfy(hasTestBeanMetadata(
+				.anySatisfy(hasOverrideMetadata(
 						field(MultipleAnnotations.class, "message"), String.class, null))
-				.anySatisfy(hasTestBeanMetadata(
+				.anySatisfy(hasOverrideMetadata(
 						field(MultipleAnnotations.class, "counter"), Integer.class, null));
 	}
 
 	@Test
-	void forTestClassWithMultipleFieldsSameMetadata() {
+	void forTestClassWithMultipleFieldsWithIdenticalMetadata() {
 		List<OverrideMetadata> overrideMetadata = OverrideMetadata.forTestClass(MultipleAnnotationsDuplicate.class);
 		assertThat(overrideMetadata).hasSize(2)
-				.anySatisfy(hasTestBeanMetadata(
+				.anySatisfy(hasOverrideMetadata(
 						field(MultipleAnnotationsDuplicate.class, "message1"), String.class, "messageBean"))
-				.anySatisfy(hasTestBeanMetadata(
+				.anySatisfy(hasOverrideMetadata(
 						field(MultipleAnnotationsDuplicate.class, "message2"), String.class, "messageBean"));
 		assertThat(new HashSet<>(overrideMetadata)).hasSize(1);
 	}
 
 	@Test
-	void forTestClassWithDifferentOverrideMetadataOnSameField() {
+	void forTestClassWithCompetingBeanOverrideAnnotationsOnSameField() {
 		Field faultyField = field(MultipleAnnotationsOnSameField.class, "message");
 		assertThatIllegalStateException()
 				.isThrownBy(() -> OverrideMetadata.forTestClass(MultipleAnnotationsOnSameField.class))
@@ -164,25 +164,27 @@ public class OverrideMetadataTests {
 		assertThat(metadata).isNotEqualTo(metadata2);
 	}
 
-	private OverrideMetadata createMetadata(Field field) {
+	private static OverrideMetadata createMetadata(Field field) {
 		return createMetadata(field, null);
 	}
 
-	private OverrideMetadata createMetadata(Field field, @Nullable String name) {
+	private static OverrideMetadata createMetadata(Field field, @Nullable String name) {
 		return new DummyOverrideMetadata(field, field.getType(), name, BeanOverrideStrategy.REPLACE_DEFINITION);
 	}
 
-	private Field field(Class<?> target, String fieldName) {
+	private static Field field(Class<?> target, String fieldName) {
 		Field field = ReflectionUtils.findField(target, fieldName);
 		assertThat(field).isNotNull();
 		return field;
 	}
 
-	private Consumer<OverrideMetadata> hasTestBeanMetadata(Field field, Class<?> beanType, @Nullable String beanName) {
+	private static Consumer<OverrideMetadata> hasOverrideMetadata(Field field, Class<?> beanType, @Nullable String beanName) {
 		return hasOverrideMetadata(field, beanType, BeanOverrideStrategy.REPLACE_DEFINITION, beanName);
 	}
 
-	private Consumer<OverrideMetadata> hasOverrideMetadata(Field field, Class<?> beanType, BeanOverrideStrategy strategy, @Nullable String beanName) {
+	private static Consumer<OverrideMetadata> hasOverrideMetadata(Field field, Class<?> beanType, BeanOverrideStrategy strategy,
+			@Nullable String beanName) {
+
 		return metadata -> {
 			assertThat(metadata.getField()).isEqualTo(field);
 			assertThat(metadata.getBeanType().toClass()).isEqualTo(beanType);
@@ -196,7 +198,6 @@ public class OverrideMetadataTests {
 
 		@DummyBean
 		String message;
-
 	}
 
 	static class MultipleAnnotations {
@@ -215,7 +216,6 @@ public class OverrideMetadataTests {
 
 		@DummyBean(beanName = "messageBean")
 		String message2;
-
 	}
 
 	static class MultipleAnnotationsOnSameField {
@@ -229,37 +229,33 @@ public class OverrideMetadataTests {
 		}
 	}
 
-	public static class ConfigA {
+	static class ConfigA {
 
-		private ExampleService noQualifier;
+		ExampleService noQualifier;
 
 		@Qualifier("test")
-		private ExampleService directQualifier;
+		ExampleService directQualifier;
 
 		@Qualifier("different")
-		private ExampleService differentDirectQualifier;
+		ExampleService differentDirectQualifier;
 
 		@CustomQualifier
-		private ExampleService customQualifier;
-
+		ExampleService customQualifier;
 	}
 
-	public static class ConfigB {
+	static class ConfigB {
 
-		private ExampleService noQualifier;
+		ExampleService noQualifier;
 
-		private ExampleService example;
+		ExampleService example;
 
 		@Qualifier("test")
-		private ExampleService directQualifier;
-
+		ExampleService directQualifier;
 	}
-
-	// Simple OverrideMetadata implementation
 
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	@DummyBean
-	public @interface MetaDummyBean {}
+	@interface MetaDummyBean {}
 
 }

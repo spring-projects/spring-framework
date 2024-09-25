@@ -69,8 +69,8 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean 'descriptionBean': there is no bean definition " +
-						"to replace with that name of type java.lang.String");
+				.withMessage("Unable to override bean: there is no bean definition " +
+						"to replace with name [descriptionBean] and type [java.lang.String].");
 	}
 
 	@Test
@@ -80,8 +80,8 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean 'descriptionBean': there is no bean definition " +
-						"to replace with that name of type java.lang.String");
+				.withMessage("Unable to override bean: there is no bean definition " +
+						"to replace with name [descriptionBean] and type [java.lang.String].");
 	}
 
 	@Test
@@ -102,7 +102,9 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 	private AnnotationConfigApplicationContext prepareContextWithFactoryBean(Object objectTypeAttribute) {
 		AnnotationConfigApplicationContext context = createContext(CaseOverrideBeanProducedByFactoryBean.class);
+		// Register a TestFactoryBean that will not be overridden
 		context.registerBean("testFactoryBean", TestFactoryBean.class, TestFactoryBean::new);
+		// Register another TestFactoryBean that will be overridden
 		RootBeanDefinition factoryBeanDefinition = new RootBeanDefinition(TestFactoryBean.class);
 		factoryBeanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, objectTypeAttribute);
 		context.registerBeanDefinition("beanToBeOverridden", factoryBeanDefinition);
@@ -142,7 +144,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 	@Test
-	void replaceBeanByTypeWithMultipleMatchesAndFieldNameQualifierMatches() {
+	void replaceBeanByTypeWithMultipleMatchesAndFieldNameAsFallbackQualifierMatches() {
 		AnnotationConfigApplicationContext context = createContext(CaseByType.class);
 		context.registerBean("counter", Integer.class, () -> 1);
 		context.registerBean("someInteger", Integer.class, () -> 2);

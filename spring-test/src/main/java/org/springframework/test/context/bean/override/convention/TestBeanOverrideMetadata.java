@@ -81,4 +81,5 @@ final class TestBeanOverrideMetadata extends OverrideMetadata {
 	public int hashCode() {
 		return this.overrideMethod.hashCode() * 29 + super.hashCode();
 	}
+
 }

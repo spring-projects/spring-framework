@@ -149,8 +149,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
 			}
 			else if (enforceExistingDefinition) {
-				throw new IllegalStateException("Unable to override bean '" + beanName + "': there is no " +
-						"bean definition to replace with that name of type " + overrideMetadata.getBeanType());
+				throw new IllegalStateException("""
+						Unable to override bean: there is no bean definition to replace \
+						with name [%s] and type [%s]."""
+							.formatted(beanName, overrideMetadata.getBeanType()));
 			}
 			beanNameIncludingFactory = beanName;
 		}

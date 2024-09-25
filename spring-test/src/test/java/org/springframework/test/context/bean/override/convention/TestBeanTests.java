@@ -40,8 +40,8 @@ public class TestBeanTests {
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
 				.withMessage("""
-						Unable to override bean 'beanToOverride': there is no bean definition \
-						to replace with that name of type java.lang.String""");
+						Unable to override bean: there is no bean definition \
+						to replace with name [beanToOverride] and type [java.lang.String].""");
 	}
 
 	@Test
@@ -78,9 +78,8 @@ public class TestBeanTests {
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
 				.withMessage("""
-						Unable to override bean 'beanToOverride': there is no bean definition \
-						to replace with that name of type %s""".formatted(
-						String.class.getName()));
+						Unable to override bean: there is no bean definition \
+						to replace with name [beanToOverride] and type [java.lang.String].""");
 	}
 
 	@Test
@@ -130,7 +129,7 @@ public class TestBeanTests {
 		@TestBean
 		private String example;
 
-		private static String example() {
+		static String example() {
 			throw new IllegalStateException("Should not be called");
 		}
 	}
@@ -140,7 +139,7 @@ public class TestBeanTests {
 		@TestBean(name = "beanToOverride")
 		private String example;
 
-		private static String example() {
+		static String example() {
 			throw new IllegalStateException("Should not be called");
 		}
 	}

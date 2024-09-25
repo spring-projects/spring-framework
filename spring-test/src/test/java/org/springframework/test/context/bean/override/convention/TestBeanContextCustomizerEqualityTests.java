@@ -46,7 +46,7 @@ class TestBeanContextCustomizerEqualityTests {
 	}
 
 
-	private ContextCustomizer createContextCustomizer(Class<?> testClass) {
+	private static ContextCustomizer createContextCustomizer(Class<?> testClass) {
 		ContextCustomizer customizer = BeanOverrideContextCustomizerTestUtils.createContextCustomizer(testClass);
 		assertThat(customizer).isNotNull();
 		return customizer;
@@ -89,7 +89,7 @@ class TestBeanContextCustomizerEqualityTests {
 		@TestBean
 		private String description;
 
-		private static String description() {
+		static String description() {
 			return "overridden";
 		}
 	}
@@ -99,7 +99,7 @@ class TestBeanContextCustomizerEqualityTests {
 		@TestBean(name = "descriptionBean")
 		private String description;
 
-		private static String description() {
+		static String description() {
 			return "overridden";
 		}
 	}

@@ -676,7 +676,7 @@ class MockHttpServletRequestTests {
 	void startAsyncShouldUpdateRequestState() {
 		assertThat(request.isAsyncStarted()).isFalse();
 		request.setAsyncSupported(true);
-		AsyncContext asyncContext = request.startAsync();
+		request.startAsync();
 		assertThat(request.isAsyncStarted()).isTrue();
 	}
 
