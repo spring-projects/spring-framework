@@ -47,7 +47,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 @JacksonXmlRootElement(localName = "problem", namespace = ProblemDetailJacksonXmlMixin.RFC_7807_NAMESPACE)
 public interface ProblemDetailJacksonXmlMixin {
 
-	/** RFC 7807 namespace. */
+	/** RFC 7807 (obsoleted by RFC 9457) namespace. */
 	String RFC_7807_NAMESPACE = "urn:ietf:rfc:7807";
 
 
