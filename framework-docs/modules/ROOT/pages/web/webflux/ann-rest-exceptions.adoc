@@ -46,7 +46,7 @@ use a protected method to map any exception to a `ProblemDetail`.
 
 You can register `ErrorResponse` interceptors through the
 xref:web/webflux/config.adoc[WebFlux Config] with a `WebFluxConfigurer`. Use that to intercept
-any RFC 7807 response and take some action.
+any RFC 9457 response and take some action.
 
 
 

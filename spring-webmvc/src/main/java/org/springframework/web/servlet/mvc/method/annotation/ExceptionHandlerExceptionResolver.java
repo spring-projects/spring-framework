@@ -251,7 +251,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	/**
 	 * Configure a list of {@link ErrorResponse.Interceptor}'s to apply when
-	 * rendering an RFC 7807 {@link org.springframework.http.ProblemDetail}
+	 * rendering an RFC 9457 {@link org.springframework.http.ProblemDetail}
 	 * error response.
 	 * @param interceptors the handlers to use
 	 * @since 6.2
