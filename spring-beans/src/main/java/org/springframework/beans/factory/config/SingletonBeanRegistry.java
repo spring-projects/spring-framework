@@ -24,6 +24,11 @@ import org.springframework.lang.Nullable;
  * implementations in order to expose their singleton management facility
  * in a uniform manner.
  *
+ * 这个接口的作用是定义一个用于共享Bean实例的注册表（registry）。
+ * 它可以被BeanFactory的实现类实现，以便以统一的方式暴露它们的单例管理功能。
+ * 在Spring框架中，SingletonBeanRegistry接口用于管理单例Bean的注册和获取。
+ * 它定义了一些方法，用于注册和获取单例Bean实例。
+ *
  * <p>The {@link ConfigurableBeanFactory} interface extends this interface.
  *
  * @author Juergen Hoeller

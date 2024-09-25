@@ -156,6 +156,7 @@ public abstract class AbstractFactoryBean<T>
 			return (this.initialized ? this.singletonInstance : getEarlySingletonInstance());
 		}
 		else {
+			// 具体实现类的 createInstance() 方法，是个抽象方法，可选择的。
 			return createInstance();
 		}
 	}

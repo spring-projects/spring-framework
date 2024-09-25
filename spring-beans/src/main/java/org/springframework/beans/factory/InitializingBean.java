@@ -25,6 +25,8 @@ package org.springframework.beans.factory;
  * init method, for example in an XML bean definition. For a list of all bean
  * lifecycle methods, see the {@link BeanFactory BeanFactory javadocs}.
  *
+ * Initializing：正在初始化～
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see DisposableBean
