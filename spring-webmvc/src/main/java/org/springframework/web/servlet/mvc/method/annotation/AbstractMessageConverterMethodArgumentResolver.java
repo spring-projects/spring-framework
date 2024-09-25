@@ -125,7 +125,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
 	@Nullable
-	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter,
+	protected Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter,
 			Type paramType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
 		HttpInputMessage inputMessage = createInputMessage(webRequest);
