@@ -18,7 +18,9 @@ package org.springframework.web.reactive.function.client
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
@@ -32,6 +34,8 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.concurrent.CompletableFuture
 import java.util.function.Function
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Mock object based tests for [WebClient] Kotlin extensions
@@ -111,6 +115,18 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
+	fun `awaitExchange with coroutines context`() {
+		val foo = mockk<Foo>()
+		val slot = slot<Function<ClientResponse, Mono<Foo>>>()
+		every { requestBodySpec.exchangeToMono(capture(slot)) } answers {
+			slot.captured.apply(mockk<ClientResponse>())
+		}
+		runBlocking(FooContextElement(foo)) {
+			assertThat(requestBodySpec.awaitExchange { currentCoroutineContext()[FooContextElement]!!.foo }).isEqualTo(foo)
+		}
+	}
+
+	@Test
 	fun `awaitExchangeOrNull returning null`() {
 		val foo = mockk<Foo>()
 		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo?>>>()) } returns Mono.empty()
@@ -125,6 +141,18 @@ class WebClientExtensionsTests {
 		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo>>>()) } returns Mono.just(foo)
 		runBlocking {
 			assertThat(requestBodySpec.awaitExchangeOrNull { foo }).isEqualTo(foo)
+		}
+	}
+
+	@Test
+	fun `awaitExchangeOrNull with coroutines context`() {
+		val foo = mockk<Foo>()
+		val slot = slot<Function<ClientResponse, Mono<Foo>>>()
+		every { requestBodySpec.exchangeToMono(capture(slot)) } answers {
+			slot.captured.apply(mockk<ClientResponse>())
+		}
+		runBlocking(FooContextElement(foo)) {
+			assertThat(requestBodySpec.awaitExchangeOrNull { currentCoroutineContext()[FooContextElement]!!.foo }).isEqualTo(foo)
 		}
 	}
 
@@ -209,4 +237,8 @@ class WebClientExtensionsTests {
 	}
 
 	class Foo
+
+	private data class FooContextElement(val foo: Foo) : AbstractCoroutineContextElement(FooContextElement) {
+		companion object Key : CoroutineContext.Key<FooContextElement>
+	}
 }

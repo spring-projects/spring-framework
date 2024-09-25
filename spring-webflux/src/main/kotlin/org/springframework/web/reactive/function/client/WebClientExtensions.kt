@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function.client
 
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
@@ -99,16 +101,20 @@ suspend fun RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(): Clien
  * @author Sebastien Deleuze
  * @since 5.3
  */
-suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(responseHandler: suspend (ClientResponse) -> T): T =
-		exchangeToMono { mono(Dispatchers.Unconfined) { responseHandler.invoke(it) } }.awaitSingle()
+suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(responseHandler: suspend (ClientResponse) -> T): T {
+    val context = currentCoroutineContext().minusKey(Job.Key)
+    return exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingle()
+}
 
 /**
  * Variant of [WebClient.RequestHeadersSpec.awaitExchange] that allows a nullable return
  *
  * @since 5.3.8
  */
-suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchangeOrNull(responseHandler: suspend (ClientResponse) -> T?): T? =
-		exchangeToMono { mono(Dispatchers.Unconfined) { responseHandler.invoke(it) } }.awaitSingleOrNull()
+suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchangeOrNull(responseHandler: suspend (ClientResponse) -> T?): T? {
+    val context = currentCoroutineContext().minusKey(Job.Key)
+	return exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingleOrNull()
+}
 
 /**
  * Coroutines variant of [WebClient.RequestHeadersSpec.exchangeToFlux].
