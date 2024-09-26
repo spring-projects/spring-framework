@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
-		if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
+		if (config.isOptimize() || config.isProxyTargetClass() || !hasTargetInterfaces(config)) {
 			Class<?> targetClass = config.getTargetClass();
 			if (targetClass == null) {
 				throw new AopConfigException("TargetSource cannot determine target class: " +
@@ -75,14 +75,14 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 		}
 	}
 
-	/**
-	 * Determine whether the supplied {@link AdvisedSupport} has only the
-	 * {@link org.springframework.aop.SpringProxy} interface specified
-	 * (or no proxy interfaces specified at all).
-	 */
-	private boolean hasNoUserSuppliedProxyInterfaces(AdvisedSupport config) {
-		Class<?>[] ifcs = config.getProxiedInterfaces();
-		return (ifcs.length == 0 || (ifcs.length == 1 && SpringProxy.class.isAssignableFrom(ifcs[0])));
+	private boolean hasTargetInterfaces(AdvisedSupport config) {
+		Class<?> targetClass = config.getTargetClass();
+		for (Class<?> ifc : config.getProxiedInterfaces()) {
+			if (targetClass != null ? ifc.isAssignableFrom(targetClass) : !SpringProxy.class.isAssignableFrom(ifc)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
