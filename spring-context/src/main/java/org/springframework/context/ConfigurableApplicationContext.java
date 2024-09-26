@@ -205,6 +205,9 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @throws BeansException if the bean factory could not be initialized
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
+	 *
+	 * 这个方法是一个启动方法，它负责加载和初始化配置，
+	 * 并在加载失败时销毁已创建的单例对象，以避免悬空的资源。换句话说，在调用这个方法后，要么所有的单例对象都被实例化，要么一个都没有被实例化。
 	 */
 	void refresh() throws BeansException, IllegalStateException;
 

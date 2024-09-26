@@ -44,6 +44,16 @@ import org.springframework.util.Assert;
  *
  * <p>See {@link Configuration @Configuration}'s javadoc for usage examples.
  *
+ * AnnotationConfigApplicationContext类是Spring框架中的一个具体实现类，它继承自GenericApplicationContext类，并实现了AnnotationConfigRegistry接口。
+ * 这个类的作用是创建一个基于注解配置的应用程序上下文（Application Context）。它可以接收一组组件类作为输入，这些组件类可以是使用@Configuration注解标记的配置类，也可以是使用@Component注解标记的普通组件类，还可以是使用jakarta.inject注解标记的JSR-330兼容类。
+ * 通过AnnotationConfigApplicationContext类，我们可以以一种统一的方式注册和管理这些组件类，并通过上下文来获取这些组件的实例。它提供了一种便捷的方式来创建和配置Spring应用程序，并且支持基于注解的配置方式。
+ * 具体来说，AnnotationConfigApplicationContext类提供了以下功能：
+ * 可以通过register方法逐个注册组件类，也可以通过scan方法进行类路径扫描注册。
+ * 支持多个@Configuration类的情况下，后面的类中定义的@Bean方法会覆盖前面类中定义的同名方法，可以通过这种方式有选择地覆盖某些Bean定义。
+ * 可以通过refresh方法刷新上下文，使其准备就绪并初始化所有的Bean实例。
+ * 可以通过继承自GenericApplicationContext类的方法，获取和管理Bean实例，包括根据名称获取Bean、根据类型获取Bean、注册Bean定义等。
+ * 总的来说，AnnotationConfigApplicationContext类的作用是创建一个基于注解配置的应用程序上下文，用于注册和管理组件类，并提供便捷的方式来创建和配置Spring应用程序。
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 3.0
@@ -67,10 +77,23 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	public AnnotationConfigApplicationContext() {
 
 		logger.warn("源码  Spring   hello");
+
 		StartupStep createAnnotatedBeanDefReader = this.getApplicationStartup().start("spring.context.annotated-bean-reader.create");
-		StartupStep createAnnotatedBeanDefReader = getApplicationStartup().start("spring.context.annotated-bean-reader.create");
+
+		// 初始化了reader和scanner，分别是 AnnotatedBeanDefinitionReader 和 ClassPathBeanDefinitionScanner 对象。
+		/**
+		 * AnnotatedBeanDefinitionReader类专门用于读取基于注解的Bean定义。
+		 * 它可以解析和处理@Configuration、@Component和jakarta.inject等注解，并将相应的类转换为Bean定义。
+		 * 通过AnnotatedBeanDefinitionReader，我们可以以编程方式注册和管理基于注解的Bean。
+		 *
+		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);
 		createAnnotatedBeanDefReader.end();
+
+		/**
+		 * ClassPathBeanDefinitionScanner类则专注于类路径的扫描和注册。它可以根据指定的包路径，
+		 * 自动扫描符合条件的类，并将其转换为Bean定义。通过ClassPathBeanDefinitionScanner，我们可以方便地进行类路径的扫描和注册。
+		 */
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -106,11 +129,11 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @param basePackages the packages to scan for component classes
 	 */
 	public AnnotationConfigApplicationContext(String... basePackages) {
-		// 第一步
+		// 作用是 初始化了reader和scanner
 		this();
-		// 第二步
+		// 作用是 扫描包路径，并将扫描到的类转换为Bean定义，并注册到BeanFactory中。
 		scan(basePackages);
-		// 第三步
+		// 作用是 刷新上下文，使其准备就绪并初始化所有的Bean实例。
 		refresh();
 	}
 

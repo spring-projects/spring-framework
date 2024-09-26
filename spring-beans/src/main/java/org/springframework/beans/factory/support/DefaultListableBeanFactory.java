@@ -949,6 +949,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return super.obtainInstanceFromSupplier(supplier, beanName, mbd);
 	}
 
+	/**
+	 * 该方法的主要目的是确保在容器初始化阶段就创建并初始化所有需要提前实例化的单例 Bean。
+	 * 所以用的是pre！
+	 * ，preInstantiateSingletons() 方法是用于在应用程序上下文初始化过程中预实例化所有非延迟初始化的单例 Bean 的方法。
+	 * 它通过遍历 Bean 名称，根据定义信息判断是否需要提前实例化，并在实例化完成后触发适用的 Bean 的初始化回调方法。
+	 * 这个方法确保了在容器初始化阶段就创建并初始化了所有需要提前实例化的单例 Bean。
+	 * @throws BeansException
+	 */
 	@Override
 	public void preInstantiateSingletons() throws BeansException {
 		if (logger.isTraceEnabled()) {
@@ -966,6 +974,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (isFactoryBean(beanName)) {
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
 					if (bean instanceof SmartFactoryBean<?> smartFactoryBean && smartFactoryBean.isEagerInit()) {
+						// 如果工厂Bean实现了SmartFactoryBean接口，并且isEagerInit()方法返回true，
 						getBean(beanName);
 					}
 				}
@@ -981,6 +990,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (singletonInstance instanceof SmartInitializingSingleton smartSingleton) {
 				StartupStep smartInitialize = getApplicationStartup().start("spring.beans.smart-initialize")
 						.tag("beanName", beanName);
+				// 如果实现了SmartInitializingSingleton接口，并且afterSingletonsInstantiated()方法返回true，
 				smartSingleton.afterSingletonsInstantiated();
 				smartInitialize.end();
 			}

@@ -63,6 +63,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		pvs.add("location", "org/springframework/web/context/WEB-INF/sessionContext.xml");
 		registerSingleton("viewResolver2", org.springframework.web.servlet.view.XmlViewResolver.class, pvs);
 
+		// 这里还是会调用到父类AbstractApplicationContext的 refresh() 方法
 		super.refresh();
 	}
 

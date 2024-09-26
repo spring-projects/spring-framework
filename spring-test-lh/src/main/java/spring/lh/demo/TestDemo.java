@@ -14,7 +14,9 @@ public class TestDemo {
 	 */
 	public static void main(String[] args) {
 		System.out.println(9);
-		AnnotationConfigApplicationContext an = new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext an = new AnnotationConfigApplicationContext("classpath:applicationContext.xml");
+
+
 		System.out.println(an);
 	}
 }

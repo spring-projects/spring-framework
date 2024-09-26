@@ -574,24 +574,46 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.applicationListeners;
 	}
 
+	/**
+	 * 可以理解为都得走这一步，因为是个模板类，最终他的子类会增加自己的额外逻辑，最后会通过super.refresh() 方法来刷新
+	 * 所以这个方法非常重要了。
+	 *
+	 * @throws BeansException
+	 * @throws IllegalStateException
+	 */
 	@Override
 	public void refresh() throws BeansException, IllegalStateException {
+
 		synchronized (this.startupShutdownMonitor) {
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
 			logger.warn("prepare refresh");
 			// Prepare this context for refreshing. 准备要刷新的内容
+			// 这个方法用于准备刷新应用程序上下文。它会设置启动时间、激活标志，并执行一些属性源的初始化操作。
 			prepareRefresh();
 
 			logger.warn("创建一个对象，一个fresh的 ConfigurableListableBeanFactory");
 			// Tell the subclass to refresh the internal bean factory. 让子类刷新内部的 beanFactory DefaultListableBeanFactory
 			// 其实这里就是创建了一个 beanFactory
 			// tip： factoryBean 返回的是 其 getObject 方法返回的对象；区分二者，用开头的字母来区分就可以。
+			/**
+			 * ConfigurableListableBeanFactory 是 Spring 中 BeanFactory 的一种可配置、可列出的扩展接口。它提供了一些更高级的功能，例如：
+			 *
+			 * 列出所有 Bean 定义：可以访问所有已经注册的 BeanDefinition，并允许在创建实例之前修改这些定义。
+			 * 单例模式的缓存：它可以管理已经创建好的单例 bean 的缓存，优化性能。
+			 * 合并 BeanDefinition：它可以合并父类和子类的 BeanDefinition，从而继承父类定义的一些公共属性。
+			 * 注册 BeanPostProcessor：允许注册 BeanPostProcessor，在 bean 初始化之前和之后执行自定义的处理逻辑。
+			 */
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			logger.warn("prepare 这个beanFactory对象");
 			// Prepare the bean factory for use in this context.
 			prepareBeanFactory(beanFactory);
+
+			/**
+			 * 上面的代码做的工作有：主要是准备工作，主要是创建了一个beanFactory对象
+			 * ConfigurableListableBeanFactory
+			 */
 
 			try {
 				logger.warn("是一个拓展功能");
@@ -610,13 +632,29 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
+				/**
+				 * 上面做的工作是：注册beanFactoryPostProcessor，用于在beanFactory创建完成后进行一些额外的处理。
+				 */
+
 				// Initialize message source for this context.
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				/**
+				 * 负责初始化事件广播器并注册事件监听器，以确保当事件被发布时，所有相关的监听器能够正确地接收和处理这些事件。
+				 * 这一机制增强了 Spring 应用程序的解耦性和响应能力，使得不同组件之间可以通过事件进行有效的协作。
+				 */
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
+				/**
+				 * onRefresh() 方法是 Spring 框架在上下文刷新时执行的关键逻辑，它提供了一个钩子，使得开发者可以在上下文生命周期
+				 * 的特定时刻插入自定义的初始化逻辑。通过合理使用 onRefresh()，开发者可以更好地管理应用程序的状态和资源，
+				 * 提高应用程序的灵活性和可维护性。
+				 *
+				 * 初始化内置的 bean：例如，ApplicationEventMulticaster 和 LifecycleProcessor。
+				 * 发布上下文刷新事件：
+				 */
 				onRefresh();
 
 				// Check for listener beans and register them.
@@ -712,7 +750,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #getBeanFactory()
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
-		// 还是要刷新一下
+		// 准备一个全新的 DefaultListableBeanFactory
 		refreshBeanFactory();
 		// 然后再去获得
 		return getBeanFactory();
@@ -778,6 +816,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * registered, and most importantly, no beans will have been instantiated yet.
 	 * <p>This template method allows for registering special BeanPostProcessors
 	 * etc in certain AbstractApplicationContext subclasses.
+	 *
+	 * postProcessBeanFactory() 方法是一个模板方法，用于在应用程序上下文的标准初始化之后修改内部的Bean工厂。在这个方法被调用时，
+	 * 初始的定义资源已经被加载，但是还没有运行任何后置处理器，也没有注册任何派生的Bean定义，最重要的是，还没有实例化任何Bean。
+	 * 这个方法的目的是允许在特定的AbstractApplicationContext子类中注册特殊的Bean后置处理器等。通过重写这个方法，
+	 * 我们可以在Bean工厂的标准初始化之后进行一些自定义的操作，以满足特定的需求。
+	 * 在postProcessBeanFactory() 方法中，我们可以对传入的beanFactory进行各种操作。例如，我们可以注册自定义的Bean后置处理器，
+	 * 这些处理器可以在Bean实例化之前或之后对Bean进行额外的处理。我们还可以注册其他特殊的Bean定义，或者修改已有的Bean定义。
+	 * 需要注意的是，postProcessBeanFactory() 方法是一个空方法，没有提供具体的实现。它被设计为一个模板方法，供子类进行重写。
+	 * 这样，子类可以根据自己的需求来实现特定的操作。
+	 *
+	 * 总的来说，postProcessBeanFactory() 方法是一个模板方法，用于在应用程序上下文的标准初始化之后修改内部的Bean工厂。
+	 * 通过重写这个方法，我们可以在Bean工厂初始化之后进行一些自定义的操作，例如注册特殊的Bean后置处理器或修改Bean定义。
+	 * 这个方法为子类提供了扩展和定制的机会。
+	 *
 	 * @param beanFactory the bean factory used by the application context
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
@@ -963,6 +1015,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
+
 		beanFactory.preInstantiateSingletons();
 	}
 
