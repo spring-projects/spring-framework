@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AnnotatedBeanDefinitionReaderTests {
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void registerBeanWithQualifiers() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(context);
@@ -56,13 +57,12 @@ class AnnotatedBeanDefinitionReaderTests {
 
 	@Lazy(false)
 	static class TestBean {
-
 	}
 
 	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
 	@interface CustomQualifier {
-
 	}
+
 }
