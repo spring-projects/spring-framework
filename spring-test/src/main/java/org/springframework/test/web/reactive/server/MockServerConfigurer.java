@@ -25,7 +25,7 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  *
  * <p>An implementation of this interface can be plugged in via
  * {@link WebTestClient.MockServerSpec#apply} where instances are likely obtained
- * via static methods, e.g.:
+ * via static methods, for example:
  *
  * <pre class="code">
  * import static org.example.ExampleSetup.securitySetup;

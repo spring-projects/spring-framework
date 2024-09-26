@@ -195,7 +195,7 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Alternative factory method that allows for custom HTTP verbs (e.g. WebDAV).
+	 * Alternative factory method that allows for custom HTTP verbs (for example, WebDAV).
 	 * @param httpMethod the HTTP method
 	 * @param uri the URI
 	 * @since 4.3

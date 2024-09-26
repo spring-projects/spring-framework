@@ -268,7 +268,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 
 	/**
-	 * Set the Spring {@link ApplicationContext}, e.g. for resource loading.
+	 * Set the Spring {@link ApplicationContext}, for example, for resource loading.
 	 */
 	@Override
 	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
@@ -285,7 +285,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Set the {@link jakarta.servlet.ServletContext}, e.g. for resource handling,
+	 * Set the {@link jakarta.servlet.ServletContext}, for example, for resource handling,
 	 * looking up file extensions, etc.
 	 */
 	@Override
@@ -807,7 +807,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Add custom {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}
 	 * to use in addition to the ones registered by default.
 	 * <p>Custom argument resolvers are invoked before built-in resolvers except for
-	 * those that rely on the presence of annotations (e.g. {@code @RequestParameter},
+	 * those that rely on the presence of annotations (for example, {@code @RequestParameter},
 	 * {@code @PathVariable}, etc). The latter can be customized by configuring the
 	 * {@link RequestMappingHandlerAdapter} directly.
 	 * @param argumentResolvers the list of custom converters (initially an empty list)
@@ -833,7 +833,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Add custom {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers}
 	 * in addition to the ones registered by default.
 	 * <p>Custom return value handlers are invoked before built-in ones except for
-	 * those that rely on the presence of annotations (e.g. {@code @ResponseBody},
+	 * those that rely on the presence of annotations (for example, {@code @ResponseBody},
 	 * {@code @ModelAttribute}, etc). The latter can be customized by configuring the
 	 * {@link RequestMappingHandlerAdapter} directly.
 	 * @param returnValueHandlers the list of custom handlers (initially an empty list)

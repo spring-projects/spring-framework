@@ -188,7 +188,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * <p><strong>Note:</strong> Mappings registered here may be accessed via
 	 * {@link ContentNegotiationManager#getMediaTypeMappings()} and may be used
 	 * not only in the parameter and path extension strategies. For example,
-	 * with the Spring MVC config, e.g. {@code @EnableWebMvc} or
+	 * with the Spring MVC config, for example, {@code @EnableWebMvc} or
 	 * {@code <mvc:annotation-driven>}, the media type mappings are also plugged
 	 * in to:
 	 * <ul>
@@ -254,7 +254,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * When {@link #setFavorPathExtension favorPathExtension} or
 	 * {@link #setFavorParameter(boolean)} is set, this property determines
 	 * whether to use only registered {@code MediaType} mappings or to allow
-	 * dynamic resolution, e.g. via {@link MediaTypeFactory}.
+	 * dynamic resolution, for example, via {@link MediaTypeFactory}.
 	 * <p>By default this is not set in which case dynamic resolution is on.
 	 */
 	public void setUseRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {

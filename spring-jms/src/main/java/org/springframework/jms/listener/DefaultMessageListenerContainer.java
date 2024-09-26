@@ -89,7 +89,7 @@ import org.springframework.util.backoff.FixedBackOff;
  * by specifying a {@link #setMaxConcurrentConsumers "maxConcurrentConsumers"}
  * value that is higher than the {@link #setConcurrentConsumers "concurrentConsumers"}
  * value. Since the latter's default is 1, you can also simply specify a
- * "maxConcurrentConsumers" of e.g. 5, which will lead to dynamic scaling up to
+ * "maxConcurrentConsumers" of, for example, 5, which will lead to dynamic scaling up to
  * 5 concurrent consumers in case of increasing message load, as well as dynamic
  * shrinking back to the standard number of consumers once the load decreases.
  * Consider adapting the {@link #setIdleTaskExecutionLimit "idleTaskExecutionLimit"}
@@ -353,8 +353,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 
 	/**
-	 * Specify concurrency limits via a "lower-upper" String, e.g. "5-10", or a simple
-	 * upper limit String, e.g. "10" (the lower limit will be 1 in this case).
+	 * Specify concurrency limits via a "lower-upper" String, for example, "5-10", or a simple
+	 * upper limit String, for example, "10" (the lower limit will be 1 in this case).
 	 * <p>This listener container will always hold on to the minimum number of consumers
 	 * ({@link #setConcurrentConsumers}) and will slowly scale up to the maximum number
 	 * of consumers {@link #setMaxConcurrentConsumers} in case of increasing load.
@@ -374,7 +374,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 		catch (NumberFormatException ex) {
 			throw new IllegalArgumentException("Invalid concurrency value [" + concurrency + "]: only " +
-					"single maximum integer (e.g. \"5\") and minimum-maximum combo (e.g. \"3-5\") supported.");
+					"single maximum integer (for example, \"5\") and minimum-maximum combo (for example, \"3-5\") supported.");
 		}
 	}
 

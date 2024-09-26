@@ -111,7 +111,7 @@ public @interface TransactionalEventListener {
 
 	/**
 	 * An optional identifier for the listener, defaulting to the fully-qualified
-	 * signature of the declaring method (e.g. "mypackage.MyClass.myMethod()").
+	 * signature of the declaring method (for example, "mypackage.MyClass.myMethod()").
 	 * @since 5.3
 	 * @see EventListener#id
 	 * @see TransactionalApplicationListener#getListenerId()

@@ -21,7 +21,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**
- * Holder class to expose SiMP attributes associated with a session (e.g. WebSocket)
+ * Holder class to expose SiMP attributes associated with a session (for example, WebSocket)
  * in the form of a thread-bound {@link SimpAttributes} object.
  *
  * @author Rossen Stoyanchev

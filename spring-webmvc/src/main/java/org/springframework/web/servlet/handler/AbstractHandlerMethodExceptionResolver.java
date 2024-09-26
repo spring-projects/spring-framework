@@ -55,7 +55,7 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 	}
 
 	/**
-	 * Whether this resolver has global exception handlers, e.g. not declared in
+	 * Whether this resolver has global exception handlers, for example, not declared in
 	 * the same class as the {@code HandlerMethod} that raised the exception and
 	 * therefore can apply to any handler.
 	 * @since 5.3

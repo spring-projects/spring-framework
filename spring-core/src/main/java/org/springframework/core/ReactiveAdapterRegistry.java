@@ -42,7 +42,7 @@ import org.springframework.util.ReflectionUtils;
  * A registry of adapters to adapt Reactive Streams {@link Publisher} to/from various
  * async/reactive types such as {@code CompletableFuture}, RxJava {@code Flowable}, etc.
  * This is designed to complement Spring's Reactor {@code Mono}/{@code Flux} support while
- * also being usable without Reactor, e.g. just for {@code org.reactivestreams} bridging.
+ * also being usable without Reactor, for example, just for {@code org.reactivestreams} bridging.
  *
  * <p>By default, depending on classpath availability, adapters are registered for Reactor
  * (including {@code CompletableFuture} and {@code Flow.Publisher} adapters), RxJava 3,

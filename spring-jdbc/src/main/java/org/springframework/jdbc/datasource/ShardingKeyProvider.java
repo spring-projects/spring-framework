@@ -27,7 +27,7 @@ import org.springframework.lang.Nullable;
  * for providing the current sharding key (plus optionally a super sharding key) in
  * {@link org.springframework.jdbc.datasource.ShardingKeyDataSourceAdapter}.
  *
- * <p>Can be used as a functional interface (e.g. with a lambda expression) for a simple
+ * <p>Can be used as a functional interface (for example, with a lambda expression) for a simple
  * sharding key, or as a two-method interface when including a super sharding key as well.
  *
  * @author Mohamed Lahyane (Anir)

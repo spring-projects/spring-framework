@@ -50,7 +50,7 @@ import org.springframework.lang.Nullable;
  * <td>path</td>
  * <td>true</td>
  * <td>true</td>
- * <td>Set the path that this tag should apply. E.g. 'customer' to allow bind
+ * <td>Set the path that this tag should apply. For example, 'customer' to allow bind
  * paths like 'address.street' rather than 'customer.address.street'.</td>
  * </tr>
  * </tbody>
@@ -78,7 +78,7 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 
 	/**
 	 * Set the path that this tag should apply.
-	 * <p>E.g. "customer" to allow bind paths like "address.street"
+	 * <p>For example, "customer" to allow bind paths like "address.street"
 	 * rather than "customer.address.street".
 	 * @see BindTag#setPath
 	 */

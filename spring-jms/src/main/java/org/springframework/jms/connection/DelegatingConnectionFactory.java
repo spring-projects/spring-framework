@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
  * {@link jakarta.jms.ConnectionFactory} implementation that delegates all calls
  * to a given target {@link jakarta.jms.ConnectionFactory}, adapting specific
  * {@code create(Queue/Topic)Connection} calls to the target ConnectionFactory
- * if necessary (e.g. when running JMS 1.0.2 API based code against a generic
+ * if necessary (for example, when running JMS 1.0.2 API based code against a generic
  * JMS 1.1 ConnectionFactory, such as ActiveMQ's PooledConnectionFactory).
  *
  * <p>As of Spring Framework 5, this class supports JMS 2.0 {@code JMSContext}

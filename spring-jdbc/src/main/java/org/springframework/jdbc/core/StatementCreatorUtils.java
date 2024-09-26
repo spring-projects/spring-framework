@@ -75,7 +75,7 @@ public abstract class StatementCreatorUtils {
 	 * {@link PreparedStatement#setNull} / {@link PreparedStatement#setObject} calls based on
 	 * well-known behavior of common databases.
 	 * <p>Consider switching this flag to "true" if you experience misbehavior at runtime,
-	 * e.g. with connection pool issues in case of an exception thrown from {@code getParameterType}
+	 * for example, with connection pool issues in case of an exception thrown from {@code getParameterType}
 	 * (as reported on JBoss AS 7) or in case of performance problems (as reported on PostgreSQL).
 	 */
 	public static final String IGNORE_GETPARAMETERTYPE_PROPERTY_NAME = "spring.jdbc.getParameterType.ignore";
@@ -324,7 +324,7 @@ public abstract class StatementCreatorUtils {
 					throw ex;
 				}
 				// Fall back to generic setNull call without SQL type specified
-				// (e.g. for MySQL TIME_WITH_TIMEZONE / TIMESTAMP_WITH_TIMEZONE).
+				// (for example, for MySQL TIME_WITH_TIMEZONE / TIMESTAMP_WITH_TIMEZONE).
 				ps.setNull(paramIndex, Types.NULL);
 			}
 		}
@@ -461,7 +461,7 @@ public abstract class StatementCreatorUtils {
 			}
 			catch (SQLFeatureNotSupportedException ex) {
 				// Fall back to generic setObject call without SQL type specified
-				// (e.g. for MySQL TIME_WITH_TIMEZONE / TIMESTAMP_WITH_TIMEZONE).
+				// (for example, for MySQL TIME_WITH_TIMEZONE / TIMESTAMP_WITH_TIMEZONE).
 				ps.setObject(paramIndex, inValue);
 			}
 		}

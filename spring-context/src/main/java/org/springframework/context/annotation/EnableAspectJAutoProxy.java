@@ -103,7 +103,7 @@ import java.lang.annotation.Target;
  *
  * <b>Note: {@code @EnableAspectJAutoProxy} applies to its local application context only,
  * allowing for selective proxying of beans at different levels.</b> Please redeclare
- * {@code @EnableAspectJAutoProxy} in each individual context, e.g. the common root web
+ * {@code @EnableAspectJAutoProxy} in each individual context, for example, the common root web
  * application context and any separate {@code DispatcherServlet} application contexts,
  * if you need to apply its behavior at multiple levels.
  *

@@ -415,7 +415,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * Subclasses can invoke this method to populate the MessagingAdviceBean cache
-	 * (e.g. to support "global" {@code @MessageExceptionHandler}).
+	 * (for example, to support "global" {@code @MessageExceptionHandler}).
 	 * @since 4.2
 	 */
 	protected void registerExceptionHandlerAdvice(

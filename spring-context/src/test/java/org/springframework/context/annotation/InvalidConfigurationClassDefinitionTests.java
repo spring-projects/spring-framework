@@ -27,7 +27,7 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.ro
 
 /**
  * Unit tests covering cases where a user defines an invalid Configuration
- * class, e.g.: forgets to annotate with {@link Configuration} or declares
+ * class, for example: forgets to annotate with {@link Configuration} or declares
  * a Configuration class as final.
  *
  * @author Chris Beams

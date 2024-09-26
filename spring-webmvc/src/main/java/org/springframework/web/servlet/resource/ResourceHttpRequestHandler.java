@@ -68,7 +68,7 @@ import org.springframework.web.util.UrlPathHelper;
  * <p>The properties {@linkplain #setLocations "locations"} and
  * {@linkplain #setLocationValues "locationValues"} accept locations from which
  * static resources can be served by this handler. This can be relative to the
- * root of the web application, or from the classpath, e.g.
+ * root of the web application, or from the classpath, for example,
  * "classpath:/META-INF/public-web-resources/", allowing convenient packaging
  * and serving of resources such as .js, .css, and others in jar files.
  *
@@ -160,7 +160,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * {@code /META-INF/public-web-resources/} directory, with resources in the
 	 * web application root taking precedence.
 	 * <p>For {@link org.springframework.core.io.UrlResource URL-based resources}
-	 * (e.g. files, HTTP URLs, etc.) this method supports a special prefix to
+	 * (for example, files, HTTP URLs, etc.) this method supports a special prefix to
 	 * indicate the charset associated with the URL so that relative paths
 	 * appended to it can be encoded correctly, for example
 	 * {@code "[charset=Windows-31J]https://example.org/path"}.
@@ -574,7 +574,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		// For very general mappings (e.g. "/") we need to check 404 first
+		// For very general mappings (for example, "/") we need to check 404 first
 		Resource resource = getResource(request);
 		if (resource == null) {
 			logger.debug("Resource not found");

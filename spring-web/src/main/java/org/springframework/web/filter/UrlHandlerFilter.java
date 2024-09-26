@@ -118,7 +118,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 	/**
 	 * Create a builder by adding a handler for URL's with a trailing slash.
-	 * @param pathPatterns path patterns to map the handler to, e.g.
+	 * @param pathPatterns path patterns to map the handler to, for example,
 	 * <code>"/path/&#42;"</code>, <code>"/path/&#42;&#42;"</code>,
 	 * <code>"/path/foo/"</code>.
 	 * @return a spec to configure the trailing slash handler with
@@ -136,7 +136,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 		/**
 		 * Add a handler for URL's with a trailing slash.
-		 * @param pathPatterns path patterns to map the handler to, e.g.
+		 * @param pathPatterns path patterns to map the handler to, for example,
 		 * <code>"/path/&#42;"</code>, <code>"/path/&#42;&#42;"</code>,
 		 * <code>"/path/foo/"</code>.
 		 * @return a spec to configure the handler with

@@ -77,7 +77,7 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 	 * Configure a custom handler for writing the request body.
 	 *
 	 * <p>The default write handler consumes and caches the request body so it
-	 * may be accessed subsequently, e.g. in test assertions. Use this property
+	 * may be accessed subsequently, for example, in test assertions. Use this property
 	 * when the request body is an infinite stream.
 	 * @param writeHandler the write handler to use returning {@code Mono<Void>}
 	 * when the body has been "written" (i.e. consumed).

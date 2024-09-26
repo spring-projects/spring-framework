@@ -41,7 +41,7 @@ operations need to execute within the same Reactor context in the same reactive 
 
 When configured with a `ReactiveTransactionManager`, all transaction-demarcated methods
 are expected to return a reactive pipeline. Void methods or regular return types need
-to be associated with a regular `PlatformTransactionManager`, e.g. through the
+to be associated with a regular `PlatformTransactionManager`, for example, through the
 `transactionManager` attribute of the corresponding `@Transactional` declarations.
 ====
 

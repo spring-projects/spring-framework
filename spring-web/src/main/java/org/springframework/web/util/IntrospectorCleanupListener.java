@@ -52,7 +52,7 @@ import org.springframework.beans.CachedIntrospectionResults;
  * <p>Application classes hardly ever need to use the JavaBeans Introspector
  * directly, so are normally not the cause of Introspector resource leaks.
  * Rather, many libraries and frameworks do not clean up the Introspector:
- * e.g. Struts and Quartz.
+ * for example, Struts and Quartz.
  *
  * <p>Note that a single such Introspector leak will cause the entire web
  * app class loader to not get garbage collected! This has the consequence that

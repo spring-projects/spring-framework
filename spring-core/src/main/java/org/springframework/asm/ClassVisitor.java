@@ -183,11 +183,11 @@ public abstract class ClassVisitor {
    * @param owner internal name of the enclosing class of the class (see {@link
    *     Type#getInternalName()}).
    * @param name the name of the method that contains the class, or {@literal null} if the class is
-   *     not enclosed in a method or constructor of its enclosing class (e.g. if it is enclosed in
+   *     not enclosed in a method or constructor of its enclosing class (for example, if it is enclosed in
    *     an instance initializer, static initializer, instance variable initializer, or class
    *     variable initializer).
    * @param descriptor the descriptor of the method that contains the class, or {@literal null} if
-   *     the class is not enclosed in a method or constructor of its enclosing class (e.g. if it is
+   *     the class is not enclosed in a method or constructor of its enclosing class (for example, if it is
    *     enclosed in an instance initializer, static initializer, instance variable initializer, or
    *     class variable initializer).
    */
@@ -293,7 +293,7 @@ public abstract class ClassVisitor {
    * @param name the internal name of C (see {@link Type#getInternalName()}).
    * @param outerName the internal name of the class or interface C is a member of (see {@link
    *     Type#getInternalName()}). Must be {@literal null} if C is not the member of a class or
-   *     interface (e.g. for local or anonymous classes).
+   *     interface (for example, for local or anonymous classes).
    * @param innerName the (simple) name of C. Must be {@literal null} for anonymous inner classes.
    * @param access the access flags of C originally declared in the source code from which this
    *     class was compiled.

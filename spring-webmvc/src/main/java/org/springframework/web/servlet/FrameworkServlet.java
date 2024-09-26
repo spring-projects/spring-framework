@@ -101,7 +101,7 @@ import org.springframework.web.util.WebUtils;
  * specifies one or more {@link org.springframework.context.ApplicationContextInitializer
  * ApplicationContextInitializer} classes. The managed web application context will be
  * delegated to these initializers, allowing for additional programmatic configuration,
- * e.g. adding property sources or activating profiles against the {@linkplain
+ * for example, adding property sources or activating profiles against the {@linkplain
  * org.springframework.context.ConfigurableApplicationContext#getEnvironment() context's
  * environment}. See also {@link org.springframework.web.context.ContextLoader} which
  * supports a "contextInitializerClasses" context-param with identical semantics for
@@ -118,7 +118,7 @@ import org.springframework.web.util.WebUtils;
  * default ApplicationContext implementation. This can be leveraged to
  * deliberately override certain bean definitions via an extra XML file.
  *
- * <p>The default namespace is "'servlet-name'-servlet", e.g. "test-servlet" for a
+ * <p>The default namespace is "'servlet-name'-servlet", for example, "test-servlet" for a
  * servlet-name "test" (leading to a "/WEB-INF/test-servlet.xml" default location
  * with XmlWebApplicationContext). The namespace can also be set explicitly via
  * the "namespace" servlet init-param.
@@ -362,7 +362,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/**
 	 * Return the namespace for this servlet, falling back to default scheme if
-	 * no custom namespace was set: e.g. "test-servlet" for a servlet named "test".
+	 * no custom namespace was set: for example, "test-servlet" for a servlet named "test".
 	 */
 	public String getNamespace() {
 		return (this.namespace != null ? this.namespace : getServletName() + DEFAULT_NAMESPACE_SUFFIX);
@@ -439,7 +439,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * (that is, ending after their initial task, without reuse of the thread).
 	 * <p><b>WARNING:</b> Do not use inheritance for child threads if you are
 	 * accessing a thread pool which is configured to potentially add new threads
-	 * on demand (e.g. a JDK {@link java.util.concurrent.ThreadPoolExecutor}),
+	 * on demand (for example, a JDK {@link java.util.concurrent.ThreadPoolExecutor}),
 	 * since this will expose the inherited context to such a pooled thread.
 	 */
 	public void setThreadContextInheritable(boolean threadContextInheritable) {

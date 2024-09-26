@@ -123,9 +123,9 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * Create a new {@code UrlResource} based on a URI specification.
 	 * <p>The given parts will automatically get encoded if necessary.
-	 * @param protocol the URL protocol to use (e.g. "jar" or "file" - without colon);
+	 * @param protocol the URL protocol to use (for example, "jar" or "file" - without colon);
 	 * also known as "scheme"
-	 * @param location the location (e.g. the file path within that protocol);
+	 * @param location the location (for example, the file path within that protocol);
 	 * also known as "scheme-specific part"
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)
@@ -137,11 +137,11 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * Create a new {@code UrlResource} based on a URI specification.
 	 * <p>The given parts will automatically get encoded if necessary.
-	 * @param protocol the URL protocol to use (e.g. "jar" or "file" - without colon);
+	 * @param protocol the URL protocol to use (for example, "jar" or "file" - without colon);
 	 * also known as "scheme"
-	 * @param location the location (e.g. the file path within that protocol);
+	 * @param location the location (for example, the file path within that protocol);
 	 * also known as "scheme-specific part"
-	 * @param fragment the fragment within that location (e.g. anchor on an HTML page,
+	 * @param fragment the fragment within that location (for example, anchor on an HTML page,
 	 * as following after a "#" separator)
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)

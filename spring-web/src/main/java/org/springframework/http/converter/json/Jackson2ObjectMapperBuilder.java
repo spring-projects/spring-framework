@@ -267,7 +267,7 @@ public class Jackson2ObjectMapperBuilder {
 	/**
 	 * Alternative to {@link #annotationIntrospector(AnnotationIntrospector)}
 	 * that allows combining with rather than replacing the currently set
-	 * introspector, e.g. via
+	 * introspector, for example, via
 	 * {@link AnnotationIntrospectorPair#pair(AnnotationIntrospector, AnnotationIntrospector)}.
 	 * @param pairingFunction a function to apply to the currently set
 	 * introspector (possibly {@code null}); the result of the function becomes

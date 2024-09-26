@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>There are two types of encode methods:
  * <ul>
- * <li>{@code "encodeXyz"} -- these encode a specific URI component (e.g. path,
+ * <li>{@code "encodeXyz"} -- these encode a specific URI component (for example, path,
  * query) by percent encoding illegal characters, which includes non-US-ASCII
  * characters, and also characters that are otherwise illegal within the given
  * URI component type, as defined in RFC 3986. The effect of this method, with
@@ -389,8 +389,8 @@ public abstract class UriUtils {
 
 	/**
 	 * Extract the file extension from the given URI path.
-	 * @param path the URI path (e.g. "/products/index.html")
-	 * @return the extracted file extension (e.g. "html")
+	 * @param path the URI path (for example, "/products/index.html")
+	 * @return the extracted file extension (for example, "html")
 	 * @since 4.3.2
 	 */
 	@Nullable

@@ -65,7 +65,7 @@ public abstract class AbstractHttpReceivingTransportHandler extends AbstractTran
 		catch (IOException ex) {
 			logger.error("Failed to read message", ex);
 			if (ex.getClass().getName().contains("Mapping")) {
-				// e.g. Jackson's JsonMappingException, indicating an incomplete payload
+				// for example, Jackson's JsonMappingException, indicating an incomplete payload
 				handleReadError(response, "Payload expected.", sockJsSession.getId());
 			}
 			else {

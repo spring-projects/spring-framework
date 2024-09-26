@@ -298,7 +298,7 @@ public abstract class AbstractApplicationEventMulticaster
 					else {
 						// Remove non-matching listeners that originally came from
 						// ApplicationListenerDetector, possibly ruled out by additional
-						// BeanDefinition metadata (e.g. factory method generics) above.
+						// BeanDefinition metadata (for example, factory method generics) above.
 						Object listener = beanFactory.getSingleton(listenerBeanName);
 						if (retriever != null) {
 							filteredListeners.remove(listener);

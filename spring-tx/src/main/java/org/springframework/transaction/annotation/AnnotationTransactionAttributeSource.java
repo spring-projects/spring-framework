@@ -149,7 +149,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * but not on checked exceptions. A default rule may override this
 	 * while still respecting any custom rules in the transaction attribute.
 	 * @param rollbackRule a rollback rule overriding the default behavior,
-	 * e.g. {@link RollbackRuleAttribute#ROLLBACK_ON_ALL_EXCEPTIONS}
+	 * for example, {@link RollbackRuleAttribute#ROLLBACK_ON_ALL_EXCEPTIONS}
 	 * @since 6.2
 	 * @see RuleBasedTransactionAttribute#getRollbackRules()
 	 * @see EnableTransactionManagement#rollbackOn()

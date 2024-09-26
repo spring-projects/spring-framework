@@ -200,7 +200,7 @@ not involving a binding process. As of 6.1, this has been simplified through a n
 `Validator.validateObject(Object)` method which is available by default now, returning
 a simple ´Errors` representation which can be inspected: typically calling `hasErrors()`
 or the new `failOnError` method for turning the error summary message into an exception
-(e.g. `validator.validateObject(myObject).failOnError(IllegalArgumentException::new)`).
+(for example, `validator.validateObject(myObject).failOnError(IllegalArgumentException::new)`).
 
 
 

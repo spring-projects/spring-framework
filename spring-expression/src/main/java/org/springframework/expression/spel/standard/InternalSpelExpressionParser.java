@@ -970,7 +970,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 
 		if (desiredTokenKind == TokenKind.IDENTIFIER) {
-			// Might be one of the textual forms of the operators (e.g. NE for != ) -
+			// Might be one of the textual forms of the operators (for example, NE for != ) -
 			// in which case we can treat it as an identifier. The list is represented here:
 			// Tokenizer.ALTERNATIVE_OPERATOR_NAMES and those ones are in order in the TokenKind enum.
 			if (t.kind.ordinal() >= TokenKind.DIV.ordinal() && t.kind.ordinal() <= TokenKind.NOT.ordinal() &&

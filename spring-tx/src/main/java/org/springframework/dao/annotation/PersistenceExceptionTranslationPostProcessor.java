@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * PersistenceExceptionTranslator} interface, which are subsequently asked to translate
  * candidate exceptions.
  *
- * <p>All of Spring's applicable resource factories (e.g.
+ * <p>All of Spring's applicable resource factories (for example,
  * {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean})
  * implement the {@code PersistenceExceptionTranslator} interface out of the box.
  * As a consequence, all that is usually needed to enable automatic exception

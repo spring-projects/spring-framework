@@ -99,7 +99,7 @@ public @interface DateTimeFormat {
 	 * a style or ISO format.
 	 * <p>Note: This pattern follows the original {@link java.text.SimpleDateFormat} style,
 	 * as also supported by Joda-Time, with strict parsing semantics towards overflows
-	 * (e.g. rejecting a Feb 29 value for a non-leap-year). As a consequence, 'yy'
+	 * (for example, rejecting a Feb 29 value for a non-leap-year). As a consequence, 'yy'
 	 * characters indicate a year in the traditional style, not a "year-of-era" as in the
 	 * {@link java.time.format.DateTimeFormatter} specification (i.e. 'yy' turns into 'uu'
 	 * when going through a {@code DateTimeFormatter} with strict resolution mode).

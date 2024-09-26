@@ -562,7 +562,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		if (!usePathPatterns) {
 			// This depends on suffix pattern matching and has different outcomes otherwise,
-			// e.g. 404 vs another method matching, depending on the test case.
+			// for example, 404 vs another method matching, depending on the test case.
 			assertThat(response.getContentAsString()).isEqualTo("test-name1-2");
 		}
 

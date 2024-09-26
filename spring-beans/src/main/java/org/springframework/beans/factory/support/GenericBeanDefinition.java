@@ -27,7 +27,7 @@ import org.springframework.util.ObjectUtils;
  * parent bean definition can be flexibly configured through the "parentName" property.
  *
  * <p>In general, use this {@code GenericBeanDefinition} class for the purpose of
- * registering declarative bean definitions (e.g. XML definitions which a bean
+ * registering declarative bean definitions (for example, XML definitions which a bean
  * post-processor might operate on, potentially even reconfiguring the parent name).
  * Use {@code RootBeanDefinition}/{@code ChildBeanDefinition} where parent/child
  * relationships happen to be pre-determined, and prefer {@link RootBeanDefinition}

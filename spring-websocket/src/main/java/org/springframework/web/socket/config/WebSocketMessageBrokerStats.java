@@ -48,7 +48,7 @@ import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
  * The frequency of logging can be changed via {@link #setLoggingPeriod(long)}.
  *
  * <p>This class is declared as a Spring bean by the above configuration with the
- * name "webSocketMessageBrokerStats" and can be easily exported to JMX, e.g. with
+ * name "webSocketMessageBrokerStats" and can be easily exported to JMX, for example, with
  * the {@link org.springframework.jmx.export.MBeanExporter MBeanExporter}.
  *
  * @author Rossen Stoyanchev

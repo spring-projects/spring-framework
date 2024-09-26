@@ -36,7 +36,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 
 /**
- * Common base class for plain JSON converters, e.g. Gson and JSON-B.
+ * Common base class for plain JSON converters, for example, Gson and JSON-B.
  *
  * <p>Note that the Jackson converters have a dedicated class hierarchy
  * due to their multi-format support.

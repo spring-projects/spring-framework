@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor}
  * while the parent class {@link SimpMessageHeaderAccessor} manages common
  * processing headers some of which are based on STOMP headers
- * (e.g. destination, content-type, etc).
+ * (for example, destination, content-type, etc).
  *
  * <p>An instance of this class can also be created by wrapping an existing
  * {@code Message}. That message may have been created with the more generic

@@ -290,7 +290,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * {@link TransactionSynchronizationManager}
 	 * check preceding it).
 	 * <p>Default is "false", i.e. using a Spring-managed Session: taking the current
-	 * thread-bound Session if available (e.g. in an Open-Session-in-View scenario),
+	 * thread-bound Session if available (for example, in an Open-Session-in-View scenario),
 	 * creating a new Session for the current transaction otherwise.
 	 * <p>Switch this flag to "true" in order to enforce use of a Hibernate-managed Session.
 	 * Note that this requires {@link SessionFactory#getCurrentSession()}
@@ -313,7 +313,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Specify a callback for customizing every Hibernate {@code Session} resource
 	 * created for a new transaction managed by this {@code HibernateTransactionManager}.
-	 * <p>This enables convenient customizations for application purposes, e.g.
+	 * <p>This enables convenient customizations for application purposes, for example,
 	 * setting Hibernate filters.
 	 * @since 5.3
 	 * @see Session#enableFilter

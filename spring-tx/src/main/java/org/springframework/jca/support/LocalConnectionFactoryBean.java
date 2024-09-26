@@ -56,7 +56,7 @@ import org.springframework.lang.Nullable;
  * of XA enlistment. You need to specify an XA-capable ConnectionManager in
  * order to make the connector interact with an XA transaction coordinator.
  * Alternatively, simply use the native local transaction facilities of the
- * exposed API (e.g. CCI local transactions), or use a corresponding
+ * exposed API (for example, CCI local transactions), or use a corresponding
  * implementation of Spring's PlatformTransactionManager SPI to drive local
  * transactions.
  *

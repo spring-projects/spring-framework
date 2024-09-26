@@ -37,14 +37,14 @@ import org.springframework.util.StringUtils;
  * A default implementation of {@code UserDestinationResolver} that relies
  * on a {@link SimpUserRegistry} to find active sessions for a user.
  *
- * <p>When a user attempts to subscribe, e.g. to "/user/queue/position-updates",
+ * <p>When a user attempts to subscribe, for example, to "/user/queue/position-updates",
  * the "/user" prefix is removed and a unique suffix added based on the session
- * id, e.g. "/queue/position-updates-useri9oqdfzo" to ensure different users can
+ * id, for example, "/queue/position-updates-useri9oqdfzo" to ensure different users can
  * subscribe to the same logical destination without colliding.
  *
- * <p>When sending to a user, e.g. "/user/{username}/queue/position-updates", the
+ * <p>When sending to a user, for example, "/user/{username}/queue/position-updates", the
  * "/user/{username}" prefix is removed and a suffix based on active session id's
- * is added, e.g. "/queue/position-updates-useri9oqdfzo".
+ * is added, for example, "/queue/position-updates-useri9oqdfzo".
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
@@ -239,7 +239,7 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 * @param sourceDestination the source destination from the input message.
 	 * @param actualDestination a subset of the destination without any user prefix.
 	 * @param sessionId the id of an active user session, never {@code null}.
-	 * @param user the target user, possibly {@code null}, e.g if not authenticated.
+	 * @param user the target user, possibly {@code null},, for example, if not authenticated.
 	 * @return a target destination, or {@code null} if none
 	 */
 	@SuppressWarnings("unused")
@@ -283,14 +283,14 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 		}
 
 		/**
-		 * The destination from the source message, e.g. "/user/{user}/queue/position-updates".
+		 * The destination from the source message, for example, "/user/{user}/queue/position-updates".
 		 */
 		public String getSourceDestination() {
 			return this.sourceDestination;
 		}
 
 		/**
-		 * The actual destination, without any user prefix, e.g. "/queue/position-updates".
+		 * The actual destination, without any user prefix, for example, "/queue/position-updates".
 		 */
 		public String getActualDestination() {
 			return this.actualDestination;

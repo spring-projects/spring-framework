@@ -82,10 +82,10 @@ parameters. While `@BindParam` is supported out of the box, you can also use a
 different annotation by setting a `DataBinder.NameResolver` on `DataBinder`
 
 Constructor binding supports `List`, `Map`, and array arguments either converted from
-a single string, e.g. comma-separated list, or based on indexed keys such as
+a single string, for example, comma-separated list, or based on indexed keys such as
 `accounts[2].name` or `account[KEY].name`.
 
-WebFlux, unlike Spring MVC, supports reactive types in the model, e.g. `Mono<Account>`.
+WebFlux, unlike Spring MVC, supports reactive types in the model, for example, `Mono<Account>`.
 You can declare a `@ModelAttribute` argument with or without a reactive type wrapper, and
 it will be resolved accordingly to the actual value.
 

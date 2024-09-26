@@ -77,7 +77,7 @@ public class MessageBrokerRegistry {
 
 	/**
 	 * Enable a simple message broker and configure one or more prefixes to filter
-	 * destinations targeting the broker (e.g. destinations prefixed with "/topic").
+	 * destinations targeting the broker (for example, destinations prefixed with "/topic").
 	 */
 	public SimpleBrokerRegistration enableSimpleBroker(String... destinationPrefixes) {
 		this.simpleBrokerRegistration = new SimpleBrokerRegistration(
@@ -127,7 +127,7 @@ public class MessageBrokerRegistry {
 	 * Configure one or more prefixes to filter destinations targeting application
 	 * annotated methods. For example destinations prefixed with "/app" may be
 	 * processed by annotated methods while other destinations may target the
-	 * message broker (e.g. "/topic", "/queue").
+	 * message broker (for example, "/topic", "/queue").
 	 * <p>When messages are processed, the matching prefix is removed from the destination
 	 * in order to form the lookup path. This means annotations should not contain the
 	 * destination prefix.

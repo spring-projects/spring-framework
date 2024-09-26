@@ -89,7 +89,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	/**
 	 * Set the prefix that gets applied to the ResourceBundle basenames,
 	 * i.e. the theme names.
-	 * E.g.: basenamePrefix="test.", themeName="theme" &rarr; basename="test.theme".
+	 * For example: basenamePrefix="test.", themeName="theme" &rarr; basename="test.theme".
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
 	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
 	 * This means that "test.theme" is effectively equivalent to "test/theme",

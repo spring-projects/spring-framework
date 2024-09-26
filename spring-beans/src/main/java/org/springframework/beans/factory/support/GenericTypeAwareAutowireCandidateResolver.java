@@ -33,7 +33,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Basic {@link AutowireCandidateResolver} that performs a full generic type
  * match with the candidate's type if the dependency is declared as a generic type
- * (e.g. {@code Repository<Customer>}).
+ * (for example, {@code Repository<Customer>}).
  *
  * <p>This is the base class for
  * {@link org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver},
@@ -147,7 +147,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		}
 
 		if (descriptor.fallbackMatchAllowed()) {
-			// Fallback matches allow unresolvable generics, e.g. plain HashMap to Map<String,String>;
+			// Fallback matches allow unresolvable generics, for example, plain HashMap to Map<String,String>;
 			// and pragmatically also java.util.Properties to any Map (since despite formally being a
 			// Map<Object,Object>, java.util.Properties is usually perceived as a Map<String,String>).
 			if (targetType.hasUnresolvableGenerics()) {

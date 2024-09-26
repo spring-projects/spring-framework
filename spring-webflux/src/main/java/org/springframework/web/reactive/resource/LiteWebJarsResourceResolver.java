@@ -58,7 +58,7 @@ public class LiteWebJarsResourceResolver extends AbstractResourceResolver {
 
 	/**
 	 * Create a {@code LiteWebJarsResourceResolver} with a custom {@code WebJarVersionLocator} instance,
-	 * e.g. with a custom cache implementation.
+	 * for example, with a custom cache implementation.
 	 */
 	public LiteWebJarsResourceResolver(WebJarVersionLocator webJarVersionLocator) {
 		this.webJarVersionLocator = webJarVersionLocator;

@@ -70,7 +70,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  * consider setting {@link #setVirtualThreads} to {@code true}.
  *
  * <p>Extends {@link SimpleAsyncTaskExecutor} and can serve as a fully capable
- * replacement for it, e.g. as a single shared instance serving as a
+ * replacement for it, for example, as a single shared instance serving as a
  * {@link org.springframework.core.task.TaskExecutor} as well as a {@link TaskScheduler}.
  * This is generally not the case with other executor/scheduler implementations
  * which tend to have specific constraints for the scheduler thread pool,
@@ -78,13 +78,13 @@ import org.springframework.util.concurrent.ListenableFuture;
  *
  * <p><b>NOTE: This scheduler variant does not track the actual completion of tasks
  * but rather just the hand-off to an execution thread.</b> As a consequence,
- * a {@link ScheduledFuture} handle (e.g. from {@link #schedule(Runnable, Instant)})
+ * a {@link ScheduledFuture} handle (for example, from {@link #schedule(Runnable, Instant)})
  * represents that hand-off rather than the actual completion of the provided task
  * (or series of repeated tasks).
  *
  * <p>As an alternative to the built-in thread-per-task capability, this scheduler
  * can also be configured with a separate target executor for scheduled task
- * execution through {@link #setTargetTaskExecutor}: e.g. pointing to a shared
+ * execution through {@link #setTargetTaskExecutor}: for example, pointing to a shared
  * {@link ThreadPoolTaskExecutor} bean. This is still rather different from a
  * {@link ThreadPoolTaskScheduler} setup since it always uses a single scheduler
  * thread while dynamically dispatching to the target thread pool which may have

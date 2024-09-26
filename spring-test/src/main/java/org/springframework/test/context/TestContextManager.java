@@ -176,7 +176,7 @@ public class TestContextManager {
 	/**
 	 * Get the current {@link TestExecutionListener TestExecutionListeners}
 	 * registered for this {@code TestContextManager}.
-	 * <p>Allows for modifications, e.g. adding a listener to the beginning of the list.
+	 * <p>Allows for modifications, for example, adding a listener to the beginning of the list.
 	 * However, make sure to keep the list stable while actually executing tests.
 	 */
 	public final List<TestExecutionListener> getTestExecutionListeners() {

@@ -206,7 +206,7 @@ public interface JdbcClient {
 		 * <p>The given parameter object will define all named parameters
 		 * based on its JavaBean properties, record components, or raw fields.
 		 * A Map instance can be provided as a complete parameter source as well.
-		 * @param namedParamObject a custom parameter object (e.g. a JavaBean,
+		 * @param namedParamObject a custom parameter object (for example, a JavaBean,
 		 * record class, or field holder) with named properties serving as
 		 * statement parameters
 		 * @return this statement specification (for chaining)
@@ -377,7 +377,7 @@ public interface JdbcClient {
 		 * Retrieve the result as a lazily resolved stream of mapped objects,
 		 * retaining the order from the original database result.
 		 * @return the result Stream, containing mapped objects, needing to be
-		 * closed once fully processed (e.g. through a try-with-resources clause)
+		 * closed once fully processed (for example, through a try-with-resources clause)
 		 */
 		Stream<T> stream();
 

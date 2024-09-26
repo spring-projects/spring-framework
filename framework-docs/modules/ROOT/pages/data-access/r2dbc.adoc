@@ -469,10 +469,10 @@ Kotlin::
 
 NOTE: R2DBC itself does not support Collection-like values. Nevertheless,
 expanding a given `List` in the example above works for named parameters
-in Spring's R2DBC support, e.g. for use in `IN` clauses as shown above.
-However, inserting or updating array-typed columns (e.g. in Postgres)
+in Spring's R2DBC support, for example, for use in `IN` clauses as shown above.
+However, inserting or updating array-typed columns (for example, in Postgres)
 requires an array type that is supported by the underlying R2DBC driver:
-typically a Java array, e.g. `String[]` to update a `text[]` column.
+typically a Java array, for example, `String[]` to update a `text[]` column.
 Do not pass `Collection<String>` or the like as an array parameter.
 
 [[r2dbc-DatabaseClient-filter]]

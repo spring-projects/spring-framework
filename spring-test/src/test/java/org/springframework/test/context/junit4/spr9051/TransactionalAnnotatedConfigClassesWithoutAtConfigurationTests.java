@@ -73,9 +73,9 @@ public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests exte
 
 		/**
 		 * Since this method does not reside in a true {@code @Configuration class},
-		 * it acts as a factory method when invoked directly (e.g., from
+		 * it acts as a factory method when invoked directly (for example, from
 		 * {@link #transactionManager()}) and as a singleton bean when retrieved
-		 * through the application context (e.g., when injected into the test
+		 * through the application context (for example, when injected into the test
 		 * instance). The result is that this method will be called twice:
 		 *
 		 * <ol>

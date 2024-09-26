@@ -26,7 +26,7 @@ import org.springframework.transaction.ReactiveTransaction;
  *
  * <p>Typically used to assemble various calls to transaction-unaware data access
  * services into a higher-level service method with transaction demarcation. As an
- * alternative, consider the use of declarative transaction demarcation (e.g. through
+ * alternative, consider the use of declarative transaction demarcation (for example, through
  * Spring's {@link org.springframework.transaction.annotation.Transactional} annotation).
  *
  * @author Mark Paluch
@@ -42,7 +42,7 @@ public interface TransactionCallback<T> {
 	 * Gets called by {@link TransactionalOperator} within a transactional context.
 	 * Does not need to care about transactions itself, although it can retrieve and
 	 * influence the status of the current transaction via the given status object,
-	 * e.g. setting rollback-only.
+	 * for example, setting rollback-only.
 	 * @param status associated transaction status
 	 * @return a result publisher
 	 * @see TransactionalOperator#transactional

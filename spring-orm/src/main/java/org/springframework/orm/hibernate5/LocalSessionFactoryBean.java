@@ -385,7 +385,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	/**
 	 * Specify an asynchronous executor for background bootstrapping,
-	 * e.g. a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}.
+	 * for example, a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}.
 	 * <p>{@code SessionFactory} initialization will then switch into background
 	 * bootstrap mode, with a {@code SessionFactory} proxy immediately returned for
 	 * injection purposes instead of waiting for Hibernate's bootstrapping to complete.
@@ -416,7 +416,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
-	 * Specify a Hibernate {@link MetadataSources} service to use (e.g. reusing an
+	 * Specify a Hibernate {@link MetadataSources} service to use (for example, reusing an
 	 * existing one), potentially populated with a custom Hibernate bootstrap
 	 * {@link org.hibernate.service.ServiceRegistry} as well.
 	 * @since 4.3
@@ -618,7 +618,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * of the SessionFactory instance, creating it via the given Configuration
 	 * object that got prepared by this LocalSessionFactoryBean.
 	 * <p>The default implementation invokes LocalSessionFactoryBuilder's buildSessionFactory.
-	 * A custom implementation could prepare the instance in a specific way (e.g. applying
+	 * A custom implementation could prepare the instance in a specific way (for example, applying
 	 * a custom ServiceRegistry) or use a custom SessionFactoryImpl subclass.
 	 * @param sfb a LocalSessionFactoryBuilder prepared by this LocalSessionFactoryBean
 	 * @return the SessionFactory instance

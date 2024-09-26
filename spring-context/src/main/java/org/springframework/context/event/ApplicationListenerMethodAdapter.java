@@ -455,7 +455,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 			String msg = "The event listener method class '" + methodDeclaringClass.getName() +
 					"' is not an instance of the actual bean class '" +
 					targetBeanClass.getName() + "'. If the bean requires proxying " +
-					"(e.g. due to @Transactional), please use class-based proxying.";
+					"(for example, due to @Transactional), please use class-based proxying.";
 			throw new IllegalStateException(getInvocationErrorMessage(targetBean, msg, args));
 		}
 	}

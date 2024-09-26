@@ -246,7 +246,7 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 		 * @param name the name to use, possibly empty if not specified
 		 * @param required whether it is marked as required
 		 * @param defaultValue fallback value, possibly {@link ValueConstants#DEFAULT_NONE}
-		 * @param label how it should appear in error messages, e.g. "path variable", "request header"
+		 * @param label how it should appear in error messages, for example, "path variable", "request header"
 		 * @param multiValued whether this argument resolver supports sending multiple values;
 		 * if not, then multiple values are formatted as a String value
 		 */

@@ -76,7 +76,7 @@ public class CorsRegistration {
 	}
 
 	/**
-	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"}, etc.
+	 * Set the HTTP methods to allow, for example, {@code "GET"}, {@code "POST"}, etc.
 	 * The special value {@code "*"} allows all methods. By default,
 	 * "simple" methods {@code GET}, {@code HEAD}, and {@code POST}
 	 * are allowed.

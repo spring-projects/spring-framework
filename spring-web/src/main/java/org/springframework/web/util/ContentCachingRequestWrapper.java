@@ -47,7 +47,7 @@ import org.springframework.util.FastByteArrayOutputStream;
  * content is not consumed, then the content is not cached, and cannot be
  * retrieved via {@link #getContentAsByteArray()}.
  *
- * <p>Used e.g. by {@link org.springframework.web.filter.AbstractRequestLoggingFilter}.
+ * <p>Used, for example, by {@link org.springframework.web.filter.AbstractRequestLoggingFilter}.
  *
  * @author Juergen Hoeller
  * @author Brian Clozel

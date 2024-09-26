@@ -414,7 +414,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	/**
 	 * Create the {@link ResponseEntity} to use from the given body, headers,
 	 * and statusCode. Subclasses can override this method to inspect and possibly
-	 * modify the body, headers, or statusCode, e.g. to re-create an instance of
+	 * modify the body, headers, or statusCode, for example, to re-create an instance of
 	 * {@link ProblemDetail} as an extension of {@link ProblemDetail}.
 	 * @param body the body to use for the response
 	 * @param headers the headers to use for the response

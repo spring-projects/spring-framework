@@ -340,7 +340,7 @@ public class ClassReader {
   private static int computeBufferSize(final InputStream inputStream) throws IOException {
     int expectedLength = inputStream.available();
     /*
-     * Some implementations can return 0 while holding available data (e.g. new
+     * Some implementations can return 0 while holding available data (for example, new
      * FileInputStream("/proc/a_file")). Also in some pathological cases a very small number might
      * be returned, and in this case we use a default size.
      */
@@ -2311,7 +2311,7 @@ public class ClassReader {
           {
             // A forward jump with an offset > 32767. In this case we automatically replace ASM_GOTO
             // with GOTO_W, ASM_JSR with JSR_W and ASM_IFxxx <l> with IFNOTxxx <L> GOTO_W <l> L:...,
-            // where IFNOTxxx is the "opposite" opcode of ASMS_IFxxx (e.g. IFNE for ASM_IFEQ) and
+            // where IFNOTxxx is the "opposite" opcode of ASMS_IFxxx (for example, IFNE for ASM_IFEQ) and
             // where <L> designates the instruction just after the GOTO_W.
             // First, change the ASM specific opcodes ASM_IFEQ ... ASM_JSR, ASM_IFNULL and
             // ASM_IFNONNULL to IFEQ ... JSR, IFNULL and IFNONNULL.

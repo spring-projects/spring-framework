@@ -69,7 +69,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 	/**
 	 * Create a {@code WebJarsResourceResolver} with a custom {@code WebJarAssetLocator} instance,
-	 * e.g. with a custom index.
+	 * for example, with a custom index.
 	 * @since 4.3
 	 */
 	public WebJarsResourceResolver(WebJarAssetLocator webJarAssetLocator) {

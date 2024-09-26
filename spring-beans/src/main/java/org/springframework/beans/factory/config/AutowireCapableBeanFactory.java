@@ -105,7 +105,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	/**
 	 * Suffix for the "original instance" convention when initializing an existing
 	 * bean instance: to be appended to the fully-qualified bean class name,
-	 * e.g. "com.mypackage.MyClass.ORIGINAL", in order to enforce the given instance
+	 * for example, "com.mypackage.MyClass.ORIGINAL", in order to enforce the given instance
 	 * to be returned, i.e. no proxies etc.
 	 * @since 5.1
 	 * @see #initializeBean(Object, String)
@@ -128,7 +128,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * Constructor resolution is based on Kotlin primary / single public / single non-public,
 	 * with a fallback to the default constructor in ambiguous scenarios, also influenced
 	 * by {@link SmartInstantiationAwareBeanPostProcessor#determineCandidateConstructors}
-	 * (e.g. for annotation-driven constructor selection).
+	 * (for example, for annotation-driven constructor selection).
 	 * @param beanClass the class of the bean to create
 	 * @return the new bean instance
 	 * @throws BeansException if instantiation or wiring failed
@@ -137,7 +137,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Populate the given bean instance through applying after-instantiation callbacks
-	 * and bean property post-processing (e.g. for annotation-driven injection).
+	 * and bean property post-processing (for example, for annotation-driven injection).
 	 * <p>Note: This is essentially intended for (re-)populating annotated fields and
 	 * methods, either for new instances or for deserialized instances. It does
 	 * <i>not</i> imply traditional by-name or by-type autowiring of properties;
@@ -196,7 +196,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * Instantiate a new bean instance of the given class with the specified autowire
 	 * strategy. All constants defined in this interface are supported here.
 	 * Can also be invoked with {@code AUTOWIRE_NO} in order to just apply
-	 * before-instantiation callbacks (e.g. for annotation-driven injection).
+	 * before-instantiation callbacks (for example, for annotation-driven injection).
 	 * <p>Does <i>not</i> apply standard {@link BeanPostProcessor BeanPostProcessors}
 	 * callbacks or perform any further initialization of the bean. This interface
 	 * offers distinct, fine-grained operations for those purposes, for example
@@ -223,7 +223,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	/**
 	 * Autowire the bean properties of the given bean instance by name or type.
 	 * Can also be invoked with {@code AUTOWIRE_NO} in order to just apply
-	 * after-instantiation callbacks (e.g. for annotation-driven injection).
+	 * after-instantiation callbacks (for example, for annotation-driven injection).
 	 * <p>Does <i>not</i> apply standard {@link BeanPostProcessor BeanPostProcessors}
 	 * callbacks or perform any further initialization of the bean. This interface
 	 * offers distinct, fine-grained operations for those purposes, for example

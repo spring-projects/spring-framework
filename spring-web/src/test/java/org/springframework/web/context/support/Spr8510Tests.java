@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * Tests the interaction between a WebApplicationContext and ContextLoaderListener with
  * regard to config location precedence, overriding and defaulting in programmatic
- * configuration use cases, e.g. with WebApplicationInitializer.
+ * configuration use cases, for example, with WebApplicationInitializer.
  *
  * @author Chris Beams
  * @since 3.1

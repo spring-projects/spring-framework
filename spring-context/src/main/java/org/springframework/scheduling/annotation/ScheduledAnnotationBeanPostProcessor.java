@@ -91,7 +91,7 @@ import org.springframework.util.StringValueResolver;
  *
  * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
  * allowing for customization of the scheduler to be used or for fine-grained
- * control over task registration (e.g. registration of {@link Trigger} tasks).
+ * control over task registration (for example, registration of {@link Trigger} tasks).
  * See the {@link EnableScheduling @EnableScheduling} javadocs for complete usage
  * details.
  *
@@ -664,7 +664,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (event instanceof ContextRefreshedEvent) {
 				// Running in an ApplicationContext -> register tasks this late...
 				// giving other ContextRefreshedEvent listeners a chance to perform
-				// their work at the same time (e.g. Spring Batch's job registration).
+				// their work at the same time (for example, Spring Batch's job registration).
 				finishRegistration();
 			}
 			else if (event instanceof ContextClosedEvent) {

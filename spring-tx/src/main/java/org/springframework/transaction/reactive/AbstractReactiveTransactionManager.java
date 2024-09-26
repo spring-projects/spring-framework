@@ -59,7 +59,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * </ul>
  *
  * <p>Subclasses have to implement specific template methods for specific
- * states of a transaction, e.g.: begin, suspend, resume, commit, rollback.
+ * states of a transaction, for example: begin, suspend, resume, commit, rollback.
  * The most important of them are abstract and must be provided by a concrete
  * implementation; for the rest, defaults are provided, so overriding is optional.
  *
@@ -763,7 +763,7 @@ public abstract class AbstractReactiveTransactionManager
 	 * <p>The returned object will usually be specific to the concrete transaction
 	 * manager implementation, carrying corresponding transaction state in a
 	 * modifiable fashion. This object will be passed into the other template
-	 * methods (e.g. doBegin and doCommit), either directly or as part of a
+	 * methods (for example, doBegin and doCommit), either directly or as part of a
 	 * DefaultReactiveTransactionStatus instance.
 	 * <p>The returned object should contain information about any existing
 	 * transaction, that is, a transaction that has already started before the
@@ -816,7 +816,7 @@ public abstract class AbstractReactiveTransactionManager
 	 * @param definition a TransactionDefinition instance, describing propagation
 	 * behavior, isolation level, read-only flag, timeout, and transaction name
 	 * @throws org.springframework.transaction.NestedTransactionNotSupportedException
-	 * if the underlying transaction does not support nesting (e.g. through savepoints)
+	 * if the underlying transaction does not support nesting (for example, through savepoints)
 	 */
 	protected abstract Mono<Void> doBegin(TransactionSynchronizationManager synchronizationManager,
 			Object transaction, TransactionDefinition definition);

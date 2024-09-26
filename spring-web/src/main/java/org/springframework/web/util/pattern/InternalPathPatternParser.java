@@ -380,7 +380,7 @@ class InternalPathPatternParser {
 	/**
 	 * For a path element representing a captured variable, locate the constraint pattern.
 	 * Assumes there is a constraint pattern.
-	 * @param data a complete path expression, e.g. /aaa/bbb/{ccc:...}
+	 * @param data a complete path expression, for example, /aaa/bbb/{ccc:...}
 	 * @param offset the start of the capture pattern of interest
 	 * @return the index of the character after the ':' within
 	 * the pattern expression relative to the start of the whole expression

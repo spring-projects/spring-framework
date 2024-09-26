@@ -31,7 +31,7 @@ import org.springframework.lang.Nullable;
  * <p>Serves as result holder for a {@link DataBinder}, obtained via
  * the {@link DataBinder#getBindingResult()} method. BindingResult
  * implementations can also be used directly, for example to invoke
- * a {@link Validator} on it (e.g. as part of a unit test).
+ * a {@link Validator} on it (for example, as part of a unit test).
  *
  * @author Juergen Hoeller
  * @since 2.0

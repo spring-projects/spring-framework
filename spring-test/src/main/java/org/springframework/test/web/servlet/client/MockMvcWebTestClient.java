@@ -130,7 +130,7 @@ public interface MockMvcWebTestClient {
 	 * including HTTP status, headers, and body. That is all that is available
 	 * when making a live request over HTTP. However when the server is
 	 * {@link MockMvc}, many more assertions are possible against the server
-	 * response, e.g. model attributes, flash attributes, etc.
+	 * response, for example, model attributes, flash attributes, etc.
 	 *
 	 * <p>Example:
 	 * <pre class="code">

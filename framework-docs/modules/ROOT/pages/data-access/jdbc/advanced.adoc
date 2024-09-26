@@ -223,7 +223,7 @@ As of 6.1.2, Spring bypasses the default `getParameterType` resolution on Postgr
 MS SQL Server. This is a common optimization to avoid further roundtrips to the DBMS just
 for parameter type resolution which is known to make a very significant difference on
 PostgreSQL and MS SQL Server specifically, in particular for batch operations. If you
-happen to see a side effect e.g. when setting a byte array to null without specific type
+happen to see a side effect, for example, when setting a byte array to null without specific type
 indication, you may explicitly set the `spring.jdbc.getParameterType.ignore=false` flag
 as a system property (see above) to restore full `getParameterType` resolution.
 

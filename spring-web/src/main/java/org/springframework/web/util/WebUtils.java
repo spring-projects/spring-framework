@@ -630,7 +630,7 @@ public abstract class WebUtils {
 	 * <ol>
 	 * <li>Try to get the parameter value using just the given <i>logical</i> name.
 	 * This handles parameters of the form {@code logicalName = value}. For normal
-	 * parameters, e.g. submitted using a hidden HTML form field, this will return
+	 * parameters, for example, submitted using a hidden HTML form field, this will return
 	 * the requested value.</li>
 	 * <li>Try to obtain the parameter value from the parameter name, where the
 	 * parameter name in the request is of the form {@code logicalName_value = xyz}

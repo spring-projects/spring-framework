@@ -291,7 +291,7 @@ public interface WebClient {
 		/**
 		 * Configure the {@link ClientHttpConnector} to use. This is useful for
 		 * plugging in and/or customizing options of the underlying HTTP client
-		 * library (e.g. SSL).
+		 * library (for example, SSL).
 		 * <p>By default this is set to
 		 * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector
 		 * ReactorClientHttpConnector}.
@@ -388,14 +388,14 @@ public interface WebClient {
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * If a {@link UriBuilderFactory} was configured for the client (for example,
 		 * with a base URI) it will be used to expand the URI template.
 		 */
 		S uri(String uri, Object... uriVariables);
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * If a {@link UriBuilderFactory} was configured for the client (for example,
 		 * with a base URI) it will be used to expand the URI template.
 		 */
 		S uri(String uri, Map<String, ?> uriVariables);

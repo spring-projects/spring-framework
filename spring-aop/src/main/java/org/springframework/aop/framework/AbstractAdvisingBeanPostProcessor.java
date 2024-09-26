@@ -135,7 +135,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	 * Check whether the given bean is eligible for advising with this
 	 * post-processor's {@link Advisor}.
 	 * <p>Delegates to {@link #isEligible(Class)} for target class checking.
-	 * Can be overridden e.g. to specifically exclude certain beans by name.
+	 * Can be overridden, for example, to specifically exclude certain beans by name.
 	 * <p>Note: Only called for regular bean instances but not for existing
 	 * proxy instances which implement {@link Advised} and allow for adding
 	 * the local {@link Advisor} to the existing proxy's {@link Advisor} chain.

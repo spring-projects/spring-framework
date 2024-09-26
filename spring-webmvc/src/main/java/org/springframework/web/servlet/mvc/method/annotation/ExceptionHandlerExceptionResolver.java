@@ -475,7 +475,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				return new ModelAndView();
 			}
 			// Any other than the original exception (or a cause) is unintended here,
-			// probably an accident (e.g. failed assertion or the like).
+			// probably an accident (for example, failed assertion or the like).
 			if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
 				logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
 			}

@@ -148,7 +148,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 	/**
 	 * This implementation searches for a unique {@link org.springframework.core.task.TaskExecutor}
 	 * bean in the context, or for an {@link Executor} bean named "taskExecutor" otherwise.
-	 * If neither of the two is resolvable (e.g. if no {@code BeanFactory} was configured at all),
+	 * If neither of the two is resolvable (for example, if no {@code BeanFactory} was configured at all),
 	 * this implementation falls back to a newly created {@link SimpleAsyncTaskExecutor} instance
 	 * for local use if no default could be found.
 	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME

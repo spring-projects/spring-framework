@@ -131,8 +131,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Create an instance of SimpAnnotationMethodMessageHandler with the given
 	 * message channels and broker messaging template.
-	 * @param clientInboundChannel the channel for receiving messages from clients (e.g. WebSocket clients)
-	 * @param clientOutboundChannel the channel for messages to clients (e.g. WebSocket clients)
+	 * @param clientInboundChannel the channel for receiving messages from clients (for example, WebSocket clients)
+	 * @param clientOutboundChannel the channel for messages to clients (for example, WebSocket clients)
 	 * @param brokerTemplate a messaging template to send application messages to the broker
 	 */
 	public SimpAnnotationMethodMessageHandler(SubscribableChannel clientInboundChannel,
@@ -159,7 +159,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * therefore a slash is automatically appended where missing to ensure a
 	 * proper prefix-based match (i.e. matching complete segments).
 	 * <p>Note however that the remaining portion of a destination after the
-	 * prefix may use a different separator (e.g. commonly "." in messaging)
+	 * prefix may use a different separator (for example, commonly "." in messaging)
 	 * depending on the configured {@code PathMatcher}.
 	 */
 	@Override

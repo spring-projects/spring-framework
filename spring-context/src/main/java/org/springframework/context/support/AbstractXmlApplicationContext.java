@@ -98,7 +98,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	/**
 	 * Initialize the bean definition reader used for loading the bean definitions
 	 * of this context. The default implementation sets the validating flag.
-	 * <p>Can be overridden in subclasses, e.g. for turning off XML validation
+	 * <p>Can be overridden in subclasses, for example, for turning off XML validation
 	 * or using a different {@link BeanDefinitionDocumentReader} implementation.
 	 * @param reader the bean definition reader used by this context
 	 * @see XmlBeanDefinitionReader#setValidating

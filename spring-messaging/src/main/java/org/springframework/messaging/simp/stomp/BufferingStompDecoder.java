@@ -35,7 +35,7 @@ import org.springframework.util.MultiValueMap;
  * is not enough data still, continues to buffer.
  *
  * <p>A single instance of this decoder can be invoked repeatedly to read all
- * messages from a single stream (e.g. WebSocket session) as long as decoding
+ * messages from a single stream (for example, WebSocket session) as long as decoding
  * does not fail. If there is an exception, StompDecoder instance should not
  * be used any more as its internal state is not guaranteed to be consistent.
  * It is expected that the underlying session is closed at that point.

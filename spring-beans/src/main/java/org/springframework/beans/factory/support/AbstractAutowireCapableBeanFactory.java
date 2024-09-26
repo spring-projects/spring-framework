@@ -205,7 +205,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Set the ParameterNameDiscoverer to use for resolving method parameter
-	 * names if needed (e.g. for constructor names).
+	 * names if needed (for example, for constructor names).
 	 * <p>Default is a {@link DefaultParameterNameDiscoverer}.
 	 */
 	public void setParameterNameDiscoverer(@Nullable ParameterNameDiscoverer parameterNameDiscoverer) {
@@ -539,7 +539,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Actually create the specified bean. Pre-creation processing has already happened
-	 * at this point, e.g. checking {@code postProcessBeforeInstantiation} callbacks.
+	 * at this point, for example, checking {@code postProcessBeforeInstantiation} callbacks.
 	 * <p>Differentiates between default bean instantiation, use of a
 	 * factory method, and autowiring a constructor.
 	 * @param beanName the name of the bean
@@ -821,7 +821,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return cachedReturnType.resolve();
 		}
 		catch (LinkageError err) {
-			// E.g. a NoClassDefFoundError for a generic method return type
+			// For example, a NoClassDefFoundError for a generic method return type
 			if (logger.isDebugEnabled()) {
 				logger.debug("Failed to resolve type for factory method of bean '" + beanName + "': " +
 						(uniqueCandidate != null ? uniqueCandidate : commonType), err);

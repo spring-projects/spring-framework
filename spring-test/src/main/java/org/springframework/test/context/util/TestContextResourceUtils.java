@@ -77,7 +77,7 @@ public abstract class TestContextResourceUtils {
 	 * <li>A path starting with a slash will be treated as an absolute path
 	 * within the classpath, for example: {@code "/org/example/schema.sql"}.
 	 * Such a path will be prepended with the {@code classpath:} prefix.
-	 * <li>A path which is already prefixed with a URL protocol (e.g.,
+	 * <li>A path which is already prefixed with a URL protocol (for example,
 	 * {@code classpath:}, {@code file:}, {@code http:}, etc.) will not have its
 	 * protocol modified.
 	 * </ul>

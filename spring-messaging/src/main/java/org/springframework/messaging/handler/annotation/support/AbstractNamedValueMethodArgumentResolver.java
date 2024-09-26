@@ -34,7 +34,7 @@ import org.springframework.messaging.handler.invocation.HandlerMethodArgumentRes
 import org.springframework.util.ClassUtils;
 
 /**
- * Abstract base class to resolve method arguments from a named value, e.g.
+ * Abstract base class to resolve method arguments from a named value, for example,
  * message headers or destination variables. Named values could have one or more
  * of a name, a required flag, and a default value.
  *

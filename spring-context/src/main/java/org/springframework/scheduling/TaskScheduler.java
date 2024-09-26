@@ -66,13 +66,13 @@ public interface TaskScheduler {
 	 * {@link ScheduledFuture} gets cancelled.
 	 * @param task the Runnable to execute whenever the trigger fires
 	 * @param trigger an implementation of the {@link Trigger} interface,
-	 * e.g. a {@link org.springframework.scheduling.support.CronTrigger} object
+	 * for example, a {@link org.springframework.scheduling.support.CronTrigger} object
 	 * wrapping a cron expression
 	 * @return a {@link ScheduledFuture} representing pending execution of the task,
 	 * or {@code null} if the given Trigger object never fires (i.e. returns
 	 * {@code null} from {@link Trigger#nextExecution})
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @see org.springframework.scheduling.support.CronTrigger
 	 */
 	@Nullable
@@ -87,7 +87,7 @@ public interface TaskScheduler {
 	 * (if this is in the past, the task will be executed immediately, i.e. as soon as possible)
 	 * @return a {@link ScheduledFuture} representing pending execution of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @since 5.0
 	 */
 	ScheduledFuture<?> schedule(Runnable task, Instant startTime);
@@ -101,7 +101,7 @@ public interface TaskScheduler {
 	 * (if this is in the past, the task will be executed immediately, i.e. as soon as possible)
 	 * @return a {@link ScheduledFuture} representing pending execution of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @deprecated as of 6.0, in favor of {@link #schedule(Runnable, Instant)}
 	 */
 	@Deprecated(since = "6.0")
@@ -120,7 +120,7 @@ public interface TaskScheduler {
 	 * @param period the interval between successive executions of the task
 	 * @return a {@link ScheduledFuture} representing pending execution of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if  the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @since 5.0
 	 */
 	ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Instant startTime, Duration period);
@@ -136,7 +136,7 @@ public interface TaskScheduler {
 	 * @param period the interval between successive executions of the task (in milliseconds)
 	 * @return a {@link ScheduledFuture} representing pending execution of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if  the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @deprecated as of 6.0, in favor of {@link #scheduleAtFixedRate(Runnable, Instant, Duration)}
 	 */
 	@Deprecated(since = "6.0")
@@ -153,7 +153,7 @@ public interface TaskScheduler {
 	 * @param period the interval between successive executions of the task
 	 * @return a {@link ScheduledFuture} representing pending execution of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @since 5.0
 	 */
 	ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Duration period);
@@ -167,7 +167,7 @@ public interface TaskScheduler {
 	 * @param period the interval between successive executions of the task (in milliseconds)
 	 * @return a {@link ScheduledFuture} representing pending execution of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @deprecated as of 6.0, in favor of {@link #scheduleAtFixedRate(Runnable, Duration)}
 	 */
 	@Deprecated(since = "6.0")
@@ -187,7 +187,7 @@ public interface TaskScheduler {
 	 * @param delay the delay between the completion of one execution and the start of the next
 	 * @return a {@link ScheduledFuture} representing pending execution of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @since 5.0
 	 */
 	ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay);
@@ -205,7 +205,7 @@ public interface TaskScheduler {
 	 * (in milliseconds)
 	 * @return a {@link ScheduledFuture} representing pending execution of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @deprecated as of 6.0, in favor of {@link #scheduleWithFixedDelay(Runnable, Instant, Duration)}
 	 */
 	@Deprecated(since = "6.0")
@@ -222,7 +222,7 @@ public interface TaskScheduler {
 	 * @param delay the delay between the completion of one execution and the start of the next
 	 * @return a {@link ScheduledFuture} representing pending execution of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @since 5.0
 	 */
 	ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay);
@@ -237,7 +237,7 @@ public interface TaskScheduler {
 	 * (in milliseconds)
 	 * @return a {@link ScheduledFuture} representing pending execution of the task
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
-	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
+	 * for internal reasons (for example, a pool overload handling policy or a pool shutdown in progress)
 	 * @deprecated as of 6.0, in favor of {@link #scheduleWithFixedDelay(Runnable, Duration)}
 	 */
 	@Deprecated(since = "6.0")

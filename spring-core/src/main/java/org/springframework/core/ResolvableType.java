@@ -711,7 +711,7 @@ public class ResolvableType implements Serializable {
 	 * <p>The {@code typeIndexesPerLevel} map can be used to reference a specific generic
 	 * for the given level. For example, an index of 0 would refer to a {@code Map} key;
 	 * whereas, 1 would refer to the value. If the map does not contain a value for a
-	 * specific level the last generic will be used (e.g. a {@code Map} value).
+	 * specific level the last generic will be used (for example, a {@code Map} value).
 	 * <p>Nesting levels may also apply to array types; for example given
 	 * {@code String[]}, a nesting level of 2 refers to {@code String}.
 	 * <p>If a type does not {@link #hasGenerics() contain} generics the
@@ -1029,7 +1029,7 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Check for type-level equality with another {@code ResolvableType}.
 	 * <p>In contrast to {@link #equals(Object)} or {@link #isAssignableFrom(ResolvableType)},
-	 * this works between different sources as well, e.g. method parameters and return types.
+	 * this works between different sources as well, for example, method parameters and return types.
 	 * @param otherType the {@code ResolvableType} to match against
 	 * @return whether the declared type and type variables match
 	 * @since 6.1

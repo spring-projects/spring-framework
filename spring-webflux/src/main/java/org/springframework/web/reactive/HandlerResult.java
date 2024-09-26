@@ -88,7 +88,7 @@ public class HandlerResult {
 	}
 
 	/**
-	 * Return the type of the value returned from the handler -- e.g. the return
+	 * Return the type of the value returned from the handler -- for example, the return
 	 * type declared on a controller method's signature. Also see
 	 * {@link #getReturnTypeSource()} to obtain the underlying
 	 * {@link MethodParameter} for the return type.

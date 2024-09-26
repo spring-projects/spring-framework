@@ -66,7 +66,7 @@ import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Central dispatcher for HTTP request handlers/controllers, e.g. for web UI controllers
+ * Central dispatcher for HTTP request handlers/controllers, for example, for web UI controllers
  * or HTTP-based remote service exporters. Dispatches to registered handlers for processing
  * a web request, providing convenient mapping and exception handling facilities.
  *
@@ -266,7 +266,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Name of request attribute that exposes an Exception resolved with a
 	 * {@link HandlerExceptionResolver} but where no view was rendered
-	 * (e.g. setting the status code).
+	 * (for example, setting the status code).
 	 */
 	public static final String EXCEPTION_ATTRIBUTE = DispatcherServlet.class.getName() + ".EXCEPTION";
 
@@ -1215,7 +1215,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
 			if (WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class) != null) {
 				if (DispatcherType.REQUEST.equals(request.getDispatcherType())) {
-					logger.trace("Request already resolved to MultipartHttpServletRequest, e.g. by MultipartFilter");
+					logger.trace("Request already resolved to MultipartHttpServletRequest, for example, by MultipartFilter");
 				}
 			}
 			else if (hasMultipartException(request)) {

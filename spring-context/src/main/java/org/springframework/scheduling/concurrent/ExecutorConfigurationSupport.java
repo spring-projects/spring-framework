@@ -182,7 +182,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * <p>Note that Spring's container shutdown continues while ongoing tasks
 	 * are being completed. If you want this executor to block and wait for the
 	 * termination of tasks before the rest of the container continues to shut
-	 * down - e.g. in order to keep up other resources that your tasks may need -,
+	 * down - for example, in order to keep up other resources that your tasks may need -,
 	 * set the {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"}
 	 * property instead of or in addition to this property.
 	 * @see java.util.concurrent.ExecutorService#shutdown()

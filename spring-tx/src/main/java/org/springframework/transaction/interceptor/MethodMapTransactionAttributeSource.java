@@ -74,7 +74,7 @@ public class MethodMapTransactionAttributeSource
 
 	/**
 	 * Set a name/attribute map, consisting of "{@code <fully-qualified class name>.<method-name>}"
-	 * method names (e.g. "com.mycompany.mycode.MyClass.myMethod") and
+	 * method names (for example, "com.mycompany.mycode.MyClass.myMethod") and
 	 * {@link TransactionAttribute} instances (or Strings to be converted
 	 * to {@code TransactionAttribute} instances).
 	 * <p>Intended for configuration via setter injection, typically within

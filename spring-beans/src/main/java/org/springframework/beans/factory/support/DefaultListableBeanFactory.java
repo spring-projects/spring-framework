@@ -349,7 +349,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.dependencyComparator = otherListableFactory.dependencyComparator;
 			// A clone of the AutowireCandidateResolver since it is potentially BeanFactoryAware
 			setAutowireCandidateResolver(otherListableFactory.getAutowireCandidateResolver().cloneIfNecessary());
-			// Make resolvable dependencies (e.g. ResourceLoader) available here as well
+			// Make resolvable dependencies (for example, ResourceLoader) available here as well
 			this.resolvableDependencies.putAll(otherListableFactory.resolvableDependencies);
 		}
 	}
@@ -772,7 +772,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		if (containsBeanDefinition(beanName)) {
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
-			// Check raw bean class, e.g. in case of a proxy.
+			// Check raw bean class, for example, in case of a proxy.
 			if (bd.hasBeanClass() && bd.getFactoryMethodName() == null) {
 				Class<?> beanClass = bd.getBeanClass();
 				if (beanClass != beanType) {
@@ -811,7 +811,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		if (containsBeanDefinition(beanName)) {
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
-			// Check raw bean class, e.g. in case of a proxy.
+			// Check raw bean class, for example, in case of a proxy.
 			if (bd.hasBeanClass() && bd.getFactoryMethodName() == null) {
 				Class<?> beanClass = bd.getBeanClass();
 				if (beanClass != beanType) {
@@ -1211,7 +1211,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		boolean explicitBeanOverride = (this.allowBeanDefinitionOverriding != null);
 		if (existingDefinition.getRole() < beanDefinition.getRole()) {
-			// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
+			// for example, was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
 			if (logger.isInfoEnabled()) {
 				logger.info("Overriding user-defined bean definition for bean '" + beanName +
 						"' with a framework-generated bean definition: replacing [" +
@@ -1290,7 +1290,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Remove corresponding bean from singleton cache, if any. Shouldn't usually
 		// be necessary, rather just meant for overriding a context's default beans
-		// (e.g. the default StaticMessageSource in a StaticApplicationContext).
+		// (for example, the default StaticMessageSource in a StaticApplicationContext).
 		destroySingleton(beanName);
 
 		// Remove a cached primary marker for the given bean.
@@ -1521,7 +1521,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		InjectionPoint previousInjectionPoint = ConstructorResolver.setCurrentInjectionPoint(descriptor);
 		try {
-			// Step 1: pre-resolved shortcut for single bean match, e.g. from @Autowired
+			// Step 1: pre-resolved shortcut for single bean match, for example, from @Autowired
 			Object shortcut = descriptor.resolveShortcut(this);
 			if (shortcut != null) {
 				return shortcut;
@@ -1529,7 +1529,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 			Class<?> type = descriptor.getDependencyType();
 
-			// Step 2: pre-defined value or expression, e.g. from @Value
+			// Step 2: pre-defined value or expression, for example, from @Value
 			Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 			if (value != null) {
 				if (value instanceof String strValue) {

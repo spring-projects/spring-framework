@@ -50,7 +50,7 @@ public abstract class BeanFactoryAnnotationUtils {
 
 	/**
 	 * Retrieve all beans of type {@code T} from the given {@code BeanFactory} declaring a
-	 * qualifier (e.g. via {@code <qualifier>} or {@code @Qualifier}) matching the given
+	 * qualifier (for example, via {@code <qualifier>} or {@code @Qualifier}) matching the given
 	 * qualifier, or having a bean name matching the given qualifier.
 	 * @param beanFactory the factory to get the target beans from (also searching ancestors)
 	 * @param beanType the type of beans to retrieve
@@ -75,7 +75,7 @@ public abstract class BeanFactoryAnnotationUtils {
 
 	/**
 	 * Obtain a bean of type {@code T} from the given {@code BeanFactory} declaring a
-	 * qualifier (e.g. via {@code <qualifier>} or {@code @Qualifier}) matching the given
+	 * qualifier (for example, via {@code <qualifier>} or {@code @Qualifier}) matching the given
 	 * qualifier, or having a bean name matching the given qualifier.
 	 * @param beanFactory the factory to get the target bean from (also searching ancestors)
 	 * @param beanType the type of bean to retrieve
@@ -109,7 +109,7 @@ public abstract class BeanFactoryAnnotationUtils {
 
 	/**
 	 * Obtain a bean of type {@code T} from the given {@code BeanFactory} declaring a qualifier
-	 * (e.g. {@code <qualifier>} or {@code @Qualifier}) matching the given qualifier).
+	 * (for example, {@code <qualifier>} or {@code @Qualifier}) matching the given qualifier).
 	 * @param bf the factory to get the target bean from
 	 * @param beanType the type of bean to retrieve
 	 * @param qualifier the qualifier for selecting between multiple bean matches

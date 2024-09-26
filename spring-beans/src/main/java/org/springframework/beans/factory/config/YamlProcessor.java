@@ -77,7 +77,7 @@ public abstract class YamlProcessor {
 	 * A map of document matchers allowing callers to selectively use only
 	 * some of the documents in a YAML resource. In YAML documents are
 	 * separated by {@code ---} lines, and each document is converted
-	 * to properties before the match is made. E.g.
+	 * to properties before the match is made. For example,
 	 * <pre class="code">
 	 * environment: dev
 	 * url: https://dev.bar.com

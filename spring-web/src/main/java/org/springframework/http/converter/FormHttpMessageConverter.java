@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} to read and write 'normal' HTML
- * forms and also to write (but not read) multipart data (e.g. file uploads).
+ * forms and also to write (but not read) multipart data (for example, file uploads).
  *
  * <p>In other words, this converter can read and write the
  * {@code "application/x-www-form-urlencoded"} media type as

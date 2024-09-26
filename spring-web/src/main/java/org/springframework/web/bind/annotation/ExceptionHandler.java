@@ -40,7 +40,7 @@ import org.springframework.core.annotation.AliasFor;
  * cause within a wrapper exception. As of 5.3, any cause level is being
  * exposed, whereas previously only an immediate cause was considered.
  * <li>Request and/or response objects (typically from the Servlet API).
- * You may choose any specific request/response type, e.g.
+ * You may choose any specific request/response type, for example,
  * {@link jakarta.servlet.ServletRequest} / {@link jakarta.servlet.http.HttpServletRequest}.
  * <li>Session object: typically {@link jakarta.servlet.http.HttpSession}.
  * An argument of this type will enforce the presence of a corresponding session.

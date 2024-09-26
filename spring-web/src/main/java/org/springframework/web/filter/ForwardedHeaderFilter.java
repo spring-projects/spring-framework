@@ -353,7 +353,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	/**
 	 * Responsible for the contextPath, requestURI, and requestURL with forwarded
 	 * headers in mind, and also taking into account changes to the path of the
-	 * underlying delegate request (e.g. on a Servlet FORWARD).
+	 * underlying delegate request (for example, on a Servlet FORWARD).
 	 */
 	private static class ForwardedPrefixExtractor {
 
@@ -375,7 +375,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		 * Constructor with required information.
 		 * @param delegate supplier for the current
 		 * {@link HttpServletRequestWrapper#getRequest() delegate request} which
-		 * may change during a forward (e.g. Tomcat.
+		 * may change during a forward (for example, Tomcat.
 		 * @param baseUrl the host, scheme, and port based on forwarded headers
 		 */
 		public ForwardedPrefixExtractor(Supplier<HttpServletRequest> delegate, String baseUrl) {
@@ -446,7 +446,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 
 		private void recalculatePathsIfNecessary() {
-			// Path of delegate request changed, e.g. FORWARD on Tomcat
+			// Path of delegate request changed, for example, FORWARD on Tomcat
 			if (!this.actualRequestUri.equals(this.delegate.get().getRequestURI())) {
 				this.actualRequestUri = this.delegate.get().getRequestURI();
 				// Keep call order

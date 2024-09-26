@@ -28,7 +28,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 
 /**
  * Defines methods for configuring message handling with simple messaging
- * protocols (e.g. STOMP) from WebSocket clients.
+ * protocols (for example, STOMP) from WebSocket clients.
  *
  * <p>Typically used to customize the configuration provided via
  * {@link EnableWebSocketMessageBroker @EnableWebSocketMessageBroker}.
@@ -94,7 +94,7 @@ public interface WebSocketMessageBrokerConfigurer {
 
 	/**
 	 * Configure the message converters to use when extracting the payload of
-	 * messages in annotated methods and when sending messages (e.g. through the
+	 * messages in annotated methods and when sending messages (for example, through the
 	 * "broker" SimpMessagingTemplate).
 	 * <p>The provided list, initially empty, can be used to add message converters
 	 * while the boolean return value is used to determine if default message should

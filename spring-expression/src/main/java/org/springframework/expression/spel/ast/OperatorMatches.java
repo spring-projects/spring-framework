@@ -78,7 +78,7 @@ public class OperatorMatches extends Operator {
 	 * @return {@code true} if the first operand matches the regex specified as the
 	 * second operand, otherwise {@code false}
 	 * @throws EvaluationException if there is a problem evaluating the expression
-	 * (e.g. the regex is invalid)
+	 * (for example, the regex is invalid)
 	 */
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {

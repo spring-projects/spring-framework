@@ -148,7 +148,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		}
 
 		// Servlet getParameterNames() not guaranteed to include multipart form items
-		// (e.g. on WebLogic 12) -> need to merge them here to be on the safe side
+		// (for example, on WebLogic 12) -> need to merge them here to be on the safe side
 		Set<String> paramNames = new LinkedHashSet<>();
 		Enumeration<String> paramEnum = super.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
@@ -169,7 +169,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		}
 
 		// Servlet getParameterMap() not guaranteed to include multipart form items
-		// (e.g. on WebLogic 12) -> need to merge them here to be on the safe side
+		// (for example, on WebLogic 12) -> need to merge them here to be on the safe side
 		Map<String, String[]> paramMap = new LinkedHashMap<>(super.getParameterMap());
 		for (String paramName : this.multipartParameterNames) {
 			if (!paramMap.containsKey(paramName)) {
@@ -269,7 +269,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			if (dest.isAbsolute() && !dest.exists()) {
 				// Servlet Part.write is not guaranteed to support absolute file paths:
 				// may translate the given path to a relative location within a temp dir
-				// (e.g. on Jetty whereas Tomcat and Undertow detect absolute paths).
+				// (for example, on Jetty whereas Tomcat and Undertow detect absolute paths).
 				// At least we offloaded the file from memory storage; it'll get deleted
 				// from the temp dir eventually in any case. And for our user's purposes,
 				// we can manually copy it to the requested location as a fallback.

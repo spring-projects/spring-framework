@@ -23,7 +23,7 @@ import org.springframework.messaging.Message;
 
 /**
  * Contract to encode and decode a {@link Message} to and from a {@link ByteBuffer}
- * allowing a higher-level protocol (e.g. STOMP over TCP) to plug in.
+ * allowing a higher-level protocol (for example, STOMP over TCP) to plug in.
  *
  * @author Rossen Stoyanchev
  * @since 6.0

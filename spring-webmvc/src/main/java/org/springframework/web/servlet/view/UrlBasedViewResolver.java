@@ -53,12 +53,12 @@ import org.springframework.web.servlet.View;
  * "/WEB-INF/jsp/test.jsp"
  *
  * <p>As a special feature, redirect URLs can be specified via the "redirect:"
- * prefix. E.g.: "redirect:myAction" will trigger a redirect to the given
+ * prefix. For example: "redirect:myAction" will trigger a redirect to the given
  * URL, rather than resolution as standard view name. This is typically used
  * for redirecting to a controller URL after finishing a form workflow.
  *
  * <p>Furthermore, forward URLs can be specified via the "forward:" prefix.
- * E.g.: "forward:myAction" will trigger a forward to the given URL, rather than
+ * For example: "forward:myAction" will trigger a forward to the given URL, rather than
  * resolution as standard view name. This is typically used for controller URLs;
  * it is not supposed to be used for JSP URLs - use logical view names there.
  *
@@ -221,7 +221,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * interpreted as relative to the web application root, i.e. the context
 	 * path will be prepended to the URL.
 	 * <p><b>Redirect URLs can be specified via the "redirect:" prefix.</b>
-	 * E.g.: "redirect:myAction"
+	 * For example: "redirect:myAction"
 	 * @see RedirectView#setContextRelative
 	 * @see #REDIRECT_URL_PREFIX
 	 */
@@ -248,7 +248,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * difference. However, some clients depend on 303 when redirecting
 	 * after a POST request; turn this flag off in such a scenario.
 	 * <p><b>Redirect URLs can be specified via the "redirect:" prefix.</b>
-	 * E.g.: "redirect:myAction"
+	 * For example: "redirect:myAction"
 	 * @see RedirectView#setHttp10Compatible
 	 * @see #REDIRECT_URL_PREFIX
 	 */

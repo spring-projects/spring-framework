@@ -82,7 +82,7 @@ public @interface ModelAttribute {
 	 * <p>The default model attribute name is inferred from the declared
 	 * attribute type (i.e. the method parameter type or method return type),
 	 * based on the non-qualified class name:
-	 * e.g. "orderAddress" for class "mypackage.OrderAddress",
+	 * for example, "orderAddress" for class "mypackage.OrderAddress",
 	 * or "orderAddressList" for "List&lt;mypackage.OrderAddress&gt;".
 	 * @since 4.3
 	 */

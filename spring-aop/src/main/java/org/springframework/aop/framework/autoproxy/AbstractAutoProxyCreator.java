@@ -71,7 +71,7 @@ import org.springframework.util.StringUtils;
  * Instead of x repetitive proxy definitions for x target beans, you can register
  * one single such post processor with the bean factory to achieve the same effect.
  *
- * <p>Subclasses can apply any strategy to decide if a bean is to be proxied, e.g. by type,
+ * <p>Subclasses can apply any strategy to decide if a bean is to be proxied, for example, by type,
  * by name, by definition details, etc. They can also return additional interceptors that
  * should just be applied to the specific bean instance. A simple concrete implementation is
  * {@link BeanNameAutoProxyCreator}, identifying the beans to be proxied via given names.
@@ -403,7 +403,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	/**
 	 * Subclasses should override this method to return {@code true} if the
 	 * given bean should not be considered for auto-proxying by this post-processor.
-	 * <p>Sometimes we need to be able to avoid this happening, e.g. if it will lead to
+	 * <p>Sometimes we need to be able to avoid this happening, for example, if it will lead to
 	 * a circular reference or if the existing target instance needs to be preserved.
 	 * This implementation returns {@code false} unless the bean name indicates an
 	 * "original instance" according to {@code AutowireCapableBeanFactory} conventions.
@@ -619,7 +619,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	/**
 	 * Return whether the given bean is to be proxied, what additional
-	 * advices (e.g. AOP Alliance interceptors) and advisors to apply.
+	 * advices (for example, AOP Alliance interceptors) and advisors to apply.
 	 * @param beanClass the class of the bean to advise
 	 * @param beanName the name of the bean
 	 * @param customTargetSource the TargetSource returned by the

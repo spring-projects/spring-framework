@@ -55,7 +55,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * An abstract base class for {@link SockJsService} implementations that provides SockJS
- * path resolution and handling of static SockJS requests (e.g. "/info", "/iframe.html",
+ * path resolution and handling of static SockJS requests (for example, "/info", "/iframe.html",
  * etc). Sub-classes must handle session URLs (i.e. transport-specific requests).
  *
  * <p>By default, only same origin requests are allowed. Use {@link #setAllowedOrigins}
@@ -143,7 +143,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
-	 * Transports with no native cross-domain communication (e.g. "eventsource",
+	 * Transports with no native cross-domain communication (for example, "eventsource",
 	 * "htmlfile") must get a simple page from the "foreign" domain in an invisible
 	 * {@code iframe} so that code in the {@code iframe} can run from a domain
 	 * local to the SockJS server. Since the {@code iframe} needs to load the
@@ -195,7 +195,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	/**
 	 * The SockJS protocol requires a server to respond to an initial "/info" request from
 	 * clients with a "cookie_needed" boolean property that indicates whether the use of a
-	 * JSESSIONID cookie is required for the application to function correctly, e.g. for
+	 * JSESSIONID cookie is required for the application to function correctly, for example, for
 	 * load balancing or in Java Servlet containers for the use of an HTTP session.
 	 * <p>This is especially important for IE 8,9 that support XDomainRequest -- a modified
 	 * AJAX/XHR -- that can do requests across domains but does not send any cookies. In
@@ -509,7 +509,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	/**
 	 * Ensure the path does not contain a file extension, either in the filename
-	 * (e.g. "/jsonp.bat") or possibly after path parameters ("/jsonp;Setup.bat")
+	 * (for example, "/jsonp.bat") or possibly after path parameters ("/jsonp;Setup.bat")
 	 * which could be used for RFD exploits.
 	 * <p>Since the last part of the path is expected to be a transport type, the
 	 * presence of an extension would not work. All we need to do is check if

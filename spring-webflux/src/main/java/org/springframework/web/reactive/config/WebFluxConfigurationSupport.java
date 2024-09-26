@@ -116,7 +116,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		if (applicationContext != null) {
 				Assert.state(!applicationContext.containsBean("mvcContentNegotiationManager"),
 						"The Java/XML config for Spring MVC and Spring WebFlux cannot both be enabled, " +
-						"e.g. via @EnableWebMvc and @EnableWebFlux, in the same application.");
+						"for example, via @EnableWebMvc and @EnableWebFlux, in the same application.");
 		}
 	}
 

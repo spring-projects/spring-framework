@@ -32,7 +32,7 @@ import io.rsocket.ConnectionSetupPayload;
  * {@link org.springframework.messaging.handler.annotation.MessageMapping @MessageMapping}
  * for a combined route pattern. It supports the same arguments as
  * {@code @MessageMapping} but the return value must be {@code void}. On a
- * server, handling can be asynchronous (e.g. {@code Mono<Void>}), in which
+ * server, handling can be asynchronous (for example, {@code Mono<Void>}), in which
  * case the connection is accepted if and when the {@code Mono<Void>} completes.
  * On the client side this method is only a callback and does not affect the
  * establishment of the connection.
@@ -40,7 +40,7 @@ import io.rsocket.ConnectionSetupPayload;
  * <p><strong>Note:</strong> an {@code @ConnectMapping} method may start
  * requests to the remote through an
  * {@link org.springframework.messaging.rsocket.RSocketRequester RSocketRequester}
- * method argument, but it must do so independent of the handling thread (e.g.
+ * method argument, but it must do so independent of the handling thread (for example,
  * via subscribing on a different thread).
  *
  * @author Rossen Stoyanchev

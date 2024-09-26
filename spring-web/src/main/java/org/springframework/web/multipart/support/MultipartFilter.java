@@ -54,7 +54,7 @@ import org.springframework.web.multipart.MultipartResolver;
  * <p>Note: This filter is an <b>alternative</b> to using DispatcherServlet's
  * MultipartResolver support, for example for web applications with custom web views
  * which do not use Spring's web MVC, or for custom filters applied before a Spring MVC
- * DispatcherServlet (e.g. {@link org.springframework.web.filter.HiddenHttpMethodFilter}).
+ * DispatcherServlet (for example, {@link org.springframework.web.filter.HiddenHttpMethodFilter}).
  * In any case, this filter should not be combined with servlet-specific multipart resolution.
  *
  * @author Juergen Hoeller

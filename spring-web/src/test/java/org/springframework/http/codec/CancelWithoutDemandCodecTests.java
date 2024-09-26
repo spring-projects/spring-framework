@@ -83,7 +83,7 @@ class CancelWithoutDemandCodecTests {
 				MediaType.APPLICATION_JSON, Collections.emptyMap());
 
 		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
-		flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)
+		flux.subscribe(subscriber); // Assume sync execution (for example, encoding with Flux.just)
 		subscriber.cancel();
 	}
 
@@ -96,7 +96,7 @@ class CancelWithoutDemandCodecTests {
 				MediaType.APPLICATION_XML, Collections.emptyMap());
 
 		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
-		flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)
+		flux.subscribe(subscriber); // Assume sync execution (for example, encoding with Flux.just)
 		subscriber.cancel();
 	}
 
@@ -110,7 +110,7 @@ class CancelWithoutDemandCodecTests {
 				MediaType.APPLICATION_PROTOBUF, Collections.emptyMap());
 
 		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
-		flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)
+		flux.subscribe(subscriber); // Assume sync execution (for example, encoding with Flux.just)
 		subscriber.cancel();
 	}
 
@@ -187,7 +187,7 @@ class CancelWithoutDemandCodecTests {
 		public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 			Flux<? extends DataBuffer> flux = Flux.from(body);
 			BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
-			flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)
+			flux.subscribe(subscriber); // Assume sync execution (for example, encoding with Flux.just)
 			subscriber.cancel();
 			return Mono.empty();
 		}
@@ -196,7 +196,7 @@ class CancelWithoutDemandCodecTests {
 		public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 			Flux<? extends DataBuffer> flux = Flux.from(body).concatMap(Flux::from);
 			BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
-			flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)
+			flux.subscribe(subscriber); // Assume sync execution (for example, encoding with Flux.just)
 			subscriber.cancel();
 			return Mono.empty();
 		}

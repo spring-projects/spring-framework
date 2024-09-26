@@ -50,7 +50,7 @@ public class DurationFormatter implements Formatter<Duration> {
 
 	/**
 	 * Create a {@code DurationFormatter} in a specific {@link DurationFormat.Style}.
-	 * <p>When a unit is needed but cannot be determined (e.g. printing a Duration in the
+	 * <p>When a unit is needed but cannot be determined (for example, printing a Duration in the
 	 * {@code SIMPLE} style), {@code DurationFormat.Unit#MILLIS} is used.
 	 */
 	public DurationFormatter(DurationFormat.Style style) {

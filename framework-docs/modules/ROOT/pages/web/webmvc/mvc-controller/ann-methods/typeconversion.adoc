@@ -26,7 +26,7 @@ method intends to accept a null value as well, either declare your argument as `
 or mark it as `required=false` in the corresponding `@RequestParam`, etc. annotation. This is
 a best practice and the recommended solution for regressions encountered in a 5.3 upgrade.
 
-Alternatively, you may specifically handle e.g. the resulting `MissingPathVariableException`
+Alternatively, you may specifically handle, for example, the resulting `MissingPathVariableException`
 in the case of a required `@PathVariable`. A null value after conversion will be treated like
 an empty original value, so the corresponding `Missing...Exception` variants will be thrown.
 ====

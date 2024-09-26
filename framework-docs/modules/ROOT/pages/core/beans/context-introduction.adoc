@@ -484,7 +484,7 @@ You can register as many event listeners as you wish, but note that, by default,
 This means that the `publishEvent()` method blocks until all listeners have finished processing the event.
 One advantage of this synchronous and single-threaded approach is that, when a listener receives an event,
 it operates inside the transaction context of the publisher if a transaction context is available.
-If another strategy for event publication becomes necessary, e.g. asynchronous event processing by default,
+If another strategy for event publication becomes necessary, for example, asynchronous event processing by default,
 see the javadoc for Spring's {spring-framework-api}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
 and {spring-framework-api}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`] implementation
 for configuration options which can be applied to a custom "applicationEventMulticaster" bean definition.
@@ -864,7 +864,7 @@ Finally, as with classic `ApplicationListener` implementations, the actual multi
 happens via a context-wide `ApplicationEventMulticaster` at runtime. By default, this is a
 `SimpleApplicationEventMulticaster` with synchronous event publication in the caller thread.
 This can be replaced/customized through an "applicationEventMulticaster" bean definition,
-e.g. for processing all events asynchronously and/or for handling listener exceptions:
+for example, for processing all events asynchronously and/or for handling listener exceptions:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----

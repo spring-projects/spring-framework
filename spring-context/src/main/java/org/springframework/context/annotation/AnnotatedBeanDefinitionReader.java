@@ -60,7 +60,7 @@ public class AnnotatedBeanDefinitionReader {
 
 	/**
 	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given registry.
-	 * <p>If the registry is {@link EnvironmentCapable}, e.g. is an {@code ApplicationContext},
+	 * <p>If the registry is {@link EnvironmentCapable}, for example, is an {@code ApplicationContext},
 	 * the {@link Environment} will be inherited, otherwise a new
 	 * {@link StandardEnvironment} will be created and used.
 	 * @param registry the {@code BeanFactory} to load bean definitions into,
@@ -130,7 +130,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * <p>Calls to {@code register} are idempotent; adding the same
 	 * component class more than once has no additional effect.
 	 * @param componentClasses one or more component classes,
-	 * e.g. {@link Configuration @Configuration} classes
+	 * for example, {@link Configuration @Configuration} classes
 	 */
 	public void register(Class<?>... componentClasses) {
 		for (Class<?> componentClass : componentClasses) {
@@ -224,7 +224,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * @param supplier a callback for creating an instance of the bean
 	 * (may be {@code null})
 	 * @param customizers one or more callbacks for customizing the factory's
-	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * {@link BeanDefinition}, for example, setting a lazy-init or primary flag
 	 * @since 5.2
 	 */
 	public <T> void registerBean(Class<T> beanClass, @Nullable String name, @Nullable Supplier<T> supplier,
@@ -243,7 +243,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * @param supplier a callback for creating an instance of the bean
 	 * (may be {@code null})
 	 * @param customizers one or more callbacks for customizing the factory's
-	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * {@link BeanDefinition}, for example, setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
 	private <T> void doRegisterBean(Class<T> beanClass, @Nullable String name,

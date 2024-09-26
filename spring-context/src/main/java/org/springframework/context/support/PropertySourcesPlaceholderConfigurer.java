@@ -48,7 +48,7 @@ import org.springframework.util.StringValueResolver;
  * {@code PropertyPlaceholderConfigurer} to ensure backward compatibility. See the spring-context
  * XSD documentation for complete details.
  *
- * <p>Any local properties (e.g. those added via {@link #setProperties}, {@link #setLocations}
+ * <p>Any local properties (for example, those added via {@link #setProperties}, {@link #setLocations}
  * et al.) are added as a {@code PropertySource}. Search precedence of local properties is
  * based on the value of the {@link #setLocalOverride localOverride} property, which is by
  * default {@code false} meaning that local properties are to be searched last, after all

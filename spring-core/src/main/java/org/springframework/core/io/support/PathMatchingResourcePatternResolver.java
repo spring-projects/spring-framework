@@ -91,7 +91,7 @@ import org.springframework.util.StringUtils;
  * Examples are real URLs such as "{@code file:C:/context.xml}", pseudo-URLs
  * such as "{@code classpath:/context.xml}", and simple unprefixed paths
  * such as "{@code /WEB-INF/context.xml}". The latter will resolve in a
- * fashion specific to the underlying {@code ResourceLoader} (e.g.
+ * fashion specific to the underlying {@code ResourceLoader} (for example,
  * {@code ServletContextResource} for a {@code WebApplicationContext}).
  *
  * <h3>Ant-style Patterns</h3>
@@ -105,7 +105,7 @@ import org.springframework.util.StringUtils;
  * the resolver follows a more complex but defined procedure to try to resolve
  * the wildcard. It produces a {@code Resource} for the path up to the last
  * non-wildcard segment and obtains a {@code URL} from it. If this URL is not a
- * "{@code jar:}" URL or container-specific variant (e.g. "{@code zip:}" in WebLogic,
+ * "{@code jar:}" URL or container-specific variant (for example, "{@code zip:}" in WebLogic,
  * "{@code wsjar}" in WebSphere", etc.), then the root directory of the filesystem
  * associated with the URL is obtained and used to resolve the wildcards by walking
  * the filesystem. In the case of a jar URL, the resolver either gets a
@@ -235,7 +235,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	static {
 		try {
-			// Detect Equinox OSGi (e.g. on WebSphere 6.1)
+			// Detect Equinox OSGi (for example, on WebSphere 6.1)
 			Class<?> fileLocatorClass = ClassUtils.forName("org.eclipse.core.runtime.FileLocator",
 					PathMatchingResourcePatternResolver.class.getClassLoader());
 			equinoxResolveMethod = fileLocatorClass.getMethod("resolve", URL.class);

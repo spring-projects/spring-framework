@@ -47,7 +47,7 @@ import org.springframework.web.util.WebUtils;
  * alternatively, you may specify a default time zone.
  *
  * <p>Custom controllers can override the user's locale and time zone by calling
- * {@code #setLocale(Context)} on the resolver, e.g. responding to a locale change
+ * {@code #setLocale(Context)} on the resolver, for example, responding to a locale change
  * request. As a more convenient alternative, consider using
  * {@link org.springframework.web.servlet.support.RequestContext#changeLocale}.
  *
@@ -233,7 +233,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	}
 
 	/**
-	 * Specify whether to reject cookies with invalid content (e.g. invalid format).
+	 * Specify whether to reject cookies with invalid content (for example, invalid format).
 	 * <p>The default is {@code true}. Turn this off for lenient handling of parse
 	 * failures, falling back to the default locale and time zone in such a case.
 	 * @since 5.1.7
@@ -247,7 +247,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 	}
 
 	/**
-	 * Return whether to reject cookies with invalid content (e.g. invalid format).
+	 * Return whether to reject cookies with invalid content (for example, invalid format).
 	 * @since 5.1.7
 	 */
 	public boolean isRejectInvalidCookies() {
@@ -342,7 +342,7 @@ public class CookieLocaleResolver extends AbstractLocaleContextResolver {
 								this.cookie.getName() + "': [" + value + "] due to: " + ex.getMessage());
 					}
 					else {
-						// Lenient handling (e.g. error dispatch): ignore locale/timezone parse exceptions
+						// Lenient handling (for example, error dispatch): ignore locale/timezone parse exceptions
 						if (logger.isDebugEnabled()) {
 							logger.debug("Ignoring invalid locale cookie '" + this.cookie.getName() +
 									"': [" + value + "] due to: " + ex.getMessage());

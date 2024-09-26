@@ -33,14 +33,14 @@ Kotlin::
 ======
 
 The body will usually be provided as a value object to be rendered to a corresponding
-response representation (e.g. JSON) by one of the registered `HttpMessageConverters`.
+response representation (for example, JSON) by one of the registered `HttpMessageConverters`.
 
 A `ResponseEntity<Resource>` can be returned for file content, copying the `InputStream`
 content of the provided resource to the response `OutputStream`. Note that the
 `InputStream` should be lazily retrieved by the `Resource` handle in order to reliably
 close it after it has been copied to the response. If you are using `InputStreamResource`
 for such a purpose, make sure to construct it with an on-demand `InputStreamSource`
-(e.g. through a lambda expression that retrieves the actual `InputStream`). Also, custom
+(for example, through a lambda expression that retrieves the actual `InputStream`). Also, custom
 subclasses of `InputStreamResource` are only supported in combination with a custom
 `contentLength()` implementation which avoids consuming the stream for that purpose.
 

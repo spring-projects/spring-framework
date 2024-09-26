@@ -125,10 +125,10 @@ public class CorsConfiguration {
 	 * A list of origins for which cross-origin requests are allowed where each
 	 * value may be one of the following:
 	 * <ul>
-	 * <li>a specific domain, e.g. {@code "https://domain1.com"}
-	 * <li>comma-delimited list of specific domains, e.g.
+	 * <li>a specific domain, for example, {@code "https://domain1.com"}
+	 * <li>comma-delimited list of specific domains, for example,
 	 * {@code "https://a1.com,https://a2.com"}; this is convenient when a value
-	 * is resolved through a property placeholder, e.g. {@code "${origin}"};
+	 * is resolved through a property placeholder, for example, {@code "${origin}"};
 	 * note that such placeholders must be resolved externally.
 	 * <li>the CORS defined special value {@code "*"} for all origins
 	 * </ul>
@@ -141,7 +141,7 @@ public class CorsConfiguration {
 	 * As a consequence, those combinations are rejected in favor of using
 	 * {@link #setAllowedOriginPatterns allowedOriginPatterns} instead.
 	 * <p>By default this is not set which means that no origins are allowed.
-	 * However, an instance of this class is often initialized further, e.g. for
+	 * However, an instance of this class is often initialized further, for example, for
 	 * {@code @CrossOrigin}, via {@link #applyPermitDefaultValues()}.
 	 */
 	public void setAllowedOrigins(@Nullable List<String> origins) {
@@ -198,9 +198,9 @@ public class CorsConfiguration {
 	 * domain1.com on port 8080 or port 8081
 	 * <li>{@literal https://*.domain1.com:[*]} -- domains ending with
 	 * domain1.com on any port, including the default port
-	 * <li>comma-delimited list of patters, e.g.
+	 * <li>comma-delimited list of patters, for example,
 	 * {@code "https://*.a1.com,https://*.a2.com"}; this is convenient when a
-	 * value is resolved through a property placeholder, e.g. {@code "${origin}"};
+	 * value is resolved through a property placeholder, for example, {@code "${origin}"};
 	 * note that such placeholders must be resolved externally.
 	 * </ul>
 	 * <p>In contrast to {@link #setAllowedOrigins(List) allowedOrigins} which
@@ -289,7 +289,7 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"},
+	 * Set the HTTP methods to allow, for example, {@code "GET"}, {@code "POST"},
 	 * {@code "PUT"}, etc. The special value {@code "*"} allows all methods.
 	 * <p>{@code Access-Control-Allow-Methods} response header is set either
 	 * to the configured method or to {@code "*"}. Keep in mind however that the
@@ -783,7 +783,7 @@ public class CorsConfiguration {
 
 
 	/**
-	 * Contains both the user-declared pattern (e.g. "https://*.domain.com") and
+	 * Contains both the user-declared pattern (for example, "https://*.domain.com") and
 	 * the regex {@link Pattern} derived from it.
 	 */
 	private static class OriginPattern {

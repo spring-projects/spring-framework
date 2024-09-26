@@ -107,7 +107,7 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 	 * @return the AutowireCapableBeanFactory for this context
 	 * @throws IllegalStateException if the context does not support the
 	 * {@link AutowireCapableBeanFactory} interface, or does not hold an
-	 * autowire-capable bean factory yet (e.g. if {@code refresh()} has
+	 * autowire-capable bean factory yet (for example, if {@code refresh()} has
 	 * never been called), or if the context has been closed already
 	 * @see ConfigurableApplicationContext#refresh()
 	 * @see ConfigurableApplicationContext#getBeanFactory()

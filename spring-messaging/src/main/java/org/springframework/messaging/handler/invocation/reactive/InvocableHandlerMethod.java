@@ -92,7 +92,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Set the ParameterNameDiscoverer for resolving parameter names when needed
-	 * (e.g. default request attribute name).
+	 * (for example, default request attribute name).
 	 * <p>Default is a {@link DefaultParameterNameDiscoverer}.
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer nameDiscoverer) {

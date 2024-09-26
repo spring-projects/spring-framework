@@ -97,7 +97,7 @@ public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationC
 	/**
 	 * Initialize the bean definition reader used for loading the bean
 	 * definitions of this context. Default implementation is empty.
-	 * <p>Can be overridden in subclasses, e.g. for turning off XML validation
+	 * <p>Can be overridden in subclasses, for example, for turning off XML validation
 	 * or using a different XmlBeanDefinitionParser implementation.
 	 * @param beanDefinitionReader the bean definition reader used by this context
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setValidationMode

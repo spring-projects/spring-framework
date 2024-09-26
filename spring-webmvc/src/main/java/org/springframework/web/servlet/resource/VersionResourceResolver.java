@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
 /**
  * Resolves request paths containing a version string that can be used as part
  * of an HTTP caching strategy in which a resource is cached with a date in the
- * distant future (e.g. 1 year) and cached until the version, and therefore the
+ * distant future (for example, 1 year) and cached until the version, and therefore the
  * URL, is changed.
  *
  * <p>Different versioning strategies exist, and this resolver must be configured
@@ -93,7 +93,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 	/**
 	 * Insert a content-based version in resource URLs that match the given path
-	 * patterns. The version is computed from the content of the file, e.g.
+	 * patterns. The version is computed from the content of the file, for example,
 	 * {@code "css/main-e36d2e05253c6c7085a91522ce43a0b4.css"}. This is a good
 	 * default strategy to use except when it cannot be, for example when using
 	 * JavaScript module loaders, use {@link #addFixedVersionStrategy} instead
@@ -114,7 +114,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * content-based versions) when using JavaScript module loaders.
 	 * <p>The version may be a random number, the current date, or a value
 	 * fetched from a git commit sha, a property file, or environment variable
-	 * and set with SpEL expressions in the configuration (e.g. see {@code @Value}
+	 * and set with SpEL expressions in the configuration (for example, see {@code @Value}
 	 * in Java config).
 	 * <p>If not done already, variants of the given {@code pathPatterns}, prefixed with
 	 * the {@code version} will be also configured. For example, adding a {@code "/js/**"} path pattern

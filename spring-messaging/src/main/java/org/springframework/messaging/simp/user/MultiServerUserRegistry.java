@@ -59,7 +59,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 	private final boolean delegateApplicationEvents;
 
-	/* Cross-server session lookup (e.g. same user connected to multiple servers) */
+	/* Cross-server session lookup (for example, same user connected to multiple servers) */
 	private final SessionLookup sessionLookup = new SessionLookup();
 
 
@@ -278,7 +278,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		// User sessions from "this" registry only (i.e. one server)
 		private final Set<TransferSimpSession> sessions;
 
-		// Cross-server session lookup (e.g. user connected to multiple servers)
+		// Cross-server session lookup (for example, user connected to multiple servers)
 		@Nullable
 		private SessionLookup sessionLookup;
 

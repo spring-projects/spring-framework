@@ -225,7 +225,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * <p>Default is -1, indicating to use the JDBC driver's default configuration
 	 * (i.e. to not pass a specific fetch size setting on to the driver).
 	 * <p>Note: As of 4.3, negative values other than -1 will get passed on to the
-	 * driver, since e.g. MySQL supports special behavior for {@code Integer.MIN_VALUE}.
+	 * driver, since, for example, MySQL supports special behavior for {@code Integer.MIN_VALUE}.
 	 * @see java.sql.Statement#setFetchSize
 	 */
 	public void setFetchSize(int fetchSize) {
@@ -834,7 +834,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * If this is {@code null}, the SQL will be assumed to contain no bind parameters.
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the result Stream, containing mapped objects, needing to be
-	 * closed once fully processed (e.g. through a try-with-resources clause)
+	 * closed once fully processed (for example, through a try-with-resources clause)
 	 * @throws DataAccessException if the query fails
 	 * @since 5.3
 	 */

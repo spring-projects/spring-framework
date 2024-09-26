@@ -20,7 +20,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.lang.Nullable;
 
 /**
- * Internal representation of a null bean instance, e.g. for a {@code null} value
+ * Internal representation of a null bean instance, for example, for a {@code null} value
  * returned from {@link FactoryBean#getObject()} or from a factory method.
  *
  * <p>Each such null bean is represented by a dedicated {@code NullBean} instance

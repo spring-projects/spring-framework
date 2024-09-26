@@ -64,7 +64,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	/**
 	 * By default, when a Resource is found, the path of the resolved resource is
 	 * compared to ensure it's under the input location where it was found.
-	 * However sometimes that may not be the case, e.g. when
+	 * However sometimes that may not be the case, for example, when
 	 * {@link org.springframework.web.servlet.resource.CssLinkResourceTransformer}
 	 * resolves public URLs of links it contains, the CSS file is the location
 	 * and the resources being resolved are css files, images, fonts and others

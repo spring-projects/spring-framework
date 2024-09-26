@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * <p>Note that at shutdown, someone should close the underlying
  * {@code Connection} via the {@code close()} method. Client code will
  * never call close on the {@code Connection} handle if it is
- * SmartConnectionFactory-aware (e.g. uses
+ * SmartConnectionFactory-aware (for example, uses
  * {@link ConnectionFactoryUtils#releaseConnection(Connection, ConnectionFactory)}).
  *
  * <p>If client code will call {@link Connection#close()} in the

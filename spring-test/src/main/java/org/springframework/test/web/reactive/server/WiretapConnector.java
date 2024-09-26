@@ -190,7 +190,7 @@ class WiretapConnector implements ClientHttpConnector {
 				}
 				if (!this.hasContentConsumer) {
 					// Couple of possible cases:
-					//  1. Mock server never consumed request body (e.g. error before read)
+					//  1. Mock server never consumed request body (for example, error before read)
 					//  2. FluxExchangeResult: getResponseBodyContent called before getResponseBody
 					//noinspection ConstantConditions
 					(this.publisher != null ? this.publisher : this.publisherNested)

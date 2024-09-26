@@ -87,7 +87,7 @@ public abstract class OrderUtils {
 	/**
 	 * Return the order declared on the specified {@code element}.
 	 * <p>Takes care of {@link Order @Order} and {@code @jakarta.annotation.Priority}.
-	 * @param element the annotated element (e.g. type or method)
+	 * @param element the annotated element (for example, type or method)
 	 * @return the order value, or {@code null} if none can be found
 	 * @since 5.3
 	 */

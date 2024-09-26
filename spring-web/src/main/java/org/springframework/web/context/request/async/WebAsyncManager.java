@@ -106,7 +106,7 @@ public final class WebAsyncManager {
 	/**
 	 * Configure the {@link AsyncWebRequest} to use. This property may be set
 	 * more than once during a single request to accurately reflect the current
-	 * state of the request (e.g. following a forward, request/response
+	 * state of the request (for example, following a forward, request/response
 	 * wrapping, etc). However, it should not be set while concurrent handling
 	 * is in progress, i.e. while {@link #isConcurrentHandlingStarted()} is
 	 * {@code true}.

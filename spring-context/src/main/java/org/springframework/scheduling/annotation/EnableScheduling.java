@@ -184,7 +184,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *
  * <p><b>Note: {@code @EnableScheduling} applies to its local application context only,
  * allowing for selective scheduling of beans at different levels.</b> Please redeclare
- * {@code @EnableScheduling} in each individual context, e.g. the common root web
+ * {@code @EnableScheduling} in each individual context, for example, the common root web
  * application context and any separate {@code DispatcherServlet} application contexts,
  * if you need to apply its behavior at multiple levels.
  *

@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
  * are nested "on top" of the target.
  *
  * <p>The user should implement the {@link #invoke(MethodInvocation)}
- * method to modify the original behavior. E.g. the following class
+ * method to modify the original behavior. For example, the following class
  * implements a tracing interceptor (traces all the calls on the
  * intercepted method(s)):
  *

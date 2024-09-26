@@ -22,12 +22,12 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Contract for customizing a {@code ConfigurableMockMvcBuilder} in some
- * specific way, e.g. a 3rd party library that wants to provide shortcuts for
+ * specific way, for example, a 3rd party library that wants to provide shortcuts for
  * setting up a MockMvc.
  *
  * <p>An implementation of this interface can be plugged in via
  * {@link ConfigurableMockMvcBuilder#apply} with instances of this type likely
- * created via static methods, e.g.:
+ * created via static methods, for example:
  *
  * <pre class="code">
  * import static org.example.ExampleSetup.mySetup;

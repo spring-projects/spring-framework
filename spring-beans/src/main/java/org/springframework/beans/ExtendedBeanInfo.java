@@ -41,7 +41,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Decorator for a standard {@link BeanInfo} object, e.g. as created by
+ * Decorator for a standard {@link BeanInfo} object, for example, as created by
  * {@link Introspector#getBeanInfo(Class)}, designed to discover and register
  * static and/or non-void returning setter methods. For example:
  *

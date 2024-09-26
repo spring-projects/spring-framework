@@ -72,8 +72,8 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 
 	private static final Set<String> DATA_ACCESS_RESOURCE_FAILURE_CODES = Set.of(
 			"08",  // Connection exception
-			"53",  // PostgreSQL: insufficient resources (e.g. disk full)
-			"54",  // PostgreSQL: program limit exceeded (e.g. statement too complex)
+			"53",  // PostgreSQL: insufficient resources (for example, disk full)
+			"54",  // PostgreSQL: program limit exceeded (for example, statement too complex)
 			"57",  // DB2: out-of-memory exception / database not started
 			"58"   // DB2: unexpected system error
 		);

@@ -1418,7 +1418,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Set the request header names (e.g. "Accept-Language") for which the
+	 * Set the request header names (for example, "Accept-Language") for which the
 	 * response is subject to content negotiation and variances based on the
 	 * value of those request headers.
 	 * @param requestHeaders the request header names

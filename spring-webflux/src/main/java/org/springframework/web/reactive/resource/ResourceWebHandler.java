@@ -61,7 +61,7 @@ import org.springframework.web.util.pattern.PathPattern;
  * <p>The {@linkplain #setLocations "locations"} property takes a list of Spring
  * {@link Resource} locations from which static resources are allowed to
  * be served by this handler. Resources could be served from a classpath location,
- * e.g. "classpath:/META-INF/public-web-resources/", allowing convenient packaging
+ * for example, "classpath:/META-INF/public-web-resources/", allowing convenient packaging
  * and serving of resources such as .js, .css, and others in jar files.
  *
  * <p>This request handler may also be configured with a

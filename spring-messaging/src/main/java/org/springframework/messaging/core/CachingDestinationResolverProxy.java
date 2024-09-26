@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 /**
  * {@link DestinationResolver} implementation that proxies a target DestinationResolver,
  * caching its {@link #resolveDestination} results. Such caching is particularly useful
- * if the destination resolving process is expensive (e.g. the destination has to be
+ * if the destination resolving process is expensive (for example, the destination has to be
  * resolved through an external system) and the resolution results are stable anyway.
  *
  * @author Agim Emruli

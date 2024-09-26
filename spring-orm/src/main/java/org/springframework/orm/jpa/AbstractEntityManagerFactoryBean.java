@@ -80,7 +80,7 @@ import org.springframework.util.CollectionUtils;
  * interface, as autodetected by Spring's
  * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor},
  * for AOP-based translation of native exceptions to Spring DataAccessExceptions.
- * Hence, the presence of e.g. LocalEntityManagerFactoryBean automatically enables
+ * Hence, the presence of, for example, LocalEntityManagerFactoryBean automatically enables
  * a PersistenceExceptionTranslationPostProcessor to translate JPA exceptions.
  *
  * @author Juergen Hoeller
@@ -301,7 +301,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * by the exposed {@code EntityManagerFactory}.
 	 * <p>This is an alternative to a {@code JpaVendorAdapter}-level
 	 * {@code postProcessEntityManager} implementation, enabling convenient
-	 * customizations for application purposes, e.g. setting Hibernate filters.
+	 * customizations for application purposes, for example, setting Hibernate filters.
 	 * @since 5.3
 	 * @see JpaVendorAdapter#postProcessEntityManager
 	 * @see JpaTransactionManager#setEntityManagerInitializer
@@ -312,7 +312,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	/**
 	 * Specify an asynchronous executor for background bootstrapping,
-	 * e.g. a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}.
+	 * for example, a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}.
 	 * <p>{@code EntityManagerFactory} initialization will then switch into background
 	 * bootstrap mode, with a {@code EntityManagerFactory} proxy immediately returned for
 	 * injection purposes instead of waiting for the JPA provider's bootstrapping to complete.

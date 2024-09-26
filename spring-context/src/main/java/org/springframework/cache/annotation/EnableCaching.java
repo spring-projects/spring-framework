@@ -176,7 +176,7 @@ public @interface EnableCaching {
 	 * For example, other beans marked with Spring's {@code @Transactional} annotation will
 	 * be upgraded to subclass proxying at the same time. This approach has no negative
 	 * impact in practice unless one is explicitly expecting one type of proxy vs another,
-	 * e.g. in tests.
+	 * for example, in tests.
 	 */
 	boolean proxyTargetClass() default false;
 

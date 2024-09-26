@@ -74,7 +74,7 @@ public interface Encoder<T> {
 	 * in fully aggregated form.
 	 * <p>By default this method raises {@link UnsupportedOperationException}
 	 * and it is expected that some encoders cannot produce a single buffer or
-	 * cannot do so synchronously (e.g. encoding a {@code Resource}).
+	 * cannot do so synchronously (for example, encoding a {@code Resource}).
 	 * @param value the value to be encoded
 	 * @param bufferFactory for creating the output {@code DataBuffer}
 	 * @param valueType the type for the value being encoded

@@ -320,7 +320,7 @@ public class ConstructorReference extends SpelNodeImpl {
 			// There is an initializer
 			if (this.dimensions == null || this.dimensions.length > 1) {
 				// There is an initializer, but this is a multidimensional array
-				// (e.g. new int[][]{{1,2},{3,4}}), which is not supported.
+				// (for example, new int[][]{{1,2},{3,4}}), which is not supported.
 				throw new SpelEvaluationException(getStartPosition(),
 						SpelMessage.MULTIDIM_ARRAY_INITIALIZER_NOT_SUPPORTED);
 			}

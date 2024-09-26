@@ -232,7 +232,7 @@ public class SubProtocolWebSocketHandler
 	 * is established and before the first sub-protocol message is received.
 	 * <p>This handler is for WebSocket connections that use a sub-protocol.
 	 * Therefore, we expect the client to send at least one sub-protocol message
-	 * in the beginning, or else we assume the connection isn't doing well, e.g.
+	 * in the beginning, or else we assume the connection isn't doing well, for example,
 	 * proxy issue, slow network, and can be closed.
 	 * <p>By default this is set to {@code 60,000} (1 minute).
 	 * @param timeToFirstMessage the maximum time allowed in milliseconds
@@ -403,7 +403,7 @@ public class SubProtocolWebSocketHandler
 			}
 		}
 		catch (Exception ex) {
-			// Could be part of normal workflow (e.g. browser tab closed)
+			// Could be part of normal workflow (for example, browser tab closed)
 			if (logger.isDebugEnabled()) {
 				logger.debug("Failed to send message to client in " + session + ": " + message, ex);
 			}
@@ -497,7 +497,7 @@ public class SubProtocolWebSocketHandler
 	/**
 	 * A higher-level protocol can use heartbeats to detect sessions that need to
 	 * be cleaned up. However, if a WebSocket session is established, but messages
-	 * can't flow (e.g. due to a proxy issue), then the higher level protocol is
+	 * can't flow (for example, due to a proxy issue), then the higher level protocol is
 	 * never successfully negotiated, and without heartbeats, sessions can hang.
 	 * The method  checks for sessions that have not received any messages 60
 	 * seconds after the WebSocket session was established, and closes them.

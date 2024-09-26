@@ -59,7 +59,7 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 
 
 	/**
-	 * Add a package name to exclude from decoration (e.g. overriding).
+	 * Add a package name to exclude from decoration (for example, overriding).
 	 * <p>Any class whose fully-qualified name starts with the name registered
 	 * here will be handled by the parent ClassLoader in the usual fashion.
 	 * @param packageName the package name to exclude
@@ -70,7 +70,7 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 	}
 
 	/**
-	 * Add a class name to exclude from decoration (e.g. overriding).
+	 * Add a class name to exclude from decoration (for example, overriding).
 	 * <p>Any class name registered here will be handled by the parent
 	 * ClassLoader in the usual fashion.
 	 * @param className the class name to exclude

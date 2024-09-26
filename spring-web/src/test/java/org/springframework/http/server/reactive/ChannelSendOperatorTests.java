@@ -179,7 +179,7 @@ class ChannelSendOperatorTests {
 
 		// 1. First item received
 		// 2. writeFunction applied and writeCompletionBarrier subscribed to it
-		// 3. writeFunction fails, e.g. to flush status and headers, before request(n) from server
+		// 3. writeFunction fails, for example, to flush status and headers, before request(n) from server
 
 		LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 

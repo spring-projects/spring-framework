@@ -96,7 +96,7 @@ public interface Validator {
 	 * Validate the given {@code target} object individually.
 	 * <p>Delegates to the common {@link #validate(Object, Errors)} method.
 	 * The returned {@link Errors errors} instance can be used to report
-	 * any resulting validation errors for the specific target object, e.g.
+	 * any resulting validation errors for the specific target object, for example,
 	 * {@code if (validator.validateObject(target).hasErrors()) ...} or
 	 * {@code validator.validateObject(target).failOnError(IllegalStateException::new));}.
 	 * <p>Note: This validation call comes with limitations in the {@link Errors}

@@ -144,7 +144,7 @@ based on the given configuration but no further activity with external bean acce
 Otherwise there is a risk for an initialization deadlock.
 
 For a scenario where expensive post-initialization activity is to be triggered,
-e.g. asynchronous database preparation steps, your bean should either implement
+for example, asynchronous database preparation steps, your bean should either implement
 `SmartInitializingSingleton.afterSingletonsInstantiated()` or rely on the context
 refresh event: implementing `ApplicationListener<ContextRefreshedEvent>` or
 declaring its annotation equivalent `@EventListener(ContextRefreshedEvent.class)`.
@@ -607,7 +607,7 @@ bean creation phase and its subsequent initial publication, they need to be decl
 `volatile` or guarded by a common lock whenever accessed.
 
 Note that concurrent access to such configuration state in singleton bean instances,
-e.g. for controller instances or repository instances, is perfectly thread-safe after
+for example, for controller instances or repository instances, is perfectly thread-safe after
 such safe initial publication from the container side. This includes common singleton
 `FactoryBean` instances which are processed within the general singleton lock as well.
 
@@ -617,7 +617,7 @@ structures (or in `volatile` fields for simple cases) as per common Java guideli
 
 Deeper `Lifecycle` integration as shown above involves runtime-mutable state such as
 a `runnable` field which will have to be declared as `volatile`. While the common
-lifecycle callbacks follow a certain order, e.g. a start callback is guaranteed to
+lifecycle callbacks follow a certain order, for example, a start callback is guaranteed to
 only happen after full initialization and a stop callback only after an initial start,
 there is a special case with the common stop before destroy arrangement: It is strongly
 recommended that the internal state in any such bean also allows for an immediate

@@ -151,7 +151,7 @@ public class WebSocketTransportRegistration {
 	 * is established and before the first sub-protocol message is received.
 	 * <p>This handler is for WebSocket connections that use a sub-protocol.
 	 * Therefore, we expect the client to send at least one sub-protocol message
-	 * in the beginning, or else we assume the connection isn't doing well, e.g.
+	 * in the beginning, or else we assume the connection isn't doing well, for example,
 	 * proxy issue, slow network, and can be closed.
 	 * <p>By default this is set to {@code 60,000} (1 minute).
 	 * @param timeToFirstMessage the maximum time allowed in milliseconds

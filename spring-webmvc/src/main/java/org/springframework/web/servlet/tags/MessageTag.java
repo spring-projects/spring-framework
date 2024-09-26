@@ -378,7 +378,7 @@ public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 
 	/**
 	 * Write the message to the page.
-	 * <p>Can be overridden in subclasses, e.g. for testing purposes.
+	 * <p>Can be overridden in subclasses, for example, for testing purposes.
 	 * @param msg the message to write
 	 * @throws IOException if writing failed
 	 */

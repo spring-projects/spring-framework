@@ -698,7 +698,7 @@ public final class ContentDisposition {
 		 * Set the value of the {@literal filename} parameter. The given
 		 * filename will be formatted as quoted-string, as defined in RFC 2616,
 		 * section 2.2, and any quote characters within the filename value will
-		 * be escaped with a backslash, e.g. {@code "foo\"bar.txt"} becomes
+		 * be escaped with a backslash, for example, {@code "foo\"bar.txt"} becomes
 		 * {@code "foo\\\"bar.txt"}.
 		 */
 		Builder filename(@Nullable String filename);

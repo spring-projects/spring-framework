@@ -41,12 +41,12 @@ import org.springframework.core.annotation.AliasFor;
  * to be stored in the session <i>temporarily</i> during the course of a
  * specific handler's conversation.
  *
- * <p>For permanent session attributes, e.g. a user authentication object,
+ * <p>For permanent session attributes, for example, a user authentication object,
  * use the traditional {@code session.setAttribute} method instead.
  * Alternatively, consider using the attribute management capabilities of the
  * generic {@link org.springframework.web.context.request.WebRequest} interface.
  *
- * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
+ * <p><b>NOTE:</b> When using controller interfaces (for example, for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations &mdash;
  * such as {@code @RequestMapping} and {@code @SessionAttributes} &mdash; on
  * the controller <i>interface</i> rather than on the implementation class.

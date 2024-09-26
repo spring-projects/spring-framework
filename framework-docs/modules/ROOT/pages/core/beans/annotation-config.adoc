@@ -20,7 +20,7 @@ can be found in the xref:core/beans/standard-annotations.adoc[relevant section].
 [NOTE]
 ====
 Annotation injection is performed before external property injection. Thus, external
-configuration (e.g. XML-specified bean properties) effectively overrides the annotations
+configuration (for example, XML-specified bean properties) effectively overrides the annotations
 for properties when wired through mixed approaches.
 ====
 

@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * "freemarkerSettings", or "templateLoaderPath" properties.
  *
  * <p>The simplest way to use this class is to specify just a "templateLoaderPath"
- * (e.g. "classpath:templates"); you do not need any further configuration then.
+ * (for example, "classpath:templates"); you do not need any further configuration then.
  *
  * <p>This bean must be included in the application context of any application
  * using {@link FreeMarkerView}. It exists purely to configure FreeMarker.

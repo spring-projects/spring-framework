@@ -296,12 +296,12 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	 * Return the collection of values associated with the command line option having the
 	 * given name.
 	 * <ul>
-	 * <li>if the option is present and has no argument (e.g.: "--foo"), return an empty
+	 * <li>if the option is present and has no argument (for example: "--foo"), return an empty
 	 * collection ({@code []})</li>
-	 * <li>if the option is present and has a single value (e.g. "--foo=bar"), return a
+	 * <li>if the option is present and has a single value (for example, "--foo=bar"), return a
 	 * collection having one element ({@code ["bar"]})</li>
 	 * <li>if the option is present and the underlying command line parsing library
-	 * supports multiple arguments (e.g. "--foo=bar --foo=baz"), return a collection
+	 * supports multiple arguments (for example, "--foo=bar --foo=baz"), return a collection
 	 * having elements for each value ({@code ["bar", "baz"]})</li>
 	 * <li>if the option is not present, return {@code null}</li>
 	 * </ul>

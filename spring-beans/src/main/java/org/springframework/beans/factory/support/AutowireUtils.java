@@ -122,7 +122,7 @@ abstract class AutowireUtils {
 
 	/**
 	 * Resolve the given autowiring value against the given required type,
-	 * e.g. an {@link ObjectFactory} value to its actual object result.
+	 * for example, an {@link ObjectFactory} value to its actual object result.
 	 * @param autowiringValue the value to resolve
 	 * @param requiredType the type to assign the result to
 	 * @return the resolved value
@@ -157,7 +157,7 @@ abstract class AutowireUtils {
 	 * the given {@code method} does not declare any {@linkplain
 	 * Method#getTypeParameters() formal type variables}</li>
 	 * <li>the {@linkplain Method#getReturnType() standard return type}, if the
-	 * target return type cannot be inferred (e.g., due to type erasure)</li>
+	 * target return type cannot be inferred (for example, due to type erasure)</li>
 	 * <li>{@code null}, if the length of the given arguments array is shorter
 	 * than the length of the {@linkplain
 	 * Method#getGenericParameterTypes() formal argument list} for the given
@@ -182,8 +182,8 @@ abstract class AutowireUtils {
 		Type[] methodParameterTypes = method.getGenericParameterTypes();
 		Assert.isTrue(args.length == methodParameterTypes.length, "Argument array does not match parameter count");
 
-		// Ensure that the type variable (e.g., T) is declared directly on the method
-		// itself (e.g., via <T>), not on the enclosing class or interface.
+		// Ensure that the type variable (for example, T) is declared directly on the method
+		// itself (for example, via <T>), not on the enclosing class or interface.
 		boolean locallyDeclaredTypeVariableMatchesReturnType = false;
 		for (TypeVariable<Method> currentTypeVariable : declaredTypeVariables) {
 			if (currentTypeVariable.equals(genericReturnType)) {

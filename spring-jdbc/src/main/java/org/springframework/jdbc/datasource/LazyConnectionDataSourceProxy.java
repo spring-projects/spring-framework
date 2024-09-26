@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
  * without fetching a Connection from the pool or communicating with the
  * database; this will be done lazily on first creation of a JDBC Statement.
  * As a bonus, this allows for taking the transaction-synchronized read-only
- * flag and/or isolation level into account in a routing DataSource (e.g.
+ * flag and/or isolation level into account in a routing DataSource (for example,
  * {@link org.springframework.jdbc.datasource.lookup.IsolationLevelDataSourceRouter}).
  *
  * <p><b>If you configure both a LazyConnectionDataSourceProxy and a
@@ -184,7 +184,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	/**
 	 * Set the default transaction isolation level to expose when no target Connection
 	 * has been fetched yet (when the actual JDBC Connection default is not known yet).
-	 * <p>This property accepts the int constant value (e.g. 8) as defined in the
+	 * <p>This property accepts the int constant value (for example, 8) as defined in the
 	 * {@link java.sql.Connection} interface; it is mainly intended for programmatic
 	 * use. Consider using the "defaultTransactionIsolationName" property for setting
 	 * the value by name (for example, {@code "TRANSACTION_SERIALIZABLE"}).

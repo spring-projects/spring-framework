@@ -83,7 +83,7 @@ public interface AnnotatedTypeMetadata {
 	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
 	 * @return a {@link Map} of attributes, with each annotation attribute name
-	 * as map key (e.g. "location") and the attribute's value as map value; or
+	 * as map key (for example, "location") and the attribute's value as map value; or
 	 * {@code null} if no matching annotation is found
 	 */
 	@Nullable
@@ -103,7 +103,7 @@ public interface AnnotatedTypeMetadata {
 	 * class names for exposure as values in the returned Map, instead of Class
 	 * references which might potentially have to be loaded first
 	 * @return a {@link Map} of attributes, with each annotation attribute name
-	 * as map key (e.g. "location") and the attribute's value as map value; or
+	 * as map key (for example, "location") and the attribute's value as map value; or
 	 * {@code null} if no matching annotation is found
 	 */
 	@Nullable
@@ -126,7 +126,7 @@ public interface AnnotatedTypeMetadata {
 	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
 	 * @return a {@link MultiValueMap} of attributes, with each annotation attribute
-	 * name as map key (e.g. "location") and a list of the attribute's values as
+	 * name as map key (for example, "location") and a list of the attribute's values as
 	 * map value; or {@code null} if no matching annotation is found
 	 * @see #getAllAnnotationAttributes(String, boolean)
 	 */
@@ -146,7 +146,7 @@ public interface AnnotatedTypeMetadata {
 	 * class names for exposure as values in the returned Map, instead of Class
 	 * references which might potentially have to be loaded first
 	 * @return a {@link MultiValueMap} of attributes, with each annotation attribute
-	 * name as map key (e.g. "location") and a list of the attribute's values as
+	 * name as map key (for example, "location") and a list of the attribute's values as
 	 * map value; or {@code null} if no matching annotation is found
 	 * @see #getAllAnnotationAttributes(String)
 	 */

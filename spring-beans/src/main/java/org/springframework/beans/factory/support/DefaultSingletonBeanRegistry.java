@@ -157,7 +157,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/**
 	 * Add the given singleton factory for building the specified singleton
 	 * if necessary.
-	 * <p>To be called for early exposure purposes, e.g. to be able to
+	 * <p>To be called for early exposure purposes, for example, to be able to
 	 * resolve circular references.
 	 * @param beanName the name of the bean
 	 * @param singletonFactory the factory for the singleton object
@@ -340,7 +340,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Register an exception that happened to get suppressed during the creation of a
-	 * singleton bean instance, e.g. a temporary circular reference resolution problem.
+	 * singleton bean instance, for example, a temporary circular reference resolution problem.
 	 * <p>The default implementation preserves any given exception in this registry's
 	 * collection of suppressed exceptions, up to a limit of 100 exceptions, adding
 	 * them as related causes to an eventual top-level {@link BeanCreationException}.
@@ -451,7 +451,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Register a containment relationship between two beans,
-	 * e.g. between an inner bean and its containing outer bean.
+	 * for example, between an inner bean and its containing outer bean.
 	 * <p>Also registers the containing bean as dependent on the contained bean
 	 * in terms of destruction order.
 	 * @param containedBeanName the name of the contained (inner) bean

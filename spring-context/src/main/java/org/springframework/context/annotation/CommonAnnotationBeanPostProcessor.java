@@ -81,7 +81,7 @@ import org.springframework.util.StringValueResolver;
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
  * that supports common Java annotations out of the box, in particular the common
  * annotations in the {@code jakarta.annotation} package. These common Java
- * annotations are supported in many Jakarta EE technologies (e.g. JSF and JAX-RS).
+ * annotations are supported in many Jakarta EE technologies (for example, JSF and JAX-RS).
  *
  * <p>This post-processor includes support for the {@link jakarta.annotation.PostConstruct}
  * and {@link jakarta.annotation.PreDestroy} annotations - as init annotation

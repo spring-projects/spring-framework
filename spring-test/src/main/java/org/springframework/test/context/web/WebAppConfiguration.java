@@ -60,7 +60,7 @@ public @interface WebAppConfiguration {
 
 	/**
 	 * The resource path to the root directory of the web application.
-	 * <p>A path that does not include a Spring resource prefix (e.g., {@code classpath:},
+	 * <p>A path that does not include a Spring resource prefix (for example, {@code classpath:},
 	 * {@code file:}, etc.) will be interpreted as a file system resource, and a
 	 * path should not end with a slash.
 	 * <p>Defaults to {@code "src/main/webapp"} as a file system resource. Note

@@ -122,7 +122,7 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 		finally {
 			// Process Spring's beforeCompletion early, in order to avoid issues
 			// with strict JTA implementations that issue warnings when doing JDBC
-			// operations after transaction completion (e.g. Connection.getWarnings).
+			// operations after transaction completion (for example, Connection.getWarnings).
 			this.beforeCompletionCalled = true;
 			this.springSynchronization.beforeCompletion();
 		}

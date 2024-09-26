@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Adding this annotation to an {@code @Configuration} class imports the Spring MVC
- * configuration from {@link WebMvcConfigurationSupport}, e.g.:
+ * configuration from {@link WebMvcConfigurationSupport}, for example:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Import;
  * </pre>
  *
  * <p>To customize the imported configuration, implement the interface
- * {@link WebMvcConfigurer} and override individual methods, e.g.:
+ * {@link WebMvcConfigurer} and override individual methods, for example:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -67,7 +67,7 @@ import org.springframework.context.annotation.Import;
  * <p>If {@link WebMvcConfigurer} does not expose some more advanced setting that
  * needs to be configured, consider removing the {@code @EnableWebMvc}
  * annotation and extending directly from {@link WebMvcConfigurationSupport}
- * or {@link DelegatingWebMvcConfiguration}, e.g.:
+ * or {@link DelegatingWebMvcConfiguration}, for example:
  *
  * <pre class="code">
  * &#064;Configuration

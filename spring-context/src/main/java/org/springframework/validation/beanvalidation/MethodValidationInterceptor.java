@@ -59,7 +59,7 @@ import org.springframework.validation.method.ParameterValidationResult;
  * their parameters and/or on their return value (in the latter case specified at
  * the method level, typically as inline annotation).
  *
- * <p>E.g.: {@code public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)}
+ * <p>For example: {@code public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)}
  *
  * <p>In case of validation errors, the interceptor can raise
  * {@link ConstraintViolationException}, or adapt the violations to

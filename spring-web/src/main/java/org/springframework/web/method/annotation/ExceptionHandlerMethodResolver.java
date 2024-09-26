@@ -202,7 +202,7 @@ public class ExceptionHandlerMethodResolver {
 
 	/**
 	 * Find a {@link Method} to handle the given exception type. This can be
-	 * useful if an {@link Exception} instance is not available (e.g. for tools).
+	 * useful if an {@link Exception} instance is not available (for example, for tools).
 	 * <p>Uses {@link ExceptionDepthComparator} if more than one match is found.
 	 * @param exceptionType the exception type
 	 * @return a Method to handle the exception, or {@code null} if none found
@@ -215,7 +215,7 @@ public class ExceptionHandlerMethodResolver {
 
 	/**
 	 * Find a {@link Method} to handle the given exception type and media type.
-	 * This can be useful if an {@link Exception} instance is not available (e.g. for tools).
+	 * This can be useful if an {@link Exception} instance is not available (for example, for tools).
 	 * @param exceptionType the exception type
 	 * @param mediaType the media type requested by the HTTP client
 	 * @return a Method to handle the exception, or {@code null} if none found

@@ -159,7 +159,7 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	The resource location of an SQL script to execute. Can be a single script location
-	or a pattern (e.g. classpath:/com/foo/sql/*-data.sql).
+	or a pattern (for example, classpath:/com/foo/sql/*-data.sql).
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>

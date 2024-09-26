@@ -41,7 +41,7 @@ import org.springframework.web.util.WebUtils;
  * attribute as well; alternatively, you may specify a default time zone.
  *
  * <p>Custom controllers can override the user's locale and time zone by calling
- * {@code #setLocale(Context)} on the resolver, e.g. responding to a locale change
+ * {@code #setLocale(Context)} on the resolver, for example, responding to a locale change
  * request. As a more convenient alternative, consider using
  * {@link org.springframework.web.servlet.support.RequestContext#changeLocale}.
  *

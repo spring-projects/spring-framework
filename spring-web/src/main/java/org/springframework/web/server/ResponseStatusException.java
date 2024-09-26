@@ -109,7 +109,7 @@ public class ResponseStatusException extends ErrorResponseException {
 	}
 
 	/**
-	 * Return headers to add to the error response, e.g. "Allow", "Accept", etc.
+	 * Return headers to add to the error response, for example, "Allow", "Accept", etc.
 	 * <p>By default, delegates to {@link #getResponseHeaders()} for backwards
 	 * compatibility.
 	 */
@@ -120,7 +120,7 @@ public class ResponseStatusException extends ErrorResponseException {
 
 	/**
 	 * Return headers associated with the exception that should be added to the
-	 * error response, e.g. "Allow", "Accept", etc.
+	 * error response, for example, "Allow", "Accept", etc.
 	 * <p>The default implementation in this class returns empty headers.
 	 * @since 5.1.13
 	 * @deprecated as of 6.0 in favor of {@link #getHeaders()}

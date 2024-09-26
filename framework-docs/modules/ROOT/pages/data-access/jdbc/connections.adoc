@@ -177,7 +177,7 @@ corresponding `DataSource` proxy class for the target connection pool: see
 This is particularly useful for potentially empty transactions without actual statement
 execution (never fetching an actual resource in such a scenario), and also in front of
 a routing `DataSource` which means to take the transaction-synchronized read-only flag
-and/or isolation level into account (e.g. `IsolationLevelDataSourceRouter`).
+and/or isolation level into account (for example, `IsolationLevelDataSourceRouter`).
 
 `LazyConnectionDataSourceProxy` also provides special support for a read-only connection
 pool to use during a read-only transaction, avoiding the overhead of switching the JDBC

@@ -37,7 +37,7 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>For an extended response, an application can also create a subclass with
  * additional properties. Subclasses can use the protected copy constructor to
- * re-create an existing {@code ProblemDetail} instance as the subclass, e.g.
+ * re-create an existing {@code ProblemDetail} instance as the subclass, for example,
  * from an {@code @ControllerAdvice} such as
  * {@link org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler} or
  * {@link org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler}.

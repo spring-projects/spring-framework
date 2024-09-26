@@ -376,7 +376,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
-	 * Handle the case when an unrecoverable binding exception occurs - e.g.
+	 * Handle the case when an unrecoverable binding exception occurs - for example,
 	 * required header, required cookie.
 	 * <p>The default implementation returns {@code null} in which case the
 	 * exception is handled in {@link #handleErrorResponse}.
@@ -641,7 +641,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 	/**
 	 * Handle the case where method validation failed on a component that is
-	 * not a web controller, e.g. on some underlying service.
+	 * not a web controller, for example, on some underlying service.
 	 * <p>The default implementation sends an HTTP 500 error, and returns an empty {@code ModelAndView}.
 	 * Alternatively, a fallback view could be chosen, or the HttpMessageNotWritableException could
 	 * be rethrown as-is.

@@ -413,7 +413,7 @@ public abstract class ConnectionFactoryUtils {
 
 	/**
 	 * Callback for resource cleanup at the end of a non-native JMS transaction
-	 * (e.g. when participating in a JtaTransactionManager transaction).
+	 * (for example, when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
 	private static class JmsResourceSynchronization extends ResourceHolderSynchronization<JmsResourceHolder, Object> {

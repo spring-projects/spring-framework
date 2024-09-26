@@ -28,9 +28,9 @@ import org.springframework.lang.Nullable;
  * Stores and exposes information about data-binding and validation errors
  * for a specific object.
  *
- * <p>Field names are typically properties of the target object (e.g. "name"
+ * <p>Field names are typically properties of the target object (for example, "name"
  * when binding to a customer object). Implementations may also support nested
- * fields in case of nested objects (e.g. "address.street"), in conjunction
+ * fields in case of nested objects (for example, "address.street"), in conjunction
  * with subtree navigation via {@link #setNestedPath}: for example, an
  * {@code AddressValidator} may validate "address", not being aware that this
  * is a nested object of a top-level customer object.
@@ -69,7 +69,7 @@ public interface Errors {
 	 * <p>The default implementation throws {@code UnsupportedOperationException}
 	 * since not all {@code Errors} implementations support nested paths.
 	 * @param nestedPath nested path within this object,
-	 * e.g. "address" (defaults to "", {@code null} is also acceptable).
+	 * for example, "address" (defaults to "", {@code null} is also acceptable).
 	 * Can end with a dot: both "address" and "address." are valid.
 	 * @see #getNestedPath()
 	 */
@@ -218,7 +218,7 @@ public interface Errors {
 	/**
 	 * Throw the mapped exception with a message summarizing the recorded errors.
 	 * @param messageToException a function mapping the message to the exception,
-	 * e.g. {@code IllegalArgumentException::new} or {@code IllegalStateException::new}
+	 * for example, {@code IllegalArgumentException::new} or {@code IllegalStateException::new}
 	 * @param <T> the exception type to be thrown
 	 * @since 6.1
 	 * @see #toString()
@@ -392,7 +392,7 @@ public interface Errors {
 
 	/**
 	 * Return a summary of the recorded errors,
-	 * e.g. for inclusion in an exception message.
+	 * for example, for inclusion in an exception message.
 	 * @see #failOnError(Function)
 	 */
 	@Override

@@ -170,7 +170,7 @@ A `HandlerAdapter` may expose its exception handling mechanism as a
 
 A `HandlerAdapter` may also choose to implement `DispatchExceptionHandler`. In that case
 `DispatcherHandler` will apply it to exceptions that arise before a handler is mapped,
-e.g. during handler mapping, or earlier, e.g. in a `WebFilter`.
+for example, during handler mapping, or earlier, for example, in a `WebFilter`.
 
 See also xref:web/webflux/controller/ann-exceptions.adoc[Exceptions] in the "`Annotated Controller`" section or
 xref:web/webflux/reactive-spring.adoc#webflux-exception-handler[Exceptions] in the WebHandler API section.

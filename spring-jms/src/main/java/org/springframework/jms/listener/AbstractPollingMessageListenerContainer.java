@@ -115,7 +115,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * Simply switch the {@link #setSessionTransacted "sessionTransacted"} flag
 	 * to "true" in order to use a locally transacted JMS Session for the entire
 	 * receive processing, including any Session operations performed by a
-	 * {@link SessionAwareMessageListener} (e.g. sending a response message). This
+	 * {@link SessionAwareMessageListener} (for example, sending a response message). This
 	 * allows for fully synchronized Spring transactions based on local JMS
 	 * transactions, similar to what
 	 * {@link org.springframework.jms.connection.JmsTransactionManager} provides. Check
@@ -259,7 +259,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			catch (RuntimeException ex) {
 				// Typically a late persistence exception from a listener-used resource
 				// -> handle it as listener exception, not as an infrastructure problem.
-				// E.g. a database locking failure should not lead to listener shutdown.
+				// For example, a database locking failure should not lead to listener shutdown.
 				handleListenerException(ex);
 			}
 			return messageReceived;

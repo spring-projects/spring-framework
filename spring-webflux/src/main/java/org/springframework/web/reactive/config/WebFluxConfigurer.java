@@ -149,7 +149,7 @@ public interface WebFluxConfigurer {
 	/**
 	 * Configure view resolution for rendering responses with a view and a model,
 	 * where the view is typically an HTML template but could also be based on
-	 * an HTTP message writer (e.g. JSON, XML).
+	 * an HTTP message writer (for example, JSON, XML).
 	 * <p>The configured view resolvers will be used for both annotated
 	 * controllers and functional endpoints.
 	 */

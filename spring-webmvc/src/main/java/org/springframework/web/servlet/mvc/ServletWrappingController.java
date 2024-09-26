@@ -48,7 +48,7 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * <p><b>Example:</b> a DispatcherServlet XML context, forwarding "*.do" to the Struts
  * ActionServlet wrapped by a ServletWrappingController. All such requests will go
- * through the configured HandlerInterceptor chain (e.g. an OpenSessionInViewInterceptor).
+ * through the configured HandlerInterceptor chain (for example, an OpenSessionInViewInterceptor).
  * From the Struts point of view, everything will work as usual.
  *
  * <pre class="code">

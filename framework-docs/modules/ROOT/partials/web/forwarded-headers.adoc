@@ -38,7 +38,7 @@ to inform the server that the original port was `443`.
 ==== X-Forwarded-Proto
 
 While not standard, https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto[`X-Forwarded-Proto: (https|http)`]
-is a de-facto standard header that is used to communicate the original protocol (e.g. https / https)
+is a de-facto standard header that is used to communicate the original protocol (for example, https / https)
 to a downstream server. For example, if a request of `https://example.com/resource` is sent to
 a proxy which forwards the request to `http://localhost:8080/resource`, then a header of
 `X-Forwarded-Proto: https` can be sent to inform the server that the original protocol was `https`.
@@ -48,7 +48,7 @@ a proxy which forwards the request to `http://localhost:8080/resource`, then a h
 ==== X-Forwarded-Ssl
 
 While not standard, `X-Forwarded-Ssl: (on|off)` is a de-facto standard header that is used to communicate the
-original protocol (e.g. https / https) to a downstream server. For example, if a request of
+original protocol (for example, https / https) to a downstream server. For example, if a request of
 `https://example.com/resource` is sent to a proxy which forwards the request to
 `http://localhost:8080/resource`, then a header of `X-Forwarded-Ssl: on` to inform the server that the
 original protocol was `https`.
@@ -103,7 +103,7 @@ applications on the same server. However, this should not be visible in URL path
 the public API where applications may use different subdomains that provides benefits
 such as:
 
-* Added security, e.g. same origin policy
+* Added security, for example, same origin policy
 * Independent scaling of applications (different domain points to different IP address)
 ====
 

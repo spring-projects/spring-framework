@@ -52,7 +52,7 @@ import org.springframework.util.ObjectUtils;
  * A JMS ConnectionFactory adapter that returns the same Connection
  * from all {@link #createConnection()} calls, and ignores calls to
  * {@link jakarta.jms.Connection#close()}. According to the JMS Connection
- * model, this is perfectly thread-safe (in contrast to e.g. JDBC). The
+ * model, this is perfectly thread-safe (in contrast to, for example, JDBC). The
  * shared Connection can be automatically recovered in case of an Exception.
  *
  * <p>You can either pass in a specific JMS Connection directly or let this

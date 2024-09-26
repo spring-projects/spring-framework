@@ -175,7 +175,7 @@ a context-wide `LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation
 `context:load-time-weaver` XML element. Such a global weaver is automatically picked up
 by all JPA `LocalContainerEntityManagerFactoryBean` instances. The following example
 shows the preferred way of setting up a load-time weaver, delivering auto-detection
-of the platform (e.g. Tomcat's weaving-capable class loader or Spring's JVM agent)
+of the platform (for example, Tomcat's weaving-capable class loader or Spring's JVM agent)
 and automatic propagation of the weaver to all weaver-aware beans:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -469,7 +469,7 @@ a non-invasiveness perspective and can feel more natural to JPA developers.
 What about providing JPA resources via constructors and other `@Autowired` injection points?
 
 `EntityManagerFactory` can easily be injected via constructors and `@Autowired` fields/methods
-as long as the target is defined as a bean, e.g. via `LocalContainerEntityManagerFactoryBean`.
+as long as the target is defined as a bean, for example, via `LocalContainerEntityManagerFactoryBean`.
 The injection point matches the original `EntityManagerFactory` definition by type as-is.
 
 However, an `@PersistenceContext`-style shared `EntityManager` reference is not available for

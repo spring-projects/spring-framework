@@ -52,7 +52,7 @@ import org.springframework.util.function.SingletonSupplier;
  * <p>Provides support for <i>executor qualification</i> on a method-by-method basis.
  * {@code AsyncExecutionAspectSupport} objects must be constructed with a default {@code
  * Executor}, but each individual method may further qualify a specific {@code Executor}
- * bean to be used when executing it, e.g. through an annotation attribute.
+ * bean to be used when executing it, for example, through an annotation attribute.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

@@ -93,7 +93,7 @@ class ControlFlowPointcutTests {
 
 	/**
 	 * Check that we can use a cflow pointcut in conjunction with
-	 * a static pointcut: e.g. all setter methods that are invoked under
+	 * a static pointcut: for example, all setter methods that are invoked under
 	 * a particular class. This greatly reduces the number of calls
 	 * to the cflow pointcut, meaning that it's not so prohibitively
 	 * expensive.

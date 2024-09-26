@@ -688,7 +688,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		// Save original default locale.
 		final Locale defaultLocale = Locale.getDefault();
 		// Use a locale that doesn't result in the generation of HTML entities
-		// (e.g., not German, where \u00e4 becomes &auml;)
+		// (for example, not German, where \u00e4 becomes &auml;)
 		Locale.setDefault(Locale.US);
 
 		try {

@@ -44,7 +44,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	/**
 	 * Name of the header that can be set to provide further information
-	 * (e.g. a {@code MethodParameter} instance) about the origin of the
+	 * (for example, a {@code MethodParameter} instance) about the origin of the
 	 * payload, to be taken into account as a conversion hint.
 	 * @since 4.2
 	 */

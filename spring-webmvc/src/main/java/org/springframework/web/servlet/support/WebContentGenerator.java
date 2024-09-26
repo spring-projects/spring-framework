@@ -238,7 +238,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * Configure one or more request header names (e.g. "Accept-Language") to
+	 * Configure one or more request header names (for example, "Accept-Language") to
 	 * add to the "Vary" response header to inform clients that the response is
 	 * subject to content negotiation and variances based on the value of the
 	 * given request headers. The configured request header names are added only

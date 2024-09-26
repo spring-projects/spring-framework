@@ -287,7 +287,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * Find the patterns matching the given lookup path. Invoking this method should
 	 * yield results equivalent to those of calling {@link #getMatchingCondition}.
 	 * This method is provided as an alternative to be used if no request is available
-	 * (e.g. introspection, tooling, etc).
+	 * (for example, introspection, tooling, etc).
 	 * @param lookupPath the lookup path to match to existing patterns
 	 * @return a collection of matching patterns sorted with the closest match at the top
 	 */

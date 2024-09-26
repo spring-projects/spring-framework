@@ -433,7 +433,7 @@ If no request factory is specified when the `RestClient` was built, it will use 
 Otherwise, if the `java.net.http` module is loaded, it will use Java's `HttpClient`.
 Finally, it will resort to the simple default.
 
-TIP: Note that the `SimpleClientHttpRequestFactory` may raise an exception when accessing the status of a response that represents an error (e.g. 401).
+TIP: Note that the `SimpleClientHttpRequestFactory` may raise an exception when accessing the status of a response that represents an error (for example, 401).
 If this is an issue, use any of the alternative request factories.
 
 [[rest-webclient]]
@@ -966,7 +966,7 @@ method parameters:
 
 | `@RequestPart`
 | Add a request part, which may be a String (form field), `Resource` (file part),
-  Object (entity to be encoded, e.g. as JSON), `HttpEntity` (part content and headers),
+  Object (entity to be encoded, for example, as JSON), `HttpEntity` (part content and headers),
   a Spring `Part`, or Reactive Streams `Publisher` of any of the above.
 
 | `MultipartFile`

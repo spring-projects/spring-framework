@@ -374,7 +374,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * <p><b>NOTE: The standard JDK HTTP library does not support HTTP PATCH.
-	 * You need to use e.g. the Apache HttpComponents request factory.</b>
+	 * You need to use, for example, the Apache HttpComponents request factory.</b>
 	 * @param url the URL
 	 * @param request the object to be PATCHed (may be {@code null})
 	 * @param responseType the type of the return value
@@ -396,7 +396,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * <p><b>NOTE: The standard JDK HTTP library does not support HTTP PATCH.
-	 * You need to use e.g. the Apache HttpComponents request factory.</b>
+	 * You need to use, for example, the Apache HttpComponents request factory.</b>
 	 * @param url the URL
 	 * @param request the object to be PATCHed (may be {@code null})
 	 * @param responseType the type of the return value
@@ -417,7 +417,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * <p><b>NOTE: The standard JDK HTTP library does not support HTTP PATCH.
-	 * You need to use e.g. the Apache HttpComponents request factory.</b>
+	 * You need to use, for example, the Apache HttpComponents request factory.</b>
 	 * @param url the URL
 	 * @param request the object to be PATCHed (may be {@code null})
 	 * @param responseType the type of the return value

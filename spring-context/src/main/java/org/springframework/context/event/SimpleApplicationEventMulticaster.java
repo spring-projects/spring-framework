@@ -86,7 +86,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * unless the TaskExecutor explicitly supports this.
 	 * <p>{@link ApplicationListener} instances which declare no support for asynchronous
 	 * execution ({@link ApplicationListener#supportsAsyncExecution()} always run within
-	 * the original thread which published the event, e.g. the transaction-synchronized
+	 * the original thread which published the event, for example, the transaction-synchronized
 	 * {@link org.springframework.transaction.event.TransactionalApplicationListener}.
 	 * @since 2.0
 	 * @see org.springframework.core.task.SyncTaskExecutor
@@ -117,7 +117,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * and logs exceptions (a la
 	 * {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_SUPPRESS_ERROR_HANDLER})
 	 * or an implementation that logs exceptions while nevertheless propagating them
-	 * (e.g. {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_PROPAGATE_ERROR_HANDLER}).
+	 * (for example, {@link org.springframework.scheduling.support.TaskUtils#LOG_AND_PROPAGATE_ERROR_HANDLER}).
 	 * @since 4.1
 	 */
 	public void setErrorHandler(@Nullable ErrorHandler errorHandler) {

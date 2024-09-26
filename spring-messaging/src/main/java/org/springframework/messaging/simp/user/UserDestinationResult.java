@@ -82,7 +82,7 @@ public class UserDestinationResult {
 
 	/**
 	 * The target destinations that the source destination was translated to,
-	 * one per active user session, e.g. "/queue/position-updates-useri9oqdfzo".
+	 * one per active user session, for example, "/queue/position-updates-useri9oqdfzo".
 	 * @return the target destinations, never {@code null} but possibly an empty
 	 * set if there are no active sessions for the user.
 	 */
@@ -91,7 +91,7 @@ public class UserDestinationResult {
 	}
 
 	/**
-	 * The user destination in the form expected when a client subscribes, e.g.
+	 * The user destination in the form expected when a client subscribes, for example,
 	 * "/user/queue/position-updates".
 	 * @return the subscribe form of the "user" destination, never {@code null}.
 	 */

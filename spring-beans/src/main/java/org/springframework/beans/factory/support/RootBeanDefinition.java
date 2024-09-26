@@ -37,18 +37,18 @@ import org.springframework.util.Assert;
 /**
  * A root bean definition represents the <b>merged bean definition at runtime</b>
  * that backs a specific bean in a Spring BeanFactory. It might have been created
- * from multiple original bean definitions that inherit from each other, e.g.
+ * from multiple original bean definitions that inherit from each other, for example,
  * {@link GenericBeanDefinition GenericBeanDefinitions} from XML declarations.
  * A root bean definition is essentially the 'unified' bean definition view at runtime.
  *
  * <p>Root bean definitions may also be used for <b>registering individual bean
  * definitions in the configuration phase.</b> This is particularly applicable for
- * programmatic definitions derived from factory methods (e.g. {@code @Bean} methods)
- * and instance suppliers (e.g. lambda expressions) which come with extra type metadata
+ * programmatic definitions derived from factory methods (for example, {@code @Bean} methods)
+ * and instance suppliers (for example, lambda expressions) which come with extra type metadata
  * (see {@link #setTargetType(ResolvableType)}/{@link #setResolvedFactoryMethod(Method)}).
  *
  * <p>Note: The preferred choice for bean definitions derived from declarative sources
- * (e.g. XML definitions) is the flexible {@link GenericBeanDefinition} variant.
+ * (for example, XML definitions) is the flexible {@link GenericBeanDefinition} variant.
  * GenericBeanDefinition comes with the advantage that it allows for dynamically
  * defining parent dependencies, not 'hard-coding' the role as a root bean definition,
  * even supporting parent relationship changes in the bean post-processor phase.

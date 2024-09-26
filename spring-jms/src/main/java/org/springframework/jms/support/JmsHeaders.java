@@ -28,7 +28,7 @@ public interface JmsHeaders {
 
 	/**
 	 * Prefix used for JMS API related headers in order to distinguish from
-	 * user-defined headers and other internal headers (e.g. correlationId).
+	 * user-defined headers and other internal headers (for example, correlationId).
 	 * @see SimpleJmsHeaderMapper
 	 */
 	String PREFIX = "jms_";

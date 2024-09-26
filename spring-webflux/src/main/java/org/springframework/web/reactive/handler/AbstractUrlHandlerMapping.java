@@ -38,8 +38,8 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * Abstract base class for URL-mapped
  * {@link org.springframework.web.reactive.HandlerMapping} implementations.
  *
- * <p>Supports direct matches, e.g. a registered "/test" matches "/test", and
- * various path pattern matches, e.g. a registered "/t*" pattern matches
+ * <p>Supports direct matches, for example, a registered "/test" matches "/test", and
+ * various path pattern matches, for example, a registered "/t*" pattern matches
  * both "/test" and "/team", "/test/*" matches all paths under "/test",
  * "/test/**" matches all paths below "/test". For details, see the
  * {@link org.springframework.web.util.pattern.PathPattern} javadoc.
@@ -119,8 +119,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Look up a handler instance for the given URL lookup path.
-	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
-	 * and various path pattern matches, e.g. a registered "/t*" matches
+	 * <p>Supports direct matches, for example, a registered "/test" matches "/test",
+	 * and various path pattern matches, for example, a registered "/t*" matches
 	 * both "/test" and "/team". For details, see the PathPattern class.
 	 * @param lookupPath the URL the handler is mapped to
 	 * @param exchange the current exchange

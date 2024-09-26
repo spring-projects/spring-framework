@@ -91,7 +91,7 @@ public class SpringObjenesis implements Objenesis {
 	 * @param clazz the class to create an instance of
 	 * @param useCache whether to use the instantiator cache
 	 * (typically {@code true} but can be set to {@code false}
-	 * e.g. for reloadable classes)
+	 * for example, for reloadable classes)
 	 * @return the new instance (never {@code null})
 	 * @throws ObjenesisException if instance creation failed
 	 */

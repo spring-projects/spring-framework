@@ -58,7 +58,7 @@ public final class CloseStatus implements Serializable {
 
 	/**
 	 * "1003 indicates that an endpoint is terminating the connection because it has
-	 * received a type of data it cannot accept (e.g., an endpoint that understands only
+	 * received a type of data it cannot accept (for example, an endpoint that understands only
 	 * text data MAY send this if it receives a binary message)."
 	 */
 	public static final CloseStatus NOT_ACCEPTABLE = new CloseStatus(1003);
@@ -76,7 +76,7 @@ public final class CloseStatus implements Serializable {
 	/**
 	 * "1006 is a reserved value and MUST NOT be set as a status code in a Close control
 	 * frame by an endpoint. It is designated for use in applications expecting a status
-	 * code to indicate that the connection was closed abnormally, e.g., without sending
+	 * code to indicate that the connection was closed abnormally, for example, without sending
 	 * or receiving a Close control frame."
 	 */
 	public static final CloseStatus NO_CLOSE_FRAME = new CloseStatus(1006);
@@ -84,14 +84,14 @@ public final class CloseStatus implements Serializable {
 	/**
 	 * "1007 indicates that an endpoint is terminating the connection because it has
 	 * received data within a message that was not consistent with the type of the message
-	 * (e.g., non-UTF-8 [RFC3629] data within a text message)."
+	 * (for example, non-UTF-8 [RFC3629] data within a text message)."
 	 */
 	public static final CloseStatus BAD_DATA = new CloseStatus(1007);
 
 	/**
 	 * "1008 indicates that an endpoint is terminating the connection because it has
 	 * received a message that violates its policy. This is a generic status code that can
-	 * be returned when there is no other more suitable status code (e.g., 1003 or 1009)
+	 * be returned when there is no other more suitable status code (for example, 1003 or 1009)
 	 * or if there is a need to hide specific details about the policy."
 	 */
 	public static final CloseStatus POLICY_VIOLATION = new CloseStatus(1008);
@@ -135,14 +135,14 @@ public final class CloseStatus implements Serializable {
 	 * "1015 is a reserved value and MUST NOT be set as a status code in a Close control
 	 * frame by an endpoint. It is designated for use in applications expecting a status
 	 * code to indicate that the connection was closed due to a failure to perform a TLS
-	 * handshake (e.g., the server certificate can't be verified)."
+	 * handshake (for example, the server certificate can't be verified)."
 	 */
 	public static final CloseStatus TLS_HANDSHAKE_FAILURE = new CloseStatus(1015);
 
 	/**
 	 * A status code for use within the framework that indicates a session has
-	 * become unreliable (e.g. timed out while sending a message) and extra
-	 * care should be exercised, e.g. avoid sending any further data to the
+	 * become unreliable (for example, timed out while sending a message) and extra
+	 * care should be exercised, for example, avoid sending any further data to the
 	 * client that may be done during normal shutdown.
 	 * @since 4.0.3
 	 */

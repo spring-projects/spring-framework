@@ -93,9 +93,9 @@ supported for all return values.
   `ResponseEntity`. See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-http-streaming[HTTP Streaming].
 
 | Reactor and other reactive types registered via `ReactiveAdapterRegistry`
-| A single value type, e.g. `Mono`, is comparable to returning `DeferredResult`.
-  A multi-value type, e.g. `Flux`, may be treated as a stream depending on the requested
-  media type, e.g. "text/event-stream", "application/json+stream", or otherwise is
+| A single value type, for example, `Mono`, is comparable to returning `DeferredResult`.
+  A multi-value type, for example, `Flux`, may be treated as a stream depending on the requested
+  media type, for example, "text/event-stream", "application/json+stream", or otherwise is
   collected to a List and rendered as a single value. See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and
   xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types].
 

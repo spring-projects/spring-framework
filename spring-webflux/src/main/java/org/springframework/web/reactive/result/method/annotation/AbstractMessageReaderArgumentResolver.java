@@ -130,7 +130,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 	 * Read the body from a method argument with {@link HttpMessageReader}.
 	 * @param bodyParam represents the element type for the body
 	 * @param actualParam the actual method argument type; possibly different
-	 * from {@code bodyParam}, e.g. for an {@code HttpEntity} argument
+	 * from {@code bodyParam}, for example, for an {@code HttpEntity} argument
 	 * @param isBodyRequired true if the body is required
 	 * @param bindingContext the binding context to use
 	 * @param exchange the current exchange

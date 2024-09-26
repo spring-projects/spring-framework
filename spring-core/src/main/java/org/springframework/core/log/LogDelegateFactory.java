@@ -46,7 +46,7 @@ public final class LogDelegateFactory {
 	 * secondary logger if logging for the primary logger is not enabled.
 	 * <p>This may be used for fallback logging from lower-level packages that
 	 * logically should log together with some higher-level package but the two
-	 * don't happen to share a suitable parent package (e.g. logging for the web
+	 * don't happen to share a suitable parent package (for example, logging for the web
 	 * and lower-level http and codec packages). For such cases the primary
 	 * (class-based) logger can be wrapped with a shared fallback logger.
 	 * @param primaryLogger primary logger to try first

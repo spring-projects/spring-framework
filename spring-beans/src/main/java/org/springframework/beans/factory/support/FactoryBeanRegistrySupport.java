@@ -122,7 +122,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			if (object == null) {
 				object = doGetObjectFromFactoryBean(factory, beanName);
 				// Only post-process and store if not put there already during getObject() call above
-				// (e.g. because of circular reference processing triggered by custom getBean calls)
+				// (for example, because of circular reference processing triggered by custom getBean calls)
 				Object alreadyThere = this.factoryBeanObjectCache.get(beanName);
 				if (alreadyThere != null) {
 					object = alreadyThere;

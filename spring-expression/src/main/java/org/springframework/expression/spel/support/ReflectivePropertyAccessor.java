@@ -382,7 +382,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
 					"is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
 			if (method == null) {
-				// Record-style plain accessor method, e.g. name()
+				// Record-style plain accessor method, for example, name()
 				method = findMethodForProperty(new String[] {propertyName},
 						"", clazz, mustBeStatic, 0, ANY_TYPES);
 			}

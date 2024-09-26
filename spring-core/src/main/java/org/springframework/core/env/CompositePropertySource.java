@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 /**
  * Composite {@link PropertySource} implementation that iterates over a set of
  * {@link PropertySource} instances. Necessary in cases where multiple property sources
- * share the same name, e.g. when multiple values are supplied to {@code @PropertySource}.
+ * share the same name, for example, when multiple values are supplied to {@code @PropertySource}.
  *
  * <p>As of Spring 4.1.2, this class extends {@link EnumerablePropertySource} instead
  * of plain {@link PropertySource}, exposing {@link #getPropertyNames()} based on the

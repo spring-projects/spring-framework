@@ -58,7 +58,7 @@ include the version of the jar and can also match against incoming URLs without 
 -- for example, from `/webjars/jquery/jquery.min.js` to `/webjars/jquery/1.2.0/jquery.min.js`.
 
 TIP: The Java configuration based on `ResourceHandlerRegistry` provides further options
-for fine-grained control, e.g. last-modified behavior and optimized resource resolution.
+for fine-grained control, for example, last-modified behavior and optimized resource resolution.
 
 
 

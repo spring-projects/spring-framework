@@ -102,7 +102,7 @@ class ConfigurationClassEnhancer {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Ignoring request to enhance %s as it has " +
 						"already been enhanced. This usually indicates that more than one " +
-						"ConfigurationClassPostProcessor has been registered (e.g. via " +
+						"ConfigurationClassPostProcessor has been registered (for example, via " +
 						"<context:annotation-config>). This is harmless, but you may " +
 						"want check your configuration and remove one CCPP if possible",
 						configClass.getName()));
@@ -164,7 +164,7 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Marker interface to be implemented by all @Configuration CGLIB subclasses.
 	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance}
-	 * through checking to see if candidate classes are already assignable to it, e.g.
+	 * through checking to see if candidate classes are already assignable to it, for example,
 	 * have already been enhanced.
 	 * <p>Also extends {@link BeanFactoryAware}, as all enhanced {@code @Configuration}
 	 * classes require access to the {@link BeanFactory} that created them.

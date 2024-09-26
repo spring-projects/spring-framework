@@ -25,7 +25,7 @@ import org.springframework.lang.Nullable;
  * is not purely a relational concept; integrity constraints such
  * as unique primary keys are required by most database types.
  *
- * <p>Serves as a superclass for more specific exceptions, e.g.
+ * <p>Serves as a superclass for more specific exceptions, for example,
  * {@link DuplicateKeyException}. However, it is generally
  * recommended to handle {@code DataIntegrityViolationException}
  * itself instead of relying on specific exception subclasses.

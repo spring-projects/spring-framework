@@ -69,7 +69,7 @@
 	which will be returned by all calls to getBean with the given id), or
 	"prototype" (independent instance resulting from each call to getBean).
 	Default is "singleton". Further scopes, such as "request" or "session",
-	might be supported by extended bean factories (e.g. in a web environment).
+	might be supported by extended bean factories (for example, in a web environment).
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -110,7 +110,7 @@
 	which will be returned by all calls to getBean with the given id), or
 	"prototype" (independent instance resulting from each call to getBean).
 	Default is "singleton". Further scopes, such as "request" or "session",
-	might be supported by extended bean factories (e.g. in a web environment).
+	might be supported by extended bean factories (for example, in a web environment).
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -151,7 +151,7 @@
 	which will be returned by all calls to getBean with the given id), or
 	"prototype" (independent instance resulting from each call to getBean).
 	Default is "singleton". Further scopes, such as "request" or "session",
-	might be supported by extended bean factories (e.g. in a web environment).
+	might be supported by extended bean factories (for example, in a web environment).
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -209,7 +209,7 @@
 	which will be returned by all calls to getBean with the given id), or
 	"prototype" (independent instance resulting from each call to getBean).
 	Default is "singleton". Further scopes, such as "request" or "session",
-	might be supported by extended bean factories (e.g. in a web environment).
+	might be supported by extended bean factories (for example, in a web environment).
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>

@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Represent a map in an expression, e.g. '{name:'foo',age:12}'
+ * Represent a map in an expression, for example, '{name:'foo',age:12}'.
  *
  * @author Andy Clement
  * @author Sam Brannen

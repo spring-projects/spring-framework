@@ -252,7 +252,7 @@
 	By default, a SimpleAsyncTaskExecutor is used which does not re-use threads and is not recommended for production.
 
 	As of 5.0 this executor is also used when a controller returns a reactive type that does streaming
-	(e.g. "text/event-stream" or "application/x-ndjson") for the blocking writes to the
+	(for example, "text/event-stream" or "application/x-ndjson") for the blocking writes to the
 	"jakarta.servlet.ServletOutputStream".
 
 								]]></xsd:documentation>
@@ -364,7 +364,7 @@
 		<xsd:annotation>
 			<xsd:documentation source="org.springframework.web.servlet.resource.ContentVersionStrategy"><![CDATA[
 	A VersionStrategy that calculates an Hex MD5 hashes from the content of the resource and appends it
-	to the file name, e.g. "styles/main-e36d2e05253c6c7085a91522ce43a0b4.css".
+	to the file name, for example, "styles/main-e36d2e05253c6c7085a91522ce43a0b4.css".
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:attribute name="patterns" type="xsd:string" use="required"/>
@@ -374,7 +374,7 @@
 		<xsd:annotation>
 			<xsd:documentation source="org.springframework.web.servlet.resource.FixedVersionStrategy"><![CDATA[
 	A VersionStrategy that relies on a fixed version applied as a request path prefix,
-	e.g. reduced SHA, version name, release date, etc.
+	for example, reduced SHA, version name, release date, etc.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:attribute name="version" type="xsd:string" use="required"/>
@@ -410,7 +410,7 @@
 		<xsd:annotation>
 			<xsd:documentation source="org.springframework.web.servlet.resource.VersionResourceResolver"><![CDATA[
 	Resolves request paths containing a version string that can be used as part of an HTTP caching strategy
-	in which a resource is cached with a far future date (e.g. 1 year) and cached until the version,
+	in which a resource is cached with a far future date (for example, 1 year) and cached until the version,
 	and therefore the URL, is changed.
 			]]></xsd:documentation>
 		</xsd:annotation>
@@ -655,9 +655,9 @@
 	"/, classpath:/META-INF/public-web-resources/" will allow resources to be served both from the web app
 	root and from any JAR on the classpath  that contains a /META-INF/public-web-resources/ directory,
 	with resources in the web app root taking precedence.
-	For URL-based resources (e.g. files, HTTP URLs, etc) this property supports a special prefix to
+	For URL-based resources (for example, files, HTTP URLs, etc) this property supports a special prefix to
 	indicate the charset associated with the URL so that relative paths appended to it can be encoded
-	correctly, e.g. "[charset=Windows-31J]https://example.org/path".
+	correctly, for example, "[charset=Windows-31J]https://example.org/path".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -1280,7 +1280,7 @@
 						<xsd:attribute name="allowed-origins" type="xsd:string">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-	Comma-separated list of origins to allow, e.g. "https://domain1.com, https://domain2.com".
+	Comma-separated list of origins to allow, for example, "https://domain1.com, https://domain2.com".
 	The special value "*" allows all domains (default).
 
 	For matching pre-flight and actual requests the "Access-Control-Allow-Origin"
@@ -1305,7 +1305,7 @@
 								<xsd:documentation><![CDATA[
 	Alternative to allowed-origins that supports origins declared via patterns.
 	In contrast to allowed-origins which does support the special value "*", this
-	property allows more flexible patterns, e.g. "*.domain1.com". Furthermore it
+	property allows more flexible patterns, for example, "*.domain1.com". Furthermore it
 	always sets the "Access-Control-Allow-Origin" response header to the matched
 	origin and never to "*" nor to any other pattern and therefore can be used in
 	combination with allowCredentials set to true.
@@ -1317,7 +1317,7 @@
 						<xsd:attribute name="allowed-methods" type="xsd:string">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-	Comma-separated list of HTTP methods to allow, e.g. "GET, POST".
+	Comma-separated list of HTTP methods to allow, for example, "GET, POST".
 	The special value "*" allows all method.
 	By default GET, HEAD and POST methods are allowed.
 								]]></xsd:documentation>

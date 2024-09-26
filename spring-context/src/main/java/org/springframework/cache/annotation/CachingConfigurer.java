@@ -47,7 +47,7 @@ public interface CachingConfigurer {
 	 * {@link CacheResolver} directly.
 	 * <p>Implementations must explicitly declare
 	 * {@link org.springframework.context.annotation.Bean @Bean} so that
-	 * the cache manager participates in the lifecycle of the context, e.g.
+	 * the cache manager participates in the lifecycle of the context, for example,
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableCaching
@@ -75,7 +75,7 @@ public interface CachingConfigurer {
 	 * the cache manager is ignored.
 	 * <p>Implementations must explicitly declare
 	 * {@link org.springframework.context.annotation.Bean @Bean} so that
-	 * the cache resolver participates in the lifecycle of the context, e.g.
+	 * the cache resolver participates in the lifecycle of the context, for example,
 	 * <pre class="code">
 	 * &#064;Configuration
 	 * &#064;EnableCaching

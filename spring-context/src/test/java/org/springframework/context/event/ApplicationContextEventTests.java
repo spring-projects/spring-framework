@@ -281,7 +281,7 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 
 	/**
 	 * Regression test for <a href="https://github.com/spring-projects/spring-framework/issues/28283">issue 28283</a>,
-	 * where event listeners proxied due to e.g.
+	 * where event listeners proxied due to, for example,
 	 * <ul>
 	 * <li>{@code @Transactional} annotations in their methods or</li>
 	 * <li>being targeted by aspects</li>

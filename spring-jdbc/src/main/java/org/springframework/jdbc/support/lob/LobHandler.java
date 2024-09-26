@@ -37,7 +37,7 @@ import org.springframework.lang.Nullable;
  * which by default delegates to JDBC's direct accessor methods, avoiding the
  * {@code java.sql.Blob} and {@code java.sql.Clob} API completely.
  * {@link DefaultLobHandler} can also be configured to access LOBs using
- * {@code PreparedStatement.setBlob/setClob} (e.g. for PostgreSQL), through
+ * {@code PreparedStatement.setBlob/setClob} (for example, for PostgreSQL), through
  * setting the {@link DefaultLobHandler#setWrapAsLob "wrapAsLob"} property.
  *
  * <p>Of course, you need to declare different field types for each database.

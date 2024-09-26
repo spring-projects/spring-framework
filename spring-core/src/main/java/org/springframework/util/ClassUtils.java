@@ -267,9 +267,9 @@ public abstract class ClassUtils {
 
 	/**
 	 * Replacement for {@code Class.forName()} that also returns Class instances
-	 * for primitives (e.g. "int") and array class names (e.g. "String[]").
+	 * for primitives (for example, "int") and array class names (for example, "String[]").
 	 * Furthermore, it is also capable of resolving nested class names in Java source
-	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
+	 * style (for example, "java.lang.Thread.State" instead of "java.lang.Thread$State").
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
 	 * (can be {@code null}, which indicates the default class loader)
@@ -1101,7 +1101,7 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine the name of the class file, relative to the containing
-	 * package: e.g. "String.class"
+	 * package: for example, "String.class".
 	 * @param clazz the class
 	 * @return the file name of the ".class" file
 	 */
@@ -1114,7 +1114,7 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine the name of the package of the given class,
-	 * e.g. "java.lang" for the {@code java.lang.String} class.
+	 * for example, "java.lang" for the {@code java.lang.String} class.
 	 * @param clazz the class
 	 * @return the package name, or the empty String if the class
 	 * is defined in the default package
@@ -1126,7 +1126,7 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine the name of the package of the given fully-qualified class name,
-	 * e.g. "java.lang" for the {@code java.lang.String} class name.
+	 * for example, "java.lang" for the {@code java.lang.String} class name.
 	 * @param fqClassName the fully-qualified class name
 	 * @return the package name, or the empty String if the class
 	 * is defined in the default package
@@ -1452,7 +1452,7 @@ public abstract class ClassUtils {
 		if (result == null && targetClass != null) {
 			// No interface method found yet -> try given target class (possibly a subclass of the
 			// declaring class, late-binding a base class method to a subclass-declared interface:
-			// see e.g. HashMap.HashIterator.hasNext)
+			// see, for example, HashMap.HashIterator.hasNext)
 			result = findInterfaceMethodIfPossible(
 					methodName, parameterTypes, targetClass, declaringClass, requirePublicInterface);
 		}

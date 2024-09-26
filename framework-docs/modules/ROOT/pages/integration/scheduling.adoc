@@ -483,7 +483,7 @@ seconds:
 ====
 When destroying the annotated bean or closing the application context, Spring Framework cancels
 scheduled tasks, which includes the next scheduled subscription to the `Publisher` as well
-as any past subscription that is still currently active (e.g. for long-running publishers
+as any past subscription that is still currently active (for example, for long-running publishers
 or even infinite publishers).
 ====
 

@@ -92,7 +92,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Set the content type for this view.
 	 * Default is "text/html;charset=ISO-8859-1".
 	 * <p>May be ignored by subclasses if the view itself is assumed
-	 * to set the content type, e.g. in case of JSPs.
+	 * to set the content type, for example, in case of JSPs.
 	 */
 	public void setContentType(@Nullable String contentType) {
 		this.contentType = contentType;

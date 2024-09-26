@@ -88,7 +88,7 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 	 * specification, only kicking in for "multipart/form-data" requests.
 	 * <p>Default is "false", trying to process any request with a "multipart/"
 	 * content type as far as the underlying Servlet container supports it
-	 * (which works on e.g. Tomcat but not on Jetty). For consistent portability
+	 * (which works on, for example, Tomcat but not on Jetty). For consistent portability
 	 * and in particular for consistent custom handling of non-form multipart
 	 * request types outside of Spring's {@link MultipartResolver} mechanism,
 	 * switch this flag to "true": Only "multipart/form-data" requests will be
