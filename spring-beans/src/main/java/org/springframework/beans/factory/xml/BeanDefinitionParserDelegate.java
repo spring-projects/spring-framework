@@ -890,7 +890,7 @@ public class BeanDefinitionParserDelegate {
 						qualifier.addMetadataAttribute(attribute);
 					}
 					else {
-						error("Qualifier 'attribute' tag must have a 'name' and 'value'", attributeEle);
+						error("Qualifier 'attribute' tag must have a 'key' and 'value'", attributeEle);
 						return;
 					}
 				}
