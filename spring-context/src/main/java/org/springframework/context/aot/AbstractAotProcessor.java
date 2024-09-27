@@ -47,8 +47,7 @@ import org.springframework.util.FileSystemUtils;
 public abstract class AbstractAotProcessor<T> {
 
 	/**
-	 * The name of a system property that is made available when the processor
-	 * runs.
+	 * The name of a system property that is made available when the processor runs.
 	 * @see #doProcess()
 	 */
 	private static final String AOT_PROCESSING = "spring.aot.processing";
@@ -125,6 +124,7 @@ public abstract class AbstractAotProcessor<T> {
 		writer.write(hints);
 	}
 
+
 	/**
 	 * Common settings for AOT processors.
 	 */
@@ -140,7 +140,6 @@ public abstract class AbstractAotProcessor<T> {
 
 		private final String artifactId;
 
-
 		private Settings(Path sourceOutput, Path resourceOutput, Path classOutput, String groupId, String artifactId) {
 			this.sourceOutput = sourceOutput;
 			this.resourceOutput = resourceOutput;
@@ -149,14 +148,12 @@ public abstract class AbstractAotProcessor<T> {
 			this.artifactId = artifactId;
 		}
 
-
 		/**
 		 * Create a new {@link Builder} for {@link Settings}.
 		 */
 		public static Builder builder() {
 			return new Builder();
 		}
-
 
 		/**
 		 * Get the output directory for generated sources.
@@ -214,11 +211,9 @@ public abstract class AbstractAotProcessor<T> {
 			@Nullable
 			private String artifactId;
 
-
 			private Builder() {
 				// internal constructor
 			}
-
 
 			/**
 			 * Set the output directory for generated sources.
