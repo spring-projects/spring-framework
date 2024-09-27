@@ -36,6 +36,9 @@ xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overrid
 and the original instance is wrapped in a Mockito spy. This strategy requires that
 exactly one candidate bean definition exists.
 
+NOTE: Only _singleton_ beans can be overridden. Any attempt to override a non-singleton
+bean will result in an exception.
+
 The following example shows how to use the default behavior of the `@MockitoBean` annotation:
 
 [tabs]

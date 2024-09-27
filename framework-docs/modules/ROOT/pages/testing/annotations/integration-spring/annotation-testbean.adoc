@@ -87,3 +87,6 @@ Alternatively, a factory method in an external class can be referenced via its
 fully-qualified method name following the syntax `<fully-qualified class name>#<method name>`
 – for example, `methodName = "org.example.TestUtils#createCustomService"`.
 ====
+
+NOTE: Only _singleton_ beans can be overridden. Any attempt to override a non-singleton
+bean will result in an exception.

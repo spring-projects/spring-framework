@@ -49,6 +49,9 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  * instance creation} &mdash; for example, based on further processing of the
  * annotation or the annotated field.
  *
+ * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
+ * Any attempt to override a non-singleton bean will result in an exception.
+ *
  * @author Simon Baslé
  * @author Stephane Nicoll
  * @author Sam Brannen

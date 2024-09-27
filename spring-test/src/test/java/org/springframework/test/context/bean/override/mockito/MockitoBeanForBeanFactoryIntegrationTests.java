@@ -90,18 +90,11 @@ public class MockitoBeanForBeanFactoryIntegrationTests {
 		public Class<?> getObjectType() {
 			return TestBean.class;
 		}
-
-		@Override
-		public boolean isSingleton() {
-			return false;
-		}
-
 	}
 
 	public interface TestBean {
 
 		String hello();
-
 	}
 
 }

@@ -69,3 +69,6 @@ Alternatively, the user can directly provide the bean name in the custom annotat
 Some `BeanOverrideProcessor` implementations could also internally compute a bean name
 based on a convention or another advanced method.
 ====
+
+NOTE: Only _singleton_ beans can be overridden. Any attempt to override a non-singleton
+bean will result in an exception.

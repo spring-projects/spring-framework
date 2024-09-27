@@ -25,7 +25,6 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -43,7 +42,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.mock;
@@ -228,17 +226,15 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionForClassBasedNonSingletonFactoryBean() {
+	void replaceBeanByNameWithMatchingBeanDefinitionForClassBasedNonSingletonFactoryBeanFails() {
 		String beanName = "descriptionBean";
 		AnnotationConfigApplicationContext context = createContext(CaseByName.class);
 		RootBeanDefinition factoryBeanDefinition = new RootBeanDefinition(NonSingletonStringFactoryBean.class);
 		context.registerBeanDefinition(beanName, factoryBeanDefinition);
 
-		assertThatNoException().isThrownBy(context::refresh);
-		// Even though the FactoryBean signals it does not manage a singleton,
-		// the Bean Override support currently replaces it with a singleton.
-		assertThat(context.isSingleton(beanName)).as("isSingleton").isTrue();
-		assertThat(context.getBean(beanName)).isEqualTo("overridden");
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("Unable to override bean 'descriptionBean': only singleton beans can be overridden.");
 	}
 
 	@Test
@@ -254,21 +250,19 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionForInterfaceBasedNonSingletonFactoryBean() {
+	void replaceBeanByNameWithMatchingBeanDefinitionForInterfaceBasedNonSingletonFactoryBeanFails() {
 		String beanName = "messageServiceBean";
 		AnnotationConfigApplicationContext context = createContext(MessageServiceTestCase.class);
 		RootBeanDefinition factoryBeanDefinition = new RootBeanDefinition(NonSingletonMessageServiceFactoryBean.class);
 		context.registerBeanDefinition(beanName, factoryBeanDefinition);
 
-		assertThatNoException().isThrownBy(context::refresh);
-		// Even though the FactoryBean signals it does not manage a singleton,
-		// the Bean Override support currently replaces it with a singleton.
-		assertThat(context.isSingleton(beanName)).as("isSingleton").isTrue();
-		assertThat(context.getBean(beanName, MessageService.class).getMessage()).isEqualTo("overridden");
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("Unable to override bean 'messageServiceBean': only singleton beans can be overridden.");
 	}
 
 	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionWithPrototypeScope() {
+	void replaceBeanByNameWithMatchingBeanDefinitionWithPrototypeScopeFails() {
 		String beanName = "descriptionBean";
 
 		AnnotationConfigApplicationContext context = createContext(CaseByName.class);
@@ -276,22 +270,13 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		definition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition(beanName, definition);
 
-		assertThatNoException().isThrownBy(context::refresh);
-		// The Bean Override support currently creates a "dummy" BeanDefinition that
-		// retains the prototype scope of the original BeanDefinition.
-		assertThat(context.isSingleton(beanName)).as("isSingleton").isFalse();
-		assertThat(context.isPrototype(beanName)).as("isPrototype").isTrue();
-		// Since the "dummy" BeanDefinition has prototype scope, a manual singleton
-		// is not registered, and the "dummy" BeanDefinition is used to create a
-		// new java.lang.String using the default constructor, which results in an
-		// empty string instead of "overridden". In other words, the bean is not
-		// actually overridden as expected, and no exception is thrown which
-		// silently masks the issue.
-		assertThat(context.getBean(beanName)).isEqualTo("");
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("Unable to override bean 'descriptionBean': only singleton beans can be overridden.");
 	}
 
 	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionWithCustomScope() {
+	void replaceBeanByNameWithMatchingBeanDefinitionWithCustomScopeFails() {
 		String beanName = "descriptionBean";
 		String scope = "customScope";
 
@@ -302,49 +287,28 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		definition.setScope(scope);
 		context.registerBeanDefinition(beanName, definition);
 
-		assertThatNoException().isThrownBy(context::refresh);
-		// The Bean Override support currently creates a "dummy" BeanDefinition that
-		// retains the custom scope of the original BeanDefinition.
-		assertThat(context.isSingleton(beanName)).as("isSingleton").isFalse();
-		assertThat(context.isPrototype(beanName)).as("isPrototype").isFalse();
-		assertThat(beanFactory.getBeanDefinition(beanName).getScope()).isEqualTo(scope);
-		// Since the "dummy" BeanDefinition has a custom scope, a manual singleton
-		// is not registered, and the "dummy" BeanDefinition is used to create a
-		// new java.lang.String using the default constructor, which results in an
-		// empty string instead of "overridden". In other words, the bean is not
-		// actually overridden as expected, and no exception is thrown which
-		// silently masks the issue.
-		assertThat(context.getBean(beanName)).isEqualTo("");
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("Unable to override bean 'descriptionBean': only singleton beans can be overridden.");
 	}
 
 	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionForPrototypeScopedFactoryBean() {
+	void replaceBeanByNameWithMatchingBeanDefinitionForPrototypeScopedFactoryBeanFails() {
 		String beanName = "messageServiceBean";
 		AnnotationConfigApplicationContext context = createContext(MessageServiceTestCase.class);
 		RootBeanDefinition factoryBeanDefinition = new RootBeanDefinition(SingletonMessageServiceFactoryBean.class);
 		factoryBeanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition(beanName, factoryBeanDefinition);
 
-		assertThatNoException().isThrownBy(context::refresh);
-		// The Bean Override support currently creates a "dummy" BeanDefinition that
-		// retains the prototype scope of the original BeanDefinition.
-		assertThat(context.isSingleton(beanName)).as("isSingleton").isFalse();
-		assertThat(context.isPrototype(beanName)).as("isPrototype").isTrue();
-		// Since the "dummy" BeanDefinition has prototype scope, a manual singleton
-		// is not registered, and the "dummy" BeanDefinition is used to create a
-		// new MessageService using the default constructor, which results in an
-		// error since MessageService is an interface.
-		assertThatExceptionOfType(BeanCreationException.class)
-				.isThrownBy(() -> context.getBean(beanName))
-				.withMessageContaining("Specified class is an interface");
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("Unable to override bean 'messageServiceBean': only singleton beans can be overridden.");
 	}
 
 	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionRetainsPrimaryFallbackAndScopeProperties() {
+	void replaceBeanByNameWithMatchingBeanDefinitionRetainsPrimaryAndFallbackFlags() {
 		AnnotationConfigApplicationContext context = createContext(CaseByName.class);
-		context.getBeanFactory().registerScope("customScope", new SimpleThreadScope());
 		RootBeanDefinition definition = new RootBeanDefinition(String.class, () -> "ORIGINAL");
-		definition.setScope("customScope");
 		definition.setPrimary(true);
 		definition.setFallback(true);
 		context.registerBeanDefinition("descriptionBean", definition);
@@ -354,8 +318,8 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 				.isNotSameAs(definition)
 				.matches(BeanDefinition::isPrimary, "isPrimary")
 				.matches(BeanDefinition::isFallback, "isFallback")
-				.satisfies(d -> assertThat(d.getScope()).isEqualTo("customScope"))
-				.matches(Predicate.not(BeanDefinition::isSingleton), "!isSingleton")
+				.satisfies(d -> assertThat(d.getScope()).isEqualTo(""))
+				.matches(BeanDefinition::isSingleton, "isSingleton")
 				.matches(Predicate.not(BeanDefinition::isPrototype), "!isPrototype");
 	}
 

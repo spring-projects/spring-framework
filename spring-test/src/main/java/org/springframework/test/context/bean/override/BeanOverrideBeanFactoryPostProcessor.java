@@ -40,6 +40,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.ResolvableType;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -116,14 +117,15 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	private void replaceDefinition(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry,
 			OverrideMetadata overrideMetadata, boolean enforceExistingDefinition) {
 
-		// The following is a "dummy" bean definition which should not be used to
+		// The following is a "pseudo" bean definition which MUST NOT be used to
 		// create an actual bean instance.
-		RootBeanDefinition beanDefinition = createBeanDefinition(overrideMetadata);
+		RootBeanDefinition pseudoBeanDefinition = createPseudoBeanDefinition(overrideMetadata);
 		String beanName = overrideMetadata.getBeanName();
 		String beanNameIncludingFactory;
 		BeanDefinition existingBeanDefinition = null;
 		if (beanName == null) {
-			beanNameIncludingFactory = getBeanNameForType(beanFactory, registry, overrideMetadata, beanDefinition, enforceExistingDefinition);
+			beanNameIncludingFactory = getBeanNameForType(
+					beanFactory, registry, overrideMetadata, pseudoBeanDefinition, enforceExistingDefinition);
 			beanName = BeanFactoryUtils.transformedBeanName(beanNameIncludingFactory);
 			if (registry.containsBeanDefinition(beanName)) {
 				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
@@ -145,25 +147,24 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 		// Process existing bean definition.
 		if (existingBeanDefinition != null) {
-			copyBeanDefinitionProperties(existingBeanDefinition, beanDefinition);
+			validateBeanDefinition(beanFactory, beanName);
+			copyBeanDefinitionProperties(existingBeanDefinition, pseudoBeanDefinition);
 			registry.removeBeanDefinition(beanName);
 		}
 
 		// At this point, we either removed an existing bean definition above, or
-		// there was no bean definition to begin with. So, we register the dummy bean
+		// there was no bean definition to begin with. So, we register the pseudo bean
 		// definition to ensure that a bean definition exists for the given bean name.
-		registry.registerBeanDefinition(beanName, beanDefinition);
+		registry.registerBeanDefinition(beanName, pseudoBeanDefinition);
 
 		Object override = overrideMetadata.createOverride(beanName, existingBeanDefinition, null);
 		overrideMetadata.track(override, beanFactory);
 		this.overrideRegistrar.registerNameForMetadata(overrideMetadata, beanNameIncludingFactory);
 
-		if (beanFactory.isSingleton(beanNameIncludingFactory)) {
-			// Now we have an instance (the override) that we can register. At this
-			// stage we don't expect a singleton instance to be present, and this call
-			// will throw an exception if there is such an instance already.
-			beanFactory.registerSingleton(beanName, override);
-		}
+		// Now we have an instance (the override) that we can register. At this stage, we don't
+		// expect a singleton instance to be present. If for some reason a singleton instance
+		// already exists, the following will throw an exception.
+		beanFactory.registerSingleton(beanName, override);
 	}
 
 	/**
@@ -196,6 +197,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 							.formatted(beanName, overrideMetadata.getBeanType()));
 			}
 		}
+		validateBeanDefinition(beanFactory, beanName);
 		this.overrideRegistrar.markWrapEarly(overrideMetadata, beanName);
 		this.overrideRegistrar.registerNameForMetadata(overrideMetadata, beanName);
 	}
@@ -276,7 +278,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	 * definition metadata available in the {@link BeanFactory} &mdash; for example,
 	 * for autowiring candidate resolution.
 	 */
-	private static RootBeanDefinition createBeanDefinition(OverrideMetadata metadata) {
+	private static RootBeanDefinition createPseudoBeanDefinition(OverrideMetadata metadata) {
 		RootBeanDefinition definition = new RootBeanDefinition(metadata.getBeanType().resolve());
 		definition.setTargetType(metadata.getBeanType());
 		definition.setQualifiedElement(metadata.getField());
@@ -284,15 +286,22 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	}
 
 	/**
+	 * Validate that the {@link BeanDefinition} for the supplied bean name is suitable
+	 * for being replaced by a bean override.
+	 */
+	private static void validateBeanDefinition(ConfigurableListableBeanFactory beanFactory, String beanName) {
+		Assert.state(beanFactory.isSingleton(beanName),
+				() -> "Unable to override bean '" + beanName + "': only singleton beans can be overridden.");
+	}
+
+	/**
 	 * Copy the following properties of the source {@link BeanDefinition} to the
-	 * target: the {@linkplain BeanDefinition#isPrimary() primary flag}, the
-	 * {@linkplain BeanDefinition#isFallback() fallback flag}, and the
-	 * {@linkplain BeanDefinition#getScope() scope}.
+	 * target: the {@linkplain BeanDefinition#isPrimary() primary flag} and the
+	 * {@linkplain BeanDefinition#isFallback() fallback flag}.
 	 */
 	private static void copyBeanDefinitionProperties(BeanDefinition source, RootBeanDefinition target) {
 		target.setPrimary(source.isPrimary());
 		target.setFallback(source.isFallback());
-		target.setScope(source.getScope());
 	}
 
 

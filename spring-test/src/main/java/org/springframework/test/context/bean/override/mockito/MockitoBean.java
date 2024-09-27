@@ -47,6 +47,9 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * registered directly}) will not be found, and a mocked bean will be added to
  * the context alongside the existing dependency.
  *
+ * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
+ * Any attempt to override a non-singleton bean will result in an exception.
+ *
  * @author Simon Baslé
  * @since 6.2
  * @see org.springframework.test.context.bean.override.mockito.MockitoSpyBean @MockitoSpyBean
