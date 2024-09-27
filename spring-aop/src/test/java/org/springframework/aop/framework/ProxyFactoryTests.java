@@ -199,7 +199,7 @@ class ProxyFactoryTests {
 		Class<?>[] oldProxiedInterfaces = pf.getProxiedInterfaces();
 		long t = 555555L;
 		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor(t);
-		pf.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
+		pf.addAdvisor(new DefaultIntroductionAdvisor(ti, TimeStamped.class));
 
 		Class<?>[] newProxiedInterfaces = pf.getProxiedInterfaces();
 		assertThat(newProxiedInterfaces).as("Advisor proxies one more interface after introduction").hasSize(oldProxiedInterfaces.length + 1);
@@ -328,14 +328,28 @@ class ProxyFactoryTests {
 	}
 
 	@Test
-	void proxyTargetClassWithIntroducedInterface() {
+	void proxyTargetClassInCaseOfIntroducedInterface() {
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetClass(MyDate.class);
 		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor(0L);
-		pf.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
+		pf.addAdvisor(new DefaultIntroductionAdvisor(ti, TimeStamped.class));
 		Object proxy = pf.getProxy();
 		assertThat(AopUtils.isCglibProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
 		assertThat(proxy).isInstanceOf(MyDate.class);
+		assertThat(proxy).isInstanceOf(TimeStamped.class);
+		assertThat(AopProxyUtils.ultimateTargetClass(proxy)).isEqualTo(MyDate.class);
+	}
+
+	@Test
+	void proxyInterfaceInCaseOfNonTargetInterface() {
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTargetClass(MyDate.class);
+		pf.addInterface(TimeStamped.class);
+		pf.addAdvice((MethodInterceptor) invocation -> {
+			throw new UnsupportedOperationException();
+		});
+		Object proxy = pf.getProxy();
+		assertThat(AopUtils.isJdkDynamicProxy(proxy)).as("Proxy is a JDK proxy").isTrue();
 		assertThat(proxy).isInstanceOf(TimeStamped.class);
 		assertThat(AopProxyUtils.ultimateTargetClass(proxy)).isEqualTo(MyDate.class);
 	}

@@ -19,7 +19,6 @@ package org.springframework.aop.framework;
 import java.io.Serializable;
 import java.lang.reflect.Proxy;
 
-import org.springframework.aop.SpringProxy;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -59,7 +58,7 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
-		if (config.isOptimize() || config.isProxyTargetClass() || !hasTargetInterfaces(config)) {
+		if (config.isOptimize() || config.isProxyTargetClass() || !config.hasUserSuppliedInterfaces()) {
 			Class<?> targetClass = config.getTargetClass();
 			if (targetClass == null) {
 				throw new AopConfigException("TargetSource cannot determine target class: " +
@@ -73,16 +72,6 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 		else {
 			return new JdkDynamicAopProxy(config);
 		}
-	}
-
-	private boolean hasTargetInterfaces(AdvisedSupport config) {
-		Class<?> targetClass = config.getTargetClass();
-		for (Class<?> ifc : config.getProxiedInterfaces()) {
-			if (targetClass != null ? ifc.isAssignableFrom(targetClass) : !SpringProxy.class.isAssignableFrom(ifc)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 }
