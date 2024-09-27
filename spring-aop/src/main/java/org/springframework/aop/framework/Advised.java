@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,9 @@ public interface Advised extends TargetClassAware {
 
 	/**
 	 * Determine whether the given interface is proxied.
-	 * @param intf the interface to check
+	 * @param ifc the interface to check
 	 */
-	boolean isInterfaceProxied(Class<?> intf);
+	boolean isInterfaceProxied(Class<?> ifc);
 
 	/**
 	 * Change the {@code TargetSource} used by this {@code Advised} object.

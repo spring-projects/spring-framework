@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -437,8 +437,9 @@ final class PostProcessorRegistrationDelegate {
 					logger.warn("Bean '" + beanName + "' of type [" + bean.getClass().getName() +
 							"] is not eligible for getting processed by all BeanPostProcessors " +
 							"(for example: not eligible for auto-proxying). Is this bean getting eagerly " +
-							"injected into a currently created BeanPostProcessor " + bppsInCreation + "? " +
-							"Check the corresponding BeanPostProcessor declaration and its dependencies.");
+							"injected/applied to a currently created BeanPostProcessor " + bppsInCreation + "? " +
+							"Check the corresponding BeanPostProcessor declaration and its dependencies/advisors. " +
+							"If this bean does not have to be post-processed, declare it with ROLE_INFRASTRUCTURE.");
 				}
 			}
 			return bean;
