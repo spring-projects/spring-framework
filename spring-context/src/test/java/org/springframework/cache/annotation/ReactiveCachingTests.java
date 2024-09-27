@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -146,6 +147,23 @@ class ReactiveCachingTests {
 	}
 
 	@Test
+	void cacheErrorHandlerWithLoggingCacheErrorHandlerAndMethodError() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(ExceptionCacheManager.class, ReactiveFailureCacheableService.class, ErrorHandlerCachingConfiguration.class);
+		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
+
+		Object key = new Object();
+		StepVerifier.create(service.cacheMono(key))
+				.expectErrorMessage("mono service error")
+				.verify();
+
+		key = new Object();
+		StepVerifier.create(service.cacheFlux(key))
+				.expectErrorMessage("flux service error")
+				.verify();
+	}
+
+	@Test
 	void cacheErrorHandlerWithSimpleCacheErrorHandler() {
 		AnnotationConfigApplicationContext ctx =
 				new AnnotationConfigApplicationContext(ExceptionCacheManager.class, ReactiveCacheableService.class);
@@ -211,6 +229,20 @@ class ReactiveCachingTests {
 			// here counter not only reflects invocations of cacheFlux but subscriptions to
 			// the returned Flux as well. See https://github.com/spring-projects/spring-framework/issues/32370
 			return Flux.defer(() -> Flux.just(this.counter.getAndIncrement(), 0L, -1L, -2L, -3L));
+		}
+	}
+
+	@CacheConfig(cacheNames = "first")
+	static class ReactiveFailureCacheableService extends ReactiveCacheableService {
+
+		@Cacheable
+		Mono<Long> cacheMono(Object arg) {
+			return Mono.error(new IllegalStateException("mono service error"));
+		}
+
+		@Cacheable
+		Flux<Long> cacheFlux(Object arg) {
+			return Flux.error(new IllegalStateException("flux service error"));
 		}
 	}
 
