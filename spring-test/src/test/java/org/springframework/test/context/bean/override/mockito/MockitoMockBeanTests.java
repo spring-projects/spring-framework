@@ -42,8 +42,8 @@ class MockitoMockBeanTests {
 				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to select a bean definition to override: found 2 bean definitions \
-						of type %s (as required by annotated field '%s.example'): %s""".formatted(
-								String.class.getName(), ByTypeSingleLookup.class.getSimpleName(), List.of("bean1", "bean2")));
+						of type %s (as required by annotated field '%s.example'): %s""",
+						String.class.getName(), ByTypeSingleLookup.class.getSimpleName(), List.of("bean1", "bean2"));
 	}
 
 

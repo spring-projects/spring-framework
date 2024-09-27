@@ -53,8 +53,8 @@ class MockitoSpyBeanTests {
 				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to select a bean to override by wrapping: found 0 bean instances of \
-						type %s (as required by annotated field '%s.example')""".formatted(
-						String.class.getName(), ByTypeSingleLookup.class.getSimpleName()));
+						type %s (as required by annotated field '%s.example')""",
+						String.class.getName(), ByTypeSingleLookup.class.getSimpleName());
 	}
 
 	@Test
@@ -67,8 +67,8 @@ class MockitoSpyBeanTests {
 				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to select a bean to override by wrapping: found 2 bean instances \
-						of type %s (as required by annotated field '%s.example'): %s""".formatted(
-						String.class.getName(), ByTypeSingleLookup.class.getSimpleName(), List.of("bean1", "bean2")));
+						of type %s (as required by annotated field '%s.example'): %s""",
+						String.class.getName(), ByTypeSingleLookup.class.getSimpleName(), List.of("bean1", "bean2"));
 	}
 
 
