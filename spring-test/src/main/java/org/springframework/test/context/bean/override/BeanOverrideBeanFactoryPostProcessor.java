@@ -104,19 +104,6 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		}
 	}
 
-	/**
-	 * Copy certain details of a {@link BeanDefinition} to the definition created by
-	 * this processor for a given {@link OverrideMetadata}.
-	 * <p>The default implementation copies the {@linkplain BeanDefinition#isPrimary()
-	 * primary flag}, @{@linkplain BeanDefinition#isFallback() fallback flag}
-	 * and the {@linkplain BeanDefinition#getScope() scope}.
-	 */
-	protected void copyBeanDefinitionDetails(BeanDefinition from, RootBeanDefinition to) {
-		to.setPrimary(from.isPrimary());
-		to.setFallback(from.isFallback());
-		to.setScope(from.getScope());
-	}
-
 	private void registerBeanOverride(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry,
 			OverrideMetadata overrideMetadata) {
 
@@ -132,6 +119,8 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	private void registerReplaceDefinition(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry,
 			OverrideMetadata overrideMetadata, boolean enforceExistingDefinition) {
 
+		// The following is a "dummy" bean definition which should not be used to
+		// create an actual bean instance.
 		RootBeanDefinition beanDefinition = createBeanDefinition(overrideMetadata);
 		String beanName = overrideMetadata.getBeanName();
 		String beanNameIncludingFactory;
@@ -157,22 +146,27 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			beanNameIncludingFactory = beanName;
 		}
 
+		// Process existing bean definition.
 		if (existingBeanDefinition != null) {
-			copyBeanDefinitionDetails(existingBeanDefinition, beanDefinition);
+			copyBeanDefinitionProperties(existingBeanDefinition, beanDefinition);
 			registry.removeBeanDefinition(beanName);
 		}
+
+		// At this point, we either removed an existing bean definition above, or
+		// there was no bean definition to begin with. So, we register the dummy bean
+		// definition to ensure that a bean definition exists for the given bean name.
 		registry.registerBeanDefinition(beanName, beanDefinition);
 
 		Object override = overrideMetadata.createOverride(beanName, existingBeanDefinition, null);
-		if (beanFactory.isSingleton(beanNameIncludingFactory)) {
-			// Now we have an instance (the override) that we can register.
-			// At this stage we don't expect a singleton instance to be present,
-			// and this call will throw if there is such an instance already.
-			beanFactory.registerSingleton(beanName, override);
-		}
-
 		overrideMetadata.track(override, beanFactory);
 		this.overrideRegistrar.registerNameForMetadata(overrideMetadata, beanNameIncludingFactory);
+
+		if (beanFactory.isSingleton(beanNameIncludingFactory)) {
+			// Now we have an instance (the override) that we can register. At this
+			// stage we don't expect a singleton instance to be present, and this call
+			// will throw an exception if there is such an instance already.
+			beanFactory.registerSingleton(beanName, override);
+		}
 	}
 
 	private String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry,
@@ -231,13 +225,6 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		this.overrideRegistrar.registerNameForMetadata(metadata, beanName);
 	}
 
-	RootBeanDefinition createBeanDefinition(OverrideMetadata metadata) {
-		RootBeanDefinition definition = new RootBeanDefinition(metadata.getBeanType().resolve());
-		definition.setTargetType(metadata.getBeanType());
-		definition.setQualifiedElement(metadata.getField());
-		return definition;
-	}
-
 	private Set<String> getExistingBeanNamesByType(ConfigurableListableBeanFactory beanFactory, OverrideMetadata metadata,
 			boolean checkAutowiredCandidate) {
 
@@ -269,6 +256,26 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			}
 		}
 		return beans;
+	}
+
+
+	private static RootBeanDefinition createBeanDefinition(OverrideMetadata metadata) {
+		RootBeanDefinition definition = new RootBeanDefinition(metadata.getBeanType().resolve());
+		definition.setTargetType(metadata.getBeanType());
+		definition.setQualifiedElement(metadata.getField());
+		return definition;
+	}
+
+	/**
+	 * Copy the following properties of the source {@link BeanDefinition} to the
+	 * target: the {@linkplain BeanDefinition#isPrimary() primary flag}, the
+	 * {@linkplain BeanDefinition#isFallback() fallback flag}, and the
+	 * {@linkplain BeanDefinition#getScope() scope}.
+	 */
+	private static void copyBeanDefinitionProperties(BeanDefinition source, RootBeanDefinition target) {
+		target.setPrimary(source.isPrimary());
+		target.setFallback(source.isFallback());
+		target.setScope(source.getScope());
 	}
 
 

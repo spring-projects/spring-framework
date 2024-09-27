@@ -51,6 +51,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class BeanOverrideBeanFactoryPostProcessorTests {
 
@@ -200,7 +201,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 	@Test
-	void allowReplaceDefinitionWhenSingletonDefinitionPresent() {
+	void replaceBeanByNameWithMatchingBeanDefinitionWithExplicitSingletonScope() {
 		AnnotationConfigApplicationContext context = createContext(CaseByName.class);
 		RootBeanDefinition definition = new RootBeanDefinition(String.class, () -> "ORIGINAL");
 		definition.setScope(BeanDefinition.SCOPE_SINGLETON);
@@ -212,7 +213,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 	@Test
-	void copyDefinitionPrimaryFallbackAndScope() {
+	void replaceBeanByNameWithMatchingBeanDefinitionRetainsPrimaryFallbackAndScopeProperties() {
 		AnnotationConfigApplicationContext context = createContext(CaseByName.class);
 		context.getBeanFactory().registerScope("customScope", new SimpleThreadScope());
 		RootBeanDefinition definition = new RootBeanDefinition(String.class, () -> "ORIGINAL");
@@ -232,22 +233,22 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 	@Test
-	void createDefinitionShouldSetQualifierElement() {
+	void qualifiedElementIsSetToBeanOverrideField() {
 		AnnotationConfigApplicationContext context = createContext(CaseByNameWithQualifier.class);
 		context.registerBeanDefinition("descriptionBean", new RootBeanDefinition(String.class, () -> "ORIGINAL"));
 
 		assertThatNoException().isThrownBy(context::refresh);
 		assertThat(context.getBeanDefinition("descriptionBean"))
-				.isInstanceOfSatisfying(RootBeanDefinition.class, this::isTheValueField);
+				.isInstanceOfSatisfying(RootBeanDefinition.class, this::qualifiedElementIsField);
 	}
 
 
-	private void isTheValueField(RootBeanDefinition def) {
-		assertThat(def.getQualifiedElement()).isInstanceOfSatisfying(Field.class, field -> {
-					assertThat(field.getDeclaringClass()).isEqualTo(CaseByNameWithQualifier.class);
-					assertThat(field.getName()).as("annotated field name")
-							.isEqualTo("description");
-				});
+	private void qualifiedElementIsField(RootBeanDefinition def) {
+		assertThat(def.getQualifiedElement()).isInstanceOfSatisfying(Field.class,
+			field -> {
+				assertThat(field.getDeclaringClass()).isEqualTo(CaseByNameWithQualifier.class);
+				assertThat(field.getName()).as("annotated field name").isEqualTo("description");
+			});
 	}
 
 	private AnnotationConfigApplicationContext createContext(Class<?> testClass) {
