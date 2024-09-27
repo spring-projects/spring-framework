@@ -611,7 +611,7 @@ class TransactionalEventListenerTests {
 	}
 
 
-	@Transactional
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@Component
 	static class TransactionalComponentTestListenerWithInterface extends BaseTransactionalTestListener implements
 			TransactionalComponentTestInterface {
