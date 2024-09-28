@@ -34,7 +34,7 @@ class EasyMockBeanOverrideProcessor implements BeanOverrideProcessor {
 	@Override
 	public OverrideMetadata createMetadata(Annotation annotation, Class<?> testClass, Field field) {
 		EasyMockBean easyMockBean = (EasyMockBean) annotation;
-		String beanName = (StringUtils.hasText(easyMockBean.name()) ? easyMockBean.name() : field.getName());
+		String beanName = (StringUtils.hasText(easyMockBean.name()) ? easyMockBean.name() : null);
 		return new EasyMockBeanOverrideMetadata(field, field.getType(), beanName, easyMockBean.mockType());
 	}
 

@@ -25,8 +25,9 @@ import java.lang.annotation.Target;
 import org.mockito.quality.Strictness;
 
 /**
- * Configure a test class that uses {@link MockitoBean} or {@link MockitoSpyBean}
- * to set up Mockito with an explicitly specified stubbing strictness.
+ * Configure a test class that uses {@link MockitoBean @MockitoBean} or
+ * {@link MockitoSpyBean @MockitoSpyBean} to set up Mockito with an explicit
+ * stubbing strictness mode.
  *
  * @author Simon Baslé
  * @since 6.2
@@ -38,8 +39,8 @@ import org.mockito.quality.Strictness;
 public @interface MockitoBeanSettings {
 
 	/**
-	 * The stubbing strictness to apply for all Mockito mocks in the annotated
-	 * class.
+	 * The stubbing strictness mode to apply for all Mockito mocks in the annotated
+	 * test class.
 	 */
 	Strictness value();
 

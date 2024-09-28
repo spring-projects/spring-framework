@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
-import java.util.List;
-
 import org.mockito.MockSettings;
 import org.mockito.MockingDetails;
 import org.mockito.Mockito;
@@ -28,11 +26,15 @@ import org.mockito.mock.MockCreationSettings;
 import org.springframework.util.Assert;
 
 /**
- * Reset strategy used on a mock bean. Usually applied to a mock through the
- * {@link MockitoBean @MockitoBean} annotation but can also be directly applied
- * to any mock in the {@code ApplicationContext} using the static methods.
+ * Reset strategy used on a mock bean.
+ *
+ * <p>Usually applied to a mock via the {@link MockitoBean @MockitoBean} or
+ * {@link MockitoSpyBean @MockitoSpyBean} annotation but can also be directly
+ * applied to any mock in the {@code ApplicationContext} using the static methods
+ * in this class.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 6.2
  * @see MockitoResetTestExecutionListener
  */
@@ -49,7 +51,7 @@ public enum MockReset {
 	AFTER,
 
 	/**
-	 * Don't reset the mock.
+	 * Do not reset the mock.
 	 */
 	NONE;
 
@@ -102,39 +104,26 @@ public enum MockReset {
 	 * @return the reset type (never {@code null})
 	 */
 	static MockReset get(Object mock) {
-		MockReset reset = MockReset.NONE;
 		MockingDetails mockingDetails = Mockito.mockingDetails(mock);
 		if (mockingDetails.isMock()) {
 			MockCreationSettings<?> settings = mockingDetails.getMockCreationSettings();
-			List<InvocationListener> listeners = settings.getInvocationListeners();
-			for (Object listener : listeners) {
+			for (InvocationListener listener : settings.getInvocationListeners()) {
 				if (listener instanceof ResetInvocationListener resetInvocationListener) {
-					reset = resetInvocationListener.getReset();
+					return resetInvocationListener.reset;
 				}
 			}
 		}
-		return reset;
+		return MockReset.NONE;
 	}
 
 	/**
 	 * Dummy {@link InvocationListener} used to hold the {@link MockReset} value.
 	 */
-	private static class ResetInvocationListener implements InvocationListener {
-
-		private final MockReset reset;
-
-		ResetInvocationListener(MockReset reset) {
-			this.reset = reset;
-		}
-
-		MockReset getReset() {
-			return this.reset;
-		}
+	private record ResetInvocationListener(MockReset reset) implements InvocationListener {
 
 		@Override
 		public void reportInvocation(MethodInvocationReport methodInvocationReport) {
 		}
-
 	}
 
 }

@@ -21,7 +21,6 @@ import java.lang.reflect.Field;
 import org.easymock.EasyMock;
 import org.easymock.MockType;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.ResolvableType;
@@ -62,17 +61,15 @@ class EasyMockBeanOverrideMetadata extends OverrideMetadata {
 		getEasyMockBeans(singletonBeanRegistry).add(mock);
 	}
 
-	private EasyMockBeans getEasyMockBeans(SingletonBeanRegistry singletonBeanRegistry) {
-		String className = EasyMockBeans.class.getName();
+	private static EasyMockBeans getEasyMockBeans(SingletonBeanRegistry singletonBeanRegistry) {
+		String beanName = EasyMockBeans.class.getName();
 		EasyMockBeans easyMockBeans = null;
-		try {
-			easyMockBeans = (EasyMockBeans) singletonBeanRegistry.getSingleton(className);
-		}
-		catch (NoSuchBeanDefinitionException ignored) {
+		if (singletonBeanRegistry.containsSingleton(beanName)) {
+			easyMockBeans = (EasyMockBeans) singletonBeanRegistry.getSingleton(beanName);
 		}
 		if (easyMockBeans == null) {
 			easyMockBeans = new EasyMockBeans();
-			singletonBeanRegistry.registerSingleton(className, easyMockBeans);
+			singletonBeanRegistry.registerSingleton(beanName, easyMockBeans);
 		}
 		return easyMockBeans;
 	}

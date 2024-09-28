@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 6.2
  */
-class MockitoBeanOverrideMetadata extends MockitoOverrideMetadata {
+class MockitoBeanOverrideMetadata extends AbstractMockitoOverrideMetadata {
 
 	private final Set<Class<?>> extraInterfaces;
 

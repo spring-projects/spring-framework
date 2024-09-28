@@ -63,11 +63,11 @@ import org.springframework.util.StringUtils;
  */
 class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
 
+	private static final BeanNameGenerator beanNameGenerator = DefaultBeanNameGenerator.INSTANCE;
+
 	private final Set<OverrideMetadata> metadata;
 
 	private final BeanOverrideRegistrar overrideRegistrar;
-
-	private final BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
 
 
 	/**
@@ -215,7 +215,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 						"Unable to override bean: no bean definitions of type %s (as required by annotated field '%s.%s')"
 							.formatted(overrideMetadata.getBeanType(), field.getDeclaringClass().getSimpleName(), field.getName()));
 			}
-			return this.beanNameGenerator.generateBeanName(beanDefinition, registry);
+			return beanNameGenerator.generateBeanName(beanDefinition, registry);
 		}
 
 		Field field = overrideMetadata.getField();
@@ -230,7 +230,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			boolean checkAutowiredCandidate) {
 
 		ResolvableType resolvableType = metadata.getBeanType();
-		Class<?> type = resolvableType.resolve(Object.class);
+		Class<?> type = resolvableType.toClass();
 
 		// Start with matching bean names for type, excluding FactoryBeans.
 		Set<String> beanNames = new LinkedHashSet<>(

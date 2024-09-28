@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Stephane Nicoll
  * @since 6.2
  */
-class MockitoSpyBeanOverrideMetadata extends MockitoOverrideMetadata {
+class MockitoSpyBeanOverrideMetadata extends AbstractMockitoOverrideMetadata {
 
 	MockitoSpyBeanOverrideMetadata(Field field, ResolvableType typeToSpy, MockitoSpyBean spyAnnotation) {
 		this(field, typeToSpy, (StringUtils.hasText(spyAnnotation.name()) ? spyAnnotation.name() : null),
@@ -62,17 +62,17 @@ class MockitoSpyBeanOverrideMetadata extends MockitoOverrideMetadata {
 			@Nullable Object existingBeanInstance) {
 
 		Assert.notNull(existingBeanInstance,
-				() -> "MockitoSpyBean requires an existing bean instance for bean " + beanName);
+				() -> "@MockitoSpyBean requires an existing bean instance for bean " + beanName);
 		return createSpy(beanName, existingBeanInstance);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T createSpy(String name, Object instance) {
+	private Object createSpy(String name, Object instance) {
 		Class<?> resolvedTypeToOverride = getBeanType().resolve();
 		Assert.notNull(resolvedTypeToOverride, "Failed to resolve type to override");
 		Assert.isInstanceOf(resolvedTypeToOverride, instance);
 		if (Mockito.mockingDetails(instance).isSpy()) {
-			return (T) instance;
+			return instance;
 		}
 		MockSettings settings = MockReset.withSettings(getReset());
 		if (StringUtils.hasLength(name)) {
@@ -91,7 +91,7 @@ class MockitoSpyBeanOverrideMetadata extends MockitoOverrideMetadata {
 			settings.spiedInstance(instance);
 			toSpy = instance.getClass();
 		}
-		return (T) Mockito.mock(toSpy, settings);
+		return Mockito.mock(toSpy, settings);
 	}
 
 

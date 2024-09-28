@@ -44,7 +44,8 @@ import org.springframework.test.context.bean.override.BeanOverride;
  *
  * @author Simon Baslé
  * @since 6.2
- * @see MockitoBean
+ * @see org.springframework.test.context.bean.override.mockito.MockitoBean @MockitoBean
+ * @see org.springframework.test.context.bean.override.convention.TestBean @TestBean
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

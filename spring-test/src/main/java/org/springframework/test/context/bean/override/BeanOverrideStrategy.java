@@ -21,14 +21,15 @@ package org.springframework.test.context.bean.override;
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  */
 public enum BeanOverrideStrategy {
 
 	/**
 	 * Replace a given bean definition, immediately preparing a singleton instance.
-	 * <p>Fails if the original bean definition exists. To create a new bean
-	 * definition in such a case, use {@link #REPLACE_OR_CREATE_DEFINITION}.
+	 * <p>Fails if the original bean definition does not exist. To create a new bean
+	 * definition in such a case, use {@link #REPLACE_OR_CREATE_DEFINITION} instead.
 	 */
 	REPLACE_DEFINITION,
 

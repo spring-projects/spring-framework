@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.bean.override.easymock;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -55,7 +56,15 @@ class EasyMockResetTestExecutionListener extends AbstractTestExecutionListener {
 
 	private void resetMocks(ConfigurableApplicationContext applicationContext) {
 		ConfigurableListableBeanFactory beanFactory = applicationContext.getBeanFactory();
-		beanFactory.getBean(EasyMockBeans.class).resetAll();
+		try {
+			beanFactory.getBean(EasyMockBeans.class).resetAll();
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Continue
+		}
+		if (applicationContext.getParent() != null) {
+			resetMocks(applicationContext.getParent());
+		}
 	}
 
 }

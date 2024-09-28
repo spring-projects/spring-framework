@@ -26,7 +26,10 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
- * Mark a field to override a bean definition in the {@code BeanFactory}.
+ * {@code @TestBean} is an annotation that can be applied to a field in a test
+ * class to override a bean in the test's
+ * {@link org.springframework.context.ApplicationContext ApplicationContext}
+ * using a static factory method.
  *
  * <p>By default, the bean to override is inferred from the type of the
  * annotated field. This requires that exactly one matching bean definition is
@@ -57,13 +60,12 @@ import org.springframework.test.context.bean.override.BeanOverride;
  *
  * <p>Consider the following example.
  *
- * <pre><code>
- * class CustomerServiceTests {
+ * <pre><code> class CustomerServiceTests {
  *
  *     &#064;TestBean
  *     private CustomerRepository repository;
  *
- *     // Tests
+ *     // &#064;Test methods ...
  *
  *     private static CustomerRepository repository() {
  *         return new TestCustomerRepository();
@@ -79,15 +81,14 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * <p>To make things more explicit, the bean and method names can be set,
  * as shown in the following example.
  *
- * <pre><code>
- * class CustomerServiceTests {
+ * <pre><code> class CustomerServiceTests {
  *
  *     &#064;TestBean(name = "customerRepository", methodName = "createTestCustomerRepository")
- *     private CustomerRepository repository;
+ *     CustomerRepository repository;
  *
- *     // Tests
+ *     // &#064;Test methods ...
  *
- *     private static CustomerRepository createTestCustomerRepository() {
+ *     static CustomerRepository createTestCustomerRepository() {
  *         return new TestCustomerRepository();
  *     }
  * }</code></pre>
@@ -96,7 +97,8 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 6.2
- * @see TestBeanOverrideProcessor
+ * @see org.springframework.test.context.bean.override.mockito.MockitoBean @MockitoBean
+ * @see org.springframework.test.context.bean.override.mockito.MockitoSpyBean @MockitoSpyBean
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

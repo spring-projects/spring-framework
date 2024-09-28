@@ -40,8 +40,11 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * with a {@link MockReset}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 6.2
  * @see MockitoTestExecutionListener
+ * @see MockitoBean @MockitoBean
+ * @see MockitoSpyBean @MockitoSpyBean
  */
 public class MockitoResetTestExecutionListener extends AbstractTestExecutionListener {
 
@@ -75,13 +78,13 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 
 	private void resetMocks(ConfigurableApplicationContext applicationContext, MockReset reset) {
 		ConfigurableListableBeanFactory beanFactory = applicationContext.getBeanFactory();
-		String[] names = beanFactory.getBeanDefinitionNames();
+		String[] beanNames = beanFactory.getBeanDefinitionNames();
 		Set<String> instantiatedSingletons = new HashSet<>(Arrays.asList(beanFactory.getSingletonNames()));
-		for (String name : names) {
-			BeanDefinition definition = beanFactory.getBeanDefinition(name);
-			if (definition.isSingleton() && instantiatedSingletons.contains(name)) {
-				Object bean = getBean(beanFactory, name);
-				if (bean != null && reset.equals(MockReset.get(bean))) {
+		for (String beanName : beanNames) {
+			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+			if (beanDefinition.isSingleton() && instantiatedSingletons.contains(beanName)) {
+				Object bean = getBean(beanFactory, beanName);
+				if (bean != null && reset == MockReset.get(bean)) {
 					Mockito.reset(bean);
 				}
 			}
@@ -98,20 +101,20 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 	}
 
 	@Nullable
-	private Object getBean(ConfigurableListableBeanFactory beanFactory, String name) {
+	private Object getBean(ConfigurableListableBeanFactory beanFactory, String beanName) {
 		try {
-			if (isStandardBeanOrSingletonFactoryBean(beanFactory, name)) {
-				return beanFactory.getBean(name);
+			if (isStandardBeanOrSingletonFactoryBean(beanFactory, beanName)) {
+				return beanFactory.getBean(beanName);
 			}
 		}
 		catch (Exception ex) {
 			// Continue
 		}
-		return beanFactory.getSingleton(name);
+		return beanFactory.getSingleton(beanName);
 	}
 
-	private boolean isStandardBeanOrSingletonFactoryBean(ConfigurableListableBeanFactory beanFactory, String name) {
-		String factoryBeanName = BeanFactory.FACTORY_BEAN_PREFIX + name;
+	private boolean isStandardBeanOrSingletonFactoryBean(ConfigurableListableBeanFactory beanFactory, String beanName) {
+		String factoryBeanName = BeanFactory.FACTORY_BEAN_PREFIX + beanName;
 		if (beanFactory.containsBean(factoryBeanName)) {
 			FactoryBean<?> factoryBean = (FactoryBean<?>) beanFactory.getBean(factoryBeanName);
 			return factoryBean.isSingleton();

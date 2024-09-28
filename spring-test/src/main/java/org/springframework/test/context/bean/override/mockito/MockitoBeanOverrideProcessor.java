@@ -23,27 +23,28 @@ import org.springframework.core.ResolvableType;
 import org.springframework.test.context.bean.override.BeanOverrideProcessor;
 
 /**
- * {@link BeanOverrideProcessor} implementation for Mockito support. Both mocking
- * and spying are supported.
+ * {@link BeanOverrideProcessor} implementation that provides support for
+ * {@link MockitoBean @MockitoBean} and {@link MockitoSpyBean @MockitoSpyBean}.
  *
  * @author Simon Baslé
  * @since 6.2
- * @see MockitoBean
- * @see MockitoSpyBean
+ * @see MockitoBean @MockitoBean
+ * @see MockitoSpyBean @MockitoSpyBean
  */
 class MockitoBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	@Override
-	public MockitoOverrideMetadata createMetadata(Annotation overrideAnnotation, Class<?> testClass, Field field) {
+	public AbstractMockitoOverrideMetadata createMetadata(Annotation overrideAnnotation, Class<?> testClass, Field field) {
 		if (overrideAnnotation instanceof MockitoBean mockBean) {
 			return new MockitoBeanOverrideMetadata(field, ResolvableType.forField(field, testClass), mockBean);
 		}
 		else if (overrideAnnotation instanceof MockitoSpyBean spyBean) {
 			return new MockitoSpyBeanOverrideMetadata(field, ResolvableType.forField(field, testClass), spyBean);
 		}
-		throw new IllegalStateException(String.format("Invalid annotation passed to MockitoBeanOverrideProcessor: "
-				+ "expected @MockitoBean/@MockitoSpyBean on field %s.%s",
-				field.getDeclaringClass().getName(), field.getName()));
+		throw new IllegalStateException("""
+				Invalid annotation passed to MockitoBeanOverrideProcessor: \
+				expected either @MockitoBean or @MockitoSpyBean on field %s.%s"""
+					.formatted(field.getDeclaringClass().getName(), field.getName()));
 	}
 
 }

@@ -28,10 +28,13 @@ import org.mockito.MockSettings;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
- * Mark a field to trigger a bean override using a Mockito mock.
+ * {@code @MockitoBean} is an annotation that can be applied to a field in a test
+ * class to override a bean in the test's
+ * {@link org.springframework.context.ApplicationContext ApplicationContext}
+ * using a Mockito mock.
  *
  * <p>If no explicit {@link #name()} is specified, a target bean definition is
- * selected according to the class of the annotated field, and there must be
+ * selected according to the type of the annotated field, and there must be
  * exactly one such candidate definition in the context. A {@code @Qualifier}
  * annotation can be used to help disambiguate.
  * If a {@link #name()} is specified, either the definition exists in the
@@ -40,13 +43,14 @@ import org.springframework.test.context.bean.override.BeanOverride;
  *
  * <p>Dependencies that are known to the application context but are not beans
  * (such as those
- * {@link org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
+ * {@linkplain org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
  * registered directly}) will not be found, and a mocked bean will be added to
  * the context alongside the existing dependency.
  *
  * @author Simon Baslé
  * @since 6.2
- * @see MockitoSpyBean
+ * @see org.springframework.test.context.bean.override.mockito.MockitoSpyBean @MockitoSpyBean
+ * @see org.springframework.test.context.bean.override.convention.TestBean @TestBean
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -63,7 +67,7 @@ public @interface MockitoBean {
 	String name() default "";
 
 	/**
-	 * Extra interfaces that should also be declared on the mock.
+	 * Extra interfaces that should also be declared by the mock.
 	 * <p>Defaults to none.
 	 * @return any extra interfaces
 	 * @see MockSettings#extraInterfaces(Class...)
@@ -71,7 +75,7 @@ public @interface MockitoBean {
 	Class<?>[] extraInterfaces() default {};
 
 	/**
-	 * The {@link Answers} type to use on the mock.
+	 * The {@link Answers} type to use in the mock.
 	 * <p>Defaults to {@link Answers#RETURNS_DEFAULTS}.
 	 * @return the answer type
 	 */
