@@ -301,8 +301,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		if (ex instanceof QueryException) {
 			return new InvalidDataAccessResourceUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof NonUniqueResultException hibEx) {
-			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, getActualSize(hibEx));
+		if (ex instanceof NonUniqueResultException nonUniqueEx) {
+			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, getActualSize(nonUniqueEx));
 		}
 		if (ex instanceof NonUniqueObjectException) {
 			return new DuplicateKeyException(ex.getMessage(), ex);
