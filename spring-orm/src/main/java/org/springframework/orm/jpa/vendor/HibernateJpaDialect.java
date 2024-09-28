@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.orm.jpa.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
@@ -86,6 +88,8 @@ import org.springframework.util.ReflectionUtils;
  */
 @SuppressWarnings("serial")
 public class HibernateJpaDialect extends DefaultJpaDialect {
+
+	private static final Pattern UNIQUE_EX_ACTUAL_SIZE_PATTERN = Pattern.compile("\\d+");
 
 	boolean prepareConnection = true;
 
@@ -297,8 +301,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		if (ex instanceof QueryException) {
 			return new InvalidDataAccessResourceUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof NonUniqueResultException) {
-			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, ex);
+		if (ex instanceof NonUniqueResultException hibEx) {
+			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, getActualSize(hibEx));
 		}
 		if (ex instanceof NonUniqueObjectException) {
 			return new DuplicateKeyException(ex.getMessage(), ex);
@@ -345,6 +349,15 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		return entityManager.unwrap(SessionImplementor.class);
 	}
 
+	protected int getActualSize(NonUniqueResultException nonUniqueEx) {
+		Matcher matcher = UNIQUE_EX_ACTUAL_SIZE_PATTERN.matcher(nonUniqueEx.getMessage());
+		if(matcher.find()) {
+			return Integer.parseInt(matcher.group());
+		}
+
+		return -1;
+	}
+
 	@Nullable
 	protected Object getIdentifier(HibernateException hibEx) {
 		try {
@@ -356,7 +369,6 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			return null;
 		}
 	}
-
 
 	private static class SessionTransactionData {
 
