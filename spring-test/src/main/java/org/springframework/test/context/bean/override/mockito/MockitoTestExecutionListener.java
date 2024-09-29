@@ -19,8 +19,7 @@ package org.springframework.test.context.bean.override.mockito;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import org.mockito.Mockito;
@@ -146,16 +145,23 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 			};
 
 		static boolean hasMockitoAnnotations(Class<?> testClass) {
-			Set<Annotation> annotations = new HashSet<>();
-			collect(testClass, annotations);
-			ReflectionUtils.doWithFields(testClass, field -> collect(field, annotations));
-			return !annotations.isEmpty();
+			if (isAnnotated(testClass)) {
+				return true;
+			}
+			// TODO Ideally we should short-circuit the search once we've found a Mockito annotation,
+			// since there's no need to continue searching additional fields or further up the class
+			// hierarchy; however, that is not possible with ReflectionUtils#doWithFields. Plus, the
+			// previous invocation of isAnnotated(testClass) only finds annotations declared directly
+			// on the test class. So, we'll likely need a completely different approach that combines
+			// the "test class/interface is annotated?" and "field is annotated?" checks in a single
+			// search algorithm.
+			AtomicBoolean found = new AtomicBoolean();
+			ReflectionUtils.doWithFields(testClass, field -> found.set(true), MockitoAnnotationDetector::isAnnotated);
+			return found.get();
 		}
 
-		static void collect(AnnotatedElement annotatedElement, Set<Annotation> annotations) {
-			Arrays.stream(annotatedElement.getAnnotations())
-					.filter(isMockitoAnnotation)
-					.forEach(annotations::add);
+		private static boolean isAnnotated(AnnotatedElement annotatedElement) {
+			return Arrays.stream(annotatedElement.getAnnotations()).anyMatch(isMockitoAnnotation);
 		}
 	}
 
