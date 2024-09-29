@@ -25,11 +25,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.FieldSource;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Events;
-import org.mockito.Mockito;
 import org.mockito.exceptions.misusing.UnnecessaryStubbingException;
 import org.mockito.quality.Strictness;
 
-import org.springframework.test.context.bean.override.mockito.MockitoBeanForByNameLookupIntegrationTests.Config;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
@@ -39,9 +39,12 @@ import static org.junit.platform.testkit.engine.EventConditions.finishedWithFail
 import static org.junit.platform.testkit.engine.EventConditions.test;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.BDDMockito.when;
+import static org.mockito.Mockito.mock;
 
 /**
- * Integration tests ensuring unnecessary stubbings are reported in various
+ * Integration tests ensuring unnecessary stubbing is reported in various
  * cases where a strict style is chosen or assumed.
  *
  * @author Simon Baslé
@@ -75,22 +78,29 @@ class MockitoBeanSettingsStrictIntegrationTests {
 		@Test
 		@SuppressWarnings("rawtypes")
 		void unnecessaryStub() {
-			List list = Mockito.mock(List.class);
-			Mockito.when(list.get(Mockito.anyInt())).thenReturn(new Object());
+			List list = mock();
+			when(list.get(anyInt())).thenReturn(new Object());
 		}
 	}
 
 	@SpringJUnitConfig(Config.class)
+	@DirtiesContext
 	@MockitoBeanSettings(Strictness.STRICT_STUBS)
 	static class ExplicitStrictness extends BaseCase {
 	}
 
 	@SpringJUnitConfig(Config.class)
+	@DirtiesContext
 	static class ImplicitStrictnessWithMockitoBean extends BaseCase {
 
 		@MockitoBean
 		@SuppressWarnings("unused")
 		DateTimeFormatter ignoredMock;
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class Config {
+		// no beans
 	}
 
 }

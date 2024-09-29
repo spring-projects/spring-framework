@@ -21,6 +21,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.quality.Strictness;
 
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -34,7 +36,8 @@ import static org.mockito.Mockito.mock;
  * @author Simon Baslé
  * @since 6.2
  */
-@SpringJUnitConfig(MockitoBeanForByNameLookupIntegrationTests.Config.class)
+@SpringJUnitConfig
+@DirtiesContext
 @MockitoBeanSettings(Strictness.LENIENT)
 class MockitoBeanSettingsLenientIntegrationTests {
 
@@ -43,6 +46,11 @@ class MockitoBeanSettingsLenientIntegrationTests {
 	void unusedStubbingNotReported() {
 		List list = mock();
 		when(list.get(anyInt())).thenReturn(new Object());
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class Config {
+		// no beans
 	}
 
 }

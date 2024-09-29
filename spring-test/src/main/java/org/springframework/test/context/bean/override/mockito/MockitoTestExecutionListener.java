@@ -104,12 +104,12 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 	}
 
 	private void initMocks(TestContext testContext) {
-		if (MockitoAnnotationDetector.hasMockitoAnnotations(testContext.getTestClass())) {
+		Class<?> testClass = testContext.getTestClass();
+		if (MockitoAnnotationDetector.hasMockitoAnnotations(testClass)) {
 			Object testInstance = testContext.getTestInstance();
-			MockitoBeanSettings annotation = AnnotationUtils.findAnnotation(testInstance.getClass(),
-					MockitoBeanSettings.class);
-			testContext.setAttribute(MOCKS_ATTRIBUTE_NAME, initMockitoSession(testInstance,
-					annotation != null ? annotation.value() : Strictness.STRICT_STUBS));
+			MockitoBeanSettings annotation = AnnotationUtils.findAnnotation(testClass, MockitoBeanSettings.class);
+			Strictness strictness = (annotation != null ? annotation.value() : Strictness.STRICT_STUBS);
+			testContext.setAttribute(MOCKS_ATTRIBUTE_NAME, initMockitoSession(testInstance, strictness));
 		}
 	}
 
