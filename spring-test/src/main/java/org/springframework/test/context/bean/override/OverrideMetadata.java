@@ -44,13 +44,14 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  * <p><strong>WARNING</strong>: implementations are used as a cache key and
  * must implement proper {@code equals()} and {@code hashCode()} methods.
  *
- * <p>Specific implementations of metadata can have state to be used during
- * override {@linkplain #createOverride(String, BeanDefinition, Object)
- * instance creation} &mdash; for example, based on further parsing of the
+ * <p>Concrete implementations of {@code OverrideMetadata} can store state to use
+ * during override {@linkplain #createOverride(String, BeanDefinition, Object)
+ * instance creation} &mdash; for example, based on further processing of the
  * annotation or the annotated field.
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  */
 public abstract class OverrideMetadata {
@@ -67,6 +68,7 @@ public abstract class OverrideMetadata {
 
 	protected OverrideMetadata(Field field, ResolvableType beanType, @Nullable String beanName,
 			BeanOverrideStrategy strategy) {
+
 		this.field = field;
 		this.beanType = beanType;
 		this.beanName = beanName;
@@ -74,18 +76,19 @@ public abstract class OverrideMetadata {
 	}
 
 	/**
-	 * Parse the given {@code testClass} and build the corresponding list of
-	 * bean {@code OverrideMetadata}.
-	 * @param testClass the class to parse
+	 * Process the given {@code testClass} and build the corresponding list of
+	 * {@code OverrideMetadata} derived from {@link BeanOverride @BeanOverride}
+	 * fields in the test class and its type hierarchy.
+	 * @param testClass the test class to process
 	 * @return a list of {@code OverrideMetadata}
 	 */
 	public static List<OverrideMetadata> forTestClass(Class<?> testClass) {
 		List<OverrideMetadata> metadata = new LinkedList<>();
-		ReflectionUtils.doWithFields(testClass, field -> parseField(field, testClass, metadata));
+		ReflectionUtils.doWithFields(testClass, field -> processField(field, testClass, metadata));
 		return metadata;
 	}
 
-	private static void parseField(Field field, Class<?> testClass, List<OverrideMetadata> metadataList) {
+	private static void processField(Field field, Class<?> testClass, List<OverrideMetadata> metadataList) {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
 		MergedAnnotations.from(field, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
 			MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
@@ -127,20 +130,20 @@ public abstract class OverrideMetadata {
 	}
 
 	/**
-	 * Get the {@link BeanOverrideStrategy} for this instance, as a hint on
-	 * how and when the override instance should be created.
+	 * Get the {@link BeanOverrideStrategy} for this {@code OverrideMetadata},
+	 * which influences how and when the bean override instance should be created.
 	 */
 	public final BeanOverrideStrategy getStrategy() {
 		return this.strategy;
 	}
 
 	/**
-	 * Create an override instance from this {@link OverrideMetadata},
-	 * optionally provided with an existing {@link BeanDefinition} and/or an
+	 * Create a bean override instance for this {@code OverrideMetadata},
+	 * optionally based on an existing {@link BeanDefinition} and/or an
 	 * original instance, that is a singleton or an early wrapped instance.
 	 * @param beanName the name of the bean being overridden
 	 * @param existingBeanDefinition an existing bean definition for the supplied
-	 * bean name, or {@code null} if not relevant
+	 * bean name, or {@code null} if irrelevant
 	 * @param existingBeanInstance an existing instance for the supplied bean name
 	 * for wrapping purposes, or {@code null} if irrelevant
 	 * @return the instance with which to override the bean
@@ -149,8 +152,9 @@ public abstract class OverrideMetadata {
 			@Nullable Object existingBeanInstance);
 
 	/**
-	 * Optionally track objects created by this {@link OverrideMetadata}.
-	 * <p>The default is not to track, but this can be overridden in subclasses.
+	 * Optionally track objects created by this {@code OverrideMetadata}.
+	 * <p>The default implementation does not track the supplied instance, but
+	 * this can be overridden in subclasses as appropriate.
 	 * @param override the bean override instance to track
 	 * @param trackingBeanRegistry the registry in which trackers can
 	 * optionally be registered
