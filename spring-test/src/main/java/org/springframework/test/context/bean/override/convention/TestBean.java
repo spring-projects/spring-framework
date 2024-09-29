@@ -93,6 +93,9 @@ import org.springframework.test.context.bean.override.BeanOverride;
  *     }
  * }</code></pre>
  *
+ * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
+ * Any attempt to override a non-singleton bean will result in an exception.
+ *
  * @author Simon Baslé
  * @author Stephane Nicoll
  * @author Sam Brannen
