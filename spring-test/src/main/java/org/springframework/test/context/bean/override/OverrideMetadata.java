@@ -122,7 +122,7 @@ public abstract class OverrideMetadata {
 	 * matching bean of type {@link #getBeanType()}.
 	 */
 	@Nullable
-	public String getBeanName() {
+	public final String getBeanName() {
 		return this.beanName;
 	}
 
