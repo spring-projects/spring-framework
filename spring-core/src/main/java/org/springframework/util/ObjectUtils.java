@@ -173,10 +173,7 @@ public abstract class ObjectUtils {
 	@Nullable
 	public static Object unwrapOptional(@Nullable Object obj) {
 		if (obj instanceof Optional<?> optional) {
-			if (optional.isEmpty()) {
-				return null;
-			}
-			Object result = optional.get();
+			Object result = optional.orElse(null);
 			Assert.isTrue(!(result instanceof Optional), "Multi-level Optional usage not supported");
 			return result;
 		}
