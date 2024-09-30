@@ -19,7 +19,6 @@ package org.springframework.web.method.annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.servlet.ServletException;
@@ -107,9 +106,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
-		boolean hasDefaultValue = KotlinDetector.isKotlinReflectPresent()
-				&& KotlinDetector.isKotlinType(parameter.getDeclaringClass())
-				&& KotlinDelegate.hasDefaultValue(nestedParameter);
+		boolean hasDefaultValue = KotlinDetector.isKotlinReflectPresent() &&
+				KotlinDetector.isKotlinType(parameter.getDeclaringClass()) &&
+				KotlinDelegate.hasDefaultValue(nestedParameter);
 
 		Object resolvedName = resolveEmbeddedValuesAndExpressions(namedValueInfo.name);
 		if (resolvedName == null) {
@@ -336,6 +335,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		}
 	}
 
+
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
@@ -346,7 +346,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		 * or an optional parameter (with a default value in the Kotlin declaration).
 		 */
 		public static boolean hasDefaultValue(MethodParameter parameter) {
-			Method method = Objects.requireNonNull(parameter.getMethod());
+			Method method = parameter.getMethod();
+			if (method == null) {
+				return false;
+			}
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			if (function != null) {
 				int index = 0;
@@ -359,4 +362,5 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			return false;
 		}
 	}
+
 }

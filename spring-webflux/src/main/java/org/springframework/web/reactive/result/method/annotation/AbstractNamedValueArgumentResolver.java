@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import kotlin.reflect.KFunction;
@@ -227,9 +226,9 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 
 		return Mono.fromSupplier(() -> {
 			Object value = null;
-			boolean hasDefaultValue = KotlinDetector.isKotlinReflectPresent()
-					&& KotlinDetector.isKotlinType(parameter.getDeclaringClass())
-					&& KotlinDelegate.hasDefaultValue(parameter);
+			boolean hasDefaultValue = KotlinDetector.isKotlinReflectPresent() &&
+					KotlinDetector.isKotlinType(parameter.getDeclaringClass()) &&
+					KotlinDelegate.hasDefaultValue(parameter);
 			if (namedValueInfo.defaultValue != null) {
 				value = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
 			}
@@ -328,6 +327,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 		}
 	}
 
+
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
@@ -338,7 +338,10 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 		 * or an optional parameter (with a default value in the Kotlin declaration).
 		 */
 		public static boolean hasDefaultValue(MethodParameter parameter) {
-			Method method = Objects.requireNonNull(parameter.getMethod());
+			Method method = parameter.getMethod();
+			if (method == null) {
+				return false;
+			}
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			if (function != null) {
 				int index = 0;
