@@ -160,6 +160,17 @@ class UriComponentsBuilderTests {
 		assertThat(fromUriString).isEqualTo(fromUri);
 	}
 
+	@Test  // see gh-27774
+	void fromUriRegistryBasedAuthority() {
+		URI uri = URI.create("http://elated_sutherland:8080/auth/realms/my-realm");
+		UriComponents result = UriComponentsBuilder.fromUri(uri).build();
+
+		assertThat(result.getScheme()).isEqualTo("http");
+		assertThat(result.getHost()).isEqualTo("elated_sutherland");
+		assertThat(result.getPort()).isEqualTo(8080);
+		assertThat(result.getPath()).isEqualTo("/auth/realms/my-realm");
+	}
+
 	@Test
 	void fromUriString() {
 		UriComponents result = UriComponentsBuilder.fromUriString("https://www.ietf.org/rfc/rfc3986.txt").build();

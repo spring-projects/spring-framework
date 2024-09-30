@@ -471,6 +471,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 */
 	public UriComponentsBuilder uri(URI uri) {
 		Assert.notNull(uri, "URI must not be null");
+		if (uri.getHost() == null && uri.getAuthority() != null) {
+			// see gh-27774
+			uriComponents(UriComponentsBuilder.fromUriString(uri.toString()).build());
+			return this;
+		}
 		this.scheme = uri.getScheme();
 		if (uri.isOpaque()) {
 			this.ssp = uri.getRawSchemeSpecificPart();
