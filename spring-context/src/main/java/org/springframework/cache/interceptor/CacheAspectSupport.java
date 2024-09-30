@@ -1155,7 +1155,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 							.onErrorResume(RuntimeException.class, ex -> {
 								try {
 									getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
-									return evaluate(null, invoker, method, contexts);
+									Object e = evaluate(null, invoker, method, contexts);
+									return (e != null ? e : Flux.error((RuntimeException) ex));
 								}
 								catch (RuntimeException exception) {
 									return Flux.error(exception);
@@ -1169,7 +1170,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 							.onErrorResume(RuntimeException.class, ex -> {
 								try {
 									getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
-									return evaluate(null, invoker, method, contexts);
+									Object e = evaluate(null, invoker, method, contexts);
+									return (e != null ? e : Mono.error((RuntimeException) ex));
 								}
 								catch (RuntimeException exception) {
 									return Mono.error(exception);
