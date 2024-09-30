@@ -37,6 +37,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
+import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_DEFINITION;
+import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION;
+
 /**
  * {@link OverrideMetadata} implementation for Mockito {@code mock} support.
  *
@@ -54,15 +57,17 @@ class MockitoBeanOverrideMetadata extends AbstractMockitoOverrideMetadata {
 	private final boolean serializable;
 
 
-	MockitoBeanOverrideMetadata(Field field, ResolvableType typeToMock, MockitoBean annotation) {
-		this(field, typeToMock, (StringUtils.hasText(annotation.name()) ? annotation.name() : null),
-				annotation.reset(), annotation.extraInterfaces(), annotation.answers(), annotation.serializable());
+	MockitoBeanOverrideMetadata(Field field, ResolvableType typeToMock, MockitoBean mockitoBean) {
+		this(field, typeToMock, (!mockitoBean.name().isBlank() ? mockitoBean.name() : null),
+			(mockitoBean.enforceOverride() ? REPLACE_DEFINITION : REPLACE_OR_CREATE_DEFINITION),
+			mockitoBean.reset(), mockitoBean.extraInterfaces(), mockitoBean.answers(), mockitoBean.serializable());
 	}
 
-	private MockitoBeanOverrideMetadata(Field field, ResolvableType typeToMock, @Nullable String beanName, MockReset reset,
-			Class<?>[] extraInterfaces, @Nullable Answers answers, boolean serializable) {
+	private MockitoBeanOverrideMetadata(Field field, ResolvableType typeToMock, @Nullable String beanName,
+			BeanOverrideStrategy strategy, MockReset reset, Class<?>[] extraInterfaces, @Nullable Answers answers,
+			boolean serializable) {
 
-		super(field, typeToMock, beanName, BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION, reset, false);
+		super(field, typeToMock, beanName, strategy, reset, false);
 		Assert.notNull(typeToMock, "'typeToMock' must not be null");
 		this.extraInterfaces = asClassSet(extraInterfaces);
 		this.answers = (answers != null ? answers : Answers.RETURNS_DEFAULTS);

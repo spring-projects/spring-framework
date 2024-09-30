@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ResolvableType;
+import org.springframework.test.context.bean.override.BeanOverrideStrategy;
 import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -124,7 +125,8 @@ class TestBeanOverrideMetadataTests {
 	private TestBeanOverrideMetadata createMetadata(Field field, Method overrideMethod) {
 		TestBean annotation = field.getAnnotation(TestBean.class);
 		String beanName = (StringUtils.hasText(annotation.name()) ? annotation.name() : null);
-		return new TestBeanOverrideMetadata(field, ResolvableType.forClass(field.getType()), beanName, overrideMethod);
+		return new TestBeanOverrideMetadata(
+				field, ResolvableType.forClass(field.getType()), beanName, BeanOverrideStrategy.REPLACE_DEFINITION, overrideMethod);
 	}
 
 	static class SampleOneOverride {

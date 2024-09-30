@@ -33,13 +33,14 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * using a Mockito mock.
  *
- * <p>If no explicit {@link #name()} is specified, a target bean definition is
- * selected according to the type of the annotated field, and there must be
- * exactly one such candidate definition in the context. A {@code @Qualifier}
- * annotation can be used to help disambiguate.
- * If a {@link #name()} is specified, either the definition exists in the
- * application context and is replaced, or it doesn't and a new one is added to
- * the context.
+ * <p>If no explicit {@link #name() name} is specified, a target bean definition
+ * is selected according to the type of the annotated field, and there must be
+ * exactly one such candidate definition in the context. Otherwise, a {@code @Qualifier}
+ * annotation can be used to help disambiguate between multiple candidates. If a
+ * {@link #name() name} is specified, by default a corresponding bean definition
+ * must exist in the application context. If you would like for a new bean definition
+ * to be created when a corresponding bean definition does not exist, set the
+ * {@link #enforceOverride() enforceOverride} attribute to {@code false}.
  *
  * <p>Dependencies that are known to the application context but are not beans
  * (such as those
@@ -51,6 +52,7 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * Any attempt to override a non-singleton bean will result in an exception.
  *
  * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  * @see org.springframework.test.context.bean.override.mockito.MockitoSpyBean @MockitoSpyBean
  * @see org.springframework.test.context.bean.override.convention.TestBean @TestBean
@@ -99,5 +101,17 @@ public @interface MockitoBean {
 	 * @return the reset mode
 	 */
 	MockReset reset() default MockReset.AFTER;
+
+	/**
+	 * Whether to require the existence of a bean definition for the bean being
+	 * overridden.
+	 * <p>Defaults to {@code true} which means that an exception will be thrown
+	 * if a corresponding bean definition does not exist.
+	 * <p>Set to {@code false} to create a new bean definition when a corresponding
+	 * bean definition does not exist.
+	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_DEFINITION
+	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_OR_CREATE_DEFINITION
+	 */
+	boolean enforceOverride() default true;
 
 }

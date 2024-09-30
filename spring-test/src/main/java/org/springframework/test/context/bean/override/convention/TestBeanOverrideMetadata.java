@@ -33,6 +33,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  */
 final class TestBeanOverrideMetadata extends OverrideMetadata {
@@ -41,9 +42,9 @@ final class TestBeanOverrideMetadata extends OverrideMetadata {
 
 
 	TestBeanOverrideMetadata(Field field, ResolvableType beanType, @Nullable String beanName,
-			Method overrideMethod) {
+			BeanOverrideStrategy strategy, Method overrideMethod) {
 
-		super(field, beanType, beanName, BeanOverrideStrategy.REPLACE_DEFINITION);
+		super(field, beanType, beanName, strategy);
 		this.overrideMethod = overrideMethod;
 	}
 

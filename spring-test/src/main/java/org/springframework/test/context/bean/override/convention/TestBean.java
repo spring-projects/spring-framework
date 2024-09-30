@@ -37,7 +37,10 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * used to help disambiguate. In the absence of a {@code @Qualifier} annotation,
  * the name of the annotated field will be used as a qualifier. Alternatively,
  * you can explicitly specify a bean name to replace by setting the
- * {@link #value()} or {@link #name()} attribute.
+ * {@link #value() value} or {@link #name() name} attribute. If you would like
+ * for a new bean definition to be created when a corresponding bean definition
+ * does not exist, set the {@link #enforceOverride() enforceOverride} attribute
+ * to {@code false}.
  *
  * <p>The instance is created from a zero-argument static factory method in the
  * test class whose return type is compatible with the annotated field. In the
@@ -142,5 +145,17 @@ public @interface TestBean {
 	 * based either on the name of the annotated field or the name of the bean.
 	 */
 	String methodName() default "";
+
+	/**
+	 * Whether to require the existence of a bean definition for the bean being
+	 * overridden.
+	 * <p>Defaults to {@code true} which means that an exception will be thrown
+	 * if a corresponding bean definition does not exist.
+	 * <p>Set to {@code false} to create a new bean definition when a corresponding
+	 * bean definition does not exist.
+	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_DEFINITION
+	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_OR_CREATE_DEFINITION
+	 */
+	boolean enforceOverride() default true;
 
 }
