@@ -37,7 +37,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.reactive.BindingContext;
@@ -227,9 +226,9 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 
 		return Mono.fromSupplier(() -> {
 			Object value = null;
-			boolean hasDefaultValue = KotlinDetector.isKotlinReflectPresent()
-					&& KotlinDetector.isKotlinType(parameter.getDeclaringClass())
-					&& KotlinDelegate.hasDefaultValue(parameter);
+			boolean hasDefaultValue = KotlinDetector.isKotlinReflectPresent() &&
+					KotlinDetector.isKotlinType(parameter.getDeclaringClass()) &&
+					KotlinDelegate.hasDefaultValue(parameter);
 			if (namedValueInfo.defaultValue != null) {
 				value = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
 			}
@@ -328,6 +327,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 		}
 	}
 
+
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
@@ -339,7 +339,9 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 		 */
 		public static boolean hasDefaultValue(MethodParameter parameter) {
 			Method method = parameter.getMethod();
-			Assert.notNull(method, () -> "Retrieved null method from MethodParameter: " + parameter);
+			if (method == null) {
+				return false;
+			}
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			if (function != null) {
 				int index = 0;

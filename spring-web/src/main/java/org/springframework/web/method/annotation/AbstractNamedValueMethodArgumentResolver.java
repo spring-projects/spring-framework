@@ -35,7 +35,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -107,9 +106,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
-		boolean hasDefaultValue = KotlinDetector.isKotlinReflectPresent()
-				&& KotlinDetector.isKotlinType(parameter.getDeclaringClass())
-				&& KotlinDelegate.hasDefaultValue(nestedParameter);
+		boolean hasDefaultValue = KotlinDetector.isKotlinReflectPresent() &&
+				KotlinDetector.isKotlinType(parameter.getDeclaringClass()) &&
+				KotlinDelegate.hasDefaultValue(nestedParameter);
 
 		Object resolvedName = resolveEmbeddedValuesAndExpressions(namedValueInfo.name);
 		if (resolvedName == null) {
@@ -336,6 +335,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		}
 	}
 
+
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
@@ -347,7 +347,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		 */
 		public static boolean hasDefaultValue(MethodParameter parameter) {
 			Method method = parameter.getMethod();
-			Assert.notNull(method, () -> "Retrieved null method from MethodParameter: " + parameter);
+			if (method == null) {
+				return false;
+			}
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			if (function != null) {
 				int index = 0;
@@ -360,4 +362,5 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			return false;
 		}
 	}
+
 }

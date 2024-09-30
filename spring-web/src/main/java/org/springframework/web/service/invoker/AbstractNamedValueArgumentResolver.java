@@ -48,7 +48,6 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-
 	@Nullable
 	private final ConversionService conversionService;
 
@@ -263,7 +262,6 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 		public NamedValueInfo update(String name, boolean required, @Nullable String defaultValue) {
 			return new NamedValueInfo(name, required, defaultValue, this.label, this.multiValued);
 		}
-
 	}
 
 }
