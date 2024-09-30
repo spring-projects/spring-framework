@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter
  * HttpMessageConverter} that can read and write the <a href="https://yaml.io/">YAML</a>
- * data format using <a href="https://github.com/FasterXML/jackson-dataformats-text/tree/2.17/yaml">
+ * data format using <a href="https://github.com/FasterXML/jackson-dataformats-text/tree/2.18/yaml">
  * the dedicated Jackson 2.x extension</a>.
  *
  * <p>By default, this converter supports the {@link MediaType#APPLICATION_YAML_VALUE}
