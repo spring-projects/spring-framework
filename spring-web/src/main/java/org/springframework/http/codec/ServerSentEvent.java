@@ -19,6 +19,7 @@ package org.springframework.http.codec;
 import java.time.Duration;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Representation for a Server-Sent Event for use with Spring's reactive Web support.
@@ -101,6 +102,21 @@ public final class ServerSentEvent<T> {
 		return this.data;
 	}
 
+
+	@Override
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof ServerSentEvent<?> that &&
+				ObjectUtils.nullSafeEquals(this.id, that.id) &&
+				ObjectUtils.nullSafeEquals(this.event, that.event) &&
+				ObjectUtils.nullSafeEquals(this.retry, that.retry) &&
+				ObjectUtils.nullSafeEquals(this.comment, that.comment) &&
+				ObjectUtils.nullSafeEquals(this.data, that.data)));
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHash(this.id, this.event, this.retry, this.comment, this.data);
+	}
 
 	@Override
 	public String toString() {

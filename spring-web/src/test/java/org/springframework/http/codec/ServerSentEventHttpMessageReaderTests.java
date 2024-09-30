@@ -74,20 +74,10 @@ class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 						request, Collections.emptyMap()).cast(ServerSentEvent.class);
 
 		StepVerifier.create(events)
-				.consumeNextWith(event -> {
-					assertThat(event.id()).isEqualTo("c42");
-					assertThat(event.event()).isEqualTo("foo");
-					assertThat(event.retry()).isEqualTo(Duration.ofMillis(123));
-					assertThat(event.comment()).isEqualTo("bla\nbla bla\nbla bla bla");
-					assertThat(event.data()).isEqualTo("bar");
-				})
-				.consumeNextWith(event -> {
-					assertThat(event.id()).isEqualTo("c43");
-					assertThat(event.event()).isEqualTo("bar");
-					assertThat(event.retry()).isEqualTo(Duration.ofMillis(456));
-					assertThat(event.comment()).isNull();
-					assertThat(event.data()).isEqualTo("baz");
-				})
+				.expectNext(ServerSentEvent.builder().id("c42").event("foo")
+						.retry(Duration.ofMillis(123)).comment("bla\nbla bla\nbla bla bla").data("bar").build())
+				.expectNext(ServerSentEvent.builder().id("c43").event("bar")
+						.retry(Duration.ofMillis(456)).data("baz").build())
 				.consumeNextWith(event -> assertThat(event.data()).isNull())
 				.consumeNextWith(event -> assertThat(event.data()).isNull())
 				.expectComplete()
@@ -108,20 +98,10 @@ class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 						request, Collections.emptyMap()).cast(ServerSentEvent.class);
 
 		StepVerifier.create(events)
-				.consumeNextWith(event -> {
-					assertThat(event.id()).isEqualTo("c42");
-					assertThat(event.event()).isEqualTo("foo");
-					assertThat(event.retry()).isEqualTo(Duration.ofMillis(123));
-					assertThat(event.comment()).isEqualTo("bla\nbla bla\nbla bla bla");
-					assertThat(event.data()).isEqualTo("bar");
-				})
-				.consumeNextWith(event -> {
-					assertThat(event.id()).isEqualTo("c43");
-					assertThat(event.event()).isEqualTo("bar");
-					assertThat(event.retry()).isEqualTo(Duration.ofMillis(456));
-					assertThat(event.comment()).isNull();
-					assertThat(event.data()).isEqualTo("baz");
-				})
+				.expectNext(ServerSentEvent.builder().id("c42").event("foo")
+						.retry(Duration.ofMillis(123)).comment("bla\nbla bla\nbla bla bla").data("bar").build())
+				.expectNext(ServerSentEvent.builder().id("c43").event("bar")
+						.retry(Duration.ofMillis(456)).data("baz").build())
 				.expectComplete()
 				.verify();
 	}
