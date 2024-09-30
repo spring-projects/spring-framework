@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 	private static final TypeDescriptor STRING_TARGET_TYPE = TypeDescriptor.valueOf(String.class);
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	@Nullable
 	private final ConversionService conversionService;
@@ -248,7 +247,6 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 		public NamedValueInfo update(String name, boolean required, @Nullable String defaultValue) {
 			return new NamedValueInfo(name, required, defaultValue, this.label, this.multiValued);
 		}
-
 	}
 
 }
