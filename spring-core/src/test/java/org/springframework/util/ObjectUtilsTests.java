@@ -62,6 +62,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
  * @author Rick Evans
  * @author Sam Brannen
  * @author Hyunjin Choi
+ * @author Ngoc Nhan
  */
 class ObjectUtilsTests {
 
@@ -1112,6 +1113,24 @@ class ObjectUtilsTests {
 		private static String prefix(Class<?> clazz) {
 			return clazz.getTypeName() + "@";
 		}
+	}
+
+	@Test
+	void unwrapOptional() {
+
+		assertThat(ObjectUtils.unwrapOptional(null)).isNull();
+		assertThat(ObjectUtils.unwrapOptional(Optional.empty())).isNull();
+		assertThat(ObjectUtils.unwrapOptional(Optional.of("some value"))).isEqualTo("some value");
+
+		Optional<Optional<Object>> nestedEmptyOptional = Optional.of(Optional.empty());
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> ObjectUtils.unwrapOptional(nestedEmptyOptional))
+			.withMessage("Multi-level Optional usage not supported");
+
+		Optional<Optional<String>> nestedStringOptional = Optional.of(Optional.of("some value"));
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> ObjectUtils.unwrapOptional(nestedStringOptional))
+			.withMessage("Multi-level Optional usage not supported");
 	}
 
 }
