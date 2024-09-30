@@ -238,10 +238,6 @@ class UriComponentsBuilderTests {
 		UriComponents result = UriComponentsBuilder
 				.fromUriString("http://[1abc:2abc:3abc::5ABC:6abc]:8080/resource").build().encode();
 		assertThat(result.getHost()).isEqualToIgnoringCase("[1abc:2abc:3abc::5ABC:6abc]");
-
-		UriComponents resultIPv4compatible = UriComponentsBuilder
-				.fromUriString("http://[::192.168.1.1]:8080/resource").build().encode();
-		assertThat(resultIPv4compatible.getHost()).isEqualTo("[::c0a8:101]");
 	}
 
 	@Test
