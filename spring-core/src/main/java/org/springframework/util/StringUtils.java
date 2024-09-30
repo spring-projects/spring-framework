@@ -262,15 +262,10 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		int len = str.length();
-		StringBuilder sb = new StringBuilder(str.length());
-		for (int i = 0; i < len; i++) {
-			char c = str.charAt(i);
-			if (!Character.isWhitespace(c)) {
-				sb.append(c);
-			}
-		}
-		return sb;
+		return str.chars()
+				.filter(c -> !Character.isWhitespace(c))
+				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+				.toString();
 	}
 
 	/**
