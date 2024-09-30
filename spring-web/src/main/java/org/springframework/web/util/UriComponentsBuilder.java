@@ -482,6 +482,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			}
 			if (uri.getHost() != null) {
 				this.host = uri.getHost();
+			} else if (uri.getRawAuthority() != null) {
+				Matcher matcher = URI_PATTERN.matcher(uri.getRawAuthority());
+				if (matcher.matches()) {
+					this.host = matcher.group(6);
+				}
 			}
 			if (uri.getPort() != -1) {
 				this.port = String.valueOf(uri.getPort());
