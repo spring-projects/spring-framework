@@ -56,9 +56,9 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 6.2
  */
-final class UrlParser {
+final class WhatWgUrlParser {
 
-	private static final Log logger = LogFactory.getLog(UrlParser.class);
+	private static final Log logger = LogFactory.getLog(WhatWgUrlParser.class);
 
 	private static final int EOF = -1;
 
@@ -98,7 +98,7 @@ final class UrlParser {
 	private boolean stopMainLoop = false;
 
 
-	private UrlParser(
+	private WhatWgUrlParser(
 			String input, @Nullable UrlRecord base, @Nullable Charset encoding,
 			@Nullable Consumer<String> validationErrorHandler) {
 
@@ -131,7 +131,7 @@ final class UrlParser {
 
 		Assert.notNull(input, "Input must not be null");
 
-		UrlParser parser = new UrlParser(input, base, encoding, validationErrorHandler);
+		WhatWgUrlParser parser = new WhatWgUrlParser(input, base, encoding, validationErrorHandler);
 		return parser.basicUrlParser(null, null);
 	}
 
@@ -743,7 +743,7 @@ final class UrlParser {
 
 		SCHEME_START {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
 				if (isAsciiAlpha(c)) {
 					p.append(Character.toLowerCase((char) c));
@@ -770,7 +770,7 @@ final class UrlParser {
 		},
 		SCHEME {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
 				if (isAsciiAlphaNumeric(c) || (c == '+' || c == '-' || c == '.')) {
 					p.append(Character.toLowerCase((char) c));
@@ -868,7 +868,7 @@ final class UrlParser {
 		},
 		NO_SCHEME {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If base is null, or base has an opaque path and c is not U+0023 (#),
 				// missing-scheme-non-relative-URL validation error, return failure.
 				if (p.base == null || p.base.path().isOpaque() && c != '#') {
@@ -901,7 +901,7 @@ final class UrlParser {
 		},
 		SPECIAL_RELATIVE_OR_AUTHORITY {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is U+002F (/) and remaining starts with U+002F (/),
 				// then set state to special authority ignore slashes state and
 				// increase pointer by 1.
@@ -922,7 +922,7 @@ final class UrlParser {
 		},
 		PATH_OR_AUTHORITY {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is U+002F (/), then set state to authority state.
 				if (c == '/') {
 					p.setState(AUTHORITY);
@@ -936,7 +936,7 @@ final class UrlParser {
 		},
 		RELATIVE {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// Assert: base’s scheme is not "file".
 				Assert.state(p.base != null && !"file".equals(p.base.scheme()),
 						"Base scheme not provided or supported");
@@ -994,7 +994,7 @@ final class UrlParser {
 		},
 		RELATIVE_SLASH {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If url is special and c is U+002F (/) or U+005C (\), then:
 				if (url.isSpecial() && (c == '/' || c == '\\')) {
 					// If c is U+005C (\), invalid-reverse-solidus validation error.
@@ -1027,7 +1027,7 @@ final class UrlParser {
 		},
 		SPECIAL_AUTHORITY_SLASHES {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is U+002F (/) and remaining starts with U+002F (/),
 				// then set state to special authority ignore slashes state and
 				// increase pointer by 1.
@@ -1048,7 +1048,7 @@ final class UrlParser {
 		},
 		SPECIAL_AUTHORITY_IGNORE_SLASHES {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is neither U+002F (/) nor U+005C (\),
 				// then set state to authority state and decrease pointer by 1.
 				if (c != '/' && c != '\\') {
@@ -1065,7 +1065,7 @@ final class UrlParser {
 		},
 		AUTHORITY {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is U+0040 (@), then:
 				if (c == '@') {
 					// Invalid-credentials validation error.
@@ -1091,7 +1091,7 @@ final class UrlParser {
 						}
 						// Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint
 						// using the userinfo percent-encode set.
-						String encodedCodePoints = p.percentEncode(codePoint, UrlParser::userinfoPercentEncodeSet);
+						String encodedCodePoints = p.percentEncode(codePoint, WhatWgUrlParser::userinfoPercentEncodeSet);
 						// If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
 						if (p.passwordTokenSeen) {
 							if (encodedCodePoints != null) {
@@ -1137,7 +1137,7 @@ final class UrlParser {
 		},
 		HOST {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If state override is given and url’s scheme is "file",
 				// then decrease pointer by 1 and set state to file host state.
 				if (p.stateOverride != null && "file".equals(url.scheme())) {
@@ -1214,7 +1214,7 @@ final class UrlParser {
 		},
 		PORT {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is an ASCII digit, append c to buffer.
 				if (isAsciiDigit(c)) {
 					p.append(c);
@@ -1281,7 +1281,7 @@ final class UrlParser {
 		},
 		FILE {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// Set url’s scheme to "file".
 				url.scheme = "file";
 				// Set url’s host to the empty string.
@@ -1347,7 +1347,7 @@ final class UrlParser {
 		},
 		FILE_SLASH {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is U+002F (/) or U+005C (\), then:
 				if (c == '/' || c == '\\') {
 					// If c is U+005C (\), invalid-reverse-solidus validation error.
@@ -1382,7 +1382,7 @@ final class UrlParser {
 		},
 		FILE_HOST {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is the EOF code point, U+002F (/), U+005C (\), U+003F (?), or U+0023 (#),
 				// then decrease pointer by 1 and then:
 				if (c == EOF || c == '/' || c == '\\' || c == '?' || c == '#') {
@@ -1433,7 +1433,7 @@ final class UrlParser {
 		},
 		PATH_START {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If url is special, then:
 				if (url.isSpecial()) {
 					// If c is U+005C (\), invalid-reverse-solidus validation error.
@@ -1484,7 +1484,7 @@ final class UrlParser {
 		},
 		PATH {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If one of the following is true:
 				// - c is the EOF code point or U+002F (/)
 				// - url is special and c is U+005C (\)
@@ -1563,7 +1563,7 @@ final class UrlParser {
 						}
 					}
 					// UTF-8 percent-encode c using the path percent-encode set and append the result to buffer.
-					String encoded = p.percentEncode(c, UrlParser::pathPercentEncodeSet);
+					String encoded = p.percentEncode(c, WhatWgUrlParser::pathPercentEncodeSet);
 					if (encoded != null) {
 						p.append(encoded);
 					}
@@ -1575,7 +1575,7 @@ final class UrlParser {
 		},
 		OPAQUE_PATH {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// EXTRA: if previous state is URL Template and the buffer is empty,
 				// append buffer to url's path and empty the buffer
 				if (p.previousState == URL_TEMPLATE && !p.buffer.isEmpty()) {
@@ -1618,7 +1618,7 @@ final class UrlParser {
 					// If c is not the EOF code point, UTF-8 percent-encode c using
 					// the C0 control percent-encode set and append the result to url’s path.
 					if (c != EOF) {
-						String encoded = p.percentEncode(c, UrlParser::c0ControlPercentEncodeSet);
+						String encoded = p.percentEncode(c, WhatWgUrlParser::c0ControlPercentEncodeSet);
 						if (encoded != null) {
 							url.path.append(encoded);
 						}
@@ -1631,7 +1631,7 @@ final class UrlParser {
 		},
 		QUERY {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If encoding is not UTF-8 and one of the following is true:
 				// - url is not special
 				// - url’s scheme is "ws" or "wss"
@@ -1648,7 +1648,7 @@ final class UrlParser {
 					// Let queryPercentEncodeSet be the special-query percent-encode set if url is special;
 					// otherwise the query percent-encode set.
 					IntPredicate queryPercentEncodeSet = (url.isSpecial() ?
-							UrlParser::specialQueryPercentEncodeSet : UrlParser::queryPercentEncodeSet);
+							WhatWgUrlParser::specialQueryPercentEncodeSet : WhatWgUrlParser::queryPercentEncodeSet);
 					// Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
 					// and append the result to url’s query.
 					String encoded = p.percentEncode(p.buffer.toString(), queryPercentEncodeSet);
@@ -1690,7 +1690,7 @@ final class UrlParser {
 		},
 		FRAGMENT {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				// If c is not the EOF code point, then:
 				if (c != EOF) {
 					if (p.validate()) {
@@ -1709,7 +1709,7 @@ final class UrlParser {
 					}
 					// UTF-8 percent-encode c using the fragment percent-encode set and
 					// append the result to url’s fragment.
-					String encoded = p.percentEncode(c, UrlParser::fragmentPercentEncodeSet);
+					String encoded = p.percentEncode(c, WhatWgUrlParser::fragmentPercentEncodeSet);
 					Assert.state(url.fragment != null, "Url's fragment should not be null");
 					if (encoded != null) {
 						url.fragment.append(encoded);
@@ -1722,7 +1722,7 @@ final class UrlParser {
 		},
 		URL_TEMPLATE {
 			@Override
-			public void handle(int c, UrlRecord url, UrlParser p) {
+			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
 				Assert.state(p.previousState != null, "No previous state set");
 				if (c == '}') {
 					p.append(c);
@@ -1739,7 +1739,7 @@ final class UrlParser {
 			}
 		};
 
-		public abstract void handle(int c, UrlRecord url, UrlParser p);
+		public abstract void handle(int c, UrlRecord url, WhatWgUrlParser p);
 
 	}
 
@@ -2133,7 +2133,7 @@ final class UrlParser {
 		 * boolean isOpaque (default false), and then runs these steps.
 		 * They return failure or a host.
 		 */
-		static Host parse(String input, boolean isOpaque, UrlParser p) {
+		static Host parse(String input, boolean isOpaque, WhatWgUrlParser p) {
 			// If input starts with U+005B ([), then:
 			if (!input.isEmpty() && input.codePointAt(0) == '[') {
 				int last = input.length() - 1;
@@ -2303,7 +2303,7 @@ final class UrlParser {
 		 * The opaque-host parser takes a scalar value string input,
 		 * and then runs these steps. They return failure or an opaque host.
 		 */
-		public static OpaqueHost parse(String input, UrlParser p) {
+		public static OpaqueHost parse(String input, WhatWgUrlParser p) {
 			for (int i = 0; i < input.length(); i++) {
 				int ch = input.codePointAt(i);
 				// If input contains a forbidden host code point, h
@@ -2326,7 +2326,7 @@ final class UrlParser {
 			}
 			// Return the result of running UTF-8 percent-encode on input
 			// using the C0 control percent-encode set.
-			String encoded = p.percentEncode(input, UrlParser::c0ControlPercentEncodeSet);
+			String encoded = p.percentEncode(input, WhatWgUrlParser::c0ControlPercentEncodeSet);
 			return new OpaqueHost(encoded);
 		}
 
@@ -2420,7 +2420,7 @@ final class UrlParser {
 			return output.toString();
 		}
 
-		public static Ipv4Address parse(String input, UrlParser p) {
+		public static Ipv4Address parse(String input, WhatWgUrlParser p) {
 			// Let parts be the result of strictly splitting input on U+002E (.).
 			List<String> parts = strictSplit(input, '.');
 			int partsSize = parts.size();

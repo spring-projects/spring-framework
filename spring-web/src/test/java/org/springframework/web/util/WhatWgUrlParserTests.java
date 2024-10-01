@@ -25,9 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-class UrlParserTests {
+class WhatWgUrlParserTests {
 
-	private static final UrlParser.UrlRecord EMPTY_URL_RECORD = new UrlParser.UrlRecord();
+	private static final WhatWgUrlParser.UrlRecord EMPTY_URL_RECORD = new WhatWgUrlParser.UrlRecord();
 
 	@Test
 	void parse() {
@@ -45,7 +45,7 @@ class UrlParserTests {
 	}
 
 	private void testParse(String input, String scheme, @Nullable String host, @Nullable String port, String path, @Nullable String query, @Nullable String fragment) {
-		UrlParser.UrlRecord result = UrlParser.parse(input, EMPTY_URL_RECORD, null, null);
+		WhatWgUrlParser.UrlRecord result = WhatWgUrlParser.parse(input, EMPTY_URL_RECORD, null, null);
 		assertThat(result.scheme()).as("Invalid scheme").isEqualTo(scheme);
 		if (host != null) {
 			assertThat(result.host()).as("Host is null").isNotNull();
@@ -74,7 +74,7 @@ class UrlParserTests {
 	}
 
 	void testParseOpaque(String input, String path, @Nullable String query) {
-		UrlParser.UrlRecord result = UrlParser.parse("mailto:user@example.com?subject=foo", EMPTY_URL_RECORD, null, null);
+		WhatWgUrlParser.UrlRecord result = WhatWgUrlParser.parse("mailto:user@example.com?subject=foo", EMPTY_URL_RECORD, null, null);
 
 
 		assertThat(result.scheme()).as("Invalid scheme").isEqualTo("mailto");

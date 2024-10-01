@@ -96,7 +96,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final Object[] EMPTY_VALUES = new Object[0];
 
-	private static final UrlParser.UrlRecord EMPTY_URL_RECORD = new UrlParser.UrlRecord();
+	private static final WhatWgUrlParser.UrlRecord EMPTY_URL_RECORD = new WhatWgUrlParser.UrlRecord();
 
 
 	@Nullable
@@ -216,7 +216,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 		UriComponentsBuilder builder = new UriComponentsBuilder();
 		if (!uri.isEmpty()) {
-			UrlParser.UrlRecord urlRecord = UrlParser.parse(uri, EMPTY_URL_RECORD, null, null);
+			WhatWgUrlParser.UrlRecord urlRecord = WhatWgUrlParser.parse(uri, EMPTY_URL_RECORD, null, null);
 			if (!urlRecord.scheme().isEmpty()) {
 				builder.scheme(urlRecord.scheme());
 			}
@@ -228,7 +228,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				}
 				builder.userInfo(userInfo.toString());
 			}
-			if (urlRecord.host() != null && !(urlRecord.host() instanceof UrlParser.EmptyHost)) {
+			if (urlRecord.host() != null && !(urlRecord.host() instanceof WhatWgUrlParser.EmptyHost)) {
 				builder.host(urlRecord.host().toString());
 			}
 			if (urlRecord.port() != null) {
