@@ -29,7 +29,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.NativeDetector;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
@@ -58,14 +57,16 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 
 	@Override
 	public void beforeTestMethod(TestContext testContext) throws Exception {
-		if (MockitoTestExecutionListener.mockitoPresent && !NativeDetector.inNativeImage()) {
+		Class<?> testClass = testContext.getTestClass();
+		if (MockitoTestExecutionListener.mockitoPresent && MockitoAnnotationDetector.hasMockitoAnnotations(testClass)) {
 			resetMocks(testContext.getApplicationContext(), MockReset.BEFORE);
 		}
 	}
 
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
-		if (MockitoTestExecutionListener.mockitoPresent && !NativeDetector.inNativeImage()) {
+		Class<?> testClass = testContext.getTestClass();
+		if (MockitoTestExecutionListener.mockitoPresent && MockitoAnnotationDetector.hasMockitoAnnotations(testClass)) {
 			resetMocks(testContext.getApplicationContext(), MockReset.AFTER);
 		}
 	}
