@@ -48,8 +48,12 @@ abstract class ReactorUriHelper {
 			builder.append(port);
 		}
 
-		appendRequestUri(request, builder);
+		String prefix = request.forwardedPrefix();
+		if (prefix != null && !prefix.isEmpty()) {
+			builder.append(prefix);
+		}
 
+		appendRequestUri(request, builder);
 		return new URI(builder.toString());
 	}
 

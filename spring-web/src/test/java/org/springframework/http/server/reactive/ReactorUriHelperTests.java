@@ -20,6 +20,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import reactor.netty.http.server.HttpServerRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,5 +50,30 @@ class ReactorUriHelperTests {
 				.hasToString("http://[fe80::a%25en1]/");
 
 	}
+
+	@ParameterizedTest(name = "{displayName}({arguments})")
+	@CsvSource(delimiter='|', value = {
+			"/prefix           | /prefix/",
+			"/prefix1/prefix2  | /prefix1/prefix2/",
+			"                  | /",
+			"''                | /",
+	})
+	void forwardedPrefix(String prefixHeader, String expectedPath) throws URISyntaxException {
+		HttpServerRequest nettyRequest = mock();
+
+		given(nettyRequest.scheme()).willReturn("https");
+		given(nettyRequest.hostName()).willReturn("localhost");
+		given(nettyRequest.hostPort()).willReturn(443);
+		given(nettyRequest.uri()).willReturn("/");
+		given(nettyRequest.forwardedPrefix()).willReturn(prefixHeader);
+
+		URI uri = ReactorUriHelper.createUri(nettyRequest);
+		assertThat(uri).hasScheme("https")
+				.hasHost("localhost")
+				.hasPort(-1)
+				.hasPath(expectedPath)
+				.hasToString("https://localhost" + expectedPath);
+	}
+
 
 }
