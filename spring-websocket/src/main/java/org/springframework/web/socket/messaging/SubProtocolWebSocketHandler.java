@@ -70,6 +70,10 @@ import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSe
 public class SubProtocolWebSocketHandler
 		implements WebSocketHandler, SubProtocolCapable, MessageHandler, SmartLifecycle {
 
+	private static final int DEFAULT_SEND_TIME_LIMIT = 10 * 1000;
+
+	private static final int DEFAULT_SEND_BUFFER_SIZE_LIMIT = 512 * 1024;
+	
 	/** The default value for {@link #setTimeToFirstMessage(int) timeToFirstMessage}. */
 	private static final int DEFAULT_TIME_TO_FIRST_MESSAGE = 60 * 1000;
 
@@ -91,9 +95,9 @@ public class SubProtocolWebSocketHandler
 
 	private final Map<String, WebSocketSessionHolder> sessions = new ConcurrentHashMap<>();
 
-	private int sendTimeLimit = 10 * 1000;
+	private int sendTimeLimit = DEFAULT_SEND_TIME_LIMIT;
 
-	private int sendBufferSizeLimit = 512 * 1024;
+	private int sendBufferSizeLimit = DEFAULT_SEND_BUFFER_SIZE_LIMIT;
 
 	private int timeToFirstMessage = DEFAULT_TIME_TO_FIRST_MESSAGE;
 
