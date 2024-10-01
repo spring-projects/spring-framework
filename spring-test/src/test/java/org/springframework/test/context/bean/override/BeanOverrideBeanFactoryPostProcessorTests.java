@@ -315,7 +315,6 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatNoException().isThrownBy(context::refresh);
 		assertThat(context.getBeanDefinition("descriptionBean"))
-				.isNotSameAs(definition)
 				.matches(BeanDefinition::isPrimary, "isPrimary")
 				.matches(BeanDefinition::isFallback, "isFallback")
 				.satisfies(d -> assertThat(d.getScope()).isEqualTo(""))
@@ -324,9 +323,8 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 	@Test
-	void qualifiedElementIsSetToBeanOverrideField() {
+	void qualifiedElementIsSetToBeanOverrideFieldForNonexistentBeanDefinition() {
 		AnnotationConfigApplicationContext context = createContext(CaseByNameWithQualifier.class);
-		context.registerBeanDefinition("descriptionBean", new RootBeanDefinition(String.class, () -> "ORIGINAL"));
 
 		assertThatNoException().isThrownBy(context::refresh);
 		assertThat(context.getBeanDefinition("descriptionBean"))
@@ -398,9 +396,12 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	static class CaseByNameWithQualifier {
 
 		@Qualifier("preferThis")
-		@DummyBean(beanName = "descriptionBean")
+		@TestBean(name = "descriptionBean", enforceOverride = false)
 		private String description;
 
+		static String descriptionBean() {
+			return "overridden";
+		}
 	}
 
 	static class TestFactoryBean implements FactoryBean<Object> {

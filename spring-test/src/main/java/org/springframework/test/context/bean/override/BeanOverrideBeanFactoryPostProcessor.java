@@ -148,14 +148,17 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		// Process existing bean definition.
 		if (existingBeanDefinition != null) {
 			validateBeanDefinition(beanFactory, beanName);
-			copyBeanDefinitionProperties(existingBeanDefinition, pseudoBeanDefinition);
+			// Since validation may have registered a singleton as a side effect -- for example,
+			// for a FactoryBean -- we need to remove the bean definition (which removes the
+			// singleton as a side effect) and re-register the bean definition.
 			registry.removeBeanDefinition(beanName);
+			registry.registerBeanDefinition(beanName, existingBeanDefinition);
 		}
-
-		// At this point, we either removed an existing bean definition above, or
-		// there was no bean definition to begin with. So, we register the pseudo bean
-		// definition to ensure that a bean definition exists for the given bean name.
-		registry.registerBeanDefinition(beanName, pseudoBeanDefinition);
+		else {
+			// There was no existing bean definition, so we register the pseudo bean definition
+			// to ensure that a bean definition exists for the given bean name.
+			registry.registerBeanDefinition(beanName, pseudoBeanDefinition);
+		}
 
 		Object override = overrideMetadata.createOverride(beanName, existingBeanDefinition, null);
 		overrideMetadata.track(override, beanFactory);
@@ -292,16 +295,6 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	private static void validateBeanDefinition(ConfigurableListableBeanFactory beanFactory, String beanName) {
 		Assert.state(beanFactory.isSingleton(beanName),
 				() -> "Unable to override bean '" + beanName + "': only singleton beans can be overridden.");
-	}
-
-	/**
-	 * Copy the following properties of the source {@link BeanDefinition} to the
-	 * target: the {@linkplain BeanDefinition#isPrimary() primary flag} and the
-	 * {@linkplain BeanDefinition#isFallback() fallback flag}.
-	 */
-	private static void copyBeanDefinitionProperties(BeanDefinition source, RootBeanDefinition target) {
-		target.setPrimary(source.isPrimary());
-		target.setFallback(source.isFallback());
 	}
 
 
