@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -72,7 +73,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	private static final long ONE_YEAR = TimeUnit.DAYS.toSeconds(365);
 
 
-	private static final Random random = new Random();
+	private static final Random random = new SecureRandom();
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
