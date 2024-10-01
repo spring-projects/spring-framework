@@ -901,7 +901,7 @@ public abstract class ObjectUtils {
 	 */
 	public static String nullSafeConciseToString(@Nullable Object obj) {
 		if (obj == null) {
-			return "null";
+			return NULL_STRING;
 		}
 		if (obj instanceof Optional<?> optional) {
 			return (optional.isEmpty() ? "Optional.empty" :
