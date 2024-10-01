@@ -142,12 +142,14 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getLocalAddress() {
 		checkNativeSessionInitialized();
 		return this.sessionHelper.getLocalAddress(getNativeSession());
 	}
 
 	@Override
+	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		checkNativeSessionInitialized();
 		return this.sessionHelper.getRemoteAddress(getNativeSession());
@@ -250,8 +252,10 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 		int getBinaryMessageSizeLimit(Session session);
 
+		@Nullable
 		InetSocketAddress getRemoteAddress(Session session);
 
+		@Nullable
 		InetSocketAddress getLocalAddress(Session session);
 
 	}
@@ -348,7 +352,9 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		@SuppressWarnings("ConstantConditions")
 		public InetSocketAddress getRemoteAddress(Session session) {
 			SocketAddress address = (SocketAddress) ReflectionUtils.invokeMethod(getRemoteAddressMethod, session);
-			Assert.isInstanceOf(InetSocketAddress.class, address);
+			if (address != null) {
+				Assert.isInstanceOf(InetSocketAddress.class, address);
+			}
 			return (InetSocketAddress) address;
 		}
 
@@ -356,7 +362,9 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		@SuppressWarnings("ConstantConditions")
 		public InetSocketAddress getLocalAddress(Session session) {
 			SocketAddress address = (SocketAddress) ReflectionUtils.invokeMethod(getLocalAddressMethod, session);
-			Assert.isInstanceOf(InetSocketAddress.class, address);
+			if (address != null) {
+				Assert.isInstanceOf(InetSocketAddress.class, address);
+			}
 			return (InetSocketAddress) address;
 		}
 	}
