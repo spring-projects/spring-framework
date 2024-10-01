@@ -31,8 +31,6 @@ import org.springframework.util.Assert;
  */
 abstract class ReactorUriHelper {
 
-	private static final String EMPTY_STRING = "";
-
 	public static URI createUri(HttpServerRequest request) throws URISyntaxException {
 		Assert.notNull(request, "HttpServerRequest must not be null");
 
@@ -55,8 +53,7 @@ abstract class ReactorUriHelper {
 			builder.append(prefix);
 		}
 
-		String suffix = requestUri(request);
-		builder.append(suffix);
+		appendRequestUri(request, builder);
 		return new URI(builder.toString());
 	}
 
@@ -126,7 +123,7 @@ abstract class ReactorUriHelper {
 				(ipv6 && ('[' == c || ']' == c || ':' == c)); // ipv6
 	}
 
-	private static String requestUri(HttpServerRequest request) {
+	private static void appendRequestUri(HttpServerRequest request, StringBuilder builder) {
 		String uri = request.uri();
 		int length = uri.length();
 		for (int i = 0; i < length; i++) {
@@ -139,13 +136,14 @@ abstract class ReactorUriHelper {
 					for (int j = i + 3; j < length; j++) {
 						c = uri.charAt(j);
 						if (c == '/' || c == '?' || c == '#') {
-							return uri.substring(j, length);
+							builder.append(uri, j, length);
+							return;
 						}
 					}
-					return EMPTY_STRING;
+					return;
 				}
 			}
 		}
-		return uri;
+		builder.append(uri);
 	}
 }
