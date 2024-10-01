@@ -904,8 +904,8 @@ public abstract class ObjectUtils {
 			return NULL_STRING;
 		}
 		if (obj instanceof Optional<?> optional) {
-			return (optional.isEmpty() ? "Optional.empty" :
-				"Optional[%s]".formatted(nullSafeConciseToString(optional.get())));
+			return optional.map(o -> "Optional[%s]".formatted(nullSafeConciseToString(o)))
+				.orElse("Optional.empty");
 		}
 		if (obj.getClass().isArray()) {
 			return (Array.getLength(obj) == 0 ? EMPTY_ARRAY : NON_EMPTY_ARRAY);
