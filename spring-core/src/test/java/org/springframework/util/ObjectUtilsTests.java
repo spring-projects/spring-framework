@@ -1119,6 +1119,7 @@ class ObjectUtilsTests {
 	void unwrapOptional() {
 
 		assertThat(ObjectUtils.unwrapOptional(null)).isNull();
+		assertThat(ObjectUtils.unwrapOptional("some value")).isEqualTo("some value");
 		assertThat(ObjectUtils.unwrapOptional(Optional.empty())).isNull();
 		assertThat(ObjectUtils.unwrapOptional(Optional.of("some value"))).isEqualTo("some value");
 
