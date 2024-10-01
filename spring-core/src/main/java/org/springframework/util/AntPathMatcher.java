@@ -897,7 +897,7 @@ public class AntPathMatcher implements PathMatcher {
 								this.doubleWildcards++;
 								pos += 2;
 							}
-							else if (pos > 0 && !this.pattern.substring(pos - 1).equals(".*")) {
+							else if (pos > 0 && !(this.pattern.charAt(pos - 1) == '.' && (pos + 1 == this.pattern.length() || this.pattern.charAt(pos + 1) != '*'))) {
 								this.singleWildcards++;
 								pos++;
 							}
