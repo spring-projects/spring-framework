@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  */
 class OverrideMetadataTests {
@@ -144,6 +146,20 @@ class OverrideMetadataTests {
 	}
 
 	@Test
+	void isEqualToWithSameMetadataAndSameQualifierValuesButWithAnnotationsDeclaredInDifferentOrder() {
+		Field field1 = field(ConfigA.class, "qualifiedDummyBean");
+		Field field2 = field(ConfigB.class, "qualifiedDummyBean");
+
+		// Prerequisite
+		assertThat(Arrays.equals(field1.getAnnotations(), field2.getAnnotations())).isFalse();
+
+		OverrideMetadata metadata1 = createMetadata(field1);
+		OverrideMetadata metadata2 = createMetadata(field2);
+		assertThat(metadata1).isEqualTo(metadata2);
+		assertThat(metadata1).hasSameHashCodeAs(metadata2);
+	}
+
+	@Test
 	void isNotEqualToWithSameMetadataAndDifferentQualifierValues() {
 		OverrideMetadata metadata = createMetadata(field(ConfigA.class, "directQualifier"));
 		OverrideMetadata metadata2 = createMetadata(field(ConfigA.class, "differentDirectQualifier"));
@@ -241,6 +257,10 @@ class OverrideMetadataTests {
 
 		@CustomQualifier
 		ExampleService customQualifier;
+
+		@DummyBean
+		@Qualifier("test")
+		ExampleService qualifiedDummyBean;
 	}
 
 	static class ConfigB {
@@ -251,6 +271,10 @@ class OverrideMetadataTests {
 
 		@Qualifier("test")
 		ExampleService directQualifier;
+
+		@Qualifier("test")
+		@DummyBean
+		ExampleService qualifiedDummyBean;
 	}
 
 	@Target(ElementType.FIELD)

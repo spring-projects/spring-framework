@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.bean.override;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -26,9 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link BeanOverrideContextCustomizer}.
@@ -72,7 +71,8 @@ class BeanOverrideContextCustomizerTests {
 		private final String key;
 
 		public DummyOverrideMetadata(String key) {
-			super(mock(Field.class), ResolvableType.forClass(Object.class), null, BeanOverrideStrategy.REPLACE_DEFINITION);
+			super(ReflectionUtils.findField(DummyOverrideMetadata.class, "key"),
+					ResolvableType.forClass(Object.class), null, BeanOverrideStrategy.REPLACE_DEFINITION);
 			this.key = key;
 		}
 

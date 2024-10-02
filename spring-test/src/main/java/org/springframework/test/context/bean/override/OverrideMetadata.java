@@ -19,9 +19,12 @@ package org.springframework.test.context.bean.override;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.beans.BeanUtils;
@@ -61,6 +64,8 @@ public abstract class OverrideMetadata {
 
 	private final Field field;
 
+	private final Set<Annotation> fieldAnnotations;
+
 	private final ResolvableType beanType;
 
 	@Nullable
@@ -73,6 +78,7 @@ public abstract class OverrideMetadata {
 			BeanOverrideStrategy strategy) {
 
 		this.field = field;
+		this.fieldAnnotations = annotationSet(field);
 		this.beanType = beanType;
 		this.beanName = beanName;
 		this.strategy = strategy;
@@ -183,16 +189,17 @@ public abstract class OverrideMetadata {
 		if (this.beanName != null) {
 			return true;
 		}
-		// by type lookup
-		return Objects.equals(this.field.getName(), that.field.getName()) &&
-				Arrays.equals(this.field.getAnnotations(), that.field.getAnnotations());
+
+		// by-type lookup
+		return (Objects.equals(this.field.getName(), that.field.getName()) &&
+				this.fieldAnnotations.equals(that.fieldAnnotations));
 	}
 
 	@Override
 	public int hashCode() {
 		int hash = Objects.hash(getClass(), this.beanType.getType(), this.beanName, this.strategy);
 		return (this.beanName != null ? hash : hash +
-				Objects.hash(this.field.getName(), Arrays.hashCode(this.field.getAnnotations())));
+				Objects.hash(this.field.getName(), this.fieldAnnotations));
 	}
 
 	@Override
@@ -203,6 +210,11 @@ public abstract class OverrideMetadata {
 				.append("beanName", this.beanName)
 				.append("strategy", this.strategy)
 				.toString();
+	}
+
+	private static Set<Annotation> annotationSet(Field field) {
+		Annotation[] annotations = field.getAnnotations();
+		return (annotations.length != 0 ? new HashSet<>(Arrays.asList(annotations)) : Collections.emptySet());
 	}
 
 }
