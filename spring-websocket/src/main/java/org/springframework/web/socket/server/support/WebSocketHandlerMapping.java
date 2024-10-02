@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -127,7 +128,7 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 		handler = (handler instanceof HandlerExecutionChain chain ? chain.getHandler() : handler);
 		if (this.webSocketUpgradeMatch && handler instanceof WebSocketHttpRequestHandler) {
 			String header = request.getHeader(HttpHeaders.UPGRADE);
-			return (request.getMethod().equals("GET") &&
+			return (HttpMethod.GET.matches(request.getMethod()) &&
 					header != null && header.equalsIgnoreCase("websocket"));
 		}
 		return true;
