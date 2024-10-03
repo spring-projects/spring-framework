@@ -93,8 +93,8 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 
 		List<OverrideMetadata> metadataForFields = OverrideMetadata.forTestClass(testClass);
 		if (!metadataForFields.isEmpty()) {
-			BeanOverrideRegistrar registrar =
-					testContext.getApplicationContext().getBean(BeanOverrideRegistrar.class);
+			BeanOverrideRegistrar registrar = testContext.getApplicationContext()
+					.getBean(BeanOverrideContextCustomizer.REGISTRAR_BEAN_NAME, BeanOverrideRegistrar.class);
 			for (OverrideMetadata metadata : metadataForFields) {
 				consumer.accept(new TestContextOverrideMetadata(testInstance, metadata), registrar);
 			}

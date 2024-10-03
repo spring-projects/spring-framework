@@ -38,7 +38,7 @@ import org.springframework.test.context.MergedContextConfiguration;
  */
 class BeanOverrideContextCustomizer implements ContextCustomizer {
 
-	private static final String REGISTRAR_BEAN_NAME =
+	static final String REGISTRAR_BEAN_NAME =
 			"org.springframework.test.context.bean.override.internalBeanOverrideRegistrar";
 
 	private static final String INFRASTRUCTURE_BEAN_NAME =
