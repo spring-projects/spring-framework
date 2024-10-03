@@ -69,10 +69,10 @@ class ReactorUriHelperTests {
 
 		URI uri = ReactorUriHelper.createUri(nettyRequest);
 		assertThat(uri).hasScheme("https")
-		               .hasHost("localhost")
-		               .hasPort(-1)
-		               .hasPath(expectedPath)
-		               .hasToString("https://localhost" + expectedPath);
+				.hasHost("localhost")
+				.hasPort(-1)
+				.hasPath(expectedPath)
+				.hasToString("https://localhost" + expectedPath);
 	}
 
 
