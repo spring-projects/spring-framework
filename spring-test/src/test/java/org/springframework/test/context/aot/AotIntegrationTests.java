@@ -42,6 +42,7 @@ import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.test.generate.CompilerFiles;
+import org.springframework.context.aot.AbstractAotProcessor;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterImportedConfigTests;
@@ -174,10 +175,20 @@ class AotIntegrationTests extends AbstractAotTests {
 	}
 
 	private void runEndToEndTests(List<Class<?>> testClasses, boolean failOnError) {
-		// AOT BUILD-TIME: PROCESSING
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints(), failOnError);
-		generator.processAheadOfTime(testClasses.stream());
+
+		// AOT BUILD-TIME: PROCESSING
+		try {
+			// Emulate AbstractAotProcessor.process().
+			System.setProperty(AbstractAotProcessor.AOT_PROCESSING, "true");
+
+			TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints(), failOnError);
+			generator.processAheadOfTime(testClasses.stream());
+		}
+		finally {
+			// Emulate AbstractAotProcessor.process().
+			System.clearProperty(AbstractAotProcessor.AOT_PROCESSING);
+		}
 
 		// AOT BUILD-TIME: COMPILATION
 		TestCompiler.forSystem().with(CompilerFiles.from(generatedFiles))
