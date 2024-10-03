@@ -33,6 +33,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
@@ -142,14 +143,9 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			beanNameIncludingFactory = beanName;
 		}
 
-		// Process existing bean definition.
 		if (existingBeanDefinition != null) {
+			// Validate existing bean definition.
 			validateBeanDefinition(beanFactory, beanName);
-			// Since validation may have registered a singleton as a side effect -- for example,
-			// for a FactoryBean -- we need to remove the bean definition (which removes the
-			// singleton as a side effect) and re-register the bean definition.
-			registry.removeBeanDefinition(beanName);
-			registry.registerBeanDefinition(beanName, existingBeanDefinition);
 		}
 		else {
 			// There was no existing bean definition, so we register the pseudo bean definition
@@ -293,6 +289,13 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	private static void validateBeanDefinition(ConfigurableListableBeanFactory beanFactory, String beanName) {
 		Assert.state(beanFactory.isSingleton(beanName),
 				() -> "Unable to override bean '" + beanName + "': only singleton beans can be overridden.");
+
+		// Since the isSingleton() check above may have registered a singleton as a side
+		// effect -- for example, for a FactoryBean -- we need to destroy the singleton,
+		// because we later manually register a bean override instance as a singleton.
+		if (beanFactory instanceof DefaultListableBeanFactory dlbf) {
+			dlbf.destroySingleton(beanName);
+		}
 	}
 
 }
