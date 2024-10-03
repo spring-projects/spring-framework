@@ -36,6 +36,7 @@ import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -89,28 +90,26 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		if (!(beanFactory instanceof BeanDefinitionRegistry registry)) {
-			throw new IllegalStateException("Cannot process bean override with a BeanFactory " +
-					"that doesn't implement BeanDefinitionRegistry: " + beanFactory.getClass());
-		}
-
 		for (OverrideMetadata metadata : this.metadata) {
-			registerBeanOverride(beanFactory, registry, metadata);
+			registerBeanOverride(beanFactory, metadata);
 		}
 	}
 
-	private void registerBeanOverride(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry,
-			OverrideMetadata overrideMetadata) {
-
+	private void registerBeanOverride(ConfigurableListableBeanFactory beanFactory, OverrideMetadata overrideMetadata) {
 		switch (overrideMetadata.getStrategy()) {
-			case REPLACE_DEFINITION -> replaceDefinition(beanFactory, registry, overrideMetadata, true);
-			case REPLACE_OR_CREATE_DEFINITION -> replaceDefinition(beanFactory, registry, overrideMetadata, false);
+			case REPLACE_DEFINITION -> replaceDefinition(beanFactory, overrideMetadata, true);
+			case REPLACE_OR_CREATE_DEFINITION -> replaceDefinition(beanFactory, overrideMetadata, false);
 			case WRAP_BEAN -> wrapBean(beanFactory, overrideMetadata);
 		}
 	}
 
-	private void replaceDefinition(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry,
-			OverrideMetadata overrideMetadata, boolean enforceExistingDefinition) {
+	private void replaceDefinition(ConfigurableListableBeanFactory beanFactory, OverrideMetadata overrideMetadata,
+			boolean enforceExistingDefinition) {
+
+		if (!(beanFactory instanceof BeanDefinitionRegistry registry)) {
+			throw new IllegalStateException("Cannot process bean override with a BeanFactory " +
+					"that doesn't implement BeanDefinitionRegistry: " + beanFactory.getClass());
+		}
 
 		// The following is a "pseudo" bean definition which MUST NOT be used to
 		// create an actual bean instance.
@@ -120,9 +119,12 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		BeanDefinition existingBeanDefinition = null;
 		if (beanName == null) {
 			beanNameIncludingFactory = getBeanNameForType(
-					beanFactory, registry, overrideMetadata, pseudoBeanDefinition, enforceExistingDefinition);
+					beanFactory, overrideMetadata, pseudoBeanDefinition, enforceExistingDefinition);
+			if (beanNameIncludingFactory == null) {
+				beanNameIncludingFactory = beanNameGenerator.generateBeanName(pseudoBeanDefinition, registry);
+			}
 			beanName = BeanFactoryUtils.transformedBeanName(beanNameIncludingFactory);
-			if (registry.containsBeanDefinition(beanName)) {
+			if (beanFactory.containsBeanDefinition(beanName)) {
 				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
 			}
 		}
@@ -200,8 +202,9 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		this.overrideRegistrar.registerNameForMetadata(overrideMetadata, beanName);
 	}
 
-	private String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, BeanDefinitionRegistry registry,
-			OverrideMetadata overrideMetadata, RootBeanDefinition beanDefinition, boolean enforceExistingDefinition) {
+	@Nullable
+	private String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, OverrideMetadata overrideMetadata,
+			RootBeanDefinition beanDefinition, boolean enforceExistingDefinition) {
 
 		Set<String> candidateNames = getExistingBeanNamesByType(beanFactory, overrideMetadata, true);
 		int candidateCount = candidateNames.size();
@@ -215,7 +218,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 						"Unable to override bean: no bean definitions of type %s (as required by annotated field '%s.%s')"
 							.formatted(overrideMetadata.getBeanType(), field.getDeclaringClass().getSimpleName(), field.getName()));
 			}
-			return beanNameGenerator.generateBeanName(beanDefinition, registry);
+			return null;
 		}
 
 		Field field = overrideMetadata.getField();
