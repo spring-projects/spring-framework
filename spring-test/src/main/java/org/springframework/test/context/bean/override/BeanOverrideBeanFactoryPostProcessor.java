@@ -19,9 +19,7 @@ package org.springframework.test.context.bean.override;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
@@ -32,16 +30,13 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
-import org.springframework.core.PriorityOrdered;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * A {@link BeanFactoryPostProcessor} implementation that processes identified
@@ -295,49 +290,6 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	private static void validateBeanDefinition(ConfigurableListableBeanFactory beanFactory, String beanName) {
 		Assert.state(beanFactory.isSingleton(beanName),
 				() -> "Unable to override bean '" + beanName + "': only singleton beans can be overridden.");
-	}
-
-
-	static class WrapEarlyBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
-			PriorityOrdered {
-
-		private final Map<String, Object> earlyReferences = new ConcurrentHashMap<>(16);
-
-		private final BeanOverrideRegistrar overrideRegistrar;
-
-		WrapEarlyBeanPostProcessor(BeanOverrideRegistrar registrar) {
-			this.overrideRegistrar = registrar;
-		}
-
-		@Override
-		public int getOrder() {
-			return Ordered.HIGHEST_PRECEDENCE;
-		}
-
-		@Override
-		public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
-			if (bean instanceof FactoryBean) {
-				return bean;
-			}
-			this.earlyReferences.put(getCacheKey(bean, beanName), bean);
-			return this.overrideRegistrar.wrapIfNecessary(bean, beanName);
-		}
-
-		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-			if (bean instanceof FactoryBean) {
-				return bean;
-			}
-			if (this.earlyReferences.remove(getCacheKey(bean, beanName)) != bean) {
-				return this.overrideRegistrar.wrapIfNecessary(bean, beanName);
-			}
-			return bean;
-		}
-
-		private String getCacheKey(Object bean, String beanName) {
-			return (StringUtils.hasLength(beanName) ? beanName : bean.getClass().getName());
-		}
-
 	}
 
 }

@@ -27,7 +27,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.test.context.bean.override.BeanOverrideBeanFactoryPostProcessor.WrapEarlyBeanPostProcessor;
 
 /**
  * {@link ContextCustomizer} implementation that registers the necessary
