@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Ruslan Akhundov
+ * @author khyojun
  * @since 4.2
  * @see <a href="https://www.w3.org/TR/cors/">CORS spec</a>
  */
@@ -54,9 +55,11 @@ public class CorsConfiguration {
 	/** Wildcard representing <em>all</em> origins, methods, or headers. */
 	public static final String ALL = "*";
 
+	private static final String PATH_SEPERATOR = "/";
+
 	private static final List<String> ALL_LIST = Collections.singletonList(ALL);
 
-	private static final OriginPattern ALL_PATTERN = new OriginPattern("*");
+	private static final OriginPattern ALL_PATTERN = new OriginPattern(ALL);
 
 	private static final List<OriginPattern> ALL_PATTERN_LIST = Collections.singletonList(ALL_PATTERN);
 
@@ -157,7 +160,7 @@ public class CorsConfiguration {
 	}
 
 	private String trimTrailingSlash(String origin) {
-		return (origin.endsWith("/") ? origin.substring(0, origin.length() - 1) : origin);
+		return (origin.endsWith(PATH_SEPERATOR) ? origin.substring(0, origin.length() - 1) : origin);
 	}
 
 	/**
