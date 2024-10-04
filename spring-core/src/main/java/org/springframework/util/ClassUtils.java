@@ -64,6 +64,7 @@ import org.springframework.lang.Nullable;
  * @author Rob Harrop
  * @author Sam Brannen
  * @author Sebastien Deleuze
+ * @author Sungbin Yang
  * @since 1.1
  * @see TypeUtils
  * @see ReflectionUtils
@@ -694,7 +695,7 @@ public abstract class ClassUtils {
 	public static String addResourcePathToPackagePath(Class<?> clazz, String resourceName) {
 		Assert.notNull(resourceName, "Resource name must not be null");
 		if (!resourceName.startsWith("/")) {
-			return classPackageAsResourcePath(clazz) + '/' + resourceName;
+			return classPackageAsResourcePath(clazz) + PATH_SEPARATOR + resourceName;
 		}
 		return classPackageAsResourcePath(clazz) + resourceName;
 	}
