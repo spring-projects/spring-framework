@@ -62,6 +62,8 @@ import org.springframework.util.Assert;
  */
 final class WhatWgUrlParser {
 
+	public static final UrlRecord EMPTY_RECORD = new UrlRecord();
+
 	private static final Log logger = LogFactory.getLog(WhatWgUrlParser.class);
 
 	private static final int EOF = -1;

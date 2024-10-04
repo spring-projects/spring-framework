@@ -71,33 +71,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
-	private static final String SCHEME_PATTERN = "([^:/?#\\\\]+):";
-
-	private static final String USERINFO_PATTERN = "([^/?#\\\\]*)";
-
-	private static final String HOST_IPV4_PATTERN = "[^/?#:\\\\]*";
-
-	private static final String HOST_IPV6_PATTERN = "\\[[\\p{XDigit}:.]*[%\\p{Alnum}]*]";
-
-	private static final String HOST_PATTERN = "(" + HOST_IPV6_PATTERN + "|" + HOST_IPV4_PATTERN + ")";
-
-	private static final String PORT_PATTERN = "(\\{[^}]+\\}?|[^/?#\\\\]*)";
-
-	private static final String PATH_PATTERN = "([^?#]*)";
-
-	private static final String QUERY_PATTERN = "([^#]*)";
-
-	private static final String LAST_PATTERN = "(.*)";
-
-	// Regex patterns that matches URIs. See RFC 3986, appendix B
-	private static final Pattern URI_PATTERN = Pattern.compile(
-			"^(" + SCHEME_PATTERN + ")?" + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN +
-					")?" + ")?" + PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
-
 	private static final Object[] EMPTY_VALUES = new Object[0];
-
-	private static final WhatWgUrlParser.UrlRecord EMPTY_URL_RECORD = new WhatWgUrlParser.UrlRecord();
-
 
 	@Nullable
 	private String scheme;
@@ -237,7 +211,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				yield builder.rfcUriRecord(record);
 			}
 			case WHAT_WG -> {
-				WhatWgUrlParser.UrlRecord record = WhatWgUrlParser.parse(uri, EMPTY_URL_RECORD, null, null);
+				WhatWgUrlParser.UrlRecord record =
+						WhatWgUrlParser.parse(uri, WhatWgUrlParser.EMPTY_RECORD, null, null);
 				yield builder.whatWgUrlRecord(record);
 			}
 		};
@@ -293,27 +268,12 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	/**
 	 * Create an instance by parsing the "Origin" header of an HTTP request.
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454</a>
+	 * @deprecated in favor of {@link UriComponentsBuilder#fromUriString(String)};
+	 * to be removed in 7.0
 	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public static UriComponentsBuilder fromOriginHeader(String origin) {
-		Matcher matcher = URI_PATTERN.matcher(origin);
-		if (matcher.matches()) {
-			UriComponentsBuilder builder = new UriComponentsBuilder();
-			String scheme = matcher.group(2);
-			String host = matcher.group(6);
-			String port = matcher.group(8);
-			if (StringUtils.hasLength(scheme)) {
-				builder.scheme(scheme);
-			}
-			builder.host(host);
-			if (StringUtils.hasLength(port)) {
-				builder.port(port);
-			}
-			checkSchemeAndHost(origin, scheme, host);
-			return builder;
-		}
-		else {
-			throw new IllegalArgumentException("[" + origin + "] is not a valid \"Origin\" header value");
-		}
+		return fromUriString(origin);
 	}
 
 
