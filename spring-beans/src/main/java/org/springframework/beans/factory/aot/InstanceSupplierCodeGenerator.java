@@ -67,7 +67,7 @@ import org.springframework.util.function.ThrowingSupplier;
  * <p>Generated code is usually a method reference that generates the
  * {@link BeanInstanceSupplier}, but some shortcut can be used as well such as:
  * <pre class="code">
- * {@code InstanceSupplier.of(TheGeneratedClass::getMyBeanInstance);}
+ * InstanceSupplier.of(TheGeneratedClass::getMyBeanInstance);
  * </pre>
  *
  * @author Phillip Webb
@@ -392,7 +392,8 @@ public class InstanceSupplierCodeGenerator {
 
 	private boolean isThrowingCheckedException(Executable executable) {
 		return Arrays.stream(executable.getGenericExceptionTypes())
-				.map(ResolvableType::forType).map(ResolvableType::toClass)
+				.map(ResolvableType::forType)
+				.map(ResolvableType::toClass)
 				.anyMatch(Exception.class::isAssignableFrom);
 	}
 
