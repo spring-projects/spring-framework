@@ -129,7 +129,7 @@ public class TestBeanForByTypeLookupIntegrationTests {
 	}
 
 	@FunctionalInterface
-	interface MessageService {
+	public interface MessageService {
 
 		String getMessage();
 	}

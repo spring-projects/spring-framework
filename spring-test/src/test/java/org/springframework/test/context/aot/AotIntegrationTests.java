@@ -155,18 +155,13 @@ class AotIntegrationTests extends AbstractAotTests {
 		runEndToEndTests(testClasses, false);
 	}
 
-	@Disabled("Comment out to run @TestBean integration tests in AOT mode")
+	@Disabled("Comment out to run Bean Override integration tests in AOT mode")
 	@Test
-	void endToEndTestsForTestBeanOverrideTestClasses() {
-		List<Class<?>> testClasses = List.of(
-				org.springframework.test.context.aot.samples.bean.override.convention.TestBeanJupiterTests.class,
-				org.springframework.test.context.bean.override.convention.TestBeanForByNameLookupIntegrationTests.class,
-				org.springframework.test.context.bean.override.convention.TestBeanForByNameLookupIntegrationTests.TestBeanFieldInEnclosingClassTests.class,
-				org.springframework.test.context.bean.override.convention.TestBeanForByNameLookupIntegrationTests.TestBeanFieldInEnclosingClassTests.TestBeanFieldInEnclosingClassLevel2Tests.class,
-				org.springframework.test.context.bean.override.convention.TestBeanForByNameLookupIntegrationTests.TestBeanFactoryMethodInEnclosingClassTests.class,
-				org.springframework.test.context.bean.override.convention.TestBeanForByNameLookupIntegrationTests.TestBeanFactoryMethodInEnclosingClassTests.TestBeanFactoryMethodInEnclosingClassLevel2Tests.class
-		);
-
+	void endToEndTestsForBeanOverrides() {
+		List<Class<?>> testClasses = createTestClassScanner()
+				.scan("org.springframework.test.context.bean.override")
+				.filter(clazz -> clazz.getSimpleName().endsWith("Tests"))
+				.toList();
 		runEndToEndTests(testClasses, true);
 	}
 
