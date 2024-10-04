@@ -97,7 +97,16 @@ class AotIntegrationTests extends AbstractAotTests {
 		// AOT BUILD-TIME: PROCESSING
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints());
-		generator.processAheadOfTime(testClasses);
+		try {
+			// Emulate AbstractAotProcessor.process().
+			System.setProperty(AbstractAotProcessor.AOT_PROCESSING, "true");
+
+			generator.processAheadOfTime(testClasses);
+		}
+		finally {
+			// Emulate AbstractAotProcessor.process().
+			System.clearProperty(AbstractAotProcessor.AOT_PROCESSING);
+		}
 
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
 		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringTests);
@@ -176,13 +185,13 @@ class AotIntegrationTests extends AbstractAotTests {
 
 	private void runEndToEndTests(List<Class<?>> testClasses, boolean failOnError) {
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
+		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints(), failOnError);
 
 		// AOT BUILD-TIME: PROCESSING
 		try {
 			// Emulate AbstractAotProcessor.process().
 			System.setProperty(AbstractAotProcessor.AOT_PROCESSING, "true");
 
-			TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles, new RuntimeHints(), failOnError);
 			generator.processAheadOfTime(testClasses.stream());
 		}
 		finally {
