@@ -60,6 +60,7 @@ import org.springframework.lang.Nullable;
  * @author Sam Brannen
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author SungbinYang
  * @since 16 April 2001
  */
 public abstract class StringUtils {
@@ -536,7 +537,7 @@ public abstract class StringUtils {
 	 * @param qualifiedName the qualified name
 	 */
 	public static String unqualify(String qualifiedName) {
-		return unqualify(qualifiedName, '.');
+		return unqualify(qualifiedName, EXTENSION_SEPARATOR);
 	}
 
 	/**
@@ -722,7 +723,7 @@ public abstract class StringUtils {
 		String pathToUse = normalizedPath;
 
 		// Shortcut if there is no work to do
-		if (pathToUse.indexOf('.') == -1) {
+		if (pathToUse.indexOf(EXTENSION_SEPARATOR) == -1) {
 			return pathToUse;
 		}
 
