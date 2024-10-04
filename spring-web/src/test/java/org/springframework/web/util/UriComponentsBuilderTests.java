@@ -638,11 +638,11 @@ class UriComponentsBuilderTests {
 	void relativeUrls() {
 		String baseUrl = "https://example.com";
 		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toString())
-				.isEqualTo(baseUrl + "/bar");
+				.isEqualTo(baseUrl + "/foo/../bar");
 		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toUriString())
-				.isEqualTo(baseUrl + "/bar");
+				.isEqualTo(baseUrl + "/foo/../bar");
 		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toUri().getPath())
-				.isEqualTo("/bar");
+				.isEqualTo("/foo/../bar");
 		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toString())
 				.isEqualTo(baseUrl + "/foo/../bar");
 		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toUriString())
@@ -741,9 +741,9 @@ class UriComponentsBuilderTests {
 
 		// empty
 		tester.accept("{}", "%7B%7D");
-		tester.accept("{ \t}", "%7B%20%7D");
+		tester.accept("{ \t}", "%7B%20%09%7D");
 		tester.accept("/a{}b", "/a%7B%7Db");
-		tester.accept("/a{ \t}b", "/a%7B%20%7Db");
+		tester.accept("/a{ \t}b", "/a%7B%20%09%7Db");
 
 		// nested, matching
 		tester.accept("{foo{}}", "%7Bfoo%7B%7D%7D");

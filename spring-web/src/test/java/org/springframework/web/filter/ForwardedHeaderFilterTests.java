@@ -649,7 +649,7 @@ class ForwardedHeaderFilterTests {
 
 			String location = "//other.info/parent/../foo/bar";
 			String redirectedUrl = sendRedirect(location);
-			assertThat(redirectedUrl).isEqualTo(("https://other.info/foo/bar"));
+			assertThat(redirectedUrl).isEqualTo(("https:" + location));
 		}
 
 		@Test

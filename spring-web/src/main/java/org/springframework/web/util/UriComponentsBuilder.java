@@ -197,7 +197,19 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	/**
-	 * Create a builder that is initialized with the given URI string.
+	 * Variant of {@link #fromUriString(String, ParserType)} that defaults to
+	 * the {@link ParserType#RFC} parsing.
+	 */
+	public static UriComponentsBuilder fromUriString(String uri) throws InvalidUrlException {
+		Assert.notNull(uri, "URI must not be null");
+		if (uri.isEmpty()) {
+			return new UriComponentsBuilder();
+		}
+		return fromUriString(uri, ParserType.RFC);
+	}
+
+	/**
+	 * Create a builder that is initialized by parsing the given URI string.
 	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
 	 * correct parsing of the URI string. For example if a query parameter
 	 * contains {@code '='} or {@code '&'} characters, the query string cannot
@@ -208,47 +220,27 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
 	 * </pre>
 	 * @param uri the URI string to initialize with
+	 * @param parserType the parsing algorithm to use
 	 * @return the new {@code UriComponentsBuilder}
 	 * @throws InvalidUrlException if {@code uri} cannot be parsed
+	 * @since 6.2
 	 */
-	public static UriComponentsBuilder fromUriString(String uri) throws InvalidUrlException {
+	public static UriComponentsBuilder fromUriString(String uri, ParserType parserType) throws InvalidUrlException {
 		Assert.notNull(uri, "URI must not be null");
-
-		UriComponentsBuilder builder = new UriComponentsBuilder();
-		if (!uri.isEmpty()) {
-			WhatWgUrlParser.UrlRecord urlRecord = WhatWgUrlParser.parse(uri, EMPTY_URL_RECORD, null, null);
-			if (!urlRecord.scheme().isEmpty()) {
-				builder.scheme(urlRecord.scheme());
-			}
-			if (urlRecord.includesCredentials()) {
-				StringBuilder userInfo = new StringBuilder(urlRecord.username());
-				if (!urlRecord.password().isEmpty()) {
-					userInfo.append(':');
-					userInfo.append(urlRecord.password());
-				}
-				builder.userInfo(userInfo.toString());
-			}
-			if (urlRecord.host() != null && !(urlRecord.host() instanceof WhatWgUrlParser.EmptyHost)) {
-				builder.host(urlRecord.host().toString());
-			}
-			if (urlRecord.port() != null) {
-				builder.port(urlRecord.port().toString());
-			}
-			if (urlRecord.path().isOpaque()) {
-				String ssp = urlRecord.path() + urlRecord.search();
-				builder.schemeSpecificPart(ssp);
-			}
-			else {
-				builder.path(urlRecord.path().toString());
-				if (StringUtils.hasLength(urlRecord.query())) {
-					builder.query(urlRecord.query());
-				}
-			}
-			if (StringUtils.hasLength(urlRecord.fragment())) {
-				builder.fragment(urlRecord.fragment());
-			}
+		if (uri.isEmpty()) {
+			return new UriComponentsBuilder();
 		}
-		return builder;
+		UriComponentsBuilder builder = new UriComponentsBuilder();
+		return switch (parserType) {
+			case RFC -> {
+				RfcUriParser.UriRecord record = RfcUriParser.parse(uri);
+				yield builder.rfcUriRecord(record);
+			}
+			case WHAT_WG -> {
+				WhatWgUrlParser.UrlRecord record = WhatWgUrlParser.parse(uri, EMPTY_URL_RECORD, null, null);
+				yield builder.whatWgUrlRecord(record);
+			}
+		};
 	}
 
 	/**
@@ -514,6 +506,58 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	public UriComponentsBuilder uriComponents(UriComponents uriComponents) {
 		Assert.notNull(uriComponents, "UriComponents must not be null");
 		uriComponents.copyToUriComponentsBuilder(this);
+		return this;
+	}
+
+	/**
+	 * Internal method to initialize this builder from an RFC {@code UriRecord}.
+	 */
+	private UriComponentsBuilder rfcUriRecord(RfcUriParser.UriRecord record) {
+		scheme(record.scheme());
+		if (record.isOpaque()) {
+			if (record.path() != null) {
+				schemeSpecificPart(record.path());
+			}
+		}
+		else {
+			userInfo(record.user());
+			host(record.host());
+			port(record.port());
+			if (record.path() != null) {
+				path(record.path());
+			}
+			query(record.query());
+		}
+		fragment(record.fragment());
+		return this;
+	}
+
+	/**
+	 * Internal method to initialize this builder from a WhatWG {@code UrlRecord}.
+	 */
+	private UriComponentsBuilder whatWgUrlRecord(WhatWgUrlParser.UrlRecord record) {
+		if (!record.scheme().isEmpty()) {
+			scheme(record.scheme());
+		}
+		if (record.path().isOpaque()) {
+			String ssp = record.path() + record.search();
+			schemeSpecificPart(ssp);
+		}
+		else {
+			userInfo(record.userInfo());
+			String hostname = record.hostname();
+			if (StringUtils.hasText(hostname)) {
+				host(hostname);
+			}
+			if (record.port() != null) {
+				port(record.portString());
+			}
+			path(record.path().toString());
+			query(record.query());
+			if (StringUtils.hasText(record.fragment())) {
+				fragment(record.fragment());
+			}
+		}
 		return this;
 	}
 
@@ -787,6 +831,34 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		PathComponent build();
 
 		PathComponentBuilder cloneBuilder();
+	}
+
+
+	/**
+	 * Enum to represent different URI parsing mechanisms.
+	 */
+	public enum ParserType {
+
+		/**
+		 * Parser that expects URI's conforming to RFC 3986 syntax.
+		 */
+		RFC,
+
+		/**
+		 * Parser based on algorithm defined in the WhatWG URL Living standard.
+		 * Browsers use this algorithm to align on lenient parsing of user typed
+		 * URL's that may deviate from RFC syntax.
+		 * <p>For more details, see:
+		 * <ul>
+		 * <li><a href="https://url.spec.whatwg.org">URL Living Standard</a>
+		 * <li><a href="https://url.spec.whatwg.org/#url-parsing">Section 4.4: URL parsing</a>
+		 * <li><a href="https://github.com/web-platform-tests/wpt/tree/master/url">web-platform-tests</a>
+		 * </ul>
+		 * <p>Use this if you need to leniently handle URL's that don't conform
+		 * to RFC syntax, or for alignment with browser parsing.
+		 */
+		WHAT_WG
+
 	}
 
 

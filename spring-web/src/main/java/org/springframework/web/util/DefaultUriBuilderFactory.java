@@ -45,6 +45,9 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	@Nullable
 	private final UriComponentsBuilder baseUri;
 
+	@Nullable
+	private UriComponentsBuilder.ParserType parserType;
+
 	private EncodingMode encodingMode = EncodingMode.TEMPLATE_AND_VALUES;
 
 	@Nullable
@@ -90,6 +93,26 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 	 */
 	public final boolean hasBaseUri() {
 		return (this.baseUri != null);
+	}
+
+	/**
+	 * Set the {@link UriComponentsBuilder.ParserType} to use.
+	 * <p>By default, if the parser type is not specified,
+	 * {@link UriComponentsBuilder} uses {@link UriComponentsBuilder.ParserType#RFC}.
+	 * @param parserType the parser type
+	 * @since 6.2
+	 */
+	public void setParserType(UriComponentsBuilder.ParserType parserType) {
+		this.parserType = parserType;
+	}
+
+	/**
+	 * Return the configured parser type.
+	 * @since 6.2
+	 */
+	@Nullable
+	public UriComponentsBuilder.ParserType getParserType() {
+		return this.parserType;
 	}
 
 	/**
@@ -265,18 +288,24 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 				result = (baseUri != null ? baseUri.cloneBuilder() : UriComponentsBuilder.newInstance());
 			}
 			else if (baseUri != null) {
-				UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uriTemplate);
+				UriComponentsBuilder builder = parseUri(uriTemplate);
 				UriComponents uri = builder.build();
 				result = (uri.getHost() == null ? baseUri.cloneBuilder().uriComponents(uri) : builder);
 			}
 			else {
-				result = UriComponentsBuilder.fromUriString(uriTemplate);
+				result = parseUri(uriTemplate);
 			}
 			if (encodingMode.equals(EncodingMode.TEMPLATE_AND_VALUES)) {
 				result.encode();
 			}
 			parsePathIfNecessary(result);
 			return result;
+		}
+
+		private UriComponentsBuilder parseUri(String uriTemplate) {
+			return (getParserType() != null ?
+					UriComponentsBuilder.fromUriString(uriTemplate, getParserType()) :
+					UriComponentsBuilder.fromUriString(uriTemplate));
 		}
 
 		private void parsePathIfNecessary(UriComponentsBuilder result) {

@@ -38,7 +38,11 @@ import org.springframework.util.Assert;
 /**
  * Implementation of the
  * <a href="https://url.spec.whatwg.org/#url-parsing">URL parsing</a> algorithm
- * of the WhatWG URL Living standard.
+ * of the WhatWG URL Living standard. Browsers use this algorithm to align on
+ * lenient parsing of user typed URL's that may deviate from RFC syntax.
+ * Use this, via {@link UriComponentsBuilder.ParserType#WHAT_WG}, if you need to
+ * leniently handle URL's that don't confirm to RFC syntax, or for alignment
+ * with browser behavior.
  *
  * <p>Comments in this class correlate to the parsing algorithm.
  * The implementation differs from the spec in the following ways:
@@ -1893,6 +1897,22 @@ final class WhatWgUrlParser {
 			else {
 				this.password.append(s);
 			}
+		}
+
+		/**
+		 * Convenience method to return the full user info.
+		 */
+		@Nullable
+		public String userInfo() {
+			if (!includesCredentials()) {
+				return null;
+			}
+			StringBuilder userInfo = new StringBuilder(username());
+			if (!password().isEmpty()) {
+				userInfo.append(':');
+				userInfo.append(password());
+			}
+			return userInfo.toString();
 		}
 
 		/**
