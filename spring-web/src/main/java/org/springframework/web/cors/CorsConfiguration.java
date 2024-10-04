@@ -56,7 +56,7 @@ public class CorsConfiguration {
 
 	private static final List<String> ALL_LIST = Collections.singletonList(ALL);
 
-	private static final OriginPattern ALL_PATTERN = new OriginPattern("*");
+	private static final OriginPattern ALL_PATTERN = new OriginPattern(ALL);
 
 	private static final List<OriginPattern> ALL_PATTERN_LIST = Collections.singletonList(ALL_PATTERN);
 
