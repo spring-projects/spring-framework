@@ -14,14 +14,15 @@ permissions:
   actions: write
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Dispatch docs deployment
     if: github.repository_owner == 'spring-projects'
+    runs-on: ubuntu-latest
     steps:
     - name: Check out code
       uses: actions/checkout@v4
       with:
-        ref: docs-build
         fetch-depth: 1
+        ref: docs-build
     - name: Dispatch (partial build)
       if: github.ref_type == 'branch'
       env:
