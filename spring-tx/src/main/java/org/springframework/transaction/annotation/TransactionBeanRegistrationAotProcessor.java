@@ -83,9 +83,6 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
 			Class<?>[] proxyInterfaces = ClassUtils.getAllInterfacesForClass(this.beanClass);
-			if (proxyInterfaces.length == 0) {
-				return;
-			}
 			for (Class<?> proxyInterface : proxyInterfaces) {
 				runtimeHints.reflection().registerType(proxyInterface, MemberCategory.INVOKE_DECLARED_METHODS);
 			}
