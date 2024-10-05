@@ -109,7 +109,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 		if (!(beanFactory instanceof BeanDefinitionRegistry registry)) {
 			throw new IllegalStateException("Cannot process bean override with a BeanFactory " +
-					"that doesn't implement BeanDefinitionRegistry: " + beanFactory.getClass());
+					"that doesn't implement BeanDefinitionRegistry: " + beanFactory.getClass().getName());
 		}
 
 		// The following is a "pseudo" bean definition which MUST NOT be used to
@@ -176,10 +176,12 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			int candidateCount = candidateNames.size();
 			if (candidateCount != 1) {
 				Field field = overrideMetadata.getField();
-				throw new IllegalStateException("Unable to select a bean to override by wrapping: found " +
-						candidateCount + " bean instances of type " + overrideMetadata.getBeanType() +
-						" (as required by annotated field '" + field.getDeclaringClass().getSimpleName() +
-						"." + field.getName() + "')" + (candidateCount > 0 ? ": " + candidateNames : ""));
+				throw new IllegalStateException("""
+						Unable to select a bean to override by wrapping: found %d bean instances of type %s \
+						(as required by annotated field '%s.%s')%s"""
+						.formatted(candidateCount, overrideMetadata.getBeanType(),
+							field.getDeclaringClass().getSimpleName(), field.getName(),
+							(candidateCount > 0 ? ": " + candidateNames : "")));
 			}
 			beanName = BeanFactoryUtils.transformedBeanName(candidateNames.iterator().next());
 		}

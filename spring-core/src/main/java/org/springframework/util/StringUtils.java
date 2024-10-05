@@ -80,7 +80,7 @@ public abstract class StringUtils {
 
 	private static final String CURRENT_PATH = ".";
 
-	private static final char EXTENSION_SEPARATOR = '.';
+	private static final char DOT_CHAR = '.';
 
 	private static final int DEFAULT_TRUNCATION_THRESHOLD = 100;
 
@@ -538,7 +538,7 @@ public abstract class StringUtils {
 	 * @param qualifiedName the qualified name
 	 */
 	public static String unqualify(String qualifiedName) {
-		return unqualify(qualifiedName, '.');
+		return unqualify(qualifiedName, DOT_CHAR);
 	}
 
 	/**
@@ -641,7 +641,7 @@ public abstract class StringUtils {
 			return null;
 		}
 
-		int extIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+		int extIndex = path.lastIndexOf(DOT_CHAR);
 		if (extIndex == -1) {
 			return null;
 		}
@@ -661,7 +661,7 @@ public abstract class StringUtils {
 	 * @return the path with stripped filename extension
 	 */
 	public static String stripFilenameExtension(String path) {
-		int extIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+		int extIndex = path.lastIndexOf(DOT_CHAR);
 		if (extIndex == -1) {
 			return path;
 		}
@@ -724,7 +724,7 @@ public abstract class StringUtils {
 		String pathToUse = normalizedPath;
 
 		// Shortcut if there is no work to do
-		if (pathToUse.indexOf(EXTENSION_SEPARATOR) == -1) {
+		if (pathToUse.indexOf(DOT_CHAR) == -1) {
 			return pathToUse;
 		}
 

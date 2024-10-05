@@ -52,7 +52,7 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (!(beanFactory instanceof ConfigurableBeanFactory cbf)) {
 			throw new IllegalStateException("Cannot process bean override with a BeanFactory " +
-					"that doesn't implement ConfigurableBeanFactory: " + beanFactory.getClass());
+					"that doesn't implement ConfigurableBeanFactory: " + beanFactory.getClass().getName());
 		}
 		this.beanFactory = cbf;
 	}

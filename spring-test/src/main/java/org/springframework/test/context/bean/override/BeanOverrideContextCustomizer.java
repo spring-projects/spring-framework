@@ -58,7 +58,7 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		if (!(context instanceof BeanDefinitionRegistry registry)) {
 			throw new IllegalStateException("Cannot process bean overrides with an ApplicationContext " +
-					"that doesn't implement BeanDefinitionRegistry: " + context.getClass());
+					"that doesn't implement BeanDefinitionRegistry: " + context.getClass().getName());
 		}
 		registerInfrastructure(registry);
 	}

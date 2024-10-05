@@ -49,29 +49,28 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 
 	@Override
 	public void beforeTestMethod(TestContext testContext) throws Exception {
-		reinjectFieldsIfConfigured(testContext);
+		reinjectFieldsIfNecessary(testContext);
 	}
 
 	/**
 	 * Process the test instance and make sure that fields flagged for bean
-	 * overriding are processed.
-	 * <p>Each field's value will be updated with the overridden bean instance.
+	 * overriding are injected with the overridden bean instance.
 	 */
 	protected void injectFields(TestContext testContext) {
-		postProcessFields(testContext, (testMetadata, overrideRegistrar) -> overrideRegistrar.inject(
-				testMetadata.testInstance, testMetadata.overrideMetadata));
+		postProcessFields(testContext, (testMetadata, registrar) ->
+				registrar.inject(testMetadata.testInstance, testMetadata.overrideMetadata));
 	}
 
 	/**
 	 * Process the test instance and make sure that fields flagged for bean
-	 * overriding are processed.
+	 * overriding are injected with the overridden bean instance, if necessary.
 	 * <p>If a fresh instance is required, the field is nulled out and then
 	 * re-injected with the overridden bean instance.
 	 * <p>This method does nothing if the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
-	 * attribute is not present in the {@code TestContext}.
+	 * attribute is not present in the {@code TestContext} with a value of {@link Boolean#TRUE}.
 	 */
-	protected void reinjectFieldsIfConfigured(TestContext testContext) throws Exception {
+	protected void reinjectFieldsIfNecessary(TestContext testContext) throws Exception {
 		if (Boolean.TRUE.equals(
 				testContext.getAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE))) {
 
