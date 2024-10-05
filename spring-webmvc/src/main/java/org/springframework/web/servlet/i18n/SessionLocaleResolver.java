@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.i18n;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.function.Function;
 
@@ -57,6 +58,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Vedran Pavic
+ * @author Sungbin Yang
  * @since 27.02.2003
  * @see #setDefaultLocale
  * @see #setDefaultTimeZone
@@ -92,6 +94,11 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 		Locale defaultLocale = getDefaultLocale();
 		return (defaultLocale != null ? defaultLocale : request.getLocale());
 	};
+
+	private Locale getLocaleFromRequest(HttpServletRequest request) {
+		return Optional.ofNullable((Locale) WebUtils.getSessionAttribute(request, this.localeAttributeName))
+				.orElse(defaultLocaleFunction.apply(request));
+	}
 
 	private Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
 
@@ -148,11 +155,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 
 	@Override
 	public Locale resolveLocale(HttpServletRequest request) {
-		Locale locale = (Locale) WebUtils.getSessionAttribute(request, this.localeAttributeName);
-		if (locale == null) {
-			locale = this.defaultLocaleFunction.apply(request);
-		}
-		return locale;
+		return getLocaleFromRequest(request);
 	}
 
 	@Override
@@ -160,20 +163,13 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 		return new TimeZoneAwareLocaleContext() {
 			@Override
 			public Locale getLocale() {
-				Locale locale = (Locale) WebUtils.getSessionAttribute(request, localeAttributeName);
-				if (locale == null) {
-					locale = defaultLocaleFunction.apply(request);
-				}
-				return locale;
+				return getLocaleFromRequest(request);
 			}
 			@Override
 			@Nullable
 			public TimeZone getTimeZone() {
-				TimeZone timeZone = (TimeZone) WebUtils.getSessionAttribute(request, timeZoneAttributeName);
-				if (timeZone == null) {
-					timeZone = defaultTimeZoneFunction.apply(request);
-				}
-				return timeZone;
+				return Optional.ofNullable((TimeZone) WebUtils.getSessionAttribute(request, timeZoneAttributeName))
+						.orElse(defaultTimeZoneFunction.apply(request));
 			}
 		};
 	}
