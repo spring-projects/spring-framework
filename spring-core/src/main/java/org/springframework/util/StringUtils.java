@@ -72,6 +72,8 @@ public abstract class StringUtils {
 
 	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
 
+	private static final char WINDOWS_FOLDER_SEPARATOR_CHAR = '\\';
+
 	private static final String DOUBLE_BACKSLASHES = "\\\\";
 
 	private static final String TOP_PATH = "..";
@@ -712,7 +714,7 @@ public abstract class StringUtils {
 
 		String normalizedPath;
 		// Optimize when there is no backslash
-		if (path.indexOf('\\') != -1) {
+		if (path.indexOf(WINDOWS_FOLDER_SEPARATOR_CHAR) != -1) {
 			normalizedPath = replace(path, DOUBLE_BACKSLASHES, FOLDER_SEPARATOR);
 			normalizedPath = replace(normalizedPath, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
 		}
@@ -722,7 +724,7 @@ public abstract class StringUtils {
 		String pathToUse = normalizedPath;
 
 		// Shortcut if there is no work to do
-		if (pathToUse.indexOf('.') == -1) {
+		if (pathToUse.indexOf(EXTENSION_SEPARATOR) == -1) {
 			return pathToUse;
 		}
 
