@@ -97,7 +97,7 @@ public class SessionLocaleResolver extends AbstractLocaleContextResolver {
 
 	private Locale getLocaleFromRequest(HttpServletRequest request) {
 		return Optional.ofNullable((Locale) WebUtils.getSessionAttribute(request, this.localeAttributeName))
-				.orElse(defaultLocaleFunction.apply(request));
+				.orElse(this.defaultLocaleFunction.apply(request));
 	}
 
 	private Function<HttpServletRequest, TimeZone> defaultTimeZoneFunction = request -> getDefaultTimeZone();
