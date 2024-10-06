@@ -43,7 +43,6 @@ public class MapAccessor implements CompilablePropertyAccessor {
 
 	/**
 	 * Create a new {@code MapAccessor} for reading as well as writing.
-	 * @since 6.2
 	 * @see #MapAccessor(boolean)
 	 */
 	public MapAccessor() {
