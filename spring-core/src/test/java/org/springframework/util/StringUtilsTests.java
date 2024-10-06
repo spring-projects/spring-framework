@@ -24,6 +24,8 @@ import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -36,38 +38,29 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 class StringUtilsTests {
 
-	@Test
-	void hasLengthBlank() {
-		String blank = "          ";
-		assertThat(StringUtils.hasLength(blank)).isTrue();
+	@ParameterizedTest
+	@ValueSource(strings = {"text", "  text  ", "  ", "\t", "\n text"})
+	void hasLengthForValidValues(String value) {
+		assertThat(StringUtils.hasLength(value)).isTrue();
 	}
 
-	@Test
-	void hasLengthNullEmpty() {
-		assertThat(StringUtils.hasLength(null)).isFalse();
-		assertThat(StringUtils.hasLength("")).isFalse();
+	@ParameterizedTest
+	@NullAndEmptySource
+	void hasLengthForInvalidValues(String value) {
+		assertThat(StringUtils.hasLength(value)).isFalse();
 	}
 
-	@Test
-	void hasLengthValid() {
-		assertThat(StringUtils.hasLength("t")).isTrue();
+	@ParameterizedTest
+	@ValueSource(strings = {"text", "  text  ", "\n text"})
+	void hasTextForValidValues(String value) {
+		assertThat(StringUtils.hasText(value)).isTrue();
 	}
 
-	@Test
-	void hasTextBlank() {
-		String blank = "          ";
-		assertThat(StringUtils.hasText(blank)).isFalse();
-	}
-
-	@Test
-	void hasTextNullEmpty() {
-		assertThat(StringUtils.hasText(null)).isFalse();
-		assertThat(StringUtils.hasText("")).isFalse();
-	}
-
-	@Test
-	void hasTextValid() {
-		assertThat(StringUtils.hasText("t")).isTrue();
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = {"  ", "\t"})
+	void hasTextForInvalidValues(String value) {
+		assertThat(StringUtils.hasText(value)).isFalse();
 	}
 
 	@Test
