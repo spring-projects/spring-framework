@@ -37,6 +37,23 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class StringUtilsTests {
 
 	@Test
+	void hasLengthBlank() {
+		String blank = "          ";
+		assertThat(StringUtils.hasLength(blank)).isTrue();
+	}
+
+	@Test
+	void hasLengthNullEmpty() {
+		assertThat(StringUtils.hasLength(null)).isFalse();
+		assertThat(StringUtils.hasLength("")).isFalse();
+	}
+
+	@Test
+	void hasLengthValid() {
+		assertThat(StringUtils.hasLength("t")).isTrue();
+	}
+
+	@Test
 	void hasTextBlank() {
 		String blank = "          ";
 		assertThat(StringUtils.hasText(blank)).isFalse();
