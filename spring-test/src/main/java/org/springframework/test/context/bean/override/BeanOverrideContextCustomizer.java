@@ -17,13 +17,8 @@
 package org.springframework.test.context.bean.override;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -34,6 +29,7 @@ import org.springframework.test.context.MergedContextConfiguration;
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  */
 class BeanOverrideContextCustomizer implements ContextCustomizer {
@@ -56,41 +52,23 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-		if (!(context instanceof BeanDefinitionRegistry registry)) {
-			throw new IllegalStateException("Cannot process bean overrides with an ApplicationContext " +
-					"that doesn't implement BeanDefinitionRegistry: " + context.getClass().getName());
-		}
-		registerInfrastructure(registry);
+		ConfigurableBeanFactory beanFactory = context.getBeanFactory();
+		// Since all three Bean Override infrastructure beans are never injected as
+		// dependencies into other beans within the ApplicationContext, it is sufficient
+		// to register them as manual singleton instances. In addition, registration of
+		// the BeanOverrideBeanFactoryPostProcessor as a singleton is a requirement for
+		// AOT processing, since a bean definition cannot be generated for the
+		// Set<OverrideMetadata> argument that it accepts in its constructor.
+		BeanOverrideRegistrar beanOverrideRegistrar = new BeanOverrideRegistrar(beanFactory);
+		beanFactory.registerSingleton(REGISTRAR_BEAN_NAME, beanOverrideRegistrar);
+		beanFactory.registerSingleton(INFRASTRUCTURE_BEAN_NAME,
+				new BeanOverrideBeanFactoryPostProcessor(this.metadata, beanOverrideRegistrar));
+		beanFactory.registerSingleton(EARLY_INFRASTRUCTURE_BEAN_NAME,
+				new WrapEarlyBeanPostProcessor(beanOverrideRegistrar));
 	}
 
 	Set<OverrideMetadata> getMetadata() {
 		return this.metadata;
-	}
-
-	private void registerInfrastructure(BeanDefinitionRegistry registry) {
-		addInfrastructureBeanDefinition(registry, BeanOverrideRegistrar.class, REGISTRAR_BEAN_NAME,
-				constructorArgs -> {});
-
-		RuntimeBeanReference registrarReference = new RuntimeBeanReference(REGISTRAR_BEAN_NAME);
-		addInfrastructureBeanDefinition(registry, WrapEarlyBeanPostProcessor.class, EARLY_INFRASTRUCTURE_BEAN_NAME,
-				constructorArgs -> constructorArgs.addIndexedArgumentValue(0, registrarReference));
-		addInfrastructureBeanDefinition(registry, BeanOverrideBeanFactoryPostProcessor.class, INFRASTRUCTURE_BEAN_NAME,
-				constructorArgs -> {
-					constructorArgs.addIndexedArgumentValue(0, this.metadata);
-					constructorArgs.addIndexedArgumentValue(1, registrarReference);
-				});
-	}
-
-	private void addInfrastructureBeanDefinition(BeanDefinitionRegistry registry,
-			Class<?> clazz, String beanName, Consumer<ConstructorArgumentValues> constructorArgumentsConsumer) {
-
-		if (!registry.containsBeanDefinition(beanName)) {
-			RootBeanDefinition definition = new RootBeanDefinition(clazz);
-			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			ConstructorArgumentValues constructorArguments = definition.getConstructorArgumentValues();
-			constructorArgumentsConsumer.accept(constructorArguments);
-			registry.registerBeanDefinition(beanName, definition);
-		}
 	}
 
 	@Override
