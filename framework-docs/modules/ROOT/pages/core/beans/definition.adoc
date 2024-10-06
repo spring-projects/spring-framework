@@ -416,8 +416,8 @@ Kotlin::
 ======
 
 This approach shows that the factory bean itself can be managed and configured through
-dependency injection (DI). See xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail]
-.
+dependency injection (DI).
+See xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail].
 
 NOTE: In Spring documentation, "factory bean" refers to a bean that is configured in the
 Spring container and that creates objects through an
@@ -442,7 +442,5 @@ The recommended way to find out about the actual runtime type of a particular be
 a `BeanFactory.getType` call for the specified bean name. This takes all of the above
 cases into account and returns the type of object that a `BeanFactory.getBean` call is
 going to return for the same bean name.
-
-
 
 

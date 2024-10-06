@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	/**
 	 * Set the ThreadFactory to use for the ExecutorService's thread pool.
-	 * Default is the underlying ExecutorService's default thread factory.
+	 * The default is the underlying ExecutorService's default thread factory.
 	 * <p>In a Jakarta EE or other managed environment with JSR-236 support,
 	 * consider specifying a JNDI-located ManagedThreadFactory: by default,
 	 * to be found at "java:comp/DefaultManagedThreadFactory".
@@ -108,7 +108,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	/**
 	 * Set whether to wait for scheduled tasks to complete on shutdown,
 	 * not interrupting running tasks and executing all tasks in the queue.
-	 * <p>Default is {@code false}, shutting down immediately through interrupting
+	 * <p>The default is {@code false}, shutting down immediately through interrupting
 	 * ongoing tasks and clearing the queue. Switch this flag to {@code true} if
 	 * you prefer fully completed tasks at the expense of a longer shutdown phase.
 	 * <p>Note that Spring's container shutdown continues while ongoing tasks
@@ -119,6 +119,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * property instead of or in addition to this property.
 	 * @see java.util.concurrent.ExecutorService#shutdown()
 	 * @see java.util.concurrent.ExecutorService#shutdownNow()
+	 * @see #shutdown()
+	 * @see #setAwaitTerminationSeconds
 	 */
 	public void setWaitForTasksToCompleteOnShutdown(boolean waitForJobsToCompleteOnShutdown) {
 		this.waitForTasksToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
@@ -237,7 +239,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	}
 
 	/**
-	 * Cancel the given remaining task which never commended execution,
+	 * Cancel the given remaining task which never commenced execution,
 	 * as returned from {@link ExecutorService#shutdownNow()}.
 	 * @param task the task to cancel (typically a {@link RunnableFuture})
 	 * @since 5.0.5

@@ -141,7 +141,7 @@ Kotlin::
 ====
 After you learn about Spring's IoC container, you may want to know more about Spring's
 `Resource` abstraction (as described in
-xref:web/webflux-webclient/client-builder.adoc#webflux-client-builder-reactor-resources[Resources])
+xref:core/resources.adoc[Resources])
 which provides a convenient mechanism for reading an InputStream from locations defined
 in a URI syntax. In particular, `Resource` paths are used to construct applications contexts,
 as described in xref:core/resources.adoc#resources-app-ctx[Application Contexts and Resource Paths].

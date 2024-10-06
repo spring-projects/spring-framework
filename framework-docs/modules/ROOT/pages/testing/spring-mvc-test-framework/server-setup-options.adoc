@@ -152,7 +152,7 @@ Kotlin::
 		@Autowired
 		lateinit var accountService: AccountService
 
-		lateinit mockMvc: MockMvc
+		lateinit var mockMvc: MockMvc
 
 		@BeforeEach
 		fun setup(wac: WebApplicationContext) {

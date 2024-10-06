@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ public class CorsRegistration {
 	/**
 	 * Whether private network access is supported.
 	 * <p>By default this is not set (i.e. private network access is not supported).
-	 * @since 6.1.3
+	 * @since 5.3.32
 	 * @see <a href="https://wicg.github.io/private-network-access/">Private network access specifications</a>
 	 */
 	public CorsRegistration allowPrivateNetwork(boolean allowPrivateNetwork) {

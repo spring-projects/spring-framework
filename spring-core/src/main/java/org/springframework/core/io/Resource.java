@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,8 +152,7 @@ public interface Resource extends InputStreamSource {
 	}
 
 	/**
-	 * Returns the contents of this resource as a string, using the specified
-	 * charset.
+	 * Return the contents of this resource as a string, using the specified charset.
 	 * @param charset the charset to use for decoding
 	 * @return the contents of this resource as a {@code String}
 	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as

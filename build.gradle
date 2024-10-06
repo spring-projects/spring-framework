@@ -3,12 +3,12 @@ plugins {
 	id 'io.freefair.aspectj' version '8.0.1' apply false
 	// kotlinVersion is managed in gradle.properties
 	id 'org.jetbrains.kotlin.plugin.serialization' version "${kotlinVersion}" apply false
-	id 'org.jetbrains.dokka' version '1.8.10'
+	id 'org.jetbrains.dokka' version '1.8.20'
 	id 'org.unbroken-dome.xjc' version '2.0.0' apply false
-	id 'com.github.ben-manes.versions' version '0.49.0'
+	id 'com.github.ben-manes.versions' version '0.51.0'
 	id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 	id 'de.undercouch.download' version '5.4.0'
-	id 'me.champeau.jmh' version '0.7.1' apply false
+	id 'me.champeau.jmh' version '0.7.2' apply false
 }
 
 ext {
@@ -115,15 +115,12 @@ configure([rootProject] + javaProjects) { project ->
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")
-		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.41")
+		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.42")
 	}
 
 	ext.javadocLinks = [
 			"https://docs.oracle.com/en/java/javase/17/docs/api/",
 			"https://jakarta.ee/specifications/platform/9/apidocs/",
-			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ and weblogic.* packages
-			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/", // com.ibm.*
-			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/", // org.jboss.resource.*
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
 			"https://eclipse.dev/aspectj/doc/released/aspectj5rt-api",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
@@ -163,7 +160,7 @@ configure(rootProject) {
 		def rootPath = file(rootDir).toPath()
 		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
 		projectDirs.forEach { dir ->
-			[ 'bin', 'build', 'out', '.settings' ]
+			[ 'bin', 'build', 'out', '.settings', 'node_modules' ]
 				.collect { rootPath.relativize(new File(dir, it).toPath()) }
 				.forEach { source.exclude "$it/**" }
 			[ '.classpath', '.project' ]

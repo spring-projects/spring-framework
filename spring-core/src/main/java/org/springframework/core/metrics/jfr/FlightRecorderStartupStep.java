@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.springframework.core.metrics.StartupStep;
-import org.springframework.lang.NonNull;
 
 /**
  * {@link StartupStep} implementation for the Java Flight Recorder.
+ *
  * <p>This variant delegates to a {@link FlightRecorderStartupEvent JFR event extension}
  * to collect and record data in Java Flight Recorder.
  *
@@ -114,11 +114,11 @@ class FlightRecorderStartupStep implements StartupStep {
 			add(key, value.get());
 		}
 
-		@NonNull
 		@Override
 		public Iterator<Tag> iterator() {
 			return new TagsIterator();
 		}
+
 
 		private class TagsIterator implements Iterator<Tag> {
 

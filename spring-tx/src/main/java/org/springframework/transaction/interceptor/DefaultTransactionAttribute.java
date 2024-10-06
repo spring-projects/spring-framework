@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 
 	/**
-	 * Create a new DefaultTransactionAttribute, with default settings.
+	 * Create a new {@code DefaultTransactionAttribute} with default settings.
 	 * Can be modified through bean property setters.
 	 * @see #setPropagationBehavior
 	 * @see #setIsolationLevel
@@ -76,7 +76,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 	/**
-	 * Create a new DefaultTransactionAttribute with the given
+	 * Create a new {@code DefaultTransactionAttribute} with the given
 	 * propagation behavior. Can be modified through bean property setters.
 	 * @param propagationBehavior one of the propagation constants in the
 	 * TransactionDefinition interface

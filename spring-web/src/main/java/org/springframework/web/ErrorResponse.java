@@ -61,6 +61,11 @@ public interface ErrorResponse {
 	 * Return the body for the response, formatted as an RFC 7807
 	 * {@link ProblemDetail} whose {@link ProblemDetail#getStatus() status}
 	 * should match the response status.
+	 * <p><strong>Note:</strong> The returned {@code ProblemDetail} may be
+	 * updated before the response is rendered, e.g. via
+	 * {@link #updateAndGetBody(MessageSource, Locale)}. Therefore, implementing
+	 * methods should use an instance field, and should not re-create the
+	 * {@code ProblemDetail} on every call, nor use a static variable.
 	 */
 	ProblemDetail getBody();
 

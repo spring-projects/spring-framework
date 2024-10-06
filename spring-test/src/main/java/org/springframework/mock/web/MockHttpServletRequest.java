@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,6 @@ import jakarta.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -100,9 +99,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final String CHARSET_PREFIX = "charset=";
 
 	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
-
-	private static final BufferedReader EMPTY_BUFFERED_READER =
-			new BufferedReader(new StringReader(""));
 
 	/**
 	 * Date formats as specified in the HTTP RFC.
@@ -737,7 +733,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			this.reader = new BufferedReader(sourceReader);
 		}
 		else {
-			this.reader = EMPTY_BUFFERED_READER;
+			this.reader = new BufferedReader(new StringReader(""));
 		}
 		return this.reader;
 	}
@@ -1020,7 +1016,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
-	private static String encodeCookies(@NonNull Cookie... cookies) {
+	private static String encodeCookies(Cookie... cookies) {
 		return Arrays.stream(cookies)
 				.map(c -> c.getName() + '=' + (c.getValue() == null ? "" : c.getValue()))
 				.collect(Collectors.joining("; "));

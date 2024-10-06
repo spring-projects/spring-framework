@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,10 +73,15 @@ public final class PersistenceManagedTypesScanner {
 	private final CandidateComponentsIndex componentsIndex;
 
 
+	/**
+	 * Create a new {@code PersistenceManagedTypesScanner} for the given resource loader.
+	 * @param resourceLoader the {@code ResourceLoader} to use
+	 */
 	public PersistenceManagedTypesScanner(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(resourceLoader.getClassLoader());
 	}
+
 
 	/**
 	 * Scan the specified packages and return a {@link PersistenceManagedTypes} that

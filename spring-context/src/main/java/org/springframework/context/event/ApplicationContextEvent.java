@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.context.ApplicationEvent;
 public abstract class ApplicationContextEvent extends ApplicationEvent {
 
 	/**
-	 * Create a new ContextStartedEvent.
+	 * Create a new {@code ApplicationContextEvent}.
 	 * @param source the {@code ApplicationContext} that the event is raised for
 	 * (must not be {@code null})
 	 */

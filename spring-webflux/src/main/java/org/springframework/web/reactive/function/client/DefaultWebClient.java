@@ -465,7 +465,7 @@ final class DefaultWebClient implements WebClient {
 				final AtomicBoolean responseReceived = new AtomicBoolean();
 				return responseMono
 						.doOnNext(response -> responseReceived.set(true))
-						.doOnError(observationContext::setError)
+						.doOnError(observation::error)
 						.doFinally(signalType -> {
 							if (signalType == SignalType.CANCEL && !responseReceived.get()) {
 								observationContext.setAborted(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,9 +63,6 @@ public class TableMetaDataContext {
 	@Nullable
 	private String schemaName;
 
-	// List of columns objects to be used in this context
-	private List<String> tableColumns = new ArrayList<>();
-
 	// Should we access insert parameter meta-data info or not
 	private boolean accessTableColumnMetaData = true;
 
@@ -75,6 +72,9 @@ public class TableMetaDataContext {
 	// The provider of table meta-data
 	@Nullable
 	private TableMetaDataProvider metaDataProvider;
+
+	// List of columns objects to be used in this context
+	private List<String> tableColumns = new ArrayList<>();
 
 	// Are we using generated key columns
 	private boolean generatedKeyColumnsUsed = false;
@@ -138,7 +138,6 @@ public class TableMetaDataContext {
 	public boolean isAccessTableColumnMetaData() {
 		return this.accessTableColumnMetaData;
 	}
-
 
 	/**
 	 * Specify whether we should override default for accessing synonyms.
@@ -266,7 +265,6 @@ public class TableMetaDataContext {
 		return values;
 	}
 
-
 	/**
 	 * Build the insert string based on configuration and meta-data information.
 	 * @return the insert string to be used
@@ -303,8 +301,8 @@ public class TableMetaDataContext {
 				}
 			}
 			else {
-				String message = "Unable to locate columns for table '" + getTableName()
-						+ "' so an insert statement can't be generated.";
+				String message = "Unable to locate columns for table '" + getTableName() +
+						"' so an insert statement can't be generated.";
 				if (isAccessTableColumnMetaData()) {
 					message += " Consider specifying explicit column names -- for example, via SimpleJdbcInsert#usingColumns().";
 				}
@@ -349,26 +347,27 @@ public class TableMetaDataContext {
 
 
 	/**
-	 * Does this database support the JDBC 3.0 feature of retrieving generated keys:
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
+	 * Does this database support the JDBC feature for retrieving generated keys?
+	 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
 	 */
 	public boolean isGetGeneratedKeysSupported() {
 		return obtainMetaDataProvider().isGetGeneratedKeysSupported();
 	}
 
 	/**
-	 * Does this database support simple query to retrieve generated keys
-	 * when the JDBC 3.0 feature is not supported:
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
+	 * Does this database support a simple query to retrieve generated keys when
+	 * the JDBC feature for retrieving generated keys is not supported?
+	 * @see #isGetGeneratedKeysSupported()
+	 * @see #getSimpleQueryForGetGeneratedKey(String, String)
 	 */
 	public boolean isGetGeneratedKeysSimulated() {
 		return obtainMetaDataProvider().isGetGeneratedKeysSimulated();
 	}
 
 	/**
-	 * Does this database support a simple query to retrieve generated keys
-	 * when the JDBC 3.0 feature is not supported:
-	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
+	 * Get the simple query to retrieve generated keys when the JDBC feature for
+	 * retrieving generated keys is not supported.
+	 * @see #isGetGeneratedKeysSimulated()
 	 */
 	@Nullable
 	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
@@ -376,8 +375,9 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Is a column name String array for retrieving generated keys supported:
-	 * {@link java.sql.Connection#createStruct(String, Object[])}?
+	 * Does this database support a column name String array for retrieving generated
+	 * keys?
+	 * @see java.sql.Connection#createStruct(String, Object[])
 	 */
 	public boolean isGeneratedKeysColumnNameArraySupported() {
 		return obtainMetaDataProvider().isGeneratedKeysColumnNameArraySupported();

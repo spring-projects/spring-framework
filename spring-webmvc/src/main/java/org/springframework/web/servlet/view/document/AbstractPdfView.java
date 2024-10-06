@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ public abstract class AbstractPdfView extends AbstractView {
 	 * The subclass can either have fixed preferences or retrieve
 	 * them from bean properties defined on the View.
 	 * @return an int containing the bits information against PdfWriter definitions
-	 * @see com.lowagie.text.pdf.PdfWriter#AllowPrinting
+	 * @see com.lowagie.text.pdf.PdfWriter#ALLOW_PRINTING
 	 * @see com.lowagie.text.pdf.PdfWriter#PageLayoutSinglePage
 	 */
 	protected int getViewerPreferences() {

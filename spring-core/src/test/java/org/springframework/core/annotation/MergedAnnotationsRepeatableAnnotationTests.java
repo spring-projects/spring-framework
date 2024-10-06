@@ -24,6 +24,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -175,7 +176,7 @@ class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	void typeHierarchyWhenWhenOnSuperclassReturnsAnnotations() {
+	void typeHierarchyWhenOnSuperclassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				SearchStrategy.TYPE_HIERARCHY, SubRepeatableClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
@@ -238,6 +239,44 @@ class MergedAnnotationsRepeatableAnnotationTests {
 				.map(MergedAnnotation::synthesize)
 				.map(Annotation::annotationType);
 		assertThat(annotationTypes).containsExactly(WithRepeatedMetaAnnotations.class, Noninherited.class, Noninherited.class);
+	}
+
+	@Test  // gh-32731
+	void searchFindsRepeatableContainerAnnotationAndRepeatedAnnotations() {
+		Class<?> clazz = StandardRepeatablesWithContainerWithMultipleAttributesTestCase.class;
+
+		// NO RepeatableContainers
+		MergedAnnotations mergedAnnotations = MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none());
+		ContainerWithMultipleAttributes container = mergedAnnotations
+				.get(ContainerWithMultipleAttributes.class)
+				.synthesize(MergedAnnotation::isPresent).orElse(null);
+		assertThat(container).as("container").isNotNull();
+		assertThat(container.name()).isEqualTo("enigma");
+		RepeatableWithContainerWithMultipleAttributes[] repeatedAnnotations = container.value();
+		assertThat(Arrays.stream(repeatedAnnotations).map(RepeatableWithContainerWithMultipleAttributes::value))
+				.containsExactly("A", "B");
+		Set<RepeatableWithContainerWithMultipleAttributes> set =
+				mergedAnnotations.stream(RepeatableWithContainerWithMultipleAttributes.class)
+				.collect(MergedAnnotationCollectors.toAnnotationSet());
+		// Only finds the locally declared repeated annotation.
+		assertThat(set.stream().map(RepeatableWithContainerWithMultipleAttributes::value))
+				.containsExactly("C");
+
+		// Standard RepeatableContainers
+		mergedAnnotations = MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.standardRepeatables());
+		container = mergedAnnotations
+				.get(ContainerWithMultipleAttributes.class)
+				.synthesize(MergedAnnotation::isPresent).orElse(null);
+		assertThat(container).as("container").isNotNull();
+		assertThat(container.name()).isEqualTo("enigma");
+		repeatedAnnotations = container.value();
+		assertThat(Arrays.stream(repeatedAnnotations).map(RepeatableWithContainerWithMultipleAttributes::value))
+				.containsExactly("A", "B");
+		set = mergedAnnotations.stream(RepeatableWithContainerWithMultipleAttributes.class)
+				.collect(MergedAnnotationCollectors.toAnnotationSet());
+		// Finds the locally declared repeated annotation plus the 2 in the container.
+		assertThat(set.stream().map(RepeatableWithContainerWithMultipleAttributes::value))
+				.containsExactly("A", "B", "C");
 	}
 
 	private <A extends Annotation> Set<A> getAnnotations(Class<? extends Annotation> container,
@@ -447,6 +486,29 @@ class MergedAnnotationsRepeatableAnnotationTests {
 	@Noninherited("X")
 	@Noninherited("Y")
 	static class WithRepeatedMetaAnnotationsClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ContainerWithMultipleAttributes {
+
+		RepeatableWithContainerWithMultipleAttributes[] value();
+
+		String name() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Repeatable(ContainerWithMultipleAttributes.class)
+	@interface RepeatableWithContainerWithMultipleAttributes {
+
+		String value() default "";
+	}
+
+	@ContainerWithMultipleAttributes(name = "enigma", value = {
+		@RepeatableWithContainerWithMultipleAttributes("A"),
+		@RepeatableWithContainerWithMultipleAttributes("B")
+	})
+	@RepeatableWithContainerWithMultipleAttributes("C")
+	static class StandardRepeatablesWithContainerWithMultipleAttributesTestCase {
 	}
 
 }

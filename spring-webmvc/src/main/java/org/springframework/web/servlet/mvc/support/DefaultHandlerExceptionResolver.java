@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -128,6 +129,10 @@ import org.springframework.web.util.WebUtils;
  * <tr class="even-row-color">
  * <td><div class="block">AsyncRequestTimeoutException</div></td>
  * <td><div class="block">503 (SC_SERVICE_UNAVAILABLE)</div></td>
+ * </tr>
+ * <tr class="even-row-color">
+ * <td><div class="block">AsyncRequestNotUsableException</div></td>
+ * <td><div class="block">Not applicable</div></td>
  * </tr>
  * </tbody>
  * </table>
@@ -222,6 +227,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof BindException theEx) {
 				return handleBindException(theEx, request, response, handler);
+			}
+			else if (ex instanceof AsyncRequestNotUsableException) {
+				return handleAsyncRequestNotUsableException(
+						(AsyncRequestNotUsableException) ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerEx) {
@@ -435,10 +444,27 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
+	 * Handle the case of an I/O failure from the ServletOutputStream.
+	 * <p>By default, do nothing since the response is not usable.
+	 * @param ex the {@link AsyncRequestTimeoutException} to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or {@code null} if none chosen
+	 * at the time of the exception (for example, if multipart resolution failed)
+	 * @return an empty ModelAndView indicating the exception was handled
+	 * @since 5.3.33
+	 */
+	protected ModelAndView handleAsyncRequestNotUsableException(AsyncRequestNotUsableException ex,
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) {
+
+		return new ModelAndView();
+	}
+
+	/**
 	 * Handle an {@link ErrorResponse} exception.
 	 * <p>The default implementation sets status and the headers of the response
 	 * to those obtained from the {@code ErrorResponse}. If available, the
-	 * {@link ProblemDetail#getDetail()}  is used as the message for
+	 * {@link ProblemDetail#getDetail()} is used as the message for
 	 * {@link HttpServletResponse#sendError(int, String)}.
 	 * @param errorResponse the exception to be handled
 	 * @param request current HTTP request
@@ -464,8 +490,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 				response.sendError(status);
 			}
 		}
-		else {
-			logger.warn("Ignoring exception, response committed. : " + errorResponse);
+		else if (logger.isWarnEnabled()) {
+			logger.warn("Ignoring exception, response committed already: " + errorResponse);
 		}
 
 		return new ModelAndView();
@@ -524,14 +550,19 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		if (!response.isCommitted()) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		}
+		else if (logger.isWarnEnabled()) {
+			logger.warn("Ignoring exception, response committed already: " + ex);
+		}
 		return new ModelAndView();
 	}
 
 	/**
 	 * Handle the case where a
 	 * {@linkplain org.springframework.http.converter.HttpMessageConverter message converter}
-	 * cannot write to an HTTP request.
+	 * cannot write to an HTTP response.
 	 * <p>The default implementation sends an HTTP 500 error, and returns an empty {@code ModelAndView}.
 	 * Alternatively, a fallback view could be chosen, or the HttpMessageNotWritableException could
 	 * be rethrown as-is.
@@ -545,7 +576,12 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleHttpMessageNotWritable(HttpMessageNotWritableException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
-		sendServerError(ex, request, response);
+		if (!response.isCommitted()) {
+			sendServerError(ex, request, response);
+		}
+		else if (logger.isWarnEnabled()) {
+			logger.warn("Ignoring exception, response committed already: " + ex);
+		}
 		return new ModelAndView();
 	}
 

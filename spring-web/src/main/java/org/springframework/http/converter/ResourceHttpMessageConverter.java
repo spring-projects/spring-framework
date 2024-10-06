@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		if (this.supportsReadStreaming && InputStreamResource.class == clazz) {
 			return new InputStreamResource(inputMessage.getBody()) {
 				@Override
+				@Nullable
 				public String getFilename() {
 					return inputMessage.getHeaders().getContentDisposition().getFilename();
 				}
@@ -108,11 +109,29 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	}
 
 	@Override
+	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException {
+
+		writeContent(resource, outputMessage);
+	}
+
+	/**
+	 * Add the default headers for the given resource to the given message.
+	 * @since 6.0
+	 */
+	public void addDefaultHeaders(HttpOutputMessage message, Resource resource, @Nullable MediaType contentType)
+			throws IOException {
+
+		addDefaultHeaders(message.getHeaders(), resource, contentType);
+	}
+
+	@Override
 	protected MediaType getDefaultContentType(Resource resource) {
 		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
 	}
 
 	@Override
+	@Nullable
 	protected Long getContentLength(Resource resource, @Nullable MediaType contentType) throws IOException {
 		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
 		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
@@ -123,23 +142,10 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		return (contentLength < 0 ? null : contentLength);
 	}
 
-	/**
-	 * Adds the default headers for the given resource to the given message.
-	 * @since 6.0
-	 */
-	public void addDefaultHeaders(HttpOutputMessage message, Resource resource, @Nullable MediaType contentType) throws IOException {
-		addDefaultHeaders(message.getHeaders(), resource, contentType);
-	}
-
-	@Override
-	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
-			throws IOException, HttpMessageNotWritableException {
-
-		writeContent(resource, outputMessage);
-	}
 
 	protected void writeContent(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+
 		// We cannot use try-with-resources here for the InputStream, since we have
 		// custom handling of the close() method in a finally-block.
 		try {

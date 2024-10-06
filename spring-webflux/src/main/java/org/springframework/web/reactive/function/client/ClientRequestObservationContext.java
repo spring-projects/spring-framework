@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ import io.micrometer.observation.transport.RequestReplySenderContext;
 import org.springframework.lang.Nullable;
 
 /**
- * Context that holds information for metadata collection
- * during the {@link ClientHttpObservationDocumentation#HTTP_REACTIVE_CLIENT_EXCHANGES HTTP client exchange observations}.
+ * Context that holds information for metadata collection during the
+ * {@link ClientHttpObservationDocumentation#HTTP_REACTIVE_CLIENT_EXCHANGES HTTP client exchange observations}.
+ *
  * <p>The {@link #getCarrier() tracing context carrier} is a {@link ClientRequest.Builder request builder},
- * since the actual request is immutable. For {@code KeyValue} extraction, the {@link #getRequest() actual request}
- * should be used instead.
+ * since the actual request is immutable. For {@code KeyValue} extraction,
+ * the {@link #getRequest() actual request} should be used instead.
  *
  * @author Brian Clozel
  * @since 6.0
@@ -37,9 +38,10 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	/**
 	 * Name of the request attribute holding the {@link ClientRequestObservationContext context}
 	 * for the current observation.
-	 * @since 6.1.1
+	 * @since 6.0.15
 	 */
 	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = ClientRequestObservationContext.class.getName();
+
 
 	@Nullable
 	private String uriTemplate;
@@ -60,13 +62,6 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 		}
 	}
 
-	/**
-	 * Return the URI template used for the current client exchange, {@code null} if none was used.
-	 */
-	@Nullable
-	public String getUriTemplate() {
-		return this.uriTemplate;
-	}
 
 	/**
 	 * Set the URI template used for the current client exchange.
@@ -76,11 +71,11 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	}
 
 	/**
-	 * Whether the client aborted the current HTTP exchange before receiving any response.
-	 * @return whether the exchange has been aborted
+	 * Return the URI template used for the current client exchange, {@code null} if none was used.
 	 */
-	public boolean isAborted() {
-		return this.aborted;
+	@Nullable
+	public String getUriTemplate() {
+		return this.uriTemplate;
 	}
 
 	/**
@@ -92,11 +87,11 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	}
 
 	/**
-	 * Return the immutable client request.
+	 * Whether the client aborted the current HTTP exchange before receiving any response.
+	 * @return whether the exchange has been aborted
 	 */
-	@Nullable
-	public ClientRequest getRequest() {
-		return this.request;
+	public boolean isAborted() {
+		return this.aborted;
 	}
 
 	/**
@@ -107,13 +102,23 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	}
 
 	/**
+	 * Return the immutable client request.
+	 */
+	@Nullable
+	public ClientRequest getRequest() {
+		return this.request;
+	}
+
+
+	/**
 	 * Get the current {@link ClientRequestObservationContext observation context}
 	 * from the given request, if available.
 	 * @param request the current client request
 	 * @return the current observation context
-	 * @since 6.1.2
+	 * @since 6.0.15
 	 */
 	public static Optional<ClientRequestObservationContext> findCurrent(ClientRequest request) {
 		return Optional.ofNullable((ClientRequestObservationContext) request.attributes().get(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,9 @@ public final class ReactiveTypeDescriptor {
 	 */
 	public Object getEmptyValue() {
 		Assert.state(this.emptySupplier != null, "Empty values not supported");
-		return this.emptySupplier.get();
+		Object emptyValue = this.emptySupplier.get();
+		Assert.notNull(emptyValue, "Invalid null return value from emptySupplier");
+		return emptyValue;
 	}
 
 	/**
@@ -130,7 +132,7 @@ public final class ReactiveTypeDescriptor {
 
 
 	/**
-	 * Descriptor for a reactive type that can produce 0..N values.
+	 * Descriptor for a reactive type that can produce {@code 0..N} values.
 	 * @param type the reactive type
 	 * @param emptySupplier a supplier of an empty-value instance of the reactive type
 	 */

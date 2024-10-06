@@ -1,12 +1,14 @@
 name: Deploy Docs
 on:
   push:
-    branches-ignore: [ gh-pages ]
-    tags: '**'
+    branches:
+      - 'main'
+      - '*.x'
+      - '!gh-pages'
+    tags:
+      - 'v*'
   repository_dispatch:
     types: request-build-reference # legacy
-  schedule:
-  - cron: '0 10 * * *' # Once per day at 10am UTC
   workflow_dispatch:
 permissions:
   actions: write
@@ -15,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'spring-projects'
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Check out code
+      uses: actions/checkout@v4
       with:
         ref: docs-build
         fetch-depth: 1

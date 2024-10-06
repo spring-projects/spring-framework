@@ -153,15 +153,16 @@ Letting qualifier values select against target bean names, within the type-match
 candidates, does not require a `@Qualifier` annotation at the injection point.
 If there is no other resolution indicator (such as a qualifier or a primary marker),
 for a non-unique dependency situation, Spring matches the injection point name
-(that is, the field name or parameter name) against the target bean names and chooses the
-same-named candidate, if any.
+(that is, the field name or parameter name) against the target bean names and chooses
+the same-named candidate, if any (either by bean name or by associated alias).
+
+This requires the `-parameters` Java compiler flag to be present. As a fallback,
+version 6.0 still supports parameter names from debug symbols via `-debug` as well.
 ====
 
-That said, if you intend to express annotation-driven injection by name, do not
-primarily use `@Autowired`, even if it is capable of selecting by bean name among
-type-matching candidates. Instead, use the JSR-250 `@Resource` annotation, which is
-semantically defined to identify a specific target component by its unique name, with
-the declared type being irrelevant for the matching process. `@Autowired` has rather
+As an alternative for injection by name, consider the JSR-250 `@Resource` annotation
+which is semantically defined to identify a specific target component by its unique name,
+with the declared type being irrelevant for the matching process. `@Autowired` has rather
 different semantics: After selecting candidate beans by type, the specified `String`
 qualifier value is considered within those type-selected candidates only (for example,
 matching an `account` qualifier against beans marked with the same qualifier label).

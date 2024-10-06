@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
@@ -38,11 +38,12 @@ import org.springframework.util.FastByteArrayOutputStream;
 /**
  * {@link jakarta.servlet.http.HttpServletResponse} wrapper that caches all content written to
  * the {@linkplain #getOutputStream() output stream} and {@linkplain #getWriter() writer},
- * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
+ * and allows this content to be retrieved via a {@linkplain #getContentAsByteArray() byte array}.
  *
  * <p>Used e.g. by {@link org.springframework.web.filter.ShallowEtagHeaderFilter}.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.1.3
  * @see ContentCachingRequestWrapper
  */
@@ -58,9 +59,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Nullable
 	private Integer contentLength;
-
-	@Nullable
-	private String contentType;
 
 
 	/**
@@ -120,9 +118,16 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		return this.writer;
 	}
 
+	/**
+	 * This method neither flushes content to the client nor commits the underlying
+	 * response, since the content has not yet been copied to the response.
+	 * <p>Invoke {@link #copyBodyToResponse()} to copy the cached body content to
+	 * the wrapped response object and flush its buffer.
+	 * @see jakarta.servlet.ServletResponseWrapper#flushBuffer()
+	 */
 	@Override
 	public void flushBuffer() throws IOException {
-		// do not flush the underlying response as the content has not been copied to it yet
+		// no-op
 	}
 
 	@Override
@@ -139,31 +144,13 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 			throw new IllegalArgumentException("Content-Length exceeds ContentCachingResponseWrapper's maximum (" +
 					Integer.MAX_VALUE + "): " + len);
 		}
-		int lenInt = (int) len;
-		if (lenInt > this.content.size()) {
-			this.content.resize(lenInt);
-		}
-		this.contentLength = lenInt;
-	}
-
-	@Override
-	public void setContentType(String type) {
-		this.contentType = type;
-	}
-
-	@Override
-	@Nullable
-	public String getContentType() {
-		return this.contentType;
+		setContentLength((int) len);
 	}
 
 	@Override
 	public boolean containsHeader(String name) {
-		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return this.contentLength != null;
-		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.contentType != null;
+		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return true;
 		}
 		else {
 			return super.containsHeader(name);
@@ -175,9 +162,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
 			this.contentLength = Integer.valueOf(value);
 		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			this.contentType = value;
-		}
 		else {
 			super.setHeader(name, value);
 		}
@@ -187,9 +171,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	public void addHeader(String name, String value) {
 		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
 			this.contentLength = Integer.valueOf(value);
-		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			this.contentType = value;
 		}
 		else {
 			super.addHeader(name, value);
@@ -219,11 +200,8 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	@Nullable
 	public String getHeader(String name) {
-		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return (this.contentLength != null) ? this.contentLength.toString() : null;
-		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.contentType;
+		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return this.contentLength.toString();
 		}
 		else {
 			return super.getHeader(name);
@@ -232,12 +210,8 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public Collection<String> getHeaders(String name) {
-		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return this.contentLength != null ? Collections.singleton(this.contentLength.toString()) :
-					Collections.emptySet();
-		}
-		else if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.contentType != null ? Collections.singleton(this.contentType) : Collections.emptySet();
+		if (this.contentLength != null && HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return Collections.singleton(this.contentLength.toString());
 		}
 		else {
 			return super.getHeaders(name);
@@ -247,14 +221,9 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	public Collection<String> getHeaderNames() {
 		Collection<String> headerNames = super.getHeaderNames();
-		if (this.contentLength != null || this.contentType != null) {
-			List<String> result = new ArrayList<>(headerNames);
-			if (this.contentLength != null) {
-				result.add(HttpHeaders.CONTENT_LENGTH);
-			}
-			if (this.contentType != null) {
-				result.add(HttpHeaders.CONTENT_TYPE);
-			}
+		if (this.contentLength != null) {
+			Set<String> result = new LinkedHashSet<>(headerNames);
+			result.add(HttpHeaders.CONTENT_LENGTH);
 			return result;
 		}
 		else {
@@ -326,10 +295,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 						rawResponse.setContentLength(complete ? this.content.size() : this.contentLength);
 					}
 					this.contentLength = null;
-				}
-				if (complete || this.contentType != null) {
-					rawResponse.setContentType(this.contentType);
-					this.contentType = null;
 				}
 			}
 			this.content.writeTo(rawResponse.getOutputStream());

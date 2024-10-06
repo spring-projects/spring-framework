@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.context.ResourceLoaderAware;
@@ -400,7 +401,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 	/**
 	 * Refresh the PropertiesHolder for the given bundle filename.
-	 * The holder can be {@code null} if not cached before, or a timed-out cache entry
+	 * <p>The holder can be {@code null} if not cached before, or a timed-out cache entry
 	 * (potentially getting re-validated against the current last-modified timestamp).
 	 * @param filename the bundle filename (basename + Locale)
 	 * @param propHolder the current PropertiesHolder for the bundle
@@ -561,7 +562,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 		private volatile long refreshTimestamp = -2;
 
-		private final ReentrantLock refreshLock = new ReentrantLock();
+		private final Lock refreshLock = new ReentrantLock();
 
 		/** Cache to hold already generated MessageFormats per message code. */
 		private final ConcurrentMap<String, Map<Locale, MessageFormat>> cachedMessageFormats =

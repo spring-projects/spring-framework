@@ -110,7 +110,8 @@ class WebClientObservationTests {
 		StepVerifier.create(client.get().uri("/path").retrieve().bodyToMono(Void.class))
 				.expectError(IllegalStateException.class)
 				.verify(Duration.ofSeconds(5));
-		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "IllegalStateException")
+		assertThatHttpObservation().hasError()
+				.hasLowCardinalityKeyValue("exception", "IllegalStateException")
 				.hasLowCardinalityKeyValue("status", "CLIENT_ERROR");
 	}
 
@@ -180,7 +181,7 @@ class WebClientObservationTests {
 		StepVerifier.create(responseMono)
 				.expectError(IllegalStateException.class)
 				.verify(Duration.ofSeconds(5));
-		assertThatHttpObservation()
+		assertThatHttpObservation().hasError()
 				.hasLowCardinalityKeyValue("exception", "IllegalStateException")
 				.hasLowCardinalityKeyValue("status", "200");
 	}

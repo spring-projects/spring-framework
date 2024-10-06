@@ -24,8 +24,7 @@
 		</property>
 	</bean>
 
-	<bean id="defaultCache"
-		  class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
+	<bean id="defaultCache" class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
 		<property name="name" value="default"/>
 	</bean>
 

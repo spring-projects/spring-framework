@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,6 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected void applyHeaders() {
 		HttpHeaders headers = getHeaders();
-
 		headers.entrySet()
 				.stream()
 				.filter(entry -> !HttpHeaders.CONTENT_LENGTH.equals(entry.getKey()))
@@ -133,7 +132,6 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 		if (!this.httpRequest.containsHeader(HttpHeaders.ACCEPT)) {
 			this.httpRequest.addHeader(HttpHeaders.ACCEPT, MediaType.ALL_VALUE);
 		}
-
 		this.contentLength = headers.getContentLength();
 	}
 
@@ -144,7 +142,6 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 		}
 
 		CookieStore cookieStore = this.context.getCookieStore();
-
 		getCookies().values()
 				.stream()
 				.flatMap(Collection::stream)

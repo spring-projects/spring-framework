@@ -268,8 +268,8 @@ The actual JPA provider bootstrapping is handed off to the specified executor an
 running in parallel, to the application bootstrap thread. The exposed `EntityManagerFactory`
 proxy can be injected into other application components and is even able to respond to
 `EntityManagerFactoryInfo` configuration inspection. However, once the actual JPA provider
-is being accessed by other components (for example, calling `createEntityManager`), those calls
-block until the background bootstrapping has completed. In particular, when you use
+is being accessed by other components (for example, calling `createEntityManager`), those
+calls block until the background bootstrapping has completed. In particular, when you use
 Spring Data JPA, make sure to set up deferred bootstrapping for its repositories as well.
 
 
@@ -284,9 +284,9 @@ to a newly created `EntityManager` per operation, in effect making its usage thr
 
 It is possible to write code against the plain JPA without any Spring dependencies, by
 using an injected `EntityManagerFactory` or `EntityManager`. Spring can understand the
-`@PersistenceUnit` and `@PersistenceContext` annotations both at the field and the method level
-if a `PersistenceAnnotationBeanPostProcessor` is enabled. The following example shows a plain
-JPA DAO implementation that uses the `@PersistenceUnit` annotation:
+`@PersistenceUnit` and `@PersistenceContext` annotations both at the field and the method
+level if a `PersistenceAnnotationBeanPostProcessor` is enabled. The following example
+shows a plain JPA DAO implementation that uses the `@PersistenceUnit` annotation:
 
 [tabs]
 ======

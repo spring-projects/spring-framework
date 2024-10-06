@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,5 +131,19 @@ public interface EvaluationContext {
 	 */
 	@Nullable
 	Object lookupVariable(String name);
+
+	/**
+	 * Determine if assignment is enabled within expressions evaluated by this evaluation
+	 * context.
+	 * <p>If this method returns {@code false}, the assignment ({@code =}), increment
+	 * ({@code ++}), and decrement ({@code --}) operators are disabled.
+	 * <p>By default, this method returns {@code true}. Concrete implementations may override
+	 * this <em>default</em> method to disable assignment.
+	 * @return {@code true} if assignment is enabled; {@code false} otherwise
+	 * @since 5.3.38
+	 */
+	default boolean isAssignmentEnabled() {
+		return true;
+	}
 
 }

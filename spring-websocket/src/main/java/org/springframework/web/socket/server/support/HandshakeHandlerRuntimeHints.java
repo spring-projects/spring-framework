@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,11 @@ import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link RuntimeHintsRegistrar} implementation that registers reflection entries
+ * {@link RuntimeHintsRegistrar} implementation that registers reflection hints
  * for {@link AbstractHandshakeHandler}.
  *
  * @author Sebastien Deleuze
@@ -60,8 +61,9 @@ class HandshakeHandlerRuntimeHints implements RuntimeHintsRegistrar {
 				"com.ibm.websphere.wsoc.WsWsocServerContainer", classLoader);
 	}
 
+
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 		ReflectionHints reflectionHints = hints.reflection();
 		if (tomcatWsPresent) {
 			registerType(reflectionHints, "org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy");
@@ -87,4 +89,5 @@ class HandshakeHandlerRuntimeHints implements RuntimeHintsRegistrar {
 		reflectionHints.registerType(TypeReference.of(className),
 				builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 	}
+
 }

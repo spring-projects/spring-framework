@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,12 +47,16 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	@Nullable
 	private final String executorName;
 
+	@Nullable
 	private BeanFactory beanFactory;
 
+	@Nullable
 	private Callable<V> timeoutCallback;
 
+	@Nullable
 	private Callable<V> errorCallback;
 
+	@Nullable
 	private Runnable completionCallback;
 
 

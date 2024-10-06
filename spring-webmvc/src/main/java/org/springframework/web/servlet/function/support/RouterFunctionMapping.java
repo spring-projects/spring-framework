@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
+import org.springframework.web.servlet.handler.MatchableHandlerMapping;
+import org.springframework.web.servlet.handler.RequestMatchResult;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -53,7 +55,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @author Brian Clozel
  * @since 5.2
  */
-public class RouterFunctionMapping extends AbstractHandlerMapping implements InitializingBean {
+public class RouterFunctionMapping extends AbstractHandlerMapping implements InitializingBean, MatchableHandlerMapping {
 
 	@Nullable
 	private RouterFunction<?> routerFunction;
@@ -223,4 +225,9 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		servletRequest.setAttribute(RouterFunctions.REQUEST_ATTRIBUTE, request);
 	}
 
+	@Nullable
+	@Override
+	public RequestMatchResult match(HttpServletRequest request, String pattern) {
+		throw new UnsupportedOperationException("This HandlerMapping uses PathPatterns");
+	}
 }

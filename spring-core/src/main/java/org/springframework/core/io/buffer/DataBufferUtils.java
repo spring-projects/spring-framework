@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ import org.springframework.util.Assert;
  */
 public abstract class DataBufferUtils {
 
-	private final static Log logger = LogFactory.getLog(DataBufferUtils.class);
+	private static final Log logger = LogFactory.getLog(DataBufferUtils.class);
 
 	private static final Consumer<DataBuffer> RELEASE_CONSUMER = DataBufferUtils::release;
 
@@ -745,7 +745,7 @@ public abstract class DataBufferUtils {
 	 */
 	private static class SingleByteMatcher implements NestedMatcher {
 
-		static SingleByteMatcher NEWLINE_MATCHER = new SingleByteMatcher(new byte[] {10});
+		static final SingleByteMatcher NEWLINE_MATCHER = new SingleByteMatcher(new byte[] {10});
 
 		private final byte[] delimiter;
 
@@ -784,7 +784,7 @@ public abstract class DataBufferUtils {
 	/**
 	 * Base class for a {@link NestedMatcher}.
 	 */
-	private static abstract class AbstractNestedMatcher implements NestedMatcher {
+	private abstract static class AbstractNestedMatcher implements NestedMatcher {
 
 		private final byte[] delimiter;
 
@@ -990,7 +990,7 @@ public abstract class DataBufferUtils {
 			DataBuffer.ByteBufferIterator iterator = dataBuffer.writableByteBuffers();
 			Assert.state(iterator.hasNext(), "No ByteBuffer available");
 			ByteBuffer byteBuffer = iterator.next();
-			Attachment attachment = new Attachment(dataBuffer,  iterator);
+			Attachment attachment = new Attachment(dataBuffer, iterator);
 			this.channel.read(byteBuffer, this.position.get(), attachment, this);
 		}
 
@@ -999,7 +999,7 @@ public abstract class DataBufferUtils {
 			attachment.iterator().close();
 			DataBuffer dataBuffer = attachment.dataBuffer();
 
-			if (this.state.get().equals(State.DISPOSED)) {
+			if (this.state.get() == State.DISPOSED) {
 				release(dataBuffer);
 				closeChannel(this.channel);
 				return;
@@ -1030,13 +1030,13 @@ public abstract class DataBufferUtils {
 		}
 
 		@Override
-		public void failed(Throwable exc, Attachment attachment) {
+		public void failed(Throwable ex, Attachment attachment) {
 			attachment.iterator().close();
 			release(attachment.dataBuffer());
 
 			closeChannel(this.channel);
 			this.state.set(State.DISPOSED);
-			this.sink.error(exc);
+			this.sink.error(ex);
 		}
 
 		private enum State {
@@ -1095,7 +1095,6 @@ public abstract class DataBufferUtils {
 		public Context currentContext() {
 			return Context.of(this.sink.contextView());
 		}
-
 	}
 
 
@@ -1190,13 +1189,13 @@ public abstract class DataBufferUtils {
 		}
 
 		@Override
-		public void failed(Throwable exc, Attachment attachment) {
+		public void failed(Throwable ex, Attachment attachment) {
 			attachment.iterator().close();
 
 			this.sink.next(attachment.dataBuffer());
 			this.writing.set(false);
 
-			this.sink.error(exc);
+			this.sink.error(ex);
 		}
 
 		@Override
@@ -1205,9 +1204,6 @@ public abstract class DataBufferUtils {
 		}
 
 		private record Attachment(ByteBuffer byteBuffer, DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator) {}
-
-
 	}
-
 
 }

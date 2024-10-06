@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public abstract class OrderUtils {
 	/** Cache marker for a non-annotated Class. */
 	private static final Object NOT_ANNOTATED = new Object();
 
-	private static final String JAVAX_PRIORITY_ANNOTATION = "jakarta.annotation.Priority";
+	private static final String JAKARTA_PRIORITY_ANNOTATION = "jakarta.annotation.Priority";
 
 	/** Cache for @Order value (or NOT_ANNOTATED marker) per Class. */
 	static final Map<AnnotatedElement, Object> orderCache = new ConcurrentReferenceHashMap<>(64);
@@ -124,7 +124,7 @@ public abstract class OrderUtils {
 		if (orderAnnotation.isPresent()) {
 			return orderAnnotation.getInt(MergedAnnotation.VALUE);
 		}
-		MergedAnnotation<?> priorityAnnotation = annotations.get(JAVAX_PRIORITY_ANNOTATION);
+		MergedAnnotation<?> priorityAnnotation = annotations.get(JAKARTA_PRIORITY_ANNOTATION);
 		if (priorityAnnotation.isPresent()) {
 			return priorityAnnotation.getInt(MergedAnnotation.VALUE);
 		}
@@ -139,7 +139,7 @@ public abstract class OrderUtils {
 	 */
 	@Nullable
 	public static Integer getPriority(Class<?> type) {
-		return MergedAnnotations.from(type, SearchStrategy.TYPE_HIERARCHY).get(JAVAX_PRIORITY_ANNOTATION)
+		return MergedAnnotations.from(type, SearchStrategy.TYPE_HIERARCHY).get(JAKARTA_PRIORITY_ANNOTATION)
 				.getValue(MergedAnnotation.VALUE, Integer.class).orElse(null);
 	}
 

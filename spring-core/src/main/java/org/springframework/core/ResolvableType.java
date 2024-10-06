@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -647,7 +647,7 @@ public class ResolvableType implements Serializable {
 	 * @param nestingLevel the required nesting level, indexed from 1 for the
 	 * current type, 2 for the first nested generic, 3 for the second and so on
 	 * @param typeIndexesPerLevel a map containing the generic index for a given
-	 * nesting level (may be {@code null})
+	 * nesting level (can be {@code null})
 	 * @return a {@code ResolvableType} for the nested level, or {@link #NONE}
 	 */
 	public ResolvableType getNested(int nestingLevel, @Nullable Map<Integer, Integer> typeIndexesPerLevel) {
@@ -679,7 +679,7 @@ public class ResolvableType implements Serializable {
 	 * generic is returned.
 	 * <p>If no generic is available at the specified indexes {@link #NONE} is returned.
 	 * @param indexes the indexes that refer to the generic parameter
-	 * (may be omitted to return the first generic)
+	 * (can be omitted to return the first generic)
 	 * @return a {@code ResolvableType} for the specified generic, or {@link #NONE}
 	 * @see #hasGenerics()
 	 * @see #getGenerics()
@@ -747,7 +747,7 @@ public class ResolvableType implements Serializable {
 	 * Convenience method that will {@link #getGenerics() get} and
 	 * {@link #resolve() resolve} generic parameters.
 	 * @return an array of resolved generic parameters (the resulting array
-	 * will never be {@code null}, but it may contain {@code null} elements})
+	 * will never be {@code null}, but it may contain {@code null} elements)
 	 * @see #getGenerics()
 	 * @see #resolve()
 	 */
@@ -782,7 +782,7 @@ public class ResolvableType implements Serializable {
 	 * Convenience method that will {@link #getGeneric(int...) get} and
 	 * {@link #resolve() resolve} a specific generic parameter.
 	 * @param indexes the indexes that refer to the generic parameter
-	 * (may be omitted to return the first generic)
+	 * (can be omitted to return the first generic)
 	 * @return a resolved {@link Class} or {@code null}
 	 * @see #getGeneric(int...)
 	 * @see #resolve()

@@ -24,7 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
@@ -249,18 +251,19 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	public Mono<Void> cleanupMultipart() {
 		return Mono.defer(() -> {
 			if (this.multipartRead) {
-				return getMultipartData()
-						.onErrorComplete()
-						.flatMapIterable(Map::values)
-						.flatMapIterable(Function.identity())
-						.flatMap(part -> part.delete()
-									.onErrorComplete())
-						.then();
+				return Mono.usingWhen(getMultipartData().onErrorComplete().map(this::collectParts),
+						parts -> Mono.empty(),
+						parts -> Flux.fromIterable(parts).flatMap(part -> part.delete().onErrorComplete())
+				);
 			}
 			else {
 				return Mono.empty();
 			}
 		});
+	}
+
+	private List<Part> collectParts(MultiValueMap<String, Part> multipartData) {
+		return multipartData.values().stream().flatMap(List::stream).collect(Collectors.toList());
 	}
 
 	@Override

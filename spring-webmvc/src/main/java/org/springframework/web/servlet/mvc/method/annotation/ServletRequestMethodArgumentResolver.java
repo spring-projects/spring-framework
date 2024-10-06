@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import jakarta.servlet.http.PushBuilder;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
@@ -68,21 +67,6 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ServletRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	@Nullable
-	private static Class<?> pushBuilder;
-
-	static {
-		try {
-			pushBuilder = ClassUtils.forName("jakarta.servlet.http.PushBuilder",
-					ServletRequestMethodArgumentResolver.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Servlet 4.0 PushBuilder not found - not supported for injection
-			pushBuilder = null;
-		}
-	}
-
-
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
@@ -90,7 +74,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 				ServletRequest.class.isAssignableFrom(paramType) ||
 				MultipartRequest.class.isAssignableFrom(paramType) ||
 				HttpSession.class.isAssignableFrom(paramType) ||
-				(pushBuilder != null && pushBuilder.isAssignableFrom(paramType)) ||
+				PushBuilder.class.isAssignableFrom(paramType) ||
 				(Principal.class.isAssignableFrom(paramType) && !parameter.hasParameterAnnotations()) ||
 				InputStream.class.isAssignableFrom(paramType) ||
 				Reader.class.isAssignableFrom(paramType) ||
@@ -143,8 +127,13 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			}
 			return session;
 		}
-		else if (pushBuilder != null && pushBuilder.isAssignableFrom(paramType)) {
-			return PushBuilderDelegate.resolvePushBuilder(request, paramType);
+		else if (PushBuilder.class.isAssignableFrom(paramType)) {
+			PushBuilder pushBuilder = request.newPushBuilder();
+			if (pushBuilder != null && !paramType.isInstance(pushBuilder)) {
+				throw new IllegalStateException(
+						"Current push builder is not of type [" + paramType.getName() + "]: " + pushBuilder);
+			}
+			return pushBuilder;
 		}
 		else if (InputStream.class.isAssignableFrom(paramType)) {
 			InputStream inputStream = request.getInputStream();
@@ -187,24 +176,6 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 
 		// Should never happen...
 		throw new UnsupportedOperationException("Unknown parameter type: " + paramType.getName());
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Servlet API 4.0 at runtime.
-	 */
-	private static class PushBuilderDelegate {
-
-		@Nullable
-		public static Object resolvePushBuilder(HttpServletRequest request, Class<?> paramType) {
-			PushBuilder pushBuilder = request.newPushBuilder();
-			if (pushBuilder != null && !paramType.isInstance(pushBuilder)) {
-				throw new IllegalStateException(
-						"Current push builder is not of type [" + paramType.getName() + "]: " + pushBuilder);
-			}
-			return pushBuilder;
-
-		}
 	}
 
 }
