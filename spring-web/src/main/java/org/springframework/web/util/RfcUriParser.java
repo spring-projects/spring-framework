@@ -142,10 +142,11 @@ abstract class RfcUriParser {
 					case ';':
 					case '?':
 					case '#':
+					case '.':
+						parser.index(--i);
+						parser.advanceTo(PATH);
+						break;
 					default:
-						if (c == '.') {
-							parser.index(--i);
-						}
 						parser.advanceTo(PATH);
 				}
 			}
