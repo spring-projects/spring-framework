@@ -97,10 +97,12 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	/**
 	 * Set the {@link UriComponentsBuilder.ParserType} to use.
-	 * <p>By default, if the parser type is not specified,
-	 * {@link UriComponentsBuilder} uses {@link UriComponentsBuilder.ParserType#RFC}.
+	 * <p>By default, {@link UriComponentsBuilder} uses the
+	 * {@link UriComponentsBuilder.ParserType#RFC parser type}.
 	 * @param parserType the parser type
 	 * @since 6.2
+	 * @see UriComponentsBuilder.ParserType
+	 * @see UriComponentsBuilder#fromUriString(String, UriComponentsBuilder.ParserType)
 	 */
 	public void setParserType(UriComponentsBuilder.ParserType parserType) {
 		this.parserType = parserType;

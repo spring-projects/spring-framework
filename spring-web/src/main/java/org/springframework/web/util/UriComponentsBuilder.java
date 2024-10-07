@@ -42,18 +42,22 @@ import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
 import org.springframework.web.util.UriComponents.UriTemplateVariables;
 
 /**
- * Builder for {@link UriComponents}.
- *
- * <p>Typical usage involves:
+ * Builder for {@link UriComponents}. Use as follows:
  * <ol>
- * <li>Create a {@code UriComponentsBuilder} with one of the static factory methods
- * (such as {@link #fromPath(String)} or {@link #fromUri(URI)})</li>
- * <li>Set the various URI components through the respective methods ({@link #scheme(String)},
- * {@link #userInfo(String)}, {@link #host(String)}, {@link #port(int)}, {@link #path(String)},
- * {@link #pathSegment(String...)}, {@link #queryParam(String, Object...)}, and
- * {@link #fragment(String)}.</li>
- * <li>Build the {@link UriComponents} instance with the {@link #build()} method.</li>
+ * <li>Create a builder through a factory method, e.g. {@link #fromUriString(String)}.
+ * <li>Set URI components (e.g. scheme, host, path, etc) through instance methods.
+ * <li>Build the {@link UriComponents}.</li>
+ * <li>Expand URI variables from a map or array or variable values.
+ * <li>Encode via {@link UriComponents#encode()}.</li>
+ * <li>Use {@link UriComponents#toUri()} or {@link UriComponents#toUriString()}.
  * </ol>
+ *
+ * <p>By default, URI parsing is based on the {@link ParserType#RFC RFC parser type},
+ * which expects input strings to conform to RFC 3986 syntax. The alternative
+ * {@link ParserType#WHAT_WG WhatWG parser type}, based on the algorithm from
+ * the WhatWG <a href="https://url.spec.whatwg.org">URL Living Standard</a>
+ * provides more lenient handling of a wide range of cases that occur in user
+ * types URL's.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -785,40 +789,36 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 
+	/**
+	 * Enum to provide a choice of URI parsers to use in {@link #fromUriString(String, ParserType)}.
+	 * @since 6.2
+	 */
+	public enum ParserType {
+
+		/**
+		 * This parser type expects URI's to conform to RFC 3986 syntax.
+		 */
+		RFC,
+
+		/**
+		 * This parser follows the
+		 * <a href="https://url.spec.whatwg.org/#url-parsing">URL parsing algorithm</a>
+		 * in the WhatWG URL Living standard that browsers implement to align on
+		 * lenient handling of user typed URL's that may not conform to RFC syntax.
+		 * @see <a href="https://url.spec.whatwg.org">URL Living Standard</a>
+		 * @see <a href="https://github.com/web-platform-tests/wpt/tree/master/url">URL tests</a>
+		 */
+		WHAT_WG
+
+	}
+
+
 	private interface PathComponentBuilder {
 
 		@Nullable
 		PathComponent build();
 
 		PathComponentBuilder cloneBuilder();
-	}
-
-
-	/**
-	 * Enum to represent different URI parsing mechanisms.
-	 */
-	public enum ParserType {
-
-		/**
-		 * Parser that expects URI's conforming to RFC 3986 syntax.
-		 */
-		RFC,
-
-		/**
-		 * Parser based on algorithm defined in the WhatWG URL Living standard.
-		 * Browsers use this algorithm to align on lenient parsing of user typed
-		 * URL's that may deviate from RFC syntax.
-		 * <p>For more details, see:
-		 * <ul>
-		 * <li><a href="https://url.spec.whatwg.org">URL Living Standard</a>
-		 * <li><a href="https://url.spec.whatwg.org/#url-parsing">Section 4.4: URL parsing</a>
-		 * <li><a href="https://github.com/web-platform-tests/wpt/tree/master/url">web-platform-tests</a>
-		 * </ul>
-		 * <p>Use this if you need to leniently handle URL's that don't conform
-		 * to RFC syntax, or for alignment with browser parsing.
-		 */
-		WHAT_WG
-
 	}
 
 
