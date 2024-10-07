@@ -518,9 +518,9 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			}
 			path(record.path().toString());
 			query(record.query());
-			if (StringUtils.hasText(record.fragment())) {
-				fragment(record.fragment());
-			}
+		}
+		if (StringUtils.hasText(record.fragment())) {
+			fragment(record.fragment());
 		}
 		return this;
 	}
