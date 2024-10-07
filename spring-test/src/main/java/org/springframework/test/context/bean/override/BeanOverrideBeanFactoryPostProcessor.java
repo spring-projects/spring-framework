@@ -76,9 +76,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	 * @param overrideRegistrar the {@code BeanOverrideRegistrar} used to track
 	 * metadata
 	 */
-	public BeanOverrideBeanFactoryPostProcessor(Set<OverrideMetadata> metadata,
-			BeanOverrideRegistrar overrideRegistrar) {
-
+	BeanOverrideBeanFactoryPostProcessor(Set<OverrideMetadata> metadata, BeanOverrideRegistrar overrideRegistrar) {
 		this.metadata = metadata;
 		this.overrideRegistrar = overrideRegistrar;
 	}
@@ -113,18 +111,23 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		}
 
 		// The following is a "pseudo" bean definition which MUST NOT be used to
-		// create an actual bean instance.
+		// create an actual bean instance. In fact, it is only used as a placeholder
+		// to support overrides for nonexistent beans.
 		RootBeanDefinition pseudoBeanDefinition = createPseudoBeanDefinition(overrideMetadata);
+
 		String beanName = overrideMetadata.getBeanName();
 		String beanNameIncludingFactory;
 		BeanDefinition existingBeanDefinition = null;
 		if (beanName == null) {
 			beanNameIncludingFactory = getBeanNameForType(beanFactory, overrideMetadata, enforceExistingDefinition);
 			if (beanNameIncludingFactory == null) {
-				beanNameIncludingFactory = beanNameGenerator.generateBeanName(pseudoBeanDefinition, registry);
+				// We need to generate a name for a nonexistent bean.
+				beanName = beanNameGenerator.generateBeanName(pseudoBeanDefinition, registry);
+				beanNameIncludingFactory = beanName;
 			}
-			beanName = BeanFactoryUtils.transformedBeanName(beanNameIncludingFactory);
-			if (beanFactory.containsBeanDefinition(beanName)) {
+			else {
+				// We are overriding an existing bean.
+				beanName = BeanFactoryUtils.transformedBeanName(beanNameIncludingFactory);
 				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
 			}
 		}
@@ -143,12 +146,13 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		}
 
 		if (existingBeanDefinition != null) {
-			// Validate existing bean definition.
+			// Validate the existing bean definition.
 			validateBeanDefinition(beanFactory, beanName);
 		}
 		else {
-			// There was no existing bean definition, so we register the pseudo bean definition
-			// to ensure that a bean definition exists for the given bean name.
+			// There was no existing bean definition, so we register the "pseudo" bean
+			// definition to ensure that a suitable bean definition exists for the given
+			// bean name for proper autowiring candidate resolution.
 			registry.registerBeanDefinition(beanName, pseudoBeanDefinition);
 		}
 
