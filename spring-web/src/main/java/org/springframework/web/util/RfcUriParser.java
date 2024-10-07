@@ -18,12 +18,14 @@ package org.springframework.web.util;
 
 import java.util.Set;
 
-import org.springframework.lang.Contract;
+import org.apache.commons.logging.Log;
+
+import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Parser for URI's based on the syntax in RFC 3986.
+ * Parser for URI's based on RFC 3986 syntax.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
@@ -31,6 +33,8 @@ import org.springframework.util.Assert;
  * @see <a href="https://www.rfc-editor.org/info/rfc3986">RFC 3986</a>
  */
 abstract class RfcUriParser {
+
+	private static final Log logger = LogDelegateFactory.getHiddenLog(RfcUriParser.class);
 
 
 	/**
@@ -44,19 +48,20 @@ abstract class RfcUriParser {
 	}
 
 
-	@Contract("false, _ -> fail")
-	private static void verify(boolean expression, String message) {
+	private static void verify(boolean expression, InternalParser parser, String message) {
 		if (!expression) {
-			fail(message);
+			fail(parser, message);
 		}
 	}
 
-	public static void verifyIsHexDigit(char c, String message) {
-		verify((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9'), message);
+	private static void verifyIsHexDigit(char c, InternalParser parser, String message) {
+		verify((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9'), parser, message);
 	}
 
-	@Contract("_ -> fail")
-	private static void fail(String message) {
+	private static void fail(InternalParser parser, String message) {
+		if (logger.isTraceEnabled()) {
+			logger.trace(InvalidUrlException.class.getSimpleName() + ": \"" + message + "\" " + parser);
+		}
 		throw new InvalidUrlException(message);
 	}
 
@@ -202,7 +207,7 @@ abstract class RfcUriParser {
 						parser.captureUser().componentIndex(i + 1);
 						break;
 					case '[':
-						verify(parser.isAtStartOfComponent(), "Bad authority");
+						verify(parser.isAtStartOfComponent(), parser, "Bad authority");
 						parser.advanceTo(IPV6);
 						break;
 					case '%':
@@ -212,7 +217,7 @@ abstract class RfcUriParser {
 						boolean isAllowed = (parser.processCurlyBrackets(c) ||
 								parser.countDownPercentEncodingInHost(c) ||
 								HierarchicalUriComponents.Type.URI.isUnreservedOrSubDelimiter(c));
-						verify(isAllowed, "Bad authority");
+						verify(isAllowed, parser, "Bad authority");
 				}
 			}
 
@@ -242,13 +247,13 @@ abstract class RfcUriParser {
 					case ':':
 						break;
 					default:
-						verifyIsHexDigit(c, "Bad authority");
+						verifyIsHexDigit(c, parser, "Bad authority");
 				}
 			}
 
 			@Override
 			public void handleEnd(InternalParser parser) {
-				verify(parser.hasHost(), "Bad authority");  // no closing ']'
+				verify(parser.hasHost(), parser, "Bad authority");  // no closing ']'
 			}
 		},
 
@@ -257,7 +262,7 @@ abstract class RfcUriParser {
 			@Override
 			public void handleNext(InternalParser parser, char c, int i) {
 				if (c == '@') {
-					verify(!parser.hasUser(), "Bad authority");
+					verify(!parser.hasUser(), parser, "Bad authority");
 					parser.switchPortForFullPassword().advanceTo(HOST, i + 1);
 				}
 				else if (c == '/') {
@@ -274,7 +279,7 @@ abstract class RfcUriParser {
 						parser.switchPortForPassword().advanceTo(HOST);
 						return;
 					}
-					fail("Bad authority");
+					fail(parser, "Bad authority");
 				}
 			}
 
@@ -342,7 +347,7 @@ abstract class RfcUriParser {
 
 			@Override
 			public void handleNext(InternalParser parser, char c, int i) {
-				fail("Bad character '*'");
+				fail(parser, "Bad character '*'");
 			}
 
 			@Override
@@ -422,31 +427,6 @@ abstract class RfcUriParser {
 			this.uri = uri;
 		}
 
-		/**
-		 * Parse the input string and return a {@link UriRecord} with the results.
-		 */
-		public UriRecord parse() {
-			Assert.isTrue(this.state == State.START && this.index == 0, "Internal Error");
-
-			while (hasNext()) {
-				this.state.handleNext(this, charAtIndex(), this.index);
-				this.index++;
-			}
-
-			this.state.handleEnd(this);
-
-			return new UriRecord(this.scheme, this.isOpaque,
-					this.user, this.host, this.port, this.path, this.query, this.fragment);
-		}
-
-		public boolean hasNext() {
-			return (this.index < this.uri.length());
-		}
-
-		public char charAtIndex() {
-			return this.uri.charAt(this.index);
-		}
-
 		// Check internal state
 
 		public boolean hasScheme() {
@@ -469,15 +449,43 @@ abstract class RfcUriParser {
 			return (this.index == this.componentIndex);
 		}
 
+		// Top-level parse loop, iterate over chars and delegate to states
+
+		public UriRecord parse() {
+			Assert.isTrue(this.state == State.START && this.index == 0, "Internal Error");
+
+			while (hasNext()) {
+				this.state.handleNext(this, charAtIndex(), this.index);
+				this.index++;
+			}
+
+			this.state.handleEnd(this);
+
+			return new UriRecord(this.scheme, this.isOpaque,
+					this.user, this.host, this.port, this.path, this.query, this.fragment);
+		}
+
+		public boolean hasNext() {
+			return (this.index < this.uri.length());
+		}
+
+		public char charAtIndex() {
+			return this.uri.charAt(this.index);
+		}
+
 		// Transitions and index updates
 
 		public void advanceTo(State state) {
+			if (logger.isTraceEnabled()) {
+				logger.trace(this.state + " -> " + state + ", " +
+						"index=" + this.index + ", componentIndex=" + this.componentIndex);
+			}
 			this.state = state;
 		}
 
 		public void advanceTo(State state, int componentIndex) {
-			this.state = state;
 			this.componentIndex = componentIndex;
+			advanceTo(state);
 		}
 
 		public InternalParser componentIndex(int componentIndex) {
@@ -498,19 +506,19 @@ abstract class RfcUriParser {
 		}
 
 		public InternalParser captureScheme() {
-			this.scheme = captureComponent().toLowerCase();
+			this.scheme = captureComponent("scheme").toLowerCase();
 			return this;
 		}
 
 		public InternalParser captureUser() {
 			this.inPassword = false;
-			this.user = captureComponent();
+			this.user = captureComponent("user");
 			return this;
 		}
 
 		public InternalParser captureHost() {
-			verify(this.remainingPercentEncodedChars == 0 && !this.inPassword, "Bad authority");
-			this.host = captureComponent();
+			verify(this.remainingPercentEncodedChars == 0 && !this.inPassword, this, "Bad authority");
+			this.host = captureComponent("host");
 			return this;
 		}
 
@@ -522,29 +530,32 @@ abstract class RfcUriParser {
 		}
 
 		public InternalParser capturePort() {
-			verify(this.openCurlyBracketCount == 0, "Bad authority");
-			this.port = captureComponent();
+			verify(this.openCurlyBracketCount == 0, this, "Bad authority");
+			this.port = captureComponent("port");
 			return this;
 		}
 
 		public InternalParser capturePath() {
-			this.path = captureComponent();
+			this.path = captureComponent("path");
 			return this;
 		}
 
 		public InternalParser captureQuery() {
-			this.query = captureComponent();
+			this.query = captureComponent("query");
 			return this;
 		}
 
 		public void captureFragmentIfNotEmpty() {
 			if (this.index > this.componentIndex + 1) {
-				this.fragment = captureComponent();
+				this.fragment = captureComponent("fragment");
 			}
 		}
 
 		public InternalParser switchPortForFullPassword() {
 			this.user = this.host + ":" + captureComponent();
+			if (logger.isTraceEnabled()) {
+				logger.trace("Switching from host/port to user=" + this.user);
+			}
 			return this;
 		}
 
@@ -553,8 +564,19 @@ abstract class RfcUriParser {
 			if (this.host != null) {
 				this.componentIndex = (this.componentIndex - this.host.length() - 1);
 				this.host = null;
+				if (logger.isTraceEnabled()) {
+					logger.trace("Switching from host/port to username/password");
+				}
 			}
 			return this;
+		}
+
+		private String captureComponent(String logPrefix) {
+			String value = captureComponent();
+			if (logger.isTraceEnabled()) {
+				logger.trace(logPrefix + " set to '" + value + "'");
+			}
+			return value;
 		}
 
 		private String captureComponent() {
@@ -562,7 +584,7 @@ abstract class RfcUriParser {
 		}
 
 		public InternalParser markPercentEncoding() {
-			verify(this.remainingPercentEncodedChars == 0, "Bad encoding");
+			verify(this.remainingPercentEncodedChars == 0, this, "Bad encoding");
 			this.remainingPercentEncodedChars = 2;
 			this.inUtf16Sequence = false;
 			return this;
@@ -578,7 +600,7 @@ abstract class RfcUriParser {
 				return false;
 			}
 			this.remainingPercentEncodedChars--;
-			verifyIsHexDigit(c, "Bad authority");
+			verifyIsHexDigit(c, this, "Bad authority");
 			return true;
 		}
 
@@ -595,7 +617,7 @@ abstract class RfcUriParser {
 				return true;
 			}
 			this.remainingPercentEncodedChars--;
-			verifyIsHexDigit(c, "Bad path");
+			verifyIsHexDigit(c, this, "Bad path");
 			this.inUtf16Sequence &= (this.remainingPercentEncodedChars > 0);
 			return true;
 		}
@@ -615,6 +637,13 @@ abstract class RfcUriParser {
 			return (this.openCurlyBracketCount > 0);
 		}
 
+		@Override
+		public String toString() {
+			return "[State=" + this.state + ", index=" + this.index + ", componentIndex=" + this.componentIndex +
+					", uri='" + this.uri + "', scheme='" + this.scheme + "', user='" + this.user +
+					"', host='" + this.host + "', path='" + this.path + "', port='" + this.port +
+					"', query='" + this.query + "', fragment='" + this.fragment + "']";
+		}
 	}
 
 }
