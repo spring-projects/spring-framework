@@ -1,38 +1,36 @@
 name: Build Pull Request
 on: pull_request
-
 permissions:
   contents: read
-
 jobs:
   build:
     name: Build Pull Request
+    if: ${{ github.repository == 'spring-projects/spring-framework' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    if: ${{ github.repository == 'spring-projects/spring-framework' }}
     steps:
-      - name: Set up JDK 17
+      - name: Set Up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'liberica'
+          java-version: '17'
       - name: Check Out
         uses: actions/checkout@v4
       - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@d9c87d481d55275bb5441eef3fe0e46805f9ef70 # v3.5.0
+        uses: gradle/actions/wrapper-validation@d156388eb19639ec20ade50009f3d199ce1e2808 # v4.1.0
       - name: Set Up Gradle
-        uses: gradle/actions/setup-gradle@d9c87d481d55275bb5441eef3fe0e46805f9ef70 # v3.5.0
+        uses: gradle/actions/setup-gradle@d156388eb19639ec20ade50009f3d199ce1e2808 # v4.1.0
       - name: Build
         env:
           CI: 'true'
           GRADLE_ENTERPRISE_URL: 'https://ge.spring.io'
         run: ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false --no-daemon --no-parallel --continue build
       - name: Print JVM Thread Dumps When Cancelled
-        uses: ./.github/actions/print-jvm-thread-dumps
         if: cancelled()
+        uses: ./.github/actions/print-jvm-thread-dumps
       - name: Upload Build Reports
-        uses: actions/upload-artifact@v4
         if: failure()
+        uses: actions/upload-artifact@v4
         with:
           name: build-reports
           path: '**/build/reports/'

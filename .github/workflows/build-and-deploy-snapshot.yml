@@ -8,9 +8,9 @@ concurrency:
 jobs:
   build-and-deploy-snapshot:
     name: Build and Deploy Snapshot
+    if: ${{ github.repository == 'spring-projects/spring-framework' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    if: ${{ github.repository == 'spring-projects/spring-framework' }}
     steps:
       - name: Check Out Code
         uses: actions/checkout@v4
@@ -18,31 +18,31 @@ jobs:
         id: build-and-publish
         uses: ./.github/actions/build
         with:
-          develocity-access-key: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           publish: true
       - name: Deploy
         uses: spring-io/artifactory-deploy-action@26bbe925a75f4f863e1e529e85be2d0093cac116 # v0.0.1
         with:
-          uri: 'https://repo.spring.io'
-          username: ${{ secrets.ARTIFACTORY_USERNAME }}
-          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-          build-name: 'spring-framework-6.2.x'
-          repository: 'libs-snapshot-local'
-          folder: 'deployment-repository'
-          signing-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          signing-passphrase: ${{ secrets.GPG_PASSPHRASE }}
           artifact-properties: |
             /**/framework-api-*.zip::zip.name=spring-framework,zip.deployed=false
             /**/framework-api-*-docs.zip::zip.type=docs
             /**/framework-api-*-schema.zip::zip.type=schema
+          build-name: 'spring-framework-6.2.x'
+          folder: 'deployment-repository'
+          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          repository: 'libs-snapshot-local'
+          signing-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          signing-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          uri: 'https://repo.spring.io'
+          username: ${{ secrets.ARTIFACTORY_USERNAME }}
       - name: Send Notification
-        uses: ./.github/actions/send-notification
         if: always()
+        uses: ./.github/actions/send-notification
         with:
-          webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
-          status: ${{ job.status }}
           build-scan-url: ${{ steps.build-and-publish.outputs.build-scan-url }}
           run-name: ${{ format('{0} | Linux | Java 17', github.ref_name) }}
+          status: ${{ job.status }}
+          webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
     outputs:
       version: ${{ steps.build-and-publish.outputs.version }}
   verify:
