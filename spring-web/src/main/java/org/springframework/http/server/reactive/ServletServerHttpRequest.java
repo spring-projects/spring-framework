@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Adapt {@link ServerHttpRequest} to the Servlet {@link HttpServletRequest}.
@@ -90,8 +91,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			AsyncContext asyncContext, String servletPath, DataBufferFactory bufferFactory, int bufferSize)
 			throws IOException, URISyntaxException {
 
-		super(HttpMethod.valueOf(request.getMethod()), initUri(request), request.getContextPath() + servletPath,
-				initHeaders(headers, request));
+		super(HttpMethod.valueOf(request.getMethod()), initUri(request),
+				request.getContextPath() + servletPath, initHeaders(headers, request));
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be greater than 0");
@@ -121,14 +122,42 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return headers;
 	}
 
-	private static URI initUri(HttpServletRequest request) throws URISyntaxException {
-		Assert.notNull(request, "'request' must not be null");
-		StringBuffer url = request.getRequestURL();
-		String query = request.getQueryString();
-		if (StringUtils.hasText(query)) {
-			url.append('?').append(query);
+	@SuppressWarnings("JavaExistingMethodCanBeUsed")
+	private static URI initUri(HttpServletRequest servletRequest) {
+		Assert.notNull(servletRequest, "'request' must not be null");
+		String urlString = null;
+		String query = null;
+		boolean hasQuery = false;
+		try {
+			StringBuffer requestURL = servletRequest.getRequestURL();
+			query = servletRequest.getQueryString();
+			hasQuery = StringUtils.hasText(query);
+			if (hasQuery) {
+				requestURL.append('?').append(query);
+			}
+			urlString = requestURL.toString();
+			return new URI(urlString);
 		}
-		return new URI(url.toString());
+		catch (URISyntaxException ex) {
+			if (hasQuery) {
+				try {
+					// Maybe malformed query, try to parse and encode it
+					query = UriComponentsBuilder.fromUriString("?" + query).build().toUri().getRawQuery();
+					return new URI(servletRequest.getRequestURL().toString() + "?" + query);
+				}
+				catch (URISyntaxException ex2) {
+					try {
+						// Try leaving it out
+						return new URI(servletRequest.getRequestURL().toString());
+					}
+					catch (URISyntaxException ex3) {
+						// ignore
+					}
+				}
+			}
+			throw new IllegalStateException(
+					"Could not resolve HttpServletRequest as URI: " + urlString, ex);
+		}
 	}
 
 	@SuppressWarnings("NullAway")

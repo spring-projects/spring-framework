@@ -50,6 +50,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * {@link ServerHttpRequest} implementation that is based on a {@link HttpServletRequest}.
@@ -119,31 +120,37 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	 */
 	public static URI initURI(HttpServletRequest servletRequest) {
 		String urlString = null;
+		String query = null;
 		boolean hasQuery = false;
 		try {
-			StringBuffer url = servletRequest.getRequestURL();
-			String query = servletRequest.getQueryString();
+			StringBuffer requestURL = servletRequest.getRequestURL();
+			query = servletRequest.getQueryString();
 			hasQuery = StringUtils.hasText(query);
 			if (hasQuery) {
-				url.append('?').append(query);
+				requestURL.append('?').append(query);
 			}
-			urlString = url.toString();
+			urlString = requestURL.toString();
 			return new URI(urlString);
 		}
 		catch (URISyntaxException ex) {
-			if (!hasQuery) {
-				throw new IllegalStateException(
-						"Could not resolve HttpServletRequest as URI: " + urlString, ex);
+			if (hasQuery) {
+				try {
+					// Maybe malformed query, try to parse and encode it
+					query = UriComponentsBuilder.fromUriString("?" + query).build().toUri().getRawQuery();
+					return new URI(servletRequest.getRequestURL().toString() + "?" + query);
+				}
+				catch (URISyntaxException ex2) {
+					try {
+						// Try leaving it out
+						return new URI(servletRequest.getRequestURL().toString());
+					}
+					catch (URISyntaxException ex3) {
+						// ignore
+					}
+				}
 			}
-			// Maybe a malformed query string... try plain request URL
-			try {
-				urlString = servletRequest.getRequestURL().toString();
-				return new URI(urlString);
-			}
-			catch (URISyntaxException ex2) {
-				throw new IllegalStateException(
-						"Could not resolve HttpServletRequest as URI: " + urlString, ex2);
-			}
+			throw new IllegalStateException(
+					"Could not resolve HttpServletRequest as URI: " + urlString, ex);
 		}
 	}
 

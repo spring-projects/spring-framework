@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -31,6 +33,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Arjen Poutsma
@@ -78,24 +81,28 @@ class ServletServerHttpRequestTests {
 		assertThat(request.getURI()).isEqualTo(uri);
 	}
 
-	@Test  // SPR-16414
-	void getUriWithQueryParam() {
+	// gh-20960
+	@ParameterizedTest(name = "{displayName}({arguments})")
+	@CsvSource(delimiter='|', value = {
+			"query=foo    | ?query=foo",
+			"query=foo%%x | ?query=foo%25%25x"
+	})
+	void getUriWithMalformedQueryParam(String inputQuery, String expectedQuery) {
 		mockRequest.setScheme("https");
 		mockRequest.setServerPort(443);
 		mockRequest.setServerName("example.com");
 		mockRequest.setRequestURI("/path");
-		mockRequest.setQueryString("query=foo");
-		assertThat(request.getURI()).isEqualTo(URI.create("https://example.com/path?query=foo"));
+		mockRequest.setQueryString(inputQuery);
+		assertThat(request.getURI()).isEqualTo(URI.create("https://example.com/path" + expectedQuery));
 	}
 
-	@Test  // SPR-16414
-	void getUriWithMalformedQueryParam() {
+	@Test
+	void getUriWithMalformedPath() {
 		mockRequest.setScheme("https");
 		mockRequest.setServerPort(443);
 		mockRequest.setServerName("example.com");
-		mockRequest.setRequestURI("/path");
-		mockRequest.setQueryString("query=foo%%x");
-		assertThat(request.getURI()).isEqualTo(URI.create("https://example.com/path"));
+		mockRequest.setRequestURI("/p%th");
+		assertThatIllegalStateException().isThrownBy(() -> request.getURI());
 	}
 
 	@Test  // SPR-13876
