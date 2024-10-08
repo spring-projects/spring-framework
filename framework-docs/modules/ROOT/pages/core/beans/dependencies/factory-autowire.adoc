@@ -124,5 +124,21 @@ These techniques are useful for beans that you never want to be injected into ot
 by autowiring. It does not mean that an excluded bean cannot itself be configured by
 using autowiring. Rather, the bean itself is not a candidate for autowiring other beans.
 
+[NOTE]
+====
+As of 6.2, `@Bean` methods support two variants of the autowire candidate flag:
+`autowireCandidate` and `defaultCandidate`.
+
+When using xref:core/beans/annotation-config/autowired-qualifiers.adoc[qualifiers],
+a bean marked with `defaultCandidate=false` is only available for injection points
+where an additional qualifier indication is present. This is useful for restricted
+delegates that are supposed to be injectable in certain areas but are not meant to
+get in the way of beans of the same type in other places. Such a bean will never
+get injected by plain declared type only, rather by type plus specific qualifier.
+
+In contrast, `autowireCandidate=false` behaves exactly like the `autowire-candidate`
+attribute as explained above: Such a bean will never get injected by type at all.
+====
+
 
 
