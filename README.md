@@ -6,7 +6,7 @@ Spring provides everything required beyond the Java programming language for cre
 
 ## Code of Conduct
 
-This project is governed by the [Spring Code of Conduct](CODE_OF_CONDUCT.adoc). By participating, you are expected to uphold this code of conduct. Please report unacceptable behavior to spring-code-of-conduct@spring.io.
+This project is governed by the [Spring Code of Conduct](https://github.com/spring-projects/spring-framework/?tab=coc-ov-file#contributor-code-of-conduct). By participating, you are expected to uphold this code of conduct. Please report unacceptable behavior to spring-code-of-conduct@spring.io.
 
 ## Access to Binaries
 
