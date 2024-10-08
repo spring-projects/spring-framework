@@ -37,6 +37,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.InterceptingClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
+import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -75,6 +76,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private static final boolean jettyClientPresent;
 
+	private static final boolean reactorNettyClientPresent;
+
 	private static final boolean jdkClientPresent;
 
 	// message factories
@@ -99,6 +102,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 		httpComponentsClientPresent = ClassUtils.isPresent("org.apache.hc.client5.http.classic.HttpClient", loader);
 		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
+		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
 		jdkClientPresent = ClassUtils.isPresent("java.net.http.HttpClient", loader);
 
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", loader) &&
@@ -462,6 +466,9 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		}
 		else if (jettyClientPresent) {
 			return new JettyClientHttpRequestFactory();
+		}
+		else if (reactorNettyClientPresent) {
+			return new ReactorClientHttpRequestFactory();
 		}
 		else if (jdkClientPresent) {
 			// java.net.http module might not be loaded, so we can't default to the JDK HttpClient
