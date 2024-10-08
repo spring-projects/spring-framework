@@ -60,6 +60,7 @@ instance's values consist of all bean instances that match the expected type, an
 `Map` instance's keys contain the corresponding bean names.
 
 
+
 [[beans-autowired-exceptions]]
 == Limitations and Disadvantages of Autowiring
 
@@ -101,10 +102,10 @@ In the latter scenario, you have several options:
 == Excluding a Bean from Autowiring
 
 On a per-bean basis, you can exclude a bean from autowiring. In Spring's XML format, set
-the `autowire-candidate` attribute of the `<bean/>` element to `false`. The container
-makes that specific bean definition unavailable to the autowiring infrastructure
-(including annotation style configurations such as xref:core/beans/annotation-config/autowired.adoc[`@Autowired`]
-).
+the `autowire-candidate` attribute of the `<bean/>` element to `false`; with the `@Bean`
+annotation, the attribute is named `autowireCandidate`. The container makes that specific
+bean definition unavailable to the autowiring infrastructure, including annotation-based
+injection points such as xref:core/beans/annotation-config/autowired.adoc[`@Autowired`].
 
 NOTE: The `autowire-candidate` attribute is designed to only affect type-based autowiring.
 It does not affect explicit references by name, which get resolved even if the
@@ -119,8 +120,8 @@ provide multiple patterns, define them in a comma-separated list. An explicit va
 `true` or `false` for a bean definition's `autowire-candidate` attribute always takes
 precedence. For such beans, the pattern matching rules do not apply.
 
-These techniques are useful for beans that you never want to be injected into other
-beans by autowiring. It does not mean that an excluded bean cannot itself be configured by
+These techniques are useful for beans that you never want to be injected into other beans
+by autowiring. It does not mean that an excluded bean cannot itself be configured by
 using autowiring. Rather, the bean itself is not a candidate for autowiring other beans.
 
 

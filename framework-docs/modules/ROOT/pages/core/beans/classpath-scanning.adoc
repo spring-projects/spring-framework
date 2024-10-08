@@ -317,8 +317,8 @@ exposed based on security policies in some environments -- for example, standalo
 JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests -- see
 {stackoverflow-questions}/19394570/java-jre-7u45-breaks-classloader-getresources).
 
-On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
-However, make sure that your component classes are exported in your `module-info`
+On the module path (Java Module System), Spring's classpath scanning generally works as
+expected. However, make sure that your component classes are exported in your `module-info`
 descriptors. If you expect Spring to invoke non-public members of your classes, make
 sure that they are 'opened' (that is, that they use an `opens` declaration instead of an
 `exports` declaration in your `module-info` descriptor).
@@ -751,7 +751,7 @@ and bean definition show.
 TIP: If you run into naming conflicts due to multiple autodetected components having the
 same non-qualified class name (i.e., classes with identical names but residing in
 different packages), you may need to configure a `BeanNameGenerator` that defaults to the
-fully qualified class name for the generated bean name. As of Spring Framework 5.2.3, the
+fully qualified class name for the generated bean name. The
 `FullyQualifiedAnnotationBeanNameGenerator` located in package
 `org.springframework.context.annotation` can be used for such purposes.
 
@@ -920,7 +920,8 @@ Kotlin::
 [[beans-scanning-qualifiers]]
 == Providing Qualifier Metadata with Annotations
 
-The `@Qualifier` annotation is discussed in xref:core/beans/annotation-config/autowired-qualifiers.adoc[Fine-tuning Annotation-based Autowiring with Qualifiers].
+The `@Qualifier` annotation is discussed in
+xref:core/beans/annotation-config/autowired-qualifiers.adoc[Fine-tuning Annotation-based Autowiring with Qualifiers].
 The examples in that section demonstrate the use of the `@Qualifier` annotation and
 custom qualifier annotations to provide fine-grained control when you resolve autowire
 candidates. Because those examples were based on XML bean definitions, the qualifier
