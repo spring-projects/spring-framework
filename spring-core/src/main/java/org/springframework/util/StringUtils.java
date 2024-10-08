@@ -450,17 +450,19 @@ public abstract class StringUtils {
 		}
 
 		int capacity = inString.length();
-		if (newPattern.length() > oldPattern.length()) {
-			capacity += 16;
+
+		int newPatternLen = newPattern.length();
+		int oldPatternLen = oldPattern.length();
+		if (newPatternLen > oldPatternLen) {
+			capacity += Math.min(Integer.MAX_VALUE, newPatternLen - oldPatternLen);
 		}
 		StringBuilder sb = new StringBuilder(capacity);
 
 		int pos = 0;  // our position in the old string
-		int patLen = oldPattern.length();
 		while (index >= 0) {
 			sb.append(inString, pos, index);
 			sb.append(newPattern);
-			pos = index + patLen;
+			pos = index + oldPatternLen;
 			index = inString.indexOf(oldPattern, pos);
 		}
 
