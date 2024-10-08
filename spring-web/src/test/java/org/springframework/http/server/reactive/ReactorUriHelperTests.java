@@ -29,6 +29,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
+ * Unit tests for {@link ReactorUriHelper}.
+ *
  * @author Arjen Poutsma
  */
 class ReactorUriHelperTests {
@@ -58,14 +60,14 @@ class ReactorUriHelperTests {
 			"                  | /",
 			"''                | /",
 	})
-	void forwardedPrefix(String prefixHeader, String expectedPath) throws URISyntaxException {
+	void forwardedPrefix(String forwardedPrefixHeader, String expectedPath) throws URISyntaxException {
 		HttpServerRequest nettyRequest = mock();
 
 		given(nettyRequest.scheme()).willReturn("https");
 		given(nettyRequest.hostName()).willReturn("localhost");
 		given(nettyRequest.hostPort()).willReturn(443);
 		given(nettyRequest.uri()).willReturn("/");
-		given(nettyRequest.forwardedPrefix()).willReturn(prefixHeader);
+		given(nettyRequest.forwardedPrefix()).willReturn(forwardedPrefixHeader);
 
 		URI uri = ReactorUriHelper.createUri(nettyRequest);
 		assertThat(uri).hasScheme("https")
@@ -74,6 +76,5 @@ class ReactorUriHelperTests {
 				.hasPath(expectedPath)
 				.hasToString("https://localhost" + expectedPath);
 	}
-
 
 }
