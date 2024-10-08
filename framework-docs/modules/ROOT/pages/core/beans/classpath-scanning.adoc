@@ -920,7 +920,8 @@ Kotlin::
 [[beans-scanning-qualifiers]]
 == Providing Qualifier Metadata with Annotations
 
-The `@Qualifier` annotation is discussed in xref:core/beans/annotation-config/autowired-qualifiers.adoc[Fine-tuning Annotation-based Autowiring with Qualifiers].
+The `@Qualifier` annotation is discussed in
+xref:core/beans/annotation-config/autowired-qualifiers.adoc[Fine-tuning Annotation-based Autowiring with Qualifiers].
 The examples in that section demonstrate the use of the `@Qualifier` annotation and
 custom qualifier annotations to provide fine-grained control when you resolve autowire
 candidates. Because those examples were based on XML bean definitions, the qualifier
