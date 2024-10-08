@@ -340,7 +340,7 @@ public interface ErrorResponse {
 
 
 	/**
-	 * Callback to perform an action before an RFC-7807 {@link ProblemDetail}
+	 * Callback to perform an action before an RFC-9457 {@link ProblemDetail}
 	 * response is rendered.
 	 *
 	 * @author Rossen Stoyanchev
