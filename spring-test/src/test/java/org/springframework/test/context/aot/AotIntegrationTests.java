@@ -155,7 +155,6 @@ class AotIntegrationTests extends AbstractAotTests {
 		runEndToEndTests(testClasses, false);
 	}
 
-	@Disabled("Comment out to run Bean Override integration tests in AOT mode")
 	@Test
 	void endToEndTestsForBeanOverrides() {
 		List<Class<?>> testClasses = createTestClassScanner()

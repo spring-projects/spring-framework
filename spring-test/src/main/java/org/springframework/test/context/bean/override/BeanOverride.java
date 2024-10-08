@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
+
 /**
  * Mark a composed annotation as eligible for Bean Override processing.
  *
@@ -37,11 +39,13 @@ import java.lang.annotation.Target;
  * {@link org.springframework.test.context.bean.override.mockito.MockitoSpyBean @MockitoSpyBean}.
  *
  * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
 @Documented
+@Reflective(BeanOverrideReflectiveProcessor.class)
 public @interface BeanOverride {
 
 	/**

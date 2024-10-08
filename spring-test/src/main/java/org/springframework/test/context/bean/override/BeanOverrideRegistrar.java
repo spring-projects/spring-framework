@@ -22,10 +22,7 @@ import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -36,36 +33,31 @@ import org.springframework.util.StringUtils;
  * for test execution listeners.
  *
  * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  */
-class BeanOverrideRegistrar implements BeanFactoryAware {
+class BeanOverrideRegistrar {
 
 	private final Map<OverrideMetadata, String> beanNameRegistry = new HashMap<>();
 
 	private final Map<String, OverrideMetadata> earlyOverrideMetadata = new HashMap<>();
 
-	@Nullable
-	private ConfigurableBeanFactory beanFactory;
+	private final ConfigurableBeanFactory beanFactory;
 
 
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (!(beanFactory instanceof ConfigurableBeanFactory cbf)) {
-			throw new IllegalStateException("Cannot process bean override with a BeanFactory " +
-					"that doesn't implement ConfigurableBeanFactory: " + beanFactory.getClass().getName());
-		}
-		this.beanFactory = cbf;
+	BeanOverrideRegistrar(ConfigurableBeanFactory beanFactory) {
+		Assert.notNull(beanFactory, "ConfigurableBeanFactory must not be null");
+		this.beanFactory = beanFactory;
 	}
 
 	/**
-	 * Check {@link #markWrapEarly(OverrideMetadata, String) early override}
+	 * Check {@linkplain #markWrapEarly(OverrideMetadata, String) early override}
 	 * records and use the {@link OverrideMetadata} to create an override
-	 * instance from the provided bean, if relevant.
+	 * instance based on the provided bean, if relevant.
 	 */
 	Object wrapIfNecessary(Object bean, String beanName) throws BeansException {
 		OverrideMetadata metadata = this.earlyOverrideMetadata.get(beanName);
 		if (metadata != null && metadata.getStrategy() == BeanOverrideStrategy.WRAP_BEAN) {
-			Assert.state(this.beanFactory != null, "ConfigurableBeanFactory must not be null");
 			bean = metadata.createOverride(beanName, null, bean);
 			metadata.track(bean, this.beanFactory);
 		}
@@ -99,7 +91,6 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 		try {
 			ReflectionUtils.makeAccessible(field);
 			Object existingValue = ReflectionUtils.getField(field, target);
-			Assert.state(this.beanFactory != null, "ConfigurableBeanFactory must not be null");
 			Object bean = this.beanFactory.getBean(beanName, field.getType());
 			if (existingValue == bean) {
 				return;
