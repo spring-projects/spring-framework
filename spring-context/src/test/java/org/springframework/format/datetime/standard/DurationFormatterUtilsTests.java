@@ -23,7 +23,10 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import org.springframework.format.annotation.DurationFormat;
 import org.springframework.format.annotation.DurationFormat.Unit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -188,6 +191,22 @@ class DurationFormatterUtilsTests {
 				.havingCause().withMessage("Does not match composite duration pattern");
 	}
 
+	@ParameterizedTest
+	@EnumSource(DurationFormat.Style.class)
+	void parseEmptyStringThrowsForAllStyles(DurationFormat.Style style) {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> DurationFormatterUtils.parse("", style))
+				.withMessage("Value must not be empty");
+	}
+
+	@ParameterizedTest
+	@EnumSource(DurationFormat.Style.class)
+	void parseNullStringThrowsForAllStyles(DurationFormat.Style style) {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> DurationFormatterUtils.parse(null, style))
+				.withMessage("Value must not be empty");
+	}
+
 	@Test
 	void printSimple() {
 		assertThat(DurationFormatterUtils.print(Duration.ofNanos(12345), SIMPLE, Unit.NANOS))
@@ -238,6 +257,14 @@ class DurationFormatterUtilsTests {
 		Duration composite = DurationFormatterUtils.parse("-1d2h34m57s28ms3us2ns", COMPOSITE);
 		assertThat(DurationFormatterUtils.print(composite, COMPOSITE))
 				.isEqualTo("-1d2h34m57s28ms3us2ns");
+	}
+
+	@ParameterizedTest
+	@EnumSource(DurationFormat.Style.class)
+	void printNullDurationThrowsForAllStyles(DurationFormat.Style style) {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> DurationFormatterUtils.print(null, style))
+				.withMessage("Value must not be null");
 	}
 
 	@Test
