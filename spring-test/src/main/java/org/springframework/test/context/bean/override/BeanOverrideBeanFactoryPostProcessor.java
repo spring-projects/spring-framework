@@ -128,7 +128,11 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			if (beanName != null) {
 				// We are overriding an existing bean by-type.
 				beanName = BeanFactoryUtils.transformedBeanName(beanName);
-				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
+				// If we are overriding a manually registered singleton, we won't find
+				// an existing bean definition.
+				if (beanFactory.containsBeanDefinition(beanName)) {
+					existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
+				}
 			}
 			else {
 				// We will later generate a name for the nonexistent bean, but since NullAway
@@ -148,6 +152,12 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 						with name [%s] and type [%s]."""
 							.formatted(beanName, overrideMetadata.getBeanType()));
 			}
+		}
+
+		// Ensure we don't have any manually registered singletons registered, since we
+		// register a bean override instance as a manual singleton at the end of this method.
+		if (beanFactory.containsSingleton(beanName)) {
+			destroySingleton(beanFactory, beanName);
 		}
 
 		if (existingBeanDefinition != null) {
@@ -333,6 +343,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		// Since the isSingleton() check above may have registered a singleton as a side
 		// effect -- for example, for a FactoryBean -- we need to destroy the singleton,
 		// because we later manually register a bean override instance as a singleton.
+		destroySingleton(beanFactory, beanName);
+	}
+
+	private static void destroySingleton(ConfigurableListableBeanFactory beanFactory, String beanName) {
 		if (beanFactory instanceof DefaultListableBeanFactory dlbf) {
 			dlbf.destroySingleton(beanName);
 		}
