@@ -71,24 +71,22 @@ class InvocationsRecorderClassTransformer implements ClassFileTransformer {
 			return false;
 		}
 		// Ignore agent classes and spring-core-test DynamicClassLoader
-		else if (className.startsWith(AGENT_PACKAGE) || className.equals(AOT_DYNAMIC_CLASSLOADER)) {
+		if (className.startsWith(AGENT_PACKAGE) || className.equals(AOT_DYNAMIC_CLASSLOADER)) {
 			return false;
 		}
 		// Do not instrument CGlib classes
-		else if (className.contains("$$")) {
+		if (className.contains("$$")) {
 			return false;
 		}
 		// Only some packages are instrumented
-		else {
-			for (String ignoredPackage : this.ignoredPackages) {
-				if (className.startsWith(ignoredPackage)) {
-					return false;
-				}
+		for (String ignoredPackage : this.ignoredPackages) {
+			if (className.startsWith(ignoredPackage)) {
+				return false;
 			}
-			for (String instrumentedPackage : this.instrumentedPackages) {
-				if (className.startsWith(instrumentedPackage)) {
-					return true;
-				}
+		}
+		for (String instrumentedPackage : this.instrumentedPackages) {
+			if (className.startsWith(instrumentedPackage)) {
+				return true;
 			}
 		}
 		return false;
