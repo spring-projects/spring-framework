@@ -104,7 +104,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	}
 
 	private void replaceDefinition(ConfigurableListableBeanFactory beanFactory, OverrideMetadata overrideMetadata,
-			boolean enforceExistingDefinition) {
+			boolean requireExistingDefinition) {
 
 		// NOTE: This method supports 3 distinct scenarios which must be accounted for.
 		//
@@ -126,7 +126,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		String beanNameIncludingFactory;
 		BeanDefinition existingBeanDefinition = null;
 		if (beanName == null) {
-			beanNameIncludingFactory = getBeanNameForType(beanFactory, overrideMetadata, enforceExistingDefinition);
+			beanNameIncludingFactory = getBeanNameForType(beanFactory, overrideMetadata, requireExistingDefinition);
 			if (beanNameIncludingFactory == null) {
 				// We need to generate a name for a nonexistent bean.
 				beanName = beanNameGenerator.generateBeanName(pseudoBeanDefinition, registry);
@@ -143,7 +143,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			if (candidates.contains(beanName)) {
 				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
 			}
-			else if (enforceExistingDefinition) {
+			else if (requireExistingDefinition) {
 				throw new IllegalStateException("""
 						Unable to override bean: there is no bean definition to replace \
 						with name [%s] and type [%s]."""
@@ -229,7 +229,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 	@Nullable
 	private String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, OverrideMetadata overrideMetadata,
-			boolean enforceExistingDefinition) {
+			boolean requireExistingDefinition) {
 
 		Set<String> candidateNames = getExistingBeanNamesByType(beanFactory, overrideMetadata, true);
 		int candidateCount = candidateNames.size();
@@ -237,7 +237,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			return candidateNames.iterator().next();
 		}
 		else if (candidateCount == 0) {
-			if (enforceExistingDefinition) {
+			if (requireExistingDefinition) {
 				Field field = overrideMetadata.getField();
 				throw new IllegalStateException(
 						"Unable to override bean: no bean definitions of type %s (as required by annotated field '%s.%s')"
