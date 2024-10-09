@@ -17,7 +17,6 @@
 package org.springframework.aot.agent;
 
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 
@@ -61,7 +60,7 @@ class InvocationsRecorderClassTransformer implements ClassFileTransformer {
 
 	@Override
 	public byte[] transform(@Nullable ClassLoader classLoader, String className, Class<?> classBeingRedefined,
-			ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+			ProtectionDomain protectionDomain, byte[] classfileBuffer) {
 
 		if (isTransformationCandidate(classLoader, className)) {
 			return attemptClassTransformation(classfileBuffer);
