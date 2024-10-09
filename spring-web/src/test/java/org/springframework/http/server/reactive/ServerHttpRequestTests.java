@@ -212,6 +212,13 @@ class ServerHttpRequestTests {
 		assertThat(nativeRequest).isInstanceOf(HttpServletRequest.class);
 	}
 
+	@Test // gh-33666
+	public void mutateKeepsHeadersCaseInsensitive() throws Exception {
+		ServerHttpRequest request = createRequest("/path");
+		request = request.mutate().header("key", "value").build();
+		assertThat(request.getHeaders().get("KEY")).isEqualTo(Collections.singletonList("value"));
+	}
+
 	private ServerHttpRequest createRequest(String uriString) throws Exception {
 		return createRequest(uriString, "");
 	}
