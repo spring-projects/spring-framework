@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,6 @@ class CacheErrorHandlerTests {
 		this.simpleService = context.getBean(SimpleService.class);
 	}
 
-
 	@AfterEach
 	void closeContext() {
 		this.context.close();
@@ -95,6 +94,7 @@ class CacheErrorHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void getSyncFail() {
 		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on get");
 		willThrow(exception).given(this.cache).get(eq(0L), any(Callable.class));
@@ -126,7 +126,6 @@ class CacheErrorHandlerTests {
 		verify(this.errorHandler).handleCacheGetError(exception, this.cache, 0L);
 		verify(this.cache).retrieve(eq(0L));
 	}
-
 
 	@Test
 	public void getFluxFail() {
