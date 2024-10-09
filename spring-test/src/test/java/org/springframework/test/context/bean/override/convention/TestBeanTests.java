@@ -126,7 +126,7 @@ public class TestBeanTests {
 
 	static class FailureByTypeLookup {
 
-		@TestBean
+		@TestBean(enforceOverride = true)
 		private String example;
 
 		static String example() {
@@ -136,7 +136,7 @@ public class TestBeanTests {
 
 	static class FailureByNameLookup {
 
-		@TestBean(name = "beanToOverride")
+		@TestBean(name = "beanToOverride", enforceOverride = true)
 		private String example;
 
 		static String example() {

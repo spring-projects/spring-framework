@@ -48,10 +48,10 @@ public class MockitoBeanForByNameLookupIntegrationTests {
 	@MockitoBean(name = "nestedField")
 	ExampleService renamed2;
 
-	@MockitoBean(name = "nonExistingBean", enforceOverride = false)
+	@MockitoBean(name = "nonExistingBean")
 	ExampleService nonExisting1;
 
-	@MockitoBean(name = "nestedNonExistingBean", enforceOverride = false)
+	@MockitoBean(name = "nestedNonExistingBean")
 	ExampleService nonExisting2;
 
 

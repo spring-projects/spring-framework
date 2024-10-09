@@ -31,16 +31,17 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * using a static factory method.
  *
- * <p>By default, the bean to override is inferred from the type of the
- * annotated field. This requires that exactly one matching bean definition is
- * present in the application context. A {@code @Qualifier} annotation can be
+ * <p>By default, the bean to override is inferred from the type of the annotated
+ * field. If multiple candidates exist, a {@code @Qualifier} annotation can be
  * used to help disambiguate. In the absence of a {@code @Qualifier} annotation,
- * the name of the annotated field will be used as a qualifier. Alternatively,
- * you can explicitly specify a bean name to replace by setting the
- * {@link #value() value} or {@link #name() name} attribute. If you would like
- * for a new bean definition to be created when a corresponding bean definition
- * does not exist, set the {@link #enforceOverride() enforceOverride} attribute
- * to {@code false}.
+ * the name of the annotated field will be used as a fallback qualifier.
+ * Alternatively, you can explicitly specify a bean name to replace by setting the
+ * {@link #value() value} or {@link #name() name} attribute.
+ *
+ * <p>A new bean definition will be created if a corresponding bean definition does
+ * not exist. However, if you would like for the test to fail when a corresponding
+ * bean definition does not exist, you can set the {@link #enforceOverride()
+ * enforceOverride} attribute to {@code true}.
  *
  * <p>The instance is created from a zero-argument static factory method in the
  * test class whose return type is compatible with the annotated field. In the
@@ -149,13 +150,13 @@ public @interface TestBean {
 	/**
 	 * Whether to require the existence of a bean definition for the bean being
 	 * overridden.
-	 * <p>Defaults to {@code true} which means that an exception will be thrown
-	 * if a corresponding bean definition does not exist.
-	 * <p>Set to {@code false} to create a new bean definition when a corresponding
+	 * <p>Defaults to {@code false} which means that a new bean definition will
+	 * be created if a corresponding bean definition does not exist.
+	 * <p>Set to {@code true} to cause an exception to be thrown if a corresponding
 	 * bean definition does not exist.
-	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_DEFINITION
 	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_OR_CREATE_DEFINITION
+	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_DEFINITION
 	 */
-	boolean enforceOverride() default true;
+	boolean enforceOverride() default false;
 
 }

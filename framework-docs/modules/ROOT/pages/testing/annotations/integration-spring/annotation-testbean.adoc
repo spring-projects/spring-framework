@@ -15,9 +15,10 @@ to override. If multiple candidates match, `@Qualifier` can be provided to narro
 candidate to override. Alternatively, a candidate whose bean definition name matches the
 name of the field will match.
 
-If you would like for a new bean definition to be created when a corresponding bean
-definition does not exist, set the `enforceOverride` attribute to `false` – for example,
-`@TestBean(enforceOverride = false)`.
+A new bean definition will be created if a corresponding bean definition does not exist.
+However, if you would like for the test to fail when a corresponding bean definition does
+not exist, you can set the `enforceOverride` attribute to `true` – for example,
+`@TestBean(enforceOverride = true)`.
 
 To use a by-name override rather than a by-type override, specify the `name` attribute
 of the annotation.

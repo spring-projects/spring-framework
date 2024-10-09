@@ -48,10 +48,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 @SpringJUnitConfig
 public class MockitoBeanForByTypeLookupIntegrationTests {
 
-	@MockitoBean(enforceOverride = false)
+	@MockitoBean
 	AnotherService serviceIsNotABean;
 
-	@MockitoBean(enforceOverride = false)
+	@MockitoBean
 	ExampleService anyNameForService;
 
 	@MockitoBean

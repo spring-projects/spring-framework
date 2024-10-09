@@ -29,27 +29,71 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Tests for {@link MockitoBean}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class MockitoMockBeanTests {
 
 	@Test
-	void contextCustomizerCannotBeCreatedWithTooManyCandidates() {
+	void cannotOverrideBeanByNameWithNoSuchBeanName() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBean("anotherBean", String.class, () -> "example");
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByNameLookup.class, context);
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("""
+						Unable to override bean: there is no bean definition \
+						to replace with name [beanToOverride] and type [java.lang.String].""");
+	}
+
+	@Test
+	void cannotOverrideBeanByNameWithBeanOfWrongType() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBean("beanToOverride", Integer.class, () -> 42);
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByNameLookup.class, context);
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("""
+						Unable to override bean: there is no bean definition \
+						to replace with name [beanToOverride] and type [java.lang.String].""");
+	}
+
+	@Test
+	void cannotOverrideBeanByTypeWithNoSuchBeanType() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByTypeLookup.class, context);
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("""
+						Unable to override bean: no bean definitions of \
+						type %s (as required by annotated field '%s.example')""".formatted(
+						String.class.getName(), FailureByTypeLookup.class.getSimpleName()));
+	}
+
+	@Test
+	void cannotOverrideBeanByTypeWithTooManyBeansOfThatType() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean("bean1", String.class, () -> "example1");
 		context.registerBean("bean2", String.class, () -> "example2");
-		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(ByTypeSingleLookup.class, context);
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(FailureByTypeLookup.class, context);
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to select a bean definition to override: found 2 bean definitions \
-						of type %s (as required by annotated field '%s.example'): %s""",
-						String.class.getName(), ByTypeSingleLookup.class.getSimpleName(), List.of("bean1", "bean2"));
+						of type %s (as required by annotated field '%s.example'): %s""".formatted(
+						String.class.getName(), FailureByTypeLookup.class.getSimpleName(), List.of("bean1", "bean2")));
 	}
 
 
-	static class ByTypeSingleLookup {
+	static class FailureByTypeLookup {
 
-		@MockitoBean
+		@MockitoBean(enforceOverride = true)
+		String example;
+
+	}
+
+	static class FailureByNameLookup {
+
+		@MockitoBean(name = "beanToOverride", enforceOverride = true)
 		String example;
 
 	}

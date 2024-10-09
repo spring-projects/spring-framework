@@ -420,7 +420,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	static class CaseByNameWithQualifier {
 
 		@Qualifier("preferThis")
-		@TestBean(name = "descriptionBean", enforceOverride = false)
+		@TestBean(name = "descriptionBean")
 		private String description;
 
 		static String descriptionBean() {

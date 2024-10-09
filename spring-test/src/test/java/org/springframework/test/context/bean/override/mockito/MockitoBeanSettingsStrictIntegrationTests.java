@@ -93,7 +93,7 @@ class MockitoBeanSettingsStrictIntegrationTests {
 	@DirtiesContext
 	static class ImplicitStrictnessWithMockitoBean extends BaseCase {
 
-		@MockitoBean(enforceOverride = false)
+		@MockitoBean
 		@SuppressWarnings("unused")
 		DateTimeFormatter ignoredMock;
 	}

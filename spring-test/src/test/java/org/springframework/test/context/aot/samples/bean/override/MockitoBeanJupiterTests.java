@@ -40,7 +40,7 @@ public class MockitoBeanJupiterTests {
 	/**
 	 * Mock for nonexistent bean.
 	 */
-	@MockitoBean(enforceOverride = false)
+	@MockitoBean
 	GreetingService greetingService;
 
 	/**

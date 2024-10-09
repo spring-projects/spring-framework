@@ -2,7 +2,7 @@
 = `@MockitoBean` and `@MockitoSpyBean`
 
 `@MockitoBean` and `@MockitoSpyBean` are used on fields in test classes to override beans
-in the test's `ApplicationContext` with a Mockito mock or spy, respectively. In the
+in the test's `ApplicationContext` with a Mockito _mock_ or _spy_, respectively. In the
 latter case, the original bean definition is not replaced, but instead an early instance
 of the bean is captured and wrapped by the spy.
 
@@ -11,9 +11,10 @@ to override. If multiple candidates match, `@Qualifier` can be provided to narro
 candidate to override. Alternatively, a candidate whose bean definition name matches the
 name of the field will match.
 
-When using `@MockitoBean`, if you would like for a new bean definition to be created when
-a corresponding bean definition does not exist, set the `enforceOverride` attribute to
-`false` – for example, `@MockitoBean(enforceOverride = false)`.
+When using `@MockitoBean`, a new bean definition will be created if a corresponding bean
+definition does not exist. However, if you would like for the test to fail when a
+corresponding bean definition does not exist, you can set the `enforceOverride` attribute
+to `true` – for example, `@MockitoBean(enforceOverride = true)`.
 
 To use a by-name override rather than a by-type override, specify the `name` attribute
 of the annotation.
