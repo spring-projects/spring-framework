@@ -322,7 +322,7 @@ final class AnnotationTypeMapping {
 				logger.isWarnEnabled()) {
 			logger.warn("""
 					Support for convention-based annotation attribute overrides is deprecated \
-					and will be removed in Spring Framework 6.2. Please annotate the following \
+					and will be removed in Spring Framework 7.0. Please annotate the following \
 					attributes in @%s with appropriate @AliasFor declarations: %s"""
 						.formatted(rootAnnotationTypeName, conventionMappedAttributes));
 		}
