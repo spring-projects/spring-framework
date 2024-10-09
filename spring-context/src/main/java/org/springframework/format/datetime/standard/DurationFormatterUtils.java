@@ -35,7 +35,6 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Valentine Wu
  * @author Simon Baslé
- * @author Kim Seungrae
  * @since 6.2
  */
 public abstract class DurationFormatterUtils {
@@ -90,7 +89,6 @@ public abstract class DurationFormatterUtils {
 	 * @return the printed result
 	 */
 	public static String print(Duration value, DurationFormat.Style style, @Nullable DurationFormat.Unit unit) {
-		Assert.notNull(value, "Value must not be null");
 		return switch (style) {
 			case ISO8601 -> value.toString();
 			case SIMPLE -> printSimple(value, unit);
