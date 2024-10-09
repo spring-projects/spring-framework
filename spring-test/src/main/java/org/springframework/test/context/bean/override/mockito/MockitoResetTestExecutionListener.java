@@ -102,7 +102,7 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 	}
 
 	@Nullable
-	private Object getBean(ConfigurableListableBeanFactory beanFactory, String beanName) {
+	private static Object getBean(ConfigurableListableBeanFactory beanFactory, String beanName) {
 		try {
 			if (isStandardBeanOrSingletonFactoryBean(beanFactory, beanName)) {
 				return beanFactory.getBean(beanName);
@@ -114,7 +114,7 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 		return beanFactory.getSingleton(beanName);
 	}
 
-	private boolean isStandardBeanOrSingletonFactoryBean(ConfigurableListableBeanFactory beanFactory, String beanName) {
+	private static boolean isStandardBeanOrSingletonFactoryBean(ConfigurableListableBeanFactory beanFactory, String beanName) {
 		String factoryBeanName = BeanFactory.FACTORY_BEAN_PREFIX + beanName;
 		if (beanFactory.containsBean(factoryBeanName)) {
 			FactoryBean<?> factoryBean = (FactoryBean<?>) beanFactory.getBean(factoryBeanName);

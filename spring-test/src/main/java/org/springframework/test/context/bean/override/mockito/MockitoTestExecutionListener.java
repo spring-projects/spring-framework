@@ -28,16 +28,16 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@code TestExecutionListener} that enables {@link MockitoBean @MockitoBean}
- * and {@link MockitoSpyBean @MockitoSpyBean} support. Also triggers Mockito
- * setup of a {@link Mockito#mockitoSession() session} for each test class that
- * uses these annotations (or any annotation in that package).
+ * and {@link MockitoSpyBean @MockitoSpyBean} support. Also triggers setup of a
+ * {@link MockitoSession} for each test class that uses these annotations (or any
+ * annotations in this package).
  *
  * <p>The {@link MockitoSession#setStrictness(Strictness) strictness} of the
  * session defaults to {@link Strictness#STRICT_STUBS}. Use
  * {@link MockitoBeanSettings @MockitoBeanSettings} to specify a different strictness.
  *
- * <p>The automatic reset support for {@code @MockBean} and {@code @SpyBean} is
- * handled by the {@link MockitoResetTestExecutionListener}.
+ * <p>The automatic reset support for {@code @MockitoBean} and {@code @MockitoSpyBean}
+ * is handled by the {@link MockitoResetTestExecutionListener}.
  *
  * @author Simon Baslé
  * @author Phillip Webb
@@ -51,9 +51,9 @@ import org.springframework.util.ClassUtils;
  */
 public class MockitoTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final String MOCKS_ATTRIBUTE_NAME = MockitoTestExecutionListener.class.getName() + ".mocks";
+	private static final String MOCKITO_SESSION_ATTRIBUTE_NAME = MockitoTestExecutionListener.class.getName() + ".mockitoSession";
 
-	static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.MockSettings",
+	static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.Mockito",
 			MockitoTestExecutionListener.class.getClassLoader());
 
 
@@ -96,25 +96,25 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 		}
 	}
 
-	private void initMocks(TestContext testContext) {
+	private static void initMocks(TestContext testContext) {
 		Class<?> testClass = testContext.getTestClass();
 		if (MockitoAnnotationDetector.hasMockitoAnnotations(testClass)) {
 			Object testInstance = testContext.getTestInstance();
 			MockitoBeanSettings annotation = AnnotationUtils.findAnnotation(testClass, MockitoBeanSettings.class);
 			Strictness strictness = (annotation != null ? annotation.value() : Strictness.STRICT_STUBS);
-			testContext.setAttribute(MOCKS_ATTRIBUTE_NAME, initMockitoSession(testInstance, strictness));
+			testContext.setAttribute(MOCKITO_SESSION_ATTRIBUTE_NAME, initMockitoSession(testInstance, strictness));
 		}
 	}
 
-	private MockitoSession initMockitoSession(Object testInstance, Strictness strictness) {
+	private static MockitoSession initMockitoSession(Object testInstance, Strictness strictness) {
 		return Mockito.mockitoSession()
 				.initMocks(testInstance)
 				.strictness(strictness)
 				.startMocking();
 	}
 
-	private void closeMocks(TestContext testContext) throws Exception {
-		Object mocks = testContext.getAttribute(MOCKS_ATTRIBUTE_NAME);
+	private static void closeMocks(TestContext testContext) throws Exception {
+		Object mocks = testContext.getAttribute(MOCKITO_SESSION_ATTRIBUTE_NAME);
 		if (mocks instanceof MockitoSession session) {
 			session.finishMocking();
 		}
