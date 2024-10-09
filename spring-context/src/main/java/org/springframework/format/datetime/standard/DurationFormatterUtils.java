@@ -62,6 +62,7 @@ public abstract class DurationFormatterUtils {
 	 * @return a duration
 	 */
 	public static Duration parse(String value, DurationFormat.Style style, @Nullable DurationFormat.Unit unit) {
+		Assert.hasText(value, () -> "Value must not be empty");
 		return switch (style) {
 			case ISO8601 -> parseIso8601(value);
 			case SIMPLE -> parseSimple(value, unit);
@@ -149,7 +150,7 @@ public abstract class DurationFormatterUtils {
 		try {
 			return Duration.parse(value);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			throw new IllegalArgumentException("'" + value + "' is not a valid ISO-8601 duration", ex);
 		}
 	}

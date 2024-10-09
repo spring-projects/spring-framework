@@ -23,7 +23,10 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import org.springframework.format.annotation.DurationFormat;
 import org.springframework.format.annotation.DurationFormat.Unit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +40,22 @@ import static org.springframework.format.annotation.DurationFormat.Style.SIMPLE;
  * Tests for {@link DurationFormatterUtils}.
  */
 class DurationFormatterUtilsTests {
+
+	@ParameterizedTest
+	@EnumSource(DurationFormat.Style.class)
+	void parseEmptyStringFailsWithDedicatedException(DurationFormat.Style style) {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> DurationFormatterUtils.parse("", style))
+				.withMessage("Value must not be empty");
+	}
+
+	@ParameterizedTest
+	@EnumSource(DurationFormat.Style.class)
+	void parseNullStringFailsWithDedicatedException(DurationFormat.Style style) {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> DurationFormatterUtils.parse(null, style))
+				.withMessage("Value must not be empty");
+	}
 
 	@Test
 	void parseSimpleWithUnits() {
