@@ -384,7 +384,7 @@ final class PostProcessorRegistrationDelegate {
 
 
 	/**
-	 * BeanPostProcessor that logs an info message when a bean is created during
+	 * BeanPostProcessor that logs a warn message when a bean is created during
 	 * BeanPostProcessor instantiation, i.e. when a bean is not eligible for
 	 * getting processed by all BeanPostProcessors.
 	 */
