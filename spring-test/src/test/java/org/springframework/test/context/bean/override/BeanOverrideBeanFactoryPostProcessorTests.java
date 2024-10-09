@@ -57,6 +57,18 @@ import static org.mockito.Mockito.mock;
 class BeanOverrideBeanFactoryPostProcessorTests {
 
 	@Test
+	void beanNameWithFactoryBeanPrefixIsRejected() {
+		AnnotationConfigApplicationContext context = createContext(FactoryBeanPrefixTestCase.class);
+
+		assertThatIllegalStateException()
+				.isThrownBy(context::refresh)
+				.withMessage("""
+					Unable to override bean '&messageService' for field 'FactoryBeanPrefixTestCase.messageService': \
+					a FactoryBean cannot be overridden. To override the bean created by the FactoryBean, remove the \
+					'&' prefix.""");
+	}
+
+	@Test
 	void replaceBeanByNameWithMatchingBeanDefinition() {
 		AnnotationConfigApplicationContext context = createContext(CaseByName.class);
 		context.registerBean("descriptionBean", String.class, () -> "Original");
@@ -348,6 +360,18 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 
+	@FunctionalInterface
+	interface MessageService {
+		String getMessage();
+	}
+
+	static class FactoryBeanPrefixTestCase {
+
+		@DummyBean(beanName = "&messageService")
+		MessageService messageService;
+
+	}
+
 	static class CaseByName {
 
 		@DummyBean(beanName = "descriptionBean")
@@ -462,11 +486,6 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		public boolean isSingleton() {
 			return false;
 		}
-	}
-
-	@FunctionalInterface
-	interface MessageService {
-		String getMessage();
 	}
 
 	static class MessageServiceTestCase {

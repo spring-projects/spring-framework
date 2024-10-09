@@ -96,6 +96,13 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	}
 
 	private void registerBeanOverride(ConfigurableListableBeanFactory beanFactory, OverrideMetadata overrideMetadata) {
+		String beanName = overrideMetadata.getBeanName();
+		Field field = overrideMetadata.getField();
+		Assert.state(!BeanFactoryUtils.isFactoryDereference(beanName),() -> """
+				Unable to override bean '%s' for field '%s.%s': a FactoryBean cannot be overridden. \
+				To override the bean created by the FactoryBean, remove the '&' prefix.""".formatted(
+					beanName, field.getDeclaringClass().getSimpleName(), field.getName()));
+
 		switch (overrideMetadata.getStrategy()) {
 			case REPLACE_DEFINITION -> replaceDefinition(beanFactory, overrideMetadata, true);
 			case REPLACE_OR_CREATE_DEFINITION -> replaceDefinition(beanFactory, overrideMetadata, false);
@@ -123,18 +130,16 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		RootBeanDefinition pseudoBeanDefinition = createPseudoBeanDefinition(overrideMetadata);
 
 		String beanName = overrideMetadata.getBeanName();
-		String beanNameIncludingFactory;
 		BeanDefinition existingBeanDefinition = null;
 		if (beanName == null) {
-			beanNameIncludingFactory = getBeanNameForType(beanFactory, overrideMetadata, requireExistingDefinition);
-			if (beanNameIncludingFactory == null) {
+			beanName = getBeanNameForType(beanFactory, overrideMetadata, requireExistingDefinition);
+			if (beanName == null) {
 				// We need to generate a name for a nonexistent bean.
 				beanName = beanNameGenerator.generateBeanName(pseudoBeanDefinition, registry);
-				beanNameIncludingFactory = beanName;
 			}
 			else {
 				// We are overriding an existing bean.
-				beanName = BeanFactoryUtils.transformedBeanName(beanNameIncludingFactory);
+				beanName = BeanFactoryUtils.transformedBeanName(beanName);
 				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
 			}
 		}
@@ -149,7 +154,6 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 						with name [%s] and type [%s]."""
 							.formatted(beanName, overrideMetadata.getBeanType()));
 			}
-			beanNameIncludingFactory = beanName;
 		}
 
 		if (existingBeanDefinition != null) {
@@ -177,7 +181,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 		Object override = overrideMetadata.createOverride(beanName, existingBeanDefinition, null);
 		overrideMetadata.track(override, beanFactory);
-		this.overrideRegistrar.registerNameForMetadata(overrideMetadata, beanNameIncludingFactory);
+		this.overrideRegistrar.registerNameForMetadata(overrideMetadata, beanName);
 
 		// Now we have an instance (the override) that we can register. At this stage, we don't
 		// expect a singleton instance to be present. If for some reason a singleton instance
