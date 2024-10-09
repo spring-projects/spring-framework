@@ -482,6 +482,7 @@ abstract class RfcUriParser {
 						"index=" + this.index + ", componentIndex=" + this.componentIndex);
 			}
 			this.state = state;
+			this.openCurlyBracketCount = 0;
 		}
 
 		public void advanceTo(State state, int componentIndex) {

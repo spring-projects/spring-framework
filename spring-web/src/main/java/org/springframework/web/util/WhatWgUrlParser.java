@@ -47,12 +47,9 @@ import org.springframework.util.Assert;
  * <p>Comments in this class correlate to the parsing algorithm.
  * The implementation differs from the spec in the following ways:
  * <ul>
- * <li>Support for URI templates has been added, through the
- * {@link State#URL_TEMPLATE} state</li>
- * <li>Consequentially, the {@linkplain UrlRecord#port() URL port} has been
- * changed from an integer to a string,</li>
- * <li>To ensure that trailing slashes are significant, this implementation
- * prepends a '/' to each segment.</li>
+ * <li>Supports URI template variables within URI components.
+ * <li>Consequently, the port is a String and not an integer.
+ * <li>Prepends '/' to each segment to ensure trailing slashes are significant.
  * </ul>
  * All of these modifications have been indicated through comments that start
  * with {@code EXTRA}.
@@ -90,9 +87,6 @@ final class WhatWgUrlParser {
 	private State state;
 
 	@Nullable
-	private State previousState;
-
-	@Nullable
 	private State stateOverride;
 
 	private boolean atSignSeen;
@@ -100,6 +94,8 @@ final class WhatWgUrlParser {
 	private boolean passwordTokenSeen;
 
 	private boolean insideBrackets;
+
+	private int openCurlyBracketCount;
 
 	private boolean stopMainLoop = false;
 
@@ -235,12 +231,22 @@ final class WhatWgUrlParser {
 			else {
 				c = "EOF";
 			}
-			logger.trace("Changing state from " + this.state + " to " +
-					newState + " (cur: " + c + " prev: " + this.previousState + ")");
+			logger.trace("Changing state from " + this.state + " to " + newState + " (cur: " + c + ")");
 		}
-		// EXTRA: we keep the previous state, to ensure that the parser can escape from malformed URI templates
-		this.previousState = this.state;
 		this.state = newState;
+		this.openCurlyBracketCount = 0;
+	}
+
+	private boolean processCurlyBrackets(int c) {
+		if (c == '{') {
+			this.openCurlyBracketCount++;
+			return true;
+		}
+		if (c == '}') {
+			this.openCurlyBracketCount--;
+			return true;
+		}
+		return (this.openCurlyBracketCount > 0 && c != EOF);
 	}
 
 	private static LinkedList<String> strictSplit(String input, int delimiter) {
@@ -755,12 +761,11 @@ final class WhatWgUrlParser {
 					p.append(Character.toLowerCase((char) c));
 					p.setState(SCHEME);
 				}
-				// EXTRA: if c is '{', then append c to buffer, set previous state to scheme state,
-				// and state to url template state.
-				else if (p.previousState != URL_TEMPLATE && c == '{') {
+				// EXTRA: if c is '{', append to buffer and continue as SCHEME
+				else if (c == '{') {
+					p.openCurlyBracketCount++;
 					p.append(c);
-					p.previousState = SCHEME;
-					p.state = URL_TEMPLATE;
+					p.setState(SCHEME);
 				}
 				// Otherwise, if state override is not given,
 				// set state to no scheme state and decrease pointer by 1.
@@ -780,11 +785,6 @@ final class WhatWgUrlParser {
 				// If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
 				if (isAsciiAlphaNumeric(c) || (c == '+' || c == '-' || c == '.')) {
 					p.append(Character.toLowerCase((char) c));
-				}
-				// EXTRA: if c is '{', then append c to buffer, set state to url template state.
-				else if (p.previousState != URL_TEMPLATE && c == '{') {
-					p.append(c);
-					p.setState(URL_TEMPLATE);
 				}
 				// Otherwise, if c is U+003A (:), then:
 				else if (c == ':') {
@@ -857,6 +857,10 @@ final class WhatWgUrlParser {
 						url.path = new PathSegment("");
 						p.setState(OPAQUE_PATH);
 					}
+				}
+				// EXTRA: if c is within URI variable, keep appending
+				else if (p.processCurlyBrackets(c)) {
+					p.append(c);
 				}
 				// Otherwise, if state override is not given, set buffer to the empty string,
 				// state to no scheme state, and start over (from the first code point in input).
@@ -1225,11 +1229,6 @@ final class WhatWgUrlParser {
 				if (isAsciiDigit(c)) {
 					p.append(c);
 				}
-				// EXTRA: if c is '{', then append c to buffer, set state to url template state.
-				else if (p.previousState != URL_TEMPLATE && c == '{') {
-					p.append(c);
-					p.setState(URL_TEMPLATE);
-				}
 				// Otherwise, if one of the following is true:
 				// - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
 				// - url is special and c is U+005C (\)
@@ -1278,6 +1277,10 @@ final class WhatWgUrlParser {
 					// Set state to path start state and decrease pointer by 1.
 					p.setState(PATH_START);
 					p.pointer--;
+				}
+				// EXTRA: if c is within URI variable, keep appending
+				else if (p.processCurlyBrackets(c)) {
+					p.append(c);
 				}
 				// Otherwise, port-invalid validation error, return failure.
 				else {
@@ -1547,11 +1550,6 @@ final class WhatWgUrlParser {
 						p.setState(FRAGMENT);
 					}
 				}
-				// EXTRA: Otherwise, if c is '{', then append c to buffer, set state to url template state.
-				else if (p.previousState != URL_TEMPLATE && c == '{') {
-					p.append(c);
-					p.setState(URL_TEMPLATE);
-				}
 				// Otherwise, run these steps:
 				else {
 					if (p.validate()) {
@@ -1582,12 +1580,6 @@ final class WhatWgUrlParser {
 		OPAQUE_PATH {
 			@Override
 			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
-				// EXTRA: if previous state is URL Template and the buffer is empty,
-				// append buffer to url's path and empty the buffer
-				if (p.previousState == URL_TEMPLATE && !p.buffer.isEmpty()) {
-					url.path.append(p.buffer.toString());
-					p.emptyBuffer();
-				}
 				// If c is U+003F (?), then set url’s query to the empty string and state to query state.
 				if (c == '?') {
 					url.query = new StringBuilder();
@@ -1598,11 +1590,6 @@ final class WhatWgUrlParser {
 				else if (c == '#') {
 					url.fragment = new StringBuilder();
 					p.setState(FRAGMENT);
-				}
-				// EXTRA: Otherwise, if c is '{', then append c to buffer, set state to url template state.
-				else if (p.previousState != URL_TEMPLATE && c == '{') {
-					p.append(c);
-					p.setState(URL_TEMPLATE);
 				}
 				// Otherwise:
 				else {
@@ -1668,11 +1655,6 @@ final class WhatWgUrlParser {
 						p.setState(FRAGMENT);
 					}
 				}
-				// EXTRA: Otherwise, if c is '{', then append c to buffer, set state to url template state.
-				else if (p.previousState != URL_TEMPLATE && c == '{') {
-					p.append(c);
-					p.setState(URL_TEMPLATE);
-				}
 				// Otherwise, if c is not the EOF code point:
 				else if (c != EOF) {
 					if (p.validate()) {
@@ -1723,24 +1705,6 @@ final class WhatWgUrlParser {
 					else {
 						url.fragment.appendCodePoint(c);
 					}
-				}
-			}
-		},
-		URL_TEMPLATE {
-			@Override
-			public void handle(int c, UrlRecord url, WhatWgUrlParser p) {
-				Assert.state(p.previousState != null, "No previous state set");
-				if (c == '}') {
-					p.append(c);
-					p.setState(p.previousState);
-				}
-				else if (c == EOF) {
-					p.pointer -= p.buffer.length() + 1;
-					p.emptyBuffer();
-					p.setState(p.previousState);
-				}
-				else {
-					p.append(c);
 				}
 			}
 		};

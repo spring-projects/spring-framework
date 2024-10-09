@@ -605,6 +605,18 @@ class UriComponentsBuilderTests {
 
 	@ParameterizedTest
 	@EnumSource(value = ParserType.class)
+	void parseBuildAndExpandHierarchical(ParserType parserType) {
+		URI uri = UriComponentsBuilder
+				.fromUriString("{scheme}://{host}:{port}/{segment}?{query}#{fragment}", parserType)
+				.buildAndExpand(Map.of(
+						"scheme", "ws", "host", "example.org", "port", "7777", "segment", "path",
+						"query", "q=1", "fragment", "foo"))
+				.toUri();
+		assertThat(uri.toString()).isEqualTo("ws://example.org:7777/path?q=1#foo");
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = ParserType.class)
 	void buildAndExpandOpaque(ParserType parserType) {
 		UriComponents result = UriComponentsBuilder.fromUriString("mailto:{user}@{domain}", parserType)
 				.buildAndExpand("foo", "example.com");
