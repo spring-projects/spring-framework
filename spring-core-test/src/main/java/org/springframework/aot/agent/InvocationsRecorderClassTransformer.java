@@ -21,6 +21,8 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.asm.ClassReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -42,6 +44,8 @@ class InvocationsRecorderClassTransformer implements ClassFileTransformer {
 	private final String[] instrumentedPackages;
 
 	private final String[] ignoredPackages;
+
+	private final Log logger = LogFactory.getLog(getClass());
 
 	public InvocationsRecorderClassTransformer(String[] instrumentedPackages, String[] ignoredPackages) {
 		Assert.notNull(instrumentedPackages, "instrumentedPackages must not be null");
@@ -99,7 +103,7 @@ class InvocationsRecorderClassTransformer implements ClassFileTransformer {
 			fileReader.accept(classVisitor, 0);
 		}
 		catch (Exception ex) {
-			ex.printStackTrace();
+			logger.error(ex);
 			return classfileBuffer;
 		}
 		if (classVisitor.isTransformed()) {
