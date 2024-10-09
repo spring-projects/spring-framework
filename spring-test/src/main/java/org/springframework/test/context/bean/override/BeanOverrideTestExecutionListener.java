@@ -16,13 +16,11 @@
 
 package org.springframework.test.context.bean.override;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * {@code TestExecutionListener} that enables {@link BeanOverride @BeanOverride}
@@ -50,7 +48,7 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	 */
 	@Override
 	public void prepareTestInstance(TestContext testContext) throws Exception {
-		injectFields(testContext, false);
+		injectFields(testContext);
 	}
 
 	/**
@@ -67,18 +65,15 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 		Object reinjectDependenciesAttribute = testContext.getAttribute(
 				DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE);
 		if (Boolean.TRUE.equals(reinjectDependenciesAttribute)) {
-			injectFields(testContext, true);
+			injectFields(testContext);
 		}
 	}
 
 	/**
 	 * Inject each {@link BeanOverride @BeanOverride} field in the test instance with
 	 * a corresponding bean override instance.
-	 * <p>If the {@code reinjectFields} flag is {@code true} (which indicates that
-	 * a fresh instance is required), the field is nulled out before injecting
-	 * the overridden bean instance.
 	 */
-	private static void injectFields(TestContext testContext, boolean reinjectFields) {
+	private static void injectFields(TestContext testContext) {
 		List<OverrideMetadata> overrideMetadataList = OverrideMetadata.forTestClass(testContext.getTestClass());
 		if (!overrideMetadataList.isEmpty()) {
 			Object testInstance = testContext.getTestInstance();
@@ -86,11 +81,6 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 					.getBean(BeanOverrideContextCustomizer.REGISTRAR_BEAN_NAME, BeanOverrideRegistrar.class);
 
 			for (OverrideMetadata overrideMetadata : overrideMetadataList) {
-				if (reinjectFields) {
-					Field field = overrideMetadata.getField();
-					ReflectionUtils.makeAccessible(field);
-					ReflectionUtils.setField(field, testInstance, null);
-				}
 				registrar.inject(testInstance, overrideMetadata);
 			}
 		}

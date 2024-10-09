@@ -89,14 +89,8 @@ class BeanOverrideRegistrar {
 
 	private void inject(Field field, Object target, String beanName) {
 		try {
-			ReflectionUtils.makeAccessible(field);
-			Object existingValue = ReflectionUtils.getField(field, target);
 			Object bean = this.beanFactory.getBean(beanName, field.getType());
-			if (existingValue == bean) {
-				return;
-			}
-			Assert.state(existingValue == null, () -> "The existing value '" + existingValue +
-					"' of field '" + field + "' is not the same as the new value '" + bean + "'");
+			ReflectionUtils.makeAccessible(field);
 			ReflectionUtils.setField(field, target, bean);
 		}
 		catch (Throwable ex) {
