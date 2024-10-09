@@ -62,6 +62,8 @@ import org.springframework.util.Assert;
  */
 class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
 
+	private static final String PSEUDO_BEAN_NAME_PLACEHOLDER = "<<< PSEUDO BEAN NAME PLACEHOLDER >>>";
+
 	private static final BeanNameGenerator beanNameGenerator = DefaultBeanNameGenerator.INSTANCE;
 
 	private final Set<OverrideMetadata> metadata;
@@ -119,33 +121,25 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		// 2) AOT processing
 		// 3) AOT runtime
 
-		if (!(beanFactory instanceof BeanDefinitionRegistry registry)) {
-			throw new IllegalStateException("Cannot process bean override with a BeanFactory " +
-					"that doesn't implement BeanDefinitionRegistry: " + beanFactory.getClass().getName());
-		}
-
-		// The following is a "pseudo" bean definition which MUST NOT be used to
-		// create an actual bean instance. In fact, it is only used as a placeholder
-		// to support overrides for nonexistent beans.
-		RootBeanDefinition pseudoBeanDefinition = createPseudoBeanDefinition(overrideMetadata);
-
 		String beanName = overrideMetadata.getBeanName();
 		BeanDefinition existingBeanDefinition = null;
 		if (beanName == null) {
 			beanName = getBeanNameForType(beanFactory, overrideMetadata, requireExistingDefinition);
-			if (beanName == null) {
-				// We need to generate a name for a nonexistent bean.
-				beanName = beanNameGenerator.generateBeanName(pseudoBeanDefinition, registry);
-			}
-			else {
-				// We are overriding an existing bean.
+			if (beanName != null) {
+				// We are overriding an existing bean by-type.
 				beanName = BeanFactoryUtils.transformedBeanName(beanName);
 				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
+			}
+			else {
+				// We will later generate a name for the nonexistent bean, but since NullAway
+				// will reject leaving the beanName set to null, we set it to a placeholder.
+				beanName = PSEUDO_BEAN_NAME_PLACEHOLDER;
 			}
 		}
 		else {
 			Set<String> candidates = getExistingBeanNamesByType(beanFactory, overrideMetadata, false);
 			if (candidates.contains(beanName)) {
+				// We are overriding an existing bean by-name.
 				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
 			}
 			else if (requireExistingDefinition) {
@@ -171,11 +165,24 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			// to operate the same in the following else-block.
 		}
 		else {
-			// There was no existing bean definition, so we register the "pseudo" bean
+			// There was no existing bean definition, so we register a "pseudo" bean
 			// definition to ensure that a suitable bean definition exists for the given
 			// bean name for proper autowiring candidate resolution.
 			//
 			// Applies during "JVM runtime" and "AOT runtime".
+
+			if (!(beanFactory instanceof BeanDefinitionRegistry registry)) {
+				throw new IllegalStateException("Cannot process bean override with a BeanFactory " +
+						"that doesn't implement BeanDefinitionRegistry: " + beanFactory.getClass().getName());
+			}
+
+			RootBeanDefinition pseudoBeanDefinition = createPseudoBeanDefinition(overrideMetadata);
+
+			// Generate a name for the nonexistent bean.
+			if (PSEUDO_BEAN_NAME_PLACEHOLDER.equals(beanName)) {
+				beanName = beanNameGenerator.generateBeanName(pseudoBeanDefinition, registry);
+			}
+
 			registry.registerBeanDefinition(beanName, pseudoBeanDefinition);
 		}
 
