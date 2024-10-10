@@ -10,6 +10,7 @@ by default, exactly in the following order:
   annotation for "`before`" modes.
 * `ApplicationEventsTestExecutionListener`: Provides support for
   xref:testing/testcontext-framework/application-events.adoc[`ApplicationEvents`].
+* `MockitoTestExecutionListener`: Initializes and closes mocks configured using `@MockitoBean` or `@MockitoSpyBean`.
 * `DependencyInjectionTestExecutionListener`: Provides dependency injection for the test
   instance.
 * `MicrometerObservationRegistryTestExecutionListener`: Provides support for
@@ -24,6 +25,8 @@ by default, exactly in the following order:
   annotation.
 * `EventPublishingTestExecutionListener`: Publishes test execution events to the test's
   `ApplicationContext` (see xref:testing/testcontext-framework/test-execution-events.adoc[Test Execution Events]).
+* `MockitoResetTestExecutionListener`: Resets mocks as configured by `@MockitoBean` or `@MockitoSpyBean`.
+* `BeanOverrideTestExecutionListener`: Provides support for xref:testing/testcontext-framework/bean-overriding.adoc[] .
 
 [[testcontext-tel-config-registering-tels]]
 == Registering `TestExecutionListener` Implementations
