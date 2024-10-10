@@ -58,8 +58,9 @@ public @interface MockitoSpyBean {
 
 	/**
 	 * The name of the bean to spy.
-	 * <p>If left unspecified, the bean to override is selected according to
-	 * the annotated field's type.
+	 * <p>If left unspecified, the bean to spy is selected according to
+	 * the annotated field's type, taking qualifiers into account if necessary.
+	 * See the {@linkplain MockitoSpyBean class-level documentation} for details.
 	 * @return the name of the spied bean
 	 */
 	String name() default "";

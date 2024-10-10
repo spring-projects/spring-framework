@@ -69,7 +69,8 @@ public @interface MockitoBean {
 	/**
 	 * The name of the bean to register or replace.
 	 * <p>If left unspecified, the bean to override is selected according to
-	 * the annotated field's type.
+	 * the annotated field's type, taking qualifiers into account if necessary.
+	 * See the {@linkplain MockitoBean class-level documentation} for details.
 	 * @return the name of the mocked bean
 	 */
 	String name() default "";
