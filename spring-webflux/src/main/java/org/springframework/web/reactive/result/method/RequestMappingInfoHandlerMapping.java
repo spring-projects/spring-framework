@@ -192,8 +192,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			HttpMethod httpMethod = request.getMethod();
 			Set<HttpMethod> methods = helper.getAllowedMethods();
 			if (HttpMethod.OPTIONS.equals(httpMethod)) {
-				Set<MediaType> mediaTypes = helper.getConsumablePatchMediaTypes();
-				HttpOptionsHandler handler = new HttpOptionsHandler(methods, mediaTypes);
+				Set<MediaType> patchMediaTypes = helper.getConsumablePatchMediaTypes();
+				Set<MediaType> queryMediaTypes = helper.getConsumableQueryMediaTypes();
+				HttpOptionsHandler handler = new HttpOptionsHandler(methods, patchMediaTypes, queryMediaTypes);
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
 			}
 			throw new MethodNotAllowedException(httpMethod, methods);
@@ -326,14 +327,23 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * PATCH specified, or that have no methods at all.
 		 */
 		public Set<MediaType> getConsumablePatchMediaTypes() {
-			Set<MediaType> result = new LinkedHashSet<>();
-			for (PartialMatch match : this.partialMatches) {
-				Set<RequestMethod> methods = match.getInfo().getMethodsCondition().getMethods();
-				if (methods.isEmpty() || methods.contains(RequestMethod.PATCH)) {
-					result.addAll(match.getInfo().getConsumesCondition().getConsumableMediaTypes());
-				}
-			}
-			return result;
+			return getConsumableMediaTypesForMethod(RequestMethod.PATCH);
+		}
+
+		/**
+		 * Return declared "consumable" types but only among those that have
+		 * PATCH specified, or that have no methods at all.
+		 */
+		public Set<MediaType> getConsumableQueryMediaTypes() {
+			return getConsumableMediaTypesForMethod(RequestMethod.QUERY);
+		}
+
+		private Set<MediaType> getConsumableMediaTypesForMethod(RequestMethod method) {
+			return this.partialMatches.stream()
+					.map(PartialMatch::getInfo)
+					.filter(info -> info.getMethodsCondition().getMethods().isEmpty() || info.getMethodsCondition().getMethods().contains(method))
+					.flatMap(info -> info.getConsumesCondition().getConsumableMediaTypes().stream())
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 		}
 
 
@@ -403,9 +413,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		private final HttpHeaders headers = new HttpHeaders();
 
 
-		public HttpOptionsHandler(Set<HttpMethod> declaredMethods, Set<MediaType> acceptPatch) {
+		public HttpOptionsHandler(Set<HttpMethod> declaredMethods, Set<MediaType> acceptPatch, Set<MediaType> acceptQuery) {
 			this.headers.setAllow(initAllowedHttpMethods(declaredMethods));
 			this.headers.setAcceptPatch(new ArrayList<>(acceptPatch));
+			this.headers.setAcceptQuery(new ArrayList<>(acceptQuery));
 		}
 
 		private static Set<HttpMethod> initAllowedHttpMethods(Set<HttpMethod> declaredMethods) {
@@ -416,7 +427,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			}
 			else {
 				Set<HttpMethod> result = new LinkedHashSet<>(declaredMethods);
-				if (result.contains(HttpMethod.GET)) {
+				if (result.contains(HttpMethod.GET) || result.contains(HttpMethod.QUERY)) {
 					result.add(HttpMethod.HEAD);
 				}
 				result.add(HttpMethod.OPTIONS);

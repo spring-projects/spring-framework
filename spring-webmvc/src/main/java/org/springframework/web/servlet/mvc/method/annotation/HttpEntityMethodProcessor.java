@@ -243,7 +243,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			outputMessage.getServletResponse().setStatus(returnStatus);
 			if (returnStatus == 200) {
 				HttpMethod method = inputMessage.getMethod();
-				if ((HttpMethod.GET.equals(method) || HttpMethod.HEAD.equals(method))
+				if ((HttpMethod.GET.equals(method) || HttpMethod.QUERY.equals(method) || HttpMethod.HEAD.equals(method))
 						&& isResourceNotModified(inputMessage, outputMessage)) {
 					outputMessage.flush();
 					return;
@@ -292,7 +292,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		HttpHeaders responseHeaders = response.getHeaders();
 		String etag = responseHeaders.getETag();
 		long lastModifiedTimestamp = responseHeaders.getLastModified();
-		if (request.getMethod() == HttpMethod.GET || request.getMethod() == HttpMethod.HEAD) {
+		if (request.getMethod() == HttpMethod.GET || request.getMethod() == HttpMethod.QUERY || request.getMethod() == HttpMethod.HEAD) {
 			responseHeaders.remove(HttpHeaders.ETAG);
 			responseHeaders.remove(HttpHeaders.LAST_MODIFIED);
 		}

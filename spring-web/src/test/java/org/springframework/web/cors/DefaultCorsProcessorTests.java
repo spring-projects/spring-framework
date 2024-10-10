@@ -238,7 +238,7 @@ class DefaultCorsProcessorTests {
 
 		this.processor.processRequest(this.conf, this.request, this.response);
 		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
-		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS)).isEqualTo("GET,HEAD");
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS)).isEqualTo("GET,QUERY,HEAD");
 		assertThat(this.response.getHeaders(HttpHeaders.VARY)).contains(HttpHeaders.ORIGIN,
 				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
 	}
