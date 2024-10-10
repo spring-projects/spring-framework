@@ -17,12 +17,12 @@
 package org.springframework.test.context.bean.override.mockito;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
 
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.bean.override.BeanOverrideContextCustomizerTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Answers.RETURNS_MOCKS;
 
 /**
  * Tests that validate the behavior of {@link MockitoBean} and
@@ -85,7 +85,7 @@ class MockitoBeanContextCustomizerEqualityTests {
 
 	static class Case1ByName {
 
-		@MockitoBean(name = "serviceBean")
+		@MockitoBean("serviceBean")
 		private String exampleService;
 
 	}
@@ -99,7 +99,7 @@ class MockitoBeanContextCustomizerEqualityTests {
 
 	static class Case2ByName {
 
-		@MockitoBean(name = "serviceBean")
+		@MockitoBean("serviceBean")
 		private String serviceToMock;
 
 	}
@@ -120,14 +120,14 @@ class MockitoBeanContextCustomizerEqualityTests {
 
 	static class Case3 {
 
-		@MockitoBean(answers = Answers.RETURNS_MOCKS)
+		@MockitoBean(answers = RETURNS_MOCKS)
 		private String exampleService;
 
 	}
 
 	static class Case4ByName {
 
-		@MockitoSpyBean(name = "serviceBean")
+		@MockitoSpyBean("serviceBean")
 		private String exampleService;
 
 	}
@@ -141,7 +141,7 @@ class MockitoBeanContextCustomizerEqualityTests {
 
 	static class Case5ByName {
 
-		@MockitoSpyBean(name = "serviceBean")
+		@MockitoSpyBean("serviceBean")
 		private String serviceToMock;
 
 	}

@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.FieldSource;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Events;
 import org.mockito.exceptions.misusing.UnnecessaryStubbingException;
-import org.mockito.quality.Strictness;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
@@ -42,6 +41,7 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.me
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.mock;
+import static org.mockito.quality.Strictness.STRICT_STUBS;
 
 /**
  * Integration tests ensuring unnecessary stubbing is reported in various
@@ -85,7 +85,7 @@ class MockitoBeanSettingsStrictIntegrationTests {
 
 	@SpringJUnitConfig(Config.class)
 	@DirtiesContext
-	@MockitoBeanSettings(Strictness.STRICT_STUBS)
+	@MockitoBeanSettings(STRICT_STUBS)
 	static class ExplicitStrictness extends BaseCase {
 	}
 

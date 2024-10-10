@@ -24,28 +24,32 @@ import java.lang.annotation.Target;
 
 import org.mockito.Mockito;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
  * Mark a field to trigger a bean override using a Mockito spy, which will wrap
- * the original instance.
+ * the original bean instance.
  *
- * <p>If no explicit {@link #name()} is specified, a target bean is selected
- * according to the class of the annotated field, and there must be exactly one
- * such candidate bean. A {@code @Qualifier} annotation can be used to help
- * disambiguate.
- * If a {@link #name()} is specified, it is required that a target bean of that
- * name has been previously registered in the application context.
+ * <p>By default, the bean to spy is inferred from the type of the annotated
+ * field. If multiple candidates exist, a {@code @Qualifier} annotation can be
+ * used to help disambiguate. In the absence of a {@code @Qualifier} annotation,
+ * the name of the annotated field will be used as a fallback qualifier.
+ * Alternatively, you can explicitly specify a bean name to spy by setting the
+ * {@link #value() value} or {@link #name() name} attribute. If a bean name is
+ * specified, it is required that a target bean with that name has been previously
+ * registered in the application context.
  *
- * <p>Dependencies that are known to the application context but are not beans
- * (such as those
+ * <p>A spy cannot be created for components which are known to the application
+ * context but are not beans &mdash; for example, components
  * {@link org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
- * registered directly}) will not be found.
+ * registered directly} as resolvable dependencies.
  *
- * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
- * Any attempt to override a non-singleton bean will result in an exception.
+ * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be spied.
+ * Any attempt to create a spy for a non-singleton bean will result in an exception.
  *
  * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  * @see org.springframework.test.context.bean.override.mockito.MockitoBean @MockitoBean
  * @see org.springframework.test.context.bean.override.convention.TestBean @TestBean
@@ -57,12 +61,22 @@ import org.springframework.test.context.bean.override.BeanOverride;
 public @interface MockitoSpyBean {
 
 	/**
-	 * The name of the bean to spy.
-	 * <p>If left unspecified, the bean to spy is selected according to
-	 * the annotated field's type, taking qualifiers into account if necessary.
-	 * See the {@linkplain MockitoSpyBean class-level documentation} for details.
-	 * @return the name of the spied bean
+	 * Alias for {@link #name()}.
+	 * <p>Intended to be used when no other attributes are needed &mdash; for
+	 * example, {@code @MockitoSpyBean("customBeanName")}.
+	 * @see #name()
 	 */
+	@AliasFor("name")
+	String value() default "";
+
+	/**
+	 * Name of the bean to spy.
+	 * <p>If left unspecified, the bean to spy is selected according to the
+	 * annotated field's type, taking qualifiers into account if necessary. See
+	 * the {@linkplain MockitoSpyBean class-level documentation} for details.
+	 * @see #value()
+	 */
+	@AliasFor("value")
 	String name() default "";
 
 	/**

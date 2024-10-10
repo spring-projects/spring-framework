@@ -77,7 +77,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class OverrideBeanTests {
-		@MockitoBean(name = "service") // <1>
+		@MockitoBean("service") // <1>
 		private CustomService customService;
 
 		// test case body...
@@ -121,7 +121,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	class OverrideBeanTests {
-		@MockitoSpyBean(name = "service") // <1>
+		@MockitoSpyBean("service") // <1>
 		private CustomService customService;
 
 		// test case body...

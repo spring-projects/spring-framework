@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.ReflectionUtils;
 
@@ -114,7 +115,7 @@ class MockitoBeanOverrideMetadataTests {
 	}
 
 	private MockitoBeanOverrideMetadata createMetadata(Field field) {
-		MockitoBean annotation = field.getAnnotation(MockitoBean.class);
+		MockitoBean annotation = AnnotatedElementUtils.getMergedAnnotation(field, MockitoBean.class);
 		return new MockitoBeanOverrideMetadata(field, ResolvableType.forClass(field.getType()), annotation);
 	}
 
@@ -128,7 +129,7 @@ class MockitoBeanOverrideMetadataTests {
 
 	static class SampleOneMockWithName {
 
-		@MockitoBean(name = "anotherService")
+		@MockitoBean("anotherService")
 		String service;
 
 	}
@@ -144,7 +145,7 @@ class MockitoBeanOverrideMetadataTests {
 		@MockitoBean(name = "beanToMock")
 		private String service3;
 
-		@MockitoBean(name = "beanToMock")
+		@MockitoBean(value = "beanToMock")
 		private String service4;
 
 		@MockitoBean(extraInterfaces = Externalizable.class)

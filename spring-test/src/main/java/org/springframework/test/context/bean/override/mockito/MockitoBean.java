@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
 import org.mockito.Answers;
 import org.mockito.MockSettings;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
@@ -33,12 +34,12 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * using a Mockito mock.
  *
- * <p>By default, the bean to override is inferred from the type of the annotated
+ * <p>By default, the bean to mock is inferred from the type of the annotated
  * field. If multiple candidates exist, a {@code @Qualifier} annotation can be
  * used to help disambiguate. In the absence of a {@code @Qualifier} annotation,
  * the name of the annotated field will be used as a fallback qualifier.
- * Alternatively, you can explicitly specify a bean name to replace by setting the
- * {@link #name() name} attribute.
+ * Alternatively, you can explicitly specify a bean name to mock by setting the
+ * {@link #value() value} or {@link #name() name} attribute.
  *
  * <p>A new bean definition will be created if a corresponding bean definition does
  * not exist. However, if you would like for the test to fail when a corresponding
@@ -52,7 +53,7 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * the context alongside the existing dependency.
  *
  * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
- * Any attempt to override a non-singleton bean will result in an exception.
+ * Any attempt to mock a non-singleton bean will result in an exception.
  *
  * @author Simon Baslé
  * @author Sam Brannen
@@ -67,12 +68,22 @@ import org.springframework.test.context.bean.override.BeanOverride;
 public @interface MockitoBean {
 
 	/**
-	 * The name of the bean to register or replace.
-	 * <p>If left unspecified, the bean to override is selected according to
-	 * the annotated field's type, taking qualifiers into account if necessary.
-	 * See the {@linkplain MockitoBean class-level documentation} for details.
-	 * @return the name of the mocked bean
+	 * Alias for {@link #name()}.
+	 * <p>Intended to be used when no other attributes are needed &mdash; for
+	 * example, {@code @MockitoBean("customBeanName")}.
+	 * @see #name()
 	 */
+	@AliasFor("name")
+	String value() default "";
+
+	/**
+	 * Name of the bean to mock.
+	 * <p>If left unspecified, the bean to mock is selected according to the
+	 * annotated field's type, taking qualifiers into account if necessary. See
+	 * the {@linkplain MockitoBean class-level documentation} for details.
+	 * @see #value()
+	 */
+	@AliasFor("value")
 	String name() default "";
 
 	/**

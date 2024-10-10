@@ -22,6 +22,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.ReflectionUtils;
 
@@ -105,7 +106,7 @@ class MockitoSpyBeanOverrideMetadataTests {
 	}
 
 	private MockitoSpyBeanOverrideMetadata createMetadata(Field field) {
-		MockitoSpyBean annotation = field.getAnnotation(MockitoSpyBean.class);
+		MockitoSpyBean annotation = AnnotatedElementUtils.getMergedAnnotation(field, MockitoSpyBean.class);
 		return new MockitoSpyBeanOverrideMetadata(field, ResolvableType.forClass(field.getType()), annotation);
 	}
 
@@ -119,7 +120,7 @@ class MockitoSpyBeanOverrideMetadataTests {
 
 	static class SampleOneSpyWithName {
 
-		@MockitoSpyBean(name = "anotherService")
+		@MockitoSpyBean("anotherService")
 		String service;
 
 	}
@@ -132,10 +133,10 @@ class MockitoSpyBeanOverrideMetadataTests {
 		@MockitoSpyBean
 		private String service2;
 
-		@MockitoSpyBean(name = "beanToMock")
+		@MockitoSpyBean(name = "beanToSpy")
 		private String service3;
 
-		@MockitoSpyBean(name = "beanToMock")
+		@MockitoSpyBean(value = "beanToSpy")
 		private String service4;
 
 		@MockitoSpyBean(reset = MockReset.BEFORE)

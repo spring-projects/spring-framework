@@ -22,11 +22,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.FailingExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
@@ -35,6 +33,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.doReturn;
+import static org.springframework.test.context.bean.override.mockito.MockReset.BEFORE;
 
 /**
  * Integration tests for {@link MockitoSpyBean} that validate automatic reset
@@ -47,11 +46,12 @@ import static org.mockito.Mockito.doReturn;
 @TestMethodOrder(OrderAnnotation.class)
 public class MockitoSpyBeanWithResetIntegrationTests {
 
-	@MockitoSpyBean(reset = MockReset.BEFORE)
+	@MockitoSpyBean(reset = BEFORE)
 	ExampleService service;
 
-	@MockitoSpyBean(reset = MockReset.BEFORE)
+	@MockitoSpyBean(name = "failingExampleServiceFactory", reset = BEFORE)
 	FailingExampleService failingService;
+
 
 	@Order(1)
 	@Test
@@ -83,21 +83,23 @@ public class MockitoSpyBeanWithResetIntegrationTests {
 	@Order(4)
 	@Test
 	void factoryBeanSecondEnsuringStubReset(ApplicationContext ctx) {
-		assertThat(ctx.getBean("factory")).isNotNull().isSameAs(this.failingService);
+		assertThat(ctx.getBean("failingExampleServiceFactory"))
+				.isNotNull()
+				.isSameAs(this.failingService);
 
 		assertThatIllegalStateException().isThrownBy(this.failingService::greeting)
 				.as("not stubbed")
 				.withMessage("Failed");
 	}
 
+
 	static class FailingExampleServiceFactory implements FactoryBean<FailingExampleService> {
-		@Nullable
+
 		@Override
 		public FailingExampleService getObject() {
 			return new FailingExampleService();
 		}
 
-		@Nullable
 		@Override
 		public Class<?> getObjectType() {
 			return FailingExampleService.class;
@@ -107,14 +109,13 @@ public class MockitoSpyBeanWithResetIntegrationTests {
 	@Configuration(proxyBeanMethods = false)
 	static class Config {
 
-		@Bean("service")
-		ExampleService bean1() {
+		@Bean
+		ExampleService service() {
 			return new RealExampleService("Production hello");
 		}
 
-		@Bean("factory")
-		@Qualifier("factory")
-		FailingExampleServiceFactory factory() {
+		@Bean
+		FailingExampleServiceFactory failingExampleServiceFactory() {
 			return new FailingExampleServiceFactory();
 		}
 	}

@@ -33,6 +33,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
+import static org.springframework.test.context.bean.override.mockito.MockReset.BEFORE;
 
 /**
  * Integration tests for {@link MockitoBean} that validate automatic reset
@@ -45,10 +46,10 @@ import static org.mockito.Mockito.doReturn;
 @TestMethodOrder(OrderAnnotation.class)
 public class MockitoBeanWithResetIntegrationTests {
 
-	@MockitoBean(reset = MockReset.BEFORE)
+	@MockitoBean(reset = BEFORE)
 	ExampleService service;
 
-	@MockitoBean(reset = MockReset.BEFORE)
+	@MockitoBean(reset = BEFORE)
 	FailingExampleService failingService;
 
 	@Order(1)

@@ -81,7 +81,7 @@ class MockitoSpyBeanTests {
 
 	static class ByNameSingleLookup {
 
-		@MockitoSpyBean(name = "beanToSpy")
+		@MockitoSpyBean("beanToSpy")
 		String example;
 
 	}

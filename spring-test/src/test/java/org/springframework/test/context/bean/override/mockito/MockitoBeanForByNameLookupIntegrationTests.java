@@ -36,22 +36,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringJUnitConfig
 public class MockitoBeanForByNameLookupIntegrationTests {
 
-	@MockitoBean(name = "field")
+	@MockitoBean("field")
 	ExampleService field;
 
-	@MockitoBean(name = "nestedField")
+	@MockitoBean("nestedField")
 	ExampleService nestedField;
 
-	@MockitoBean(name = "field")
+	@MockitoBean("field")
 	ExampleService renamed1;
 
-	@MockitoBean(name = "nestedField")
+	@MockitoBean("nestedField")
 	ExampleService renamed2;
 
-	@MockitoBean(name = "nonExistingBean")
+	@MockitoBean("nonExistingBean")
 	ExampleService nonExisting1;
 
-	@MockitoBean(name = "nestedNonExistingBean")
+	@MockitoBean("nestedNonExistingBean")
 	ExampleService nonExisting2;
 
 
