@@ -140,7 +140,7 @@ public class StopWatch {
 	 * @see #stop()
 	 */
 	public void start(String taskName) throws IllegalStateException {
-		if (this.currentTaskName != null) {
+		if (isRunning()) {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
 		}
 		this.currentTaskName = taskName;
@@ -155,7 +155,7 @@ public class StopWatch {
 	 * @see #start(String)
 	 */
 	public void stop() throws IllegalStateException {
-		if (this.currentTaskName == null) {
+		if (!isRunning()) {
 			throw new IllegalStateException("Can't stop StopWatch: it's not running");
 		}
 		long lastTime = System.nanoTime() - this.startTimeNanos;
