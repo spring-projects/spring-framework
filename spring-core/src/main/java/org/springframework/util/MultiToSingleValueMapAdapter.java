@@ -139,11 +139,11 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 		Collection<V> values = this.values;
 		if (values == null) {
 			Collection<List<V>> targetValues = this.targetMap.values();
-			values = new AbstractCollection<V>() {
+			values = new AbstractCollection<>() {
 				@Override
 				public Iterator<V> iterator() {
 					Iterator<List<V>> targetIterator = targetValues.iterator();
-					return new Iterator<V>() {
+					return new Iterator<>() {
 						@Override
 						public boolean hasNext() {
 							return targetIterator.hasNext();

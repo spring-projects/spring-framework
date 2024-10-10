@@ -207,7 +207,7 @@ public class PrintingResultHandler implements ResultHandler {
 	protected void printModelAndView(@Nullable ModelAndView mav) throws Exception {
 		this.printer.printValue("View name", (mav != null) ? mav.getViewName() : null);
 		this.printer.printValue("View", (mav != null) ? mav.getView() : null);
-		if (mav == null || mav.getModel().size() == 0) {
+		if (mav == null || mav.getModel().isEmpty()) {
 			this.printer.printValue("Model", null);
 		}
 		else {

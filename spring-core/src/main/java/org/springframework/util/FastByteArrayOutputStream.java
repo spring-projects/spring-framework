@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -508,30 +508,31 @@ public class FastByteArrayOutputStream extends OutputStream {
 				// This stream doesn't have any data in it...
 				return;
 			}
-			else if (len == 0) {
+
+			if (len == 0) {
 				return;
 			}
-			else if (len < 0) {
+
+			if (len < 0) {
 				throw new IllegalArgumentException("len must be 0 or greater: " + len);
 			}
+
+			if (this.nextIndexInCurrentBuffer < this.currentBufferLength) {
+				int bytesToCopy = Math.min(len, this.currentBufferLength - this.nextIndexInCurrentBuffer);
+				messageDigest.update(this.currentBuffer, this.nextIndexInCurrentBuffer, bytesToCopy);
+				this.nextIndexInCurrentBuffer += bytesToCopy;
+				updateMessageDigest(messageDigest, len - bytesToCopy);
+			}
 			else {
-				if (this.nextIndexInCurrentBuffer < this.currentBufferLength) {
-					int bytesToCopy = Math.min(len, this.currentBufferLength - this.nextIndexInCurrentBuffer);
-					messageDigest.update(this.currentBuffer, this.nextIndexInCurrentBuffer, bytesToCopy);
-					this.nextIndexInCurrentBuffer += bytesToCopy;
-					updateMessageDigest(messageDigest, len - bytesToCopy);
+				if (this.buffersIterator.hasNext()) {
+					this.currentBuffer = this.buffersIterator.next();
+					updateCurrentBufferLength();
+					this.nextIndexInCurrentBuffer = 0;
 				}
 				else {
-					if (this.buffersIterator.hasNext()) {
-						this.currentBuffer = this.buffersIterator.next();
-						updateCurrentBufferLength();
-						this.nextIndexInCurrentBuffer = 0;
-					}
-					else {
-						this.currentBuffer = null;
-					}
-					updateMessageDigest(messageDigest, len);
+					this.currentBuffer = null;
 				}
+				updateMessageDigest(messageDigest, len);
 			}
 		}
 
