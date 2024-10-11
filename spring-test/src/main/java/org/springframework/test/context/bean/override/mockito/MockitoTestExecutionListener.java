@@ -25,22 +25,24 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
 /**
- * {@code TestExecutionListener} that enables {@link MockitoBean @MockitoBean}
- * and {@link MockitoSpyBean @MockitoSpyBean} support. Also triggers setup of a
- * {@link MockitoSession} for each test class that uses these annotations (or any
- * annotations in this package).
+ * {@code TestExecutionListener} that manages a {@link MockitoSession} for each
+ * test class that uses {@link MockitoBean @MockitoBean},
+ * {@link MockitoSpyBean @MockitoSpyBean},
+ * {@link MockitoBeanSettings @MockitoBeanSettings}, or any annotations from the
+ * {@code org.mockito} package.
  *
  * <p>The {@link MockitoSession#setStrictness(Strictness) strictness} of the
  * session defaults to {@link Strictness#STRICT_STUBS}. Use
- * {@link MockitoBeanSettings @MockitoBeanSettings} to specify a different strictness.
+ * {@code @MockitoBeanSettings} to specify a different strictness.
  *
- * <p>The automatic reset support for {@code @MockitoBean} and {@code @MockitoSpyBean}
- * is handled by the {@link MockitoResetTestExecutionListener}.
+ * <p>Dependency injection for {@code @MockitoBean} and {@code @MockitoSpyBean}
+ * fields is handled by the
+ * {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
+ * BeanOverrideTestExecutionListener}, and automatic reset support for
+ * {@code @MockitoBean} and {@code @MockitoSpyBean} is handled by the
+ * {@link MockitoResetTestExecutionListener}.
  *
  * @author Simon Baslé
- * @author Phillip Webb
- * @author Andy Wilkinson
- * @author Moritz Halbritter
  * @author Sam Brannen
  * @since 6.2
  * @see MockitoResetTestExecutionListener

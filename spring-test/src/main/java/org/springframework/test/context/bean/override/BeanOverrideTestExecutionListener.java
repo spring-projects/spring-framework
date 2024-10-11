@@ -29,6 +29,9 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
  *
  * @author Simon Baslé
  * @author Sam Brannen
+ * @author Phillip Webb
+ * @author Andy Wilkinson
+ * @author Moritz Halbritter
  * @since 6.2
  */
 public class BeanOverrideTestExecutionListener extends AbstractTestExecutionListener {
