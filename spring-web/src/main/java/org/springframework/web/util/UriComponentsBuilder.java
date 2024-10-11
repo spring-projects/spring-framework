@@ -243,15 +243,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return fromUriString(httpUrl);
 	}
 
-	private static void checkSchemeAndHost(String uri, @Nullable String scheme, @Nullable String host) {
-		if (StringUtils.hasLength(scheme) && scheme.startsWith("http") && !StringUtils.hasLength(host)) {
-			throw new IllegalArgumentException("[" + uri + "] is not a valid HTTP URL");
-		}
-		if (StringUtils.hasLength(host) && host.startsWith("[") && !host.endsWith("]")) {
-			throw new IllegalArgumentException("Invalid IPV6 host in [" + uri + "]");
-		}
-	}
-
 	/**
 	 * Create a new {@code UriComponents} object from the URI associated with
 	 * the given HttpRequest while also overlaying with values from the headers
