@@ -17,12 +17,12 @@
 package org.springframework.web.cors;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.validator.routines.UrlValidator;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.util.InvalidUrlException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -31,20 +31,25 @@ import org.springframework.web.util.UriComponentsBuilder;
  * <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>.
  *
  * @author Sebastien Deleuze
+ * @author Igor Durbek
  * @since 4.2
  */
 public abstract class CorsUtils {
 
 	/**
-	 * Returns {@code true} if the request is a valid CORS one by checking {@code Origin}
-	 * header presence and ensuring that origins are different.
+	 * Returns {@code IsCorsRequestResult.IS_CORS_REQUEST} if the request is a valid CORS one by checking {@code Origin}
+	 * header presence and ensuring that origins are different. Returns {@code IsCorsRequestResult.IS_NOT_CORS_REQUEST}
+	 * otherwise, or {@code IsCorsRequestResult.MALFORMED_ORIGIN} if the url is malformed.
 	 */
 	public static IsCorsRequestResult isCorsRequest(HttpServletRequest request) {
 		String origin = request.getHeader(HttpHeaders.ORIGIN);
 		if (origin == null) {
 			return IsCorsRequestResult.IS_NOT_CORS_REQUEST;
 		}
-		if (!(new UrlValidator().isValid(origin))) {
+		try {
+			UriComponentsBuilder.fromUriString(origin);
+		}
+		catch (InvalidUrlException ex) {
 			return IsCorsRequestResult.MALFORMED_ORIGIN;
 		}
 		UriComponents originUrl = UriComponentsBuilder.fromUriString(origin).build();
