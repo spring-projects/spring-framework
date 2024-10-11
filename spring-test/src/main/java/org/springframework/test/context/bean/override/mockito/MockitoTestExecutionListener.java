@@ -64,44 +64,25 @@ public class MockitoTestExecutionListener extends AbstractMockitoTestExecutionLi
 	}
 
 	@Override
-	public void prepareTestInstance(TestContext testContext) {
-		if (mockitoPresent) {
-			closeMocks(testContext);
-			initMocks(testContext);
-		}
-	}
-
-	@Override
 	public void beforeTestMethod(TestContext testContext) {
-		if (mockitoPresent && Boolean.TRUE.equals(
-				testContext.getAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE))) {
-			closeMocks(testContext);
+		if (mockitoPresent && hasMockitoAnnotations(testContext)) {
 			initMocks(testContext);
 		}
 	}
 
 	@Override
 	public void afterTestMethod(TestContext testContext) {
-		if (mockitoPresent) {
-			closeMocks(testContext);
-		}
-	}
-
-	@Override
-	public void afterTestClass(TestContext testContext) {
-		if (mockitoPresent) {
+		if (mockitoPresent && hasMockitoAnnotations(testContext)) {
 			closeMocks(testContext);
 		}
 	}
 
 	private static void initMocks(TestContext testContext) {
-		if (hasMockitoAnnotations(testContext)) {
-			Class<?> testClass = testContext.getTestClass();
-			Object testInstance = testContext.getTestInstance();
-			MockitoBeanSettings annotation = AnnotationUtils.findAnnotation(testClass, MockitoBeanSettings.class);
-			Strictness strictness = (annotation != null ? annotation.value() : Strictness.STRICT_STUBS);
-			testContext.setAttribute(MOCKITO_SESSION_ATTRIBUTE_NAME, initMockitoSession(testInstance, strictness));
-		}
+		Class<?> testClass = testContext.getTestClass();
+		Object testInstance = testContext.getTestInstance();
+		MockitoBeanSettings annotation = AnnotationUtils.findAnnotation(testClass, MockitoBeanSettings.class);
+		Strictness strictness = (annotation != null ? annotation.value() : Strictness.STRICT_STUBS);
+		testContext.setAttribute(MOCKITO_SESSION_ATTRIBUTE_NAME, initMockitoSession(testInstance, strictness));
 	}
 
 	private static MockitoSession initMockitoSession(Object testInstance, Strictness strictness) {

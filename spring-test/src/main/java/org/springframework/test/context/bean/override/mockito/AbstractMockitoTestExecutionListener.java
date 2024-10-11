@@ -16,16 +16,16 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.lang.reflect.Field;
 import java.util.function.Predicate;
 
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Abstract base class for {@code TestExecutionListener} implementations involving
@@ -44,8 +44,8 @@ abstract class AbstractMockitoTestExecutionListener extends AbstractTestExecutio
 
 	private static final String ORG_MOCKITO_PACKAGE = "org.mockito";
 
-	private static final Predicate<Annotation> isMockitoAnnotation = annotation -> {
-			String packageName = annotation.annotationType().getPackageName();
+	private static final Predicate<MergedAnnotation<?>> isMockitoAnnotation = mergedAnnotation -> {
+			String packageName = mergedAnnotation.getType().getPackageName();
 			return (packageName.startsWith(SPRING_MOCKITO_PACKAGE) ||
 					packageName.startsWith(ORG_MOCKITO_PACKAGE));
 		};
@@ -60,25 +60,47 @@ abstract class AbstractMockitoTestExecutionListener extends AbstractTestExecutio
 		return hasMockitoAnnotations(testContext.getTestClass());
 	}
 
-	private static boolean hasMockitoAnnotations(Class<?> testClass) {
-		if (isAnnotated(testClass)) {
+	/**
+	 * Determine if Mockito annotations are declared on the supplied class, on an
+	 * interface it implements, on a superclass, or on an enclosing class or
+	 * whether a field in any such class is annotated with a Mockito annotation.
+	 */
+	private static boolean hasMockitoAnnotations(Class<?> clazz) {
+		// Declared on the class?
+		if (MergedAnnotations.from(clazz, SearchStrategy.DIRECT).stream().anyMatch(isMockitoAnnotation)) {
 			return true;
 		}
-		// TODO Ideally we should short-circuit the search once we've found a Mockito annotation,
-		// since there's no need to continue searching additional fields or further up the class
-		// hierarchy; however, that is not possible with ReflectionUtils#doWithFields. Plus, the
-		// previous invocation of isAnnotated(testClass) only finds annotations declared directly
-		// on the test class. So, we'll likely need a completely different approach that combines
-		// the "test class/interface is annotated?" and "field is annotated?" checks in a single
-		// search algorithm, and we'll also need to support @Nested class hierarchies.
-		AtomicBoolean found = new AtomicBoolean();
-		ReflectionUtils.doWithFields(testClass,
-				field -> found.set(true), AbstractMockitoTestExecutionListener::isAnnotated);
-		return found.get();
-	}
 
-	private static boolean isAnnotated(AnnotatedElement annotatedElement) {
-		return Arrays.stream(annotatedElement.getAnnotations()).anyMatch(isMockitoAnnotation);
+		// Declared on a field?
+		for (Field field : clazz.getDeclaredFields()) {
+			if (MergedAnnotations.from(field, SearchStrategy.DIRECT).stream().anyMatch(isMockitoAnnotation)) {
+				return true;
+			}
+		}
+
+		// Declared on an interface?
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			if (hasMockitoAnnotations(ifc)) {
+				return true;
+			}
+		}
+
+		// Declared on a superclass?
+		Class<?> superclass = clazz.getSuperclass();
+		if (superclass != null & superclass != Object.class) {
+			if (hasMockitoAnnotations(superclass)) {
+				return true;
+			}
+		}
+
+		// Declared on an enclosing class of an inner class?
+		if (TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
+			if (hasMockitoAnnotations(clazz.getEnclosingClass())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }
