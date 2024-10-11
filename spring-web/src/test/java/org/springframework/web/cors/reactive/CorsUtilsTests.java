@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.cors.IsCorsRequestResult;
 import org.springframework.web.server.adapter.ForwardedHeaderTransformer;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -39,13 +40,19 @@ class CorsUtilsTests {
 	@Test
 	void isCorsRequest() {
 		ServerHttpRequest request = get("http://domain.example/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
-		assertThat(CorsUtils.isCorsRequest(request)).isTrue();
+		assertThat(CorsUtils.isCorsRequest(request)).isEqualTo(IsCorsRequestResult.IS_CORS_REQUEST);
 	}
 
 	@Test
 	void isNotCorsRequest() {
 		ServerHttpRequest request = get("/").build();
-		assertThat(CorsUtils.isCorsRequest(request)).isFalse();
+		assertThat(CorsUtils.isCorsRequest(request)).isEqualTo(IsCorsRequestResult.IS_NOT_CORS_REQUEST);
+	}
+
+	@Test
+	void isMalformedOriginCorsRequest() {
+		ServerHttpRequest request = get("http://example.com").header(HttpHeaders.ORIGIN, "http://*@:;").build();
+		assertThat(CorsUtils.isCorsRequest(request)).isEqualTo(IsCorsRequestResult.MALFORMED_ORIGIN);
 	}
 
 	@Test

@@ -30,6 +30,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.IsCorsRequestResult;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -43,6 +44,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Igor Durbek
  * @since 5.0
  */
 public class DefaultCorsProcessor implements CorsProcessor {
@@ -83,8 +85,13 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			}
 		}
 
-		if (!CorsUtils.isCorsRequest(request)) {
+		IsCorsRequestResult isCorsRequestResult = CorsUtils.isCorsRequest(request);
+		if (isCorsRequestResult == IsCorsRequestResult.IS_NOT_CORS_REQUEST) {
 			return true;
+		}
+		else if (isCorsRequestResult == IsCorsRequestResult.MALFORMED_ORIGIN) {
+			rejectRequest(response);
+			return false;
 		}
 
 		if (responseHeaders.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null) {

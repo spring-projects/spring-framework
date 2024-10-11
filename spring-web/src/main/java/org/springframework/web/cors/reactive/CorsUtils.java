@@ -23,6 +23,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.web.cors.IsCorsRequestResult;
+import org.springframework.web.util.InvalidUrlException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -31,17 +33,28 @@ import org.springframework.web.util.UriComponentsBuilder;
  * <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>.
  *
  * @author Sebastien Deleuze
+ * @author Igor Durbek
  * @since 5.0
  */
 public abstract class CorsUtils {
 
 	/**
-	 * Returns {@code true} if the request is a valid CORS one by checking {@code Origin}
-	 * header presence and ensuring that origins are different via {@link #isSameOrigin}.
+	 * Returns {@code IsCorsRequestResult.IS_CORS_REQUEST} if the request is a valid CORS one by checking {@code Origin}
+	 * header presence and ensuring that origins are different via {@link #isSameOrigin}. Returns
+	 * {@code IsCorsRequestResult.IS_NOT_CORS_REQUEST} otherwise, or {@code IsCorsRequestResult.MALFORMED_ORIGIN}
+	 * in case the origin url is malformed.
 	 */
 	@SuppressWarnings("deprecation")
-	public static boolean isCorsRequest(ServerHttpRequest request) {
-		return request.getHeaders().containsKey(HttpHeaders.ORIGIN) && !isSameOrigin(request);
+	public static IsCorsRequestResult isCorsRequest(ServerHttpRequest request) {
+		boolean containsOrigin = request.getHeaders().containsKey(HttpHeaders.ORIGIN);
+		try {
+			boolean hasDifferentOrigin = !isSameOrigin(request);
+			boolean originOk = containsOrigin && hasDifferentOrigin;
+			return originOk ? IsCorsRequestResult.IS_CORS_REQUEST : IsCorsRequestResult.IS_NOT_CORS_REQUEST;
+		}
+		catch (InvalidUrlException ex) {
+			return IsCorsRequestResult.MALFORMED_ORIGIN;
+		}
 	}
 
 	/**
