@@ -26,7 +26,6 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -92,11 +91,9 @@ class CrossOriginTests {
 		return Stream.of(named("PathPatternParser", mapping1), named("AntPathMatcher", mapping2));
 	}
 
-
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 
-	@BeforeEach
 	void setup() {
 		this.request.setMethod("GET");
 		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain.com/");
@@ -135,6 +132,7 @@ class CrossOriginTests {
 
 	@PathPatternsParameterizedTest  // SPR-12931
 	void noAnnotationWithOrigin(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		setup();
 		mapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/no");
 		HandlerExecutionChain chain = mapping.getHandler(request);
@@ -152,6 +150,7 @@ class CrossOriginTests {
 
 	@PathPatternsParameterizedTest
 	void defaultAnnotation(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		setup();
 		mapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/default");
 		HandlerExecutionChain chain = mapping.getHandler(request);
@@ -167,6 +166,7 @@ class CrossOriginTests {
 
 	@PathPatternsParameterizedTest
 	void customized(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		setup();
 		mapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/customized");
 		HandlerExecutionChain chain = mapping.getHandler(request);
@@ -250,6 +250,7 @@ class CrossOriginTests {
 
 	@PathPatternsParameterizedTest
 	void classLevel(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		setup();
 		mapping.registerHandler(new ClassLevelController());
 
 		this.request.setRequestURI("/foo");
@@ -280,6 +281,7 @@ class CrossOriginTests {
 
 	@PathPatternsParameterizedTest // SPR-13468
 	void classLevelComposedAnnotation(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		setup();
 		mapping.registerHandler(new ClassLevelMappingWithComposedAnnotation());
 
 		this.request.setRequestURI("/foo");
@@ -293,6 +295,7 @@ class CrossOriginTests {
 
 	@PathPatternsParameterizedTest // SPR-13468
 	void methodLevelComposedAnnotation(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		setup();
 		mapping.registerHandler(new MethodLevelMappingWithComposedAnnotation());
 
 		this.request.setRequestURI("/foo");
@@ -306,6 +309,7 @@ class CrossOriginTests {
 
 	@PathPatternsParameterizedTest
 	void preFlightRequest(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		setup();
 		mapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
@@ -323,6 +327,7 @@ class CrossOriginTests {
 
 	@PathPatternsParameterizedTest
 	void ambiguousHeaderPreFlightRequest(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		setup();
 		mapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
@@ -342,6 +347,7 @@ class CrossOriginTests {
 
 	@PathPatternsParameterizedTest
 	void ambiguousProducesPreFlightRequest(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		setup();
 		mapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
@@ -367,6 +373,7 @@ class CrossOriginTests {
 
 	@PathPatternsParameterizedTest
 	void maxAgeWithDefaultOrigin(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		setup();
 		mapping.registerHandler(new MaxAgeWithDefaultOriginController());
 
 		this.request.setRequestURI("/classAge");
