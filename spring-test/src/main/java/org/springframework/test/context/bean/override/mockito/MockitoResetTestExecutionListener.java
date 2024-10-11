@@ -32,7 +32,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
  * {@code TestExecutionListener} that resets any mock beans that have been marked
@@ -45,7 +44,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * @see MockitoBean @MockitoBean
  * @see MockitoSpyBean @MockitoSpyBean
  */
-public class MockitoResetTestExecutionListener extends AbstractTestExecutionListener {
+public class MockitoResetTestExecutionListener extends AbstractMockitoTestExecutionListener {
 
 	/**
 	 * Executes before {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener}.
@@ -56,17 +55,15 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 	}
 
 	@Override
-	public void beforeTestMethod(TestContext testContext) throws Exception {
-		Class<?> testClass = testContext.getTestClass();
-		if (MockitoTestExecutionListener.mockitoPresent && MockitoAnnotationDetector.hasMockitoAnnotations(testClass)) {
+	public void beforeTestMethod(TestContext testContext) {
+		if (mockitoPresent && hasMockitoAnnotations(testContext)) {
 			resetMocks(testContext.getApplicationContext(), MockReset.BEFORE);
 		}
 	}
 
 	@Override
-	public void afterTestMethod(TestContext testContext) throws Exception {
-		Class<?> testClass = testContext.getTestClass();
-		if (MockitoTestExecutionListener.mockitoPresent && MockitoAnnotationDetector.hasMockitoAnnotations(testClass)) {
+	public void afterTestMethod(TestContext testContext) {
+		if (mockitoPresent && hasMockitoAnnotations(testContext)) {
 			resetMocks(testContext.getApplicationContext(), MockReset.AFTER);
 		}
 	}
@@ -114,7 +111,7 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 		return beanFactory.getSingleton(beanName);
 	}
 
-	private static boolean isStandardBeanOrSingletonFactoryBean(ConfigurableListableBeanFactory beanFactory, String beanName) {
+	private static boolean isStandardBeanOrSingletonFactoryBean(BeanFactory beanFactory, String beanName) {
 		String factoryBeanName = BeanFactory.FACTORY_BEAN_PREFIX + beanName;
 		if (beanFactory.containsBean(factoryBeanName)) {
 			FactoryBean<?> factoryBean = (FactoryBean<?>) beanFactory.getBean(factoryBeanName);

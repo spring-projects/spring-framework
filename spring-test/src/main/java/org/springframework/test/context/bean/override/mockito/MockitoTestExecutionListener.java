@@ -22,9 +22,7 @@ import org.mockito.quality.Strictness;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@code TestExecutionListener} that enables {@link MockitoBean @MockitoBean}
@@ -49,12 +47,10 @@ import org.springframework.util.ClassUtils;
  * @see MockitoBean @MockitoBean
  * @see MockitoSpyBean @MockitoSpyBean
  */
-public class MockitoTestExecutionListener extends AbstractTestExecutionListener {
+public class MockitoTestExecutionListener extends AbstractMockitoTestExecutionListener {
 
-	private static final String MOCKITO_SESSION_ATTRIBUTE_NAME = MockitoTestExecutionListener.class.getName() + ".mockitoSession";
-
-	static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.Mockito",
-			MockitoTestExecutionListener.class.getClassLoader());
+	private static final String MOCKITO_SESSION_ATTRIBUTE_NAME =
+			MockitoTestExecutionListener.class.getName() + ".mockitoSession";
 
 
 	/**
@@ -66,7 +62,7 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 	}
 
 	@Override
-	public void prepareTestInstance(TestContext testContext) throws Exception {
+	public void prepareTestInstance(TestContext testContext) {
 		if (mockitoPresent) {
 			closeMocks(testContext);
 			initMocks(testContext);
@@ -74,7 +70,7 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 	}
 
 	@Override
-	public void beforeTestMethod(TestContext testContext) throws Exception {
+	public void beforeTestMethod(TestContext testContext) {
 		if (mockitoPresent && Boolean.TRUE.equals(
 				testContext.getAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE))) {
 			closeMocks(testContext);
@@ -83,22 +79,22 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 	}
 
 	@Override
-	public void afterTestMethod(TestContext testContext) throws Exception {
+	public void afterTestMethod(TestContext testContext) {
 		if (mockitoPresent) {
 			closeMocks(testContext);
 		}
 	}
 
 	@Override
-	public void afterTestClass(TestContext testContext) throws Exception {
+	public void afterTestClass(TestContext testContext) {
 		if (mockitoPresent) {
 			closeMocks(testContext);
 		}
 	}
 
 	private static void initMocks(TestContext testContext) {
-		Class<?> testClass = testContext.getTestClass();
-		if (MockitoAnnotationDetector.hasMockitoAnnotations(testClass)) {
+		if (hasMockitoAnnotations(testContext)) {
+			Class<?> testClass = testContext.getTestClass();
 			Object testInstance = testContext.getTestInstance();
 			MockitoBeanSettings annotation = AnnotationUtils.findAnnotation(testClass, MockitoBeanSettings.class);
 			Strictness strictness = (annotation != null ? annotation.value() : Strictness.STRICT_STUBS);
@@ -113,9 +109,8 @@ public class MockitoTestExecutionListener extends AbstractTestExecutionListener 
 				.startMocking();
 	}
 
-	private static void closeMocks(TestContext testContext) throws Exception {
-		Object mocks = testContext.getAttribute(MOCKITO_SESSION_ATTRIBUTE_NAME);
-		if (mocks instanceof MockitoSession session) {
+	private static void closeMocks(TestContext testContext) {
+		if (testContext.getAttribute(MOCKITO_SESSION_ATTRIBUTE_NAME) instanceof MockitoSession session) {
 			session.finishMocking();
 		}
 	}

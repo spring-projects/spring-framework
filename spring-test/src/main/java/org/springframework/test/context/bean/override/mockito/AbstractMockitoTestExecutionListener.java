@@ -22,28 +22,45 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Utility class that detects {@code org.mockito} annotations as well as the
- * annotations in this package (like {@link MockitoBeanSettings @MockitoBeanSettings}).
+ * Abstract base class for {@code TestExecutionListener} implementations involving
+ * Mockito.
  *
- * @author Simon Baslé
  * @author Sam Brannen
+ * @author Simon Baslé
+ * @since 6.2
  */
-abstract class MockitoAnnotationDetector {
+abstract class AbstractMockitoTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final String MOCKITO_BEAN_PACKAGE = MockitoBeanSettings.class.getPackageName();
+	static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.Mockito",
+			AbstractMockitoTestExecutionListener.class.getClassLoader());
+
+	private static final String SPRING_MOCKITO_PACKAGE = "org.springframework.test.context.bean.override.mockito";
 
 	private static final String ORG_MOCKITO_PACKAGE = "org.mockito";
 
 	private static final Predicate<Annotation> isMockitoAnnotation = annotation -> {
 			String packageName = annotation.annotationType().getPackageName();
-			return (packageName.startsWith(MOCKITO_BEAN_PACKAGE) ||
+			return (packageName.startsWith(SPRING_MOCKITO_PACKAGE) ||
 					packageName.startsWith(ORG_MOCKITO_PACKAGE));
 		};
 
-	static boolean hasMockitoAnnotations(Class<?> testClass) {
+
+	/**
+	 * Determine if the test class for the supplied {@linkplain TestContext
+	 * test context} uses {@code org.mockito} annotations or any of the annotations
+	 * in this package (such as {@link MockitoBeanSettings @MockitoBeanSettings}).
+	 */
+	static boolean hasMockitoAnnotations(TestContext testContext) {
+		return hasMockitoAnnotations(testContext.getTestClass());
+	}
+
+	private static boolean hasMockitoAnnotations(Class<?> testClass) {
 		if (isAnnotated(testClass)) {
 			return true;
 		}
@@ -53,9 +70,10 @@ abstract class MockitoAnnotationDetector {
 		// previous invocation of isAnnotated(testClass) only finds annotations declared directly
 		// on the test class. So, we'll likely need a completely different approach that combines
 		// the "test class/interface is annotated?" and "field is annotated?" checks in a single
-		// search algorithm.
+		// search algorithm, and we'll also need to support @Nested class hierarchies.
 		AtomicBoolean found = new AtomicBoolean();
-		ReflectionUtils.doWithFields(testClass, field -> found.set(true), MockitoAnnotationDetector::isAnnotated);
+		ReflectionUtils.doWithFields(testClass,
+				field -> found.set(true), AbstractMockitoTestExecutionListener::isAnnotated);
 		return found.get();
 	}
 
