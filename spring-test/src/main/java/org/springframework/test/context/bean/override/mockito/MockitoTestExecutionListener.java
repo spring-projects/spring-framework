@@ -20,8 +20,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
 /**
@@ -80,7 +80,8 @@ public class MockitoTestExecutionListener extends AbstractMockitoTestExecutionLi
 	private static void initMocks(TestContext testContext) {
 		Class<?> testClass = testContext.getTestClass();
 		Object testInstance = testContext.getTestInstance();
-		MockitoBeanSettings annotation = AnnotationUtils.findAnnotation(testClass, MockitoBeanSettings.class);
+		MockitoBeanSettings annotation =
+				TestContextAnnotationUtils.findMergedAnnotation(testClass, MockitoBeanSettings.class);
 		Strictness strictness = (annotation != null ? annotation.value() : Strictness.STRICT_STUBS);
 		testContext.setAttribute(MOCKITO_SESSION_ATTRIBUTE_NAME, initMockitoSession(testInstance, strictness));
 	}
