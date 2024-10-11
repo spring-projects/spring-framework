@@ -17,6 +17,7 @@
 package org.springframework.web.cors;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.validator.routines.UrlValidator;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -38,19 +39,22 @@ public abstract class CorsUtils {
 	 * Returns {@code true} if the request is a valid CORS one by checking {@code Origin}
 	 * header presence and ensuring that origins are different.
 	 */
-	public static boolean isCorsRequest(HttpServletRequest request) {
+	public static IsCorsRequestResult isCorsRequest(HttpServletRequest request) {
 		String origin = request.getHeader(HttpHeaders.ORIGIN);
 		if (origin == null) {
-			return false;
+			return IsCorsRequestResult.IS_NOT_CORS_REQUEST;
+		}
+		if (!(new UrlValidator().isValid(origin))) {
+			return IsCorsRequestResult.MALFORMED_ORIGIN;
 		}
 		UriComponents originUrl = UriComponentsBuilder.fromUriString(origin).build();
 		String scheme = request.getScheme();
 		String host = request.getServerName();
 		int port = request.getServerPort();
-		return !(ObjectUtils.nullSafeEquals(scheme, originUrl.getScheme()) &&
+		boolean isCorsRequest = !(ObjectUtils.nullSafeEquals(scheme, originUrl.getScheme()) &&
 				ObjectUtils.nullSafeEquals(host, originUrl.getHost()) &&
 				getPort(scheme, port) == getPort(originUrl.getScheme(), originUrl.getPort()));
-
+		return isCorsRequest ? IsCorsRequestResult.IS_CORS_REQUEST : IsCorsRequestResult.IS_NOT_CORS_REQUEST;
 	}
 
 	private static int getPort(@Nullable String scheme, int port) {

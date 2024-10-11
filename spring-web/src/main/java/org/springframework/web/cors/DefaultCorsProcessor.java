@@ -83,8 +83,13 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
 		}
 
-		if (!CorsUtils.isCorsRequest(request)) {
+		IsCorsRequestResult isCorsRequestResult = CorsUtils.isCorsRequest(request);
+		if (isCorsRequestResult == IsCorsRequestResult.IS_NOT_CORS_REQUEST) {
 			return true;
+		}
+		else if (isCorsRequestResult == IsCorsRequestResult.MALFORMED_ORIGIN) {
+			rejectRequest(new ServletServerHttpResponse(response));
+			return false;
 		}
 
 		if (response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null) {

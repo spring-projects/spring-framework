@@ -35,13 +35,20 @@ class CorsUtilsTests {
 	void isCorsRequest() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader(HttpHeaders.ORIGIN, "https://domain.com");
-		assertThat(CorsUtils.isCorsRequest(request)).isTrue();
+		assertThat(CorsUtils.isCorsRequest(request)).isEqualTo(IsCorsRequestResult.IS_CORS_REQUEST);
 	}
 
 	@Test
 	void isNotCorsRequest() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		assertThat(CorsUtils.isCorsRequest(request)).isFalse();
+		assertThat(CorsUtils.isCorsRequest(request)).isEqualTo(IsCorsRequestResult.IS_NOT_CORS_REQUEST);
+	}
+
+	@Test
+	void isMalformedUrlCorsRequest() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader(HttpHeaders.ORIGIN, "http://*@:;");
+		assertThat(CorsUtils.isCorsRequest(request)).isEqualTo(IsCorsRequestResult.MALFORMED_ORIGIN);
 	}
 
 	@Test
