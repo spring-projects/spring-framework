@@ -39,7 +39,7 @@ public abstract class CorsUtils {
 	/**
 	 * Returns {@code IsCorsRequestResult.IS_CORS_REQUEST} if the request is a valid CORS one by checking {@code Origin}
 	 * header presence and ensuring that origins are different. Returns {@code IsCorsRequestResult.IS_NOT_CORS_REQUEST}
-	 * otherwise, or {@code IsCorsRequestResult.MALFORMED_ORIGIN} if the url is malformed.
+	 * otherwise, or {@code IsCorsRequestResult.MALFORMED_ORIGIN} if the origin url is malformed.
 	 */
 	public static IsCorsRequestResult isCorsRequest(HttpServletRequest request) {
 		String origin = request.getHeader(HttpHeaders.ORIGIN);
