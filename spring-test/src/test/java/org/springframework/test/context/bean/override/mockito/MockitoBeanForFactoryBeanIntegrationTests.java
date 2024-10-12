@@ -40,7 +40,7 @@ import static org.mockito.BDDMockito.when;
  */
 @SpringJUnitConfig
 @TestMethodOrder(OrderAnnotation.class)
-public class MockitoBeanForBeanFactoryIntegrationTests {
+public class MockitoBeanForFactoryBeanIntegrationTests {
 
 	@MockitoBean
 	private TestBean testBean;

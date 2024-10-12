@@ -276,7 +276,9 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 
 		ValueHolder[] argumentValues = resolveArgumentValues(registeredBean, executable);
 		Set<String> autowiredBeanNames = new LinkedHashSet<>(resolved.length * 2);
-		for (int i = 0; i < parameterCount; i++) {
+		int startIndex = (executable instanceof Constructor<?> constructor &&
+				ClassUtils.isInnerClass(constructor.getDeclaringClass())) ? 1 : 0;
+		for (int i = startIndex; i < parameterCount; i++) {
 			MethodParameter parameter = getMethodParameter(executable, i);
 			DependencyDescriptor descriptor = new DependencyDescriptor(parameter, true);
 			String shortcut = (this.shortcutBeanNames != null ? this.shortcutBeanNames[i] : null);

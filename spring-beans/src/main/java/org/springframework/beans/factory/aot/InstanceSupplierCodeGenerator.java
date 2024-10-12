@@ -99,7 +99,7 @@ public class InstanceSupplierCodeGenerator {
 
 
 	/**
-	 * Create a new instance.
+	 * Create a new generator instance.
 	 * @param generationContext the generation context
 	 * @param className the class name of the bean to instantiate
 	 * @param generatedMethods the generated methods
@@ -158,47 +158,43 @@ public class InstanceSupplierCodeGenerator {
 	private CodeBlock generateCodeForConstructor(RegisteredBean registeredBean, Constructor<?> constructor) {
 		String beanName = registeredBean.getBeanName();
 		Class<?> beanClass = registeredBean.getBeanClass();
-		Class<?> declaringClass = constructor.getDeclaringClass();
 
-		Visibility accessVisibility = getAccessVisibility(registeredBean, constructor);
 		if (KotlinDetector.isKotlinReflectPresent() && KotlinDelegate.hasConstructorWithOptionalParameter(beanClass)) {
-			return generateCodeForInaccessibleConstructor(beanName, beanClass, constructor,
+			return generateCodeForInaccessibleConstructor(beanName, constructor,
 					hints -> hints.registerType(beanClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 		}
-		else if (accessVisibility != Visibility.PRIVATE) {
-			return generateCodeForAccessibleConstructor(beanName, beanClass, constructor, declaringClass);
+
+		if (!isVisible(constructor, constructor.getDeclaringClass())) {
+			return generateCodeForInaccessibleConstructor(beanName, constructor,
+					hints -> hints.registerConstructor(constructor, ExecutableMode.INVOKE));
 		}
-		return generateCodeForInaccessibleConstructor(beanName, beanClass, constructor,
-				hints -> hints.registerConstructor(constructor, ExecutableMode.INVOKE));
+		return generateCodeForAccessibleConstructor(beanName, constructor);
 	}
 
-	private CodeBlock generateCodeForAccessibleConstructor(String beanName, Class<?> beanClass,
-			Constructor<?> constructor, Class<?> declaringClass) {
-
+	private CodeBlock generateCodeForAccessibleConstructor(String beanName, Constructor<?> constructor) {
 		this.generationContext.getRuntimeHints().reflection().registerConstructor(
 				constructor, ExecutableMode.INTROSPECT);
 
 		if (constructor.getParameterCount() == 0) {
 			if (!this.allowDirectSupplierShortcut) {
-				return CodeBlock.of("$T.using($T::new)", InstanceSupplier.class, declaringClass);
+				return CodeBlock.of("$T.using($T::new)", InstanceSupplier.class, constructor.getDeclaringClass());
 			}
 			if (!isThrowingCheckedException(constructor)) {
-				return CodeBlock.of("$T::new", declaringClass);
+				return CodeBlock.of("$T::new", constructor.getDeclaringClass());
 			}
-			return CodeBlock.of("$T.of($T::new)", ThrowingSupplier.class, declaringClass);
+			return CodeBlock.of("$T.of($T::new)", ThrowingSupplier.class, constructor.getDeclaringClass());
 		}
 
 		GeneratedMethod generatedMethod = generateGetInstanceSupplierMethod(method ->
-				buildGetInstanceMethodForConstructor(
-						method, beanName, beanClass, constructor, declaringClass, PRIVATE_STATIC));
+				buildGetInstanceMethodForConstructor(method, beanName, constructor, PRIVATE_STATIC));
 		return generateReturnStatement(generatedMethod);
 	}
 
-	private CodeBlock generateCodeForInaccessibleConstructor(String beanName, Class<?> beanClass,
+	private CodeBlock generateCodeForInaccessibleConstructor(String beanName,
 			Constructor<?> constructor, Consumer<ReflectionHints> hints) {
 
 		CodeWarnings codeWarnings = new CodeWarnings();
-		codeWarnings.detectDeprecation(beanClass, constructor)
+		codeWarnings.detectDeprecation(constructor.getDeclaringClass(), constructor)
 				.detectDeprecation(Arrays.stream(constructor.getParameters()).map(Parameter::getType));
 		hints.accept(this.generationContext.getRuntimeHints().reflection());
 
@@ -206,32 +202,34 @@ public class InstanceSupplierCodeGenerator {
 			method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
 			method.addModifiers(PRIVATE_STATIC);
 			codeWarnings.suppress(method);
-			method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, beanClass));
-			method.addStatement(generateResolverForConstructor(beanClass, constructor));
+			method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, constructor.getDeclaringClass()));
+			method.addStatement(generateResolverForConstructor(constructor));
 		});
 
 		return generateReturnStatement(generatedMethod);
 	}
 
-	private void buildGetInstanceMethodForConstructor(MethodSpec.Builder method,
-			String beanName, Class<?> beanClass, Constructor<?> constructor, Class<?> declaringClass,
-			javax.lang.model.element.Modifier... modifiers) {
+	private void buildGetInstanceMethodForConstructor(MethodSpec.Builder method, String beanName,
+			Constructor<?> constructor, javax.lang.model.element.Modifier... modifiers) {
+
+		Class<?> declaringClass = constructor.getDeclaringClass();
 
 		CodeWarnings codeWarnings = new CodeWarnings();
-		codeWarnings.detectDeprecation(beanClass, constructor, declaringClass)
+		codeWarnings.detectDeprecation(declaringClass, constructor)
 				.detectDeprecation(Arrays.stream(constructor.getParameters()).map(Parameter::getType));
 		method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
 		method.addModifiers(modifiers);
 		codeWarnings.suppress(method);
-		method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, beanClass));
+		method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, declaringClass));
 
 		CodeBlock.Builder code = CodeBlock.builder();
-		code.add(generateResolverForConstructor(beanClass, constructor));
+		code.add(generateResolverForConstructor(constructor));
 		boolean hasArguments = constructor.getParameterCount() > 0;
+		boolean onInnerClass = ClassUtils.isInnerClass(declaringClass);
 
 		CodeBlock arguments = hasArguments ?
 				new AutowiredArgumentsCodeGenerator(declaringClass, constructor)
-						.generateCode(constructor.getParameterTypes())
+						.generateCode(constructor.getParameterTypes(), (onInnerClass ? 1 : 0))
 				: NO_ARGS;
 
 		CodeBlock newInstance = generateNewInstanceCodeForConstructor(declaringClass, arguments);
@@ -239,24 +237,29 @@ public class InstanceSupplierCodeGenerator {
 		method.addStatement(code.build());
 	}
 
-	private CodeBlock generateResolverForConstructor(Class<?> beanClass, Constructor<?> constructor) {
+	private CodeBlock generateResolverForConstructor(Constructor<?> constructor) {
 		CodeBlock parameterTypes = generateParameterTypesCode(constructor.getParameterTypes());
-		return CodeBlock.of("return $T.<$T>forConstructor($L)", BeanInstanceSupplier.class, beanClass, parameterTypes);
+		return CodeBlock.of("return $T.<$T>forConstructor($L)", BeanInstanceSupplier.class,
+				constructor.getDeclaringClass(), parameterTypes);
 	}
 
 	private CodeBlock generateNewInstanceCodeForConstructor(Class<?> declaringClass, CodeBlock args) {
+		if (ClassUtils.isInnerClass(declaringClass)) {
+			return CodeBlock.of("$L.getBeanFactory().getBean($T.class).new $L($L)",
+					REGISTERED_BEAN_PARAMETER_NAME, declaringClass.getEnclosingClass(),
+					declaringClass.getSimpleName(), args);
+		}
 		return CodeBlock.of("new $T($L)", declaringClass, args);
 	}
 
 	private CodeBlock generateCodeForFactoryMethod(
 			RegisteredBean registeredBean, Method factoryMethod, Class<?> targetClass) {
 
-		Visibility accessVisibility = getAccessVisibility(registeredBean, factoryMethod);
-		if (accessVisibility != Visibility.PRIVATE) {
-			return generateCodeForAccessibleFactoryMethod(registeredBean.getBeanName(), factoryMethod, targetClass,
-					registeredBean.getMergedBeanDefinition().getFactoryBeanName());
+		if (!isVisible(factoryMethod, targetClass)) {
+			return generateCodeForInaccessibleFactoryMethod(registeredBean.getBeanName(), factoryMethod, targetClass);
 		}
-		return generateCodeForInaccessibleFactoryMethod(registeredBean.getBeanName(), factoryMethod, targetClass);
+		return generateCodeForAccessibleFactoryMethod(registeredBean.getBeanName(), factoryMethod, targetClass,
+				registeredBean.getMergedBeanDefinition().getFactoryBeanName());
 	}
 
 	private CodeBlock generateCodeForAccessibleFactoryMethod(String beanName,
@@ -366,11 +369,13 @@ public class InstanceSupplierCodeGenerator {
 		return code.build();
 	}
 
-	private Visibility getAccessVisibility(RegisteredBean registeredBean, Member member) {
-		AccessControl beanTypeAccessControl = AccessControl.forResolvableType(registeredBean.getBeanType());
+	private boolean isVisible(Member member, Class<?> targetClass) {
+		AccessControl classAccessControl = AccessControl.forClass(targetClass);
 		AccessControl memberAccessControl = AccessControl.forMember(member);
-		return AccessControl.lowest(beanTypeAccessControl, memberAccessControl).getVisibility();
-	}
+		Visibility visibility = AccessControl.lowest(classAccessControl, memberAccessControl).getVisibility();
+		return (visibility == Visibility.PUBLIC || (visibility != Visibility.PRIVATE &&
+				member.getDeclaringClass().getPackageName().equals(this.className.packageName())));
+		}
 
 	private CodeBlock generateParameterTypesCode(Class<?>[] parameterTypes) {
 		CodeBlock.Builder code = CodeBlock.builder();
@@ -392,6 +397,7 @@ public class InstanceSupplierCodeGenerator {
 				.anyMatch(Exception.class::isAssignableFrom);
 	}
 
+
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
 	 */
@@ -410,7 +416,6 @@ public class InstanceSupplierCodeGenerator {
 			}
 			return false;
 		}
-
 	}
 
 

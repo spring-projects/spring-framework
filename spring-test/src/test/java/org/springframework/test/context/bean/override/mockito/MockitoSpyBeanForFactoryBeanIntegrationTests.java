@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.bean.override.mockito.MockitoBeanForBeanFactoryIntegrationTests.TestBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBeanForFactoryBeanIntegrationTests.TestBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +40,7 @@ import static org.mockito.Mockito.doReturn;
  */
 @SpringJUnitConfig
 @TestMethodOrder(OrderAnnotation.class)
-class MockitoSpyBeanForBeanFactoryIntegrationTests {
+class MockitoSpyBeanForFactoryBeanIntegrationTests {
 
 	@MockitoSpyBean
 	private TestBean testBean;
