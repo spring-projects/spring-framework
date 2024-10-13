@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -64,6 +65,8 @@ import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -104,6 +107,9 @@ final class DefaultRestClient implements RestClient {
 	private final HttpHeaders defaultHeaders;
 
 	@Nullable
+	private final MultiValueMap<String, String> defaultCookies;
+
+	@Nullable
 	private final Consumer<RequestHeadersSpec<?>> defaultRequest;
 
 	private final List<StatusHandler> defaultStatusHandlers;
@@ -123,6 +129,7 @@ final class DefaultRestClient implements RestClient {
 			@Nullable List<ClientHttpRequestInitializer> initializers,
 			UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders,
+			@Nullable MultiValueMap<String, String> defaultCookies,
 			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
 			@Nullable List<StatusHandler> statusHandlers,
 			List<HttpMessageConverter<?>> messageConverters,
@@ -135,6 +142,7 @@ final class DefaultRestClient implements RestClient {
 		this.interceptors = interceptors;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
+		this.defaultCookies = defaultCookies;
 		this.defaultRequest = defaultRequest;
 		this.defaultStatusHandlers = (statusHandlers != null ? new ArrayList<>(statusHandlers) : new ArrayList<>());
 		this.messageConverters = messageConverters;
@@ -293,6 +301,8 @@ final class DefaultRestClient implements RestClient {
 
 	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
+		private static final String COOKIE_DELIMITER = "; ";
+
 		private final HttpMethod httpMethod;
 
 		@Nullable
@@ -300,6 +310,9 @@ final class DefaultRestClient implements RestClient {
 
 		@Nullable
 		private HttpHeaders headers;
+
+		@Nullable
+		private MultiValueMap<String, String> cookies;
 
 		@Nullable
 		private InternalBody body;
@@ -356,6 +369,13 @@ final class DefaultRestClient implements RestClient {
 			return this.headers;
 		}
 
+		private MultiValueMap<String, String> getCookies() {
+			if (this.cookies == null) {
+				this.cookies = new LinkedMultiValueMap<>(3);
+			}
+			return this.cookies;
+		}
+
 		@Override
 		public DefaultRequestBodyUriSpec header(String headerName, String... headerValues) {
 			for (String headerValue : headerValues) {
@@ -379,6 +399,18 @@ final class DefaultRestClient implements RestClient {
 		@Override
 		public DefaultRequestBodyUriSpec acceptCharset(Charset... acceptableCharsets) {
 			getHeaders().setAcceptCharset(Arrays.asList(acceptableCharsets));
+			return this;
+		}
+
+		@Override
+		public DefaultRequestBodyUriSpec cookie(String name, String value) {
+			getCookies().add(name, value);
+			return this;
+		}
+
+		@Override
+		public DefaultRequestBodyUriSpec cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+			cookiesConsumer.accept(getCookies());
 			return this;
 		}
 
@@ -525,6 +557,12 @@ final class DefaultRestClient implements RestClient {
 			try {
 				uri = initUri();
 				HttpHeaders headers = initHeaders();
+
+				MultiValueMap<String, String> cookies = initCookies();
+				if (!CollectionUtils.isEmpty(cookies)) {
+					headers.put(HttpHeaders.COOKIE, List.of(cookiesToHeaderValue(cookies)));
+				}
+
 				ClientHttpRequest clientRequest = createRequest(uri);
 				clientRequest.getHeaders().addAll(headers);
 				Map<String, Object> attributes = getAttributes();
@@ -597,6 +635,28 @@ final class DefaultRestClient implements RestClient {
 				result.putAll(this.headers);
 				return result;
 			}
+		}
+
+		private MultiValueMap<String, String> initCookies() {
+			MultiValueMap<String, String> mergedCookies = new LinkedMultiValueMap<>();
+
+			if(!CollectionUtils.isEmpty(defaultCookies)) {
+				mergedCookies.putAll(defaultCookies);
+			}
+
+			if(!CollectionUtils.isEmpty(this.cookies)) {
+				mergedCookies.putAll(this.cookies);
+			}
+
+			return mergedCookies;
+		}
+
+		private String cookiesToHeaderValue(MultiValueMap<String, String> cookies) {
+			List<String> flatCookies = new ArrayList<>();
+			cookies.forEach((name, cookieValues) -> cookieValues.forEach(value ->
+				flatCookies.add(new HttpCookie(name, value).toString())
+			));
+			return String.join(COOKIE_DELIMITER, flatCookies);
 		}
 
 		private ClientHttpRequest createRequest(URI uri) throws IOException {

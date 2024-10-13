@@ -814,6 +814,25 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getHeader("foo")).isEqualTo("bar"));
 	}
 
+	@ParameterizedRestClientTest
+	void retrieveDefaultCookiesAsCookieHeader(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+		prepareResponse(response ->
+				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
+		RestClient restClientWithCookies = this.restClient.mutate()
+				.defaultCookie("testCookie", "firstValue", "secondValue")
+				.build();
+
+		restClientWithCookies.get()
+			.uri("/greeting")
+			.header("X-Test-Header", "testvalue")
+			.retrieve();
+
+		expectRequest(request ->
+			assertThat(request.getHeader(HttpHeaders.COOKIE))
+					.isEqualTo("testCookie=firstValue; testCookie=secondValue")
+		);
+	}
 
 	@ParameterizedRestClientTest
 	void filterForErrorHandling(ClientHttpRequestFactory requestFactory) {
@@ -947,6 +966,55 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/foo%20bar"));
 	}
 
+	@ParameterizedRestClientTest
+	void cookieAddsCookie(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+
+		this.restClient.get()
+				.uri("/greeting")
+				.cookie("foo", "bar")
+				.retrieve()
+				.body(String.class);
+
+		expectRequest(request -> assertThat(request.getHeader("Cookie")).isEqualTo("foo=bar"));
+	}
+
+	@ParameterizedRestClientTest
+	void cookieOverridesDefaultCookie(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+		RestClient restClientWithCookies = this.restClient.mutate()
+				.defaultCookie("testCookie", "firstValue", "secondValue")
+				.build();
+
+		restClientWithCookies.get()
+				.uri("/greeting")
+				.cookie("testCookie", "test")
+				.retrieve()
+				.body(String.class);
+
+		expectRequest(request -> assertThat(request.getHeader("Cookie")).isEqualTo("testCookie=test"));
+	}
+
+	@ParameterizedRestClientTest
+	void cookiesCanRemoveCookie(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
+				.setBody("Hello Spring!"));
+
+		this.restClient.get()
+				.uri("/greeting")
+				.cookie("foo", "bar")
+				.cookie("test", "Hello")
+				.cookies(cookies -> cookies.remove("foo"))
+				.retrieve()
+				.body(String.class);
+
+		expectRequest(request -> assertThat(request.getHeader("Cookie")).isEqualTo("test=Hello"));
+	}
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {
 		MockResponse response = new MockResponse();
