@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import org.junit.jupiter.api.Test;
