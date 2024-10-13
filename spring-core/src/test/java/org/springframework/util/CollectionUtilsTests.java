@@ -16,17 +16,7 @@
 
 package org.springframework.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 
@@ -177,6 +167,32 @@ class CollectionUtilsTests {
 	}
 
 	@Test
+	void findValueOfType() {
+		List<Integer> integerList = new ArrayList<>();
+		integerList.add(1);
+		assertThat(CollectionUtils.findValueOfType(integerList, Integer.class)).isEqualTo(1);
+
+		Set<Integer> integerSet = new HashSet<>();
+		integerSet.add(2);
+		assertThat(CollectionUtils.findValueOfType(integerSet, Integer.class)).isEqualTo(2);
+	}
+
+	@Test
+	void findValueOfTypeWithNullOrEmptyCollection() {
+		List<Integer> emptyList = new ArrayList<>();
+		assertThat(CollectionUtils.findValueOfType(null, Integer.class)).isNull();
+		assertThat(CollectionUtils.findValueOfType(emptyList, Integer.class)).isNull();
+	}
+
+	@Test
+	void findValueOfTypeWithMoreThanOneValue() {
+		List<Integer> integerList = new ArrayList<>();
+		integerList.add(1);
+		integerList.add(2);
+		assertThat(CollectionUtils.findValueOfType(integerList, Integer.class)).isNull();
+	}
+
+	@Test
 	void hasUniqueObject() {
 		List<String> list = new ArrayList<>();
 		list.add("myElement");
@@ -211,6 +227,97 @@ class CollectionUtilsTests {
 	}
 
 	@Test
+	void findCommonElementType() {
+		List<Integer> integerList = new ArrayList<>();
+		integerList.add(1);
+		integerList.add(2);
+
+		assertThat(CollectionUtils.findCommonElementType(integerList)).isEqualTo(Integer.class);
+	}
+
+	@Test
+	void findCommonElementTypeWithNullOrEmptyCollection() {
+		List<Integer> emptyList = new ArrayList<>();
+		assertThat(CollectionUtils.findCommonElementType(null)).isNull();
+		assertThat(CollectionUtils.findCommonElementType(emptyList)).isNull();
+	}
+
+	@Test
+	void findCommonElementTypeWithDifferentElementType() {
+		List<Object> list = new ArrayList<>();
+		list.add(1);
+		list.add("foo");
+		assertThat(CollectionUtils.findCommonElementType(list)).isNull();
+	}
+
+	@Test
+	void firstElementWithSet() {
+		Set<Integer> set = new HashSet<>();
+		set.add(17);
+		set.add(3);
+		set.add(2);
+		set.add(1);
+		assertThat(CollectionUtils.firstElement(set)).isEqualTo(17);
+	}
+
+	@Test
+	void firstElementWithSortedSet() {
+		SortedSet<Integer> sortedSet = new TreeSet<>();
+		sortedSet.add(17);
+		sortedSet.add(3);
+		sortedSet.add(2);
+		sortedSet.add(1);
+		assertThat(CollectionUtils.firstElement(sortedSet)).isEqualTo(1);
+	}
+
+	@Test
+	void firstElementWithList() {
+		List<Integer> list = new ArrayList<>();
+		list.add(1);
+		list.add(2);
+		list.add(3);
+		assertThat(CollectionUtils.firstElement(list)).isEqualTo(1);
+	}
+
+	@Test
+	void lastElementWithSet() {
+		Set<Integer> set = new HashSet<>();
+		set.add(17);
+		set.add(3);
+		set.add(2);
+		set.add(1);
+		assertThat(CollectionUtils.lastElement(set)).isEqualTo(3);
+	}
+
+	@Test
+	void lastElementWithSortedSet() {
+		SortedSet<Integer> sortedSet = new TreeSet<>();
+		sortedSet.add(17);
+		sortedSet.add(3);
+		sortedSet.add(2);
+		sortedSet.add(1);
+		assertThat(CollectionUtils.lastElement(sortedSet)).isEqualTo(17);
+	}
+
+	@Test
+	void lastElementWithList() {
+		List<Integer> list = new ArrayList<>();
+		list.add(1);
+		list.add(2);
+		list.add(3);
+		assertThat(CollectionUtils.lastElement(list)).isEqualTo(3);
+	}
+
+	@Test
+	void toArray() {
+		Vector<String> vector = new Vector<>();
+		vector.add("foo");
+		vector.add("bar");
+		Enumeration<String> enumeration = vector.elements();
+		assertThat(CollectionUtils.toArray(enumeration, new String[]{})).contains("foo", "bar");
+	}
+
+	@Test
 	void conversionOfEmptyMap() {
 		MultiValueMap<String, String> asMultiValueMap = CollectionUtils.toMultiValueMap(new HashMap<>());
 		assertThat(asMultiValueMap).isEmpty();
@@ -232,6 +339,22 @@ class CollectionUtilsTests {
 		assertThat(asMultiValueMap).doesNotContainKeys("key");
 		wrapped.put("key", new ArrayList<>());
 		assertThat(asMultiValueMap).containsKey("key");
+	}
+
+	@Test
+	void compositeMap() {
+		Map<String, String> first = new HashMap<>();
+		first.put("key1", "value1");
+		first.put("key2", "value2");
+
+		Map<String, String> second = new HashMap<>();
+		second.put("key3", "value3");
+		second.put("key4", "value4");
+
+		Map<String, String> compositeMap = CollectionUtils.compositeMap(first, second);
+
+		assertThat(compositeMap).containsKeys("key1", "key2", "key3", "key4");
+		assertThat(compositeMap).containsValues("value1", "value2", "value3", "value4");
 	}
 
 
