@@ -213,7 +213,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			return this.notModified;
 		}
 		// 2) If-Unmodified-Since
-		else if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
+		if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
 			updateResponseStateChanging(etag, lastModifiedTimestamp);
 			return this.notModified;
 		}
