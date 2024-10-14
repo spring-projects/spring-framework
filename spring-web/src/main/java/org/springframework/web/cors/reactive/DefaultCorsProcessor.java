@@ -83,8 +83,15 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			}
 		}
 
-		if (!CorsUtils.isCorsRequest(request)) {
-			return true;
+		try {
+			if (!CorsUtils.isCorsRequest(request)) {
+				return true;
+			}
+		}
+		catch (IllegalArgumentException ex) {
+			logger.debug("Reject: origin is malformed");
+			rejectRequest(response);
+			return false;
 		}
 
 		if (responseHeaders.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null) {

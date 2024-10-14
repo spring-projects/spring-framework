@@ -184,6 +184,20 @@ class DefaultCorsProcessorTests {
 		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isTrue();
 	}
 
+	@Test //gh-33682
+	public void actualRequestMalformedOriginRejected() throws Exception {
+		this.request.setMethod(HttpMethod.GET.name());
+		this.request.addHeader(HttpHeaders.ORIGIN, "http://*@:;");
+		this.conf.addAllowedOrigin("https://domain2.com");
+
+		boolean result = this.processor.processRequest(this.conf, this.request, this.response);
+		assertThat(result).isFalse();
+		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isFalse();
+		assertThat(this.response.getHeaders(HttpHeaders.VARY)).contains(HttpHeaders.ORIGIN,
+				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
+		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_FORBIDDEN);
+	}
+
 	@Test
 	void actualRequestExposedHeaders() throws Exception {
 		this.request.setMethod(HttpMethod.GET.name());
