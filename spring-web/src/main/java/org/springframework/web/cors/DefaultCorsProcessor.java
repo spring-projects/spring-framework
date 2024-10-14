@@ -83,8 +83,15 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
 		}
 
-		if (!CorsUtils.isCorsRequest(request)) {
-			return true;
+		try {
+			if (!CorsUtils.isCorsRequest(request)) {
+				return true;
+			}
+		}
+		catch (IllegalArgumentException ex) {
+			logger.debug("Reject: origin is malformed");
+			rejectRequest(new ServletServerHttpResponse(response));
+			return false;
 		}
 
 		if (response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null) {

@@ -190,6 +190,21 @@ class DefaultCorsProcessorTests {
 		assertThat(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN)).isTrue();
 	}
 
+	@Test // gh-33682
+	public void actualRequestMalformedOriginRejected() {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+				.method(HttpMethod.GET, "http://localhost/test.html")
+				.header(HttpHeaders.ORIGIN, "http://*@:;"));
+
+		this.conf.addAllowedOrigin("https://domain2.com");
+		boolean result = this.processor.process(this.conf, exchange);
+		ServerHttpResponse response = exchange.getResponse();
+
+		assertThat(result).isFalse();
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		assertThat(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN)).isFalse();
+	}
+
 	@Test
 	void actualRequestExposedHeaders() {
 		ServerWebExchange exchange = actualRequest();
