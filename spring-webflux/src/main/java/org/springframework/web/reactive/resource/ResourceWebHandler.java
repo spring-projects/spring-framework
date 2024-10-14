@@ -502,15 +502,131 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 * <p>By default, this method delegates to {@link ResourceHandlerUtils#normalizeInputPath}.
 	 */
 	protected String processPath(String path) {
-		return ResourceHandlerUtils.normalizeInputPath(path);
+		path = StringUtils.replace(path, "\\", "/");
+		path = cleanDuplicateSlashes(path);
+		path = cleanLeadingSlash(path);
+		return normalizePath(path);
+	}
+
+	private String cleanDuplicateSlashes(String path) {
+		StringBuilder sb = null;
+		char prev = 0;
+		for (int i = 0; i < path.length(); i++) {
+			char curr = path.charAt(i);
+			try {
+				if (curr == '/' && prev == '/') {
+					if (sb == null) {
+						sb = new StringBuilder(path.substring(0, i));
+					}
+					continue;
+				}
+				if (sb != null) {
+					sb.append(path.charAt(i));
+				}
+			}
+			finally {
+				prev = curr;
+			}
+		}
+		return (sb != null ? sb.toString() : path);
+	}
+
+	private String cleanLeadingSlash(String path) {
+		boolean slash = false;
+		for (int i = 0; i < path.length(); i++) {
+			if (path.charAt(i) == '/') {
+				slash = true;
+			}
+			else if (path.charAt(i) > ' ' && path.charAt(i) != 127) {
+				if (i == 0 || (i == 1 && slash)) {
+					return path;
+				}
+				return (slash ? "/" + path.substring(i) : path.substring(i));
+			}
+		}
+		return (slash ? "/" : "");
+	}
+
+	private static String normalizePath(String path) {
+		if (path.contains("%")) {
+			try {
+				path = URLDecoder.decode(path, StandardCharsets.UTF_8);
+			}
+			catch (Exception ex) {
+				return "";
+			}
+			if (path.contains("../")) {
+				path = StringUtils.cleanPath(path);
+			}
+		}
+		return path;
 	}
 
 	/**
-	 * Invoked after {@link ResourceHandlerUtils#isInvalidPath(String)}
-	 * to allow subclasses to perform further validation.
-	 * <p>By default, this method does not perform any validations.
+	 * Check whether the given path contains invalid escape sequences.
+	 * @param path the path to validate
+	 * @return {@code true} if the path is invalid, {@code false} otherwise
+	 */
+	private boolean isInvalidEncodedPath(String path) {
+		if (path.contains("%")) {
+			try {
+				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
+				String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+				if (isInvalidPath(decodedPath)) {
+					return true;
+				}
+				decodedPath = processPath(decodedPath);
+				if (isInvalidPath(decodedPath)) {
+					return true;
+				}
+			}
+			catch (IllegalArgumentException ex) {
+				// May not be possible to decode...
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Identifies invalid resource paths. By default rejects:
+	 * <ul>
+	 * <li>Paths that contain "WEB-INF" or "META-INF"
+	 * <li>Paths that contain "../" after a call to
+	 * {@link StringUtils#cleanPath}.
+	 * <li>Paths that represent a {@link ResourceUtils#isUrl
+	 * valid URL} or would represent one after the leading slash is removed.
+	 * </ul>
+	 * <p><strong>Note:</strong> this method assumes that leading, duplicate '/'
+	 * or control characters (e.g. white space) have been trimmed so that the
+	 * path starts predictably with a single '/' or does not have one.
+	 * @param path the path to validate
+	 * @return {@code true} if the path is invalid, {@code false} otherwise
 	 */
 	protected boolean isInvalidPath(String path) {
+		if (path.contains("WEB-INF") || path.contains("META-INF")) {
+			if (logger.isWarnEnabled()) {
+				logger.warn(LogFormatUtils.formatValue(
+						"Path with \"WEB-INF\" or \"META-INF\": [" + path + "]", -1, true));
+			}
+			return true;
+		}
+		if (path.contains(":/")) {
+			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
+			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
+				if (logger.isWarnEnabled()) {
+					logger.warn(LogFormatUtils.formatValue(
+							"Path represents URL or has \"url:\" prefix: [" + path + "]", -1, true));
+				}
+				return true;
+			}
+		}
+		if (path.contains("../")) {
+			if (logger.isWarnEnabled()) {
+				logger.warn(LogFormatUtils.formatValue(
+						"Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]", -1, true));
+			}
+			return true;
+		}
 		return false;
 	}
 
