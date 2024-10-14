@@ -202,10 +202,15 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	@Override
 	public boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp) {
-		HttpServletResponse response = getResponse();
-		if (this.notModified || (response != null && HttpStatus.OK.value() != response.getStatus())) {
-			return this.notModified;
+		if (this.notModified) {
+			return true;
 		}
+
+		HttpServletResponse response = getResponse();
+		if (response != null && HttpStatus.OK.value() != response.getStatus()) {
+			return false;
+		}
+
 		// Evaluate conditions in order of precedence.
 		// See https://datatracker.ietf.org/doc/html/rfc9110#section-13.2.2
 		if (validateIfMatch(etag)) {
