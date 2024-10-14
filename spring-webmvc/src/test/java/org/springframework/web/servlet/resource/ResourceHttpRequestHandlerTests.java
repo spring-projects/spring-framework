@@ -643,6 +643,7 @@ class ResourceHttpRequestHandlerTests {
 			testInvalidPath("../testsecret/secret.txt");
 			testInvalidPath("test/../../testsecret/secret.txt");
 			testInvalidPath(":/../../testsecret/secret.txt");
+			testInvalidPath("/testsecret/test/../secret.txt");
 
 			Resource location = new UrlResource(ResourceHttpRequestHandlerTests.class.getResource("./test/"));
 			this.handler.setLocations(List.of(location));

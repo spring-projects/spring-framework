@@ -687,6 +687,7 @@ class ResourceWebHandlerTests {
 
 			testResolvePathWithTraversal(method, "../testsecret/secret.txt");
 			testResolvePathWithTraversal(method, "test/../../testsecret/secret.txt");
+			testResolvePathWithTraversal(method, "/testsecret/test/../secret.txt");
 			testResolvePathWithTraversal(method, ":/../../testsecret/secret.txt");
 
 			location = new UrlResource(getClass().getResource("./test/"));
