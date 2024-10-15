@@ -10,7 +10,6 @@ by default, exactly in the following order:
   annotation for "`before`" modes.
 * `ApplicationEventsTestExecutionListener`: Provides support for
   xref:testing/testcontext-framework/application-events.adoc[`ApplicationEvents`].
-* `MockitoTestExecutionListener`: Initializes and closes mocks configured using `@MockitoBean` or `@MockitoSpyBean`.
 * `DependencyInjectionTestExecutionListener`: Provides dependency injection for the test
   instance.
 * `MicrometerObservationRegistryTestExecutionListener`: Provides support for

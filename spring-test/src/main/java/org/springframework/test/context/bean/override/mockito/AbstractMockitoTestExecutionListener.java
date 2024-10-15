@@ -42,19 +42,16 @@ abstract class AbstractMockitoTestExecutionListener extends AbstractTestExecutio
 
 	private static final String SPRING_MOCKITO_PACKAGE = "org.springframework.test.context.bean.override.mockito";
 
-	private static final String ORG_MOCKITO_PACKAGE = "org.mockito";
-
 	private static final Predicate<MergedAnnotation<?>> isMockitoAnnotation = mergedAnnotation -> {
 			String packageName = mergedAnnotation.getType().getPackageName();
-			return (packageName.startsWith(SPRING_MOCKITO_PACKAGE) ||
-					packageName.startsWith(ORG_MOCKITO_PACKAGE));
+			return packageName.startsWith(SPRING_MOCKITO_PACKAGE);
 		};
 
 
 	/**
 	 * Determine if the test class for the supplied {@linkplain TestContext
-	 * test context} uses {@code org.mockito} annotations or any of the annotations
-	 * in this package (such as {@link MockitoBeanSettings @MockitoBeanSettings}).
+	 * test context} uses any of the annotations in this package (such as
+	 * {@link MockitoBean @MockitoBean}).
 	 */
 	static boolean hasMockitoAnnotations(TestContext testContext) {
 		return hasMockitoAnnotations(testContext.getTestClass());

@@ -30,9 +30,8 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
 /**
- * Verifies proper handling of the {@link org.mockito.MockitoSession MockitoSession}
- * when a {@link MockitoBean @MockitoBean} field is declared in the enclosing class of
- * a {@link Nested @Nested} test class.
+ * Verifies proper reset of mocks when a {@link MockitoBean @MockitoBean} field
+ * is declared in the enclosing class of a {@link Nested @Nested} test class.
  *
  * @author Andy Wilkinson
  * @author Sam Brannen

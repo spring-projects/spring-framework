@@ -40,7 +40,6 @@ import org.springframework.test.context.TestContext;
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 6.2
- * @see MockitoTestExecutionListener
  * @see MockitoBean @MockitoBean
  * @see MockitoSpyBean @MockitoSpyBean
  */
