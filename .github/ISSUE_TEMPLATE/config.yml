@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/spring-projects/security-advisories/security/advisories/new
+    about: Security issues must be disclosed and discussed in private. See https://spring.io/security-policy
+  - name: Asking for help
+    url: https://stackoverflow.com/tags/spring
+    about: The Spring team is using StackOverflow for questions.
+
