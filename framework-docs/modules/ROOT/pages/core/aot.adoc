@@ -290,6 +290,19 @@ Java::
 
 	}
 ----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration(proxyBeanMethods = false)
+	class UserConfiguration {
+
+		@Bean
+		fun myInterface(): MyInterface = MyImplementation()
+
+	}
+----
 ======
 
 In the example above, the declared  type for the `myInterface` bean is `MyInterface`.
@@ -311,6 +324,19 @@ Java::
 		public MyImplementation myInterface() {
 			return new MyImplementation();
 		}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration(proxyBeanMethods = false)
+	class UserConfiguration {
+
+		@Bean
+		fun myInterface() = MyImplementation()
 
 	}
 ----
@@ -371,6 +397,15 @@ Java::
 		// ...
 	}
 ----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	class ClientFactoryBean<T : AbstractClient> : FactoryBean<T> {
+		// ...
+	}
+----
 ======
 
 A concrete client declaration should provide a resolved generic for the client, as shown in the following example:
@@ -388,6 +423,19 @@ Java::
 		public ClientFactoryBean<MyClient> myClient() {
 			return new ClientFactoryBean<>(...);
 		}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration(proxyBeanMethods = false)
+	class UserConfiguration {
+
+		@Bean
+		fun myClient() = ClientFactoryBean<MyClient>(...)
 
 	}
 ----
@@ -412,6 +460,16 @@ Java::
     // ...
     registry.registerBeanDefinition("myClient", beanDefinition);
 ----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+    val beanDefinition = RootBeanDefinition(ClientFactoryBean::class.java)
+    beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(ClientFactoryBean::class.java, MyClient::class.java));
+    // ...
+    registry.registerBeanDefinition("myClient", beanDefinition)
+----
 ======
 
 [[aot.bestpractices.jpa]]
@@ -431,6 +489,19 @@ Java::
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setPackagesToScan("com.example.app");
 		return factoryBean;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Bean
+	fun customDBEntityManagerFactory(dataSource: DataSource): LocalContainerEntityManagerFactoryBean {
+		val factoryBean = LocalContainerEntityManagerFactoryBean()
+		factoryBean.dataSource = dataSource
+		factoryBean.setPackagesToScan("com.example.app")
+		return factoryBean
 	}
 ----
 ======
@@ -458,6 +529,25 @@ Java::
 		return factoryBean;
 	}
 ----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Bean
+	fun persistenceManagedTypes(resourceLoader: ResourceLoader): PersistenceManagedTypes {
+		return PersistenceManagedTypesScanner(resourceLoader)
+				.scan("com.example.app")
+	}
+
+	@Bean
+	fun customDBEntityManagerFactory(dataSource: DataSource, managedTypes: PersistenceManagedTypes): LocalContainerEntityManagerFactoryBean {
+		val factoryBean = LocalContainerEntityManagerFactoryBean()
+		factoryBean.dataSource = dataSource
+		factoryBean.setManagedTypes(managedTypes)
+		return factoryBean
+	}
+----
 ======
 
 [[aot.hints]]
@@ -478,6 +568,13 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	runtimeHints.resources().registerPattern("config/app.properties");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	runtimeHints.resources().registerPattern("config/app.properties")
 ----
 ======
 
