@@ -39,16 +39,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
+import java.util.jar.Attributes;
+import java.util.jar.Attributes.Name;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipException;
@@ -229,6 +234,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	private static final Predicate<ResolvedModule> isNotSystemModule =
 			resolvedModule -> !systemModuleNames.contains(resolvedModule.name());
+
+	@Nullable
+	private static Set<ClassPathManifestEntry> classPathManifestEntriesCache;
 
 	@Nullable
 	private static Method equinoxResolveMethod;
@@ -522,25 +530,30 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @since 4.3
 	 */
 	protected void addClassPathManifestEntries(Set<Resource> result) {
+		Set<ClassPathManifestEntry> entries = classPathManifestEntriesCache;
+		if (entries == null) {
+			entries = getClassPathManifestEntries();
+			classPathManifestEntriesCache = entries;
+		}
+		for (ClassPathManifestEntry entry : entries) {
+			if (!result.contains(entry.resource()) &&
+					(entry.alternative() != null && !result.contains(entry.alternative()))) {
+				result.add(entry.resource());
+			}
+		}
+	}
+
+	private Set<ClassPathManifestEntry> getClassPathManifestEntries() {
+		Set<ClassPathManifestEntry> manifestEntries = new HashSet<>();
+		Set<File> seen = new HashSet<>();
 		try {
-			String javaClassPathProperty = System.getProperty("java.class.path");
-			for (String path : StringUtils.delimitedListToStringArray(javaClassPathProperty, File.pathSeparator)) {
+			String paths = System.getProperty("java.class.path");
+			for (String path : StringUtils.delimitedListToStringArray(paths, File.pathSeparator)) {
 				try {
-					String filePath = new File(path).getAbsolutePath();
-					int prefixIndex = filePath.indexOf(':');
-					if (prefixIndex == 1) {
-						// Possibly a drive prefix on Windows (for example, "c:"), so we prepend a slash
-						// and convert the drive letter to uppercase for consistent duplicate detection.
-						filePath = "/" + StringUtils.capitalize(filePath);
-					}
-					// Since '#' can appear in directories/filenames, java.net.URL should not treat it as a fragment
-					filePath = StringUtils.replace(filePath, "#", "%23");
-					// Build URL that points to the root of the jar file
-					UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
-							ResourceUtils.FILE_URL_PREFIX + filePath + ResourceUtils.JAR_URL_SEPARATOR);
-					// Potentially overlapping with URLClassLoader.getURLs() result in addAllClassLoaderJarRoots().
-					if (!result.contains(jarResource) && !hasDuplicate(filePath, result) && jarResource.exists()) {
-						result.add(jarResource);
+					File jar = new File(path).getAbsoluteFile();
+					if (jar.isFile() && seen.add(jar)) {
+						manifestEntries.add(ClassPathManifestEntry.of(jar));
+						manifestEntries.addAll(getClassPathManifestEntriesFromJar(jar));
 					}
 				}
 				catch (MalformedURLException ex) {
@@ -550,34 +563,45 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					}
 				}
 			}
+			return Collections.unmodifiableSet(manifestEntries);
 		}
 		catch (Exception ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Failed to evaluate 'java.class.path' manifest entries: " + ex);
 			}
+			return Collections.emptySet();
 		}
 	}
 
-	/**
-	 * Check whether the given file path has a duplicate but differently structured entry
-	 * in the existing result, i.e. with or without a leading slash.
-	 * @param filePath the file path (with or without a leading slash)
-	 * @param result the current result
-	 * @return {@code true} if there is a duplicate (i.e. to ignore the given file path),
-	 * {@code false} to proceed with adding a corresponding resource to the current result
-	 */
-	private boolean hasDuplicate(String filePath, Set<Resource> result) {
-		if (result.isEmpty()) {
-			return false;
+	private Set<ClassPathManifestEntry> getClassPathManifestEntriesFromJar(File jar) throws IOException {
+		URL base = jar.toURI().toURL();
+		File parent = jar.getAbsoluteFile().getParentFile();
+		try (JarFile jarFile = new JarFile(jar)) {
+			Manifest manifest = jarFile.getManifest();
+			Attributes attributes = (manifest != null) ? manifest.getMainAttributes() : null;
+			String classPath = (attributes != null) ? attributes.getValue(Name.CLASS_PATH) : null;
+			Set<ClassPathManifestEntry> manifestEntries = new HashSet<>();
+			if (StringUtils.hasLength(classPath)) {
+				StringTokenizer tokenizer = new StringTokenizer(classPath);
+				while (tokenizer.hasMoreTokens()) {
+					String path = tokenizer.nextToken();
+					if (path.indexOf(':') >= 0 && !"file".equalsIgnoreCase(new URL(base, path).getProtocol())) {
+						// See jdk.internal.loader.URLClassPath.JarLoader.tryResolveFile(URL, String)
+						continue;
+					}
+					File candidate = new File(parent, path);
+					if (candidate.isFile() && candidate.getCanonicalPath().contains(parent.getCanonicalPath())) {
+						manifestEntries.add(ClassPathManifestEntry.of(candidate));
+					}
+				}
+			}
+			return Collections.unmodifiableSet(manifestEntries);
 		}
-		String duplicatePath = (filePath.startsWith("/") ? filePath.substring(1) : "/" + filePath);
-		try {
-			return result.contains(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX +
-					duplicatePath + ResourceUtils.JAR_URL_SEPARATOR));
-		}
-		catch (MalformedURLException ex) {
-			// Ignore: just for testing against duplicate.
-			return false;
+		catch (Exception ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to load manifest entries from jar file '" + jar + "': " + ex);
+			}
+			return Collections.emptySet();
 		}
 	}
 
@@ -1170,4 +1194,51 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 	}
 
+
+	/**
+	 * A single {@code Class-Path} manifest entry.
+	 */
+	private record ClassPathManifestEntry(Resource resource, @Nullable Resource alternative) {
+
+		private static final String JARFILE_URL_PREFIX = ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX;
+
+		static ClassPathManifestEntry of(File file) throws MalformedURLException {
+			String path = fixPath(file.getAbsolutePath());
+			Resource resource = asJarFileResource(path);
+			Resource alternative = createAlternative(path);
+			return new ClassPathManifestEntry(resource, alternative);
+		}
+
+		private static String fixPath(String path) {
+			int prefixIndex = path.indexOf(':');
+			if (prefixIndex == 1) {
+				// Possibly a drive prefix on Windows (for example, "c:"), so we prepend a slash
+				// and convert the drive letter to uppercase for consistent duplicate detection.
+				path = "/" + StringUtils.capitalize(path);
+			}
+			// Since '#' can appear in directories/filenames, java.net.URL should not treat it as a fragment
+			return StringUtils.replace(path, "#", "%23");
+		}
+
+		/**
+		 * Return a alternative form of the resource, i.e. with or without a leading slash.
+		 * @param path the file path (with or without a leading slash)
+		 * @return the alternative form or {@code null}
+		 */
+		@Nullable
+		private static Resource createAlternative(String path) {
+			try {
+				String alternativePath = path.startsWith("/") ? path.substring(1) : "/" + path;
+				return asJarFileResource(alternativePath);
+			}
+			catch (MalformedURLException ex) {
+				return null;
+			}
+		}
+
+		private static Resource asJarFileResource(String path)
+				throws MalformedURLException {
+			return new UrlResource(JARFILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR);
+		}
+	}
 }
