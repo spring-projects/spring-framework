@@ -603,6 +603,9 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		Assert.hasLength(schemaLanguage, "No schema language provided");
 		Source[] schemaSources = new Source[resources.length];
 
+		// This parser is used to read the schema resources provided by the application.
+		// The parser used for reading the source is protected against XXE attacks.
+		// See "processSource(Source source)".
 		SAXParserFactory saxParserFactory = this.schemaParserFactory;
 		if (saxParserFactory == null) {
 			saxParserFactory = SAXParserFactory.newInstance();
@@ -907,6 +910,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 
 		try {
+			// By default, Spring will prevent the processing of external entities.
+			// This is a mitigation against XXE attacks.
 			if (xmlReader == null) {
 				SAXParserFactory saxParserFactory = this.sourceParserFactory;
 				if (saxParserFactory == null) {

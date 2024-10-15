@@ -164,6 +164,8 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		if (source instanceof StreamSource streamSource) {
 			InputSource inputSource = new InputSource(streamSource.getInputStream());
 			try {
+				// By default, Spring will prevent the processing of external entities.
+				// This is a mitigation against XXE attacks.
 				SAXParserFactory saxParserFactory = this.sourceParserFactory;
 				if (saxParserFactory == null) {
 					saxParserFactory = SAXParserFactory.newInstance();
