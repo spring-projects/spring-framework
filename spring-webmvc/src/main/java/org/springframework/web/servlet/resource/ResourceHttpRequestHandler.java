@@ -180,7 +180,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	public void setLocations(List<Resource> locations) {
 		Assert.notNull(locations, "Locations list must not be null");
 		this.locationResources.clear();
-		this.locationResources.addAll(locations);
+		for (Resource location : locations) {
+			ResourceHandlerUtils.assertResourceLocation(location);
+			this.locationResources.add(location);
+		}
 	}
 
 	/**
@@ -493,6 +496,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 					charset = Charset.forName(value);
 					location = location.substring(endIndex + 1);
 				}
+				ResourceHandlerUtils.assertLocationPath(location);
 				Resource resource = applicationContext.getResource(location);
 				if (location.equals("/") && !(resource instanceof ServletContextResource)) {
 					throw new IllegalStateException(

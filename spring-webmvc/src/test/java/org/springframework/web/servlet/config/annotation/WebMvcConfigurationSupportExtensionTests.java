@@ -457,7 +457,7 @@ class WebMvcConfigurationSupportExtensionTests {
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
-			registry.addResourceHandler("/resources/**").addResourceLocations("src/test/java");
+			registry.addResourceHandler("/resources/**").addResourceLocations("src/test/java/");
 		}
 
 		@Override

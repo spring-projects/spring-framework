@@ -204,7 +204,7 @@ class ResourceHandlerRegistryTests {
 
 	@Test
 	void urlResourceWithCharset() {
-		this.registration.addResourceLocations("[charset=ISO-8859-1]file:///tmp");
+		this.registration.addResourceLocations("[charset=ISO-8859-1]file:///tmp/");
 		this.registration.resourceChain(true);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");

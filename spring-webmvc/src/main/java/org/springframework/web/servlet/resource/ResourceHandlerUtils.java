@@ -27,6 +27,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.log.LogFormatUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
@@ -42,6 +44,42 @@ public abstract class ResourceHandlerUtils {
 
 	private static final Log logger = LogFactory.getLog(ResourceHandlerUtils.class);
 
+	private static final String FOLDER_SEPARATOR = "/";
+
+	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
+
+
+	/**
+	 * Assert the given location is not null, and its path ends on slash.
+	 */
+	public static void assertResourceLocation(@Nullable Resource location) {
+		Assert.notNull(location, "Resource location must not be null");
+		try {
+			String path;
+			if (location instanceof UrlResource) {
+				path = location.getURL().toExternalForm();
+			}
+			else if (location instanceof ClassPathResource classPathResource) {
+				path = classPathResource.getPath();
+			}
+			else {
+				path = location.getURL().getPath();
+			}
+			assertLocationPath(path);
+		}
+		catch (IOException ex) {
+			// ignore
+		}
+	}
+
+	/**
+	 * Assert the given location path is a directory and ends on slash.
+	 */
+	public static void assertLocationPath(@Nullable String path) {
+		Assert.notNull(path, "Resource location path must not be null");
+		Assert.isTrue(path.endsWith(FOLDER_SEPARATOR) || path.endsWith(WINDOWS_FOLDER_SEPARATOR),
+				"Resource location does not end with slash: " + path);
+	}
 
 	/**
 	 * Normalize the given resource path replacing the following:
