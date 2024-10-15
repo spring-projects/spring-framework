@@ -629,6 +629,16 @@ class UriComponentsBuilderTests {
 		assertThat(result.toUriString()).isEqualTo("mailto:foo@example.com");
 	}
 
+	@ParameterizedTest // gh-33699
+	@EnumSource(value = ParserType.class)
+	void schemeVariableMixedCase(ParserType parserType) {
+		URI uri = UriComponentsBuilder
+				.fromUriString("{TheScheme}://example.org", parserType)
+				.buildAndExpand(Map.of("TheScheme", "ws"))
+				.toUri();
+		assertThat(uri.toString()).isEqualTo("ws://example.org");
+	}
+
 	@ParameterizedTest
 	@EnumSource(value = ParserType.class)
 	void queryParamWithValueWithEquals(ParserType parserType) {
