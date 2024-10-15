@@ -23,6 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
@@ -250,6 +251,19 @@ public abstract class BeanUtils {
 			if (ctors.length == 1) {
 				// A single non-public constructor, for example, from a non-public record type
 				return (Constructor<T>) ctors[0];
+			}
+		}
+		else if (clazz.isRecord()) {
+			try {
+				// if record -> use canonical constructor, which is always presented
+				Class<?>[] paramTypes
+						= Arrays.stream(clazz.getRecordComponents())
+						.map(RecordComponent::getType)
+						.toArray(Class<?>[]::new);
+				return clazz.getDeclaredConstructor(paramTypes);
+			}
+			catch (NoSuchMethodException ex) {
+				// Giving up with record...
 			}
 		}
 

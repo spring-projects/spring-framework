@@ -521,8 +521,24 @@ class BeanUtilsTests {
 		assertThat(BeanUtils.isSimpleProperty(type)).as("Type [" + type.getName() + "] should not be a simple property").isFalse();
 	}
 
+	@Test
+	void resolveRecordConstructor() throws NoSuchMethodException {
+		assertThat(BeanUtils.getResolvableConstructor(RecordWithMultiplePublicConstructors.class))
+				.isEqualTo(getRecordWithMultipleVariationsConstructor());
+	}
+
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertThat(BeanUtils.resolveSignature(signature, MethodSignatureBean.class)).isEqualTo(desiredMethod);
+	}
+
+	public record RecordWithMultiplePublicConstructors(String value, String name) {
+		public RecordWithMultiplePublicConstructors(String value) {
+			this(value, "default value");
+		}
+	}
+
+	private Constructor<RecordWithMultiplePublicConstructors> getRecordWithMultipleVariationsConstructor() throws NoSuchMethodException {
+		return RecordWithMultiplePublicConstructors.class.getConstructor(String.class, String.class);
 	}
 
 
