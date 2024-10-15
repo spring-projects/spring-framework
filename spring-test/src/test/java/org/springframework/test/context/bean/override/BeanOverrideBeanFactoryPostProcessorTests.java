@@ -83,7 +83,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean: there is no bean definition " +
+				.withMessage("Unable to override bean: there is no bean " +
 						"to replace with name [descriptionBean] and type [java.lang.String].");
 	}
 
@@ -94,7 +94,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean: there is no bean definition " +
+				.withMessage("Unable to override bean: there is no bean " +
 						"to replace with name [descriptionBean] and type [java.lang.String].");
 	}
 
@@ -140,7 +140,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean: no bean definitions of type java.lang.Integer " +
+				.withMessage("Unable to override bean: no beans of type java.lang.Integer " +
 						"(as required by annotated field 'CaseByType.counter')");
 	}
 
@@ -152,7 +152,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(context::refresh)
-				.withMessage("Unable to select a bean definition to override: found 2 bean definitions " +
+				.withMessage("Unable to select a bean to override: found 2 beans " +
 						"of type java.lang.Integer (as required by annotated field 'CaseByType.counter'): " +
 						"[someInteger, anotherInteger]");
 	}
@@ -388,24 +388,24 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 
 	static class CaseByNameWithReplaceOrCreateStrategy {
 
-		@DummyBean(beanName = "descriptionBean", strategy = BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION)
+		@DummyBean(beanName = "descriptionBean", strategy = BeanOverrideStrategy.REPLACE_OR_CREATE)
 		private String description;
 
 	}
 
 	static class CaseByTypeWithReplaceOrCreateStrategy {
 
-		@DummyBean(strategy = BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION)
+		@DummyBean(strategy = BeanOverrideStrategy.REPLACE_OR_CREATE)
 		private String description;
 
 	}
 
 	static class CaseByNameAndByTypeWithReplaceOrCreateStrategy {
 
-		@DummyBean(beanName = "descriptionBean", strategy = BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION)
+		@DummyBean(beanName = "descriptionBean", strategy = BeanOverrideStrategy.REPLACE_OR_CREATE)
 		private String description;
 
-		@DummyBean(strategy = BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION)
+		@DummyBean(strategy = BeanOverrideStrategy.REPLACE_OR_CREATE)
 		private Integer counter;
 
 	}

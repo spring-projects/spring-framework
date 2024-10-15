@@ -106,14 +106,14 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 					beanName, field.getDeclaringClass().getSimpleName(), field.getName()));
 
 		switch (overrideMetadata.getStrategy()) {
-			case REPLACE_DEFINITION -> replaceDefinition(beanFactory, overrideMetadata, true);
-			case REPLACE_OR_CREATE_DEFINITION -> replaceDefinition(beanFactory, overrideMetadata, false);
-			case WRAP_BEAN -> wrapBean(beanFactory, overrideMetadata);
+			case REPLACE -> replaceBean(beanFactory, overrideMetadata, true);
+			case REPLACE_OR_CREATE -> replaceBean(beanFactory, overrideMetadata, false);
+			case WRAP -> wrapBean(beanFactory, overrideMetadata);
 		}
 	}
 
-	private void replaceDefinition(ConfigurableListableBeanFactory beanFactory, OverrideMetadata overrideMetadata,
-			boolean requireExistingDefinition) {
+	private void replaceBean(ConfigurableListableBeanFactory beanFactory, OverrideMetadata overrideMetadata,
+			boolean requireExistingBean) {
 
 		// NOTE: This method supports 3 distinct scenarios which must be accounted for.
 		//
@@ -124,7 +124,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		String beanName = overrideMetadata.getBeanName();
 		BeanDefinition existingBeanDefinition = null;
 		if (beanName == null) {
-			beanName = getBeanNameForType(beanFactory, overrideMetadata, requireExistingDefinition);
+			beanName = getBeanNameForType(beanFactory, overrideMetadata, requireExistingBean);
 			if (beanName != null) {
 				// We are overriding an existing bean by-type.
 				beanName = BeanFactoryUtils.transformedBeanName(beanName);
@@ -146,9 +146,9 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 				// We are overriding an existing bean by-name.
 				existingBeanDefinition = beanFactory.getBeanDefinition(beanName);
 			}
-			else if (requireExistingDefinition) {
+			else if (requireExistingBean) {
 				throw new IllegalStateException("""
-						Unable to override bean: there is no bean definition to replace \
+						Unable to override bean: there is no bean to replace \
 						with name [%s] and type [%s]."""
 							.formatted(beanName, overrideMetadata.getBeanType()));
 			}
@@ -237,7 +237,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			Set<String> candidates = getExistingBeanNamesByType(beanFactory, overrideMetadata, false);
 			if (!candidates.contains(beanName)) {
 				throw new IllegalStateException("""
-						Unable to override bean by wrapping: there is no existing bean definition \
+						Unable to override bean by wrapping: there is no existing bean \
 						with name [%s] and type [%s]."""
 							.formatted(beanName, overrideMetadata.getBeanType()));
 			}
@@ -249,7 +249,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 	@Nullable
 	private String getBeanNameForType(ConfigurableListableBeanFactory beanFactory, OverrideMetadata overrideMetadata,
-			boolean requireExistingDefinition) {
+			boolean requireExistingBean) {
 
 		Set<String> candidateNames = getExistingBeanNamesByType(beanFactory, overrideMetadata, true);
 		int candidateCount = candidateNames.size();
@@ -257,10 +257,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			return candidateNames.iterator().next();
 		}
 		else if (candidateCount == 0) {
-			if (requireExistingDefinition) {
+			if (requireExistingBean) {
 				Field field = overrideMetadata.getField();
 				throw new IllegalStateException(
-						"Unable to override bean: no bean definitions of type %s (as required by annotated field '%s.%s')"
+						"Unable to override bean: no beans of type %s (as required by annotated field '%s.%s')"
 							.formatted(overrideMetadata.getBeanType(), field.getDeclaringClass().getSimpleName(), field.getName()));
 			}
 			return null;
@@ -268,7 +268,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 		Field field = overrideMetadata.getField();
 		throw new IllegalStateException("""
-				Unable to select a bean definition to override: found %s bean definitions of type %s \
+				Unable to select a bean to override: found %s beans of type %s \
 				(as required by annotated field '%s.%s'): %s"""
 					.formatted(candidateCount, overrideMetadata.getBeanType(), field.getDeclaringClass().getSimpleName(),
 						field.getName(), candidateNames));

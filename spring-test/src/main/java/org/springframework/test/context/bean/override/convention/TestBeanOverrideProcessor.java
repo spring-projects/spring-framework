@@ -37,8 +37,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
-import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_DEFINITION;
-import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION;
+import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE;
+import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_OR_CREATE;
 
 /**
  * {@link BeanOverrideProcessor} implementation for {@link TestBean @TestBean}
@@ -62,7 +62,7 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 		String beanName = (!testBean.name().isBlank() ? testBean.name() : null);
 		String methodName = testBean.methodName();
-		BeanOverrideStrategy strategy = (testBean.enforceOverride() ? REPLACE_DEFINITION : REPLACE_OR_CREATE_DEFINITION);
+		BeanOverrideStrategy strategy = (testBean.enforceOverride() ? REPLACE : REPLACE_OR_CREATE);
 
 		Method overrideMethod;
 		if (!methodName.isBlank()) {

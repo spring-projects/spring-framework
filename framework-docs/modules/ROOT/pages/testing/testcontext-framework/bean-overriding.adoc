@@ -46,14 +46,16 @@ with `@BeanOverride` and instantiates the corresponding `BeanOverrideProcessor` 
 responsible for registering appropriate `OverrideMetadata`.
 
 The internal `BeanOverrideBeanFactoryPostProcessor` then uses that information to alter
-the test's `ApplicationContext` by registering and replacing bean definitions as defined
-by the corresponding `BeanOverrideStrategy`:
+the test's `ApplicationContext` by registering and replacing beans as defined by the
+corresponding `BeanOverrideStrategy`:
 
-* `REPLACE_DEFINITION`: Replaces the bean definition. Throws an exception if a
-  corresponding bean definition does not exist.
-* `REPLACE_OR_CREATE_DEFINITION`: Replaces the bean definition if it exists. Creates a
-  new bean definition if a corresponding bean definition does not exist.
-* `WRAP_BEAN`: Retrieves the original bean instance and wraps it.
+`REPLACE`::
+  Replaces the bean. Throws an exception if a corresponding bean does not exist.
+`REPLACE_OR_CREATE`::
+  Replaces the bean if it exists. Creates a new bean if a corresponding bean does not
+  exist.
+`WRAP`::
+  Retrieves the original bean and wraps it.
 
 [NOTE]
 ====

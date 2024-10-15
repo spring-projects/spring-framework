@@ -27,7 +27,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.OverrideMetadata;
 
-import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION;
+import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_OR_CREATE;
 
 /**
  * {@link OverrideMetadata} that provides support for {@link EasyMockBean @EasyMockBean}.
@@ -43,7 +43,7 @@ class EasyMockBeanOverrideMetadata extends OverrideMetadata {
 	EasyMockBeanOverrideMetadata(Field field, Class<?> typeToOverride, @Nullable String beanName,
 			MockType mockType) {
 
-		super(field, ResolvableType.forClass(typeToOverride), beanName, REPLACE_OR_CREATE_DEFINITION);
+		super(field, ResolvableType.forClass(typeToOverride), beanName, REPLACE_OR_CREATE);
 		this.mockType = mockType;
 	}
 

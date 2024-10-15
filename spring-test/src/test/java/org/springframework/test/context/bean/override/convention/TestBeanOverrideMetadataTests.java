@@ -126,7 +126,7 @@ class TestBeanOverrideMetadataTests {
 		TestBean annotation = field.getAnnotation(TestBean.class);
 		String beanName = (StringUtils.hasText(annotation.name()) ? annotation.name() : null);
 		return new TestBeanOverrideMetadata(
-				field, ResolvableType.forClass(field.getType()), beanName, BeanOverrideStrategy.REPLACE_DEFINITION, overrideMethod);
+				field, ResolvableType.forClass(field.getType()), beanName, BeanOverrideStrategy.REPLACE, overrideMethod);
 	}
 
 	static class SampleOneOverride {

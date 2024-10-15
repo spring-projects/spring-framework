@@ -41,7 +41,7 @@ class MockitoSpyBeanTests {
 				.isThrownBy(context::refresh)
 				.withMessage("""
 						Unable to override bean by wrapping: \
-						there is no existing bean definition with name [beanToSpy] and type [%s].""",
+						there is no existing bean with name [beanToSpy] and type [%s].""",
 						String.class.getName());
 	}
 

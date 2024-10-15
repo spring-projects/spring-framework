@@ -69,7 +69,7 @@ class BeanOverrideContextCustomizerFactoryTests {
 
 
 	private Consumer<OverrideMetadata> dummyMetadata(@Nullable String beanName, Class<?> beanType) {
-		return dummyMetadata(beanName, beanType, BeanOverrideStrategy.REPLACE_DEFINITION);
+		return dummyMetadata(beanName, beanType, BeanOverrideStrategy.REPLACE);
 	}
 
 	private Consumer<OverrideMetadata> dummyMetadata(@Nullable String beanName, Class<?> beanType, BeanOverrideStrategy strategy) {

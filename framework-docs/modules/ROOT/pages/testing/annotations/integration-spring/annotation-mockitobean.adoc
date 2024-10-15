@@ -3,18 +3,17 @@
 
 `@MockitoBean` and `@MockitoSpyBean` are used on fields in test classes to override beans
 in the test's `ApplicationContext` with a Mockito _mock_ or _spy_, respectively. In the
-latter case, the original bean definition is not replaced, but instead an early instance
-of the bean is captured and wrapped by the spy.
+latter case, an early instance of the original bean is captured and wrapped by the spy.
 
-By default, the annotated field's type is used to search for candidate bean definitions
-to override. If multiple candidates match, `@Qualifier` can be provided to narrow the
-candidate to override. Alternatively, a candidate whose bean definition name matches the
-name of the field will match.
+By default, the annotated field's type is used to search for candidate beans to override.
+If multiple candidates match, `@Qualifier` can be provided to narrow the candidate to
+override. Alternatively, a candidate whose bean name matches the name of the field will
+match.
 
-When using `@MockitoBean`, a new bean definition will be created if a corresponding bean
-definition does not exist. However, if you would like for the test to fail when a
-corresponding bean definition does not exist, you can set the `enforceOverride` attribute
-to `true` – for example, `@MockitoBean(enforceOverride = true)`.
+When using `@MockitoBean`, a new bean will be created if a corresponding bean does not
+exist. However, if you would like for the test to fail when a corresponding bean does not
+exist, you can set the `enforceOverride` attribute to `true` – for example,
+`@MockitoBean(enforceOverride = true)`.
 
 To use a by-name override rather than a by-type override, specify the `name` attribute
 of the annotation.
@@ -32,14 +31,16 @@ During the test class lifecycle, Mockito is set up via the `Mockito#mockitoSessi
 mechanism. Notably, it enables `STRICT_STUBS` mode by default. This can be changed on
 individual test classes with the `@MockitoBeanSettings` annotation.
 
-The `@MockitoBean` annotation uses the `REPLACE_OR_CREATE_DEFINITION`
+By default, the `@MockitoBean` annotation uses the `REPLACE_OR_CREATE`
 xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy for test bean overriding].
-If no existing bean definition matches, a new bean definition is created on the fly.
+If no existing bean matches, a new bean is created on the fly. As mentioned previously,
+you can switch to the `REPLACE` strategy by setting the `enforceOverride` attribute to
+`true`.
 
-The `@MockitoSpyBean` annotation uses the `WRAP_BEAN`
+The `@MockitoSpyBean` annotation uses the `WRAP`
 xref:testing/testcontext-framework/bean-overriding.adoc#testcontext-bean-overriding-custom[strategy],
 and the original instance is wrapped in a Mockito spy. This strategy requires that
-exactly one candidate bean definition exists.
+exactly one candidate bean exists.
 
 NOTE: Only _singleton_ beans can be overridden. Any attempt to override a non-singleton
 bean will result in an exception.

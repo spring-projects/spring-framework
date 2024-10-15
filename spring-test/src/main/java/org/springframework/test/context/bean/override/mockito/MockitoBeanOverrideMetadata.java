@@ -37,8 +37,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_DEFINITION;
-import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_OR_CREATE_DEFINITION;
+import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE;
+import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_OR_CREATE;
 
 /**
  * {@link OverrideMetadata} implementation for Mockito {@code mock} support.
@@ -59,7 +59,7 @@ class MockitoBeanOverrideMetadata extends AbstractMockitoOverrideMetadata {
 
 	MockitoBeanOverrideMetadata(Field field, ResolvableType typeToMock, MockitoBean mockitoBean) {
 		this(field, typeToMock, (!mockitoBean.name().isBlank() ? mockitoBean.name() : null),
-			(mockitoBean.enforceOverride() ? REPLACE_DEFINITION : REPLACE_OR_CREATE_DEFINITION),
+			(mockitoBean.enforceOverride() ? REPLACE : REPLACE_OR_CREATE),
 			mockitoBean.reset(), mockitoBean.extraInterfaces(), mockitoBean.answers(), mockitoBean.serializable());
 	}
 

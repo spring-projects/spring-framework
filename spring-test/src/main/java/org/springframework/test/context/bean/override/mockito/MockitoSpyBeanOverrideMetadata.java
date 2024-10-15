@@ -52,7 +52,7 @@ class MockitoSpyBeanOverrideMetadata extends AbstractMockitoOverrideMetadata {
 	MockitoSpyBeanOverrideMetadata(Field field, ResolvableType typeToSpy, @Nullable String beanName,
 			MockReset reset, boolean proxyTargetAware) {
 
-		super(field, typeToSpy, beanName, BeanOverrideStrategy.WRAP_BEAN, reset, proxyTargetAware);
+		super(field, typeToSpy, beanName, BeanOverrideStrategy.WRAP, reset, proxyTargetAware);
 		Assert.notNull(typeToSpy, "typeToSpy must not be null");
 	}
 

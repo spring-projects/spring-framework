@@ -185,7 +185,7 @@ class OverrideMetadataTests {
 	}
 
 	private static OverrideMetadata createMetadata(Field field, @Nullable String name) {
-		return new DummyOverrideMetadata(field, field.getType(), name, BeanOverrideStrategy.REPLACE_DEFINITION);
+		return new DummyOverrideMetadata(field, field.getType(), name, BeanOverrideStrategy.REPLACE);
 	}
 
 	private static Field field(Class<?> target, String fieldName) {
@@ -195,7 +195,7 @@ class OverrideMetadataTests {
 	}
 
 	private static Consumer<OverrideMetadata> hasOverrideMetadata(Field field, Class<?> beanType, @Nullable String beanName) {
-		return hasOverrideMetadata(field, beanType, BeanOverrideStrategy.REPLACE_DEFINITION, beanName);
+		return hasOverrideMetadata(field, beanType, BeanOverrideStrategy.REPLACE, beanName);
 	}
 
 	private static Consumer<OverrideMetadata> hasOverrideMetadata(Field field, Class<?> beanType, BeanOverrideStrategy strategy,

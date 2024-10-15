@@ -57,7 +57,7 @@ class BeanOverrideRegistrar {
 	 */
 	Object wrapIfNecessary(Object bean, String beanName) throws BeansException {
 		OverrideMetadata metadata = this.earlyOverrideMetadata.get(beanName);
-		if (metadata != null && metadata.getStrategy() == BeanOverrideStrategy.WRAP_BEAN) {
+		if (metadata != null && metadata.getStrategy() == BeanOverrideStrategy.WRAP) {
 			bean = metadata.createOverride(beanName, null, bean);
 			metadata.track(bean, this.beanFactory);
 		}

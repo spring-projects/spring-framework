@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
 
 	String beanName() default "";
 
-	BeanOverrideStrategy strategy() default BeanOverrideStrategy.REPLACE_DEFINITION;
+	BeanOverrideStrategy strategy() default BeanOverrideStrategy.REPLACE;
 
 	class DummyBeanOverrideProcessor implements BeanOverrideProcessor {
 

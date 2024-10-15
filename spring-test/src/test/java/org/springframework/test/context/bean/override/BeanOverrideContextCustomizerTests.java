@@ -72,7 +72,7 @@ class BeanOverrideContextCustomizerTests {
 
 		public DummyOverrideMetadata(String key) {
 			super(ReflectionUtils.findField(DummyOverrideMetadata.class, "key"),
-					ResolvableType.forClass(Object.class), null, BeanOverrideStrategy.REPLACE_DEFINITION);
+					ResolvableType.forClass(Object.class), null, BeanOverrideStrategy.REPLACE);
 			this.key = key;
 		}
 
