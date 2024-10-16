@@ -66,8 +66,6 @@ package org.springframework.test.context;
  * DirtiesContextBeforeModesTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.event.ApplicationEventsTestExecutionListener
  * ApplicationEventsTestExecutionListener}</li>
- * <li>{@link org.springframework.test.context.bean.override.mockito.MockitoTestExecutionListener
- * MockitoTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
  * DependencyInjectionTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.observation.MicrometerObservationRegistryTestExecutionListener

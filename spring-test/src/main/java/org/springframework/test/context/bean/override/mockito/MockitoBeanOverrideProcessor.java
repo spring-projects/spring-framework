@@ -34,12 +34,12 @@ import org.springframework.test.context.bean.override.BeanOverrideProcessor;
 class MockitoBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	@Override
-	public AbstractMockitoOverrideMetadata createMetadata(Annotation overrideAnnotation, Class<?> testClass, Field field) {
+	public AbstractMockitoBeanOverrideHandler createHandler(Annotation overrideAnnotation, Class<?> testClass, Field field) {
 		if (overrideAnnotation instanceof MockitoBean mockBean) {
-			return new MockitoBeanOverrideMetadata(field, ResolvableType.forField(field, testClass), mockBean);
+			return new MockitoBeanOverrideHandler(field, ResolvableType.forField(field, testClass), mockBean);
 		}
 		else if (overrideAnnotation instanceof MockitoSpyBean spyBean) {
-			return new MockitoSpyBeanOverrideMetadata(field, ResolvableType.forField(field, testClass), spyBean);
+			return new MockitoSpyBeanOverrideHandler(field, ResolvableType.forField(field, testClass), spyBean);
 		}
 		throw new IllegalStateException("""
 				Invalid annotation passed to MockitoBeanOverrideProcessor: \

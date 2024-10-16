@@ -47,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author David Eckel
+ * @author Yanming Zhou
  */
 class UriComponentsBuilderTests {
 
@@ -627,6 +628,22 @@ class UriComponentsBuilderTests {
 		values.put("domain", "example.com");
 		UriComponentsBuilder.fromUriString("mailto:{user}@{domain}", parserType).buildAndExpand(values);
 		assertThat(result.toUriString()).isEqualTo("mailto:foo@example.com");
+	}
+
+	@ParameterizedTest // gh-33699
+	@EnumSource(value = ParserType.class)
+	void schemeVariableMixedCase(ParserType parserType) {
+
+		BiConsumer<String, String> tester = (scheme, value) -> {
+			URI uri = UriComponentsBuilder.fromUriString(scheme + "://example.org", parserType)
+					.buildAndExpand(Map.of("TheScheme", value))
+					.toUri();
+			assertThat(uri.toString()).isEqualTo("wss://example.org");
+		};
+
+		tester.accept("{TheScheme}", "wss");
+		tester.accept("{TheScheme}s", "ws");
+		tester.accept("ws{TheScheme}", "s");
 	}
 
 	@ParameterizedTest

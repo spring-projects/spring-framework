@@ -180,7 +180,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	public void setLocations(List<Resource> locations) {
 		Assert.notNull(locations, "Locations list must not be null");
 		this.locationResources.clear();
-		this.locationResources.addAll(locations);
+		for (Resource location : locations) {
+			ResourceHandlerUtils.assertResourceLocation(location);
+			this.locationResources.add(location);
+		}
 	}
 
 	/**
@@ -315,7 +318,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 */
 	public void setMediaTypes(Map<String, MediaType> mediaTypes) {
 		mediaTypes.forEach((ext, mediaType) ->
-				this.mediaTypes.put(ext.toLowerCase(Locale.ENGLISH), mediaType));
+				this.mediaTypes.put(ext.toLowerCase(Locale.ROOT), mediaType));
 	}
 
 	/**
@@ -493,6 +496,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 					charset = Charset.forName(value);
 					location = location.substring(endIndex + 1);
 				}
+				ResourceHandlerUtils.assertLocationPath(location);
 				Resource resource = applicationContext.getResource(location);
 				if (location.equals("/") && !(resource instanceof ServletContextResource)) {
 					throw new IllegalStateException(
@@ -704,7 +708,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			String filename = resource.getFilename();
 			String ext = StringUtils.getFilenameExtension(filename);
 			if (ext != null) {
-				mediaType = this.mediaTypes.get(ext.toLowerCase(Locale.ENGLISH));
+				mediaType = this.mediaTypes.get(ext.toLowerCase(Locale.ROOT));
 			}
 			if (mediaType == null) {
 				List<MediaType> mediaTypes = MediaTypeFactory.getMediaTypes(filename);

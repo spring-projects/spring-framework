@@ -157,6 +157,9 @@ final class PersistenceUnitReader {
 	Document buildDocument(ErrorHandler handler, InputStream stream)
 			throws ParserConfigurationException, SAXException, IOException {
 
+		// This document loader is used for loading application configuration files.
+		// As a result, attackers would need complete write access to application configuration
+		// to leverage XXE attacks. This does not qualify as privilege escalation.
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
 		DocumentBuilder parser = dbf.newDocumentBuilder();

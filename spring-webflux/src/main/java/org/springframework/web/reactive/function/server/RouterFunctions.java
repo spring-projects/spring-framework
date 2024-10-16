@@ -184,7 +184,7 @@ public abstract class RouterFunctions {
 	 * Route requests that match the given pattern to resources relative to the given root location.
 	 * For instance
 	 * <pre class="code">
-	 * Resource location = new FileSystemResource("public-resources/");
+	 * Resource location = new FileUrlResource("public-resources/");
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
      * </pre>
 	 * @param pattern the pattern to match
@@ -201,7 +201,7 @@ public abstract class RouterFunctions {
 	 * Route requests that match the given pattern to resources relative to the given root location.
 	 * For instance
 	 * <pre class="code">
-	 * Resource location = new FileSystemResource("public-resources/");
+	 * Resource location = new FileUrlResource("public-resources/");
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
      * </pre>
 	 * @param pattern the pattern to match
@@ -224,7 +224,7 @@ public abstract class RouterFunctions {
 	 * <pre class="code">
 	 * Mono&lt;Resource&gt; defaultResource = Mono.just(new ClassPathResource("index.html"));
 	 * Function&lt;ServerRequest, Mono&lt;Resource&gt;&gt; lookupFunction =
-	 *   RouterFunctions.resourceLookupFunction("/resources/**", new FileSystemResource("public-resources/"))
+	 *   RouterFunctions.resourceLookupFunction("/resources/**", new FileUrlResource("public-resources/"))
 	 *     .andThen(resourceMono -&gt; resourceMono.switchIfEmpty(defaultResource));
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources(lookupFunction);
      * </pre>
@@ -761,7 +761,7 @@ public abstract class RouterFunctions {
 		 * Route requests that match the given pattern to resources relative to the given root location.
 		 * For instance
 		 * <pre class="code">
-		 * Resource location = new FileSystemResource("public-resources/");
+		 * Resource location = new FileUrlResource("public-resources/");
 		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
 	     * </pre>
 		 * @param pattern the pattern to match
@@ -775,7 +775,7 @@ public abstract class RouterFunctions {
 		 * Route requests that match the given pattern to resources relative to the given root location.
 		 * For instance
 		 * <pre class="code">
-		 * Resource location = new FileSystemResource("public-resources/");
+		 * Resource location = new FileUrlResource("public-resources/");
 		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
 	     * </pre>
 		 * @param pattern the pattern to match

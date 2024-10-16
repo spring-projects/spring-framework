@@ -23,9 +23,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
-import org.springframework.test.context.bean.override.BeanOverrideContextCustomizerFactoryTests.Test2.Green;
-import org.springframework.test.context.bean.override.BeanOverrideContextCustomizerFactoryTests.Test2.Orange;
-import org.springframework.test.context.bean.override.DummyBean.DummyBeanOverrideProcessor.DummyOverrideMetadata;
+import org.springframework.test.context.bean.override.DummyBean.DummyBeanOverrideProcessor.DummyBeanOverrideHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,37 +45,37 @@ class BeanOverrideContextCustomizerFactoryTests {
 	void createContextCustomizerWhenTestHasSingleBeanOverride() {
 		BeanOverrideContextCustomizer customizer = createContextCustomizer(Test1.class);
 		assertThat(customizer).isNotNull();
-		assertThat(customizer.getMetadata()).singleElement().satisfies(dummyMetadata(null, String.class));
+		assertThat(customizer.getBeanOverrideHandlers()).singleElement().satisfies(dummyHandler(null, String.class));
 	}
 
 	@Test
 	void createContextCustomizerWhenNestedTestHasSingleBeanOverrideInParent() {
-		BeanOverrideContextCustomizer customizer = createContextCustomizer(Orange.class);
+		BeanOverrideContextCustomizer customizer = createContextCustomizer(Test2.Orange.class);
 		assertThat(customizer).isNotNull();
-		assertThat(customizer.getMetadata()).singleElement().satisfies(dummyMetadata(null, String.class));
+		assertThat(customizer.getBeanOverrideHandlers()).singleElement().satisfies(dummyHandler(null, String.class));
 	}
 
 	@Test
 	void createContextCustomizerWhenNestedTestHasBeanOverrideAsWellAsTheParent() {
-		BeanOverrideContextCustomizer customizer = createContextCustomizer(Green.class);
+		BeanOverrideContextCustomizer customizer = createContextCustomizer(Test2.Green.class);
 		assertThat(customizer).isNotNull();
-		assertThat(customizer.getMetadata())
-				.anySatisfy(dummyMetadata(null, String.class))
-				.anySatisfy(dummyMetadata("counterBean", Integer.class))
+		assertThat(customizer.getBeanOverrideHandlers())
+				.anySatisfy(dummyHandler(null, String.class))
+				.anySatisfy(dummyHandler("counterBean", Integer.class))
 				.hasSize(2);
 	}
 
 
-	private Consumer<OverrideMetadata> dummyMetadata(@Nullable String beanName, Class<?> beanType) {
-		return dummyMetadata(beanName, beanType, BeanOverrideStrategy.REPLACE_DEFINITION);
+	private Consumer<BeanOverrideHandler> dummyHandler(@Nullable String beanName, Class<?> beanType) {
+		return dummyHandler(beanName, beanType, BeanOverrideStrategy.REPLACE);
 	}
 
-	private Consumer<OverrideMetadata> dummyMetadata(@Nullable String beanName, Class<?> beanType, BeanOverrideStrategy strategy) {
-		return metadata -> {
-			assertThat(metadata).isExactlyInstanceOf(DummyOverrideMetadata.class);
-			assertThat(metadata.getBeanName()).isEqualTo(beanName);
-			assertThat(metadata.getBeanType().toClass()).isEqualTo(beanType);
-			assertThat(metadata.getStrategy()).isEqualTo(strategy);
+	private Consumer<BeanOverrideHandler> dummyHandler(@Nullable String beanName, Class<?> beanType, BeanOverrideStrategy strategy) {
+		return handler -> {
+			assertThat(handler).isExactlyInstanceOf(DummyBeanOverrideHandler.class);
+			assertThat(handler.getBeanName()).isEqualTo(beanName);
+			assertThat(handler.getBeanType().toClass()).isEqualTo(beanType);
+			assertThat(handler.getStrategy()).isEqualTo(strategy);
 		};
 	}
 
@@ -100,7 +98,6 @@ class BeanOverrideContextCustomizerFactoryTests {
 
 		@Nested
 		class Orange {
-
 		}
 
 		@Nested

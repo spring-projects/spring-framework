@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,12 @@ public final class AccessControl {
 
 	private final Visibility visibility;
 
+
 	AccessControl(Class<?> target, Visibility visibility) {
 		this.target = target;
 		this.visibility = visibility;
 	}
+
 
 	/**
 	 * Create an {@link AccessControl} for the given member. This considers the
@@ -68,8 +70,7 @@ public final class AccessControl {
 	 * @return the {@link AccessControl} for the type
 	 */
 	public static AccessControl forResolvableType(ResolvableType resolvableType) {
-		return new AccessControl(resolvableType.toClass(),
-				Visibility.forResolvableType(resolvableType));
+		return new AccessControl(resolvableType.toClass(), Visibility.forResolvableType(resolvableType));
 	}
 
 	/**
@@ -87,8 +88,8 @@ public final class AccessControl {
 	 * @return the lowest {@link AccessControl} from the candidates
 	 */
 	public static AccessControl lowest(AccessControl... candidates) {
-		int index = Visibility.lowestIndex(Arrays.stream(candidates)
-				.map(AccessControl::getVisibility).toArray(Visibility[]::new));
+		int index = Visibility.lowestIndex(
+				Arrays.stream(candidates).map(AccessControl::getVisibility).toArray(Visibility[]::new));
 		return candidates[index];
 	}
 
@@ -124,6 +125,7 @@ public final class AccessControl {
 		}
 		return this.target.getPackageName().equals(type.packageName());
 	}
+
 
 	/**
 	 * Access visibility types as determined by the <a href=
@@ -270,6 +272,6 @@ public final class AccessControl {
 			}
 			return index;
 		}
-
 	}
+
 }

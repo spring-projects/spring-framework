@@ -633,7 +633,7 @@ scheduled with a trigger.
 
 
 [[scheduling-task-namespace-scheduler]]
-=== The 'scheduler' Element
+=== The `scheduler` Element
 
 The following element creates a `ThreadPoolTaskScheduler` instance with the
 specified thread pool size:
@@ -744,7 +744,7 @@ The following example sets the `keep-alive` value to two minutes:
 
 
 [[scheduling-task-namespace-scheduled-tasks]]
-=== The 'scheduled-tasks' Element
+=== The `scheduled-tasks` Element
 
 The most powerful feature of Spring's task namespace is the support for configuring
 tasks to be scheduled within a Spring Application Context. This follows an approach

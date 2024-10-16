@@ -28,8 +28,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link SmartInstantiationAwareBeanPostProcessor} implementation that wraps
- * beans in order to support the {@link BeanOverrideStrategy#WRAP_BEAN WRAP_BEAN}
- * bean override strategy.
+ * beans in order to support the {@link BeanOverrideStrategy#WRAP WRAP} bean
+ * override strategy.
  *
  * @author Simon Baslé
  * @author Stephane Nicoll

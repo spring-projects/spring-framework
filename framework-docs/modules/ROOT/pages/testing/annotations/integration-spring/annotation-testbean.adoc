@@ -10,15 +10,14 @@ have a return type compatible with the type of the bean to override. To make thi
 explicit, or if you'd rather use a different name, the annotation allows for a specific
 method name to be provided.
 
-By default, the annotated field's type is used to search for candidate bean definitions
-to override. If multiple candidates match, `@Qualifier` can be provided to narrow the
-candidate to override. Alternatively, a candidate whose bean definition name matches the
-name of the field will match.
+By default, the annotated field's type is used to search for candidate beans to override.
+If multiple candidates match, `@Qualifier` can be provided to narrow the candidate to
+override. Alternatively, a candidate whose bean name matches the name of the field will
+match.
 
-A new bean definition will be created if a corresponding bean definition does not exist.
-However, if you would like for the test to fail when a corresponding bean definition does
-not exist, you can set the `enforceOverride` attribute to `true` – for example,
-`@TestBean(enforceOverride = true)`.
+A bean will be created if a corresponding bean does not exist. However, if you would like
+for the test to fail when a corresponding bean does not exist, you can set the
+`enforceOverride` attribute to `true` – for example, `@TestBean(enforceOverride = true)`.
 
 To use a by-name override rather than a by-type override, specify the `name` attribute
 of the annotation.

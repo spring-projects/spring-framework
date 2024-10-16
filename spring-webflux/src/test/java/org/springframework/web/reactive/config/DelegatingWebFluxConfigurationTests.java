@@ -124,7 +124,7 @@ public class DelegatingWebFluxConfigurationTests {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
 		willAnswer(invocation -> {
 			ResourceHandlerRegistry registry = invocation.getArgument(0);
-			registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static");
+			registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
 			return null;
 		}).given(webFluxConfigurer).addResourceHandlers(any(ResourceHandlerRegistry.class));
 

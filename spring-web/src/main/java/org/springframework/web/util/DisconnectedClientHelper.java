@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -84,7 +85,7 @@ public class DisconnectedClientHelper {
 	public static boolean isClientDisconnectedException(Throwable ex) {
 		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
 		if (message != null) {
-			String text = message.toLowerCase();
+			String text = message.toLowerCase(Locale.ROOT);
 			for (String phrase : EXCEPTION_PHRASES) {
 				if (text.contains(phrase)) {
 					return true;

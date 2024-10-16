@@ -27,7 +27,6 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener;
 import org.springframework.test.context.bean.override.mockito.MockitoResetTestExecutionListener;
-import org.springframework.test.context.bean.override.mockito.MockitoTestExecutionListener;
 import org.springframework.test.context.event.ApplicationEventsTestExecutionListener;
 import org.springframework.test.context.event.EventPublishingTestExecutionListener;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
@@ -69,7 +68,6 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
-				MockitoTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
@@ -92,7 +90,6 @@ class TestExecutionListenersTests {
 				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
-				MockitoTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
@@ -114,7 +111,6 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
-				MockitoTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
@@ -137,7 +133,6 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
-				MockitoTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				BarTestExecutionListener.class,//
 				micrometerListenerClass,//

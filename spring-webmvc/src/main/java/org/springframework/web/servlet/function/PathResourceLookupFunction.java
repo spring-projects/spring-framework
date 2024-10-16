@@ -47,7 +47,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 
 	public PathResourceLookupFunction(String pattern, Resource location) {
 		Assert.hasLength(pattern, "'pattern' must not be empty");
-		Assert.notNull(location, "'location' must not be null");
+		ResourceHandlerUtils.assertResourceLocation(location);
 		this.pattern = PathPatternParser.defaultInstance.parse(pattern);
 		this.location = location;
 	}

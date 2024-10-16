@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public final class MediaTypeFactory {
 				String[] tokens = StringUtils.tokenizeToStringArray(line, " \t\n\r\f");
 				MediaType mediaType = MediaType.parseMediaType(tokens[0]);
 				for (int i = 1; i < tokens.length; i++) {
-					String fileExtension = tokens[i].toLowerCase(Locale.ENGLISH);
+					String fileExtension = tokens[i].toLowerCase(Locale.ROOT);
 					result.add(fileExtension, mediaType);
 				}
 			}
@@ -117,7 +117,7 @@ public final class MediaTypeFactory {
 		List<MediaType> mediaTypes = null;
 		String ext = StringUtils.getFilenameExtension(filename);
 		if (ext != null) {
-			mediaTypes = fileExtensionToMediaTypes.get(ext.toLowerCase(Locale.ENGLISH));
+			mediaTypes = fileExtensionToMediaTypes.get(ext.toLowerCase(Locale.ROOT));
 		}
 		return (mediaTypes != null ? mediaTypes : Collections.emptyList());
 	}

@@ -154,8 +154,8 @@ public @interface TestBean {
 	 * be created if a corresponding bean definition does not exist.
 	 * <p>Set to {@code true} to cause an exception to be thrown if a corresponding
 	 * bean definition does not exist.
-	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_OR_CREATE_DEFINITION
-	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_DEFINITION
+	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_OR_CREATE
+	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE
 	 */
 	boolean enforceOverride() default false;
 

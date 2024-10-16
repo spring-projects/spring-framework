@@ -177,6 +177,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 	private DOMSource readDOMSource(InputStream body, HttpInputMessage inputMessage) throws IOException {
 		try {
+			// By default, Spring will prevent the processing of external entities.
+			// This is a mitigation against XXE attacks.
 			DocumentBuilderFactory builderFactory = this.documentBuilderFactory;
 			if (builderFactory == null) {
 				builderFactory = DocumentBuilderFactory.newInstance();

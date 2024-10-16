@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,21 +28,22 @@ import org.springframework.lang.Nullable;
  * @author Brian Clozel
  * @since 6.0
  */
-public class JavaSerializationHint implements ConditionalHint {
+public final class JavaSerializationHint implements ConditionalHint {
 
 	private final TypeReference type;
 
 	@Nullable
 	private final TypeReference reachableType;
 
+
 	JavaSerializationHint(Builder builder) {
 		this.type = builder.type;
 		this.reachableType = builder.reachableType;
 	}
 
+
 	/**
-	 * Return the {@link TypeReference type} that needs to be serialized using
-	 * Java serialization at runtime.
+	 * Return the {@link TypeReference type} that needs to be serialized using Java serialization at runtime.
 	 * @return a {@link Serializable} type
 	 */
 	public TypeReference getType() {
@@ -56,16 +57,9 @@ public class JavaSerializationHint implements ConditionalHint {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		JavaSerializationHint that = (JavaSerializationHint) o;
-		return this.type.equals(that.type)
-				&& Objects.equals(this.reachableType, that.reachableType);
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof JavaSerializationHint that &&
+				this.type.equals(that.type) && Objects.equals(this.reachableType, that.reachableType)));
 	}
 
 	@Override
@@ -84,16 +78,13 @@ public class JavaSerializationHint implements ConditionalHint {
 		@Nullable
 		private TypeReference reachableType;
 
-
 		Builder(TypeReference type) {
 			this.type = type;
 		}
 
 		/**
-		 * Make this hint conditional on the fact that the specified type
-		 * can be resolved.
-		 * @param reachableType the type that should be reachable for this
-		 * hint to apply
+		 * Make this hint conditional on the fact that the specified type can be resolved.
+		 * @param reachableType the type that should be reachable for this hint to apply
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder onReachableType(TypeReference reachableType) {
@@ -108,6 +99,6 @@ public class JavaSerializationHint implements ConditionalHint {
 		JavaSerializationHint build() {
 			return new JavaSerializationHint(this);
 		}
-
 	}
+
 }

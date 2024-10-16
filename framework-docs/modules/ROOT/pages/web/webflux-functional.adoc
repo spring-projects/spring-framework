@@ -835,7 +835,7 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    Resource location = new FileSystemResource("public-resources/");
+    Resource location = new FileUrlResource("public-resources/");
     RouterFunction<ServerResponse> resources = RouterFunctions.resources("/resources/**", location);
 ----
 
@@ -843,7 +843,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    val location = FileSystemResource("public-resources/")
+    val location = FileUrlResource("public-resources/")
     val resources = router { resources("/resources/**", location) }
 ----
 ======

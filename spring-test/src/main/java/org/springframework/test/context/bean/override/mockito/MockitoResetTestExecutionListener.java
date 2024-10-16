@@ -16,9 +16,11 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.mockito.Mockito;
 
@@ -30,8 +32,13 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestContextAnnotationUtils;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@code TestExecutionListener} that resets any mock beans that have been marked
@@ -40,11 +47,20 @@ import org.springframework.test.context.TestContext;
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 6.2
- * @see MockitoTestExecutionListener
  * @see MockitoBean @MockitoBean
  * @see MockitoSpyBean @MockitoSpyBean
  */
-public class MockitoResetTestExecutionListener extends AbstractMockitoTestExecutionListener {
+public class MockitoResetTestExecutionListener extends AbstractTestExecutionListener {
+
+	static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.Mockito",
+			MockitoResetTestExecutionListener.class.getClassLoader());
+
+	private static final String SPRING_MOCKITO_PACKAGE = "org.springframework.test.context.bean.override.mockito";
+
+	private static final Predicate<MergedAnnotation<?>> isMockitoAnnotation = mergedAnnotation -> {
+			String packageName = mergedAnnotation.getType().getPackageName();
+			return packageName.startsWith(SPRING_MOCKITO_PACKAGE);
+		};
 
 	/**
 	 * Executes before {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener}.
@@ -67,6 +83,7 @@ public class MockitoResetTestExecutionListener extends AbstractMockitoTestExecut
 			resetMocks(testContext.getApplicationContext(), MockReset.AFTER);
 		}
 	}
+
 
 	private void resetMocks(ApplicationContext applicationContext, MockReset reset) {
 		if (applicationContext instanceof ConfigurableApplicationContext configurableContext) {
@@ -118,6 +135,58 @@ public class MockitoResetTestExecutionListener extends AbstractMockitoTestExecut
 			return factoryBean.isSingleton();
 		}
 		return true;
+	}
+
+	/**
+	 * Determine if the test class for the supplied {@linkplain TestContext
+	 * test context} uses any of the annotations in this package (such as
+	 * {@link MockitoBean @MockitoBean}).
+	 */
+	static boolean hasMockitoAnnotations(TestContext testContext) {
+		return hasMockitoAnnotations(testContext.getTestClass());
+	}
+
+	/**
+	 * Determine if Mockito annotations are declared on the supplied class, on an
+	 * interface it implements, on a superclass, or on an enclosing class or
+	 * whether a field in any such class is annotated with a Mockito annotation.
+	 */
+	private static boolean hasMockitoAnnotations(Class<?> clazz) {
+		// Declared on the class?
+		if (MergedAnnotations.from(clazz, MergedAnnotations.SearchStrategy.DIRECT).stream().anyMatch(isMockitoAnnotation)) {
+			return true;
+		}
+
+		// Declared on a field?
+		for (Field field : clazz.getDeclaredFields()) {
+			if (MergedAnnotations.from(field, MergedAnnotations.SearchStrategy.DIRECT).stream().anyMatch(isMockitoAnnotation)) {
+				return true;
+			}
+		}
+
+		// Declared on an interface?
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			if (hasMockitoAnnotations(ifc)) {
+				return true;
+			}
+		}
+
+		// Declared on a superclass?
+		Class<?> superclass = clazz.getSuperclass();
+		if (superclass != null & superclass != Object.class) {
+			if (hasMockitoAnnotations(superclass)) {
+				return true;
+			}
+		}
+
+		// Declared on an enclosing class of an inner class?
+		if (TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
+			if (hasMockitoAnnotations(clazz.getEnclosingClass())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

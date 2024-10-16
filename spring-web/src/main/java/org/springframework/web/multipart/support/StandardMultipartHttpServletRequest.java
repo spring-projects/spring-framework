@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -118,7 +119,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		do {
 			String msg = cause.getMessage();
 			if (msg != null) {
-				msg = msg.toLowerCase();
+				msg = msg.toLowerCase(Locale.ROOT);
 				if ((msg.contains("exceed") && (msg.contains("size") || msg.contains("length"))) ||
 						(msg.contains("request") && (msg.contains("big") || msg.contains("large")))) {
 					throw new MaxUploadSizeExceededException(-1, ex);

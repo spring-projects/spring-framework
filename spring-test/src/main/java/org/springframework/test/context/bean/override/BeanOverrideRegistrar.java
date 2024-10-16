@@ -28,7 +28,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * An internal class used to track {@link OverrideMetadata}-related state after
+ * An internal class used to track {@link BeanOverrideHandler}-related state after
  * the bean factory has been processed and to provide field injection utilities
  * for test execution listeners.
  *
@@ -38,9 +38,9 @@ import org.springframework.util.StringUtils;
  */
 class BeanOverrideRegistrar {
 
-	private final Map<OverrideMetadata, String> beanNameRegistry = new HashMap<>();
+	private final Map<BeanOverrideHandler, String> beanNameRegistry = new HashMap<>();
 
-	private final Map<String, OverrideMetadata> earlyOverrideMetadata = new HashMap<>();
+	private final Map<String, BeanOverrideHandler> wrappingBeanOverrideHandlers = new HashMap<>();
 
 	private final ConfigurableBeanFactory beanFactory;
 
@@ -51,40 +51,42 @@ class BeanOverrideRegistrar {
 	}
 
 	/**
-	 * Check {@linkplain #markWrapEarly(OverrideMetadata, String) early override}
-	 * records and use the {@link OverrideMetadata} to create an override
-	 * instance based on the provided bean, if relevant.
+	 * Register the provided {@link BeanOverrideHandler} and associate it with the
+	 * given {@code beanName}.
+	 */
+	void registerBeanOverrideHandler(BeanOverrideHandler handler, String beanName) {
+		this.beanNameRegistry.put(handler, beanName);
+	}
+
+	/**
+	 * Register the provided {@link BeanOverrideHandler} as a
+	 * {@linkplain BeanOverrideStrategy#WRAP "wrapping"} handler and associate it
+	 * with the given {@code beanName}, allowing for subsequent wrapping of the
+	 * bean via {@link #wrapIfNecessary(Object, String)}.
+	 */
+	void registerWrappingBeanOverrideHandler(BeanOverrideHandler handler, String beanName) {
+		this.wrappingBeanOverrideHandlers.put(beanName, handler);
+	}
+
+	/**
+	 * Check {@linkplain #registerWrappingBeanOverrideHandler(BeanOverrideHandler, String)
+	 * wrapping handler} records and use the corresponding {@link BeanOverrideHandler}
+	 * to create an override instance by wrapping the provided bean, if relevant.
 	 */
 	Object wrapIfNecessary(Object bean, String beanName) throws BeansException {
-		OverrideMetadata metadata = this.earlyOverrideMetadata.get(beanName);
-		if (metadata != null && metadata.getStrategy() == BeanOverrideStrategy.WRAP_BEAN) {
-			bean = metadata.createOverride(beanName, null, bean);
-			metadata.track(bean, this.beanFactory);
+		BeanOverrideHandler handler = this.wrappingBeanOverrideHandlers.get(beanName);
+		if (handler != null && handler.getStrategy() == BeanOverrideStrategy.WRAP) {
+			bean = handler.createOverrideInstance(beanName, null, bean);
+			handler.trackOverrideInstance(bean, this.beanFactory);
 		}
 		return bean;
 	}
 
-	/**
-	 * Register the provided {@link OverrideMetadata} and associate it with the
-	 * supplied {@code beanName}.
-	 */
-	void registerNameForMetadata(OverrideMetadata metadata, String beanName) {
-		this.beanNameRegistry.put(metadata, beanName);
-	}
-
-	/**
-	 * Mark the provided {@link OverrideMetadata} and {@code beanName} as "wrap
-	 * early", allowing for later bean override using {@link #wrapIfNecessary(Object, String)}.
-	 */
-	void markWrapEarly(OverrideMetadata metadata, String beanName) {
-		this.earlyOverrideMetadata.put(beanName, metadata);
-	}
-
-	void inject(Object target, OverrideMetadata overrideMetadata) {
-		String beanName = this.beanNameRegistry.get(overrideMetadata);
+	void inject(Object target, BeanOverrideHandler handler) {
+		String beanName = this.beanNameRegistry.get(handler);
 		Assert.state(StringUtils.hasLength(beanName),
-				() -> "No bean found for OverrideMetadata: " + overrideMetadata);
-		inject(overrideMetadata.getField(), target, beanName);
+				() -> "No bean found for BeanOverrideHandler: " + handler);
+		inject(handler.getField(), target, beanName);
 	}
 
 	private void inject(Field field, Object target, String beanName) {

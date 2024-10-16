@@ -23,7 +23,7 @@
 
 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="properties">
-			<value>location=file:///tmp</value>
+			<value>location=file:///tmp/</value>
 		</property>
 	</bean>
 

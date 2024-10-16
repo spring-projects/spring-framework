@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,6 @@ public final class ResourcePatternHint implements ConditionalHint {
 
 	/**
 	 * Return the pattern to use for identifying the resources to match.
-	 * @return the pattern
 	 */
 	public String getPattern() {
 		return this.pattern;
@@ -79,7 +78,6 @@ public final class ResourcePatternHint implements ConditionalHint {
 
 	/**
 	 * Return the regex {@link Pattern} to use for identifying the resources to match.
-	 * @return the regex pattern
 	 */
 	public Pattern toRegex() {
 		String prefix = (this.pattern.startsWith("*") ? ".*" : "");
@@ -98,16 +96,9 @@ public final class ResourcePatternHint implements ConditionalHint {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		ResourcePatternHint that = (ResourcePatternHint) o;
-		return this.pattern.equals(that.pattern)
-				&& Objects.equals(this.reachableType, that.reachableType);
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof ResourcePatternHint that &&
+				this.pattern.equals(that.pattern) && Objects.equals(this.reachableType, that.reachableType)));
 	}
 
 	@Override
