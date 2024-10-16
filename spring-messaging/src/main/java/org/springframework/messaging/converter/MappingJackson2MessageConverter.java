@@ -316,7 +316,8 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		else if (conversionHint instanceof JsonView jsonView) {
 			return extractViewClass(jsonView, conversionHint);
 		}
-		else if (conversionHint instanceof Class<?> clazz) {
+		else if (conversionHint instanceof Class<?> clazz &&
+				objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)) {
 			return clazz;
 		}
 

@@ -25,6 +25,9 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -160,6 +163,18 @@ class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
+	public void fromMessageToMessageWithPojoClass(){
+		// #16793 https://github.com/spring-projects/spring-framework/issues/16793
+		//ObjectMapper objectMapper = JsonMapper.builder().configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false).build();
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+		String payload = "{\"string\":\"foo\"}";
+		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
+		Object actual = converter.fromMessage(message, MyBean.class, MyBean.class);
+		assertThat(actual).isInstanceOf(MyBean.class);
+		assertThat(((MyBean) actual).getString()).isEqualTo("foo");
+	}
+
+	@Test
 	void toMessage() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		MyBean payload = new MyBean();
@@ -233,7 +248,6 @@ class MappingJackson2MessageConverterTests {
 		assertThat(back.getWithView2()).isEqualTo("with");
 		assertThat(back.getWithoutView()).isNull();
 	}
-
 
 
 	@JsonView(MyJacksonView1.class)
