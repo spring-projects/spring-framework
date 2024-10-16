@@ -498,7 +498,7 @@ Kotlin::
 ----
 	@Bean
 	fun customDBEntityManagerFactory(dataSource: DataSource): LocalContainerEntityManagerFactoryBean {
-		val factoryBean = LocalContainerEntityManagerFactoryBean();
+		val factoryBean = LocalContainerEntityManagerFactoryBean()
 		factoryBean.dataSource = dataSource
 		factoryBean.packagesToScan= "com.example.app"
 		return factoryBean
@@ -542,10 +542,10 @@ Kotlin::
 
 	@Bean
 	fun customDBEntityManagerFactory(dataSource: DataSource, managedTypes: PersistenceManagedTypes): LocalContainerEntityManagerFactoryBean {
-		val factoryBean = LocalContainerEntityManagerFactoryBean();
+		val factoryBean = LocalContainerEntityManagerFactoryBean()
 		factoryBean.dataSource = dataSource
 		factoryBean.managedTypes = managedTypes
-		return factoryBean;
+		return factoryBean
 	}
 ----
 ======
