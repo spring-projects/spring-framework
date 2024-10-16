@@ -28,28 +28,28 @@ import org.mockito.listeners.VerificationStartedListener;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
-import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link OverrideMetadata} implementation for Mockito {@code spy} support.
+ * {@link BeanOverrideHandler} implementation for Mockito {@code spy} support.
  *
  * @author Phillip Webb
  * @author Simon Baslé
  * @author Stephane Nicoll
  * @since 6.2
  */
-class MockitoSpyBeanOverrideMetadata extends AbstractMockitoOverrideMetadata {
+class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 
-	MockitoSpyBeanOverrideMetadata(Field field, ResolvableType typeToSpy, MockitoSpyBean spyAnnotation) {
+	MockitoSpyBeanOverrideHandler(Field field, ResolvableType typeToSpy, MockitoSpyBean spyAnnotation) {
 		this(field, typeToSpy, (StringUtils.hasText(spyAnnotation.name()) ? spyAnnotation.name() : null),
 				spyAnnotation.reset(), spyAnnotation.proxyTargetAware());
 	}
 
-	MockitoSpyBeanOverrideMetadata(Field field, ResolvableType typeToSpy, @Nullable String beanName,
+	MockitoSpyBeanOverrideHandler(Field field, ResolvableType typeToSpy, @Nullable String beanName,
 			MockReset reset, boolean proxyTargetAware) {
 
 		super(field, typeToSpy, beanName, BeanOverrideStrategy.WRAP, reset, proxyTargetAware);
@@ -58,7 +58,7 @@ class MockitoSpyBeanOverrideMetadata extends AbstractMockitoOverrideMetadata {
 
 
 	@Override
-	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
+	protected Object createOverrideInstance(String beanName, @Nullable BeanDefinition existingBeanDefinition,
 			@Nullable Object existingBeanInstance) {
 
 		Assert.notNull(existingBeanInstance,

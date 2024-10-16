@@ -38,8 +38,8 @@ class BeanOverrideContextCustomizerTests {
 
 	@Test
 	void customizerIsEqualWithIdenticalMetadata() {
-		BeanOverrideContextCustomizer customizer = createCustomizer(new DummyOverrideMetadata("key"));
-		BeanOverrideContextCustomizer customizer2 = createCustomizer(new DummyOverrideMetadata("key"));
+		BeanOverrideContextCustomizer customizer = createCustomizer(new DummyBeanOverrideHandler("key"));
+		BeanOverrideContextCustomizer customizer2 = createCustomizer(new DummyBeanOverrideHandler("key"));
 		assertThat(customizer).isEqualTo(customizer2);
 		assertThat(customizer).hasSameHashCodeAs(customizer2);
 	}
@@ -47,37 +47,37 @@ class BeanOverrideContextCustomizerTests {
 	@Test
 	void customizerIsEqualWithIdenticalMetadataInDifferentOrder() {
 		BeanOverrideContextCustomizer customizer = createCustomizer(
-				new DummyOverrideMetadata("key1"), new DummyOverrideMetadata("key2"));
+				new DummyBeanOverrideHandler("key1"), new DummyBeanOverrideHandler("key2"));
 		BeanOverrideContextCustomizer customizer2 = createCustomizer(
-				new DummyOverrideMetadata("key2"), new DummyOverrideMetadata("key1"));
+				new DummyBeanOverrideHandler("key2"), new DummyBeanOverrideHandler("key1"));
 		assertThat(customizer).isEqualTo(customizer2);
 		assertThat(customizer).hasSameHashCodeAs(customizer2);
 	}
 
 	@Test
 	void customizerIsNotEqualWithDifferentMetadata() {
-		BeanOverrideContextCustomizer customizer = createCustomizer(new DummyOverrideMetadata("key"));
+		BeanOverrideContextCustomizer customizer = createCustomizer(new DummyBeanOverrideHandler("key"));
 		BeanOverrideContextCustomizer customizer2 = createCustomizer(
-				new DummyOverrideMetadata("key"), new DummyOverrideMetadata("another"));
+				new DummyBeanOverrideHandler("key"), new DummyBeanOverrideHandler("another"));
 		assertThat(customizer).isNotEqualTo(customizer2);
 	}
 
-	private BeanOverrideContextCustomizer createCustomizer(OverrideMetadata... metadata) {
-		return new BeanOverrideContextCustomizer(new LinkedHashSet<>(Arrays.asList(metadata)));
+	private BeanOverrideContextCustomizer createCustomizer(BeanOverrideHandler... handlers) {
+		return new BeanOverrideContextCustomizer(new LinkedHashSet<>(Arrays.asList(handlers)));
 	}
 
-	private static class DummyOverrideMetadata extends OverrideMetadata {
+	private static class DummyBeanOverrideHandler extends BeanOverrideHandler {
 
 		private final String key;
 
-		public DummyOverrideMetadata(String key) {
-			super(ReflectionUtils.findField(DummyOverrideMetadata.class, "key"),
+		public DummyBeanOverrideHandler(String key) {
+			super(ReflectionUtils.findField(DummyBeanOverrideHandler.class, "key"),
 					ResolvableType.forClass(Object.class), null, BeanOverrideStrategy.REPLACE);
 			this.key = key;
 		}
 
 		@Override
-		protected Object createOverride(String beanName, BeanDefinition existingBeanDefinition,
+		protected Object createOverrideInstance(String beanName, BeanDefinition existingBeanDefinition,
 				Object existingBeanInstance) {
 			return existingBeanInstance;
 		}
@@ -90,7 +90,7 @@ class BeanOverrideContextCustomizerTests {
 			if (o == null || getClass() != o.getClass()) {
 				return false;
 			}
-			DummyOverrideMetadata that = (DummyOverrideMetadata) o;
+			DummyBeanOverrideHandler that = (DummyBeanOverrideHandler) o;
 			return Objects.equals(this.key, that.key);
 		}
 

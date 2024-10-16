@@ -23,25 +23,25 @@ import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
-import org.springframework.test.context.bean.override.OverrideMetadata;
 
 /**
- * Abstract base {@link OverrideMetadata} implementation for Mockito.
+ * Abstract base {@link BeanOverrideHandler} implementation for Mockito.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 6.2
  */
-abstract class AbstractMockitoOverrideMetadata extends OverrideMetadata {
+abstract class AbstractMockitoBeanOverrideHandler extends BeanOverrideHandler {
 
 	private final MockReset reset;
 
 	private final boolean proxyTargetAware;
 
 
-	protected AbstractMockitoOverrideMetadata(Field field, ResolvableType beanType, @Nullable String beanName,
+	protected AbstractMockitoBeanOverrideHandler(Field field, ResolvableType beanType, @Nullable String beanName,
 			BeanOverrideStrategy strategy, @Nullable MockReset reset, boolean proxyTargetAware) {
 
 		super(field, beanType, beanName, strategy);
@@ -67,7 +67,7 @@ abstract class AbstractMockitoOverrideMetadata extends OverrideMetadata {
 	}
 
 	@Override
-	protected void track(Object mock, SingletonBeanRegistry trackingBeanRegistry) {
+	protected void trackOverrideInstance(Object mock, SingletonBeanRegistry trackingBeanRegistry) {
 		getMockitoBeans(trackingBeanRegistry).add(mock);
 	}
 
@@ -89,7 +89,7 @@ abstract class AbstractMockitoOverrideMetadata extends OverrideMetadata {
 		if (other == this) {
 			return true;
 		}
-		return (other instanceof AbstractMockitoOverrideMetadata that && super.equals(that) &&
+		return (other instanceof AbstractMockitoBeanOverrideHandler that && super.equals(that) &&
 				(this.reset == that.reset) && (this.proxyTargetAware == that.proxyTargetAware));
 	}
 

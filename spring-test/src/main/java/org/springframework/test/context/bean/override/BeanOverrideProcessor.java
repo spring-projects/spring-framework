@@ -20,33 +20,33 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 /**
- * Strategy interface for Bean Override processing, providing
- * {@link OverrideMetadata} that drives how the target bean is overridden.
+ * Strategy interface for Bean Override processing, which creates a
+ * {@link BeanOverrideHandler} that drives how the target bean is overridden.
  *
  * <p>At least one composed annotation that is meta-annotated with
  * {@link BeanOverride @BeanOverride} must be a companion of this processor and
- * may provide additional user settings that drive how the concrete
- * {@code OverrideMetadata} is configured.
+ * may optionally provide annotation attributes that can be used to configure the
+ * {@code BeanOverrideHandler}.
  *
  * <p>Implementations are required to have a no-argument constructor and be
  * stateless.
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  */
 @FunctionalInterface
 public interface BeanOverrideProcessor {
 
 	/**
-	 * Create an {@link OverrideMetadata} instance for the given annotated field.
+	 * Create a {@link BeanOverrideHandler} for the given annotated field.
 	 * @param overrideAnnotation the composed annotation that declares the
 	 * {@link BeanOverride @BeanOverride} annotation which registers this processor
 	 * @param testClass the test class to process
 	 * @param field the annotated field
-	 * @return the {@link OverrideMetadata} instance that should handle the
-	 * given field
+	 * @return the {@code BeanOverrideHandler} that should handle the given field
 	 */
-	OverrideMetadata createMetadata(Annotation overrideAnnotation, Class<?> testClass, Field field);
+	BeanOverrideHandler createHandler(Annotation overrideAnnotation, Class<?> testClass, Field field);
 
 }

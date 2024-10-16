@@ -41,16 +41,21 @@ import org.springframework.util.ReflectionUtils;
 import static org.springframework.core.annotation.MergedAnnotations.SearchStrategy.DIRECT;
 
 /**
- * Metadata for Bean Override injection points, also responsible for creation of
- * the overriding instance.
+ * Handler for Bean Override injection points that is responsible for creating
+ * the bean override instance for a given set of metadata and potentially for
+ * tracking the created instance.
  *
- * <p><strong>WARNING</strong>: implementations are used as a cache key and
- * must implement proper {@code equals()} and {@code hashCode()} methods.
+ * <p><strong>WARNING</strong>: Implementations are used as a cache key and must
+ * implement proper {@code equals()} and {@code hashCode()} methods based on the
+ * unique set of metadata used to identify the bean to override. Overridden
+ * {@code equals()} and {@code hashCode()} methods should also delegate to the
+ * {@code super} implementations in this class in order to support the basic
+ * metadata used by all bean overrides.
  *
- * <p>Concrete implementations of {@code OverrideMetadata} can store state to use
- * during override {@linkplain #createOverride(String, BeanDefinition, Object)
- * instance creation} &mdash; for example, based on further processing of the
- * annotation or the annotated field.
+ * <p>Concrete implementations of {@code BeanOverrideHandler} can store additional
+ * metadata to use during override {@linkplain #createOverrideInstance instance
+ * creation} &mdash; for example, based on further processing of the annotation
+ * or the annotated field.
  *
  * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
  * Any attempt to override a non-singleton bean will result in an exception.
@@ -60,7 +65,7 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  * @author Sam Brannen
  * @since 6.2
  */
-public abstract class OverrideMetadata {
+public abstract class BeanOverrideHandler {
 
 	private final Field field;
 
@@ -74,7 +79,7 @@ public abstract class OverrideMetadata {
 	private final BeanOverrideStrategy strategy;
 
 
-	protected OverrideMetadata(Field field, ResolvableType beanType, @Nullable String beanName,
+	protected BeanOverrideHandler(Field field, ResolvableType beanType, @Nullable String beanName,
 			BeanOverrideStrategy strategy) {
 
 		this.field = field;
@@ -85,19 +90,19 @@ public abstract class OverrideMetadata {
 	}
 
 	/**
-	 * Process the given {@code testClass} and build the corresponding list of
-	 * {@code OverrideMetadata} derived from {@link BeanOverride @BeanOverride}
-	 * fields in the test class and its type hierarchy.
+	 * Process the given {@code testClass} and build the corresponding
+	 * {@code BeanOverrideHandler} list derived from {@link BeanOverride @BeanOverride}
+	 * fields in the test class, its type hierarchy, and its enclosing class hierarchy.
 	 * @param testClass the test class to process
-	 * @return a list of {@code OverrideMetadata}
+	 * @return a list of bean override handlers
 	 */
-	public static List<OverrideMetadata> forTestClass(Class<?> testClass) {
-		List<OverrideMetadata> metadata = new LinkedList<>();
-		ReflectionUtils.doWithFields(testClass, field -> processField(field, testClass, metadata));
-		return metadata;
+	public static List<BeanOverrideHandler> forTestClass(Class<?> testClass) {
+		List<BeanOverrideHandler> handlers = new LinkedList<>();
+		ReflectionUtils.doWithFields(testClass, field -> processField(field, testClass, handlers));
+		return handlers;
 	}
 
-	private static void processField(Field field, Class<?> testClass, List<OverrideMetadata> metadataList) {
+	private static void processField(Field field, Class<?> testClass, List<BeanOverrideHandler> handlers) {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
 		MergedAnnotations.from(field, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
 			MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
@@ -109,8 +114,8 @@ public abstract class OverrideMetadata {
 
 			Assert.state(overrideAnnotationFound.compareAndSet(false, true),
 					() -> "Multiple @BeanOverride annotations found on field: " + field);
-			OverrideMetadata metadata = processor.createMetadata(composedAnnotation, testClass, field);
-			metadataList.add(metadata);
+			BeanOverrideHandler handler = processor.createHandler(composedAnnotation, testClass, field);
+			handlers.add(handler);
 		});
 	}
 
@@ -139,7 +144,7 @@ public abstract class OverrideMetadata {
 	}
 
 	/**
-	 * Get the {@link BeanOverrideStrategy} for this {@code OverrideMetadata},
+	 * Get the {@link BeanOverrideStrategy} for this {@code BeanOverrideHandler},
 	 * which influences how and when the bean override instance should be created.
 	 */
 	public final BeanOverrideStrategy getStrategy() {
@@ -147,28 +152,31 @@ public abstract class OverrideMetadata {
 	}
 
 	/**
-	 * Create a bean override instance for this {@code OverrideMetadata},
-	 * optionally based on an existing {@link BeanDefinition} and/or an
-	 * original instance, that is a singleton or an early wrapped instance.
+	 * Create a bean override instance for an existing {@link BeanDefinition} or
+	 * an existing singleton bean, based on the metadata in this
+	 * {@code BeanOverrideHandler}.
 	 * @param beanName the name of the bean being overridden
 	 * @param existingBeanDefinition an existing bean definition for the supplied
-	 * bean name, or {@code null} if irrelevant
+	 * bean name, or {@code null} if not available or not relevant
 	 * @param existingBeanInstance an existing instance for the supplied bean name
-	 * for wrapping purposes, or {@code null} if irrelevant
+	 * for wrapping purposes, or {@code null} if not available or not relevant
 	 * @return the instance with which to override the bean
+	 * @see #trackOverrideInstance(Object, SingletonBeanRegistry)
 	 */
-	protected abstract Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
-			@Nullable Object existingBeanInstance);
+	protected abstract Object createOverrideInstance(String beanName,
+			@Nullable BeanDefinition existingBeanDefinition, @Nullable Object existingBeanInstance);
 
 	/**
-	 * Optionally track objects created by this {@code OverrideMetadata}.
+	 * Track the supplied bean override instance that was created by this
+	 * {@code BeanOverrideHandler}.
 	 * <p>The default implementation does not track the supplied instance, but
 	 * this can be overridden in subclasses as appropriate.
 	 * @param override the bean override instance to track
-	 * @param trackingBeanRegistry the registry in which trackers can
-	 * optionally be registered
+	 * @param trackingBeanRegistry a registry in which this handler can store
+	 * tracking state in the form of a singleton bean
+	 * @see #createOverrideInstance(String, BeanDefinition, Object)
 	 */
-	protected void track(Object override, SingletonBeanRegistry trackingBeanRegistry) {
+	protected void trackOverrideInstance(Object override, SingletonBeanRegistry trackingBeanRegistry) {
 		// NO-OP
 	}
 
@@ -180,7 +188,7 @@ public abstract class OverrideMetadata {
 		if (other == null || other.getClass() != getClass()) {
 			return false;
 		}
-		OverrideMetadata that = (OverrideMetadata) other;
+		BeanOverrideHandler that = (BeanOverrideHandler) other;
 		if (!Objects.equals(this.beanType.getType(), that.beanType.getType()) ||
 				!Objects.equals(this.beanName, that.beanName) ||
 				!Objects.equals(this.strategy, that.strategy)) {

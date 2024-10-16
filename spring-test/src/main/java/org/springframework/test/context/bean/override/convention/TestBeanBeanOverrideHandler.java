@@ -24,41 +24,41 @@ import java.util.Objects;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
-import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * {@link OverrideMetadata} implementation for {@link TestBean}.
+ * {@link BeanOverrideHandler} implementation for {@link TestBean}.
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 6.2
  */
-final class TestBeanOverrideMetadata extends OverrideMetadata {
+final class TestBeanBeanOverrideHandler extends BeanOverrideHandler {
 
-	private final Method overrideMethod;
+	private final Method factoryMethod;
 
 
-	TestBeanOverrideMetadata(Field field, ResolvableType beanType, @Nullable String beanName,
-			BeanOverrideStrategy strategy, Method overrideMethod) {
+	TestBeanBeanOverrideHandler(Field field, ResolvableType beanType, @Nullable String beanName,
+			BeanOverrideStrategy strategy, Method factoryMethod) {
 
 		super(field, beanType, beanName, strategy);
-		this.overrideMethod = overrideMethod;
+		this.factoryMethod = factoryMethod;
 	}
 
 
 	@Override
-	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
+	protected Object createOverrideInstance(String beanName, @Nullable BeanDefinition existingBeanDefinition,
 			@Nullable Object existingBeanInstance) {
 
 		try {
-			ReflectionUtils.makeAccessible(this.overrideMethod);
-			return this.overrideMethod.invoke(null);
+			ReflectionUtils.makeAccessible(this.factoryMethod);
+			return this.factoryMethod.invoke(null);
 		}
 		catch (IllegalAccessException | InvocationTargetException ex) {
-			throw new IllegalStateException("Failed to invoke bean overriding method " + this.overrideMethod.getName() +
+			throw new IllegalStateException("Failed to invoke bean overriding method " + this.factoryMethod.getName() +
 					"; a static method with no formal parameters is expected", ex);
 		}
 	}
@@ -74,13 +74,13 @@ final class TestBeanOverrideMetadata extends OverrideMetadata {
 		if (!super.equals(other)) {
 			return false;
 		}
-		TestBeanOverrideMetadata that = (TestBeanOverrideMetadata) other;
-		return Objects.equals(this.overrideMethod, that.overrideMethod);
+		TestBeanBeanOverrideHandler that = (TestBeanBeanOverrideHandler) other;
+		return Objects.equals(this.factoryMethod, that.factoryMethod);
 	}
 
 	@Override
 	public int hashCode() {
-		return this.overrideMethod.hashCode() * 29 + super.hashCode();
+		return this.factoryMethod.hashCode() * 29 + super.hashCode();
 	}
 
 }

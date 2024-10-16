@@ -151,7 +151,7 @@ class TestBeanOverrideProcessorTests {
 	}
 
 	@Test
-	void createMetaDataForUnknownExplicitMethod() throws Exception {
+	void createBeanOverrideHandlerForUnknownExplicitMethod() throws Exception {
 		Class<?> clazz = ExplicitMethodNameTestCase.class;
 		Class<?> returnType = ExampleService.class;
 		Field field = clazz.getField("a");
@@ -159,24 +159,24 @@ class TestBeanOverrideProcessorTests {
 		assertThat(overrideAnnotation).isNotNull();
 
 		assertThatIllegalStateException()
-				.isThrownBy(() -> this.processor.createMetadata(overrideAnnotation, clazz, field))
+				.isThrownBy(() -> this.processor.createHandler(overrideAnnotation, clazz, field))
 				.withMessage("No static method found named explicit1() in %s with return type %s",
 						clazz.getName(), returnType.getName());
 	}
 
 	@Test
-	void createMetaDataForKnownExplicitMethod() throws Exception {
+	void createBeanOverrideHandlerForKnownExplicitMethod() throws Exception {
 		Class<?> clazz = ExplicitMethodNameTestCase.class;
 		Field field = clazz.getField("b");
 		TestBean overrideAnnotation = field.getAnnotation(TestBean.class);
 		assertThat(overrideAnnotation).isNotNull();
 
-		assertThat(this.processor.createMetadata(overrideAnnotation, clazz, field))
-				.isInstanceOf(TestBeanOverrideMetadata.class);
+		assertThat(this.processor.createHandler(overrideAnnotation, clazz, field))
+				.isInstanceOf(TestBeanBeanOverrideHandler.class);
 	}
 
 	@Test
-	void createMetaDataForConventionBasedFactoryMethod() throws Exception {
+	void createBeanOverrideHandlerForConventionBasedFactoryMethod() throws Exception {
 		Class<?> returnType = ExampleService.class;
 		Class<?> clazz = MethodConventionTestCase.class;
 		Field field = clazz.getField("field");
@@ -184,19 +184,19 @@ class TestBeanOverrideProcessorTests {
 		assertThat(overrideAnnotation).isNotNull();
 
 		assertThatIllegalStateException()
-				.isThrownBy(() -> this.processor.createMetadata(overrideAnnotation, clazz, field))
+				.isThrownBy(() -> this.processor.createHandler(overrideAnnotation, clazz, field))
 				.withMessage("No static method found named field() or someField() in %s with return type %s",
 						clazz.getName(), returnType.getName());
 	}
 
 	@Test
-	void failToCreateMetadataForOtherAnnotation() throws NoSuchFieldException {
+	void failToCreateBeanOverrideHandlerForOtherAnnotation() throws Exception {
 		Class<?> clazz = MethodConventionTestCase.class;
 		Field field = clazz.getField("field");
 		NonNull badAnnotation = AnnotationUtils.synthesizeAnnotation(NonNull.class);
 
 		assertThatIllegalStateException()
-				.isThrownBy(() -> this.processor.createMetadata(badAnnotation, clazz, field))
+				.isThrownBy(() -> this.processor.createHandler(badAnnotation, clazz, field))
 				.withMessage("Invalid annotation passed to TestBeanOverrideProcessor: expected @TestBean" +
 								" on field %s.%s", field.getDeclaringClass().getName(), field.getName());
 	}

@@ -44,10 +44,10 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 			"org.springframework.test.context.bean.override.internalWrapEarlyBeanPostProcessor";
 
 
-	private final Set<OverrideMetadata> metadata;
+	private final Set<BeanOverrideHandler> handlers;
 
-	BeanOverrideContextCustomizer(Set<OverrideMetadata> metadata) {
-		this.metadata = metadata;
+	BeanOverrideContextCustomizer(Set<BeanOverrideHandler> handlers) {
+		this.handlers = handlers;
 	}
 
 	@Override
@@ -58,17 +58,17 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 		// to register them as manual singleton instances. In addition, registration of
 		// the BeanOverrideBeanFactoryPostProcessor as a singleton is a requirement for
 		// AOT processing, since a bean definition cannot be generated for the
-		// Set<OverrideMetadata> argument that it accepts in its constructor.
+		// Set<BeanOverrideHandler> argument that it accepts in its constructor.
 		BeanOverrideRegistrar beanOverrideRegistrar = new BeanOverrideRegistrar(beanFactory);
 		beanFactory.registerSingleton(REGISTRAR_BEAN_NAME, beanOverrideRegistrar);
 		beanFactory.registerSingleton(INFRASTRUCTURE_BEAN_NAME,
-				new BeanOverrideBeanFactoryPostProcessor(this.metadata, beanOverrideRegistrar));
+				new BeanOverrideBeanFactoryPostProcessor(this.handlers, beanOverrideRegistrar));
 		beanFactory.registerSingleton(EARLY_INFRASTRUCTURE_BEAN_NAME,
 				new WrapEarlyBeanPostProcessor(beanOverrideRegistrar));
 	}
 
-	Set<OverrideMetadata> getMetadata() {
-		return this.metadata;
+	Set<BeanOverrideHandler> getBeanOverrideHandlers() {
+		return this.handlers;
 	}
 
 	@Override
@@ -80,12 +80,12 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 			return false;
 		}
 		BeanOverrideContextCustomizer that = (BeanOverrideContextCustomizer) other;
-		return this.metadata.equals(that.metadata);
+		return this.handlers.equals(that.handlers);
 	}
 
 	@Override
 	public int hashCode() {
-		return this.metadata.hashCode();
+		return this.handlers.hashCode();
 	}
 
 }

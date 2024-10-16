@@ -42,9 +42,9 @@ import static org.springframework.test.context.bean.override.BeanOverrideStrateg
 
 /**
  * {@link BeanOverrideProcessor} implementation for {@link TestBean @TestBean}
- * support, which creates metadata for annotated fields in a given class and
- * ensures that a corresponding static factory method exists, according to the
- * {@linkplain TestBean documented conventions}.
+ * support, which creates a {@link TestBeanBeanOverrideHandler} for annotated
+ * fields in a given class and ensures that a corresponding static factory method
+ * exists, according to the {@linkplain TestBean documented conventions}.
  *
  * @author Simon Baslé
  * @author Sam Brannen
@@ -54,7 +54,7 @@ import static org.springframework.test.context.bean.override.BeanOverrideStrateg
 class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	@Override
-	public TestBeanOverrideMetadata createMetadata(Annotation overrideAnnotation, Class<?> testClass, Field field) {
+	public TestBeanBeanOverrideHandler createHandler(Annotation overrideAnnotation, Class<?> testClass, Field field) {
 		if (!(overrideAnnotation instanceof TestBean testBean)) {
 			throw new IllegalStateException("Invalid annotation passed to %s: expected @TestBean on field %s.%s"
 					.formatted(getClass().getSimpleName(), field.getDeclaringClass().getName(), field.getName()));
@@ -64,10 +64,10 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 		String methodName = testBean.methodName();
 		BeanOverrideStrategy strategy = (testBean.enforceOverride() ? REPLACE : REPLACE_OR_CREATE);
 
-		Method overrideMethod;
+		Method factoryMethod;
 		if (!methodName.isBlank()) {
 			// If the user specified an explicit method name, search for that.
-			overrideMethod = findTestBeanFactoryMethod(testClass, field.getType(), methodName);
+			factoryMethod = findTestBeanFactoryMethod(testClass, field.getType(), methodName);
 		}
 		else {
 			// Otherwise, search for candidate factory methods whose names match either
@@ -78,11 +78,11 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 			if (beanName != null) {
 				candidateMethodNames.add(beanName);
 			}
-			overrideMethod = findTestBeanFactoryMethod(testClass, field.getType(), candidateMethodNames);
+			factoryMethod = findTestBeanFactoryMethod(testClass, field.getType(), candidateMethodNames);
 		}
 
-		return new TestBeanOverrideMetadata(
-				field, ResolvableType.forField(field, testClass), beanName, strategy, overrideMethod);
+		return new TestBeanBeanOverrideHandler(
+				field, ResolvableType.forField(field, testClass), beanName, strategy, factoryMethod);
 	}
 
 	/**

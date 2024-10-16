@@ -19,8 +19,8 @@ package org.springframework.test.context.bean.override.easymock;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
+import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.BeanOverrideProcessor;
-import org.springframework.test.context.bean.override.OverrideMetadata;
 import org.springframework.util.StringUtils;
 
 /**
@@ -32,10 +32,10 @@ import org.springframework.util.StringUtils;
 class EasyMockBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	@Override
-	public OverrideMetadata createMetadata(Annotation annotation, Class<?> testClass, Field field) {
+	public BeanOverrideHandler createHandler(Annotation annotation, Class<?> testClass, Field field) {
 		EasyMockBean easyMockBean = (EasyMockBean) annotation;
 		String beanName = (StringUtils.hasText(easyMockBean.name()) ? easyMockBean.name() : null);
-		return new EasyMockBeanOverrideMetadata(field, field.getType(), beanName, easyMockBean.mockType());
+		return new EasyMockBeanOverrideHandler(field, field.getType(), beanName, easyMockBean.mockType());
 	}
 
 }

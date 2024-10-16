@@ -25,22 +25,22 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
-import org.springframework.test.context.bean.override.OverrideMetadata;
+import org.springframework.test.context.bean.override.BeanOverrideHandler;
 
 import static org.springframework.test.context.bean.override.BeanOverrideStrategy.REPLACE_OR_CREATE;
 
 /**
- * {@link OverrideMetadata} that provides support for {@link EasyMockBean @EasyMockBean}.
+ * {@link BeanOverrideHandler} that provides support for {@link EasyMockBean @EasyMockBean}.
  *
  * @author Sam Brannen
  * @since 6.2
  */
-class EasyMockBeanOverrideMetadata extends OverrideMetadata {
+class EasyMockBeanOverrideHandler extends BeanOverrideHandler {
 
 	private final MockType mockType;
 
 
-	EasyMockBeanOverrideMetadata(Field field, Class<?> typeToOverride, @Nullable String beanName,
+	EasyMockBeanOverrideHandler(Field field, Class<?> typeToOverride, @Nullable String beanName,
 			MockType mockType) {
 
 		super(field, ResolvableType.forClass(typeToOverride), beanName, REPLACE_OR_CREATE);
@@ -49,7 +49,7 @@ class EasyMockBeanOverrideMetadata extends OverrideMetadata {
 
 
 	@Override
-	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
+	protected Object createOverrideInstance(String beanName, @Nullable BeanDefinition existingBeanDefinition,
 			@Nullable Object existingBeanInstance) {
 
 		Class<?> typeToMock = getBeanType().getRawClass();
@@ -57,7 +57,7 @@ class EasyMockBeanOverrideMetadata extends OverrideMetadata {
 	}
 
 	@Override
-	protected void track(Object mock, SingletonBeanRegistry singletonBeanRegistry) {
+	protected void trackOverrideInstance(Object mock, SingletonBeanRegistry singletonBeanRegistry) {
 		getEasyMockBeans(singletonBeanRegistry).add(mock);
 	}
 

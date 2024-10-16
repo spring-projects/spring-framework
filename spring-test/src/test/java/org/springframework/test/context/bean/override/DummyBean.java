@@ -50,25 +50,25 @@ import org.springframework.util.StringUtils;
 	class DummyBeanOverrideProcessor implements BeanOverrideProcessor {
 
 		@Override
-		public OverrideMetadata createMetadata(Annotation annotation, Class<?> testClass, Field field) {
+		public BeanOverrideHandler createHandler(Annotation annotation, Class<?> testClass, Field field) {
 			DummyBean dummyBean = (DummyBean) annotation;
 			String beanName = (StringUtils.hasText(dummyBean.beanName()) ? dummyBean.beanName() : null);
-			return new DummyBeanOverrideProcessor.DummyOverrideMetadata(field, field.getType(), beanName,
+			return new DummyBeanOverrideProcessor.DummyBeanOverrideHandler(field, field.getType(), beanName,
 					dummyBean.strategy());
 		}
 
 		// Bare bone, "dummy", implementation that should not override anything
-		// else than createOverride.
-		static class DummyOverrideMetadata extends OverrideMetadata {
+		// other than createOverrideInstance().
+		static class DummyBeanOverrideHandler extends BeanOverrideHandler {
 
-			DummyOverrideMetadata(Field field, Class<?> typeToOverride, @Nullable String beanName,
+			DummyBeanOverrideHandler(Field field, Class<?> typeToOverride, @Nullable String beanName,
 					BeanOverrideStrategy strategy) {
 
 				super(field, ResolvableType.forClass(typeToOverride), beanName, strategy);
 			}
 
 			@Override
-			protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
+			protected Object createOverrideInstance(String beanName, @Nullable BeanDefinition existingBeanDefinition,
 					@Nullable Object existingBeanInstance) {
 
 				Class<?> beanType = getField().getType();

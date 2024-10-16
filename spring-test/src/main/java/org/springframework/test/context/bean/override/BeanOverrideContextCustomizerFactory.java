@@ -31,6 +31,7 @@ import org.springframework.test.context.TestContextAnnotationUtils;
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  * @see BeanOverride
  */
@@ -41,19 +42,18 @@ class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 	public BeanOverrideContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
-		Set<OverrideMetadata> metadata = new HashSet<>();
-		findOverrideMetadata(testClass, metadata);
-		if (metadata.isEmpty()) {
+		Set<BeanOverrideHandler> handlers = new HashSet<>();
+		findBeanOverrideHandler(testClass, handlers);
+		if (handlers.isEmpty()) {
 			return null;
 		}
-		return new BeanOverrideContextCustomizer(metadata);
+		return new BeanOverrideContextCustomizer(handlers);
 	}
 
-	private void findOverrideMetadata(Class<?> testClass, Set<OverrideMetadata> metadata) {
-		List<OverrideMetadata> overrideMetadata = OverrideMetadata.forTestClass(testClass);
-		metadata.addAll(overrideMetadata);
+	private void findBeanOverrideHandler(Class<?> testClass, Set<BeanOverrideHandler> handlers) {
+		handlers.addAll(BeanOverrideHandler.forTestClass(testClass));
 		if (TestContextAnnotationUtils.searchEnclosingClass(testClass)) {
-			findOverrideMetadata(testClass.getEnclosingClass(), metadata);
+			findBeanOverrideHandler(testClass.getEnclosingClass(), handlers);
 		}
 	}
 

@@ -23,79 +23,79 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.test.context.bean.override.OverrideMetadata;
+import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link MockitoSpyBeanOverrideMetadata}.
+ * Tests for {@link MockitoSpyBeanOverrideHandler}.
  *
  * @author Stephane Nicoll
  */
-class MockitoSpyBeanOverrideMetadataTests {
+class MockitoSpyBeanOverrideHandlerTests {
 
 	@Test
 	void forTestClassSetsNameToNullIfAnnotationNameIsNull() {
-		List<OverrideMetadata> list = OverrideMetadata.forTestClass(SampleOneSpy.class);
-		assertThat(list).singleElement().satisfies(metadata -> assertThat(metadata.getBeanName()).isNull());
+		List<BeanOverrideHandler> list = BeanOverrideHandler.forTestClass(SampleOneSpy.class);
+		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isNull());
 	}
 
 	@Test
 	void forTestClassSetsNameToAnnotationName() {
-		List<OverrideMetadata> list = OverrideMetadata.forTestClass(SampleOneSpyWithName.class);
-		assertThat(list).singleElement().satisfies(metadata -> assertThat(metadata.getBeanName()).isEqualTo("anotherService"));
+		List<BeanOverrideHandler> list = BeanOverrideHandler.forTestClass(SampleOneSpyWithName.class);
+		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isEqualTo("anotherService"));
 	}
 
 	@Test
 	void isEqualToWithSameInstance() {
-		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		assertThat(metadata).isEqualTo(metadata);
-		assertThat(metadata).hasSameHashCodeAs(metadata);
+		MockitoSpyBeanOverrideHandler handler = createBeanOverrideHandler(sampleField("service"));
+		assertThat(handler).isEqualTo(handler);
+		assertThat(handler).hasSameHashCodeAs(handler);
 	}
 
 	@Test
 	void isEqualToWithSameMetadata() {
-		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service"));
-		assertThat(metadata).isEqualTo(metadata2);
-		assertThat(metadata).hasSameHashCodeAs(metadata2);
+		MockitoSpyBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
+		MockitoSpyBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service"));
+		assertThat(handler1).isEqualTo(handler2);
+		assertThat(handler1).hasSameHashCodeAs(handler2);
 	}
 
 	@Test
 	void isNotEqualToByTypeLookupWithSameMetadataButDifferentField() {
-		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service2"));
-		assertThat(metadata).isNotEqualTo(metadata2);
+		MockitoSpyBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
+		MockitoSpyBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service2"));
+		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 	@Test
 	void isEqualToByNameLookupWithSameMetadataButDifferentField() {
-		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service3"));
-		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service4"));
-		assertThat(metadata).isEqualTo(metadata2);
-		assertThat(metadata).hasSameHashCodeAs(metadata2);
+		MockitoSpyBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service3"));
+		MockitoSpyBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service4"));
+		assertThat(handler1).isEqualTo(handler2);
+		assertThat(handler1).hasSameHashCodeAs(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentBeanName() {
-		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service3"));
-		assertThat(metadata).isNotEqualTo(metadata2);
+		MockitoSpyBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
+		MockitoSpyBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service3"));
+		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentReset() {
-		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service5"));
-		assertThat(metadata).isNotEqualTo(metadata2);
+		MockitoSpyBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
+		MockitoSpyBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service5"));
+		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentProxyTargetAwareFlag() {
-		MockitoSpyBeanOverrideMetadata metadata = createMetadata(sampleField("service"));
-		MockitoSpyBeanOverrideMetadata metadata2 = createMetadata(sampleField("service6"));
-		assertThat(metadata).isNotEqualTo(metadata2);
+		MockitoSpyBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("service"));
+		MockitoSpyBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("service6"));
+		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 
@@ -105,9 +105,9 @@ class MockitoSpyBeanOverrideMetadataTests {
 		return field;
 	}
 
-	private MockitoSpyBeanOverrideMetadata createMetadata(Field field) {
+	private MockitoSpyBeanOverrideHandler createBeanOverrideHandler(Field field) {
 		MockitoSpyBean annotation = AnnotatedElementUtils.getMergedAnnotation(field, MockitoSpyBean.class);
-		return new MockitoSpyBeanOverrideMetadata(field, ResolvableType.forClass(field.getType()), annotation);
+		return new MockitoSpyBeanOverrideHandler(field, ResolvableType.forClass(field.getType()), annotation);
 	}
 
 
