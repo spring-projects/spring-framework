@@ -62,6 +62,7 @@ public @interface PatchExchange {
 
 	/**
 	 * Alias for {@link HttpExchange#headers()}.
+	 * @since 6.2
 	 */
 	@AliasFor(annotation = HttpExchange.class)
 	String[] headers() default {};
