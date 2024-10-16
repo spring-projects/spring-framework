@@ -192,7 +192,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		private final ServerHttpRequest originalRequest;
 
-
 		public MutatedServerHttpRequest(URI uri, @Nullable String contextPath,
 				HttpMethod method, @Nullable SslInfo sslInfo, @Nullable InetSocketAddress remoteAddress,
 				HttpHeaders headers, Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
@@ -232,7 +231,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			return this.body;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public <T> T getNativeRequest() {
 			return ServerHttpRequestDecorator.getNativeRequest(this.originalRequest);
