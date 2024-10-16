@@ -77,14 +77,14 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	 * a corresponding bean override instance.
 	 */
 	private static void injectFields(TestContext testContext) {
-		List<BeanOverrideHandler> handlerList = BeanOverrideHandler.forTestClass(testContext.getTestClass());
-		if (!handlerList.isEmpty()) {
+		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(testContext.getTestClass());
+		if (!handlers.isEmpty()) {
 			Object testInstance = testContext.getTestInstance();
-			BeanOverrideRegistrar registrar = testContext.getApplicationContext()
-					.getBean(BeanOverrideContextCustomizer.REGISTRAR_BEAN_NAME, BeanOverrideRegistrar.class);
+			BeanOverrideRegistry beanOverrideRegistry = testContext.getApplicationContext()
+					.getBean(BeanOverrideContextCustomizer.REGISTRY_BEAN_NAME, BeanOverrideRegistry.class);
 
-			for (BeanOverrideHandler handler : handlerList) {
-				registrar.inject(testInstance, handler);
+			for (BeanOverrideHandler handler : handlers) {
+				beanOverrideRegistry.inject(testInstance, handler);
 			}
 		}
 	}

@@ -39,10 +39,10 @@ class WrapEarlyBeanPostProcessor implements SmartInstantiationAwareBeanPostProce
 
 	private final Map<String, Object> earlyReferences = new ConcurrentHashMap<>(16);
 
-	private final BeanOverrideRegistrar overrideRegistrar;
+	private final BeanOverrideRegistry beanOverrideRegistry;
 
-	WrapEarlyBeanPostProcessor(BeanOverrideRegistrar registrar) {
-		this.overrideRegistrar = registrar;
+	WrapEarlyBeanPostProcessor(BeanOverrideRegistry beanOverrideRegistry) {
+		this.beanOverrideRegistry = beanOverrideRegistry;
 	}
 
 	@Override
@@ -56,7 +56,7 @@ class WrapEarlyBeanPostProcessor implements SmartInstantiationAwareBeanPostProce
 			return bean;
 		}
 		this.earlyReferences.put(getCacheKey(bean, beanName), bean);
-		return this.overrideRegistrar.wrapIfNecessary(bean, beanName);
+		return this.beanOverrideRegistry.wrapBeanIfNecessary(bean, beanName);
 	}
 
 	@Override
@@ -65,7 +65,7 @@ class WrapEarlyBeanPostProcessor implements SmartInstantiationAwareBeanPostProce
 			return bean;
 		}
 		if (this.earlyReferences.remove(getCacheKey(bean, beanName)) != bean) {
-			return this.overrideRegistrar.wrapIfNecessary(bean, beanName);
+			return this.beanOverrideRegistry.wrapBeanIfNecessary(bean, beanName);
 		}
 		return bean;
 	}

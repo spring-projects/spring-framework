@@ -68,21 +68,21 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 	private final Set<BeanOverrideHandler> beanOverrideHandlers;
 
-	private final BeanOverrideRegistrar beanOverrideRegistrar;
+	private final BeanOverrideRegistry beanOverrideRegistry;
 
 
 	/**
 	 * Create a new {@code BeanOverrideBeanFactoryPostProcessor} with the supplied
 	 * set of {@link BeanOverrideHandler BeanOverrideHandlers} to process, using
-	 * the given {@link BeanOverrideRegistrar}.
+	 * the given {@link BeanOverrideRegistry}.
 	 * @param beanOverrideHandlers the bean override handlers to process
-	 * @param beanOverrideRegistrar the registrar used to track bean override handlers
+	 * @param beanOverrideRegistry the registry used to track bean override handlers
 	 */
 	BeanOverrideBeanFactoryPostProcessor(Set<BeanOverrideHandler> beanOverrideHandlers,
-			BeanOverrideRegistrar beanOverrideRegistrar) {
+			BeanOverrideRegistry beanOverrideRegistry) {
 
 		this.beanOverrideHandlers = beanOverrideHandlers;
-		this.beanOverrideRegistrar = beanOverrideRegistrar;
+		this.beanOverrideRegistry = beanOverrideRegistry;
 	}
 
 
@@ -193,7 +193,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 
 		Object override = handler.createOverrideInstance(beanName, existingBeanDefinition, null);
 		handler.trackOverrideInstance(override, beanFactory);
-		this.beanOverrideRegistrar.registerBeanOverrideHandler(handler, beanName);
+		this.beanOverrideRegistry.registerBeanOverrideHandler(handler, beanName);
 
 		// Now we have an instance (the override) that we can manually register as a singleton.
 		//
@@ -245,8 +245,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			}
 		}
 		validateBeanDefinition(beanFactory, beanName);
-		this.beanOverrideRegistrar.registerWrappingBeanOverrideHandler(handler, beanName);
-		this.beanOverrideRegistrar.registerBeanOverrideHandler(handler, beanName);
+		this.beanOverrideRegistry.registerBeanOverrideHandler(handler, beanName);
 	}
 
 	@Nullable

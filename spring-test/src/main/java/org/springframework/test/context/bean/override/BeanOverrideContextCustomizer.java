@@ -34,8 +34,8 @@ import org.springframework.test.context.MergedContextConfiguration;
  */
 class BeanOverrideContextCustomizer implements ContextCustomizer {
 
-	static final String REGISTRAR_BEAN_NAME =
-			"org.springframework.test.context.bean.override.internalBeanOverrideRegistrar";
+	static final String REGISTRY_BEAN_NAME =
+			"org.springframework.test.context.bean.override.internalBeanOverrideRegistry";
 
 	private static final String INFRASTRUCTURE_BEAN_NAME =
 			"org.springframework.test.context.bean.override.internalBeanOverridePostProcessor";
@@ -59,12 +59,12 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 		// the BeanOverrideBeanFactoryPostProcessor as a singleton is a requirement for
 		// AOT processing, since a bean definition cannot be generated for the
 		// Set<BeanOverrideHandler> argument that it accepts in its constructor.
-		BeanOverrideRegistrar beanOverrideRegistrar = new BeanOverrideRegistrar(beanFactory);
-		beanFactory.registerSingleton(REGISTRAR_BEAN_NAME, beanOverrideRegistrar);
+		BeanOverrideRegistry beanOverrideRegistry = new BeanOverrideRegistry(beanFactory);
+		beanFactory.registerSingleton(REGISTRY_BEAN_NAME, beanOverrideRegistry);
 		beanFactory.registerSingleton(INFRASTRUCTURE_BEAN_NAME,
-				new BeanOverrideBeanFactoryPostProcessor(this.handlers, beanOverrideRegistrar));
+				new BeanOverrideBeanFactoryPostProcessor(this.handlers, beanOverrideRegistry));
 		beanFactory.registerSingleton(EARLY_INFRASTRUCTURE_BEAN_NAME,
-				new WrapEarlyBeanPostProcessor(beanOverrideRegistrar));
+				new WrapEarlyBeanPostProcessor(beanOverrideRegistry));
 	}
 
 	Set<BeanOverrideHandler> getBeanOverrideHandlers() {

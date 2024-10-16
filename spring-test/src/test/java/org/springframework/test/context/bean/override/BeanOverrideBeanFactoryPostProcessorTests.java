@@ -48,7 +48,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link BeanOverrideBeanFactoryPostProcessor} combined with a
- * {@link BeanOverrideRegistrar}.
+ * {@link BeanOverrideRegistry}.
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
