@@ -198,7 +198,7 @@ heartbeats to be exchanged, the SockJS heartbeats are disabled.
 
 The Spring SockJS support also lets you configure the `TaskScheduler` to
 schedule heartbeats tasks. The task scheduler is backed by a thread pool,
-with default settings based on the number of available processors. Your
+with default settings based on the number of available processors. You
 should consider customizing the settings according to your specific needs.
 
 
