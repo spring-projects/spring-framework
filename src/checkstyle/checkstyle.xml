@@ -229,6 +229,22 @@
 			<property name="message" value="Please use class literals for primitives and void -- for example, int.class instead of Integer.TYPE."/>
 			<property name="ignoreComments" value="true"/>
 		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="toLowerCaseWithoutLocale"/>
+			<property name="format" value="\.toLowerCase\(\)"/>
+			<property name="maximum" value="0"/>
+			<property name="message"
+					  value="String.toLowerCase() should be String.toLowerCase(Locale.ROOT)"/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="toUpperCaseWithoutLocale"/>
+			<property name="format" value="\.toUpperCase\(\)"/>
+			<property name="maximum" value="0"/>
+			<property name="message"
+					  value="String.toUpperCase() should be String.toUpperCase(Locale.ROOT)"/>
+			<property name="ignoreComments" value="true"/>
+		</module>
 		<module
 			name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
 			<property name="maximum" value="0"/>
