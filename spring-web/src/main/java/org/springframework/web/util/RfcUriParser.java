@@ -29,7 +29,6 @@ import org.springframework.util.Assert;
  * Parser for URI's based on RFC 3986 syntax.
  *
  * @author Rossen Stoyanchev
- * @author Yanming Zhou
  * @since 6.2
  *
  * @see <a href="https://www.rfc-editor.org/info/rfc3986">RFC 3986</a>

@@ -633,29 +633,17 @@ class UriComponentsBuilderTests {
 	@ParameterizedTest // gh-33699
 	@EnumSource(value = ParserType.class)
 	void schemeVariableMixedCase(ParserType parserType) {
-		URI uri = UriComponentsBuilder
-				.fromUriString("{TheScheme}://example.org", parserType)
-				.buildAndExpand(Map.of("TheScheme", "ws"))
-				.toUri();
-		assertThat(uri.toString()).isEqualTo("ws://example.org");
 
-		uri = UriComponentsBuilder
-				.fromUriString("{TheScheme}s://example.org", parserType)
-				.buildAndExpand(Map.of("TheScheme", "ws"))
-				.toUri();
-		assertThat(uri.toString()).isEqualTo("wss://example.org");
+		BiConsumer<String, String> tester = (scheme, value) -> {
+			URI uri = UriComponentsBuilder.fromUriString(scheme + "://example.org", parserType)
+					.buildAndExpand(Map.of("TheScheme", value))
+					.toUri();
+			assertThat(uri.toString()).isEqualTo("wss://example.org");
+		};
 
-		uri = UriComponentsBuilder
-				.fromUriString("s{TheScheme}://example.org", parserType)
-				.buildAndExpand(Map.of("TheScheme", "ws"))
-				.toUri();
-		assertThat(uri.toString()).isEqualTo("sws://example.org");
-
-		uri = UriComponentsBuilder
-				.fromUriString("s{TheScheme}s://example.org", parserType)
-				.buildAndExpand(Map.of("TheScheme", "ws"))
-				.toUri();
-		assertThat(uri.toString()).isEqualTo("swss://example.org");
+		tester.accept("{TheScheme}", "wss");
+		tester.accept("{TheScheme}s", "ws");
+		tester.accept("ws{TheScheme}", "s");
 	}
 
 	@ParameterizedTest
