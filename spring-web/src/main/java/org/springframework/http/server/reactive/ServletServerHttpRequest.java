@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static MultiValueMap<String, String> createDefaultHttpHeaders(HttpServletRequest request) {
 		MultiValueMap<String, String> headers =
-				CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+				CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT));
 		for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
 			String name = (String) names.nextElement();
 			for (Enumeration<?> values = request.getHeaders(name); values.hasMoreElements(); ) {

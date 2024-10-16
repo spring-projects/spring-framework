@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -319,7 +319,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 */
 	public void setMediaTypes(Map<String, MediaType> mediaTypes) {
 		mediaTypes.forEach((ext, mediaType) ->
-				this.mediaTypes.put(ext.toLowerCase(Locale.ENGLISH), mediaType));
+				this.mediaTypes.put(ext.toLowerCase(Locale.ROOT), mediaType));
 	}
 
 	/**
@@ -843,7 +843,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			String filename = resource.getFilename();
 			String ext = StringUtils.getFilenameExtension(filename);
 			if (ext != null) {
-				mediaType = this.mediaTypes.get(ext.toLowerCase(Locale.ENGLISH));
+				mediaType = this.mediaTypes.get(ext.toLowerCase(Locale.ROOT));
 			}
 			if (mediaType == null) {
 				List<MediaType> mediaTypes = MediaTypeFactory.getMediaTypes(filename);

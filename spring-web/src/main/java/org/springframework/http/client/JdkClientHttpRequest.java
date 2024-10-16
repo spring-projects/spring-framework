@@ -26,6 +26,7 @@ import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -139,7 +140,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		}
 
 		headers.forEach((headerName, headerValues) -> {
-			if (!DISALLOWED_HEADERS.contains(headerName.toLowerCase())) {
+			if (!DISALLOWED_HEADERS.contains(headerName.toLowerCase(Locale.ROOT))) {
 				for (String headerValue : headerValues) {
 					builder.header(headerName, headerValue);
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -339,7 +339,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			this.mediaTypes = new HashMap<>(mediaTypes.size());
 		}
 		mediaTypes.forEach((ext, type) ->
-				this.mediaTypes.put(ext.toLowerCase(Locale.ENGLISH), type));
+				this.mediaTypes.put(ext.toLowerCase(Locale.ROOT), type));
 	}
 
 	/**
@@ -664,7 +664,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		if (!CollectionUtils.isEmpty(this.mediaTypes)) {
 			String ext = StringUtils.getFilenameExtension(filename);
 			if (ext != null) {
-				mediaType = this.mediaTypes.get(ext.toLowerCase(Locale.ENGLISH));
+				mediaType = this.mediaTypes.get(ext.toLowerCase(Locale.ROOT));
 			}
 		}
 		if (mediaType == null) {

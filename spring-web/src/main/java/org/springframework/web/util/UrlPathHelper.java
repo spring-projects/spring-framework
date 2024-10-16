@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.util;
 
 import java.net.URLDecoder;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -629,7 +630,7 @@ public class UrlPathHelper {
 
 	private String removeJsessionid(String requestUri) {
 		String key = ";jsessionid=";
-		int index = requestUri.toLowerCase().indexOf(key);
+		int index = requestUri.toLowerCase(Locale.ROOT).indexOf(key);
 		if (index == -1) {
 			return requestUri;
 		}

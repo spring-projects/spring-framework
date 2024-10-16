@@ -82,7 +82,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	private static final Log logger = LogFactory.getLog(ForwardedHeaderFilter.class);
 
 	private static final Set<String> FORWARDED_HEADER_NAMES =
-			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(10, Locale.ENGLISH));
+			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(10, Locale.ROOT));
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");
@@ -204,7 +204,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 
 		private static Set<String> headerNames(HttpServletRequest request) {
-			Set<String> headerNames = Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(Locale.ENGLISH));
+			Set<String> headerNames = Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(Locale.ROOT));
 			Enumeration<String> names = request.getHeaderNames();
 			while (names.hasMoreElements()) {
 				String name = names.nextElement();
