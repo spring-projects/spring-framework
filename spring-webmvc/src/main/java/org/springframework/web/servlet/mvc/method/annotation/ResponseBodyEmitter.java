@@ -117,7 +117,7 @@ public class ResponseBodyEmitter {
 	}
 
 
-	synchronized void initialize(Handler handler) throws IOException {
+	public synchronized void initialize(Handler handler) throws IOException {
 		this.handler = handler;
 
 		try {
@@ -315,7 +315,7 @@ public class ResponseBodyEmitter {
 	 * timeout, error, and completion for any reason (including from the
 	 * container side).
 	 */
-	interface Handler {
+	public interface Handler {
 
 		/**
 		 * Immediately write and flush the given data to the network.
