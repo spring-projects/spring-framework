@@ -152,6 +152,31 @@ public abstract class BeanOverrideHandler {
 	}
 
 	/**
+	 * {@linkplain #createOverrideInstance Create} and
+	 * {@linkplain #trackOverrideInstance track} a bean override instance for an
+	 * existing {@link BeanDefinition} or an existing singleton bean, based on the
+	 * metadata in this {@code BeanOverrideHandler}.
+	 * @param beanName the name of the bean being overridden
+	 * @param existingBeanDefinition an existing bean definition for the supplied
+	 * bean name, or {@code null} if not available or not relevant
+	 * @param existingBeanInstance an existing instance for the supplied bean name
+	 * for wrapping purposes, or {@code null} if not available or not relevant
+	 * @param singletonBeanRegistry a registry in which this handler can store
+	 * tracking state in the form of a singleton bean
+	 * @return the instance with which to override the bean
+	 * @see #trackOverrideInstance(Object, SingletonBeanRegistry)
+	 * @see #createOverrideInstance(String, BeanDefinition, Object)
+	 */
+	final Object createOverrideInstance(
+			String beanName, @Nullable BeanDefinition existingBeanDefinition,
+			@Nullable Object existingBeanInstance, SingletonBeanRegistry singletonBeanRegistry) {
+
+		Object override = createOverrideInstance(beanName, existingBeanDefinition, existingBeanInstance);
+		trackOverrideInstance(override, singletonBeanRegistry);
+		return override;
+	}
+
+	/**
 	 * Create a bean override instance for an existing {@link BeanDefinition} or
 	 * an existing singleton bean, based on the metadata in this
 	 * {@code BeanOverrideHandler}.
@@ -172,11 +197,11 @@ public abstract class BeanOverrideHandler {
 	 * <p>The default implementation does not track the supplied instance, but
 	 * this can be overridden in subclasses as appropriate.
 	 * @param override the bean override instance to track
-	 * @param trackingBeanRegistry a registry in which this handler can store
+	 * @param singletonBeanRegistry a registry in which this handler can store
 	 * tracking state in the form of a singleton bean
 	 * @see #createOverrideInstance(String, BeanDefinition, Object)
 	 */
-	protected void trackOverrideInstance(Object override, SingletonBeanRegistry trackingBeanRegistry) {
+	protected void trackOverrideInstance(Object override, SingletonBeanRegistry singletonBeanRegistry) {
 		// NO-OP
 	}
 

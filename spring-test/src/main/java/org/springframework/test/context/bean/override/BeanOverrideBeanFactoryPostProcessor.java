@@ -191,8 +191,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			registry.registerBeanDefinition(beanName, pseudoBeanDefinition);
 		}
 
-		Object override = handler.createOverrideInstance(beanName, existingBeanDefinition, null);
-		handler.trackOverrideInstance(override, beanFactory);
+		Object override = handler.createOverrideInstance(beanName, existingBeanDefinition, null, beanFactory);
 		this.beanOverrideRegistry.registerBeanOverrideHandler(handler, beanName);
 
 		// Now we have an instance (the override) that we can manually register as a singleton.

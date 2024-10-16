@@ -78,9 +78,7 @@ class BeanOverrideRegistry {
 		BeanOverrideHandler handler = this.wrappingBeanOverrideHandlers.get(beanName);
 		Assert.state(handler != null,
 				() -> "Failed to find wrapping BeanOverrideHandler for bean '" + beanName + "'");
-		bean = handler.createOverrideInstance(beanName, null, bean);
-		handler.trackOverrideInstance(bean, this.beanFactory);
-		return bean;
+		return handler.createOverrideInstance(beanName, null, bean, this.beanFactory);
 	}
 
 	void inject(Object target, BeanOverrideHandler handler) {
