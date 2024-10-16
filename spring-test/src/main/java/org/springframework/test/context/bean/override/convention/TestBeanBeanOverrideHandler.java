@@ -58,8 +58,8 @@ final class TestBeanBeanOverrideHandler extends BeanOverrideHandler {
 			return this.factoryMethod.invoke(null);
 		}
 		catch (IllegalAccessException | InvocationTargetException ex) {
-			throw new IllegalStateException("Failed to invoke bean overriding method " + this.factoryMethod.getName() +
-					"; a static method with no formal parameters is expected", ex);
+			throw new IllegalStateException(
+					"Failed to invoke @TestBean factory method: " + this.factoryMethod, ex);
 		}
 	}
 
