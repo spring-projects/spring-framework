@@ -64,8 +64,8 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	private final Supplier<InstantiationDescriptor> instantiationDescriptor;
 
 
-	DefaultBeanRegistrationCodeFragments(BeanRegistrationsCode beanRegistrationsCode,
-			RegisteredBean registeredBean,
+	DefaultBeanRegistrationCodeFragments(
+			BeanRegistrationsCode beanRegistrationsCode, RegisteredBean registeredBean,
 			BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory) {
 
 		this.beanRegistrationsCode = beanRegistrationsCode;
