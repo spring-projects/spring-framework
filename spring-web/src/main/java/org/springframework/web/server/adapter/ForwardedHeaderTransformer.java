@@ -61,7 +61,7 @@ import org.springframework.web.util.UriComponents;
 public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, ServerHttpRequest> {
 
 	static final Set<String> FORWARDED_HEADER_NAMES =
-			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(10, Locale.ENGLISH));
+			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(10, Locale.ROOT));
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");

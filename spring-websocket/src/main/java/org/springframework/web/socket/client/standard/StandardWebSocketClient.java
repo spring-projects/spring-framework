@@ -203,7 +203,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private static int getPort(URI uri) {
 		if (uri.getPort() == -1) {
-			String scheme = uri.getScheme().toLowerCase(Locale.ENGLISH);
+			String scheme = uri.getScheme().toLowerCase(Locale.ROOT);
 			return ("wss".equals(scheme) ? 443 : 80);
 		}
 		return uri.getPort();

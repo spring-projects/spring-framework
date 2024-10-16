@@ -391,7 +391,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new LinkedMultiValueMap<>());
 
-	private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.ENGLISH);
+	private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.ROOT);
 
 	private static final ZoneId GMT = ZoneId.of("GMT");
 
@@ -421,7 +421,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * <p>This is the common constructor, using a case-insensitive map structure.
 	 */
 	public HttpHeaders() {
-		this(CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH)));
+		this(CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT)));
 	}
 
 	/**
@@ -717,7 +717,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public void setAcceptCharset(List<Charset> acceptableCharsets) {
 		StringJoiner joiner = new StringJoiner(", ");
 		for (Charset charset : acceptableCharsets) {
-			joiner.add(charset.name().toLowerCase(Locale.ENGLISH));
+			joiner.add(charset.name().toLowerCase(Locale.ROOT));
 		}
 		set(ACCEPT_CHARSET, joiner.toString());
 	}

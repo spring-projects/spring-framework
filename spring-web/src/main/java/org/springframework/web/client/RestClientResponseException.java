@@ -105,7 +105,7 @@ public class RestClientResponseException extends RestClientException {
 	private static HttpHeaders copyHeaders(@Nullable HttpHeaders headers) {
 		if (headers != null) {
 			MultiValueMap<String, String> result =
-					CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(headers.size(), Locale.ENGLISH));
+					CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(headers.size(), Locale.ROOT));
 			headers.forEach((name, values) -> values.forEach(value -> result.add(name, value)));
 			return HttpHeaders.readOnlyHttpHeaders(result);
 		}

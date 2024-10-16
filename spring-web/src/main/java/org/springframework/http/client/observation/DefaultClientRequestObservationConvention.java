@@ -17,6 +17,7 @@
 package org.springframework.http.client.observation;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import io.micrometer.common.KeyValue;
@@ -89,7 +90,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	@Nullable
 	public String getContextualName(ClientRequestObservationContext context) {
 		ClientHttpRequest request = context.getCarrier();
-		return (request != null ? "http " + request.getMethod().name().toLowerCase() : null);
+		return (request != null ? "http " + request.getMethod().name().toLowerCase(Locale.ROOT) : null);
 	}
 
 	@Override

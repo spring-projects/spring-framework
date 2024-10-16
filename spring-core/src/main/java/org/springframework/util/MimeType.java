@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,10 +181,10 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		Assert.hasLength(subtype, "'subtype' must not be empty");
 		checkToken(type);
 		checkToken(subtype);
-		this.type = type.toLowerCase(Locale.ENGLISH);
-		this.subtype = subtype.toLowerCase(Locale.ENGLISH);
+		this.type = type.toLowerCase(Locale.ROOT);
+		this.subtype = subtype.toLowerCase(Locale.ROOT);
 		if (!CollectionUtils.isEmpty(parameters)) {
-			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ENGLISH);
+			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ROOT);
 			parameters.forEach((parameter, value) -> {
 				checkParameters(parameter, value);
 				map.put(parameter, value);

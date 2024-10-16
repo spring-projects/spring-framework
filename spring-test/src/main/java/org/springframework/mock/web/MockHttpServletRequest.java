@@ -412,7 +412,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private void updateContentTypeHeader() {
 		if (StringUtils.hasLength(this.contentType)) {
 			String value = this.contentType;
-			if (StringUtils.hasLength(this.characterEncoding) && !this.contentType.toLowerCase().contains(CHARSET_PREFIX)) {
+			if (StringUtils.hasLength(this.characterEncoding) &&
+					!this.contentType.toLowerCase(Locale.ROOT).contains(CHARSET_PREFIX)) {
 				value += ';' + CHARSET_PREFIX + this.characterEncoding;
 			}
 			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, value, true);
@@ -490,7 +491,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			}
 			catch (IllegalArgumentException ex) {
 				// Try to get charset value anyway
-				contentType = contentType.toLowerCase();
+				contentType = contentType.toLowerCase(Locale.ROOT);
 				int charsetIndex = contentType.indexOf(CHARSET_PREFIX);
 				if (charsetIndex != -1) {
 					this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
