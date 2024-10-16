@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.support;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,8 +78,8 @@ public class PropertyComparator<T> implements Comparator<T> {
 		Object v1 = getPropertyValue(o1);
 		Object v2 = getPropertyValue(o2);
 		if (this.sortDefinition.isIgnoreCase() && (v1 instanceof String text1) && (v2 instanceof String text2)) {
-			v1 = text1.toLowerCase();
-			v2 = text2.toLowerCase();
+			v1 = text1.toLowerCase(Locale.ROOT);
+			v2 = text2.toLowerCase(Locale.ROOT);
 		}
 
 		int result;

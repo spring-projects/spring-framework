@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
@@ -750,7 +751,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				throw internalException( this.expressionString.length(), SpelMessage.OOD);
 			}
 			throw internalException(node.startPos, SpelMessage.NOT_EXPECTED_TOKEN,
-					"qualified ID", node.getKind().toString().toLowerCase());
+					"qualified ID", node.getKind().toString().toLowerCase(Locale.ROOT));
 		}
 		return new QualifiedIdentifier(qualifiedIdPieces.getFirst().getStartPosition(),
 				qualifiedIdPieces.getLast().getEndPosition(), qualifiedIdPieces.toArray(new SpelNodeImpl[0]));
@@ -942,7 +943,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 		if (t.kind != expectedKind) {
 			throw internalException(t.startPos, SpelMessage.NOT_EXPECTED_TOKEN,
-					expectedKind.toString().toLowerCase(), t.getKind().toString().toLowerCase());
+					expectedKind.toString().toLowerCase(Locale.ROOT), t.getKind().toString().toLowerCase(Locale.ROOT));
 		}
 		return t;
 	}
@@ -1038,7 +1039,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (t.getKind().hasPayload()) {
 			return t.stringValue();
 		}
-		return t.kind.toString().toLowerCase();
+		return t.kind.toString().toLowerCase(Locale.ROOT);
 	}
 
 	private void checkOperands(Token token, @Nullable SpelNodeImpl left, @Nullable SpelNodeImpl right) {

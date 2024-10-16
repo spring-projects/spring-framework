@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -159,7 +160,7 @@ public @interface NestedTestConfiguration {
 				return null;
 			}
 			try {
-				return EnclosingConfiguration.valueOf(name.trim().toUpperCase());
+				return EnclosingConfiguration.valueOf(name.trim().toUpperCase(Locale.ROOT));
 			}
 			catch (IllegalArgumentException ex) {
 				Log logger = LogFactory.getLog(EnclosingConfiguration.class);
@@ -171,7 +172,6 @@ public @interface NestedTestConfiguration {
 				return null;
 			}
 		}
-
 	}
 
 }
