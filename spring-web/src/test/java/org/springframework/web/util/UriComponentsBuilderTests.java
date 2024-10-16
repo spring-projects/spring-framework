@@ -47,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author David Eckel
+ * @author Yanming Zhou
  */
 class UriComponentsBuilderTests {
 
@@ -637,6 +638,24 @@ class UriComponentsBuilderTests {
 				.buildAndExpand(Map.of("TheScheme", "ws"))
 				.toUri();
 		assertThat(uri.toString()).isEqualTo("ws://example.org");
+
+		uri = UriComponentsBuilder
+				.fromUriString("{TheScheme}s://example.org", parserType)
+				.buildAndExpand(Map.of("TheScheme", "ws"))
+				.toUri();
+		assertThat(uri.toString()).isEqualTo("wss://example.org");
+
+		uri = UriComponentsBuilder
+				.fromUriString("s{TheScheme}://example.org", parserType)
+				.buildAndExpand(Map.of("TheScheme", "ws"))
+				.toUri();
+		assertThat(uri.toString()).isEqualTo("sws://example.org");
+
+		uri = UriComponentsBuilder
+				.fromUriString("s{TheScheme}s://example.org", parserType)
+				.buildAndExpand(Map.of("TheScheme", "ws"))
+				.toUri();
+		assertThat(uri.toString()).isEqualTo("swss://example.org");
 	}
 
 	@ParameterizedTest
