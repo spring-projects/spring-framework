@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.socket.sockjs.frame;
+
+import java.util.Locale;
 
 import org.springframework.util.Assert;
 
@@ -58,7 +60,7 @@ public abstract class AbstractSockJsMessageCodec implements SockJsMessageCodec {
 		for (char c : characters) {
 			if (isSockJsSpecialChar(c)) {
 				result.append('\\').append('u');
-				String hex = Integer.toHexString(c).toLowerCase();
+				String hex = Integer.toHexString(c).toLowerCase(Locale.ROOT);
 				result.append("0".repeat(Math.max(0, (4 - hex.length()))));
 				result.append(hex);
 			}

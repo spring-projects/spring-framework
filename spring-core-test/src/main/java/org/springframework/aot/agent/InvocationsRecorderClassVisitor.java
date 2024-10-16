@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.aot.agent;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.springframework.asm.ClassVisitor;
@@ -40,6 +41,7 @@ class InvocationsRecorderClassVisitor extends ClassVisitor implements Opcodes {
 
 	private final ClassWriter classWriter;
 
+
 	public InvocationsRecorderClassVisitor() {
 		this(new ClassWriter(ClassWriter.COMPUTE_MAXS));
 	}
@@ -48,6 +50,7 @@ class InvocationsRecorderClassVisitor extends ClassVisitor implements Opcodes {
 		super(SpringAsmInfo.ASM_VERSION, classWriter);
 		this.classWriter = classWriter;
 	}
+
 
 	public boolean isTransformed() {
 		return this.isTransformed;
@@ -63,6 +66,7 @@ class InvocationsRecorderClassVisitor extends ClassVisitor implements Opcodes {
 		MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
 		return new InvocationsRecorderMethodVisitor(mv);
 	}
+
 
 	@SuppressWarnings("deprecation")
 	class InvocationsRecorderMethodVisitor extends MethodVisitor implements Opcodes {
@@ -82,7 +86,6 @@ class InvocationsRecorderClassVisitor extends ClassVisitor implements Opcodes {
 		public InvocationsRecorderMethodVisitor(MethodVisitor mv) {
 			super(SpringAsmInfo.ASM_VERSION, mv);
 		}
-
 
 		@Override
 		public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
@@ -116,7 +119,6 @@ class InvocationsRecorderClassVisitor extends ClassVisitor implements Opcodes {
 			super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
 		}
 
-
 		private boolean shouldRecordMethodCall(String owner, String method) {
 			String methodReference = owner + "#" + method;
 			return instrumentedMethods.contains(methodReference);
@@ -124,13 +126,12 @@ class InvocationsRecorderClassVisitor extends ClassVisitor implements Opcodes {
 
 		private String rewriteMethodName(String owner, String methodName) {
 			int classIndex = owner.lastIndexOf('/');
-			return owner.substring(classIndex + 1).toLowerCase() + methodName;
+			return owner.substring(classIndex + 1).toLowerCase(Locale.ROOT) + methodName;
 		}
 
 		private String rewriteDescriptor(int opcode, String owner, String name, String descriptor) {
 			return (opcode == Opcodes.INVOKESTATIC || opcode == Opcodes.H_INVOKESTATIC) ? descriptor : "(L" + owner + ";" + descriptor.substring(1);
 		}
-
 	}
 
 }

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -214,10 +215,10 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			return null;
 		}
 		else if (isStoresUpperCaseIdentifiers()) {
-			return identifierName.toUpperCase();
+			return identifierName.toUpperCase(Locale.ROOT);
 		}
 		else if (isStoresLowerCaseIdentifiers()) {
-			return identifierName.toLowerCase();
+			return identifierName.toLowerCase(Locale.ROOT);
 		}
 		else {
 			return identifierName;
@@ -326,10 +327,10 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 				TableMetaData tmd = new TableMetaData(tables.getString("TABLE_CAT"),
 						tables.getString("TABLE_SCHEM"), tables.getString("TABLE_NAME"));
 				if (tmd.schemaName() == null) {
-					tableMeta.put(this.userName != null ? this.userName.toUpperCase() : "", tmd);
+					tableMeta.put(this.userName != null ? this.userName.toUpperCase(Locale.ROOT) : "", tmd);
 				}
 				else {
-					tableMeta.put(tmd.schemaName().toUpperCase(), tmd);
+					tableMeta.put(tmd.schemaName().toUpperCase(Locale.ROOT), tmd);
 				}
 			}
 		}
@@ -356,7 +357,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			Map<String, TableMetaData> tableMeta) {
 
 		if (schemaName != null) {
-			TableMetaData tmd = tableMeta.get(schemaName.toUpperCase());
+			TableMetaData tmd = tableMeta.get(schemaName.toUpperCase(Locale.ROOT));
 			if (tmd == null) {
 				throw new DataAccessResourceFailureException("Unable to locate table meta-data for '" +
 						tableName + "' in the '" + schemaName + "' schema");
@@ -369,7 +370,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		else {
 			TableMetaData tmd = tableMeta.get(getDefaultSchema());
 			if (tmd == null) {
-				tmd = tableMeta.get(this.userName != null ? this.userName.toUpperCase() : "");
+				tmd = tableMeta.get(this.userName != null ? this.userName.toUpperCase(Locale.ROOT) : "");
 			}
 			if (tmd == null) {
 				tmd = tableMeta.get("PUBLIC");
