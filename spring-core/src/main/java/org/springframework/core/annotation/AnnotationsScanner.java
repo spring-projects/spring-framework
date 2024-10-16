@@ -103,7 +103,7 @@ abstract class AnnotationsScanner {
 
 		return switch (searchStrategy) {
 			case DIRECT -> processElement(context, source, processor);
-			case INHERITED_ANNOTATIONS -> processClassInheritedAnnotations(context, source, searchStrategy, processor);
+			case INHERITED_ANNOTATIONS -> processClassInheritedAnnotations(context, source, processor);
 			case SUPERCLASS -> processClassHierarchy(context, source, processor, false, Search.never);
 			case TYPE_HIERARCHY -> processClassHierarchy(context, source, processor, true, searchEnclosingClass);
 		};
@@ -111,18 +111,17 @@ abstract class AnnotationsScanner {
 
 	@Nullable
 	private static <C, R> R processClassInheritedAnnotations(C context, Class<?> source,
-			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor) {
+			AnnotationsProcessor<C, R> processor) {
 
 		try {
-			if (isWithoutHierarchy(source, searchStrategy, Search.never)) {
+			if (isWithoutHierarchy(source, Search.never)) {
 				return processElement(context, source, processor);
 			}
 			Annotation[] relevant = null;
 			int remaining = Integer.MAX_VALUE;
 			int aggregateIndex = 0;
 			Class<?> root = source;
-			while (source != null && source != Object.class && remaining > 0 &&
-					!hasPlainJavaAnnotationsOnly(source)) {
+			while (source != null && source != Object.class && remaining > 0 && !hasPlainJavaAnnotationsOnly(source)) {
 				R result = processor.doWithAggregate(context, aggregateIndex);
 				if (result != null) {
 					return result;
@@ -483,7 +482,7 @@ abstract class AnnotationsScanner {
 		if (hasPlainJavaAnnotationsOnly(source)) {
 			return true;
 		}
-		if (searchStrategy == SearchStrategy.DIRECT || isWithoutHierarchy(source, searchStrategy, searchEnclosingClass)) {
+		if (searchStrategy == SearchStrategy.DIRECT || isWithoutHierarchy(source, searchEnclosingClass)) {
 			if (source instanceof Method method && method.isBridge()) {
 				return false;
 			}
@@ -508,9 +507,7 @@ abstract class AnnotationsScanner {
 		return (type.getName().startsWith("java.") || type == Ordered.class);
 	}
 
-	private static boolean isWithoutHierarchy(AnnotatedElement source, SearchStrategy searchStrategy,
-			Predicate<Class<?>> searchEnclosingClass) {
-
+	private static boolean isWithoutHierarchy(AnnotatedElement source, Predicate<Class<?>> searchEnclosingClass) {
 		if (source == Object.class) {
 			return true;
 		}
@@ -522,7 +519,7 @@ abstract class AnnotationsScanner {
 		}
 		if (source instanceof Method sourceMethod) {
 			return (Modifier.isPrivate(sourceMethod.getModifiers()) ||
-					isWithoutHierarchy(sourceMethod.getDeclaringClass(), searchStrategy, searchEnclosingClass));
+					isWithoutHierarchy(sourceMethod.getDeclaringClass(), searchEnclosingClass));
 		}
 		return true;
 	}
