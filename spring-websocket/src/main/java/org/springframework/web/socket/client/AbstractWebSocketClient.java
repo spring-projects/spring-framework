@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.socket.client;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -81,7 +82,7 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 		HttpHeaders headersToUse = new HttpHeaders();
 		if (headers != null) {
 			headers.forEach((header, values) -> {
-				if (values != null && !specialHeaders.contains(header.toLowerCase())) {
+				if (values != null && !specialHeaders.contains(header.toLowerCase(Locale.ROOT))) {
 					headersToUse.put(header, values);
 				}
 			});
