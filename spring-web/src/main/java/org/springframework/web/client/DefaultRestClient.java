@@ -119,12 +119,12 @@ final class DefaultRestClient implements RestClient {
 
 
 	DefaultRestClient(ClientHttpRequestFactory clientRequestFactory,
-			@Nullable List<ClientHttpRequestInterceptor> interceptors,
 			@Nullable List<ClientHttpRequestInitializer> initializers,
+			@Nullable List<ClientHttpRequestInterceptor> interceptors,
 			UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders,
 			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
-			@Nullable List<StatusHandler> statusHandlers,
+			@Nullable List<StatusHandler> defaultStatusHandlers,
 			List<HttpMessageConverter<?>> messageConverters,
 			ObservationRegistry observationRegistry,
 			@Nullable ClientRequestObservationConvention observationConvention,
@@ -136,7 +136,7 @@ final class DefaultRestClient implements RestClient {
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultRequest = defaultRequest;
-		this.defaultStatusHandlers = (statusHandlers != null ? new ArrayList<>(statusHandlers) : new ArrayList<>());
+		this.defaultStatusHandlers = (defaultStatusHandlers != null ? new ArrayList<>(defaultStatusHandlers) : new ArrayList<>());
 		this.messageConverters = messageConverters;
 		this.observationRegistry = observationRegistry;
 		this.observationConvention = observationConvention;
