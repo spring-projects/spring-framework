@@ -56,6 +56,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriTemplateHandler;
@@ -128,6 +130,9 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	private HttpHeaders defaultHeaders;
 
 	@Nullable
+	private MultiValueMap<String, String> defaultCookies;
+
+	@Nullable
 	private Consumer<RestClient.RequestHeadersSpec<?>> defaultRequest;
 
 	@Nullable
@@ -169,6 +174,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		else {
 			this.defaultHeaders = null;
 		}
+		this.defaultCookies = (other.defaultCookies != null ?
+				new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.defaultRequest = other.defaultRequest;
 		this.statusHandlers = (other.statusHandlers != null ? new ArrayList<>(other.statusHandlers) : null);
 
@@ -287,6 +294,25 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			this.defaultHeaders = new HttpHeaders();
 		}
 		return this.defaultHeaders;
+	}
+
+	@Override
+	public RestClient.Builder defaultCookie(String cookie, String... values) {
+		initCookies().addAll(cookie, Arrays.asList(values));
+		return this;
+	}
+
+	@Override
+	public RestClient.Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+		cookiesConsumer.accept(initCookies());
+		return this;
+	}
+
+	private MultiValueMap<String, String> initCookies() {
+		if (this.defaultCookies == null) {
+			this.defaultCookies = new LinkedMultiValueMap<>(3);
+		}
+		return this.defaultCookies;
 	}
 
 	@Override
@@ -443,11 +469,13 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		ClientHttpRequestFactory requestFactory = initRequestFactory();
 		UriBuilderFactory uriBuilderFactory = initUriBuilderFactory();
 		HttpHeaders defaultHeaders = copyDefaultHeaders();
+		MultiValueMap<String, String> defaultCookies = copyDefaultCookies();
 		List<HttpMessageConverter<?>> messageConverters = (this.messageConverters != null ?
 				this.messageConverters : initMessageConverters());
 		return new DefaultRestClient(requestFactory,
 				this.interceptors, this.initializers, uriBuilderFactory,
 				defaultHeaders,
+				defaultCookies,
 				this.defaultRequest,
 				this.statusHandlers,
 				messageConverters,
@@ -495,6 +523,18 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 			HttpHeaders copy = new HttpHeaders();
 			this.defaultHeaders.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
 			return HttpHeaders.readOnlyHttpHeaders(copy);
+		}
+		else {
+			return null;
+		}
+	}
+
+	@Nullable
+	private MultiValueMap<String, String> copyDefaultCookies() {
+		if (this.defaultCookies != null) {
+			MultiValueMap<String, String> copy = new LinkedMultiValueMap<>(this.defaultCookies.size());
+			this.defaultCookies.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
+			return CollectionUtils.unmodifiableMultiValueMap(copy);
 		}
 		else {
 			return null;
