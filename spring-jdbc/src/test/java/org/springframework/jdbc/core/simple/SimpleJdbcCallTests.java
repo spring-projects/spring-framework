@@ -16,12 +16,15 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.lang.reflect.Field;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -30,6 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -360,4 +364,78 @@ class SimpleJdbcCallTests {
 		verifyStatement(adder, "{call ADD_INVOICE(@AMOUNT = ?, @CUSTID = ?)}");
 	}
 
+	/**
+	 * This test verifies that when declaring a parameter for a SimpleJdbcCall, 
+	 * then the parameter is added as expected.
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	void verifyUncompiledDeclareParameterIsAdded() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		SimpleJdbcCall call = new SimpleJdbcCall(dataSource)
+				.withProcedureName("procedure_name")
+				.declareParameters(new SqlParameter("PARAM", Types.VARCHAR));
+		
+		Field params = AbstractJdbcCall.class.getDeclaredField("declaredParameters");
+		params.setAccessible(true);
+		List<SqlParameter> paramList = (List<SqlParameter>) params.get(call);
+		assertThat(paramList).hasSize(1).allMatch(sqlParam -> sqlParam.getName().equals("PARAM"));
+	}
+	
+	/**
+	 * This verifies that once the SimpleJdbcCall is compiled, then adding
+	 * a parameter is ignored
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	void verifyWhenCompiledThenDeclareParameterIsIgnored() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		SimpleJdbcCall call = new SimpleJdbcCall(dataSource)
+				.withProcedureName("procedure_name")
+				.declareParameters(new SqlParameter("PARAM", Types.VARCHAR));
+		call.compile();
+		
+		call.declareParameters(new SqlParameter("Ignored Param", Types.VARCHAR));
+		
+		Field params = AbstractJdbcCall.class.getDeclaredField("declaredParameters");
+		params.setAccessible(true);
+		List<SqlParameter> paramList = (List<SqlParameter>) params.get(call);
+		assertThat(paramList).hasSize(1).allMatch(sqlParam -> sqlParam.getName().equals("PARAM"));
+	}
+	
+	/**
+	 * When adding a declared row mapper, this verifies that the declaredRowMappers
+	 * gets the new mapper
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	void verifyUncompiledDeclareRowMapperIsAdded() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		SimpleJdbcCall call = new SimpleJdbcCall(dataSource)
+				.withProcedureName("procedure_name")
+				.returningResultSet("result_set", (rs,i) -> new Object());
+		
+		Field rowMappers = AbstractJdbcCall.class.getDeclaredField("declaredRowMappers");
+		rowMappers.setAccessible(true);
+		Map<String, RowMapper<?>> mappers = (Map<String, RowMapper<?>>) rowMappers.get(call);
+		assertThat(mappers).hasSize(1).allSatisfy((key,value) -> key.equals("result_set"));
+	}
+	
+	/**
+	 * This verifies that when adding a row mapper after the call is compiled
+	 * then the request is ignored
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	void verifyWhenCompiledThenDeclareRowMapperIsIgnored() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		SimpleJdbcCall call = new SimpleJdbcCall(dataSource)
+				.withProcedureName("procedure_name")
+				.returningResultSet("result_set", (rs,i) -> new Object());
+		call.compile();
+		
+		call.returningResultSet("not added", (rs,i) -> new Object());
+		
+		Field rowMappers = AbstractJdbcCall.class.getDeclaredField("declaredRowMappers");
+		rowMappers.setAccessible(true);
+		Map<String, RowMapper<?>> mappers = (Map<String, RowMapper<?>>) rowMappers.get(call);
+		assertThat(mappers).hasSize(1).allSatisfy((key,value) -> key.equals("result_set"));
+	}
+	
 }
