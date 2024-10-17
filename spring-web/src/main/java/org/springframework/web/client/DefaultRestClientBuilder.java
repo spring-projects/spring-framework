@@ -446,7 +446,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		List<HttpMessageConverter<?>> messageConverters = (this.messageConverters != null ?
 				this.messageConverters : initMessageConverters());
 		return new DefaultRestClient(requestFactory,
-				this.interceptors, this.initializers, uriBuilderFactory,
+				this.initializers, this.interceptors, uriBuilderFactory,
 				defaultHeaders,
 				this.defaultRequest,
 				this.statusHandlers,
