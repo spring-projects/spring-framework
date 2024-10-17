@@ -325,6 +325,14 @@ class PropertySourcesPropertyResolverTests {
 				.hasToString("${p1}:${p2}");
 	}
 
+	@Test // gh-33727
+	void resolveNestedPlaceHolderIfValueShouldConvertToOtherTypes() {
+		MutablePropertySources ps = new MutablePropertySources();
+		ps.addFirst(new MockPropertySource().withProperty("new.enabled", "${old.enabled:true}"));
+		ConfigurablePropertyResolver pr = new PropertySourcesPropertyResolver(ps);
+		assertThat(pr.getProperty("new.enabled", Boolean.class, false)).isTrue();
+	}
+
 	@Test
 	void ignoreUnresolvableNestedPlaceholdersIsConfigurable() {
 		MutablePropertySources ps = new MutablePropertySources();

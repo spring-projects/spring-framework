@@ -84,10 +84,14 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 				}
 				Object value = propertySource.getProperty(key);
 				if (value != null) {
-					if (resolveNestedPlaceholders &&
-							(String.class.equals(targetValueType) || CharSequence.class.equals(targetValueType)) &&
-							value instanceof CharSequence cs) {
-						value = resolveNestedPlaceholders(cs.toString());
+					if (resolveNestedPlaceholders) {
+						if (value instanceof String string) {
+							value = resolveNestedPlaceholders(string);
+						}
+						else if ((value instanceof CharSequence cs) && (String.class.equals(targetValueType) ||
+								CharSequence.class.equals(targetValueType))) {
+							value = resolveNestedPlaceholders(cs.toString());
+						}
 					}
 					logKeyFound(key, propertySource, value);
 					return convertValueIfNecessary(value, targetValueType);
