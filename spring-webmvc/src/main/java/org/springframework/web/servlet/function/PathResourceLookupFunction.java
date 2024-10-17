@@ -61,7 +61,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 		}
 
 		pathContainer = this.pattern.extractPathWithinPattern(pathContainer);
-		String path = processPath(pathContainer.value());
+		String path = ResourceHandlerUtils.normalizeInputPath(pathContainer.value());
 		if (ResourceHandlerUtils.shouldIgnoreInputPath(path)) {
 			return Optional.empty();
 		}
@@ -82,14 +82,6 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 		catch (IOException ex) {
 			throw new UncheckedIOException(ex);
 		}
-	}
-
-	/**
-	 * Process the given resource path.
-	 * <p>By default, this method delegates to {@link ResourceHandlerUtils#normalizeInputPath}.
-	 */
-	protected String processPath(String path) {
-		return ResourceHandlerUtils.normalizeInputPath(path);
 	}
 
 	@Override
