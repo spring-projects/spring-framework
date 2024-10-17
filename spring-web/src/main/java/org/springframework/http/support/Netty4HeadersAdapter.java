@@ -17,6 +17,7 @@
 package org.springframework.http.support;
 
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -61,7 +62,10 @@ public final class Netty4HeadersAdapter implements MultiValueMap<String, String>
 	@Override
 	public void add(String key, @Nullable String value) {
 		if (value != null) {
-			this.headers.add(key, value);
+			List<String> values = this.get(key);
+			values = values == null ? new ArrayList<>() : new ArrayList<>(values);
+			values.add(value);
+			this.headers.set(key, values);
 		}
 	}
 

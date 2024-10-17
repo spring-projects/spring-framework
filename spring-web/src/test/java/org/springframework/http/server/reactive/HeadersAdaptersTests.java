@@ -126,6 +126,16 @@ class HeadersAdaptersTests {
 		assertThatThrownBy(names::remove).isInstanceOf(IllegalStateException.class);
 	}
 
+	@ParameterizedHeadersTest
+	void testHeadersOutput(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.add("testHeader", "second");
+		MultiValueMap<String, String> multiValueMap =
+				CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+		headers.forEach(multiValueMap::addAll);
+		assertThat(multiValueMap.toString()).isEqualToIgnoringCase("{testheader=[first, second]}");
+	}
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@ParameterizedTest

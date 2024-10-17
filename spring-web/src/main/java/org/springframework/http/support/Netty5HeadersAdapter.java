@@ -64,7 +64,10 @@ public final class Netty5HeadersAdapter implements MultiValueMap<String, String>
 	@Override
 	public void add(String key, @Nullable String value) {
 		if (value != null) {
-			this.headers.add(key, value);
+			List<String> values = this.get(key);
+			values = values == null ? new ArrayList<>() : new ArrayList<>(values);
+			values.add(value);
+			this.headers.set(key, values);
 		}
 	}
 
