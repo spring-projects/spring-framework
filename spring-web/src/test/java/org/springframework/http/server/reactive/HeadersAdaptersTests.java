@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -124,6 +125,42 @@ class HeadersAdaptersTests {
 		assertThat(names.next()).isEqualTo("TestHeader");
 		names.remove();
 		assertThatThrownBy(names::remove).isInstanceOf(IllegalStateException.class);
+	}
+
+	@ParameterizedHeadersTest
+	void testAddHeadersOutput(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.add("testHeader", "second");
+		MultiValueMap<String, String> multiValueMap =
+				CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+		headers.forEach(multiValueMap::addAll);
+		assertThat(multiValueMap.toString()).isEqualToIgnoringCase("{testheader=[first, second]}");
+	}
+
+	@ParameterizedHeadersTest
+	void testAddAllSingletonHeadersOutput(MultiValueMap<String, String> headers) {
+		headers.addAll("TestHeader", Collections.singletonList("first"));
+		headers.addAll("testHeader", Collections.singletonList("second"));
+		MultiValueMap<String, String> multiValueMap =
+				CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+		headers.forEach(multiValueMap::addAll);
+		assertThat(multiValueMap.toString()).isEqualToIgnoringCase("{testheader=[first, second]}");
+	}
+
+	@ParameterizedHeadersTest
+	void testAddAllMultipleHeadersOutput(MultiValueMap<String, String> headers) {
+		MultiValueMap<String, String> map1 =
+				CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+		map1.add("TestHeader", "first");
+		headers.addAll(map1);
+		MultiValueMap<String, String> map2 =
+				CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+		map2.add("testHeader", "second");
+		headers.addAll(map2);
+		MultiValueMap<String, String> multiValueMap =
+				CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+		headers.forEach(multiValueMap::addAll);
+		assertThat(multiValueMap.toString()).isEqualToIgnoringCase("{testheader=[first, second]}");
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
