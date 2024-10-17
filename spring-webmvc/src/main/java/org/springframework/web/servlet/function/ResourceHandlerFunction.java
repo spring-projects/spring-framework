@@ -40,7 +40,7 @@ import org.springframework.lang.Nullable;
 class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 
 	private static final Set<HttpMethod> SUPPORTED_METHODS =
-			Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
+			Set.of(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.HEAD, HttpMethod.OPTIONS);
 
 
 	private final Resource resource;
@@ -58,6 +58,11 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 	public ServerResponse handle(ServerRequest request) {
 		HttpMethod method = request.method();
 		if (HttpMethod.GET.equals(method)) {
+			return EntityResponse.fromObject(this.resource)
+					.headers(headers -> this.headersConsumer.accept(this.resource, headers))
+					.build();
+		}
+		else if (HttpMethod.QUERY.equals(method)) {
 			return EntityResponse.fromObject(this.resource)
 					.headers(headers -> this.headersConsumer.accept(this.resource, headers))
 					.build();

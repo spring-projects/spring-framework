@@ -51,8 +51,8 @@ import org.springframework.core.annotation.AliasFor;
  * at the method level. In most cases, at the method level applications will
  * prefer to use one of the HTTP method specific variants
  * {@link GetMapping @GetMapping}, {@link PostMapping @PostMapping},
- * {@link PutMapping @PutMapping}, {@link DeleteMapping @DeleteMapping}, or
- * {@link PatchMapping @PatchMapping}.
+ * {@link PutMapping @PutMapping}, {@link DeleteMapping @DeleteMapping},
+ * {@link PatchMapping @PatchMapping}, or {@link QueryMapping}.
  *
  * <p><strong>NOTE:</strong> This annotation cannot be used in conjunction with
  * other {@code @RequestMapping} annotations that are declared on the same element
@@ -121,7 +121,7 @@ public @interface RequestMapping {
 
 	/**
 	 * The HTTP request methods to map to, narrowing the primary mapping:
-	 * GET, POST, HEAD, OPTIONS, PUT, PATCH, DELETE, TRACE.
+	 * GET, POST, HEAD, OPTIONS, PUT, PATCH, DELETE, TRACE, QUERY.
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit this
 	 * HTTP method restriction.

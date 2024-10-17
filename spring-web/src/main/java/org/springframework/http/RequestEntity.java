@@ -336,6 +336,26 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
+	 * Create an HTTP QUERY builder with the given url.
+	 * @param url the URL
+	 * @return the created builder
+	 */
+	public static BodyBuilder query(URI url) {
+		return method(HttpMethod.QUERY, url);
+	}
+
+	/**
+	 * Create an HTTP QUERY builder with the given string base uri template.
+	 * @param uriTemplate the uri template to use
+	 * @param uriVariables variables to expand the URI template with
+	 * @return the created builder
+	 * @since x.x.x
+	 */
+	public static BodyBuilder query(String uriTemplate, Object... uriVariables) {
+		return method(HttpMethod.QUERY, uriTemplate, uriVariables);
+	}
+
+	/**
 	 * Create an HTTP PUT builder with the given url.
 	 * @param url the URL
 	 * @return the created builder
