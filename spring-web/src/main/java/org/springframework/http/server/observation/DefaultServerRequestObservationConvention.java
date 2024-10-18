@@ -160,9 +160,14 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 	}
 
 	protected KeyValue outcome(ServerRequestObservationContext context) {
-		if (context.getResponse() != null) {
-			HttpStatusCode statusCode = HttpStatusCode.valueOf(context.getResponse().getStatus());
-			return HttpOutcome.forStatus(statusCode);
+		try {
+			if (context.getResponse() != null) {
+				HttpStatusCode statusCode = HttpStatusCode.valueOf(context.getResponse().getStatus());
+				return HttpOutcome.forStatus(statusCode);
+			}
+		}
+		catch (IllegalArgumentException ex) {
+			return HTTP_OUTCOME_UNKNOWN;
 		}
 		return HTTP_OUTCOME_UNKNOWN;
 	}
