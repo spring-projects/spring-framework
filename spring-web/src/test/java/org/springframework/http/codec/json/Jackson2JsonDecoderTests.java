@@ -117,7 +117,7 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 	}
 
 	@Test  // SPR-15866
-	public void canDecodeWithProvidedMimeType() {
+	void canDecodeWithProvidedMimeType() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper(), textJavascript);
 
@@ -239,7 +239,7 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 	}
 
 	@Test // gh-22042
-	public void decodeWithNullLiteral() {
+	void decodeWithNullLiteral() {
 		Flux<Object> result = this.decoder.decode(Flux.concat(stringBuffer("null")),
 				ResolvableType.forType(Pojo.class), MediaType.APPLICATION_JSON, Collections.emptyMap());
 
@@ -247,7 +247,7 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 	}
 
 	@Test // gh-27511
-	public void noDefaultConstructor() {
+	void noDefaultConstructor() {
 		Flux<DataBuffer> input = Flux.from(stringBuffer("{\"property1\":\"foo\",\"property2\":\"bar\"}"));
 
 		testDecode(input, BeanWithNoDefaultConstructor.class, step -> step
@@ -268,7 +268,7 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 	}
 
 	@Test  // SPR-15975
-	public void customDeserializer() {
+	void customDeserializer() {
 		Mono<DataBuffer> input = stringBuffer("{\"test\": 1}");
 
 		testDecode(input, TestObject.class, step -> step
@@ -289,7 +289,7 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void decodeNonUtf8Encoding() {
+	void decodeNonUtf8Encoding() {
 		Mono<DataBuffer> input = stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.UTF_16);
 		ResolvableType type = ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {});
 
@@ -302,7 +302,7 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void decodeNonUnicode() {
+	void decodeNonUnicode() {
 		Flux<DataBuffer> input = Flux.concat(stringBuffer("{\"føø\":\"bår\"}", StandardCharsets.ISO_8859_1));
 		ResolvableType type = ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {});
 
@@ -315,7 +315,7 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void decodeMonoNonUtf8Encoding() {
+	void decodeMonoNonUtf8Encoding() {
 		Mono<DataBuffer> input = stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.UTF_16);
 		ResolvableType type = ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {});
 
@@ -328,7 +328,7 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void decodeAscii() {
+	void decodeAscii() {
 		Flux<DataBuffer> input = Flux.concat(stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.US_ASCII));
 		ResolvableType type = ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {});
 
@@ -337,6 +337,15 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 						.verifyComplete(),
 				MediaType.parseMediaType("application/json; charset=us-ascii"),
 				null);
+	}
+
+	@Test
+	void cancelWhileDecoding() {
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("[{\"bar\":\"b1\",\"foo\":\"f1\"},").block(),
+				stringBuffer("{\"bar\":\"b2\",\"foo\":\"f2\"}]").block());
+
+		testDecodeCancel(input, ResolvableType.forClass(Pojo.class), null, null);
 	}
 
 

@@ -44,6 +44,7 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -162,7 +163,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 				catch (IOException ex) {
 					sink.error(processException(ex));
 				}
-			});
+			})
+			.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		});
 	}
 
