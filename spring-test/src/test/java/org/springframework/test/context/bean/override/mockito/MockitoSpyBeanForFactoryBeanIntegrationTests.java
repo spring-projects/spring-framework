@@ -20,7 +20,6 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.mockito.Mockito;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +31,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -63,7 +63,7 @@ class MockitoSpyBeanForFactoryBeanIntegrationTests {
 		doReturn("sp-hi").when(this.testBean).hello();
 
 		assertThat(bean.hello()).as("after stubbing").isEqualTo("sp-hi");
-		verify(bean, Mockito.times(2)).hello();
+		verify(bean, times(2)).hello();
 	}
 
 	@Order(2)
