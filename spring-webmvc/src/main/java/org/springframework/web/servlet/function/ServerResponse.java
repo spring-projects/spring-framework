@@ -584,11 +584,11 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Defines a builder for async response bodies.
-	 * @since 6.2
-	 * @param <B> the builder subclass
+	 * Defines a builder for a body that sends server-sent events.
+	 *
+	 * @since 5.3.2
 	 */
-	interface AsyncBuilder<B extends AsyncBuilder<B>> {
+	interface SseBuilder {
 
 		/**
 		 * Completes the stream with the given error.
@@ -611,7 +611,7 @@ public interface ServerResponse {
 		 * @param onTimeout the callback to invoke on timeout
 		 * @return this builder
 		 */
-		B onTimeout(Runnable onTimeout);
+		SseBuilder onTimeout(Runnable onTimeout);
 
 		/**
 		 * Register a callback to be invoked when an error occurs during
@@ -619,24 +619,14 @@ public interface ServerResponse {
 		 * @param onError the callback to invoke on error
 		 * @return this builder
 		 */
-		B onError(Consumer<Throwable> onError);
+		SseBuilder onError(Consumer<Throwable> onError);
 
 		/**
 		 * Register a callback to be invoked when the request completes.
 		 * @param onCompletion the callback to invoked on completion
 		 * @return this builder
 		 */
-		B onComplete(Runnable onCompletion);
-
-	}
-
-
-	/**
-	 * Defines a builder for a body that sends server-sent events.
-	 *
-	 * @since 5.3.2
-	 */
-	interface SseBuilder extends AsyncBuilder<SseBuilder> {
+		SseBuilder onComplete(Runnable onCompletion);
 
 		/**
 		 * Sends the given object as a server-sent event.
@@ -706,7 +696,45 @@ public interface ServerResponse {
 	 *
 	 * @since 6.2
 	 */
-	interface StreamBuilder extends AsyncBuilder<StreamBuilder> {
+	interface StreamBuilder {
+
+		/**
+		 * Completes the stream with the given error.
+		 *
+		 * <p>The throwable is dispatched back into Spring MVC, and passed to
+		 * its exception handling mechanism. Since the response has
+		 * been committed by this point, the response status can not change.
+		 * @param t the throwable to dispatch
+		 */
+		void error(Throwable t);
+
+		/**
+		 * Completes the stream.
+		 */
+		void complete();
+
+		/**
+		 * Register a callback to be invoked when a request times
+		 * out.
+		 * @param onTimeout the callback to invoke on timeout
+		 * @return this builder
+		 */
+		StreamBuilder onTimeout(Runnable onTimeout);
+
+		/**
+		 * Register a callback to be invoked when an error occurs during
+		 * processing.
+		 * @param onError the callback to invoke on error
+		 * @return this builder
+		 */
+		StreamBuilder onError(Consumer<Throwable> onError);
+
+		/**
+		 * Register a callback to be invoked when the request completes.
+		 * @param onCompletion the callback to invoked on completion
+		 * @return this builder
+		 */
+		StreamBuilder onComplete(Runnable onCompletion);
 
 		/**
 		 * Write the given object to the response stream, without flushing.
