@@ -177,7 +177,7 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 
 		@GetMapping("/stream")
 		public Publisher<Long> stream() {
-			return testInterval(Duration.ofMillis(50), 5);
+			return testInterval(Duration.ofMillis(1), 5);
 		}
 	}
 

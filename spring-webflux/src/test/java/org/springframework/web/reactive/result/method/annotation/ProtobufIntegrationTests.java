@@ -168,7 +168,7 @@ class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 		@GetMapping(value = "/message-stream", produces = "application/x-protobuf;delimited=true")
 		Flux<Msg> messageStream() {
-			return testInterval(Duration.ofMillis(50), 5).map(l ->
+			return testInterval(Duration.ofMillis(1), 5).map(l ->
 					Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(l.intValue()).build()).build());
 		}
 
