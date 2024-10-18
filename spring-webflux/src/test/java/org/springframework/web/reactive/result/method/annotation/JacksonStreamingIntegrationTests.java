@@ -109,7 +109,7 @@ class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		@GetMapping(value = "/stream",
 				produces = { APPLICATION_NDJSON_VALUE, "application/stream+x-jackson-smile" })
 		Flux<Person> person() {
-			return testInterval(Duration.ofMillis(100), 50).map(l -> new Person("foo " + l));
+			return testInterval(Duration.ofMillis(1), 50).map(l -> new Person("foo " + l));
 		}
 
 	}

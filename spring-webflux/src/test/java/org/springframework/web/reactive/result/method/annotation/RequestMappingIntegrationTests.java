@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -34,6 +35,8 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -116,6 +119,13 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 		assertThat(performGet("/stream", new HttpHeaders(), int[].class).getBody()).isEqualTo(expected);
 	}
 
+	@ParameterizedHttpServerTest  // gh-33739
+	void requestBodyAndDelayedResponse(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		assertThat(performPost("/post", new HttpHeaders(), "text", String.class).getBody()).isEqualTo("text");
+	}
+
 
 	@Configuration
 	@EnableWebFlux
@@ -177,8 +187,14 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 
 		@GetMapping("/stream")
 		public Publisher<Long> stream() {
-			return testInterval(Duration.ofMillis(50), 5);
+			return testInterval(Duration.ofMillis(1), 5);
 		}
+
+		@PostMapping("/post")
+		public Mono<String> postDelayedInput(@RequestBody String text) {
+			return Mono.just(text).delayElement(Duration.ofMillis(1));
+		}
+
 	}
 
 
