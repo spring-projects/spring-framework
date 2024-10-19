@@ -40,6 +40,7 @@ import static org.mockito.Mockito.times;
 @ExtendWith(SpringExtension.class)
 // TODO Remove @ContextConfiguration declaration.
 // @ContextConfiguration is currently required due to a bug in the TestContext framework.
+// See https://github.com/spring-projects/spring-framework/issues/31456
 @ContextConfiguration
 class MockitoBeanNestedTests {
 
