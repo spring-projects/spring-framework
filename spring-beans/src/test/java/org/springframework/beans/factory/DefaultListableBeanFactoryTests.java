@@ -1718,18 +1718,73 @@ class DefaultListableBeanFactoryTests {
 		assertThat(bean.getBeanName()).isEqualTo("bd1");
 	}
 
+	/**
+	 * {@code determineHighestPriorityCandidate()} should reject duplicate
+	 * priorities for the highest priority detected.
+	 *
+	 * @see #getBeanByTypeWithMultipleNonHighestPriorityCandidates()
+	 */
 	@Test
-	void getBeanByTypeWithMultiplePriority() {
+	void getBeanByTypeWithMultipleHighestPriorityCandidates() {
 		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		RootBeanDefinition bd1 = new RootBeanDefinition(HighPriorityTestBean.class);
-		RootBeanDefinition bd2 = new RootBeanDefinition(HighPriorityTestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(LowPriorityTestBean.class);
+		RootBeanDefinition bd3 = new RootBeanDefinition(HighPriorityTestBean.class);
 		lbf.registerBeanDefinition("bd1", bd1);
 		lbf.registerBeanDefinition("bd2", bd2);
+		lbf.registerBeanDefinition("bd3", bd3);
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
 				.isThrownBy(() -> lbf.getBean(TestBean.class))
-				.withMessageContaining("Multiple beans found with the same priority")
-				.withMessageContaining("5"); // conflicting priority
+				.withMessageContaining("Multiple beans found with the same highest priority (5) among candidates: ");
+	}
+
+	/**
+	 * {@code determineHighestPriorityCandidate()} should ignore duplicate
+	 * priorities for any priority other than the highest, and the order in
+	 * which beans is declared should not affect the outcome.
+	 *
+	 * @see #getBeanByTypeWithMultipleHighestPriorityCandidates()
+	 */
+	@Test  // gh-33733
+	void getBeanByTypeWithMultipleNonHighestPriorityCandidates() {
+		getBeanByTypeWithMultipleNonHighestPriorityCandidates(
+				PriorityService1.class,
+				PriorityService2A.class,
+				PriorityService2B.class,
+				PriorityService3.class
+			);
+
+		getBeanByTypeWithMultipleNonHighestPriorityCandidates(
+				PriorityService3.class,
+				PriorityService2B.class,
+				PriorityService2A.class,
+				PriorityService1.class
+			);
+
+		getBeanByTypeWithMultipleNonHighestPriorityCandidates(
+				PriorityService2A.class,
+				PriorityService1.class,
+				PriorityService2B.class,
+				PriorityService3.class
+			);
+
+		getBeanByTypeWithMultipleNonHighestPriorityCandidates(
+				PriorityService2A.class,
+				PriorityService3.class,
+				PriorityService1.class,
+				PriorityService2B.class
+			);
+	}
+
+	private void getBeanByTypeWithMultipleNonHighestPriorityCandidates(Class<?>... classes) {
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		for (Class<?> clazz : classes) {
+			lbf.registerBeanDefinition(clazz.getSimpleName(), new RootBeanDefinition(clazz));
+		}
+
+		PriorityService bean = lbf.getBean(PriorityService.class);
+		assertThat(bean).isExactlyInstanceOf(PriorityService1.class);
 	}
 
 	@Test
@@ -3516,6 +3571,26 @@ class DefaultListableBeanFactoryTests {
 		public KnowsIfInstantiated() {
 			instantiated = true;
 		}
+	}
+
+
+	interface PriorityService {
+	}
+
+	@Priority(1)
+	static class PriorityService1 implements PriorityService {
+	}
+
+	@Priority(2)
+	static class PriorityService2A implements PriorityService {
+	}
+
+	@Priority(2)
+	static class PriorityService2B implements PriorityService {
+	}
+
+	@Priority(3)
+	static class PriorityService3 implements PriorityService {
 	}
 
 
