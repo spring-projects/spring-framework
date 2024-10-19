@@ -1776,12 +1776,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @param requiredType the target dependency type to match against
 	 * @return the name of the candidate with the highest priority,
 	 * or {@code null} if none found
+	 * @throws NoUniqueBeanDefinitionException if multiple beans are detected with
+	 * the same highest priority value
 	 * @see #getPriority(Object)
 	 */
 	@Nullable
 	protected String determineHighestPriorityCandidate(Map<String, Object> candidates, Class<?> requiredType) {
 		String highestPriorityBeanName = null;
 		Integer highestPriority = null;
+		boolean highestPriorityConflictDetected = false;
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateBeanName = entry.getKey();
 			Object beanInstance = entry.getValue();
@@ -1790,13 +1793,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (candidatePriority != null) {
 					if (highestPriority != null) {
 						if (candidatePriority.equals(highestPriority)) {
-							throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
-									"Multiple beans found with the same priority ('" + highestPriority +
-									"') among candidates: " + candidates.keySet());
+							highestPriorityConflictDetected = true;
 						}
 						else if (candidatePriority < highestPriority) {
 							highestPriorityBeanName = candidateBeanName;
 							highestPriority = candidatePriority;
+							highestPriorityConflictDetected = false;
 						}
 					}
 					else {
@@ -1805,6 +1807,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 				}
 			}
+		}
+
+		if (highestPriorityConflictDetected) {
+			throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
+					"Multiple beans found with the same highest priority (" + highestPriority +
+					") among candidates: " + candidates.keySet());
+
 		}
 		return highestPriorityBeanName;
 	}
