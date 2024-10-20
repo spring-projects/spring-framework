@@ -339,6 +339,70 @@ class DateFormattingTests {
 			assertThat(bindingResult.getFieldValue(propertyName)).isEqualTo("2021-03-02");
 		}
 
+		/**
+		 * {@link SimpleDateBean#styleDateTimeWithFallbackPatternsForPreAndPostJdk20}
+		 * configures "SS" as the date/time style to use. Thus, we have to be aware
+		 * of the following if we do not configure fallback patterns for parsing.
+		 *
+		 * <ul>
+		 * <li>JDK &le; 19 requires a standard space before the "PM".
+		 * <li>JDK &ge; 20 requires a narrow non-breaking space (NNBSP) before the "PM".
+		 * </ul>
+		 *
+		 * <p>To avoid compatibility issues between JDK versions, we have configured
+		 * two fallback patterns which emulate the "SS" style: <code>"MM/dd/yy h:mm a"</code>
+		 * matches against a standard space before the "PM", and <code>"MM/dd/yy h:mm&#92;u202Fa"</code>
+		 * matches against a narrow non-breaking space (NNBSP) before the "PM".
+		 *
+		 * <p>Thus, the following should theoretically be supported on any JDK (or at least
+		 * JDK 17 - 23, where we have tested it).
+		 *
+		 * @see #patternDateTime(String)
+		 */
+		@ParameterizedTest(name = "input date: {0}")  // gh-33151
+		@ValueSource(strings = {"10/31/09, 12:00 PM", "10/31/09, 12:00\u202FPM"})
+		void styleDateTime_PreAndPostJdk20(String propertyValue) {
+			String propertyName = "styleDateTimeWithFallbackPatternsForPreAndPostJdk20";
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add(propertyName, propertyValue);
+			binder.bind(propertyValues);
+			BindingResult bindingResult = binder.getBindingResult();
+			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			String value = binder.getBindingResult().getFieldValue(propertyName).toString();
+			// Since the "SS" style is always used for printing and the underlying format
+			// changes depending on the JDK version, we cannot be certain that a normal
+			// space is used before the "PM". Consequently we have to use a regular
+			// expression to match against any Unicode space character (\p{Zs}).
+			assertThat(value).startsWith("10/31/09").matches(".+?12:00\\p{Zs}PM");
+		}
+
+		/**
+		 * To avoid the use of Locale-based styles (such as "MM") for
+		 * {@link SimpleDateBean#patternDateTimeWithFallbackPatternForPreAndPostJdk20}, we have configured a
+		 * primary pattern (<code>"MM/dd/yy h:mm a"</code>) that matches against a standard space
+		 * before the "PM" and a fallback pattern (<code>"MM/dd/yy h:mm&#92;u202Fa"</code> that matches
+		 * against a narrow non-breaking space (NNBSP) before the "PM".
+		 *
+		 * <p>Thus, the following should theoretically be supported on any JDK (or at least
+		 * JDK 17 - 23, where we have tested it).
+		 *
+		 * @see #styleDateTime(String)
+		 */
+		@ParameterizedTest(name = "input date: {0}")  // gh-33151
+		@ValueSource(strings = {"10/31/09 3:45 PM", "10/31/09 3:45\u202FPM"})
+		void patternDateTime_PreAndPostJdk20(String propertyValue) {
+			String propertyName = "patternDateTimeWithFallbackPatternForPreAndPostJdk20";
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add(propertyName, propertyValue);
+			binder.bind(propertyValues);
+			BindingResult bindingResult = binder.getBindingResult();
+			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			String value = binder.getBindingResult().getFieldValue(propertyName).toString();
+			// Since the "MM/dd/yy h:mm a" primary pattern is always used for printing, we
+			// can be certain that a normal space is used before the "PM".
+			assertThat(value).matches("10/31/09 3:45 PM");
+		}
+
 		@Test
 		void patternDateWithUnsupportedPattern() {
 			String propertyValue = "210302";
@@ -389,11 +453,22 @@ class DateFormattingTests {
 		@DateTimeFormat(style = "S-", fallbackPatterns = { "yyyy-MM-dd", "yyyyMMdd", "yyyy.MM.dd" })
 		private Date styleDateWithFallbackPatterns;
 
+		// "SS" style matches either a standard space or a narrow non-breaking space (NNBSP) before AM/PM,
+		// depending on the version of the JDK.
+		// Fallback patterns match a standard space OR a narrow non-breaking space (NNBSP) before AM/PM.
+		@DateTimeFormat(style = "SS", fallbackPatterns = { "M/d/yy, h:mm a", "M/d/yy, h:mm\u202Fa" })
+		private Date styleDateTimeWithFallbackPatternsForPreAndPostJdk20;
+
 		@DateTimeFormat(pattern = "M/d/yy h:mm")
 		private Date patternDate;
 
 		@DateTimeFormat(pattern = "yyyy-MM-dd", fallbackPatterns = { "M/d/yy", "yyyyMMdd", "yyyy.MM.dd" })
 		private Date patternDateWithFallbackPatterns;
+
+		// Primary pattern matches a standard space before AM/PM.
+		// Fallback pattern matches a narrow non-breaking space (NNBSP) before AM/PM.
+		@DateTimeFormat(pattern = "MM/dd/yy h:mm a", fallbackPatterns = "MM/dd/yy h:mm\u202Fa")
+		private Date patternDateTimeWithFallbackPatternForPreAndPostJdk20;
 
 		@DateTimeFormat(iso = ISO.DATE)
 		private Date isoDate;
@@ -459,6 +534,14 @@ class DateFormattingTests {
 			this.styleDateWithFallbackPatterns = styleDateWithFallbackPatterns;
 		}
 
+		public Date getStyleDateTimeWithFallbackPatternsForPreAndPostJdk20() {
+			return this.styleDateTimeWithFallbackPatternsForPreAndPostJdk20;
+		}
+
+		public void setStyleDateTimeWithFallbackPatternsForPreAndPostJdk20(Date styleDateTimeWithFallbackPatternsForPreAndPostJdk20) {
+			this.styleDateTimeWithFallbackPatternsForPreAndPostJdk20 = styleDateTimeWithFallbackPatternsForPreAndPostJdk20;
+		}
+
 		public Date getPatternDate() {
 			return this.patternDate;
 		}
@@ -473,6 +556,14 @@ class DateFormattingTests {
 
 		public void setPatternDateWithFallbackPatterns(Date patternDateWithFallbackPatterns) {
 			this.patternDateWithFallbackPatterns = patternDateWithFallbackPatterns;
+		}
+
+		public Date getPatternDateTimeWithFallbackPatternForPreAndPostJdk20() {
+			return this.patternDateTimeWithFallbackPatternForPreAndPostJdk20;
+		}
+
+		public void setPatternDateTimeWithFallbackPatternForPreAndPostJdk20(Date patternDateTimeWithFallbackPatternForPreAndPostJdk20) {
+			this.patternDateTimeWithFallbackPatternForPreAndPostJdk20 = patternDateTimeWithFallbackPatternForPreAndPostJdk20;
 		}
 
 		public Date getIsoDate() {

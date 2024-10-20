@@ -618,6 +618,41 @@ class DateTimeFormattingTests {
 			assertThat(bindingResult.getFieldValue(propertyName)).asString().matches("12:00:00\\p{Zs}PM");
 		}
 
+		/**
+		 * {@link DateTimeBean#styleLocalTimeWithFallbackPatternsForPreAndPostJdk20}
+		 * configures "-M" as the time style to use. Thus, we have to be aware
+		 * of the following if we do not configure fallback patterns for parsing.
+		 *
+		 * <ul>
+		 * <li>JDK &le; 19 requires a standard space before the "PM".
+		 * <li>JDK &ge; 20 requires a narrow non-breaking space (NNBSP) before the "PM".
+		 * </ul>
+		 *
+		 * <p>To avoid compatibility issues between JDK versions, we have configured
+		 * two fallback patterns which emulate the "-M" style: <code>"HH:mm:ss a"</code>
+		 * matches against a standard space before the "PM", and <code>"HH:mm:ss&#92;u202Fa"</code>
+		 * matches against a narrow non-breaking space (NNBSP) before the "PM".
+		 *
+		 * <p>Thus, the following should theoretically be supported on any JDK (or at least
+		 * JDK 17 - 23, where we have tested it).
+		 */
+		@ParameterizedTest(name = "input date: {0}")  // gh-33151
+		@ValueSource(strings = { "12:00:00 PM", "12:00:00\u202FPM" })
+		void styleLocalTime_PreAndPostJdk20(String propertyValue) {
+			String propertyName = "styleLocalTimeWithFallbackPatternsForPreAndPostJdk20";
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add(propertyName, propertyValue);
+			binder.bind(propertyValues);
+			BindingResult bindingResult = binder.getBindingResult();
+			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			String value = binder.getBindingResult().getFieldValue(propertyName).toString();
+			// Since the "-M" style is always used for printing and the underlying format
+			// changes depending on the JDK version, we cannot be certain that a normal
+			// space is used before the "PM". Consequently we have to use a regular
+			// expression to match against any Unicode space character (\p{Zs}).
+			assertThat(value).matches("12:00:00\\p{Zs}PM");
+		}
+
 		@ParameterizedTest(name = "input date: {0}")
 		@ValueSource(strings = {"2021-03-02T12:00:00", "2021-03-02 12:00:00", "3/2/21 12:00"})
 		void isoLocalDateTime(String propertyValue) {
@@ -694,6 +729,12 @@ class DateTimeFormattingTests {
 
 		@DateTimeFormat(style = "-M", fallbackPatterns = {"HH:mm:ss", "HH:mm"})
 		private LocalTime styleLocalTimeWithFallbackPatterns;
+
+		// "-M" style matches either a standard space or a narrow non-breaking space (NNBSP) before AM/PM,
+		// depending on the version of the JDK.
+		// Fallback patterns match a standard space OR a narrow non-breaking space (NNBSP) before AM/PM.
+		@DateTimeFormat(style = "-M", fallbackPatterns = {"HH:mm:ss a", "HH:mm:ss\u202Fa"})
+		private LocalTime styleLocalTimeWithFallbackPatternsForPreAndPostJdk20;
 
 		private LocalDateTime localDateTime;
 
@@ -796,6 +837,15 @@ class DateTimeFormattingTests {
 
 		public void setStyleLocalTimeWithFallbackPatterns(LocalTime styleLocalTimeWithFallbackPatterns) {
 			this.styleLocalTimeWithFallbackPatterns = styleLocalTimeWithFallbackPatterns;
+		}
+
+		public LocalTime getStyleLocalTimeWithFallbackPatternsForPreAndPostJdk20() {
+			return this.styleLocalTimeWithFallbackPatternsForPreAndPostJdk20;
+		}
+
+		public void setStyleLocalTimeWithFallbackPatternsForPreAndPostJdk20(
+				LocalTime styleLocalTimeWithFallbackPatternsForPreAndPostJdk20) {
+			this.styleLocalTimeWithFallbackPatternsForPreAndPostJdk20 = styleLocalTimeWithFallbackPatternsForPreAndPostJdk20;
 		}
 
 		public LocalDateTime getLocalDateTime() {
