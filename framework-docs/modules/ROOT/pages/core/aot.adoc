@@ -435,7 +435,7 @@ Kotlin::
 	class UserConfiguration {
 
 		@Bean
-		ClientFactoryBean<MyClient> myClient() = ClientFactoryBean(...)
+		fun myClient() = ClientFactoryBean<MyClient>(...)
 
 	}
 ----
@@ -500,7 +500,7 @@ Kotlin::
 	fun customDBEntityManagerFactory(dataSource: DataSource): LocalContainerEntityManagerFactoryBean {
 		val factoryBean = LocalContainerEntityManagerFactoryBean()
 		factoryBean.dataSource = dataSource
-		factoryBean.packagesToScan= "com.example.app"
+		factoryBean.setPackagesToScan("com.example.app")
 		return factoryBean
 	}
 ----
@@ -544,7 +544,7 @@ Kotlin::
 	fun customDBEntityManagerFactory(dataSource: DataSource, managedTypes: PersistenceManagedTypes): LocalContainerEntityManagerFactoryBean {
 		val factoryBean = LocalContainerEntityManagerFactoryBean()
 		factoryBean.dataSource = dataSource
-		factoryBean.managedTypes = managedTypes
+		factoryBean.setManagedTypes(managedTypes)
 		return factoryBean
 	}
 ----
