@@ -1136,7 +1136,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			set(HOST, value);
 		}
 		else {
-			remove(HOST, null);
+			remove(HOST);
 		}
 	}
 
