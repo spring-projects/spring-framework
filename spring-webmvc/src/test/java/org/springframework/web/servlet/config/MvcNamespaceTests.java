@@ -920,7 +920,7 @@ public class MvcNamespaceTests {
 			CorsConfiguration config = configs.get("/**");
 			assertThat(config).isNotNull();
 			assertThat(config.getAllowedOrigins().toArray()).isEqualTo(new String[]{"*"});
-			assertThat(config.getAllowedMethods().toArray()).isEqualTo(new String[]{"GET", "HEAD", "POST"});
+			assertThat(config.getAllowedMethods().toArray()).isEqualTo(new String[]{"GET", "QUERY", "HEAD", "POST"});
 			assertThat(config.getAllowedHeaders().toArray()).isEqualTo(new String[]{"*"});
 			assertThat(config.getExposedHeaders()).isNull();
 			assertThat(config.getAllowCredentials()).isNull();
@@ -953,7 +953,7 @@ public class MvcNamespaceTests {
 			assertThat(config.getMaxAge()).isEqualTo(Long.valueOf(123));
 			config = configs.get("/resources/**");
 			assertThat(config.getAllowedOrigins().toArray()).isEqualTo(new String[]{"https://domain1.com"});
-			assertThat(config.getAllowedMethods().toArray()).isEqualTo(new String[]{"GET", "HEAD", "POST"});
+			assertThat(config.getAllowedMethods().toArray()).isEqualTo(new String[]{"GET", "QUERY", "HEAD", "POST"});
 			assertThat(config.getAllowedHeaders().toArray()).isEqualTo(new String[]{"*"});
 			assertThat(config.getExposedHeaders()).isNull();
 			assertThat(config.getAllowCredentials()).isNull();

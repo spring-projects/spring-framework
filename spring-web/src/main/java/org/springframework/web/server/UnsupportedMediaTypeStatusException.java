@@ -165,6 +165,9 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 		if (this.method == HttpMethod.PATCH) {
 			headers.setAcceptPatch(this.supportedMediaTypes);
 		}
+		if (this.method == HttpMethod.QUERY) {
+			headers.setAcceptQuery(this.supportedMediaTypes);
+		}
 		return headers;
 	}
 

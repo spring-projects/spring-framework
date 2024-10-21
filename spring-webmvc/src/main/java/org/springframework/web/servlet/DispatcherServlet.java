@@ -1073,7 +1073,8 @@ public class DispatcherServlet extends FrameworkServlet {
 				// Process last-modified header, if supported by the handler.
 				String method = request.getMethod();
 				boolean isGet = HttpMethod.GET.matches(method);
-				if (isGet || HttpMethod.HEAD.matches(method)) {
+				boolean isQuery = HttpMethod.QUERY.matches(method);
+				if (isGet || isQuery || HttpMethod.HEAD.matches(method)) {
 					long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
 					if (new ServletWebRequest(request, response).checkNotModified(lastModified) && isGet) {
 						return;
