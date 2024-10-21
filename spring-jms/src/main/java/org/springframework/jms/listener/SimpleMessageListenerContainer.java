@@ -341,7 +341,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 					connectionFactory, new LocallyExposedJmsResourceHolder(session));
 		}
 		try {
-			executeListener(session, message);
+			createObservation(message).observe(() -> executeListener(session, message));
 		}
 		finally {
 			if (exposeResource) {
