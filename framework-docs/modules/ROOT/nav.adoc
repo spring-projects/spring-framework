@@ -451,5 +451,6 @@
 ** xref:languages/groovy.adoc[]
 ** xref:languages/dynamic.adoc[]
 * xref:appendix.adoc[]
-* {spring-framework-wiki}[Wiki]
-
+* {spring-framework-docs-root}/{spring-version}/javadoc-api/[Java API,window=_blank, role=link-external]
+* {spring-framework-api-kdoc}/[Kotlin API,window=_blank, role=link-external]
+* {spring-framework-wiki}[Wiki, window=_blank, role=link-external]
