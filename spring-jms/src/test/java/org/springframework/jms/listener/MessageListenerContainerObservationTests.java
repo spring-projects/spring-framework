@@ -74,7 +74,8 @@ class MessageListenerContainerObservationTests {
 		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
 		jmsTemplate.convertAndSend("spring.test.observation", "message content");
 		latch.await(2, TimeUnit.SECONDS);
-		assertThat(registry).hasObservationWithNameEqualTo("jms.message.process")
+		assertThat(registry).hasNumberOfObservationsWithNameEqualTo("jms.message.process", 1)
+				.hasObservationWithNameEqualTo("jms.message.process")
 				.that()
 				.hasHighCardinalityKeyValue("messaging.destination.name", "spring.test.observation");
 		assertThat(registry).hasNumberOfObservationsEqualTo(1);
@@ -98,8 +99,7 @@ class MessageListenerContainerObservationTests {
 		TextMessage response = (TextMessage) jmsTemplate.sendAndReceive("spring.test.observation",
 							session -> session.createTextMessage("test request"));
 
-		// request received by listener and response received by template
-		assertThat(registry).hasNumberOfObservationsWithNameEqualTo("jms.message.process", 2);
+		assertThat(registry).hasNumberOfObservationsWithNameEqualTo("jms.message.process", 1);
 		// response sent to the template
 		assertThat(registry).hasNumberOfObservationsWithNameEqualTo("jms.message.publish", 1);
 

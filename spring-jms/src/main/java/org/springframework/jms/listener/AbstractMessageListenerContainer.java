@@ -676,16 +676,21 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @see #handleListenerException
 	 */
 	protected void executeListener(Session session, Message message) {
-		createObservation(message).observe(() -> {
-			try {
-				doExecuteListener(session, message);
-			}
-			catch (Throwable ex) {
-				handleListenerException(ex);
-			}
-		});
+		try {
+			doExecuteListener(session, message);
+		}
+		catch (Throwable ex) {
+			handleListenerException(ex);
+		}
 	}
 
+	/**
+	 * Create, but do not start an {@link Observation} for JMS message processing.
+	 * <p>This will return a "no-op" observation if Micrometer Jakarta instrumentation
+	 * is not available or if no Observation Registry has been configured.
+	 * @param message the message to be observed
+	 * @since 6.1
+	 */
 	protected Observation createObservation(Message message) {
 		if (micrometerJakartaPresent && this.observationRegistry != null) {
 			return ObservationFactory.create(this.observationRegistry, message);
@@ -770,7 +775,6 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 		Connection conToClose = null;
 		Session sessionToClose = null;
-		Observation observation = createObservation(message);
 		try {
 			Session sessionToUse = session;
 			if (micrometerJakartaPresent && this.observationRegistry != null) {
@@ -782,7 +786,6 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 				sessionToClose = createSession(conToClose);
 				sessionToUse = sessionToClose;
 			}
-			observation.start();
 			// Actually invoke the message listener...
 			listener.onMessage(message, sessionToUse);
 			// Clean up specially exposed Session, if any.
@@ -794,11 +797,9 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 			}
 		}
 		catch (JMSException exc) {
-			observation.error(exc);
 			throw exc;
 		}
 		finally {
-			observation.stop();
 			JmsUtils.closeSession(sessionToClose);
 			JmsUtils.closeConnection(conToClose);
 		}
