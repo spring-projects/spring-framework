@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,17 +80,14 @@ public interface ThrowingFunction<T, R> extends Function<T, R> {
 	 */
 	default ThrowingFunction<T, R> throwing(BiFunction<String, Exception, RuntimeException> exceptionWrapper) {
 		return new ThrowingFunction<>() {
-
 			@Override
 			public R applyWithException(T t) throws Exception {
 				return ThrowingFunction.this.applyWithException(t);
 			}
-
 			@Override
 			public R apply(T t) {
 				return apply(t, exceptionWrapper);
 			}
-
 		};
 	}
 

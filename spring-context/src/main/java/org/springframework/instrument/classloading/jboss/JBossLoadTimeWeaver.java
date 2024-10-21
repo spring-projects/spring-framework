@@ -17,6 +17,7 @@
 package org.springframework.instrument.classloading.jboss;
 
 import java.lang.instrument.ClassFileTransformer;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -26,12 +27,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.function.ThrowingFunction;
 
 /**
  * {@link LoadTimeWeaver} implementation for JBoss's instrumentable ClassLoader.
  * Thanks to Ales Justin and Marius Bogoevici for the initial prototype.
  *
- * <p>This weaver supports WildFly 13+.
+ * <p>This weaver supports WildFly 13-23 (DelegatingClassFileTransformer) as well as
+ * WildFly 24+ (DelegatingClassTransformer), as of Spring Framework 6.1.15.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -39,8 +42,14 @@ import org.springframework.util.ReflectionUtils;
  */
 public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 
-	private static final String DELEGATING_TRANSFORMER_CLASS_NAME =
+	private static final String LEGACY_DELEGATING_TRANSFORMER_CLASS_NAME =
 			"org.jboss.as.server.deployment.module.DelegatingClassFileTransformer";
+
+	private static final String DELEGATING_TRANSFORMER_CLASS_NAME =
+			"org.jboss.as.server.deployment.module.DelegatingClassTransformer";
+
+	private static final String CLASS_TRANSFORMER_CLASS_NAME =
+			"org.jboss.modules.ClassTransformer";
 
 	private static final String WRAPPER_TRANSFORMER_CLASS_NAME =
 			"org.jboss.modules.JLIClassTransformer";
@@ -51,6 +60,8 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	private final Object delegatingTransformer;
 
 	private final Method addTransformer;
+
+	private final ThrowingFunction<Object, Object> adaptTransformer;
 
 
 	/**
@@ -90,18 +101,29 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 				wrappedTransformer.setAccessible(true);
 				suggestedTransformer = wrappedTransformer.get(suggestedTransformer);
 			}
-			if (!suggestedTransformer.getClass().getName().equals(DELEGATING_TRANSFORMER_CLASS_NAME)) {
+
+			Class<?> transformerType = ClassFileTransformer.class;
+			if (suggestedTransformer.getClass().getName().equals(LEGACY_DELEGATING_TRANSFORMER_CLASS_NAME)) {
+				this.adaptTransformer = (t -> t);
+			}
+			else if (suggestedTransformer.getClass().getName().equals(DELEGATING_TRANSFORMER_CLASS_NAME)) {
+				transformerType = classLoader.loadClass(CLASS_TRANSFORMER_CLASS_NAME);
+				Constructor<?> adaptedTransformer = classLoader.loadClass(WRAPPER_TRANSFORMER_CLASS_NAME)
+						.getConstructor(ClassFileTransformer.class);
+				this.adaptTransformer = adaptedTransformer::newInstance;
+			}
+			else {
 				throw new IllegalStateException(
-						"Transformer not of the expected type DelegatingClassFileTransformer: " +
+						"Transformer not of expected type DelegatingClass(File)Transformer: " +
 						suggestedTransformer.getClass().getName());
 			}
 			this.delegatingTransformer = suggestedTransformer;
 
 			Method addTransformer = ReflectionUtils.findMethod(this.delegatingTransformer.getClass(),
-					"addTransformer", ClassFileTransformer.class);
+					"addTransformer", transformerType);
 			if (addTransformer == null) {
 				throw new IllegalArgumentException(
-						"Could not find 'addTransformer' method on JBoss DelegatingClassFileTransformer: " +
+						"Could not find 'addTransformer' method on JBoss DelegatingClass(File)Transformer: " +
 						this.delegatingTransformer.getClass().getName());
 			}
 			addTransformer.setAccessible(true);
@@ -116,7 +138,7 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		try {
-			this.addTransformer.invoke(this.delegatingTransformer, transformer);
+			this.addTransformer.invoke(this.delegatingTransformer, this.adaptTransformer.apply(transformer));
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException("Could not add transformer on JBoss ClassLoader: " + this.classLoader, ex);
