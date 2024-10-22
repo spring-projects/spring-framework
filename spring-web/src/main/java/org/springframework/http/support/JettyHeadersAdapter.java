@@ -20,6 +20,7 @@ import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +30,7 @@ import org.eclipse.jetty.http.HttpFields;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -38,6 +39,7 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Simon Baslé
  * @since 6.1
  */
 public final class JettyHeadersAdapter implements MultiValueMap<String, String> {
@@ -97,7 +99,8 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		Map<String, String> singleValueMap = CollectionUtils.newLinkedHashMap(this.headers.size());
+		Map<String, String> singleValueMap = new LinkedCaseInsensitiveMap<>(
+				this.headers.size(), Locale.ROOT);
 		Iterator<HttpField> iterator = this.headers.iterator();
 		iterator.forEachRemaining(field -> {
 			if (!singleValueMap.containsKey(field.getName())) {
@@ -189,7 +192,7 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 			}
 			@Override
 			public int size() {
-				return headers.size();
+				return headers.getFieldNamesCollection().size();
 			}
 		};
 	}

@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.StreamSupport;
@@ -30,13 +31,14 @@ import io.netty5.handler.codec.http.headers.HttpHeaders;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
 
 /**
  * {@code MultiValueMap} implementation for wrapping Netty HTTP headers.
  *
  * @author Violeta Georgieva
+ * @author Simon Baslé
  * @since 6.1
  */
 public final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
@@ -92,7 +94,8 @@ public final class Netty5HeadersAdapter implements MultiValueMap<String, String>
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		Map<String, String> singleValueMap = CollectionUtils.newLinkedHashMap(this.headers.size());
+		Map<String, String> singleValueMap = new LinkedCaseInsensitiveMap<>(
+				this.headers.size(), Locale.ROOT);
 		this.headers.forEach(entry -> singleValueMap.putIfAbsent(
 				entry.getKey().toString(), entry.getValue().toString()));
 		return singleValueMap;
