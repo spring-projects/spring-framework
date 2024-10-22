@@ -1,6 +1,6 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Asking for help
+  - name: Community Support
     url: https://stackoverflow.com/tags/spring
-    about: The Spring team is using StackOverflow for questions.
+    about: Please ask and answer questions on StackOverflow with the tag `spring`.
 
