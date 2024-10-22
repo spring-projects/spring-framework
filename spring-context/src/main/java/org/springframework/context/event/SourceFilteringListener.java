@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.context.ApplicationListener} decorator that filters
@@ -102,10 +103,7 @@ public class SourceFilteringListener implements GenericApplicationListener {
 	 * @param event the event to process (matching the specified source)
 	 */
 	protected void onApplicationEventInternal(ApplicationEvent event) {
-		if (this.delegate == null) {
-			throw new IllegalStateException(
-					"Must specify a delegate object or override the onApplicationEventInternal method");
-		}
+		Assert.state(this.delegate != null, "Delegate must not be null");
 		this.delegate.onApplicationEvent(event);
 	}
 
