@@ -16,8 +16,6 @@
 
 package org.springframework.web.filter;
 
-import java.io.InputStream;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
@@ -49,18 +47,17 @@ class ShallowEtagHeaderFilterTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		assertThat(filter.isEligibleForEtag(request, response, 200, InputStream.nullInputStream())).isTrue();
-		assertThat(filter.isEligibleForEtag(request, response, 300, InputStream.nullInputStream())).isFalse();
+		assertThat(filter.isEligibleForEtag(request, response)).isTrue();
 
 		request = new MockHttpServletRequest("HEAD", "/hotels");
-		assertThat(filter.isEligibleForEtag(request, response, 200, InputStream.nullInputStream())).isFalse();
+		assertThat(filter.isEligibleForEtag(request, response)).isFalse();
 
 		request = new MockHttpServletRequest("POST", "/hotels");
-		assertThat(filter.isEligibleForEtag(request, response, 200, InputStream.nullInputStream())).isFalse();
+		assertThat(filter.isEligibleForEtag(request, response)).isFalse();
 
 		request = new MockHttpServletRequest("POST", "/hotels");
 		request.addHeader("Cache-Control","must-revalidate, no-store");
-		assertThat(filter.isEligibleForEtag(request, response, 200, InputStream.nullInputStream())).isFalse();
+		assertThat(filter.isEligibleForEtag(request, response)).isFalse();
 	}
 
 	@Test
@@ -172,7 +169,7 @@ class ShallowEtagHeaderFilterTests {
 	}
 
 	@Test  // SPR-12960
-	public void filterWriterWithDisabledCaching() throws Exception {
+	void filterWriterWithDisabledCaching() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType(TEXT_PLAIN_VALUE);
@@ -257,7 +254,7 @@ class ShallowEtagHeaderFilterTests {
 	}
 
 	@Test // SPR-13717
-	public void filterFlushResponse() throws Exception {
+	void filterFlushResponse() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
