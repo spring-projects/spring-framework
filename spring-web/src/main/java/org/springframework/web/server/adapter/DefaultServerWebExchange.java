@@ -300,19 +300,25 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	@Override
 	public boolean checkNotModified(@Nullable String eTag, Instant lastModified) {
-		HttpStatusCode status = getResponse().getStatusCode();
-		if (this.notModified || (status != null && !HttpStatus.OK.equals(status))) {
-			return this.notModified;
+		if (isNotModified()) {
+			return true;
 		}
+
+		HttpStatusCode status = getResponse().getStatusCode();
+		if (status != null && !HttpStatus.OK.equals(status)) {
+			return false;
+		}
+
 		// Evaluate conditions in order of precedence.
 		// See https://datatracker.ietf.org/doc/html/rfc9110#section-13.2.2
+
 		// 1) If-Match
 		if (validateIfMatch(eTag)) {
 			updateResponseStateChanging(eTag, lastModified);
 			return this.notModified;
 		}
 		// 2) If-Unmodified-Since
-		else if (validateIfUnmodifiedSince(lastModified)) {
+		if (validateIfUnmodifiedSince(lastModified)) {
 			updateResponseStateChanging(eTag, lastModified);
 			return this.notModified;
 		}
