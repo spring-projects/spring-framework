@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.DisconnectedClientHelper;
 
 /**
  * Abstract base class for {@link HandlerExceptionResolver} implementations.
@@ -47,6 +48,12 @@ import org.springframework.web.servlet.ModelAndView;
 public abstract class AbstractHandlerExceptionResolver implements HandlerExceptionResolver, Ordered {
 
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
+
+	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
+			"org.springframework.web.servlet.handler.DisconnectedClient";
+
+	private static final DisconnectedClientHelper disconnectedClientHelper =
+			new DisconnectedClientHelper(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
 
 	/** Logger available to subclasses. */
@@ -173,7 +180,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		if (shouldApplyTo(request, handler)) {
 			prepareResponse(ex, response);
 			ModelAndView result = doResolveException(request, response, handler, ex);
-			if (result != null) {
+			if (result != null && !disconnectedClientHelper.checkAndLogClientDisconnectedException(ex)) {
 				// Print debug message when warn logger is not enabled.
 				if (logger.isDebugEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
 					logger.debug(buildLogMessage(ex, request) + (result.isEmpty() ? "" : " to " + result));

@@ -51,6 +51,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.util.DisconnectedClientHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -245,6 +246,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			else if (ex instanceof AsyncRequestNotUsableException) {
 				return handleAsyncRequestNotUsableException(
 						(AsyncRequestNotUsableException) ex, request, response, handler);
+			}
+			else if (DisconnectedClientHelper.isClientDisconnectedException(ex)) {
+				return handleDisconnectedClientException(ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerEx) {
@@ -510,6 +514,26 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView handleAsyncRequestNotUsableException(AsyncRequestNotUsableException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) {
+
+		return new ModelAndView();
+	}
+
+	/**
+	 * Handle an Exception that indicates the client has gone away. This is
+	 * typically an {@link IOException} of a specific subtype or with a message
+	 * specific to the underlying Servlet container. Those are detected through
+	 * {@link DisconnectedClientHelper#isClientDisconnectedException(Throwable)}
+	 * <p>By default, do nothing since the response is not usable.
+	 * @param ex the {@code Exception} to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or {@code null} if none chosen
+	 * at the time of the exception (for example, if multipart resolution failed)
+	 * @return an empty ModelAndView indicating the exception was handled
+	 * @since 6.2
+	 */
+	protected ModelAndView handleDisconnectedClientException(
+			Exception ex, HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) {
 
 		return new ModelAndView();
 	}
