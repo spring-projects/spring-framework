@@ -236,9 +236,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			resolvedModule -> !systemModuleNames.contains(resolvedModule.name());
 
 	@Nullable
-	private static Set<ClassPathManifestEntry> classPathManifestEntriesCache;
-
-	@Nullable
 	private static Method equinoxResolveMethod;
 
 	static {
@@ -261,7 +258,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private final Map<String, Resource[]> rootDirCache = new ConcurrentHashMap<>();
 
-	private final Map<String, NavigableSet<String>> jarEntryCache = new ConcurrentHashMap<>();
+	private final Map<String, NavigableSet<String>> jarEntriesCache = new ConcurrentHashMap<>();
+
+	@Nullable
+	private volatile Set<ClassPathManifestEntry> manifestEntriesCache;
 
 
 	/**
@@ -377,7 +377,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	public void clearCache() {
 		this.rootDirCache.clear();
-		this.jarEntryCache.clear();
+		this.jarEntriesCache.clear();
+		this.manifestEntriesCache = null;
 	}
 
 
@@ -530,10 +531,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @since 4.3
 	 */
 	protected void addClassPathManifestEntries(Set<Resource> result) {
-		Set<ClassPathManifestEntry> entries = classPathManifestEntriesCache;
+		Set<ClassPathManifestEntry> entries = this.manifestEntriesCache;
 		if (entries == null) {
 			entries = getClassPathManifestEntries();
-			classPathManifestEntriesCache = entries;
+			this.manifestEntriesCache = entries;
 		}
 		for (ClassPathManifestEntry entry : entries) {
 			if (!result.contains(entry.resource()) &&
@@ -544,7 +545,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	private Set<ClassPathManifestEntry> getClassPathManifestEntries() {
-		Set<ClassPathManifestEntry> manifestEntries = new HashSet<>();
+		Set<ClassPathManifestEntry> manifestEntries = new LinkedHashSet<>();
 		Set<File> seen = new HashSet<>();
 		try {
 			String paths = System.getProperty("java.class.path");
@@ -578,9 +579,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		File parent = jar.getAbsoluteFile().getParentFile();
 		try (JarFile jarFile = new JarFile(jar)) {
 			Manifest manifest = jarFile.getManifest();
-			Attributes attributes = (manifest != null) ? manifest.getMainAttributes() : null;
-			String classPath = (attributes != null) ? attributes.getValue(Name.CLASS_PATH) : null;
-			Set<ClassPathManifestEntry> manifestEntries = new HashSet<>();
+			Attributes attributes = (manifest != null ? manifest.getMainAttributes() : null);
+			String classPath = (attributes != null ? attributes.getValue(Name.CLASS_PATH) : null);
+			Set<ClassPathManifestEntry> manifestEntries = new LinkedHashSet<>();
 			if (StringUtils.hasLength(classPath)) {
 				StringTokenizer tokenizer = new StringTokenizer(classPath);
 				while (tokenizer.hasMoreTokens()) {
@@ -806,11 +807,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (separatorIndex != -1) {
 			jarFileUrl = urlFile.substring(0, separatorIndex);
 			rootEntryPath = urlFile.substring(separatorIndex + 2);  // both separators are 2 chars
-			NavigableSet<String> entryCache = this.jarEntryCache.get(jarFileUrl);
-			if (entryCache != null) {
+			NavigableSet<String> entriesCache = this.jarEntriesCache.get(jarFileUrl);
+			if (entriesCache != null) {
 				Set<Resource> result = new LinkedHashSet<>(64);
 				// Search sorted entries from first entry with rootEntryPath prefix
-				for (String entryPath : entryCache.tailSet(rootEntryPath, false)) {
+				for (String entryPath : entriesCache.tailSet(rootEntryPath, false)) {
 					if (!entryPath.startsWith(rootEntryPath)) {
 						// We are beyond the potential matches in the current TreeSet.
 						break;
@@ -870,11 +871,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				rootEntryPath = rootEntryPath + "/";
 			}
 			Set<Resource> result = new LinkedHashSet<>(64);
-			NavigableSet<String> entryCache = new TreeSet<>();
-			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements(); ) {
-				JarEntry entry = entries.nextElement();
-				String entryPath = entry.getName();
-				entryCache.add(entryPath);
+			NavigableSet<String> entriesCache = new TreeSet<>();
+			for (String entryPath : jarFile.stream().map(JarEntry::getName).sorted().toList()) {
+				entriesCache.add(entryPath);
 				if (entryPath.startsWith(rootEntryPath)) {
 					String relativePath = entryPath.substring(rootEntryPath.length());
 					if (getPathMatcher().match(subPattern, relativePath)) {
@@ -883,7 +882,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				}
 			}
 			// Cache jar entries in TreeSet for efficient searching on re-encounter.
-			this.jarEntryCache.put(jarFileUrl, entryCache);
+			this.jarEntriesCache.put(jarFileUrl, entriesCache);
 			return result;
 		}
 		finally {
@@ -1236,9 +1235,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 		}
 
-		private static Resource asJarFileResource(String path)
-				throws MalformedURLException {
+		private static Resource asJarFileResource(String path) throws MalformedURLException {
 			return new UrlResource(JARFILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR);
 		}
 	}
+
 }
