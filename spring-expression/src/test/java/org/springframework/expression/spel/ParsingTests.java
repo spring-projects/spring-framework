@@ -18,12 +18,12 @@ package org.springframework.expression.spel;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Parse some expressions and check we get the AST we expect.
@@ -34,10 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Andy Clement
  * @author Sam Brannen
  */
-class ParsingTests {
-
-	private final SpelExpressionParser parser = new SpelExpressionParser();
-
+class ParsingTests extends AbstractExpressionTests {
 
 	@Nested
 	class Miscellaneous {
@@ -104,12 +101,14 @@ class ParsingTests {
 			parseCheck("have乐趣()");
 		}
 
-		@Test
-		void unsupportedCharactersInIdentifiers() {
-			// Invalid syntax
-			assertThatIllegalStateException()
-					.isThrownBy(() -> parser.parseRaw("apple~banana"))
-					.withMessage("Unsupported character '~' (126) encountered at position 6 in expression.");
+		@ParameterizedTest(name = "expression = ''{0}''")
+		@CsvSource(textBlock = """
+			apple~banana, ~, 6
+			map[‘c],      ‘, 5
+			A § B,        §, 3
+			""")
+		void unsupportedCharacter(String expression, char ch, int position) {
+			parseAndCheckError(expression, SpelMessage.UNSUPPORTED_CHARACTER, position, ch, (int) ch);
 		}
 
 		@Test

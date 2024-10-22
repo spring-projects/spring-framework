@@ -266,9 +266,7 @@ class Tokenizer {
 						raiseParseException(this.pos, SpelMessage.UNEXPECTED_ESCAPE_CHAR);
 						break;
 					default:
-						throw new IllegalStateException(
-								"Unsupported character '%s' (%d) encountered at position %d in expression."
-										.formatted(ch, (int) ch, (this.pos + 1)));
+						raiseParseException(this.pos + 1, SpelMessage.UNSUPPORTED_CHARACTER, ch, (int) ch);
 				}
 			}
 		}
