@@ -291,7 +291,11 @@ public enum SpelMessage {
 
 	/** @since 6.0.13 */
 	NEGATIVE_REPEATED_TEXT_COUNT(Kind.ERROR, 1081,
-			"Repeat count ''{0}'' must not be negative");
+			"Repeat count ''{0}'' must not be negative"),
+
+	/** @since 6.1.15 */
+	UNSUPPORTED_CHARACTER(Kind.ERROR, 1082,
+			"Unsupported character ''{0}'' ({1}) encountered in expression");
 
 
 	private final Kind kind;

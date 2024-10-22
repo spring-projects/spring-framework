@@ -42,7 +42,7 @@ public abstract class AbstractExpressionTests {
 	protected static final boolean SHOULD_NOT_BE_WRITABLE = false;
 
 
-	protected final ExpressionParser parser = new SpelExpressionParser();
+	protected final SpelExpressionParser parser = new SpelExpressionParser();
 
 	protected final StandardEvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 
