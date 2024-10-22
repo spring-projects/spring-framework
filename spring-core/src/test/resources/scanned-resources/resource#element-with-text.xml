@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<school>TestSchool
+	<class teacher = "Happy Teacher">Test Teacher One
+		<unknownStudent>Abe Sample</unknownStudent>
+		<maleStudent>Jane Doe</maleStudent>
+		<femaleStudent>John Doe</femaleStudent>
+	</class>
+	<class teacher = "Sad Teacher">Test Teacher Two
+		<unknownStudent>Def Sample</unknownStudent>
+		<maleStudent>Jane Dane</maleStudent>
+		<femaleStudent>John Dane</femaleStudent>
+	</class>
+	<principal>Test Principal
+		<firstName>Head</firstName>
+		<lastName>Master</lastName>
+	</principal>
+	<guard>Fox Test</guard>
+</school>
