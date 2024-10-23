@@ -824,13 +824,14 @@ class RestClientIntegrationTests {
 				.build();
 
 		restClientWithCookies.get()
-			.uri("/greeting")
-			.header("X-Test-Header", "testvalue")
-			.retrieve();
+				.uri("/greeting")
+				.header("X-Test-Header", "testvalue")
+				.retrieve()
+				.body(String.class);
 
 		expectRequest(request ->
-			assertThat(request.getHeader(HttpHeaders.COOKIE))
-					.isEqualTo("testCookie=firstValue; testCookie=secondValue")
+				assertThat(request.getHeader(HttpHeaders.COOKIE))
+						.isEqualTo("testCookie=firstValue; testCookie=secondValue")
 		);
 	}
 
