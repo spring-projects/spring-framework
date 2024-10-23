@@ -21,7 +21,7 @@ The caveat to overriding the `/` Servlet mapping is that the `RequestDispatcher`
 default Servlet must be retrieved by name rather than by path. The
 `DefaultServletHttpRequestHandler` tries to auto-detect the default Servlet for
 the container at startup time, using a list of known names for most of the major Servlet
-containers (including Tomcat, Jetty, GlassFish, JBoss, Resin, WebLogic, and WebSphere).
+containers (including Tomcat, Jetty, GlassFish, JBoss, WebLogic, and WebSphere).
 If the default Servlet has been custom-configured with a different name, or if a
 different Servlet container is being used where the default Servlet name is unknown,
 then you must explicitly provide the default Servlet's name, as the following example shows:

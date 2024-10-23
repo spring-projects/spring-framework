@@ -142,8 +142,7 @@ Alternatively, specify a custom `persistenceXmlLocation` on your
 META-INF/my-persistence.xml) and include only a descriptor with that name in your
 application jar files. Because the Jakarta EE server looks only for default
 `META-INF/persistence.xml` files, it ignores such custom persistence units and, hence,
-avoids conflicts with a Spring-driven JPA setup upfront. (This applies to Resin 3.1, for
-example.)
+avoids conflicts with a Spring-driven JPA setup upfront.
 
 .When is load-time weaving required?
 ****
