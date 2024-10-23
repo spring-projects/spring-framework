@@ -40,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -301,8 +300,6 @@ final class DefaultRestClient implements RestClient {
 
 	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
-		private static final String COOKIE_DELIMITER = "; ";
-
 		private final HttpMethod httpMethod;
 
 		@Nullable
@@ -557,10 +554,9 @@ final class DefaultRestClient implements RestClient {
 			try {
 				uri = initUri();
 				HttpHeaders headers = initHeaders();
-
 				MultiValueMap<String, String> cookies = initCookies();
 				if (!CollectionUtils.isEmpty(cookies)) {
-					headers.put(HttpHeaders.COOKIE, List.of(cookiesToHeaderValue(cookies)));
+					headers.set(HttpHeaders.COOKIE, serializeCookies(cookies));
 				}
 
 				ClientHttpRequest clientRequest = createRequest(uri);
@@ -638,25 +634,36 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		private MultiValueMap<String, String> initCookies() {
-			MultiValueMap<String, String> mergedCookies = new LinkedMultiValueMap<>();
-
-			if(!CollectionUtils.isEmpty(defaultCookies)) {
-				mergedCookies.putAll(defaultCookies);
+			MultiValueMap<String, String> defaultCookies = DefaultRestClient.this.defaultCookies;
+			if (CollectionUtils.isEmpty(this.cookies)) {
+				return (defaultCookies != null ? defaultCookies : new LinkedMultiValueMap<>());
 			}
-
-			if(!CollectionUtils.isEmpty(this.cookies)) {
-				mergedCookies.putAll(this.cookies);
+			else if (CollectionUtils.isEmpty(defaultCookies)) {
+				return this.cookies;
 			}
-
-			return mergedCookies;
+			else {
+				MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+				map.putAll(DefaultRestClient.this.defaultCookies);
+				map.putAll(this.cookies);
+				return map;
+			}
 		}
 
-		private String cookiesToHeaderValue(MultiValueMap<String, String> cookies) {
-			List<String> flatCookies = new ArrayList<>();
-			cookies.forEach((name, cookieValues) -> cookieValues.forEach(value ->
-				flatCookies.add(new HttpCookie(name, value).toString())
-			));
-			return String.join(COOKIE_DELIMITER, flatCookies);
+		private String serializeCookies(MultiValueMap<String, String> cookies) {
+			boolean first = true;
+			StringBuilder sb = new StringBuilder();
+			for (Map.Entry<String, List<String>> entry : cookies.entrySet()) {
+				for (String value : entry.getValue()) {
+					if (!first) {
+						sb.append("; ");
+					}
+					else {
+						first = false;
+					}
+					sb.append(entry.getKey()).append("=").append(value);
+				}
+			}
+			return sb.toString();
 		}
 
 		private ClientHttpRequest createRequest(URI uri) throws IOException {

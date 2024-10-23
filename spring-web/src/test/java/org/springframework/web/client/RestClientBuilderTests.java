@@ -151,7 +151,7 @@ public class RestClientBuilderTests {
 	}
 
 	@Test
-	void defaultCookieWithMultipleValuesAddsCookieToDefaultCookiesMapWithAllValues() {
+	void defaultCookieWithMultipleValuesAddsCookieToDefaultCookiesMap() {
 		RestClient.Builder builder = RestClient.builder();
 
 		builder.defaultCookie("myCookie", "testValue1", "testValue2");

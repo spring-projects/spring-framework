@@ -468,21 +468,21 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	public RestClient build() {
 		ClientHttpRequestFactory requestFactory = initRequestFactory();
 		UriBuilderFactory uriBuilderFactory = initUriBuilderFactory();
+
 		HttpHeaders defaultHeaders = copyDefaultHeaders();
 		MultiValueMap<String, String> defaultCookies = copyDefaultCookies();
-		List<HttpMessageConverter<?>> messageConverters = (this.messageConverters != null ?
-				this.messageConverters : initMessageConverters());
-		return new DefaultRestClient(requestFactory,
-				this.interceptors, this.initializers, uriBuilderFactory,
-				defaultHeaders,
-				defaultCookies,
+
+		List<HttpMessageConverter<?>> converters =
+				(this.messageConverters != null ? this.messageConverters : initMessageConverters());
+
+		return new DefaultRestClient(
+				requestFactory, this.interceptors, this.initializers,
+				uriBuilderFactory, defaultHeaders, defaultCookies,
 				this.defaultRequest,
 				this.statusHandlers,
-				messageConverters,
-				this.observationRegistry,
-				this.observationConvention,
-				new DefaultRestClientBuilder(this)
-				);
+				converters,
+				this.observationRegistry, this.observationConvention,
+				new DefaultRestClientBuilder(this));
 	}
 
 	private ClientHttpRequestFactory initRequestFactory() {
@@ -519,26 +519,22 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	@Nullable
 	private HttpHeaders copyDefaultHeaders() {
-		if (this.defaultHeaders != null) {
-			HttpHeaders copy = new HttpHeaders();
-			this.defaultHeaders.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
-			return HttpHeaders.readOnlyHttpHeaders(copy);
-		}
-		else {
+		if (this.defaultHeaders == null) {
 			return null;
 		}
+		HttpHeaders copy = new HttpHeaders();
+		this.defaultHeaders.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
+		return HttpHeaders.readOnlyHttpHeaders(copy);
 	}
 
 	@Nullable
 	private MultiValueMap<String, String> copyDefaultCookies() {
-		if (this.defaultCookies != null) {
-			MultiValueMap<String, String> copy = new LinkedMultiValueMap<>(this.defaultCookies.size());
-			this.defaultCookies.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
-			return CollectionUtils.unmodifiableMultiValueMap(copy);
-		}
-		else {
+		if (this.defaultCookies == null) {
 			return null;
 		}
+		MultiValueMap<String, String> copy = new LinkedMultiValueMap<>(this.defaultCookies.size());
+		this.defaultCookies.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
+		return CollectionUtils.unmodifiableMultiValueMap(copy);
 	}
 
 }
