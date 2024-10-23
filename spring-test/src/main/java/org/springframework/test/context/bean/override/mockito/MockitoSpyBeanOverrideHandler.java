@@ -39,19 +39,24 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  */
 class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 
+	private static final VerificationStartedListener verificationStartedListener =
+			new SpringAopBypassingVerificationStartedListener();
+
+
 	MockitoSpyBeanOverrideHandler(Field field, ResolvableType typeToSpy, MockitoSpyBean spyAnnotation) {
 		this(field, typeToSpy, (StringUtils.hasText(spyAnnotation.name()) ? spyAnnotation.name() : null),
-				spyAnnotation.reset(), spyAnnotation.proxyTargetAware());
+				spyAnnotation.reset());
 	}
 
 	MockitoSpyBeanOverrideHandler(Field field, ResolvableType typeToSpy, @Nullable String beanName,
-			MockReset reset, boolean proxyTargetAware) {
+			MockReset reset) {
 
-		super(field, typeToSpy, beanName, BeanOverrideStrategy.WRAP, reset, proxyTargetAware);
+		super(field, typeToSpy, beanName, BeanOverrideStrategy.WRAP, reset);
 		Assert.notNull(typeToSpy, "typeToSpy must not be null");
 	}
 
@@ -77,9 +82,7 @@ class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 		if (StringUtils.hasLength(name)) {
 			settings.name(name);
 		}
-		if (isProxyTargetAware()) {
-			settings.verificationStartedListeners(new SpringAopBypassingVerificationStartedListener());
-		}
+		settings.verificationStartedListeners(verificationStartedListener);
 		Class<?> toSpy;
 		if (Proxy.isProxyClass(instance.getClass())) {
 			settings.defaultAnswer(AdditionalAnswers.delegatesTo(instance));

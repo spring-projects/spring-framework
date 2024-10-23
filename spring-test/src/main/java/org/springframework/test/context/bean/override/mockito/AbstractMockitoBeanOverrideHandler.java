@@ -17,7 +17,6 @@
 package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.reflect.Field;
-import java.util.Objects;
 
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.ResolvableType;
@@ -38,15 +37,12 @@ abstract class AbstractMockitoBeanOverrideHandler extends BeanOverrideHandler {
 
 	private final MockReset reset;
 
-	private final boolean proxyTargetAware;
 
-
-	protected AbstractMockitoBeanOverrideHandler(Field field, ResolvableType beanType, @Nullable String beanName,
-			BeanOverrideStrategy strategy, @Nullable MockReset reset, boolean proxyTargetAware) {
+	protected AbstractMockitoBeanOverrideHandler(Field field, ResolvableType beanType,
+			@Nullable String beanName, BeanOverrideStrategy strategy, @Nullable MockReset reset) {
 
 		super(field, beanType, beanName, strategy);
 		this.reset = (reset != null ? reset : MockReset.AFTER);
-		this.proxyTargetAware = proxyTargetAware;
 	}
 
 
@@ -56,14 +52,6 @@ abstract class AbstractMockitoBeanOverrideHandler extends BeanOverrideHandler {
 	 */
 	MockReset getReset() {
 		return this.reset;
-	}
-
-	/**
-	 * Return if AOP advised beans should be proxy target aware.
-	 * @return if proxy target aware
-	 */
-	boolean isProxyTargetAware() {
-		return this.proxyTargetAware;
 	}
 
 	@Override
@@ -90,12 +78,12 @@ abstract class AbstractMockitoBeanOverrideHandler extends BeanOverrideHandler {
 			return true;
 		}
 		return (other instanceof AbstractMockitoBeanOverrideHandler that && super.equals(that) &&
-				(this.reset == that.reset) && (this.proxyTargetAware == that.proxyTargetAware));
+				this.reset == that.reset);
 	}
 
 	@Override
 	public int hashCode() {
-		return super.hashCode() + Objects.hash(this.reset, this.proxyTargetAware);
+		return super.hashCode() + this.reset.hashCode();
 	}
 
 	@Override
@@ -106,7 +94,6 @@ abstract class AbstractMockitoBeanOverrideHandler extends BeanOverrideHandler {
 				.append("beanName", getBeanName())
 				.append("strategy", getStrategy())
 				.append("reset", getReset())
-				.append("proxyTargetAware", isProxyTargetAware())
 				.toString();
 	}
 
