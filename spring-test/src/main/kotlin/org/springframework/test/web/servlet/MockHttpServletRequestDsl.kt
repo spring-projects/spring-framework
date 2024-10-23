@@ -41,7 +41,7 @@ import org.springframework.test.web.servlet.request.AbstractMockHttpServletReque
  * @author Sebastien Deleuze
  * @since 5.2
  */
-open class MockHttpServletRequestDsl internal constructor (private val builder: AbstractMockHttpServletRequestBuilder<*>) {
+open class MockHttpServletRequestDsl(private val builder: AbstractMockHttpServletRequestBuilder<*>) {
 
 	/**
 	 * @see [MockHttpServletRequestBuilder.contextPath]
