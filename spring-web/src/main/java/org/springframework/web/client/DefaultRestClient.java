@@ -455,14 +455,18 @@ final class DefaultRestClient implements RestClient {
 
 		@Override
 		public ResponseSpec retrieve() {
-			return exchangeInternal(DefaultResponseSpec::new, false);
+			ResponseSpec responseSpec = exchangeInternal(DefaultResponseSpec::new, false);
+			Assert.state(responseSpec != null, "No ResponseSpec");
+			return responseSpec;
 		}
 
 		@Override
+		@Nullable
 		public <T> T exchange(ExchangeFunction<T> exchangeFunction, boolean close) {
 			return exchangeInternal(exchangeFunction, close);
 		}
 
+		@Nullable
 		private <T> T exchangeInternal(ExchangeFunction<T> exchangeFunction, boolean close) {
 			Assert.notNull(exchangeFunction, "ExchangeFunction must not be null");
 
