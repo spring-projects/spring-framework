@@ -22,6 +22,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * A {@link MockResolver} for testing Spring applications with Mockito.
@@ -31,21 +32,27 @@ import org.springframework.util.Assert;
  *
  * @author Sam Brannen
  * @author Andy Wilkinson
+ * @author Juergen Hoeller
  * @since 6.2
  */
 public class SpringMockResolver implements MockResolver {
 
+	static final boolean aopAvailable = ClassUtils.isPresent(
+			"org.springframework.aop.framework.Advised", SpringMockResolver.class.getClassLoader());
+
+
 	@Override
 	public Object resolve(Object instance) {
-		return getUltimateTargetObject(instance);
+		if (aopAvailable) {
+			return getUltimateTargetObject(instance);
+		}
+		return instance;
 	}
 
 	/**
 	 * This is a modified version of
 	 * {@link org.springframework.test.util.AopTestUtils#getUltimateTargetObject(Object)
-	 * AopTestUtils#getUltimateTargetObject()} which only checks static target
-	 * sources.
-	 * @param <T> the type of the target object
+	 * AopTestUtils#getUltimateTargetObject()} which only checks static target sources.
 	 * @param candidate the instance to check (potentially a Spring AOP proxy;
 	 * never {@code null})
 	 * @return the target object or the {@code candidate} (never {@code null})
@@ -53,8 +60,7 @@ public class SpringMockResolver implements MockResolver {
 	 * @see Advised#getTargetSource()
 	 * @see TargetSource#isStatic()
 	 */
-	@SuppressWarnings("unchecked")
-	static <T> T getUltimateTargetObject(Object candidate) {
+	static Object getUltimateTargetObject(Object candidate) {
 		Assert.notNull(candidate, "Candidate must not be null");
 		try {
 			if (AopUtils.isAopProxy(candidate) && candidate instanceof Advised advised) {
@@ -70,7 +76,7 @@ public class SpringMockResolver implements MockResolver {
 		catch (Throwable ex) {
 			throw new IllegalStateException("Failed to unwrap proxied object", ex);
 		}
-		return (T) candidate;
+		return candidate;
 	}
 
 }

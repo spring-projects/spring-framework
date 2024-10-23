@@ -70,7 +70,6 @@ class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 		return createSpy(beanName, existingBeanInstance);
 	}
 
-	@SuppressWarnings("unchecked")
 	private Object createSpy(String name, Object instance) {
 		Class<?> resolvedTypeToOverride = getBeanType().resolve();
 		Assert.notNull(resolvedTypeToOverride, "Failed to resolve type to override");
@@ -78,11 +77,15 @@ class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 		if (Mockito.mockingDetails(instance).isSpy()) {
 			return instance;
 		}
+
 		MockSettings settings = MockReset.withSettings(getReset());
 		if (StringUtils.hasLength(name)) {
 			settings.name(name);
 		}
-		settings.verificationStartedListeners(verificationStartedListener);
+		if (SpringMockResolver.aopAvailable) {
+			settings.verificationStartedListeners(verificationStartedListener);
+		}
+
 		Class<?> toSpy;
 		if (Proxy.isProxyClass(instance.getClass())) {
 			settings.defaultAnswer(AdditionalAnswers.delegatesTo(instance));
