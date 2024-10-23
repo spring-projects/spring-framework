@@ -31,7 +31,6 @@ import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Service;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 
@@ -50,10 +49,10 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  * @since 6.2
  * @see <a href="https://github.com/spring-projects/spring-boot/issues/5837">5837</a>
- * @see MockitoBeanAndAopProxyTests
+ * @see MockitoBeanAndSpringAopProxyTests
  */
 @ExtendWith(SpringExtension.class)
-class MockitoSpyBeanAndAopProxyTests {
+class MockitoSpyBeanAndSpringAopProxyTests {
 
 	@MockitoSpyBean
 	DateService dateService;
@@ -161,7 +160,6 @@ class MockitoSpyBeanAndAopProxyTests {
 		}
 	}
 
-	@Service
 	static class DateService {
 
 		@Cacheable("test")
