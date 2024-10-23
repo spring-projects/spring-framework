@@ -30,7 +30,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
-import org.springframework.test.util.AopTestUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -103,7 +102,7 @@ class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 
 		@Override
 		public void onVerificationStarted(VerificationStartedEvent event) {
-			event.setMock(AopTestUtils.getUltimateTargetObject(event.getMock()));
+			event.setMock(SpringMockResolver.getUltimateTargetObject(event.getMock()));
 		}
 	}
 

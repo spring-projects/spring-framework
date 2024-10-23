@@ -16,13 +16,15 @@
 
 package org.springframework.test.context.bean.override.mockito;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -58,12 +60,21 @@ class MockitoSpyBeanAndSpringAopProxyTests {
 	DateService dateService;
 
 
+	@BeforeEach
+	void resetCache() {
+		// We have to clear the "test" cache before each test. Otherwise, method
+		// invocations on the Spring AOP proxy will never make it to the Mockito spy.
+		dateService.clearCache();
+	}
+
 	/**
 	 * Stubbing and verification for a Mockito spy that is wrapped in a Spring AOP
 	 * proxy should always work when performed via the ultimate target of the Spring
 	 * AOP proxy (i.e., the actual spy instance).
 	 */
-	@Test
+	// We need to run this test at least twice to ensure the Mockito spy can be reused
+	// across test method invocations without using @DirtestContext.
+	@RepeatedTest(2)
 	void stubAndVerifyOnUltimateTargetOfSpringAopProxy() {
 		assertThat(AopUtils.isAopProxy(dateService)).as("is Spring AOP proxy").isTrue();
 		DateService spy = AopTestUtils.getUltimateTargetObject(dateService);
@@ -93,13 +104,14 @@ class MockitoSpyBeanAndSpringAopProxyTests {
 	 * AOP proxy to stubbing calls, while supplying the Spring AOP proxy to verification
 	 * calls.
 	 */
-	@Disabled("Disabled until transparent verification for @MockitoSpyBean is implemented")
-	@Test
+	// We need to run this test at least twice to ensure the Mockito spy can be reused
+	// across test method invocations without using @DirtestContext.
+	@RepeatedTest(2)
 	void stubOnUltimateTargetAndVerifyOnSpringAopProxy() {
 		assertThat(AopUtils.isAopProxy(dateService)).as("is Spring AOP proxy").isTrue();
-		DateService spy = AopTestUtils.getUltimateTargetObject(dateService);
-		assertThat(Mockito.mockingDetails(spy).isSpy()).as("ultimate target is Mockito spy").isTrue();
+		assertThat(Mockito.mockingDetails(dateService).isSpy()).as("Spring AOP proxy is Mockito spy").isTrue();
 
+		DateService spy = AopTestUtils.getUltimateTargetObject(dateService);
 		given(spy.getDate(false)).willReturn(1L);
 		Long date = dateService.getDate(false);
 		assertThat(date).isOne();
@@ -123,7 +135,9 @@ class MockitoSpyBeanAndSpringAopProxyTests {
 	 * stubbing for a proxied mock.
 	 */
 	@Disabled("Disabled until Mockito provides support for transparent stubbing of a proxied spy")
-	@Test
+	// We need to run this test at least twice to ensure the Mockito spy can be reused
+	// across test method invocations without using @DirtestContext.
+	@RepeatedTest(2)
 	void stubAndVerifyDirectlyOnSpringAopProxy() throws Exception {
 		assertThat(AopUtils.isCglibProxy(dateService)).as("is Spring AOP CGLIB proxy").isTrue();
 		assertThat(Mockito.mockingDetails(dateService).isSpy()).as("is Mockito spy").isTrue();
@@ -166,6 +180,11 @@ class MockitoSpyBeanAndSpringAopProxyTests {
 		Long getDate(boolean argument) {
 			return System.nanoTime();
 		}
+
+		@CacheEvict(cacheNames = "test", allEntries = true)
+		void clearCache() {
+		}
+
 	}
 
 }
