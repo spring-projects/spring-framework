@@ -553,14 +553,16 @@ final class DefaultRestClient implements RestClient {
 			URI uri = null;
 			try {
 				uri = initUri();
-				HttpHeaders headers = initHeaders();
-				MultiValueMap<String, String> cookies = initCookies();
-				if (!CollectionUtils.isEmpty(cookies)) {
-					headers.set(HttpHeaders.COOKIE, serializeCookies(cookies));
+				String serializedCookies = serializeCookies();
+				if (serializedCookies != null) {
+					getHeaders().set(HttpHeaders.COOKIE, serializedCookies);
 				}
+				HttpHeaders headers = initHeaders();
 
 				ClientHttpRequest clientRequest = createRequest(uri);
-				clientRequest.getHeaders().addAll(headers);
+				if (headers != null) {
+					clientRequest.getHeaders().addAll(headers);
+				}
 				Map<String, Object> attributes = getAttributes();
 				clientRequest.getAttributes().putAll(attributes);
 				ClientRequestObservationContext observationContext = new ClientRequestObservationContext(clientRequest);
@@ -617,42 +619,28 @@ final class DefaultRestClient implements RestClient {
 			return (this.uri != null ? this.uri : DefaultRestClient.this.uriBuilderFactory.expand(""));
 		}
 
-		private HttpHeaders initHeaders() {
-			HttpHeaders defaultHeaders = DefaultRestClient.this.defaultHeaders;
-			if (CollectionUtils.isEmpty(this.headers)) {
-				return (defaultHeaders != null ? defaultHeaders : new HttpHeaders());
-			}
-			else if (CollectionUtils.isEmpty(defaultHeaders)) {
-				return this.headers;
-			}
-			else {
-				HttpHeaders result = new HttpHeaders();
-				result.putAll(defaultHeaders);
-				result.putAll(this.headers);
-				return result;
-			}
-		}
-
-		private MultiValueMap<String, String> initCookies() {
+		@Nullable
+		private String serializeCookies() {
+			MultiValueMap<String, String> map;
 			MultiValueMap<String, String> defaultCookies = DefaultRestClient.this.defaultCookies;
 			if (CollectionUtils.isEmpty(this.cookies)) {
-				return (defaultCookies != null ? defaultCookies : new LinkedMultiValueMap<>());
+				map = defaultCookies;
 			}
 			else if (CollectionUtils.isEmpty(defaultCookies)) {
-				return this.cookies;
+				map = this.cookies;
 			}
 			else {
-				MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-				map.putAll(DefaultRestClient.this.defaultCookies);
+				map = new LinkedMultiValueMap<>(defaultCookies.size() + this.cookies.size());
+				map.putAll(defaultCookies);
 				map.putAll(this.cookies);
-				return map;
 			}
+			return (!CollectionUtils.isEmpty(map) ? serializeCookies(map) : null);
 		}
 
-		private String serializeCookies(MultiValueMap<String, String> cookies) {
+		private static String serializeCookies(MultiValueMap<String, String> map) {
 			boolean first = true;
 			StringBuilder sb = new StringBuilder();
-			for (Map.Entry<String, List<String>> entry : cookies.entrySet()) {
+			for (Map.Entry<String, List<String>> entry : map.entrySet()) {
 				for (String value : entry.getValue()) {
 					if (!first) {
 						sb.append("; ");
@@ -666,12 +654,30 @@ final class DefaultRestClient implements RestClient {
 			return sb.toString();
 		}
 
+		@Nullable
+		private HttpHeaders initHeaders() {
+			HttpHeaders defaultHeaders = DefaultRestClient.this.defaultHeaders;
+			if (CollectionUtils.isEmpty(this.headers)) {
+				return defaultHeaders;
+			}
+			else if (CollectionUtils.isEmpty(defaultHeaders)) {
+				return this.headers;
+			}
+			else {
+				HttpHeaders result = new HttpHeaders();
+				result.putAll(defaultHeaders);
+				result.putAll(this.headers);
+				return result;
+			}
+		}
+
 		private ClientHttpRequest createRequest(URI uri) throws IOException {
 			ClientHttpRequestFactory factory;
 			if (DefaultRestClient.this.interceptors != null) {
 				factory = DefaultRestClient.this.interceptingRequestFactory;
 				if (factory == null) {
-					factory = new InterceptingClientHttpRequestFactory(DefaultRestClient.this.clientRequestFactory, DefaultRestClient.this.interceptors);
+					factory = new InterceptingClientHttpRequestFactory(
+							DefaultRestClient.this.clientRequestFactory, DefaultRestClient.this.interceptors);
 					DefaultRestClient.this.interceptingRequestFactory = factory;
 				}
 			}
