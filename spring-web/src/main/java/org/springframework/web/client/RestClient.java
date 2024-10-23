@@ -615,8 +615,10 @@ public interface RestClient {
 		S httpRequest(Consumer<ClientHttpRequest> requestConsumer);
 
 		/**
-		 * Proceed to declare how to extract the response. For example to extract
-		 * a {@link ResponseEntity} with status, headers, and body:
+		 * Enter the retrieve workflow and use the returned {@link ResponseSpec}
+		 * to select from a number of built-in options to extract the response.
+		 * For example:
+		 *
 		 * <pre class="code">
 		 * ResponseEntity&lt;Person&gt; entity = client.get()
 		 *     .uri("/persons/1")
@@ -632,6 +634,10 @@ public interface RestClient {
 		 *     .retrieve()
 		 *     .body(Person.class);
 		 * </pre>
+		 * Note that this method does not actually execute the request until you
+		 * call one of the returned {@link ResponseSpec}. Use the
+		 * {@link #exchange(ExchangeFunction)} variants if you need to separate
+		 * request execution from response extraction.
 		 * <p>By default, 4xx response code result in a
 		 * {@link HttpClientErrorException} and 5xx response codes in a
 		 * {@link HttpServerErrorException}. To customize error handling, use
@@ -664,6 +670,7 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 * @return the value returned from the exchange function
 		 */
+		@Nullable
 		default <T> T exchange(ExchangeFunction<T> exchangeFunction) {
 			return exchange(exchangeFunction, true);
 		}
@@ -695,6 +702,7 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 * @return the value returned from the exchange function
 		 */
+		@Nullable
 		<T> T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
 
 
@@ -712,6 +720,7 @@ public interface RestClient {
 			 * @return the exchanged type
 			 * @throws IOException in case of I/O errors
 			 */
+			@Nullable
 			T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
 		}
 
