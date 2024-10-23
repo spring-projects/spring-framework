@@ -42,7 +42,8 @@ asciidoc:
     spring-framework-reference: '{spring-framework-docs-root}/{spring-version}/reference'
     #
     # Other Spring portfolio projects
-    spring-boot-docs: '{docs-site}/spring-boot/docs/current/reference/html'
+    spring-boot-docs: '{docs-site}/spring-boot'
+    spring-boot-docs-ref: '{spring-boot-docs}/reference'
     spring-boot-issues: '{spring-github-org}/spring-boot/issues'
     # TODO add more projects / links or just build up on {docs-site}?
     # TODO rename the below using new conventions

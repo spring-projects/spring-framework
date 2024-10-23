@@ -7,7 +7,7 @@ You can use the `@EnableWebMvc` annotation to enable MVC configuration with prog
 
 include-code::./WebConfiguration[tag=snippet,indent=0]
 
-NOTE: When using Spring Boot, you may want to use `@Configuration` classes of type `WebMvcConfigurer` but without `@EnableWebMvc` to keep Spring Boot MVC customizations. See more details in xref:web/webmvc/mvc-config/customize.adoc[the MVC Config API section] and in {spring-boot-docs}/web.html#web.servlet.spring-mvc.auto-configuration[the dedicated Spring Boot documentation].
+NOTE: When using Spring Boot, you may want to use `@Configuration` classes of type `WebMvcConfigurer` but without `@EnableWebMvc` to keep Spring Boot MVC customizations. See more details in xref:web/webmvc/mvc-config/customize.adoc[the MVC Config API section] and in {spring-boot-docs-ref}/web/servlet.html#web.servlet.spring-mvc.auto-configuration[the dedicated Spring Boot documentation].
 
 The preceding example registers a number of Spring MVC
 xref:web/webmvc/mvc-servlet/special-bean-types.adoc[infrastructure beans] and adapts to dependencies

@@ -186,7 +186,7 @@ Therefore, if you wish to use the `@Value` annotation in Kotlin, you need to esc
 character by writing pass:q[`@Value("\${property}")`].
 
 NOTE: If you use Spring Boot, you should probably use
-{spring-boot-docs}/boot-features-external-config.html#boot-features-external-config-typesafe-configuration-properties[`@ConfigurationProperties`]
+{spring-boot-docs-ref}/features/external-config.html#features.external-config.typesafe-configuration-properties[`@ConfigurationProperties`]
 instead of `@Value` annotations.
 
 As an alternative, you can customize the property placeholder prefix by declaring the
@@ -323,7 +323,7 @@ The recommended testing framework is https://junit.org/junit5/[JUnit 5] along wi
 https://mockk.io/[Mockk] for mocking.
 
 NOTE: If you are using Spring Boot, see
-{spring-boot-docs}/features.html#features.kotlin.testing[this related documentation].
+{spring-boot-docs-ref}/features/kotlin.html#features.kotlin.testing[this related documentation].
 
 
 [[constructor-injection]]

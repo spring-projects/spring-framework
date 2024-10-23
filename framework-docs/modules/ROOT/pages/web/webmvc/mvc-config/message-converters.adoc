@@ -11,7 +11,7 @@ You can also customize the list of configured message converters at the end by o
 
 TIP: In a Spring Boot application, the `WebMvcAutoConfiguration` adds any
 `HttpMessageConverter` beans it detects, in addition to default converters. Hence, in a
-Boot application, prefer to use the {spring-boot-docs}/web.html#web.servlet.spring-mvc.message-converters[HttpMessageConverters]
+Boot application, prefer to use the {spring-boot-docs-ref}/web/servlet.html#web.servlet.spring-mvc.message-converters[HttpMessageConverters]
 mechanism. Or alternatively, use `extendMessageConverters` to modify message converters
 at the end.
 

@@ -9,7 +9,7 @@ known as _JUL_ or `java.util.logging`) if neither Log4j 2.x nor SLF4J is availab
 
 Put Log4j 2.x or Logback (or another SLF4J provider) in your classpath, without any extra
 bridges, and let the framework auto-adapt to your choice. For further information see the
-{spring-boot-docs}/features.html#features.logging[Spring
+{spring-boot-docs-ref}/features/logging.html[Spring
 Boot Logging Reference Documentation].
 
 [NOTE]

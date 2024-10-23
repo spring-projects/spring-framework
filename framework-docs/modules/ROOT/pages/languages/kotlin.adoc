@@ -13,7 +13,7 @@ Most of the code samples of the reference documentation are
 provided in Kotlin in addition to Java.
 
 The easiest way to build a Spring application with Kotlin is to leverage Spring Boot and
-its {spring-boot-docs}/boot-features-kotlin.html[dedicated Kotlin support].
+its {spring-boot-docs-ref}/features/kotlin.html[dedicated Kotlin support].
 {spring-site-guides}/tutorials/spring-boot-kotlin/[This comprehensive tutorial]
 will teach you how to build Spring Boot applications with Kotlin using https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
 

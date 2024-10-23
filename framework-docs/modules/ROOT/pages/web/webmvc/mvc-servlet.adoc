@@ -111,7 +111,7 @@ the lifecycle of the Servlet container, Spring Boot uses Spring configuration to
 bootstrap itself and the embedded Servlet container. `Filter` and `Servlet` declarations
 are detected in Spring configuration and registered with the Servlet container.
 For more details, see the
-{spring-boot-docs}/web.html#web.servlet.embedded-container[Spring Boot documentation].
+{spring-boot-docs-ref}/web/servlet.html#web.servlet.embedded-container[Spring Boot documentation].
 
 
 

@@ -47,7 +47,7 @@ Kotlin::
 NOTE: When using Spring Boot, you may want to use `@Configuration` classes of type `WebFluxConfigurer` but without
 `@EnableWebFlux` to keep Spring Boot WebFlux customizations. See more details in
 xref:#webflux-config-customize[the WebFlux config API section] and in
-{spring-boot-docs}/web.html#web.reactive.webflux.auto-configuration[the dedicated Spring Boot documentation].
+{spring-boot-docs-ref}/web/reactive.html#web.reactive.webflux.auto-configuration[the dedicated Spring Boot documentation].
 
 The preceding example registers a number of Spring WebFlux
 xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[infrastructure beans] and adapts to dependencies

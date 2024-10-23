@@ -7,7 +7,7 @@ Metrics can help you to track error rates, usage patterns, performance, and more
 Traces provide a holistic view of an entire system, crossing application boundaries; you can zoom in on particular user requests and follow their entire completion across applications.
 
 Spring Framework instruments various parts of its own codebase to publish observations if an `ObservationRegistry` is configured.
-You can learn more about {spring-boot-docs}/actuator.html#actuator.metrics[configuring the observability infrastructure in Spring Boot].
+You can learn more about {spring-boot-docs-ref}/actuator/observability.html[configuring the observability infrastructure in Spring Boot].
 
 
 [[observability.list]]

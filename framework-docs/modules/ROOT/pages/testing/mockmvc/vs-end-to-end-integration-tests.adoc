@@ -21,7 +21,7 @@ for rendering JSON, XML, and other formats through `@ResponseBody` methods.
 
 Alternatively, you may consider the full end-to-end integration testing support from
 Spring Boot with `@SpringBootTest`. See the
-{spring-boot-docs}/spring-boot-features.html#boot-features-testing[Spring Boot Reference Guide].
+{spring-boot-docs-ref}/testing/spring-boot-applications.html[Spring Boot Reference Guide].
 
 There are pros and cons for each approach. The options provided in Spring MVC Test are
 different stops on the scale from classic unit testing to full integration testing. To be
