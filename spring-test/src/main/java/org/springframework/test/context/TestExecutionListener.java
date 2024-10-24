@@ -66,6 +66,8 @@ package org.springframework.test.context;
  * DirtiesContextBeforeModesTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.event.ApplicationEventsTestExecutionListener
  * ApplicationEventsTestExecutionListener}</li>
+ * <li>{@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
+ * BeanOverrideTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
  * DependencyInjectionTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.observation.MicrometerObservationRegistryTestExecutionListener
@@ -82,8 +84,6 @@ package org.springframework.test.context;
  * EventPublishingTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.bean.override.mockito.MockitoResetTestExecutionListener
  * MockitoResetTestExecutionListener}</li>
- * <li>{@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
- * BeanOverrideTestExecutionListener}</li>
  * </ul>
  *
  * @author Sam Brannen

@@ -54,7 +54,7 @@ import org.springframework.util.ClassUtils;
  */
 public class MockitoResetTestExecutionListener extends AbstractTestExecutionListener {
 
-	static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.Mockito",
+	private static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.Mockito",
 			MockitoResetTestExecutionListener.class.getClassLoader());
 
 	private static final String SPRING_MOCKITO_PACKAGE = "org.springframework.test.context.bean.override.mockito";
@@ -62,8 +62,9 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 	private static final Predicate<MergedAnnotation<?>> isSpringMockitoAnnotation = mergedAnnotation ->
 			mergedAnnotation.getType().getPackageName().equals(SPRING_MOCKITO_PACKAGE);
 
+
 	/**
-	 * Executes before {@link org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener}.
+	 * Returns {@code Ordered.LOWEST_PRECEDENCE - 100}.
 	 */
 	@Override
 	public int getOrder() {

@@ -68,6 +68,7 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
+				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
@@ -75,8 +76,7 @@ class TestExecutionListenersTests {
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
-				MockitoResetTestExecutionListener.class,//
-				BeanOverrideTestExecutionListener.class
+				MockitoResetTestExecutionListener.class//
 			);
 		assertRegisteredListeners(DefaultListenersTestCase.class, expected);
 	}
@@ -90,6 +90,7 @@ class TestExecutionListenersTests {
 				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
+				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
@@ -97,8 +98,7 @@ class TestExecutionListenersTests {
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
-				MockitoResetTestExecutionListener.class,//
-				BeanOverrideTestExecutionListener.class
+				MockitoResetTestExecutionListener.class//
 			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerPrependedTestCase.class, expected);
 	}
@@ -111,6 +111,7 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
+				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
@@ -119,7 +120,6 @@ class TestExecutionListenersTests {
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
 				MockitoResetTestExecutionListener.class,//
-				BeanOverrideTestExecutionListener.class,//
 				BazTestExecutionListener.class
 			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerAppendedTestCase.class, expected);
@@ -133,6 +133,7 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
+				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				BarTestExecutionListener.class,//
 				micrometerListenerClass,//
@@ -141,8 +142,7 @@ class TestExecutionListenersTests {
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
-				MockitoResetTestExecutionListener.class,//
-				BeanOverrideTestExecutionListener.class
+				MockitoResetTestExecutionListener.class//
 			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerInsertedTestCase.class, expected);
 	}

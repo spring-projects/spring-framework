@@ -37,11 +37,15 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 public class BeanOverrideTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
-	 * Executes almost last ({@code LOWEST_PRECEDENCE - 50}).
+	 * Returns {@code 1950}, which ensures that the {@code BeanOverrideTestExecutionListener}
+	 * is ordered after the
+	 * {@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
+	 * DirtiesContextBeforeModesTestExecutionListener} and just before the
+	 * {@link DependencyInjectionTestExecutionListener}.
 	 */
 	@Override
 	public int getOrder() {
-		return LOWEST_PRECEDENCE - 50;
+		return 1950;
 	}
 
 	/**

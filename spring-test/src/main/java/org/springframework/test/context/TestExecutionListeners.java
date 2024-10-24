@@ -82,6 +82,7 @@ public @interface TestExecutionListeners {
 	 * @see org.springframework.test.context.web.ServletTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
 	 * @see org.springframework.test.context.event.ApplicationEventsTestExecutionListener
+	 * @see org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
 	 * @see org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
 	 * @see org.springframework.test.context.support.CommonCachesTestExecutionListener
@@ -89,7 +90,6 @@ public @interface TestExecutionListeners {
 	 * @see org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
 	 * @see org.springframework.test.context.event.EventPublishingTestExecutionListener
 	 * @see org.springframework.test.context.bean.override.mockito.MockitoResetTestExecutionListener
-	 * @see org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener
 	 */
 	@AliasFor("value")
 	Class<? extends TestExecutionListener>[] listeners() default {};
