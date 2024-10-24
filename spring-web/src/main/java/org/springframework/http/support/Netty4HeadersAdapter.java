@@ -17,7 +17,9 @@
 package org.springframework.http.support;
 
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,12 @@ public final class Netty4HeadersAdapter implements MultiValueMap<String, String>
 		this.headers = headers;
 	}
 
+	private void addAllIgnoreCase(String key, List<? extends String> values) {
+		List<String> listToUpdate = this.get(key);
+		listToUpdate = listToUpdate == null ? new ArrayList<>() : new ArrayList<>(listToUpdate);
+		listToUpdate.addAll(values);
+		this.headers.set(key, listToUpdate);
+	}
 
 	@Override
 	@Nullable
@@ -61,18 +69,18 @@ public final class Netty4HeadersAdapter implements MultiValueMap<String, String>
 	@Override
 	public void add(String key, @Nullable String value) {
 		if (value != null) {
-			this.headers.add(key, value);
+			addAllIgnoreCase(key, Collections.singletonList(value));
 		}
 	}
 
 	@Override
 	public void addAll(String key, List<? extends String> values) {
-		this.headers.add(key, values);
+		addAllIgnoreCase(key, values);
 	}
 
 	@Override
 	public void addAll(MultiValueMap<String, String> values) {
-		values.forEach(this.headers::add);
+		values.forEach(this::addAllIgnoreCase);
 	}
 
 	@Override
