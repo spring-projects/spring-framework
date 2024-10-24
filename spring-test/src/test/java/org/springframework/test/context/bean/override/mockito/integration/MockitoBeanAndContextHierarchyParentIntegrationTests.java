@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito;
+package org.springframework.test.context.bean.override.mockito.integration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.ExampleServiceCaller;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,10 +37,10 @@ import static org.mockito.BDDMockito.given;
  * @author Sam Brannen
  * @author Phillip Webb
  * @since 6.2
- * @see MockitoSpyBeanAndContextHierarchyChildTests
+ * @see MockitoSpyBeanAndContextHierarchyChildIntegrationTests
  */
 @SpringJUnitConfig
-public class MockitoBeanAndContextHierarchyParentTests {
+public class MockitoBeanAndContextHierarchyParentIntegrationTests {
 
 	@MockitoBean
 	ExampleService service;

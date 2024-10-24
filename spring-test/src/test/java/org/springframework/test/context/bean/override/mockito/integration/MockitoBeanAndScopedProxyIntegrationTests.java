@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito;
+package org.springframework.test.context.bean.override.mockito.integration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +28,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.ExampleServiceCaller;
 import org.springframework.test.context.bean.override.example.FailingExampleService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +44,7 @@ import static org.mockito.BDDMockito.given;
  * @see <a href="https://github.com/spring-projects/spring-boot/issues/5724">gh-5724</a>
  */
 @ExtendWith(SpringExtension.class)
-public class MockitoBeanAndScopedProxyTests {
+public class MockitoBeanAndScopedProxyIntegrationTests {
 
 	@MockitoBean
 	// The ExampleService mock should replace the scoped-proxy FailingExampleService

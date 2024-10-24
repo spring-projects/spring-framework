@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito;
+package org.springframework.test.context.bean.override.mockito.integration;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -43,7 +44,7 @@ import static org.mockito.BDDMockito.given;
  * @since 6.2
  */
 @ExtendWith(SpringExtension.class)
-public class MockitoBeanAndAsyncInterfaceMethodTests {
+public class MockitoBeanAndAsyncInterfaceMethodIntegrationTests {
 
 	@MockitoBean
 	Transformer transformer;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito;
+package org.springframework.test.context.bean.override.mockito.integration;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +27,8 @@ import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.ExampleServiceCaller;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,11 +40,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @author Phillip Webb
  * @since 6.2
- * @see MockitoBeanAndContextHierarchyParentTests
+ * @see MockitoBeanAndContextHierarchyParentIntegrationTests
  */
 @ContextHierarchy(@ContextConfiguration)
 @DisabledInAotMode // @ContextHierarchy is not supported in AOT.
-public class MockitoSpyBeanAndContextHierarchyChildTests extends MockitoBeanAndContextHierarchyParentTests {
+public class MockitoSpyBeanAndContextHierarchyChildIntegrationTests extends
+		MockitoBeanAndContextHierarchyParentIntegrationTests {
 
 	@MockitoSpyBean
 	ExampleServiceCaller serviceCaller;

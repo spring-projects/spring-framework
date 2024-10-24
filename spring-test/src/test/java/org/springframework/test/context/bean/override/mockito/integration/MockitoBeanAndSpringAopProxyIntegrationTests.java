@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override.mockito;
+package org.springframework.test.context.bean.override.mockito.integration;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +30,7 @@ import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,10 +47,10 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  * @since 6.2
  * @see <a href="https://github.com/spring-projects/spring-boot/issues/5837">5837</a>
- * @see MockitoSpyBeanAndSpringAopProxyTests
+ * @see MockitoSpyBeanAndSpringAopProxyIntegrationTests
  */
 @ExtendWith(SpringExtension.class)
-class MockitoBeanAndSpringAopProxyTests {
+class MockitoBeanAndSpringAopProxyIntegrationTests {
 
 	@MockitoBean
 	DateService dateService;

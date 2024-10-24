@@ -26,11 +26,11 @@ import org.springframework.test.context.bean.override.BeanOverrideContextCustomi
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Tests for {@link MockitoSpyBean}.
+ * Tests for {@link MockitoSpyBean @MockitoSpyBean}.
  *
  * @author Stephane Nicoll
  */
-class MockitoSpyBeanTests {
+class MockitoSpyBeanConfigurationErrorTests {
 
 	@Test
 	void contextCustomizerCannotBeCreatedWithNoSuchBeanName() {
