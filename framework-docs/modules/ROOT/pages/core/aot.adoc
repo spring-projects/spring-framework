@@ -244,7 +244,7 @@ However, keep in mind that some optimizations are made at build time based on a 
 This section lists the best practices that make sure your application is ready for AOT.
 
 [[aot.bestpractices.bean-registration]]
-== Programmatic bean registration
+=== Programmatic bean registration
 
 The AOT engine takes care of the `@Configuration` model and any callback that might be
 invoked as part of processing your configuration. If you need to register additional
