@@ -117,7 +117,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		Assert.notNull(wrapper, "ContentCachingResponseWrapper not found");
 		HttpServletResponse rawResponse = (HttpServletResponse) wrapper.getResponse();
 
-		if (isEligibleForEtag(request, wrapper, wrapper.getStatus(), wrapper.getContentInputStream())) {
+		if (isEligibleForEtag(request, wrapper)) {
 			String eTag = wrapper.getHeader(HttpHeaders.ETAG);
 			if (!StringUtils.hasText(eTag)) {
 				eTag = generateETagHeaderValue(wrapper.getContentInputStream(), this.writeWeakETag);
@@ -142,12 +142,10 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 * </ul>
 	 * @param request the HTTP request
 	 * @param response the HTTP response
-	 * @param responseStatusCode the HTTP response status code
-	 * @param inputStream the response body
 	 * @return {@code true} if eligible for ETag generation, {@code false} otherwise
 	 */
-	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response,
-			int responseStatusCode, InputStream inputStream) {
+	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response) {
+		int responseStatusCode = response.getStatus();
 
 		if (!response.isCommitted() &&
 				responseStatusCode >= 200 && responseStatusCode < 300 &&
