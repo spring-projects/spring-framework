@@ -149,6 +149,23 @@ class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
+	void queryHttpMediaTypeNotSupported() {
+		this.servletRequest = new MockHttpServletRequest("QUERY", "/");
+		this.request = new ServletWebRequest(this.servletRequest, this.servletResponse);
+
+		ResponseEntity<Object> entity = testException(
+				new HttpMediaTypeNotSupportedException(
+						MediaType.APPLICATION_JSON,
+						List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML),
+						HttpMethod.QUERY));
+
+		HttpHeaders headers = entity.getHeaders();
+		assertThat(headers.getFirst(HttpHeaders.ACCEPT)).isEqualTo("application/atom+xml, application/xml");
+		assertThat(headers.getFirst(HttpHeaders.ACCEPT)).isEqualTo("application/atom+xml, application/xml");
+		assertThat(headers.getFirst(HttpHeaders.ACCEPT_QUERY)).isEqualTo("application/atom+xml, application/xml");
+	}
+
+	@Test
 	void httpMediaTypeNotAcceptable() {
 		testException(new HttpMediaTypeNotAcceptableException(""));
 	}

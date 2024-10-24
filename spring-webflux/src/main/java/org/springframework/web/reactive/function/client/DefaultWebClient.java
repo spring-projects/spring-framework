@@ -172,6 +172,11 @@ final class DefaultWebClient implements WebClient {
 	}
 
 	@Override
+	public RequestHeadersUriSpec<?> query() {
+		return methodInternal(HttpMethod.QUERY);
+	}
+
+	@Override
 	public RequestBodyUriSpec method(HttpMethod httpMethod) {
 		return methodInternal(httpMethod);
 	}

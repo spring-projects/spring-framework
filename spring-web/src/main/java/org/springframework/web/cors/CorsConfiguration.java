@@ -62,9 +62,9 @@ public class CorsConfiguration {
 
 	private static final List<String> DEFAULT_PERMIT_ALL = Collections.singletonList(ALL);
 
-	private static final List<HttpMethod> DEFAULT_METHODS = List.of(HttpMethod.GET, HttpMethod.HEAD);
+	private static final List<HttpMethod> DEFAULT_METHODS = List.of(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.HEAD);
 
-	private static final List<String> DEFAULT_PERMIT_METHODS = List.of(HttpMethod.GET.name(),
+	private static final List<String> DEFAULT_PERMIT_METHODS = List.of(HttpMethod.GET.name(), HttpMethod.QUERY.name(),
 			HttpMethod.HEAD.name(), HttpMethod.POST.name());
 
 

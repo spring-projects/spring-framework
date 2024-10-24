@@ -165,6 +165,9 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 			if (requestMethod.equals(RequestMethod.HEAD) && getMethods().contains(RequestMethod.GET)) {
 				return requestMethodConditionCache.get(HttpMethod.GET.name());
 			}
+			if (requestMethod.equals(RequestMethod.HEAD) && getMethods().contains(RequestMethod.QUERY)) {
+				return requestMethodConditionCache.get(HttpMethod.QUERY.name());
+			}
 		}
 		return null;
 	}
@@ -190,6 +193,9 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 				return -1;
 			}
 			else if (this.methods.contains(RequestMethod.GET) && other.methods.contains(RequestMethod.HEAD)) {
+				return 1;
+			}
+			else if (this.methods.contains(RequestMethod.QUERY) && other.methods.contains(RequestMethod.HEAD)) {
 				return 1;
 			}
 		}
