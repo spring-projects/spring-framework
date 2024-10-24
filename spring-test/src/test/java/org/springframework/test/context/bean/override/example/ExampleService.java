@@ -17,7 +17,7 @@
 package org.springframework.test.context.bean.override.example;
 
 /**
- * Example service interface for mocking tests.
+ * Example service interface for tests.
  *
  * @author Phillip Webb
  * @since 6.2

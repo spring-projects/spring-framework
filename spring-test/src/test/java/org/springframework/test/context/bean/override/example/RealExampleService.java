@@ -17,7 +17,7 @@
 package org.springframework.test.context.bean.override.example;
 
 /**
- * Example service implementation for spy tests.
+ * Example service implementation for tests.
  *
  * @author Phillip Webb
  */

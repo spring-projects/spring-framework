@@ -17,7 +17,7 @@
 package org.springframework.test.context.bean.override.example;
 
 /**
- * Example bean for mocking tests that call the {@link ExampleService}.
+ * Example bean for tests that call the {@link ExampleService}.
  *
  * @author Phillip Webb
  * @since 6.2
