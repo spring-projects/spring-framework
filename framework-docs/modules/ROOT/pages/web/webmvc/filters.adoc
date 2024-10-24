@@ -9,7 +9,11 @@ The `spring-web` module provides some useful filters:
 * xref:web/webmvc/filters.adoc#filters-forwarded-headers[Forwarded Headers]
 * xref:web/webmvc/filters.adoc#filters-shallow-etag[Shallow ETag]
 * xref:web/webmvc/filters.adoc#filters-cors[CORS]
+* xref:web/webmvc/filters.adoc#filters.url-handler[URL Handler]
 
+Servlet filters can be configured in the `web.xml` configuration file or using Servlet annotations.
+If you are using Spring Boot, you can
+{spring-boot-docs}/how-to/webserver.html#howto.webserver.add-servlet-filter-listener.spring-bean[declare them as beans and configure them as part of your application].
 
 
 [[filters-http-put]]
@@ -109,4 +113,22 @@ See the sections on xref:web/webmvc-cors.adoc[CORS] and the xref:web/webmvc-cors
 
 
 
+[[filters.url-handler]]
+== URL Handler
+[.small]#xref:web/webflux/reactive-spring.adoc#filters.url-handler[See equivalent in the Reactive stack]#
+
+In previous Spring Framework versions, Spring MVC could be configured to ignore trailing slashes in URL paths
+when mapping incoming requests on controller methods. This could be done by enabling the `setUseTrailingSlashMatch`
+option on the `PathMatchConfigurer`. This means that sending a "GET /home/" request would be handled by a controller
+method annotated with `@GetMapping("/home")`.
+
+This option has been retired, but applications are still expected to handle such requests in a safe way.
+The `UrlHandlerFilter` Servlet filter has been designed for this purpose. It can be configured to:
+
+* respond with an HTTP redirect status when receiving URLs with trailing slashes, sending browsers to the non-trailing slash URL variant.
+* wrap the request to act as if the request was sent without a trailing slash and continue the processing of the request.
+
+Here is how you can instantiate and configure a `UrlHandlerFilter` for a blog application:
+
+include-code::./UrlHandlerFilterConfiguration[tag=config,indent=0]
 

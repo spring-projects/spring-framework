@@ -419,6 +419,24 @@ controllers. However, when you use it with Spring Security, we advise relying on
 
 See the section on xref:web/webflux-cors.adoc[CORS] and the xref:web/webflux-cors.adoc#webflux-cors-webfilter[CORS `WebFilter`] for more details.
 
+[[filters.url-handler]]
+=== URL Handler
+[.small]#xref:web/webmvc/filters.adoc#filters.url-handler[See equivalent in the Servlet stack]#
+
+You may want your controller endpoints to match routes with or without a trailing slash in the URL path.
+For example, both "GET /home" and "GET /home/" should be handled by a controller method annotated with `@GetMapping("/home")`.
+
+Adding trailing slash variants to all mapping declarations is not the best way to handle this use case.
+The `UrlHandlerFilter` web filter has been designed for this purpose. It can be configured to:
+
+* respond with an HTTP redirect status when receiving URLs with trailing slashes, sending browsers to the non-trailing slash URL variant.
+* mutate the request to act as if the request was sent without a trailing slash and continue the processing of the request.
+
+Here is how you can instantiate and configure a `UrlHandlerFilter` for a blog application:
+
+include-code::./UrlHandlerFilterConfiguration[tag=config,indent=0]
+
+
 
 [[webflux-exception-handler]]
 == Exceptions
