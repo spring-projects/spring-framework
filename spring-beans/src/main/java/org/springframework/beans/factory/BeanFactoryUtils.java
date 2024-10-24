@@ -45,11 +45,13 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Separator for generated bean names. If a class name or parent name is not
 	 * unique, "#1", "#2" etc will be appended, until the name becomes unique.
+	 * 生成的bean名称的分隔符。如果类名或父名称不唯一，则将附加“1”、“2”等，直到名称变得唯一。
 	 */
 	public static final String GENERATED_BEAN_NAME_SEPARATOR = "#";
 
 	/**
 	 * Cache from name with factory bean prefix to stripped name without dereference.
+	 * 从带有工厂bean前缀的名称缓存到无解引用的剥离名称
 	 *
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 * @since 5.1
@@ -73,6 +75,7 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Return the actual bean name, stripping out the factory dereference
 	 * prefix (if any, also stripping repeated factory prefixes if found).
+	 * 返回实际的bean名称，去掉工厂取消引用前缀（如果有，也去掉重复的工厂前缀（如果找到））
 	 *
 	 * @param name the name of the bean
 	 * @return the transformed name
@@ -96,6 +99,7 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Return whether the given name is a bean name which has been generated
 	 * by the default naming strategy (containing a "#..." part).
+	 * 返回给定名称是否为默认命名策略生成的bean名称（包含“…”部分）
 	 *
 	 * @param name the name of the bean
 	 * @return whether the given name is a generated bean name
@@ -110,6 +114,7 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Extract the "raw" bean name from the given (potentially generated) bean name,
 	 * excluding any "#..." suffixes which might have been added for uniqueness.
+	 * 从给定的（可能生成的）bean名称中提取“原始”bean名称，不包括可能为唯一性而添加的任何“…”后缀。
 	 *
 	 * @param name the potentially generated bean name
 	 * @return the raw bean name
@@ -129,6 +134,8 @@ public abstract class BeanFactoryUtils {
 	 * Includes counts of ancestor bean factories.
 	 * <p>Beans that are "overridden" (specified in a descendant factory
 	 * with the same name) are only counted once.
+	 * 统计此工厂参与的任何层次结构中的所有bean。包括祖先豆工厂的数量
+	 * <p> 被“覆盖”（在具有相同名称的子代工厂中指定）的Bean只计算一次。
 	 *
 	 * @param lbf the bean factory
 	 * @return count of beans including those defined in ancestor factories
@@ -140,6 +147,7 @@ public abstract class BeanFactoryUtils {
 
 	/**
 	 * Return all bean names in the factory, including ancestor factories.
+	 * 返回工厂中的所有bean名称，包括祖先工厂。
 	 *
 	 * @param lbf the bean factory
 	 * @return the array of matching bean names, or an empty array if none
@@ -157,6 +165,9 @@ public abstract class BeanFactoryUtils {
 	 * the raw FactoryBean itself will be matched against the type.
 	 * <p>This version of {@code beanNamesForTypeIncludingAncestors} automatically
 	 * includes prototypes and FactoryBeans.
+	 * 获取给定类型的所有bean名称，包括在祖先工厂中定义的名称。在重写bean定义的情况下，将返回唯一的名称
+	 * <p> 是否考虑由FactoryBean创建的对象，这意味着FactoryBean将被初始化。如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与类型匹配
+	 * <p> 此版本的{@code beanNamesForTypeIncludeAncestors}自动包含原型和FactoryBean。
 	 *
 	 * @param lbf  the bean factory
 	 * @param type the type that beans must match (as a {@code ResolvableType})
@@ -187,6 +198,10 @@ public abstract class BeanFactoryUtils {
 	 * will be matched against the type. If "allowEagerInit" is not set,
 	 * only raw FactoryBeans will be checked (which doesn't require initialization
 	 * of each FactoryBean).
+	 * 获取给定类型的所有bean名称，包括在祖先工厂中定义的名称。在重写bean定义的情况下，将返回唯一的名称
+	 * <p> 如果设置了“allowEagerInit”标志，则考虑由FactoryBean创建的对象，这意味着FactoryBean将被初始化。
+	 * 如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与类型匹配。
+	 * 如果未设置“allowEagerInit”，则只检查原始FactoryBean（不需要初始化每个FactoryBean）。
 	 *
 	 * @param lbf                  the bean factory
 	 * @param type                 the type that beans must match (as a {@code ResolvableType})
@@ -225,6 +240,9 @@ public abstract class BeanFactoryUtils {
 	 * the raw FactoryBean itself will be matched against the type.
 	 * <p>This version of {@code beanNamesForTypeIncludingAncestors} automatically
 	 * includes prototypes and FactoryBeans.
+	 * 获取给定类型的所有bean名称，包括在祖先工厂中定义的名称。在重写bean定义的情况下，将返回唯一的名称
+	 * <p> 是否考虑由FactoryBean创建的对象，这意味着FactoryBean将被初始化。如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与类型匹配
+	 * <p> 此版本的{@code beanNamesForTypeInclude Ancestors}自动包含原型和FactoryBean
 	 *
 	 * @param lbf  the bean factory
 	 * @param type the type that beans must match (as a {@code Class})
@@ -254,6 +272,10 @@ public abstract class BeanFactoryUtils {
 	 * will be matched against the type. If "allowEagerInit" is not set,
 	 * only raw FactoryBeans will be checked (which doesn't require initialization
 	 * of each FactoryBean).
+	 * 获取给定类型的所有bean名称，包括在祖先工厂中定义的名称。在重写bean定义的情况下，将返回唯一的名称
+	 * <p> 如果设置了“allowEagerInit”标志，则考虑由FactoryBean创建的对象，这意味着FactoryBean将被初始化。
+	 * 如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与类型匹配。
+	 * 如果未设置“allowEagerInit”，则只检查原始FactoryBean（不需要初始化每个FactoryBean）
 	 *
 	 * @param lbf                  the bean factory
 	 * @param includeNonSingletons whether to include prototype or scoped beans too
@@ -267,8 +289,7 @@ public abstract class BeanFactoryUtils {
 	 * @return the array of matching bean names, or an empty array if none
 	 * @see ListableBeanFactory#getBeanNamesForType(Class, boolean, boolean)
 	 */
-	public static String[] beanNamesForTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
+	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		String[] result = lbf.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
@@ -287,6 +308,8 @@ public abstract class BeanFactoryUtils {
 	 * Get all bean names whose {@code Class} has the supplied {@link Annotation}
 	 * type, including those defined in ancestor factories, without creating any bean
 	 * instances yet. Will return unique names in case of overridden bean definitions.
+	 * 获取其{@code Class}具有提供的{@link Annotation}类型的所有bean名称，包括在祖先工厂中定义的名称，而无需创建任何bean实例。
+	 * 在重写bean定义的情况下，将返回唯一的名称。
 	 *
 	 * @param lbf            the bean factory
 	 * @param annotationType the type of annotation to look for
@@ -325,6 +348,11 @@ public abstract class BeanFactoryUtils {
 	 * hiding corresponding beans in ancestor factories.</b> This feature allows for
 	 * 'replacing' beans by explicitly choosing the same bean name in a child factory;
 	 * the bean in the ancestor factory won't be visible then, not even for by-type lookups.
+	 * 返回给定类型或子类型的所有bean，如果当前bean工厂是HierarchicalBeanFactory，则还将拾取祖先bean工厂中定义的bean。
+	 * 返回的Map将只包含此类型的bean
+	 * <p> 是否考虑由FactoryBean创建的对象，这意味着FactoryBean将被初始化。如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与类型匹配
+	 * <p> <b>注意：同名bean将在“最低”工厂级别优先，即这些bean将从它们所在的最低工厂返回，将相应的bean隐藏在祖先工厂中<b>
+	 * 此功能允许通过在子工厂中明确选择相同的bean名称来“替换”bean；那么祖先工厂中的bean将不可见，即使是按类型查找也不可见。
 	 *
 	 * @param lbf  the bean factory
 	 * @param type type of bean to match
@@ -367,6 +395,13 @@ public abstract class BeanFactoryUtils {
 	 * hiding corresponding beans in ancestor factories.</b> This feature allows for
 	 * 'replacing' beans by explicitly choosing the same bean name in a child factory;
 	 * the bean in the ancestor factory won't be visible then, not even for by-type lookups.
+	 * 返回给定类型或子类型的所有bean，如果当前bean工厂是HierarchicalBeanFactory，则还将拾取祖先bean工厂中定义的bean。
+	 * 返回的Map将只包含此类型的bean
+	 * <p> 如果设置了“allowEagerInit”标志，则考虑由FactoryBean创建的对象，这意味着FactoryBean将被初始化。
+	 * 如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与类型匹配。如果未设置“allowEagerInit”，
+	 * 则只检查原始FactoryBean（不需要初始化每个FactoryBean）
+	 * <p> <b>注意：同名bean将在“最低”工厂级别优先，即这些bean将从它们所在的最低工厂返回，将相应的bean隐藏在祖先工厂中<b>
+	 * 此功能允许通过在子工厂中明确选择相同的bean名称来“替换”bean；那么祖先工厂中的bean将不可见，即使是按类型查找也不可见
 	 *
 	 * @param lbf                  the bean factory
 	 * @param type                 type of bean to match
@@ -418,6 +453,12 @@ public abstract class BeanFactoryUtils {
 	 * hiding corresponding beans in ancestor factories.</b> This feature allows for
 	 * 'replacing' beans by explicitly choosing the same bean name in a child factory;
 	 * the bean in the ancestor factory won't be visible then, not even for by-type lookups.
+	 * 返回给定类型或子类型的单个bean，如果当前bean工厂是HierarchicalBeanFactory，则还将拾取祖先bean工厂中定义的bean。
+	 * 当我们期望一个bean而不关心bean名称时，这是一种有用的方便方法
+	 * <p> 是否考虑由FactoryBean创建的对象，这意味着FactoryBean将被初始化。如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与类型匹配
+	 * <p> 此版本的{@code beanOfTypeInclude Ancestors}自动包含原型和FactoryBean<p>
+	 * <b>注意：同名bean将在“最低”工厂级别优先，即这些bean将从它们所在的最低工厂返回，将相应的bean隐藏在祖先工厂中<b>
+	 * 此功能允许通过在子工厂中明确选择相同的bean名称来“替换”bean；那么祖先工厂中的bean将不可见，即使是按类型查找也不可见。
 	 *
 	 * @param lbf  the bean factory
 	 * @param type type of bean to match
@@ -449,6 +490,13 @@ public abstract class BeanFactoryUtils {
 	 * hiding corresponding beans in ancestor factories.</b> This feature allows for
 	 * 'replacing' beans by explicitly choosing the same bean name in a child factory;
 	 * the bean in the ancestor factory won't be visible then, not even for by-type lookups.
+	 * 返回给定类型或子类型的单个bean，如果当前bean工厂是HierarchicalBeanFactory，则还将拾取祖先bean工厂中定义的bean。
+	 * 当我们期望一个bean而不关心bean名称时，这是一种有用的方便方法
+	 * <p> 如果设置了“allowEagerInit”标志，则考虑由FactoryBean创建的对象，这意味着FactoryBean将被初始化。
+	 * 如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与类型匹配。
+	 * 如果未设置“allowEagerInit”，则只检查原始FactoryBean（不需要初始化每个FactoryBean）
+	 * <p> <b>注意：同名bean将在“最低”工厂级别优先，即这些bean将从它们所在的最低工厂返回，将相应的bean隐藏在祖先工厂中<b>
+	 * 此功能允许通过在子工厂中明确选择相同的bean名称来“替换”bean；那么祖先工厂中的bean将不可见，即使是按类型查找也不可见。
 	 *
 	 * @param lbf                  the bean factory
 	 * @param type                 type of bean to match
@@ -482,6 +530,9 @@ public abstract class BeanFactoryUtils {
 	 * the raw FactoryBean itself will be matched against the type.
 	 * <p>This version of {@code beanOfType} automatically includes
 	 * prototypes and FactoryBeans.
+	 * 返回给定类型或子类型的单个bean，而不是在祖先工厂中查找。当我们期望一个bean而不关心bean名称时，这是一种有用的方便方法
+	 * <p> 是否考虑由FactoryBean创建的对象，这意味着FactoryBean将被初始化。如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与类型匹配
+	 * <p> 此版本的{@code beanOfType}自动包含原型和FactoryBean。
 	 *
 	 * @param lbf  the bean factory
 	 * @param type type of bean to match
@@ -507,6 +558,10 @@ public abstract class BeanFactoryUtils {
 	 * will be matched against the type. If "allowEagerInit" is not set,
 	 * only raw FactoryBeans will be checked (which doesn't require initialization
 	 * of each FactoryBean).
+	 * 返回给定类型或子类型的单个bean，而不是在祖先工厂中查找。当我们期望一个bean而不关心bean名称时，这是一种有用的方便方法
+	 * <p> 如果设置了“allowEagerInit”标志，则考虑由FactoryBean创建的对象，这意味着FactoryBean将被初始化。
+	 * 如果FactoryBean创建的对象不匹配，则原始FactoryBean本身将与类型匹配。
+	 * 如果未设置“allowEagerInit”，则只检查原始FactoryBean（不需要初始化每个FactoryBean）
 	 *
 	 * @param lbf                  the bean factory
 	 * @param type                 type of bean to match
@@ -535,6 +590,7 @@ public abstract class BeanFactoryUtils {
 
 	/**
 	 * Merge the given bean names result with the given parent result.
+	 * 将给定的bean名称结果与给定的父结果合并
 	 *
 	 * @param result       the local bean name result
 	 * @param parentResult the parent bean name result (possibly empty)
@@ -558,6 +614,7 @@ public abstract class BeanFactoryUtils {
 
 	/**
 	 * Extract a unique bean for the given type from the given Map of matching beans.
+	 * 从给定的匹配bean映射中提取给定类型的唯一bean
 	 *
 	 * @param type          type of bean to match
 	 * @param matchingBeans all matching beans found

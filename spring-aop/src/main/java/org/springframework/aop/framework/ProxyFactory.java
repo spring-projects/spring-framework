@@ -17,7 +17,6 @@
 package org.springframework.aop.framework;
 
 import org.aopalliance.intercept.Interceptor;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -44,6 +43,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	/**
 	 * Create a new ProxyFactory.
 	 * <p>Will proxy all interfaces that the given target implements.
+	 *
 	 * @param target the target object to be proxied
 	 */
 	public ProxyFactory(Object target) {
@@ -54,6 +54,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	/**
 	 * Create a new ProxyFactory.
 	 * <p>No target, only interfaces. Must add interceptors.
+	 *
 	 * @param proxyInterfaces the interfaces that the proxy should implement
 	 */
 	public ProxyFactory(Class<?>... proxyInterfaces) {
@@ -65,8 +66,9 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * <p>Convenience method for creating a proxy for a single interceptor,
 	 * assuming that the interceptor handles all calls itself rather than
 	 * delegating to a target, like in the case of remoting proxies.
+	 *
 	 * @param proxyInterface the interface that the proxy should implement
-	 * @param interceptor the interceptor that the proxy should invoke
+	 * @param interceptor    the interceptor that the proxy should invoke
 	 */
 	public ProxyFactory(Class<?> proxyInterface, Interceptor interceptor) {
 		addInterface(proxyInterface);
@@ -76,8 +78,9 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	/**
 	 * Create a ProxyFactory for the specified {@code TargetSource},
 	 * making the proxy implement the specified interface.
+	 *
 	 * @param proxyInterface the interface that the proxy should implement
-	 * @param targetSource the TargetSource that the proxy should invoke
+	 * @param targetSource   the TargetSource that the proxy should invoke
 	 */
 	public ProxyFactory(Class<?> proxyInterface, TargetSource targetSource) {
 		addInterface(proxyInterface);
@@ -91,6 +94,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * or removed interfaces. Can add and remove interceptors.
 	 * <p>Uses a default class loader: Usually, the thread context class loader
 	 * (if necessary for proxy creation).
+	 *
 	 * @return the proxy object
 	 */
 	public Object getProxy() {
@@ -102,12 +106,16 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * <p>Can be called repeatedly. Effect will vary if we've added
 	 * or removed interfaces. Can add and remove interceptors.
 	 * <p>Uses the given class loader (if necessary for proxy creation).
+	 * 根据此工厂中的设置创建新的代理
+	 * <p> 可以反复调用。如果我们添加或删除了接口，效果会有所不同。可以添加和删除拦截器
+	 * <p> 使用给定的类加载器（如果需要创建代理）
+	 *
 	 * @param classLoader the class loader to create the proxy with
-	 * (or {@code null} for the low-level proxy facility's default)
+	 *                    (or {@code null} for the low-level proxy facility's default)
 	 * @return the proxy object
 	 */
 	public Object getProxy(@Nullable ClassLoader classLoader) {
-
+		// 创建代理
 		return createAopProxy().getProxy(classLoader);
 	}
 
@@ -117,8 +125,9 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * <p>Convenience method for creating a proxy for a single interceptor,
 	 * assuming that the interceptor handles all calls itself rather than
 	 * delegating to a target, like in the case of remoting proxies.
+	 *
 	 * @param proxyInterface the interface that the proxy should implement
-	 * @param interceptor the interceptor that the proxy should invoke
+	 * @param interceptor    the interceptor that the proxy should invoke
 	 * @return the proxy object
 	 * @see #ProxyFactory(Class, org.aopalliance.intercept.Interceptor)
 	 */
@@ -130,8 +139,9 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	/**
 	 * Create a proxy for the specified {@code TargetSource},
 	 * implementing the specified interface.
+	 *
 	 * @param proxyInterface the interface that the proxy should implement
-	 * @param targetSource the TargetSource that the proxy should invoke
+	 * @param targetSource   the TargetSource that the proxy should invoke
 	 * @return the proxy object
 	 * @see #ProxyFactory(Class, org.springframework.aop.TargetSource)
 	 */
@@ -143,6 +153,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	/**
 	 * Create a proxy for the specified {@code TargetSource} that extends
 	 * the target class of the {@code TargetSource}.
+	 *
 	 * @param targetSource the TargetSource that the proxy should invoke
 	 * @return the proxy object
 	 */

@@ -40,6 +40,9 @@ import org.springframework.lang.Nullable;
  */
 public final class ParserContext {
 
+	/**
+	 * readerContext中封装了BeanDefinitionRegistry对象，用于BeanDefinition的注册。
+	 */
 	private final XmlReaderContext readerContext;
 
 	private final BeanDefinitionParserDelegate delegate;

@@ -31,25 +31,34 @@ package org.springframework.core;
  *
  * <p>Consult the Javadoc for {@link OrderComparator} for details on the
  * sort semantics for non-ordered objects.
+ * <p>
+ * Ordered是一个接口，可以由需要排序的对象实现，例如在集合中
+ * 实际顺序可以解释为优先级，第一个对象（具有最低顺序值）具有最高优先级。
+ * 请注意，此接口还有一个优先级标记：PriorityOrdered。
+ * 有关PriorityOrdered对象相对于普通ordered对象的排序方式的详细信息，请参阅PriorityOrdered的Javadoc。
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @since 07.04.2003
  * @see PriorityOrdered
  * @see OrderComparator
  * @see org.springframework.core.annotation.Order
  * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
+ * @since 07.04.2003
  */
 public interface Ordered {
 
 	/**
 	 * Useful constant for the highest precedence value.
+	 * 最高优先级值的有用常数
+	 *
 	 * @see java.lang.Integer#MIN_VALUE
 	 */
 	int HIGHEST_PRECEDENCE = Integer.MIN_VALUE;
 
 	/**
 	 * Useful constant for the lowest precedence value.
+	 * 用于最低优先级值的有用常数
+	 *
 	 * @see java.lang.Integer#MAX_VALUE
 	 */
 	int LOWEST_PRECEDENCE = Integer.MAX_VALUE;
@@ -62,6 +71,10 @@ public interface Ordered {
 	 * analogous to Servlet {@code load-on-startup} values).
 	 * <p>Same order values will result in arbitrary sort positions for the
 	 * affected objects.
+	 * 获取此对象的顺序值。
+	 * 较高的值被解释为较低的优先级。因此，具有最低值的对象具有最高优先级（有点类似于启动值上的Servlet加载）。
+	 * 相同的顺序值将导致受影响对象的任意排序位置。
+	 *
 	 * @return the order value
 	 * @see #HIGHEST_PRECEDENCE
 	 * @see #LOWEST_PRECEDENCE

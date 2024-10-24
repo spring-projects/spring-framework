@@ -27,7 +27,8 @@ import javax.annotation.Nullable;
  * method to modify the original behavior. E.g. the following class
  * implements a tracing interceptor (traces all the calls on the
  * intercepted method(s)):
- *
+ * 在接口到达目标的途中拦截其调用。这些嵌套在目标的“顶部”
+ * <p> 用户应该实现{@link #invoke(MethodInvocation)}方法来修改原始行为。例如，以下类实现了一个跟踪拦截器（跟踪被拦截方法上的所有调用）：
  * <pre class=code>
  * class TracingInterceptor implements MethodInterceptor {
  *   Object invoke(MethodInvocation i) throws Throwable {
@@ -49,11 +50,13 @@ public interface MethodInterceptor extends Interceptor {
 	 * Implement this method to perform extra treatments before and
 	 * after the invocation. Polite implementations would certainly
 	 * like to invoke {@link Joinpoint#proceed()}.
+	 * 实现此方法以在调用前后执行额外的处理。优雅的实现当然希望调用{@link Joinpoint#proceed()}.
+	 *
 	 * @param invocation the method invocation joinpoint
 	 * @return the result of the call to {@link Joinpoint#proceed()};
 	 * might be intercepted by the interceptor
 	 * @throws Throwable if the interceptors or the target object
-	 * throws an exception
+	 *                   throws an exception
 	 */
 	@Nullable
 	Object invoke(@Nonnull MethodInvocation invocation) throws Throwable;

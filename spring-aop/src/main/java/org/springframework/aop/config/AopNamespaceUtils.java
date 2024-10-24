@@ -68,8 +68,14 @@ public abstract class AopNamespaceUtils {
 		registerComponentIfNecessary(beanDefinition, parserContext);
 	}
 
+	/**
+	 * 注册AnnotationAwareAspectJAutoProxyCreator
+	 * @param parserContext
+	 * @param sourceElement
+	 */
 	public static void registerAspectJAnnotationAutoProxyCreatorIfNecessary(ParserContext parserContext, Element sourceElement) {
-		// 1、注册AnnotationAwareAspectJAutoProxyCreator
+		// 1、注册或升级AnnotationAwareAspectJAutoProxyCreator
+		// 注册或升级AutoProxyCreator定义BeanName为'org.springframework.aop.config.internalAutoProxyCreator'的BeanDefinition
 		BeanDefinition beanDefinition = AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(
 				parserContext.getRegistry(), parserContext.extractSource(sourceElement));
 		// 2、解析子标签 proxy-target-class 和 expose-proxy
@@ -78,12 +84,35 @@ public abstract class AopNamespaceUtils {
 		registerComponentIfNecessary(beanDefinition, parserContext);
 	}
 
+	/**
+	 * proxy-target-class: Spring AOP 部分使用JDK动态代理或者CGLIB动态代理来为目标方法创建代理(建议尽量使用JDK动态代理)
+	 * 如果被代理的目标对象实现了智少一个接口, 则会使用JDK动态代理. 所有该目标类型实现的接口都将被代理.
+	 * 若该目标对象没有实现任何接口, 则创建一个CGLIB代理. 如果希望强制使用CGLIB代理(例如希望代理目标对象的所有方法, 而不只是实现自接口的方法),
+	 * 那也可以. 但是需要考虑以下两个问题
+	 * 无法通知(advise)Final方法, 因为不能覆写
+	 * 需要将CGLIB二进制发信包放到classpath下面
+	 * 相比之下, JDK本身就提供了动态代理, 强制使用CGLIB代理需要将<aop:config>的proxy-target-class属性设置为true
+	 * <aop:config proxy-target-class="true"></aop:config>
+	 * 当需要使用CGLIB代理和@AspectJ自动代理支持, 可以按照以下方法设置
+	 * <aop:aspectj-autoproxy  proxy-target-class="true"/>
+	 * 而实际使用的过程中才会发现细节问题的差别，The devil is in the details。
+	 * JDK动态代理：其代理对象必须是某个接口的实现，它是通过在运行期间创建一个接口的实现类来完成对目标对象的代理。
+	 * CGLIB代理：实现原理类似于JDK动态代理，只是它在运行期间生成的代理对象是针对目标类扩展的子类。
+	 * CGLIB是高效的代码生成包，底层是依靠ASM（开源的Java字节码编辑类库）操作字节码实现的，性能比JDK强。
+	 * expose-proxy：有时候目标对象内部的自我调用将无法实施切面中的增强，可以这样使用：
+	 * <aop:aspectj-autoproxy expose-proxy="true"/>
+	 *
+	 * @param registry
+	 * @param sourceElement
+	 */
 	private static void useClassProxyingIfNecessary(BeanDefinitionRegistry registry, @Nullable Element sourceElement) {
 		if (sourceElement != null) {
+			// 解析子标签 proxy-target-class
 			boolean proxyTargetClass = Boolean.parseBoolean(sourceElement.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE));
 			if (proxyTargetClass) {
 				AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 			}
+			// 解析子标签 expose-proxy
 			boolean exposeProxy = Boolean.parseBoolean(sourceElement.getAttribute(EXPOSE_PROXY_ATTRIBUTE));
 			if (exposeProxy) {
 				AopConfigUtils.forceAutoProxyCreatorToExposeProxy(registry);
