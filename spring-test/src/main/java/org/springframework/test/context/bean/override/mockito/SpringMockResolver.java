@@ -37,13 +37,13 @@ import org.springframework.util.ClassUtils;
  */
 public class SpringMockResolver implements MockResolver {
 
-	static final boolean aopAvailable = ClassUtils.isPresent(
+	static final boolean springAopPresent = ClassUtils.isPresent(
 			"org.springframework.aop.framework.Advised", SpringMockResolver.class.getClassLoader());
 
 
 	@Override
 	public Object resolve(Object instance) {
-		if (aopAvailable) {
+		if (springAopPresent) {
 			return getUltimateTargetObject(instance);
 		}
 		return instance;
