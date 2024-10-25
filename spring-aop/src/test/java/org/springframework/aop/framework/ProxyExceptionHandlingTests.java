@@ -21,7 +21,6 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Objects;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,6 +30,8 @@ import org.mockito.stubbing.Answer;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.lang.Nullable;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.doAnswer;
 import static org.mockito.BDDMockito.doThrow;
 import static org.mockito.BDDMockito.mock;
@@ -39,7 +40,7 @@ import static org.mockito.BDDMockito.mock;
  * @author Mikaël Francoeur
  * @since 6.2
  */
-abstract class ProxyExceptionHandlingTests implements WithAssertions {
+abstract class ProxyExceptionHandlingTests {
 
 	private static final RuntimeException uncheckedException = new RuntimeException();
 
@@ -47,7 +48,7 @@ abstract class ProxyExceptionHandlingTests implements WithAssertions {
 
 	private static final UndeclaredCheckedException undeclaredCheckedException = new UndeclaredCheckedException();
 
-	protected final MyClass target = mock(MyClass.class);
+	protected final MyClass target = mock();
 
 	protected final ProxyFactory proxyFactory = new ProxyFactory(target);
 
@@ -63,8 +64,7 @@ abstract class ProxyExceptionHandlingTests implements WithAssertions {
 		Mockito.clearInvocations(target);
 	}
 
-	protected void assertProxyType(Object proxy) {
-	}
+	protected abstract void assertProxyType(Object proxy);
 
 	private void invokeProxy() {
 		throwableSeenByCaller = catchThrowable(() -> Objects.requireNonNull(proxy).doSomething());
