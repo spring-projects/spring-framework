@@ -472,16 +472,16 @@ public abstract class DataBufferUtils {
 	 * Note: {@link Subscription#request(long)} happens eagerly for the first time upon subscription
 	 * and then repeats every time {@code bufferSize - (bufferSize >> 2)} consumed.
 	 * @param publisher the source of {@link DataBuffer} which should be represented as an {@link InputStream}
-	 * @param bufferSize the maximum amount of {@link DataBuffer} prefetched in advance and stored inside {@link InputStream}
+	 * @param demand the maximum number of buffers to request from the Publisher and buffer on an ongoing basis
 	 * @return an {@link InputStream} instance representing given {@link Publisher} messages
 	 */
-	public static <T extends DataBuffer> InputStream subscribeAsInputStream(Publisher<T> publisher, int bufferSize) {
+	public static <T extends DataBuffer> InputStream subscriberInputStream(Publisher<T> publisher, int demand) {
 		Assert.notNull(publisher, "Publisher must not be null");
-		Assert.isTrue(bufferSize > 0, "Buffer size must be > 0");
+		Assert.isTrue(demand > 0, "maxBufferCount must be > 0");
 
-		InputStreamSubscriber inputStreamSubscriber = new InputStreamSubscriber(bufferSize);
-		publisher.subscribe(inputStreamSubscriber);
-		return inputStreamSubscriber;
+		SubscriberInputStream subscriber = new SubscriberInputStream(demand);
+		publisher.subscribe(subscriber);
+		return subscriber;
 	}
 
 

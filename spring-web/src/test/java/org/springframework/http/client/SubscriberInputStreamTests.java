@@ -36,12 +36,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 
 /**
- * Unit tests for {@link InputStreamSubscriber}.
+ * Unit tests for {@link SubscriberInputStream}.
  *
  * @author Arjen Poutsma
  * @author Oleh Dokuka
  */
-class InputStreamSubscriberTests {
+class SubscriberInputStreamTests {
 
 	private static final byte[] FOO = "foo".getBytes(UTF_8);
 
@@ -98,7 +98,7 @@ class InputStreamSubscriberTests {
 				this.byteMapper, this.executor, null);
 
 
-		try (InputStream is = InputStreamSubscriber.subscribeTo(
+		try (InputStream is = SubscriberInputStream.subscribeTo(
 				toStringPublisher(publisher), s -> s.getBytes(UTF_8), s -> {}, 1)) {
 
 			byte[] chunk = new byte[3];
@@ -123,7 +123,7 @@ class InputStreamSubscriberTests {
 				},
 				this.byteMapper, this.executor, 2);
 
-		try (InputStream is = InputStreamSubscriber.subscribeTo(
+		try (InputStream is = SubscriberInputStream.subscribeTo(
 				toStringPublisher(publisher), s -> s.getBytes(UTF_8), s -> {}, 1)) {
 
 			StringBuilder stringBuilder = new StringBuilder();
@@ -167,7 +167,7 @@ class InputStreamSubscriberTests {
 
 		List<String> discarded = new ArrayList<>();
 
-		try (InputStream is = InputStreamSubscriber.subscribeTo(
+		try (InputStream is = SubscriberInputStream.subscribeTo(
 				toStringPublisher(publisher), s -> s.getBytes(UTF_8), discarded::add, 1)) {
 
 			byte[] chunk = new byte[3];
@@ -198,7 +198,7 @@ class InputStreamSubscriberTests {
 				},
 				this.byteMapper, this.executor, null);
 
-		try (InputStream is = InputStreamSubscriber.subscribeTo(
+		try (InputStream is = SubscriberInputStream.subscribeTo(
 				toStringPublisher(publisher), s -> s.getBytes(UTF_8), s -> {}, 1)) {
 
 			byte[] chunk = new byte[3];
@@ -234,7 +234,7 @@ class InputStreamSubscriberTests {
 		Throwable savedEx = null;
 
 		StringBuilder sb = new StringBuilder();
-		try (InputStream is = InputStreamSubscriber.subscribeTo(
+		try (InputStream is = SubscriberInputStream.subscribeTo(
 				publisher, s -> { throw new NullPointerException("boom"); }, s -> {}, 1)) {
 
 			byte[] chunk = new byte[3];

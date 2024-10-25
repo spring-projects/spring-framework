@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.client;
+package org.springframework.core.io.buffer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,47 +22,37 @@ import java.util.ConcurrentModificationException;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import reactor.core.Exceptions;
 
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Bridges between {@link Flow.Publisher Flow.Publisher&lt;T&gt;} and {@link InputStream}.
+ * Bridges between {@link Publisher Publisher&lt;DataBuffer&gt;} and {@link InputStream}.
  *
  * <p>Note that this class has a near duplicate in
- * {@link org.springframework.core.io.buffer.InputStreamSubscriber}.
+ * {@link org.springframework.http.client.SubscriberInputStream}.
  *
  * @author Oleh Dokuka
  * @author Rossen Stoyanchev
  * @since 6.2
- * @param <T> the publisher byte buffer type
  */
-final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscriber<T> {
-
-	private static final Log logger = LogFactory.getLog(InputStreamSubscriber.class);
+final class SubscriberInputStream extends InputStream implements Subscriber<DataBuffer> {
 
 	private static final Object READY = new Object();
 
-	private static final byte[] DONE = new byte[0];
+	private static final DataBuffer DONE = DefaultDataBufferFactory.sharedInstance.allocateBuffer(0);
 
-	private static final byte[] CLOSED = new byte[0];
+	private static final DataBuffer CLOSED = DefaultDataBufferFactory.sharedInstance.allocateBuffer(0);
 
-
-	private final Function<T, byte[]> mapper;
-
-	private final Consumer<T> onDiscardHandler;
 
 	private final int prefetch;
 
@@ -70,23 +60,21 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 
 	private final ReentrantLock lock;
 
-	private final Queue<T> queue;
+	private final Queue<DataBuffer> queue;
 
 	private final AtomicReference<Object> parkedThread = new AtomicReference<>();
 
 	private final AtomicInteger workAmount = new AtomicInteger();
 
-	volatile boolean closed;
+	private volatile boolean closed;
 
 	private int consumed;
 
 	@Nullable
-	private byte[] available;
-
-	private int position;
+	private DataBuffer available;
 
 	@Nullable
-	private Flow.Subscription subscription;
+	private Subscription subscription;
 
 	private boolean done;
 
@@ -94,51 +82,16 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 	private Throwable error;
 
 
-	private InputStreamSubscriber(Function<T, byte[]> mapper, Consumer<T> onDiscardHandler, int prefetch) {
-		this.mapper = mapper;
-		this.onDiscardHandler = onDiscardHandler;
-		this.prefetch = prefetch;
-		this.limit = (prefetch == Integer.MAX_VALUE ? Integer.MAX_VALUE : prefetch - (prefetch >> 2));
-		this.queue = new ArrayBlockingQueue<>(prefetch);
+	SubscriberInputStream(int demand) {
+		this.prefetch = demand;
+		this.limit = (demand == Integer.MAX_VALUE ? Integer.MAX_VALUE : demand - (demand >> 2));
+		this.queue = new ArrayBlockingQueue<>(demand);
 		this.lock = new ReentrantLock(false);
 	}
 
 
-	/**
-	 * Subscribes to given {@link Flow.Publisher} and returns subscription
-	 * as {@link InputStream} that allows reading all propagated {@link DataBuffer} messages via its imperative API.
-	 * Given the {@link InputStream} implementation buffers messages as per configuration.
-	 * The returned {@link InputStream} is considered terminated when the given {@link Flow.Publisher} signaled one of the
-	 * terminal signal ({@link Flow.Subscriber#onComplete() or {@link Flow.Subscriber#onError(Throwable)}})
-	 * and all the stored {@link DataBuffer} polled from the internal buffer.
-	 * The returned {@link InputStream} will call {@link Flow.Subscription#cancel()} and release all stored {@link DataBuffer}
-	 * when {@link InputStream#close()} is called.
-	 * <p>
-	 * Note: The implementation of the returned {@link InputStream} disallow concurrent call on
-	 * any of the {@link InputStream#read} methods
-	 * <p>
-	 * Note: {@link Flow.Subscription#request(long)} happens eagerly for the first time upon subscription
-	 * and then repeats every time {@code bufferSize - (bufferSize >> 2)} consumed.
-	 * @param publisher the source of {@link DataBuffer} which should be represented as an {@link InputStream}
-	 * @param mapper function to transform &lt;T&gt; element to {@code byte[]}. Note, &lt;T&gt; should be released during the mapping if needed.
-	 * @param onDiscardHandler &lt;T&gt; element consumer if returned {@link InputStream} is closed prematurely.
-	 * @param bufferSize the maximum amount of &lt;T&gt; elements prefetched in advance and stored inside {@link InputStream}
-	 * @return an {@link InputStream} instance representing given {@link Flow.Publisher} messages
-	 */
-	public static <T> InputStream subscribeTo(Flow.Publisher<T> publisher, Function<T, byte[]> mapper, Consumer<T> onDiscardHandler, int bufferSize) {
-
-		Assert.notNull(publisher, "Flow.Publisher must not be null");
-		Assert.notNull(mapper, "mapper must not be null");
-		Assert.notNull(onDiscardHandler, "onDiscardHandler must not be null");
-		Assert.isTrue(bufferSize > 0, "bufferSize must be greater than 0");
-
-		InputStreamSubscriber<T> iss = new InputStreamSubscriber<>(mapper, onDiscardHandler, bufferSize);
-		publisher.subscribe(iss);
-		return iss;
-	}
-
 	@Override
-	public void onSubscribe(Flow.Subscription subscription) {
+	public void onSubscribe(Subscription subscription) {
 		if (this.subscription != null) {
 			subscription.cancel();
 			return;
@@ -149,8 +102,8 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 	}
 
 	@Override
-	public void onNext(T buffer) {
-		Assert.notNull(buffer, "Buffer must not be null");
+	public void onNext(DataBuffer buffer) {
+		Assert.notNull(buffer, "DataBuffer must not be null");
 
 		if (this.done) {
 			discard(buffer);
@@ -165,7 +118,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 
 		int previousWorkState = addWork();
 		if (previousWorkState == Integer.MIN_VALUE) {
-			T value = this.queue.poll();
+			DataBuffer value = this.queue.poll();
 			if (value != null) {
 				discard(value);
 			}
@@ -240,7 +193,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 		}
 
 		try {
-			byte[] next = getNextOrAwait();
+			DataBuffer next = getNextOrAwait();
 
 			if (next == DONE) {
 				this.closed = true;
@@ -257,7 +210,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 				return -1;
 			}
 
-			return next[this.position++] & 0xFF;
+			return next.read() & 0xFF;
 		}
 		catch (Throwable ex) {
 			this.closed = true;
@@ -286,7 +239,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 
 		try {
 			for (int j = 0; j < len;) {
-				byte[] next = getNextOrAwait();
+				DataBuffer next = getNextOrAwait();
 
 				if (next == DONE) {
 					cleanAndFinalize();
@@ -308,11 +261,9 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 					cleanAndFinalize();
 					return -1;
 				}
-				int i = this.position;
-				for (; i < next.length && j < len; i++, j++) {
-					b[off + j] = next[i];
-				}
-				this.position = i;
+				int initialReadPosition = next.readPosition();
+				next.read(b, off + j, Math.min(len - j, next.readableByteCount()));
+				j += next.readPosition() - initialReadPosition;
 			}
 
 			return len;
@@ -328,8 +279,9 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 		}
 	}
 
-	byte[] getNextOrAwait() {
-		if (this.available == null || this.available.length - this.position == 0) {
+	private DataBuffer getNextOrAwait() {
+		if (this.available == null || this.available.readableByteCount() == 0) {
+			discard(this.available);
 			this.available = null;
 
 			int actualWorkAmount = this.workAmount.getAcquire();
@@ -339,11 +291,10 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 				}
 
 				boolean done = this.done;
-				T buffer = this.queue.poll();
+				DataBuffer buffer = this.queue.poll();
 				if (buffer != null) {
 					int consumed = ++this.consumed;
-					this.position = 0;
-					this.available = Objects.requireNonNull(this.mapper.apply(buffer));
+					this.available = buffer;
 					if (consumed == this.limit) {
 						this.consumed = 0;
 						requiredSubscriber().request(this.limit);
@@ -365,12 +316,13 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 		return this.available;
 	}
 
-	void cleanAndFinalize() {
+	private void cleanAndFinalize() {
+		discard(this.available);
 		this.available = null;
 
 		for (;;) {
 			int workAmount = this.workAmount.getPlain();
-			T value;
+			DataBuffer value;
 			while ((value = this.queue.poll()) != null) {
 				discard(value);
 			}
@@ -405,20 +357,13 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 		}
 	}
 
-	private Flow.Subscription requiredSubscriber() {
+	private Subscription requiredSubscriber() {
 		Assert.state(this.subscription != null, "Subscriber must be subscribed to use InputStream");
 		return this.subscription;
 	}
 
-	void discard(T buffer) {
-		try {
-			this.onDiscardHandler.accept(buffer);
-		}
-		catch (Throwable ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to release " + buffer.getClass().getSimpleName() + ": " + buffer, ex);
-			}
-		}
+	private void discard(@Nullable DataBuffer buffer) {
+		DataBufferUtils.release(buffer);
 	}
 
 	private void await() {

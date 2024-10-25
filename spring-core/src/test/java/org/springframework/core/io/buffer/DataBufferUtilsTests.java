@@ -754,7 +754,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		byte[] chunk = new byte[readChunkSize];
 		List<String> words = new ArrayList<>();
 
-		try (InputStream in = DataBufferUtils.subscribeAsInputStream(publisher, bufferSize)) {
+		try (InputStream in = DataBufferUtils.subscriberInputStream(publisher, bufferSize)) {
 			int read;
 			while ((read = in.read(chunk)) > -1) {
 				words.add(new String(chunk, 0, read, StandardCharsets.UTF_8));
@@ -791,7 +791,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		byte[] chunk = new byte[4];
 		List<String> words = new ArrayList<>();
 
-		try (InputStream in = DataBufferUtils.subscribeAsInputStream(publisher, 1)) {
+		try (InputStream in = DataBufferUtils.subscriberInputStream(publisher, 1)) {
 			int read;
 			while ((read = in.read(chunk)) > -1) {
 				words.add(new String(chunk, 0, read, StandardCharsets.UTF_8));
@@ -830,7 +830,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		byte[] chunk = new byte[3];
 		ArrayList<String> words = new ArrayList<>();
 
-		try (InputStream inputStream = DataBufferUtils.subscribeAsInputStream(publisher, 1)) {
+		try (InputStream inputStream = DataBufferUtils.subscriberInputStream(publisher, 1)) {
 			words.add(new String(chunk,0, inputStream.read(chunk), StandardCharsets.UTF_8));
 			assertThat(inputStream.read()).isEqualTo(' ' & 0xFF);
 			words.add(new String(chunk,0, inputStream.read(chunk), StandardCharsets.UTF_8));
@@ -874,7 +874,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 			byte[] chunk = new byte[3];
 			ArrayList<String> words = new ArrayList<>();
 
-			try (InputStream in = DataBufferUtils.subscribeAsInputStream(publisher, ThreadLocalRandom.current().nextInt(1, 4))) {
+			try (InputStream in = DataBufferUtils.subscriberInputStream(publisher, ThreadLocalRandom.current().nextInt(1, 4))) {
 				in.read(chunk);
 				String word = new String(chunk, StandardCharsets.UTF_8);
 				words.add(word);
