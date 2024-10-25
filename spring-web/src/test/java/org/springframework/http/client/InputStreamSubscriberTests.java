@@ -16,11 +16,6 @@
 
 package org.springframework.http.client;
 
-import org.junit.jupiter.api.Test;
-import org.reactivestreams.FlowAdapters;
-import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -31,6 +26,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
+
+import org.junit.jupiter.api.Test;
+import org.reactivestreams.FlowAdapters;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
@@ -68,11 +68,11 @@ class InputStreamSubscriberTests {
 
 	@Test
 	void basic() {
-		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = new OutputStreamPublisher<>(outputStream -> {
 			outputStream.write(FOO);
 			outputStream.write(BAR);
 			outputStream.write(BAZ);
-		}, this.byteMapper, this.executor);
+		}, this.byteMapper, this.executor, null);
 		Flux<String> flux = toString(flowPublisher);
 
 		StepVerifier.create(flux)
@@ -82,14 +82,14 @@ class InputStreamSubscriberTests {
 
 	@Test
 	void flush() {
-		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = new OutputStreamPublisher<>(outputStream -> {
 			outputStream.write(FOO);
 			outputStream.flush();
 			outputStream.write(BAR);
 			outputStream.flush();
 			outputStream.write(BAZ);
 			outputStream.flush();
-		}, this.byteMapper, this.executor);
+		}, this.byteMapper, this.executor, null);
 		Flux<String> flux = toString(flowPublisher);
 
 		try (InputStream is = InputStreamSubscriber.subscribeTo(FlowAdapters.toFlowPublisher(flux), (s) -> s.getBytes(StandardCharsets.UTF_8), (ignore) -> {}, 1)) {
@@ -110,7 +110,7 @@ class InputStreamSubscriberTests {
 
 	@Test
 	void chunkSize() {
-		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = new OutputStreamPublisher<>(outputStream -> {
 			outputStream.write(FOO);
 			outputStream.write(BAR);
 			outputStream.write(BAZ);
@@ -146,7 +146,7 @@ class InputStreamSubscriberTests {
 	void cancel() throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(1);
 
-		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = new OutputStreamPublisher<>(outputStream -> {
 			assertThatIOException()
 					.isThrownBy(() -> {
 						outputStream.write(FOO);
@@ -159,7 +159,7 @@ class InputStreamSubscriberTests {
 					.withMessage("Subscription has been terminated");
 			latch.countDown();
 
-		}, this.byteMapper, this.executor);
+		}, this.byteMapper, this.executor, null);
 		Flux<String> flux = toString(flowPublisher);
 		List<String> discarded = new ArrayList<>();
 
@@ -182,14 +182,14 @@ class InputStreamSubscriberTests {
 	void closed() throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(1);
 
-		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = new OutputStreamPublisher<>(outputStream -> {
 			OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
 			writer.write("foo");
 			writer.close();
 			assertThatIOException().isThrownBy(() -> writer.write("bar"))
 					.withMessage("Stream closed");
 			latch.countDown();
-		}, this.byteMapper, this.executor);
+		}, this.byteMapper, this.executor, null);
 		Flux<String> flux = toString(flowPublisher);
 
 		try (InputStream is = InputStreamSubscriber.subscribeTo(FlowAdapters.toFlowPublisher(flux), (s) -> s.getBytes(StandardCharsets.UTF_8), ig -> {}, 1)) {
@@ -211,7 +211,7 @@ class InputStreamSubscriberTests {
 	void mapperThrowsException() throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(1);
 
-		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = new OutputStreamPublisher<>(outputStream -> {
 				outputStream.write(FOO);
 				outputStream.flush();
 				assertThatIOException().isThrownBy(() -> {
@@ -219,7 +219,7 @@ class InputStreamSubscriberTests {
 					outputStream.flush();
 				}).withMessage("Subscription has been terminated");
 				latch.countDown();
-		}, this.byteMapper, this.executor);
+		}, this.byteMapper, this.executor, null);
 		Throwable ex = null;
 
 		StringBuilder stringBuilder = new StringBuilder();

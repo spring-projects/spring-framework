@@ -16,9 +16,6 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 import reactor.core.Exceptions;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -75,26 +72,26 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 	}
 
 	/**
-	 * Subscribes to given {@link Publisher} and returns subscription
+	 * Subscribes to given {@link Flow.Publisher} and returns subscription
 	 * as {@link InputStream} that allows reading all propagated {@link DataBuffer} messages via its imperative API.
 	 * Given the {@link InputStream} implementation buffers messages as per configuration.
-	 * The returned {@link InputStream} is considered terminated when the given {@link Publisher} signaled one of the
-	 * terminal signal ({@link Subscriber#onComplete() or {@link Subscriber#onError(Throwable)}})
+	 * The returned {@link InputStream} is considered terminated when the given {@link Flow.Publisher} signaled one of the
+	 * terminal signal ({@link Flow.Subscriber#onComplete() or {@link Flow.Subscriber#onError(Throwable)}})
 	 * and all the stored {@link DataBuffer} polled from the internal buffer.
-	 * The returned {@link InputStream} will call {@link Subscription#cancel()} and release all stored {@link DataBuffer}
+	 * The returned {@link InputStream} will call {@link Flow.Subscription#cancel()} and release all stored {@link DataBuffer}
 	 * when {@link InputStream#close()} is called.
 	 * <p>
 	 * Note: The implementation of the returned {@link InputStream} disallow concurrent call on
 	 * any of the {@link InputStream#read} methods
 	 * <p>
-	 * Note: {@link Subscription#request(long)} happens eagerly for the first time upon subscription
+	 * Note: {@link Flow.Subscription#request(long)} happens eagerly for the first time upon subscription
 	 * and then repeats every time {@code bufferSize - (bufferSize >> 2)} consumed
 	 *
 	 * @param publisher the source of {@link DataBuffer} which should be represented as an {@link InputStream}
 	 * @param mapper function to transform &lt;T&gt; element to {@code byte[]}. Note, &lt;T&gt; should be released during the mapping if needed.
 	 * @param onDiscardHandler &lt;T&gt; element consumer if returned {@link InputStream} is closed prematurely.
 	 * @param bufferSize the maximum amount of &lt;T&gt; elements prefetched in advance and stored inside {@link InputStream}
-	 * @return an {@link InputStream} instance representing given {@link Publisher} messages
+	 * @return an {@link InputStream} instance representing given {@link Flow.Publisher} messages
 	 */
 	public static <T> InputStream subscribeTo(Flow.Publisher<T> publisher, Function<T, byte[]> mapper, Consumer<T> onDiscardHandler, int bufferSize) {
 
@@ -221,7 +218,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 		}
 		catch (Throwable t) {
 			this.closed = true;
-			this.s.cancel();
+			requiredSubscriber().cancel();
 			cleanAndFinalize();
 			throw Exceptions.propagate(t);
 		}
@@ -263,7 +260,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 						return j;
 					}
 				} else if (bytes == CLOSED) {
-					this.s.cancel();
+					requiredSubscriber().cancel();
 					cleanAndFinalize();
 					return -1;
 				}
@@ -278,7 +275,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 		}
 		catch (Throwable t) {
 			this.closed = true;
-			this.s.cancel();
+			requiredSubscriber().cancel();
 			cleanAndFinalize();
 			throw Exceptions.propagate(t);
 		}
@@ -305,7 +302,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 					this.available = Objects.requireNonNull(this.mapper.apply(t));
 					if (consumed == this.limit) {
 						this.consumed = 0;
-						this.s.request(this.limit);
+						requiredSubscriber().request(this.limit);
 					}
 					break;
 				}
@@ -367,12 +364,17 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 		}
 
 		try {
-			this.s.cancel();
+			requiredSubscriber().cancel();
 			cleanAndFinalize();
 		}
 		finally {
 			this.lock.unlock();
 		}
+	}
+
+	private Flow.Subscription requiredSubscriber() {
+		Assert.state(this.s != null, "Subscriber must be subscribed to use InputStream");
+		return this.s;
 	}
 
 	private void await() {

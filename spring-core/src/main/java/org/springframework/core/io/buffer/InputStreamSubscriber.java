@@ -175,7 +175,7 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 		}
 		catch (Throwable t) {
 			this.closed = true;
-			this.s.cancel();
+			requiredSubscriber().cancel();
 			cleanAndFinalize();
 			throw Exceptions.propagate(t);
 		}
@@ -217,7 +217,7 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 						return j;
 					}
 				} else if (bytes == CLOSED) {
-					this.s.cancel();
+					requiredSubscriber().cancel();
 					cleanAndFinalize();
 					return -1;
 				}
@@ -230,7 +230,7 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 		}
 		catch (Throwable t) {
 			this.closed = true;
-			this.s.cancel();
+			requiredSubscriber().cancel();
 			cleanAndFinalize();
 			throw Exceptions.propagate(t);
 		}
@@ -258,7 +258,7 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 					this.available = t;
 					if (consumed == this.limit) {
 						this.consumed = 0;
-						this.s.request(this.limit);
+						requiredSubscriber().request(this.limit);
 					}
 					break;
 				}
@@ -315,12 +315,17 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 		}
 
 		try {
-			this.s.cancel();
+			requiredSubscriber().cancel();
 			cleanAndFinalize();
 		}
 		finally {
 			this.lock.unlock();
 		}
+	}
+
+	private Subscription requiredSubscriber() {
+		Assert.state(this.s != null, "Subscriber must be subscribed to use InputStream");
+		return this.s;
 	}
 
 	private void await() {
