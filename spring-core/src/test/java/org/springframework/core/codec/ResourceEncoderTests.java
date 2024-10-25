@@ -80,7 +80,7 @@ class ResourceEncoderTests extends AbstractEncoderTests<ResourceEncoder> {
 
 		Flux<Resource> i = Flux.error(new InputException());
 
-		Flux<DataBuffer> result = ((Encoder<Resource>) this.encoder).encode(i,
+		Flux<DataBuffer> result = this.encoder.encode(i,
 				this.bufferFactory, outputType,
 				mimeType, hints);
 

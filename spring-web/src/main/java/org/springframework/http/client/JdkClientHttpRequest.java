@@ -120,7 +120,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		catch (ExecutionException ex) {
 			Throwable cause = ex.getCause();
 
-			if (cause instanceof CancellationException caEx) {
+			if (cause instanceof CancellationException) {
 				throw new HttpTimeoutException("Request timed out");
 			}
 			if (cause instanceof UncheckedIOException uioEx) {

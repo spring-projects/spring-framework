@@ -2522,7 +2522,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		expression = parser.parseExpression("#negate(#ints.?[#this<2][0])");
 		assertThat(expression.getValue(context, Integer.class).toString()).isEqualTo("-1");
 		// Selection isn't compilable.
-		assertThat(((SpelNodeImpl)((SpelExpression) expression).getAST()).isCompilable()).isFalse();
+		assertThat(((SpelExpression) expression).getAST().isCompilable()).isFalse();
 	}
 
 	@Test

@@ -459,7 +459,7 @@ class ErrorResponseExceptionTests {
 			ErrorResponse ex, @Nullable String suffix, @Nullable Object[] arguments) {
 
 		assertThat(ex.getDetailMessageCode())
-				.isEqualTo(ErrorResponse.getDefaultDetailMessageCode(((Exception) ex).getClass(), suffix));
+				.isEqualTo(ErrorResponse.getDefaultDetailMessageCode(ex.getClass(), suffix));
 
 		if (arguments != null) {
 			assertThat(ex.getDetailMessageArguments()).containsExactlyElementsOf(Arrays.asList(arguments));
