@@ -436,8 +436,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		if (headers == EMPTY) {
 			this.headers = CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
 		}
-		else if (headers instanceof ReadOnlyHttpHeaders readOnlyHttpHeaders) {
-			this.headers = readOnlyHttpHeaders.headers;
+		else if (headers instanceof HttpHeaders httpHeaders) {
+			while (httpHeaders.headers instanceof HttpHeaders wrapped) {
+				httpHeaders = wrapped;
+			}
+			this.headers = httpHeaders.headers;
 		}
 		else {
 			this.headers = headers;
