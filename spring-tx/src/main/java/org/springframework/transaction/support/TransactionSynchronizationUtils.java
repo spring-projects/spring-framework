@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public abstract class TransactionSynchronizationUtils {
 
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationUtils.class);
 
-	private static final boolean aopAvailable = ClassUtils.isPresent(
+	private static final boolean aopPresent = ClassUtils.isPresent(
 			"org.springframework.aop.scope.ScopedObject", TransactionSynchronizationUtils.class.getClassLoader());
 
 
@@ -67,7 +67,7 @@ public abstract class TransactionSynchronizationUtils {
 		if (resourceRef instanceof InfrastructureProxy infrastructureProxy) {
 			resourceRef = infrastructureProxy.getWrappedObject();
 		}
-		if (aopAvailable) {
+		if (aopPresent) {
 			// now unwrap scoped proxy
 			resourceRef = ScopedProxyUnwrapper.unwrapIfNecessary(resourceRef);
 		}
