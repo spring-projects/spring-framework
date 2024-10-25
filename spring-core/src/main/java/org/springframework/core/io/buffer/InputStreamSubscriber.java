@@ -1,8 +1,23 @@
+/*
+ * Copyright 2002-2024 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.core.io.buffer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.ConcurrentModificationException;
 import java.util.Objects;
 import java.util.Queue;
@@ -27,70 +42,83 @@ import org.springframework.util.Assert;
  * {@link org.springframework.http.client.InputStreamSubscriber}.
  *
  * @author Oleh Dokuka
- * @since 6.1
+ * @author Rossen Stoyanchev
+ * @since 6.2
  */
 final class InputStreamSubscriber extends InputStream implements Subscriber<DataBuffer> {
 
-	static final Object READY = new Object();
-	static final DataBuffer DONE = DefaultDataBuffer.fromEmptyByteBuffer(DefaultDataBufferFactory.sharedInstance, ByteBuffer.allocate(0));
-	static final DataBuffer CLOSED = DefaultDataBuffer.fromEmptyByteBuffer(DefaultDataBufferFactory.sharedInstance, ByteBuffer.allocate(0));
+	private static final Object READY = new Object();
 
-	final int prefetch;
-	final int limit;
-	final ReentrantLock       lock;
-	final Queue<DataBuffer> queue;
+	private static final DataBuffer DONE = DefaultDataBufferFactory.sharedInstance.allocateBuffer(0);
 
-	final AtomicReference<Object> parkedThread = new AtomicReference<>();
-	final AtomicInteger workAmount = new AtomicInteger();
+	private static final DataBuffer CLOSED = DefaultDataBufferFactory.sharedInstance.allocateBuffer(0);
 
-	volatile boolean closed;
-	int consumed;
+
+	private final int prefetch;
+
+	private final int limit;
+
+	private final ReentrantLock lock;
+
+	private final Queue<DataBuffer> queue;
+
+	private final AtomicReference<Object> parkedThread = new AtomicReference<>();
+
+	private final AtomicInteger workAmount = new AtomicInteger();
+
+	private volatile boolean closed;
+
+	private int consumed;
 
 	@Nullable
-	DataBuffer available;
+	private DataBuffer available;
 
 	@Nullable
-	Subscription s;
-	boolean done;
+	private Subscription subscription;
+
+	private boolean done;
+
 	@Nullable
-	Throwable error;
+	private Throwable error;
+
 
 	InputStreamSubscriber(int prefetch) {
 		this.prefetch = prefetch;
-		this.limit = prefetch == Integer.MAX_VALUE ? Integer.MAX_VALUE : prefetch - (prefetch >> 2);
+		this.limit = (prefetch == Integer.MAX_VALUE ? Integer.MAX_VALUE : prefetch - (prefetch >> 2));
 		this.queue = new ArrayBlockingQueue<>(prefetch);
 		this.lock = new ReentrantLock(false);
 	}
 
+
 	@Override
 	public void onSubscribe(Subscription subscription) {
-		if (this.s != null) {
+		if (this.subscription != null) {
 			subscription.cancel();
 			return;
 		}
 
-		this.s = subscription;
-		subscription.request(prefetch == Integer.MAX_VALUE ? Long.MAX_VALUE : prefetch);
+		this.subscription = subscription;
+		subscription.request(this.prefetch == Integer.MAX_VALUE ? Long.MAX_VALUE : this.prefetch);
 	}
 
 	@Override
-	public void onNext(DataBuffer t) {
-		Assert.notNull(t, "DataBuffer must not be null");
+	public void onNext(DataBuffer buffer) {
+		Assert.notNull(buffer, "DataBuffer must not be null");
 
 		if (this.done) {
-			discard(t);
+			discard(buffer);
 			return;
 		}
 
-		if (!queue.offer(t)) {
-			discard(t);
-			error = new RuntimeException("Buffer overflow");
-			done = true;
+		if (!this.queue.offer(buffer)) {
+			discard(buffer);
+			this.error = new RuntimeException("Buffer overflow");
+			this.done = true;
 		}
 
 		int previousWorkState = addWork();
 		if (previousWorkState == Integer.MIN_VALUE) {
-			DataBuffer value = queue.poll();
+			DataBuffer value = this.queue.poll();
 			if (value != null) {
 				discard(value);
 			}
@@ -136,51 +164,62 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 				return Integer.MIN_VALUE;
 			}
 
-			int nextProduced = produced == Integer.MAX_VALUE ? 1 : produced + 1;
+			int nextProduced = (produced == Integer.MAX_VALUE ? 1 : produced + 1);
 
-
-			if (workAmount.weakCompareAndSetRelease(produced, nextProduced)) {
+			if (this.workAmount.weakCompareAndSetRelease(produced, nextProduced)) {
 				return produced;
 			}
 		}
 	}
 
+	private void resume() {
+		if (this.parkedThread != READY) {
+			Object old = this.parkedThread.getAndSet(READY);
+			if (old != READY) {
+				LockSupport.unpark((Thread)old);
+			}
+		}
+	}
+
+	/* InputStream implementation */
+
 	@Override
 	public int read() throws IOException {
-		if (!lock.tryLock()) {
+		if (!this.lock.tryLock()) {
 			if (this.closed) {
 				return -1;
 			}
-			throw new ConcurrentModificationException("concurrent access is disallowed");
+			throw new ConcurrentModificationException("Concurrent access is not allowed");
 		}
 
 		try {
-			DataBuffer bytes = getBytesOrAwait();
+			DataBuffer next = getNextOrAwait();
 
-			if (bytes == DONE) {
+			if (next == DONE) {
 				this.closed = true;
 				cleanAndFinalize();
 				if (this.error == null) {
 					return -1;
 				}
 				else {
-					throw Exceptions.propagate(error);
+					throw Exceptions.propagate(this.error);
 				}
-			} else if (bytes == CLOSED) {
+			}
+			else if (next == CLOSED) {
 				cleanAndFinalize();
 				return -1;
 			}
 
-			return bytes.read() & 0xFF;
+			return next.read() & 0xFF;
 		}
-		catch (Throwable t) {
+		catch (Throwable ex) {
 			this.closed = true;
 			requiredSubscriber().cancel();
 			cleanAndFinalize();
-			throw Exceptions.propagate(t);
+			throw Exceptions.propagate(ex);
 		}
 		finally {
-			lock.unlock();
+			this.lock.unlock();
 		}
 	}
 
@@ -191,7 +230,7 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 			return 0;
 		}
 
-		if (!lock.tryLock()) {
+		if (!this.lock.tryLock()) {
 			if (this.closed) {
 				return -1;
 			}
@@ -200,9 +239,9 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 
 		try {
 			for (int j = 0; j < len;) {
-				DataBuffer bytes = getBytesOrAwait();
+				DataBuffer next = getNextOrAwait();
 
-				if (bytes == DONE) {
+				if (next == DONE) {
 					cleanAndFinalize();
 					if (this.error == null) {
 						this.closed = true;
@@ -211,37 +250,37 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 					else {
 						if (j == 0) {
 							this.closed = true;
-							throw Exceptions.propagate(error);
+							throw Exceptions.propagate(this.error);
 						}
 
 						return j;
 					}
-				} else if (bytes == CLOSED) {
+				}
+				else if (next == CLOSED) {
 					requiredSubscriber().cancel();
 					cleanAndFinalize();
 					return -1;
 				}
-				int initialReadPosition = bytes.readPosition();
-				bytes.read(b, off + j, Math.min(len - j, bytes.readableByteCount()));
-				j += bytes.readPosition() - initialReadPosition;
+				int initialReadPosition = next.readPosition();
+				next.read(b, off + j, Math.min(len - j, next.readableByteCount()));
+				j += next.readPosition() - initialReadPosition;
 			}
 
 			return len;
 		}
-		catch (Throwable t) {
+		catch (Throwable ex) {
 			this.closed = true;
 			requiredSubscriber().cancel();
 			cleanAndFinalize();
-			throw Exceptions.propagate(t);
+			throw Exceptions.propagate(ex);
 		}
 		finally {
-			lock.unlock();
+			this.lock.unlock();
 		}
 	}
 
-	DataBuffer getBytesOrAwait() {
+	private DataBuffer getNextOrAwait() {
 		if (this.available == null || this.available.readableByteCount() == 0) {
-
 			discard(this.available);
 			this.available = null;
 
@@ -251,11 +290,11 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 					return CLOSED;
 				}
 
-				boolean d = this.done;
-				DataBuffer t = this.queue.poll();
-				if (t != null) {
+				boolean done = this.done;
+				DataBuffer buffer = this.queue.poll();
+				if (buffer != null) {
 					int consumed = ++this.consumed;
-					this.available = t;
+					this.available = buffer;
 					if (consumed == this.limit) {
 						this.consumed = 0;
 						requiredSubscriber().request(this.limit);
@@ -263,11 +302,11 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 					break;
 				}
 
-				if (d) {
+				if (done) {
 					return DONE;
 				}
 
-				actualWorkAmount = workAmount.addAndGet(-actualWorkAmount);
+				actualWorkAmount = this.workAmount.addAndGet(-actualWorkAmount);
 				if (actualWorkAmount == 0) {
 					await();
 				}
@@ -277,15 +316,14 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 		return this.available;
 	}
 
-	void cleanAndFinalize() {
+	private void cleanAndFinalize() {
 		discard(this.available);
 		this.available = null;
 
 		for (;;) {
 			int workAmount = this.workAmount.getPlain();
 			DataBuffer value;
-
-			while((value = queue.poll()) != null) {
+			while ((value = this.queue.poll()) != null) {
 				discard(value);
 			}
 
@@ -293,10 +331,6 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 				return;
 			}
 		}
-	}
-
-	void discard(@Nullable DataBuffer value) {
-		DataBufferUtils.release(value);
 	}
 
 	@Override
@@ -324,8 +358,12 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 	}
 
 	private Subscription requiredSubscriber() {
-		Assert.state(this.s != null, "Subscriber must be subscribed to use InputStream");
-		return this.s;
+		Assert.state(this.subscription != null, "Subscriber must be subscribed to use InputStream");
+		return this.subscription;
+	}
+
+	private void discard(@Nullable DataBuffer buffer) {
+		DataBufferUtils.release(buffer);
 	}
 
 	private void await() {
@@ -341,7 +379,7 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 				throw new IllegalStateException("Only one (Virtual)Thread can await!");
 			}
 
-			if (parkedThread.compareAndSet( null, toUnpark)) {
+			if (this.parkedThread.compareAndSet( null, toUnpark)) {
 				LockSupport.park();
 				// we don't just break here because park() can wake up spuriously
 				// if we got a proper resume, get() == READY and the loop will quit above
@@ -349,15 +387,6 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 		}
 		// clear the resume indicator so that the next await call will park without a resume()
 		this.parkedThread.lazySet(null);
-	}
-
-	private void resume() {
-		if (this.parkedThread != READY) {
-			Object old = parkedThread.getAndSet(READY);
-			if (old != READY) {
-				LockSupport.unpark((Thread)old);
-			}
-		}
 	}
 
 }

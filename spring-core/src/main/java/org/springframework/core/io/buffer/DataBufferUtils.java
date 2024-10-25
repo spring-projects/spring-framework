@@ -470,8 +470,7 @@ public abstract class DataBufferUtils {
 	 * any of the {@link InputStream#read} methods
 	 * <p>
 	 * Note: {@link Subscription#request(long)} happens eagerly for the first time upon subscription
-	 * and then repeats every time {@code bufferSize - (bufferSize >> 2)} consumed
-	 *
+	 * and then repeats every time {@code bufferSize - (bufferSize >> 2)} consumed.
 	 * @param publisher the source of {@link DataBuffer} which should be represented as an {@link InputStream}
 	 * @param bufferSize the maximum amount of {@link DataBuffer} prefetched in advance and stored inside {@link InputStream}
 	 * @return an {@link InputStream} instance representing given {@link Publisher} messages
