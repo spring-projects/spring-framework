@@ -1,15 +1,5 @@
 package org.springframework.http.client;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import reactor.core.Exceptions;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ConcurrentModificationException;
@@ -23,6 +13,17 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import reactor.core.Exceptions;
+
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Bridges between {@link Flow.Publisher Flow.Publisher&lt;T&gt;} and {@link InputStream}.
@@ -43,10 +44,10 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 
 	final int prefetch;
 	final int limit;
-	final Function<T, byte[]> mapper;
-	final Consumer<T>         onDiscardHandler;
 	final ReentrantLock       lock;
 	final Queue<T> queue;
+	final Function<T, byte[]> mapper;
+	final Consumer<T>         onDiscardHandler;
 
 	final AtomicReference<Object> parkedThread = new AtomicReference<>();
 	final AtomicInteger workAmount = new AtomicInteger();
@@ -248,20 +249,24 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 				byte[] bytes = getBytesOrAwait();
 
 				if (bytes == DONE) {
-					this.closed = true;
 					cleanAndFinalize();
 					if (this.error == null) {
+						this.closed = true;
 						return j == 0 ? -1 : j;
 					}
 					else {
-						throw Exceptions.propagate(error);
+						if (j == 0) {
+							this.closed = true;
+							throw Exceptions.propagate(error);
+						}
+
+						return j;
 					}
 				} else if (bytes == CLOSED) {
 					this.s.cancel();
 					cleanAndFinalize();
 					return -1;
 				}
-
 				int i = this.position;
 				for (; i < bytes.length && j < len; i++, j++) {
 					b[off + j] = bytes[i];
@@ -311,7 +316,7 @@ final class InputStreamSubscriber<T> extends InputStream implements Flow.Subscri
 
 				actualWorkAmount = workAmount.addAndGet(-actualWorkAmount);
 				if (actualWorkAmount == 0) {
-                    await();
+					await();
 				}
 			}
 		}

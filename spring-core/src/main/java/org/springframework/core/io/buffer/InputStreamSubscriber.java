@@ -1,11 +1,5 @@
 package org.springframework.core.io.buffer;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import org.springframework.lang.Nullable;
-import reactor.core.Exceptions;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -17,6 +11,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import reactor.core.Exceptions;
+
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Bridges between {@link Publisher Publisher&lt;DataBuffer&gt;} and {@link InputStream}.
@@ -73,6 +75,8 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 
 	@Override
 	public void onNext(DataBuffer t) {
+		Assert.notNull(t, "DataBuffer must not be null");
+
 		if (this.done) {
 			discard(t);
 			return;
@@ -350,6 +354,5 @@ final class InputStreamSubscriber extends InputStream implements Subscriber<Data
 			}
 		}
 	}
-
 
 }
