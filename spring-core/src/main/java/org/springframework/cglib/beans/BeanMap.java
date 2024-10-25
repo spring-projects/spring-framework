@@ -17,10 +17,11 @@
 package org.springframework.cglib.beans;
 
 import java.security.ProtectionDomain;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -307,14 +308,11 @@ abstract public class BeanMap implements Map {
 		return code;
 	}
 
-	// TODO: optimize
 	@Override
 	public Set entrySet() {
-		HashMap copy = new HashMap();
-		for (Object key : keySet()) {
-			copy.put(key, get(key));
-		}
-		return Collections.unmodifiableMap(copy).entrySet();
+		Set set = new HashSet<>(keySet().size());
+		keySet().forEach(key -> set.add(new SimpleImmutableEntry<>(key, get(key))));
+		return Collections.unmodifiableSet(set);
 	}
 
 	@Override
