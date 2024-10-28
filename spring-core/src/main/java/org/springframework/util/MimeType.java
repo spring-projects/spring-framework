@@ -62,6 +62,11 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	private static final BitSet TOKEN;
 
+	private static final char[] SEPARATORS = {
+			'(', ')', '<', '>', '@', ',', ';', ':', '\\', '\"', '/',
+			'[', ']', '?', '=', '{', '}', ' ', '\t'
+	};
+
 	static {
 		// variable names refer to RFC 2616, section 2.2
 		BitSet ctl = new BitSet(128);
@@ -71,25 +76,9 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		ctl.set(127);
 
 		BitSet separators = new BitSet(128);
-		separators.set('(');
-		separators.set(')');
-		separators.set('<');
-		separators.set('>');
-		separators.set('@');
-		separators.set(',');
-		separators.set(';');
-		separators.set(':');
-		separators.set('\\');
-		separators.set('\"');
-		separators.set('/');
-		separators.set('[');
-		separators.set(']');
-		separators.set('?');
-		separators.set('=');
-		separators.set('{');
-		separators.set('}');
-		separators.set(' ');
-		separators.set('\t');
+		for (char separator : SEPARATORS) {
+			separators.set(separator);
+		}
 
 		TOKEN = new BitSet(128);
 		TOKEN.set(0, 128);
