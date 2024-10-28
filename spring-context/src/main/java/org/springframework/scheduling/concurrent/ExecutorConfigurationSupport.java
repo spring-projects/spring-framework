@@ -36,6 +36,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.lang.Nullable;
 
 /**
@@ -75,6 +77,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private boolean virtualThreads = false;
+
 	private ThreadFactory threadFactory = this;
 
 	private boolean threadNamePrefixSet = false;
@@ -105,6 +109,25 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 
 	/**
+	 * Specify whether to use virtual threads instead of platform threads.
+	 * This is off by default, setting up a traditional platform thread pool.
+	 * <p>Set this flag to {@code true} on Java 21 or higher for a tightly
+	 * managed thread pool setup with virtual threads. In contrast to
+	 * {@link SimpleAsyncTaskExecutor}, this is integrated with Spring's
+	 * lifecycle management for stopping and restarting execution threads,
+	 * including an early stop signal for a graceful shutdown arrangement.
+	 * <p>Specify either this or {@link #setThreadFactory}, not both.
+	 * @since 6.2
+	 * @see #setThreadFactory
+	 * @see VirtualThreadTaskExecutor#getVirtualThreadFactory()
+	 * @see SimpleAsyncTaskExecutor#setVirtualThreads
+	 */
+	public void setVirtualThreads(boolean virtualThreads) {
+		this.virtualThreads = virtualThreads;
+		this.threadFactory = this;
+	}
+
+	/**
 	 * Set the ThreadFactory to use for the ExecutorService's thread pool.
 	 * The default is the underlying ExecutorService's default thread factory.
 	 * <p>In a Jakarta EE or other managed environment with JSR-236 support,
@@ -120,6 +143,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	public void setThreadFactory(@Nullable ThreadFactory threadFactory) {
 		this.threadFactory = (threadFactory != null ? threadFactory : this);
+		this.virtualThreads = false;
 	}
 
 	@Override
@@ -282,7 +306,9 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 		if (!this.threadNamePrefixSet && this.beanName != null) {
 			setThreadNamePrefix(this.beanName + "-");
 		}
-		this.executor = initializeExecutor(this.threadFactory, this.rejectedExecutionHandler);
+		ThreadFactory factory = (this.virtualThreads ?
+				new VirtualThreadTaskExecutor(getThreadNamePrefix()).getVirtualThreadFactory() : this.threadFactory);
+		this.executor = initializeExecutor(factory, this.rejectedExecutionHandler);
 		this.lifecycleDelegate = new ExecutorLifecycleDelegate(this.executor);
 	}
 
