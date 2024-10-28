@@ -52,8 +52,11 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * registered directly}) will not be found, and a mocked bean will be added to
  * the context alongside the existing dependency.
  *
- * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
- * Any attempt to mock a non-singleton bean will result in an exception.
+ * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be mocked.
+ * Any attempt to mock a non-singleton bean will result in an exception. When
+ * mocking a bean created by a {@link org.springframework.beans.factory.FactoryBean
+ * FactoryBean}, the {@code FactoryBean} will be replaced with a singleton mock
+ * of the type of object created by the {@code FactoryBean}.
  *
  * @author Simon Baslé
  * @author Sam Brannen

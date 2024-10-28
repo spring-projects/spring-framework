@@ -82,7 +82,7 @@ Java::
 <2> The result of this static method will be used as the instance and injected into the field.
 ======
 
-[NOTE]
+[TIP]
 ====
 Spring searches for the factory method to invoke in the test class, in the test class
 hierarchy, and in the enclosing class hierarchy for a `@Nested` test class.
@@ -92,5 +92,12 @@ fully-qualified method name following the syntax `<fully-qualified class name>#<
 – for example, `methodName = "org.example.TestUtils#createCustomService"`.
 ====
 
-NOTE: Only _singleton_ beans can be overridden. Any attempt to override a non-singleton
-bean will result in an exception.
+[TIP]
+====
+Only _singleton_ beans can be overridden. Any attempt to override a non-singleton bean
+will result in an exception.
+
+When overriding a bean created by a `FactoryBean`, the `FactoryBean` will be replaced
+with a singleton bean corresponding to the value returned from the `@TestBean` factory
+method.
+====

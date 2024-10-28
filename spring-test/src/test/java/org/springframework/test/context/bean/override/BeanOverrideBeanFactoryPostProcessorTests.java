@@ -237,16 +237,16 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		assertThat(context.getBean(beanName)).isEqualTo("overridden");
 	}
 
-	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionForClassBasedNonSingletonFactoryBeanFails() {
+	@Test  // gh-33800
+	void replaceBeanByNameWithMatchingBeanDefinitionForClassBasedNonSingletonFactoryBean() {
 		String beanName = "descriptionBean";
 		AnnotationConfigApplicationContext context = createContext(CaseByName.class);
 		RootBeanDefinition factoryBeanDefinition = new RootBeanDefinition(NonSingletonStringFactoryBean.class);
 		context.registerBeanDefinition(beanName, factoryBeanDefinition);
 
-		assertThatIllegalStateException()
-				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean 'descriptionBean': only singleton beans can be overridden.");
+		assertThatNoException().isThrownBy(context::refresh);
+		assertThat(context.isSingleton(beanName)).as("isSingleton").isTrue();
+		assertThat(context.getBean(beanName)).isEqualTo("overridden");
 	}
 
 	@Test
@@ -261,16 +261,16 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		assertThat(context.getBean(beanName, MessageService.class).getMessage()).isEqualTo("overridden");
 	}
 
-	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionForInterfaceBasedNonSingletonFactoryBeanFails() {
+	@Test  // gh-33800
+	void replaceBeanByNameWithMatchingBeanDefinitionForInterfaceBasedNonSingletonFactoryBean() {
 		String beanName = "messageServiceBean";
 		AnnotationConfigApplicationContext context = createContext(MessageServiceTestCase.class);
 		RootBeanDefinition factoryBeanDefinition = new RootBeanDefinition(NonSingletonMessageServiceFactoryBean.class);
 		context.registerBeanDefinition(beanName, factoryBeanDefinition);
 
-		assertThatIllegalStateException()
-				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean 'messageServiceBean': only singleton beans can be overridden.");
+		assertThatNoException().isThrownBy(context::refresh);
+		assertThat(context.isSingleton(beanName)).as("isSingleton").isTrue();
+		assertThat(context.getBean(beanName, MessageService.class).getMessage()).isEqualTo("overridden");
 	}
 
 	@Test

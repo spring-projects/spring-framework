@@ -197,8 +197,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		// Now we have an instance (the override) that we can manually register as a singleton.
 		//
 		// However, we need to remove any existing singleton instance -- for example, a
-		// manually registered singleton or a singleton that was registered as a side effect
-		// of the isSingleton() check in validateBeanDefinition().
+		// manually registered singleton.
 		//
 		// As a bonus, by manually registering a singleton during "AOT processing", we allow
 		// GenericApplicationContext's preDetermineBeanType() method to transparently register
@@ -334,10 +333,18 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	/**
 	 * Validate that the {@link BeanDefinition} for the supplied bean name is suitable
 	 * for being replaced by a bean override.
+	 * <p>If there is no registered {@code BeanDefinition} for the supplied bean name,
+	 * no validation is performed.
 	 */
 	private static void validateBeanDefinition(ConfigurableListableBeanFactory beanFactory, String beanName) {
-		Assert.state(beanFactory.isSingleton(beanName),
-				() -> "Unable to override bean '" + beanName + "': only singleton beans can be overridden.");
+		// Due to https://github.com/spring-projects/spring-framework/issues/33800, we do NOT invoke
+		// beanFactory.isSingleton(beanName), since doing so can result in a BeanCreationException for
+		// certain beans -- for example, a Spring Data FactoryBean for a JpaRepository.
+		if (beanFactory.containsBeanDefinition(beanName)) {
+			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+			Assert.state(beanDefinition.isSingleton(),
+					() -> "Unable to override bean '" + beanName + "': only singleton beans can be overridden.");
+		}
 	}
 
 	private static void destroySingleton(ConfigurableListableBeanFactory beanFactory, String beanName) {

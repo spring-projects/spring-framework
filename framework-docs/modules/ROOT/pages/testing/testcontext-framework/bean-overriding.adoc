@@ -57,6 +57,19 @@ defined by the corresponding `BeanOverrideStrategy`:
 `WRAP`::
   Retrieves the original bean and wraps it.
 
+[TIP]
+====
+Only _singleton_ beans can be overridden. Any attempt to override a non-singleton bean
+will result in an exception.
+
+When replacing a bean created by a `FactoryBean`, the `FactoryBean` itself will be
+replaced with a singleton bean corresponding to bean override instance created by the
+applicable `BeanOverrideHandler`.
+
+When wrapping a bean created by a `FactoryBean`, the object created by the `FactoryBean`
+will be wrapped, not the `FactoryBean` itself.
+====
+
 [NOTE]
 ====
 In contrast to Spring's autowiring mechanism (for example, resolution of an `@Autowired`
@@ -71,6 +84,3 @@ Alternatively, the user can directly provide the bean name in the custom annotat
 `BeanOverrideProcessor` implementations may also internally compute a bean name based on
 a convention or some other method.
 ====
-
-NOTE: Only _singleton_ beans can be overridden. Any attempt to override a non-singleton
-bean will result in an exception.

@@ -98,7 +98,10 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * }</code></pre>
  *
  * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
- * Any attempt to override a non-singleton bean will result in an exception.
+ * Any attempt to override a non-singleton bean will result in an exception. When
+ * overriding a bean created by a {@link org.springframework.beans.factory.FactoryBean
+ * FactoryBean}, the {@code FactoryBean} will be replaced with a singleton bean
+ * corresponding to the value returned from the {@code @TestBean} factory method.
  *
  * @author Simon Baslé
  * @author Stephane Nicoll

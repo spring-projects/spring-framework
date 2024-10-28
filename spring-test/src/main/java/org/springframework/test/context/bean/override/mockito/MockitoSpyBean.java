@@ -43,8 +43,11 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * {@link org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
  * registered directly} as resolvable dependencies.
  *
- * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be spied.
- * Any attempt to create a spy for a non-singleton bean will result in an exception.
+ * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be spied. Any attempt
+ * to create a spy for a non-singleton bean will result in an exception. When
+ * creating a spy for a {@link org.springframework.beans.factory.FactoryBean FactoryBean},
+ * a spy will be created for the object created by the {@code FactoryBean}, not
+ * for the {@code FactoryBean} itself.
  *
  * @author Simon Baslé
  * @author Sam Brannen
