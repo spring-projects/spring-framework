@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,17 +35,18 @@ import org.springframework.aot.hint.annotation.Reflective;
  * <p>In terms of target method signatures, any parameter types are supported.
  * However, the return type is constrained to either {@code void} or
  * {@link java.util.concurrent.Future}. In the latter case, you may declare the
- * more specific {@link org.springframework.util.concurrent.ListenableFuture} or
- * {@link java.util.concurrent.CompletableFuture} types which allow for richer
- * interaction with the asynchronous task and for immediate composition with
- * further processing steps.
+ * more specific {@link java.util.concurrent.CompletableFuture} type which allows
+ * for richer interaction with the asynchronous task and for immediate composition
+ * with further processing steps.
  *
  * <p>A {@code Future} handle returned from the proxy will be an actual asynchronous
- * {@code Future} that can be used to track the result of the asynchronous method
- * execution. However, since the target method needs to implement the same signature,
- * it will have to return a temporary {@code Future} handle that just passes a value
- * through: for example, Spring's {@link AsyncResult}, EJB 3.1's {@link jakarta.ejb.AsyncResult},
- * or {@link java.util.concurrent.CompletableFuture#completedFuture(Object)}.
+ * {@code (Completable)Future} that can be used to track the result of the
+ * asynchronous method execution. However, since the target method needs to implement
+ * the same signature, it will have to return a temporary {@code Future} handle that
+ * just passes a value after computation in the execution thread: typically through
+ * {@link java.util.concurrent.CompletableFuture#completedFuture(Object)}. The
+ * provided value will be exposed to the caller through the actual asynchronous
+ * {@code Future} handle at runtime.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
