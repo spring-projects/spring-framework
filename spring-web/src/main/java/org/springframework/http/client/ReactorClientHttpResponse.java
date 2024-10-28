@@ -52,11 +52,14 @@ final class ReactorClientHttpResponse implements ClientHttpResponse {
 	private volatile InputStream body;
 
 
-	public ReactorClientHttpResponse(HttpClientResponse response, Connection connection, Duration readTimeout) {
+	public ReactorClientHttpResponse(
+			HttpClientResponse response, Connection connection, Duration readTimeout) {
+
 		this.response = response;
 		this.connection = connection;
 		this.readTimeout = readTimeout;
-		this.headers = HttpHeaders.readOnlyHttpHeaders(new Netty4HeadersAdapter(response.responseHeaders()));
+		this.headers = HttpHeaders.readOnlyHttpHeaders(
+				new Netty4HeadersAdapter(response.responseHeaders()));
 	}
 
 
@@ -106,7 +109,8 @@ final class ReactorClientHttpResponse implements ClientHttpResponse {
 			StreamUtils.drain(body);
 			body.close();
 		}
-		catch (IOException ignored) {
+		catch (IOException ex) {
+			// ignore
 		}
 	}
 
