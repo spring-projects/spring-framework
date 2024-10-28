@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 
+import io.netty.buffer.ByteBuf;
+import org.reactivestreams.FlowAdapters;
 import reactor.netty.Connection;
 import reactor.netty.http.client.HttpClientResponse;
 
@@ -79,19 +81,22 @@ final class ReactorClientHttpResponse implements ClientHttpResponse {
 		if (body != null) {
 			return body;
 		}
-
 		try {
-			body = this.connection.inbound().receive().aggregate().asInputStream().block(this.readTimeout);
+			SubscriberInputStream<ByteBuf> is = new SubscriberInputStream<>(
+					byteBuf -> {
+						byte[] bytes = new byte[byteBuf.readableBytes()];
+						byteBuf.readBytes(bytes);
+						byteBuf.release();
+						return bytes;
+					},
+					ByteBuf::release, 16);
+			this.connection.inbound().receive().retain().subscribe(FlowAdapters.toSubscriber(is));
+			this.body = is;
+			return is;
 		}
 		catch (RuntimeException ex) {
 			throw ReactorClientHttpRequest.convertException(ex);
 		}
-
-		if (body == null) {
-			body = InputStream.nullInputStream();
-		}
-		this.body = body;
-		return body;
 	}
 
 	@Override
