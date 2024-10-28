@@ -53,19 +53,50 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 
 	private final URI uri;
 
+	@Nullable
 	private final Duration exchangeTimeout;
 
-	private final Duration readTimeout;
 
+	/**
+	 * Create an instance.
+	 * @param httpClient the client to perform the request with
+	 * @param method the HTTP method
+	 * @param uri the URI for the request
+	 * @since 6.2
+	 */
+	public ReactorClientHttpRequest(HttpClient httpClient, HttpMethod method, URI uri) {
+		this.httpClient = httpClient;
+		this.method = method;
+		this.uri = uri;
+		this.exchangeTimeout = null;
+	}
 
+	/**
+	 * Package private constructor for use until exchangeTimeout is removed.
+	 */
+	ReactorClientHttpRequest(HttpClient httpClient, HttpMethod method, URI uri, @Nullable Duration exchangeTimeout) {
+		this.httpClient = httpClient;
+		this.method = method;
+		this.uri = uri;
+		this.exchangeTimeout = exchangeTimeout;
+	}
+
+	/**
+	 * Original constructor with timeout values.
+	 * @deprecated without a replacement; readTimeout is now applied to the
+	 * underlying client via {@link HttpClient#responseTimeout(Duration)}, and the
+	 * value passed here is not used; exchangeTimeout is deprecated and superseded
+	 * by Reactor Netty timeout configuration, but applied if set.
+	 */
+	@Deprecated(since = "6.2", forRemoval = true)
 	public ReactorClientHttpRequest(
-			HttpClient httpClient, URI uri, HttpMethod method, Duration exchangeTimeout, Duration readTimeout) {
+			HttpClient httpClient, URI uri, HttpMethod method,
+			@Nullable Duration exchangeTimeout, @Nullable Duration readTimeout) {
 
 		this.httpClient = httpClient;
 		this.method = method;
 		this.uri = uri;
 		this.exchangeTimeout = exchangeTimeout;
-		this.readTimeout = readTimeout;
 	}
 
 
@@ -89,18 +120,19 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 		sender = (this.uri.isAbsolute() ? sender.uri(this.uri) : sender.uri(this.uri.toString()));
 
 		try {
-			ReactorClientHttpResponse result =
+			Mono<ReactorClientHttpResponse> mono =
 					sender.send((request, outbound) -> send(headers, body, request, outbound))
-							.responseConnection((response, conn) ->
-									Mono.just(new ReactorClientHttpResponse(response, conn, this.readTimeout)))
-							.next()
-							.block(this.exchangeTimeout);
+							.responseConnection((response, conn) -> Mono.just(new ReactorClientHttpResponse(response, conn)))
+							.next();
 
-			if (result == null) {
+			ReactorClientHttpResponse clientResponse =
+					(this.exchangeTimeout != null ? mono.block(this.exchangeTimeout) : mono.block());
+
+			if (clientResponse == null) {
 				throw new IOException("HTTP exchange resulted in no result");
 			}
 
-			return result;
+			return clientResponse;
 		}
 		catch (RuntimeException ex) {
 			throw convertException(ex);
