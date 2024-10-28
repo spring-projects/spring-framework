@@ -38,10 +38,10 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * Alternatively, you can explicitly specify a bean name to replace by setting the
  * {@link #value() value} or {@link #name() name} attribute.
  *
- * <p>A new bean definition will be created if a corresponding bean definition does
- * not exist. However, if you would like for the test to fail when a corresponding
- * bean definition does not exist, you can set the {@link #enforceOverride()
- * enforceOverride} attribute to {@code true}.
+ * <p>A bean will be created if a corresponding bean does not exist. However, if
+ * you would like for the test to fail when a corresponding bean does not exist,
+ * you can set the {@link #enforceOverride() enforceOverride} attribute to {@code true}
+ * &mdash; for example,  {@code @TestBean(enforceOverride = true)}.
  *
  * <p>The instance is created from a zero-argument static factory method in the
  * test class whose return type is compatible with the annotated field. In the
@@ -151,12 +151,11 @@ public @interface TestBean {
 	String methodName() default "";
 
 	/**
-	 * Whether to require the existence of a bean definition for the bean being
-	 * overridden.
-	 * <p>Defaults to {@code false} which means that a new bean definition will
-	 * be created if a corresponding bean definition does not exist.
+	 * Whether to require the existence of the bean being overridden.
+	 * <p>Defaults to {@code false} which means that a bean will be created if a
+	 * corresponding bean does not exist.
 	 * <p>Set to {@code true} to cause an exception to be thrown if a corresponding
-	 * bean definition does not exist.
+	 * bean does not exist.
 	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE_OR_CREATE
 	 * @see org.springframework.test.context.bean.override.BeanOverrideStrategy#REPLACE
 	 */
