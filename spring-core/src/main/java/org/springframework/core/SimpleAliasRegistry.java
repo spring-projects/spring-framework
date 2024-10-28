@@ -31,10 +31,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Simple implementation of the {@link AliasRegistry} interface.
- * 简单别名管理接口实现
+ *
  * <p>Serves as base class for
  * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
  * implementations.
+ *
+ * <p>简单别名注册表(SimpleAliasRegistry)
+ * <p>主要使用map作为别名(alias)的缓存, 并对{@link AliasRegistry}接口的简单实现
+ * <p>作为{@link org.springframework.beans.factory.support.BeanDefinitionRegistry}实现的基类。
  *
  * @author Juergen Hoeller
  * @author Qimiao Chen

@@ -63,6 +63,17 @@ import java.util.stream.Stream;
  * have a look at {@link StaticListableBeanFactory}, which manages existing
  * bean instances rather than creating new ones based on bean definitions.
  *
+ * <p>默认能获取的BeanFactory(DefaultListableBeanFactory)
+ * Spring对{@link ConfigurableListableBeanFactory}的默认实现和{@link BeanDefinitionRegistry}接口：
+ * 一个成熟的bean工厂基于bean定义元数据，可通过后处理器进行扩展。
+ * <p>典型的用法是先注册所有bean定义（可能读从bean定义文件）访问bean之前。按名称查找Bean
+ * 因此，在本地bean定义表中是一种廉价的操作，对预解析的bean定义元数据对象进行操作。
+ * <p>请注意，特定bean定义格式的阅读器通常是单独实现，而不是作为bean工厂子类实现：例如
+ * {link.org.springframework.beans工厂.xmlXmlBeanDefinition阅读器}。
+ * <p>对于另一种实施方式{@link org.springframework.beans.factory.ListableBeanFactory}接口，
+ * 看看{@link StaticListableBeanFactory}，它管理现有的bean实例，而不是基于bean定义创建新的实例。
+ * <p>综合继承及实现接口能力, 主要是对bean注册后的处理
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen

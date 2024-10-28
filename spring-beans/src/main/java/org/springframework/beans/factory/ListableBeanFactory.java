@@ -49,6 +49,18 @@ import java.util.Map;
  * and {@code containsBeanDefinition}, the methods in this interface
  * are not designed for frequent invocation. Implementations may be slow.
  *
+ * <p>能获取的BeanFactory(ListableBeanFactory)
+ * <p>扩展{@link BeanFactory}接口，由可以枚举所有bean实例的bean工厂实现，而不是根据客户端的请求逐一尝试按名称查找bean。
+ * 预加载所有bean定义的BeanFactory实现（如基于XML的工厂）可以实现此接口
+ * <p> 如果这是一个{@link HierarchicalBeanFactory}，则返回值将<i>不考虑任何BeanFactory层次结构，而仅与当前工厂中定义的bean相关。
+ * 使用{@link BeanFactory Utils}辅助类来考虑祖先工厂中的bean
+ * <p> 此接口中的方法将只尊重此工厂的bean定义。它们将忽略通过其他方式注册的任何单例bean，
+ * 如{@link org.springframework.beans.factory.config.ConfigurableBeanFactory}的{@code registerSingleton}方法，
+ * 但{@code getBeanNameForType}和{@code get BeansOfType}除外，它们也将检查此类手动注册的单例bean。
+ * 当然，BeanFactory的{@code getBean}也允许透明访问这种特殊的bean。然而，在典型场景中，所有bean都将由外部bean定义定义，因此大多数应用程序不需要担心这种差异
+ * <p><b>注意：<b>除了{@code getBeanDefinition Count}和{@code contains BeanDefinition}之外，此接口中的方法不是为频繁调用而设计的。实施可能很慢。
+ * <p>根据各种条件获取bean的配置清单
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see HierarchicalBeanFactory

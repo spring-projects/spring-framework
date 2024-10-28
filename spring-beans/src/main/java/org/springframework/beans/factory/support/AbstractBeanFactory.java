@@ -61,6 +61,17 @@ import java.util.function.UnaryOperator;
  * respectively. Default implementations of those operations can be found in
  * {@link DefaultListableBeanFactory} and {@link AbstractAutowireCapableBeanFactory}.
  *
+ * <p>抽象bean工厂(AbstractBeanFactory)
+ * <P>{@link org.springframework.beans.factory.BeanFactory}实现的抽象基类，
+ * 提供了{@link org.springframework.beans.factory.config.ConfigurableBeanFactory}SPI的全部功能。
+ * <i>是否不<i>假设一个可列出的bean工厂：因此也可以用作bean工厂实现的基类，这些实现从某些后端资源获取bean定义（其中bean定义访问是一项昂贵的操作）
+ * <p>此类提供了一个单例缓存（通过其基类{@link org.springframework.beans.factory.support.DefaultSingletonBeanRegistry}、单例原型确定、
+ * {@link org.springframework.beans.factory.FactoryBean}处理、别名、子bean定义的bean定义合并和
+ * bean销毁（{@link org.springframework.beans.factory.DisposableBean}接口、自定义销毁方法）。
+ * 此外，它还可以通过实现{@link org.springframework.beans.factory.HierarchicalBeanFactory}接口来管理bean工厂层次结构（在未知bean的情况下委托给父级）
+ * <p>子类要实现的主要模板方法是{@link #getBeanDefinition}和{@link #createBean}，分别检索给定bean名称的bean定义和为给定bean定义创建bean实例。
+ * 这些操作的默认实现可以在{@link DefaultListableBeanFactory}和{@link AbstractAutowireCapableBeanFactory｝中找到。
+ * <p> 综合{@link FactoryBeanRegistrySupport}和{@link ConfigurableBeanFactory}的功能
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -964,6 +975,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Add new BeanPostProcessors that will get applied to beans created
 	 * by this factory. To be invoked during factory configuration.
 	 * 添加新的BeanPostProcessors，这些处理器将应用于此工厂创建的bean。在工厂配置期间调用
+	 *
 	 * @see #addBeanPostProcessor
 	 * @since 5.3
 	 */
@@ -1685,6 +1697,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Evaluate the given String as contained in a bean definition,
 	 * potentially resolving it as an expression.
 	 * 将给定的String求值为包含在bean定义中，可能将其解析为表达式。
+	 *
 	 * @param value          the value to check
 	 * @param beanDefinition the bean definition that the value comes from
 	 * @return the resolved value
@@ -1899,6 +1912,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Remove the singleton instance (if any) for the given bean name,
 	 * but only if it hasn't been used for other purposes than type checking.
 	 * 移除给定bean名称的singleton实例（如果有的话），但前提是它没有用于类型检查以外的其他目的
+	 *
 	 * @param beanName the name of the bean
 	 * @return {@code true} if actually removed, {@code false} otherwise
 	 */
@@ -2027,6 +2041,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * to be called on factory shutdown (if applicable). Only applies to singletons.
 	 * 将给定的bean添加到此工厂中的一次性bean列表中，注册其DisposableBean接口和或在工厂关闭时调用的给定destroy方法（如果适用）
 	 * 仅适用于单例
+	 *
 	 * @param beanName the name of the bean
 	 * @param bean     the bean instance
 	 * @param mbd      the bean definition for the bean

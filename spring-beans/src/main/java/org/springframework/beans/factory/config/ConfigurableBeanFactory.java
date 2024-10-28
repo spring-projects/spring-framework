@@ -43,6 +43,14 @@ import java.security.AccessControlContext;
  * needs. This extended interface is just meant to allow for framework-internal
  * plug'n'play and for special access to bean factory configuration methods.
  *
+ * <p>可配置bean工厂(ConfigurableBeanFactory)
+ * <p>配置接口由大多数bean工厂实现。除了{@link org.springframework.beans.factory.BeanFactory}接口中的bean工厂客户端方法外,
+ * 还提供配置bean工厂的工具.
+ * <p>此bean工厂接口不适用于正常的应用程序代码：对于典型需求, 请坚持使用{@link org.springframework.beans.factory}或
+ * {@link org.springframework.beans.factory.ListableBeanFactory}。
+ * 这个扩展接口只是为了允许框架内部插件和对bean工厂配置方法的特殊访问。
+ * <p>提供配置Factory的各种方法
+ *
  * @author Juergen Hoeller
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.beans.factory.ListableBeanFactory
@@ -54,8 +62,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	/**
 	 * Scope identifier for the standard singleton scope: {@value}.
 	 * <p>Custom scopes can be added via {@code registerScope}.
-	 * 标准单例作用域的作用域标识符：{@value}
-	 * 自定义作用域可以通过{@code registerScope}添加。
+	 * <p>标准单例作用域的作用域标识符：{@value}
+	 * <p>自定义作用域可以通过{@code registerScope}添加。
 	 *
 	 * @see #registerScope
 	 */
@@ -64,8 +72,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	/**
 	 * Scope identifier for the standard prototype scope: {@value}.
 	 * <p>Custom scopes can be added via {@code registerScope}.
-	 * 标准原型作用域的作用域标识符: {@value}
-	 * 自定义作用域可以通过{@code registerScope}添加。
+	 * <p>标准原型作用域的作用域标识符: {@value}
+	 * <p>自定义作用域可以通过{@code registerScope}添加。
 	 *
 	 * @see #registerScope
 	 */
@@ -76,8 +84,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Set the parent of this bean factory.
 	 * <p>Note that the parent cannot be changed: It should only be set outside
 	 * a constructor if it isn't available at the time of factory instantiation.
-	 * 设置这个bean工厂的父级
-	 * 请注意，不能更改父级：只有在工厂实例化时父级不可用时，才应在构造函数外部设置它
+	 * <p>设置这个bean工厂的父级
+	 * <p>请注意，不能更改父级：只有在工厂实例化时父级不可用时，才应在构造函数外部设置它
 	 *
 	 * @param parentBeanFactory the parent BeanFactory
 	 * @throws IllegalStateException if this factory is already associated with
@@ -92,9 +100,10 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <p>Note that this class loader will only apply to bean definitions
 	 * that do not carry a resolved bean class yet. This is the case as of
 	 * Spring 2.0 by default: Bean definitions only carry bean class names,
-	 * to be resolved once the factory processes the bean definition.设置用于加载bean类的类加载器。默认为线程上下文类加载器
-	 * 请注意，这个类加载器将仅适用于尚未携带已解析bean类的bean定义。
-	 * 默认情况下，这是Spring 2.0的情况：Bean定义只携带Bean类名，一旦工厂处理了Bean定义，就会解析。
+	 * to be resolved once the factory processes the bean definition.
+	 * <p>设置用于加载bean类的类加载器。默认为线程上下文类加载器
+	 * <p>请注意，这个类加载器将仅适用于尚未携带已解析bean类的bean定义。
+	 * <p>默认情况下，这是Spring 2.0的情况：Bean定义只携带Bean类名，一旦工厂处理了Bean定义，就会解析。
 	 *
 	 * @param beanClassLoader the class loader to use,
 	 *                        or {@code null} to suggest the default class loader

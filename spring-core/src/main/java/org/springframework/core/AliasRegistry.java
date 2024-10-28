@@ -18,8 +18,11 @@ package org.springframework.core;
 
 /**
  * Common interface for managing aliases. Serves as a super-interface for
- * AliasRegistry接口主要是对springBean的别名进行管理的顶级接口，主要是对别名的增删功能。
  * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
+ *
+ * <p>别名注册表(AliasRegistry)
+ * <p>AliasRegistry作为{@link org.springframework.beans.factory.support.BeanDefinitionRegistry}的顶级接口,
+ * 主要是对springBean的别名(alias)进行管理, 对别名的增删功能
  *
  * @author Juergen Hoeller
  * @since 2.5.2

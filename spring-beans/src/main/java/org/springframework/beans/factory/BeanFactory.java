@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * The root interface for accessing a Spring bean container.
- * 用于访问Spring bean容器的根接口
+ *
  * <p>This is the basic client view of a bean container;
  * further interfaces such as {@link ListableBeanFactory} and
  * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}
@@ -95,6 +95,44 @@ import org.springframework.lang.Nullable;
  * <li>a custom {@code destroy-method} definition
  * </ol>
  *
+ * <p>bean工厂(BeanFactory)
+ * <p>用于访问Spring bean容器的根接口, 获取bean及bean的各种属性
+ * <p>这是bean容器的基本客户端视图；
+ * 其他接口，如{@link ListableBeanFactory}和{@link org.springframework.beans.factory.config.ConfigurableBeanFactory},
+ * 可用于特定目的
+ * <p> 此接口由包含多个bean定义的对象实现，每个bean定义都由一个String名称唯一标识。
+ * 根据bean定义，工厂将返回包含对象的独立实例（原型设计模式）或单个共享实例（Singleton设计模式的高级替代方案，其中实例是工厂范围内的单例）。
+ * 返回哪种类型的实例取决于bean工厂配置：API是相同的。
+ * 自Spring 2.0以来，根据具体的应用程序上下文，可以使用更多的作用域（例如web环境中的“请求”和“会话”作用域）
+ * <p> 这种方法的要点是BeanFactory是应用程序组件的中央注册表，并集中配置应用程序组件（例如，单个对象不再需要读取属性文件）。
+ * 关于这种方法的好处的讨论，请参阅“专家一对一J2EE设计和开发”的第4章和第11章
+ * <p> 请注意，通常最好依靠依赖注入（“推送”配置）通过setter或构造函数配置应用程序对象，而不是使用任何形式的“拉取”配置，如BeanFactory查找。
+ * Spring的依赖注入功能是使用此BeanFactory接口及其子接口实现的
+ * <p> 通常，BeanFactory会加载存储在配置源（如XML文档）中的bean定义，并使用{@code org.springframework.beans}包来配置bean。
+ * 然而，实现可以简单地返回它在必要时直接在Java代码中创建的Java对象。对于定义的存储方式没有限制：LDAP、RDBMS、XML、属性文件等。
+ * 鼓励实现支持bean之间的引用（依赖注入）<p> 与{@link ListableBeanFactory}中的方法不同，如果这是{@link HierarchicalBeanFactory}，
+ * 则此接口中的所有操作也将检查父工厂。如果在此工厂实例中找不到bean，将询问直接父工厂。此工厂实例中的Bean应该覆盖任何父工厂中同名的Bean
+ * <p> Bean工厂实现应尽可能支持标准Bean生命周期接口。完整的初始化方法及其标准顺序是：
+ * <ol>
+ * <li>BeanNameAware的{@code setBeanName}
+ * <li>BeanClassLoaderAware的{@code setBeanClassLoader}
+ * <li>BeanFactory Aware的{1@code setBean Factory}
+ * <li]EnvironmentAware的{0@code setEnvironment}
+ * <li>EmbeddedValueResolverWare的{@codesetEmbeddedValueResolver}
+ * <li>ResourceLoaderAwares的{@CodesetResourceLoader}（仅适用于在应用程序上下文中运行时）
+ * <li>ApplicationEventPublisherAware
+ * <li>MessageSourceAware的{@code setMessageSource}（仅适用于在应用程序上下文中运行时）
+ * <li>ApplicationContextAware的{@code setApplicationContext}
+ * <li>BeanPostProcessors的自定义｛@code init方法｝定义
+ * <li>｛@code postProcessAfterInitialization｝方法
+ * </ol>
+ * <p>关闭bean工厂时，应用以下生命周期方法：
+ * <ol>
+ * <li>｛@code postProcessBeforeDestruction｝销毁方法WealthBeanPostProcessers
+ * <li>DisposableBean的｛@code destruction｝
+ * <li>自定义｛@code Destruction方法｝定义
+ * </ol>
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -124,9 +162,9 @@ public interface BeanFactory {
 	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
 	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
 	 * will return the factory, not the instance returned by the factory.
-	 * <p>
-	 * 用于区分和FactoryBean创建的bean
-	 * 为了区分“FactoryBean” 和 “FactoryBean 创建的 bean实例”，Spring 使用了 “&” 前缀
+	 *
+	 * <p>用于区分和FactoryBean创建的bean
+	 * <p>为了区分“FactoryBean” 和 “FactoryBean 创建的 bean实例”，Spring 使用了 “&” 前缀
 	 * 假设我们的 beanName 为 apple，则 getBean("apple") 获得的是 AppleFactoryBean 通过 getObject()方法创建的 bean 实例
 	 * 而getBean("&apple") 获得的是 AppleFactoryBean 本身
 	 */

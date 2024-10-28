@@ -35,6 +35,15 @@ import java.util.Iterator;
  * use cases. This interface is just meant to allow for framework-internal
  * plug'n'play even when needing access to bean factory configuration methods.
  *
+ * <p>可配置列表BeanFactory(ConfigurableListableBeanFactory)
+ * <p>配置接口将由大多数可列出的bean工厂实现。
+ * 除了{@link ConfigurableBeanFactory}，它还提供以下设施分析和修改bean定义，并预实例化单例。
+ * <p>此子接口为{@link org.springframework.beans.factory.BeanFactory}
+ * 不打算在正常的应用程序代码中使用：坚持{@link org.springframework.beans.factory.BeanFactory}或
+ * {@link org.springframework.beans.factory.ListableBeanFactory}用例。此接口仅用于允许框架内部即使需要访问bean工厂配置方法，
+ * 也可以进行插件配置
+ * <p>BeanFactory配置清单, 指定忽略类型及接口等
+ *
  * @author Juergen Hoeller
  * @see org.springframework.context.support.AbstractApplicationContext#getBeanFactory()
  * @since 03.11.2003

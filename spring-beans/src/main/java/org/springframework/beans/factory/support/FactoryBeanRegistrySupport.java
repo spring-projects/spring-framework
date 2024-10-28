@@ -33,6 +33,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * integrated with {@link DefaultSingletonBeanRegistry}'s singleton management.
  *
  * <p>Serves as base class for {@link AbstractBeanFactory}.
+ * <p>工厂bean注册表支持(FactoryBeanRegistrySupport)
+ * 支持需要处理{@link org.springframework.beans.factory.FactoryBean}实例的单例注册表的基类，与{@link DefaultSingletonBeanRegistry}的单例管理集成
+ * <p>作为{@link AbstractBeanFactory}的基类。
+ * <p>在{@link DefaultSingletonBeanRegistry}的基础上增加对工厂Bean的支持
  *
  * @author Juergen Hoeller
  * @since 2.5.1
@@ -41,15 +45,16 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 
 	/**
 	 * Cache of singleton objects created by FactoryBeans: FactoryBean name to object.
-	 * FactoryBean创建的单例对象的缓存
-	 * key 是 FactoryBean
-	 * value 是 FactoryBean创建的单例对象
+	 * <p>FactoryBean创建的单例对象的缓存
+	 * <p>key 是 FactoryBean
+	 * <p>value 是 FactoryBean创建的单例对象
 	 */
 	private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>(16);
 
 
 	/**
 	 * Determine the type for the given FactoryBean.
+	 * <p>确定给定FactoryBean的类型
 	 *
 	 * @param factoryBean the FactoryBean instance to check
 	 * @return the FactoryBean's object type,
@@ -88,6 +93,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	/**
 	 * Obtain an object to expose from the given FactoryBean.
 	 * 从工厂Bean获取对象
+	 *
 	 * @param factory           the FactoryBean instance
 	 * @param beanName          the name of the bean
 	 * @param shouldPostProcess whether the bean is subject to post-processing
@@ -151,6 +157,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	/**
 	 * Obtain an object to expose from the given FactoryBean.
 	 * 从给定的FactoryBean中获取要公开的对象。
+	 *
 	 * @param factory  the FactoryBean instance
 	 * @param beanName the name of the bean
 	 * @return the object obtained from the FactoryBean
@@ -182,7 +189,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 		// initialized yet: Many FactoryBeans just return null then.
 		if (object == null) {
 			if (isSingletonCurrentlyInCreation(beanName)) {
-				throw new BeanCurrentlyInCreationException( beanName, "FactoryBean which is currently in creation returned null from getObject");
+				throw new BeanCurrentlyInCreationException(beanName, "FactoryBean which is currently in creation returned null from getObject");
 			}
 			object = new NullBean();
 		}
@@ -196,6 +203,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * Subclasses may override this, for example, to apply post-processors.
 	 * 对从FactoryBean获得的给定对象进行后处理。生成的对象将被公开用于bean引用
 	 * 默认实现只是按原样返回给定的对象。例如，子类可以重写它以应用后处理程序。
+	 *
 	 * @param object   the object obtained from the FactoryBean.
 	 * @param beanName the name of the bean
 	 * @return the object to expose
@@ -248,6 +256,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * is set, interaction with the user code will be executed using the privileged
 	 * of the security context returned by this method.
 	 * 返回此bean工厂的安全上下文。如果设置了安全管理器，则将使用此方法返回的安全上下文的特权执行与用户代码的交互。
+	 *
 	 * @see AccessController#getContext()
 	 */
 	protected AccessControlContext getAccessControlContext() {

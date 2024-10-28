@@ -23,8 +23,12 @@ import org.springframework.lang.Nullable;
  * Can be implemented by {@link org.springframework.beans.factory.BeanFactory}
  * implementations in order to expose their singleton management facility
  * in a uniform manner.
- * SingletonBeanRegistry接口主要是对单例bean进行管理的顶级接口
  * <p>The {@link ConfigurableBeanFactory} interface extends this interface.
+ * 
+ * <p>单例bean注册表(SingletonBeanRegistry)
+ * <p>SingletonBeanRegistry接口主要是对单例bean进行管理的顶级接口
+ * <p>为共享bean实例定义注册表的接口. 实现可以通过{@link org.springframework.beans.factory.BeanFactory}来实现,
+ * 以便以统一的方式公开其单例管理功能, 对于单例bean的注册/获取
  *
  * @author Juergen Hoeller
  * @see ConfigurableBeanFactory
@@ -49,8 +53,17 @@ public interface SingletonBeanRegistry {
 	 * for runtime registration of singletons. As a consequence, a registry
 	 * implementation should synchronize singleton access; it will have to do
 	 * this anyway if it supports a BeanFactory's lazy initialization of singletons.
-	 * 单例的注册，如果脱离生命周期（诸如生命周期回调等相关）单独调用该方法，就是单纯的注册而不执行
-	 * 通常，是容器在基于 BeanDefinition 创建 singleton 时调用该方法的
+	 *
+	 * <p>注册单例(registerSingleton)
+	 * <p>在给定的bean名称下, 在bean注册表中将给定的现有对象注册为单例.
+	 * <p>给定的实例应该完全初始化；注册表将不会执行任何初始化回调(特别是, 它不会调用InitializingBean的{@code afterPropertiesSet}方法)
+	 * 给定的实例也不会收到任何销毁回调(如DisposableBean的{@code destroy}方法)
+	 * <p>在完整的BeanFactory中运行时：<b>如果您的bean应该接收初始化和/或销毁回调, 请注册bean定义而不是现有实例<b>
+	 * <p>通常在注册表配置期间调用, 但也可用于单例的运行时注册。因此, 注册表实现应该同步单例访问；
+	 * 如果它支持BeanFactory的单例延迟初始化, 它无论如何都必须这样做。
+	 *
+	 * <p>单例的注册, 如果脱离生命周期(诸如生命周期回调等相关)单独调用该方法, 就是单纯的注册而不执行
+	 * 通常, 是容器在基于 BeanDefinition 创建 singleton 时调用该方法的
 	 *
 	 * @param beanName        the name of the bean
 	 * @param singletonObject the existing singleton object
@@ -98,8 +111,8 @@ public interface SingletonBeanRegistry {
 	 * You need to resolve the canonical bean name first before checking the singleton status.
 	 * 检查指定 singleton 是否存在
 	 * 该方法 + ListableBeanFactory#containsBeanDefinition：可以查看当前容器中是否可以
-	 * 获取到指定 name 的 bean，无论它是否实例化完成
-	 * BeanFactory#containsBean 在上一步基础上，还可以查找父级容器
+	 * 获取到指定 name 的 bean, 无论它是否实例化完成
+	 * BeanFactory#containsBean 在上一步基础上, 还可以查找父级容器
 	 *
 	 * @param beanName the name of the bean to look for
 	 * @return if this bean factory contains a singleton instance with the given name

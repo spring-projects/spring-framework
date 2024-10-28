@@ -50,6 +50,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * (which inherit from it). Can alternatively also be used as a nested
  * helper to delegate to.
  *
+ * <p>默认单例bean注册表(DefaultSingletonBeanRegistry)
+ * <p>共享bean实例的通用注册表, 实现了{@link org.springframework.beans.factory.config.SingletonBeanRegistry}.
+ * 允许注册单例实例，这些实例应通过bean名称为注册表的所有调用者共享
+ * <p>还支持在注册表关闭时销毁{@link org.springframework.beans.factory.DisposableBean}实例（可能对应也可能不对应于已注册的单例）的注册。
+ * 可以注册bean之间的依赖关系以执行适当的关闭命令
+ * <p> 此类主要用作{@link org.springframework.beans.factory.BeanFactory} 实现的基类，排除了单例bean实例的常见管理。
+ * 请注意，{@link org.springframework.beans.factory.config.ConfigurableBeanFactory}接口扩展了{@link SingletonBeanRegistry}接口
+ * <p>请注意, 与{@link AbstractBeanFactory}和{@link DefaultListableBeanFactory}（继承自它）不同，
+ * 此类既不假定bean定义概念，也不假定bean实例的特定创建过程, 也可以用作嵌套的助手来委派。
+ * <p> 对于{@link SingletonBeanRegistry} 各函数的实现
+ *
  * @author Juergen Hoeller
  * @see #registerSingleton
  * @see #registerDisposableBean
@@ -581,6 +592,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/**
 	 * Determine whether a dependent bean has been registered for the given name.
 	 * 确定是否已为给定名称注册了依赖bean
+	 *
 	 * @param beanName the name of the bean to check
 	 */
 	protected boolean hasDependentBean(String beanName) {
@@ -590,6 +602,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/**
 	 * Return the names of all beans which depend on the specified bean, if any.
 	 * 返回依赖于指定bean的所有bean的名称（如果有的话）
+	 *
 	 * @param beanName the name of the bean
 	 * @return the array of dependent bean names, or an empty array if none
 	 */

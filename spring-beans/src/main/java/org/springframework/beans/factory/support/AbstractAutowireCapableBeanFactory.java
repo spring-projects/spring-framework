@@ -62,6 +62,20 @@ import java.util.function.Supplier;
  * {@link BeanDefinitionRegistry} interfaces, which represent the API and SPI
  * view of such a factory, respectively.
  *
+ * <p>有自动装配能力的抽象bean工厂(AbstractAutowireCapableBeanFactory)
+ * <p>实现默认bean创建的抽象bean工厂超类, 具有{@link RootBeanDefinition}类指定的全部功能。
+ * 实现{@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}
+ * 除了AbstractBeanFactory的{@link #createBean}方法之外，还有其他接口。
+ * <p>提供bean创建（具有构造函数解析）、属性填充、布线（包括自动布线）和初始化。处理运行时bean
+ * 引用、解析托管集合、调用初始化方法等。
+ * 支持自动连接构造函数、按名称的属性和按类型的属性。
+ * <p>子类实现的主要模板方法是{@link #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)}用于自动装配。
+ * 如果是{@link org.springframework.beans.factory.ListableBeanFactory}它能够搜索其bean定义，匹配的bean通常是通过这样的搜索来实现。
+ * 否则，可以实现简化的匹配。
+ * <p>请注意，这个类不假设或实现bean定义注册表功能。有关实现，请参阅{@link DefaultListableBeanFactory}
+ * {@link org.springframework.beans.factory.ListableBeanFactory}和{@link BeanDefinitionRegistry}接口，
+ * 表示API和SPI分别是这样一个工厂的视图。
+ * <p>综合{@link AbstractBeanFactory}并对接口{@link AutowireCapableBeanFactory}进行实现
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
