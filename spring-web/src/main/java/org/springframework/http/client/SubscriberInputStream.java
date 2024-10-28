@@ -34,12 +34,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.Exceptions;
 
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Bridges between {@link Flow.Publisher Flow.Publisher&lt;T&gt;} and {@link InputStream}.
+ * An {@link InputStream} backed by {@link Flow.Subscriber Flow.Subscriber}
+ * receiving byte buffers from a {@link Flow.Publisher} source.
+ *
+ * <p>Byte buffers are stored in a queue. The {@code demand} constructor value
+ * determines the number of buffers requested initially. When storage falls
+ * below a {@code (demand - (demand >> 2))} limit, a request is made to refill
+ * the queue.
+ *
+ * <p>The {@code InputStream} terminates after an onError or onComplete signal,
+ * and stored buffers are read. If the {@code InputStream} is closed,
+ * the {@link Flow.Subscription} is cancelled, and stored buffers released.
  *
  * <p>Note that this class has a near duplicate in
  * {@link org.springframework.core.io.buffer.SubscriberInputStream}.
@@ -94,7 +103,20 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 	private Throwable error;
 
 
-	private SubscriberInputStream(Function<T, byte[]> mapper, Consumer<T> onDiscardHandler, int demand) {
+	/**
+	 * Create an instance.
+	 * @param mapper function to transform byte buffers to {@code byte[]};
+	 * the function should also release the byte buffer if necessary.
+	 * @param onDiscardHandler a callback to release byte buffers if the
+	 * {@link InputStream} is closed prematurely.
+	 * @param demand the number of buffers to request initially, and buffer
+	 * internally on an ongoing basis.
+	 */
+	SubscriberInputStream(Function<T, byte[]> mapper, Consumer<T> onDiscardHandler, int demand) {
+		Assert.notNull(mapper, "mapper must not be null");
+		Assert.notNull(onDiscardHandler, "onDiscardHandler must not be null");
+		Assert.isTrue(demand > 0, "demand must be greater than 0");
+
 		this.mapper = mapper;
 		this.onDiscardHandler = onDiscardHandler;
 		this.prefetch = demand;
@@ -103,38 +125,6 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 		this.lock = new ReentrantLock(false);
 	}
 
-
-	/**
-	 * Subscribes to given {@link Flow.Publisher} and returns subscription
-	 * as {@link InputStream} that allows reading all propagated {@link DataBuffer} messages via its imperative API.
-	 * Given the {@link InputStream} implementation buffers messages as per configuration.
-	 * The returned {@link InputStream} is considered terminated when the given {@link Flow.Publisher} signaled one of the
-	 * terminal signal ({@link Flow.Subscriber#onComplete() or {@link Flow.Subscriber#onError(Throwable)}})
-	 * and all the stored {@link DataBuffer} polled from the internal buffer.
-	 * The returned {@link InputStream} will call {@link Flow.Subscription#cancel()} and release all stored {@link DataBuffer}
-	 * when {@link InputStream#close()} is called.
-	 * <p>
-	 * Note: The implementation of the returned {@link InputStream} disallow concurrent call on
-	 * any of the {@link InputStream#read} methods
-	 * <p>
-	 * Note: {@link Flow.Subscription#request(long)} happens eagerly for the first time upon subscription
-	 * and then repeats every time {@code bufferSize - (bufferSize >> 2)} consumed.
-	 * @param publisher the source of {@link DataBuffer} which should be represented as an {@link InputStream}
-	 * @param mapper function to transform &lt;T&gt; element to {@code byte[]}. Note, &lt;T&gt; should be released during the mapping if needed.
-	 * @param onDiscardHandler &lt;T&gt; element consumer if returned {@link InputStream} is closed prematurely.
-	 * @param demand the maximum number of buffers to request from the Publisher and buffer on an ongoing basis
-	 * @return an {@link InputStream} instance representing given {@link Flow.Publisher} messages
-	 */
-	public static <T> InputStream subscribeTo(Flow.Publisher<T> publisher, Function<T, byte[]> mapper, Consumer<T> onDiscardHandler, int demand) {
-		Assert.notNull(publisher, "Flow.Publisher must not be null");
-		Assert.notNull(mapper, "mapper must not be null");
-		Assert.notNull(onDiscardHandler, "onDiscardHandler must not be null");
-		Assert.isTrue(demand > 0, "demand must be greater than 0");
-
-		SubscriberInputStream<T> iss = new SubscriberInputStream<>(mapper, onDiscardHandler, demand);
-		publisher.subscribe(iss);
-		return iss;
-	}
 
 	@Override
 	public void onSubscribe(Flow.Subscription subscription) {
@@ -222,7 +212,7 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 		if (this.parkedThread != READY) {
 			Object old = this.parkedThread.getAndSet(READY);
 			if (old != READY) {
-				LockSupport.unpark((Thread)old);
+				LockSupport.unpark((Thread) old);
 			}
 		}
 	}

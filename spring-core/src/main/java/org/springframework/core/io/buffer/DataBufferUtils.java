@@ -33,6 +33,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -457,23 +458,19 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Subscribes to given {@link Publisher} and returns subscription
-	 * as {@link InputStream} that allows reading all propagated {@link DataBuffer} messages via its imperative API.
-	 * Given the {@link InputStream} implementation buffers messages as per configuration.
-	 * The returned {@link InputStream} is considered terminated when the given {@link Publisher} signaled one of the
-	 * terminal signal ({@link Subscriber#onComplete() or {@link Subscriber#onError(Throwable)}})
-	 * and all the stored {@link DataBuffer} polled from the internal buffer.
-	 * The returned {@link InputStream} will call {@link Subscription#cancel()} and release all stored {@link DataBuffer}
-	 * when {@link InputStream#close()} is called.
-	 * <p>
-	 * Note: The implementation of the returned {@link InputStream} disallow concurrent call on
-	 * any of the {@link InputStream#read} methods
-	 * <p>
-	 * Note: {@link Subscription#request(long)} happens eagerly for the first time upon subscription
-	 * and then repeats every time {@code bufferSize - (bufferSize >> 2)} consumed.
-	 * @param publisher the source of {@link DataBuffer} which should be represented as an {@link InputStream}
-	 * @param demand the maximum number of buffers to request from the Publisher and buffer on an ongoing basis
-	 * @return an {@link InputStream} instance representing given {@link Publisher} messages
+	 * Subscribe to given {@link Publisher} of {@code DataBuffer}s, and return an
+	 * {@link InputStream} to consume the byte content with.
+	 * <p>Byte buffers are stored in a queue. The {@code demand} constructor value
+	 * determines the number of buffers requested initially. When storage falls
+	 * below a {@code (demand - (demand >> 2))} limit, a request is made to refill
+	 * the queue.
+	 * <p>The {@code InputStream} terminates after an onError or onComplete signal,
+	 * and stored buffers are read. If the {@code InputStream} is closed,
+	 * the {@link Flow.Subscription} is cancelled, and stored buffers released.
+	 * @param publisher the source of {@code DataBuffer}s
+	 * @param demand the number of buffers to request initially, and buffer
+	 * internally on an ongoing basis.
+	 * @return an {@link InputStream} backed by the {@link Publisher}
 	 */
 	public static <T extends DataBuffer> InputStream subscriberInputStream(Publisher<T> publisher, int demand) {
 		Assert.notNull(publisher, "Publisher must not be null");

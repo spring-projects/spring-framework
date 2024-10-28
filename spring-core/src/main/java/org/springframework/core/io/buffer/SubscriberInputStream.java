@@ -22,12 +22,12 @@ import java.util.ConcurrentModificationException;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.Exceptions;
@@ -36,7 +36,17 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Bridges between {@link Publisher Publisher&lt;DataBuffer&gt;} and {@link InputStream}.
+ * An {@link InputStream} backed by {@link Flow.Subscriber Flow.Subscriber}
+ * receiving byte buffers from a {@link Flow.Publisher} source.
+ *
+ * <p>Byte buffers are stored in a queue. The {@code demand} constructor value
+ * determines the number of buffers requested initially. When storage falls
+ * below a {@code (demand - (demand >> 2))} limit, a request is made to refill
+ * the queue.
+ *
+ * <p>The {@code InputStream} terminates after an onError or onComplete signal,
+ * and stored buffers are read. If the {@code InputStream} is closed,
+ * the {@link Flow.Subscription} is cancelled, and stored buffers released.
  *
  * <p>Note that this class has a near duplicate in
  * {@link org.springframework.http.client.SubscriberInputStream}.
@@ -82,6 +92,11 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 	private Throwable error;
 
 
+	/**
+	 * Create an instance.
+	 * @param demand the number of buffers to request initially, and buffer
+	 * internally on an ongoing basis.
+	 */
 	SubscriberInputStream(int demand) {
 		this.prefetch = demand;
 		this.limit = (demand == Integer.MAX_VALUE ? Integer.MAX_VALUE : demand - (demand >> 2));
