@@ -78,7 +78,9 @@ import org.springframework.util.ErrorHandler;
  * but rather just the hand-off to an execution thread.</b> As a consequence,
  * a {@link ScheduledFuture} handle (e.g. from {@link #schedule(Runnable, Instant)})
  * represents that hand-off rather than the actual completion of the provided task
- * (or series of repeated tasks).
+ * (or series of repeated tasks). Also, this scheduler participates in lifecycle
+ * management to a limited degree only, stopping trigger firing and fixed-delay
+ * task execution but not stopping the execution of handed-off tasks.
  *
  * <p>As an alternative to the built-in thread-per-task capability, this scheduler
  * can also be configured with a separate target executor for scheduled task
