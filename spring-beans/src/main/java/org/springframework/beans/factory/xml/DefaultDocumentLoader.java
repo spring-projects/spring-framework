@@ -31,15 +31,19 @@ import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Spring's default {@link DocumentLoader} implementation.
- * Spring的默认{@link DocumentLoader}实现。
  * <p>Simply loads {@link Document documents} using the standard JAXP-configured
  * XML parser. If you want to change the {@link DocumentBuilder} that is used to
  * load documents, then one strategy is to define a corresponding Java system property
  * when starting your JVM. For example, to use the Oracle {@link DocumentBuilder},
  * you might start your application like as follows:
- * 只需使用标准JAXP配置的XML解析器加载{@linkDocumentdocuments}。如果您想更改用于加载文档的{@linkDocumentBuilder}，那么一种策略是在启动JVM时定义相应的Java系统属性。
- * 例如，要使用Oracle｛@link DocumentBuilder｝，可以按如下方式启动应用程序：
  * <pre class="code">java -Djavax.xml.parsers.DocumentBuilderFactory=oracle.xml.jaxp.JXDocumentBuilderFactory MyMainClass</pre>
+ *
+ * <p>默认文档加载器(DefaultDocumentLoader)
+ * <p>Spring的默认{@link DocumentLoader}实现。
+ * <p>只需使用标准JAXP配置的XML解析器加载{@link Document documents}。如果您想更改用于加载文档的{@link DocumentBuilder},
+ * 那么一种策略是在启动JVM时定义相应的Java系统属性。
+ * 例如，要使用Oracle{@link DocumentBuilder}, 可以按如下方式启动应用程序：
+ * <p>定义从资源文件加载到转换为Document的功能
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -49,13 +53,13 @@ public class DefaultDocumentLoader implements DocumentLoader {
 
 	/**
 	 * JAXP attribute used to configure the schema language for validation.
-	 * 用于配置模式语言以进行验证的JAXP属性
+	 * <p>用于配置模式语言以进行验证的JAXP属性
 	 */
 	private static final String SCHEMA_LANGUAGE_ATTRIBUTE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
 
 	/**
 	 * JAXP attribute value indicating the XSD schema language.
-	 * 指示XSD模式语言的JAXP属性值
+	 * <p>指示XSD模式语言的JAXP属性值
 	 */
 	private static final String XSD_SCHEMA_LANGUAGE = "http://www.w3.org/2001/XMLSchema";
 
@@ -64,9 +68,8 @@ public class DefaultDocumentLoader implements DocumentLoader {
 
 
 	/**
-	 * Load the {@link Document} at the supplied {@link InputSource} using the standard JAXP-configured
-	 * XML parser.
-	 * 使用标准JAXP配置的XML解析器在提供的｛@link InputSource｝处加载｛@linkDocument｝
+	 * Load the {@link Document} at the supplied {@link InputSource} using the standard JAXP-configured XML parser.
+	 * <p>使用标准JAXP配置的XML解析器在提供的｛@link InputSource｝处加载｛@linkDocument｝
 	 */
 	@Override
 	public Document loadDocument(InputSource inputSource, EntityResolver entityResolver, ErrorHandler errorHandler, int validationMode, boolean namespaceAware) throws Exception {
@@ -81,7 +84,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 
 	/**
 	 * Create the {@link DocumentBuilderFactory} instance.
-	 * 创建文档生成器工厂
+	 * <p>创建文档生成器工厂
 	 *
 	 * @param validationMode 验证模式 the type of validation: {@link XmlValidationModeDetector#VALIDATION_DTD DTD}
 	 *                       or {@link XmlValidationModeDetector#VALIDATION_XSD XSD})
@@ -119,7 +122,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 * Create a JAXP DocumentBuilder that this bean definition reader
 	 * will use for parsing XML documents. Can be overridden in subclasses,
 	 * adding further initialization of the builder.
-	 * 创建一个JAXP DocumentBuilder，该bean定义读取器将用于解析XML文档。可以在子类中重写，添加生成器的进一步初始化
+	 * <p>创建一个JAXP DocumentBuilder，该bean定义读取器将用于解析XML文档。可以在子类中重写，添加生成器的进一步初始化
 	 *
 	 * @param factory        the JAXP DocumentBuilderFactory that the DocumentBuilder
 	 *                       should be created with

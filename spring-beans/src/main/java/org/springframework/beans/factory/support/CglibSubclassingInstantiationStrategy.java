@@ -16,35 +16,30 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy;
 import org.springframework.cglib.core.SpringNamingPolicy;
-import org.springframework.cglib.proxy.Callback;
-import org.springframework.cglib.proxy.CallbackFilter;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
-import org.springframework.cglib.proxy.NoOp;
+import org.springframework.cglib.proxy.*;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 /**
  * Default object instantiation strategy for use in BeanFactories.
  *
  * <p>Uses CGLIB to generate subclasses dynamically if methods need to be
  * overridden by the container to implement <em>Method Injection</em>.
+ * BeanFactory中使用的默认对象实例化策略
+ * <p> 如果方法需要被容器重写以实现<em>方法注入<em>，则使用CGLIB动态生成子类
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -56,18 +51,21 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	/**
 	 * Index in the CGLIB callback array for passthrough behavior,
 	 * in which case the subclass won't override the original class.
+	 * CGLIB回调数组中用于传递行为的索引，在这种情况下，子类不会覆盖原始类
 	 */
 	private static final int PASSTHROUGH = 0;
 
 	/**
 	 * Index in the CGLIB callback array for a method that should
 	 * be overridden to provide <em>method lookup</em>.
+	 * CGLIB回调数组中应重写以提供<em>方法查找<em>的方法的索引
 	 */
 	private static final int LOOKUP_OVERRIDE = 1;
 
 	/**
 	 * Index in the CGLIB callback array for a method that should
 	 * be overridden using generic <em>method replacer</em> functionality.
+	 * CGLIB回调数组中应使用泛型<em>方法替换器<em>功能覆盖的方法的索引
 	 */
 	private static final int METHOD_REPLACER = 2;
 
@@ -79,7 +77,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
 	@Override
 	protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
-			@Nullable Constructor<?> ctor, Object... args) {
+													@Nullable Constructor<?> ctor, Object... args) {
 
 		// Must generate CGLIB subclass...
 		return new CglibSubclassCreator(bd, owner).instantiate(ctor, args);
@@ -107,10 +105,11 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		/**
 		 * Create a new instance of a dynamically generated subclass implementing the
 		 * required lookups.
+		 *
 		 * @param ctor constructor to use. If this is {@code null}, use the
-		 * no-arg constructor (no parameterization, or Setter Injection)
+		 *             no-arg constructor (no parameterization, or Setter Injection)
 		 * @param args arguments to use for the constructor.
-		 * Ignored if the {@code ctor} parameter is {@code null}.
+		 *             Ignored if the {@code ctor} parameter is {@code null}.
 		 * @return new instance of the dynamically generated subclass
 		 */
 		public Object instantiate(@Nullable Constructor<?> ctor, Object... args) {
@@ -118,13 +117,11 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			Object instance;
 			if (ctor == null) {
 				instance = BeanUtils.instantiateClass(subclass);
-			}
-			else {
+			} else {
 				try {
 					Constructor<?> enhancedSubclassConstructor = subclass.getConstructor(ctor.getParameterTypes());
 					instance = enhancedSubclassConstructor.newInstance(args);
-				}
-				catch (Exception ex) {
+				} catch (Exception ex) {
 					throw new BeanInstantiationException(this.beanDefinition.getBeanClass(),
 							"Failed to invoke constructor for CGLIB enhanced subclass [" + subclass.getName() + "]", ex);
 				}
@@ -132,7 +129,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			// SPR-10785: set callbacks directly on the instance instead of in the
 			// enhanced class (via the Enhancer) in order to avoid memory leaks.
 			Factory factory = (Factory) instance;
-			factory.setCallbacks(new Callback[] {NoOp.INSTANCE,
+			factory.setCallbacks(new Callback[]{NoOp.INSTANCE,
 					new LookupOverrideMethodInterceptor(this.beanDefinition, this.owner),
 					new ReplaceOverrideMethodInterceptor(this.beanDefinition, this.owner)});
 			return instance;
@@ -206,11 +203,9 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			}
 			if (methodOverride == null) {
 				return PASSTHROUGH;
-			}
-			else if (methodOverride instanceof LookupOverride) {
+			} else if (methodOverride instanceof LookupOverride) {
 				return LOOKUP_OVERRIDE;
-			}
-			else if (methodOverride instanceof ReplaceOverride) {
+			} else if (methodOverride instanceof ReplaceOverride) {
 				return METHOD_REPLACER;
 			}
 			throw new UnsupportedOperationException("Unexpected MethodOverride subclass: " +
@@ -243,8 +238,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 						this.owner.getBean(lo.getBeanName()));
 				// Detect package-protected NullBean instance through equals(null) check
 				return (bean.equals(null) ? null : bean);
-			}
-			else {
+			} else {
 				// Find target bean matching the (potentially generic) method return type
 				ResolvableType genericReturnType = ResolvableType.forMethodReturnType(method);
 				return (argsToUse != null ? this.owner.getBeanProvider(genericReturnType).getObject(argsToUse) :

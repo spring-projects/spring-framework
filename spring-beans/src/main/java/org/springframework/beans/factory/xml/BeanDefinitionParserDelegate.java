@@ -40,6 +40,11 @@ import java.util.*;
  * {@link BeanDefinitionParser BeanDefinitionParsers} or
  * {@link BeanDefinitionDecorator BeanDefinitionDecorators}.
  *
+ * <p>Bean定义解析器委托(BeanDefinitionParserDelegate)
+ * <p>用于解析XML bean定义的有状态委托类。用于主解析器和任何扩展{@link BeanDefinitionParser BeanDefinitionParser}
+ * 或{@link BeanDefinitionDecorator BeanDefinitionDecorator}。
+ * <p>定义解析Element的各种方法
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rod Johnson

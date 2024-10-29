@@ -16,13 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
-
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -31,11 +24,20 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
+
 /**
  * Simple object instantiation strategy for use in a BeanFactory.
  *
  * <p>Does not support Method Injection, although it provides hooks for subclasses
  * to override to add Method Injection support, for example by overriding methods.
+ * BeanFactory中使用的简单对象实例化策略
+ * <p>不支持方法注入，尽管它为子类提供了钩子来重写以添加方法注入支持，例如通过重写方法
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -50,6 +52,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * Return the factory method currently being invoked or {@code null} if none.
 	 * <p>Allows factory method implementations to determine whether the current
 	 * caller is the container itself as opposed to user code.
+	 * 返回当前正在调用的工厂方法，如果没有，则返回{@code null}
+	 * <p> 允许工厂方法实现确定当前调用者是否是容器本身，而不是用户代码
 	 */
 	@Nullable
 	public static Method getCurrentlyInvokedFactoryMethod() {
@@ -76,21 +80,18 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 						if (System.getSecurityManager() != null) {
 							constructorToUse = AccessController.doPrivileged(
 									(PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
-						}
-						else {
+						} else {
 							// 获取默认的无参构造器
 							constructorToUse = clazz.getDeclaredConstructor();
 						}
 						bd.resolvedConstructorOrFactoryMethod = constructorToUse;
-					}
-					catch (Throwable ex) {
+					} catch (Throwable ex) {
 						throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 					}
 				}
 			}
 			return BeanUtils.instantiateClass(constructorToUse);
-		}
-		else {
+		} else {
 			// Must generate CGLIB subclass.
 			return instantiateWithMethodInjection(bd, beanName, owner);
 		}
@@ -110,7 +111,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 	@Override
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
-			final Constructor<?> ctor, Object... args) {
+							  final Constructor<?> ctor, Object... args) {
 
 		if (!bd.hasMethodOverrides()) {
 			if (System.getSecurityManager() != null) {
@@ -121,8 +122,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 				});
 			}
 			return BeanUtils.instantiateClass(ctor, args);
-		}
-		else {
+		} else {
 			return instantiateWithMethodInjection(bd, beanName, owner, ctor, args);
 		}
 	}
@@ -132,16 +132,18 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * UnsupportedOperationException, if they can instantiate an object with
 	 * the Method Injection specified in the given RootBeanDefinition.
 	 * Instantiation should use the given constructor and parameters.
+	 * 如果子类可以使用给定RootBeanDefinition中指定的方法注入实例化对象，则可以重写此方法，该方法被实现为抛出UnsupportedOperationException。
+	 * 实例化应使用给定的构造函数和参数。
 	 */
 	protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName,
-			BeanFactory owner, @Nullable Constructor<?> ctor, Object... args) {
+													BeanFactory owner, @Nullable Constructor<?> ctor, Object... args) {
 
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
 	@Override
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
-			@Nullable Object factoryBean, final Method factoryMethod, Object... args) {
+							  @Nullable Object factoryBean, final Method factoryMethod, Object... args) {
 
 		try {
 			if (System.getSecurityManager() != null) {
@@ -149,8 +151,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					ReflectionUtils.makeAccessible(factoryMethod);
 					return null;
 				});
-			}
-			else {
+			} else {
 				ReflectionUtils.makeAccessible(factoryMethod);
 			}
 
@@ -162,26 +163,21 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					result = new NullBean();
 				}
 				return result;
-			}
-			finally {
+			} finally {
 				if (priorInvokedFactoryMethod != null) {
 					currentlyInvokedFactoryMethod.set(priorInvokedFactoryMethod);
-				}
-				else {
+				} else {
 					currentlyInvokedFactoryMethod.remove();
 				}
 			}
-		}
-		catch (IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			throw new BeanInstantiationException(factoryMethod,
 					"Illegal arguments to factory method '" + factoryMethod.getName() + "'; " +
-					"args: " + StringUtils.arrayToCommaDelimitedString(args), ex);
-		}
-		catch (IllegalAccessException ex) {
+							"args: " + StringUtils.arrayToCommaDelimitedString(args), ex);
+		} catch (IllegalAccessException ex) {
 			throw new BeanInstantiationException(factoryMethod,
 					"Cannot access factory method '" + factoryMethod.getName() + "'; is it public?", ex);
-		}
-		catch (InvocationTargetException ex) {
+		} catch (InvocationTargetException ex) {
 			String msg = "Factory method '" + factoryMethod.getName() + "' threw exception";
 			if (bd.getFactoryBeanName() != null && owner instanceof ConfigurableBeanFactory &&
 					((ConfigurableBeanFactory) owner).isCurrentlyInCreation(bd.getFactoryBeanName())) {

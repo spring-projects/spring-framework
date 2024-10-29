@@ -404,6 +404,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * 子类可以重写此方法，以便提供自定义的配置环境{@link ConfigurableEnvironment}实现。
 	 */
 	protected ConfigurableEnvironment createEnvironment() {
+		// 标准环境  StandardEnvironment ; 可配置环境 ConfigurableEnvironment
 		return new StandardEnvironment();
 	}
 
@@ -548,6 +549,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p><b>Do not call this when needing to resolve a location pattern.</b>
 	 * Call the context's {@code getResources} method instead, which
 	 * will delegate to the ResourcePatternResolver.
+	 * 获取资源模式解析器
+	 * 返回 获取资源模式解析器, 用于将位置模式解析为资源实例.
+	 * 默认为{@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}，
+	 * 支持Ant风格的位置模式
+	 * <p> 可以在子类中重写，用于扩展解析策略，例如在web环境中
+	 * <p> <b>当需要解析位置模式时，不要调用此函数<b> 改为调用上下文的{@code getResources}方法，
+	 * 该方法将委托给ResourcePatternResolver。
 	 *
 	 * @return the ResourcePatternResolver for this context
 	 * @see #getResources
@@ -719,17 +727,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
-		// 留给子类覆盖
+		// 留给子类覆盖 spring的扩展性
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
 		// 验证所有标记为必需的属性是否可解析
 		// 验证需要的属性是否都已放入环境
+		// {@link #getEnvironment()} 获取一个标准可配置环境
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
-		// 存储预刷新ApplicationListeners
+		// 存储预刷新早期应用程序监听器
 		if (this.earlyApplicationListeners == null) {
 			this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
 		} else {
@@ -748,6 +757,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * <p>Replace any stub property sources with actual instances.
 	 * 用实际实例替换任何存根属性源
+	 * 模版方法
 	 *
 	 * @see org.springframework.core.env.PropertySource.StubPropertySource
 	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources
@@ -775,7 +785,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Configure the factory's standard context characteristics,
 	 * such as the context's ClassLoader and post-processors.
 	 * 配置工厂的标准上下文特征, 例如上下文的ClassLoader和后处理器
-	 *
+	 * <p>
 	 * 增加扩展
 	 * 1. 增加对SpringEL表达式支持
 	 * 2. 增加对属性编辑器的支持

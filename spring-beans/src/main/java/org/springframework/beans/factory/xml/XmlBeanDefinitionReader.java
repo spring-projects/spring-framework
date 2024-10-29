@@ -54,6 +54,15 @@ import java.util.Set;
  * talking to the latter's implementation of the
  * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry} interface.
  *
+ * <p>XMLBean定义阅读器(XmlBeanDefinitionReader)
+ * <p>用于XMLBean定义的Bean定义阅读器。将实际的XML文档读取委托给{@link BeanDefinitionDocumentReader}接口的实现。
+ * <p>通常应用于{@link org.springframework.beans.factory.support.DefaultListableBeanFactory}或{@link org.springframework.context.support.GenericApplicationContext}。
+ * <p>该类加载一个DOM文档并对其应用BeanDefinitionDocumentReader。文档阅读器将向给定的bean工厂注册每个bean定义，并与后者对{@link org.springframework.beans.factory.support.BeanDefinitionRegistry}接口的实际对话。
+ * <p>
+ * 1.通过继承自AbstractBeanDefinitionReader中的方法，来使用ResourceLoader将资源文件路径转换为对应的Resource文件。
+ * 2.通过DocumentLoader对Resource文件进行转换，将Resource文件转换为Document文件。
+ * 3.通过实现接口BeanDefinitionDocumentReader的DefaultBeanDefinitionDocumentReader类对Document进行解析，并使用BeanDefinitionRarserDelegate对Element进行解析。
+ *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Chris Beams
@@ -559,7 +568,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Create the {@link BeanDefinitionDocumentReader} to use for actually
 	 * reading bean definitions from an XML document.
 	 * <p>The default implementation instantiates the specified "documentReaderClass".
-	 * 创建{@linkBeanDefinitionDocumentReader}，用于从XML文档中实际读取bean定义<p> 默认实现实例化指定的“documentReaderClass”
+	 * 创建{@link BeanDefinitionDocumentReader}，用于从XML文档中实际读取bean定义
+	 * <p> 默认实现实例化指定的“documentReaderClass”
+	 *
 	 * @see #setDocumentReaderClass
 	 */
 	protected BeanDefinitionDocumentReader createBeanDefinitionDocumentReader() {

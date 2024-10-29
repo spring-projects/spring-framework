@@ -42,14 +42,14 @@ import org.springframework.core.io.Resource;
  * resources and is highly configurable in its actual XML parsing behavior.
  *
  * <p>XML扩展bean工厂(XmlBeanFactory)
- * <p>读取bean定义的{@link DefaultListableBeanFactory}的便利扩展来自XML文档。委托给下面的{@link XmlBeanDefinition Reader}；
+ * <p>读取bean定义的{@link DefaultListableBeanFactory}的便利扩展来自XML文档。委托给下面的{@link XmlBeanDefinitionReader}；
  * 有相当于使用带有DefaultListableBeanFactory的XmlBeanDefinitionReader。
  * <p>所需XML文档的结构、元素和属性名称在这个类中是硬编码的。（当然，如有必要，可以运行转换以产生这种格式）。
  * “beans”不需要是XML的根元素document：此类将解析XML文件中的所有bean定义元素。
  * <p>此类将每个bean定义注册到{@link DefaultListableBeanFactory}超类，并依赖于后者对{@link BeanFactory}接口的实现。
  * 它支持单例、原型和对这两种bean的引用。
  * 请参阅{@code“spring-beans-3.x.xsd”}（或历史上的{@code”spring-beaans-2.0.dtd“}）有关选项和配置样式的详细信息。
- * <p><b>对于高级需求，可以考虑使用{@link DefaultListableBeanFactory}{@link XmlBeanDefinition阅读器}</b>
+ * <p><b>对于高级需求，可以考虑使用{@link DefaultListableBeanFactory}{@link XmlBeanDefinitionReader}</b>
  * 后者允许从多个XML读取资源，并且在实际的XML解析行为中具有高度的可配置性。
  * <p>XmlBeanFactory对{@link DefaultListableBeanFactory}类进行扩展, 主要用于XML文档当中读取 bean定义
  * 对于注册及获取bena都是使用从父类{@link DefaultListableBeanFactory}继承的方法去实现, 而唯独与父类不同的

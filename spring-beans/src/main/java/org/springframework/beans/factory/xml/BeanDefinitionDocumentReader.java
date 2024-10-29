@@ -27,6 +27,9 @@ import org.w3c.dom.Document;
  * state in instance variables during the execution of the
  * {@code registerBeanDefinitions} method &mdash; for example, global
  * settings that are defined for all bean definitions in the document.
+ * <p>Bean定义文档阅读器(BeanDefinitionDocumentReader)
+ * <p>用于解析包含Spring bean定义的XML文档的SPI。{@link XmlBeanDefinitionReader}用于实际解析DOM文档。
+ * <p>实例化每个文档解析：实现可以在{@code registerBeanDefinitions}方法执行期间在实例变量中保存状态；例如，为文档中的所有bean定义的全局设置。
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -38,7 +41,7 @@ public interface BeanDefinitionDocumentReader {
 	/**
 	 * Read bean definitions from the given DOM document and
 	 * register them with the registry in the given reader context.
-	 * 加载并注册beanDefinition
+	 * <p>加载并注册beanDefinition
 	 *
 	 * @param doc           the DOM document
 	 * @param readerContext the current context of the reader

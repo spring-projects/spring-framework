@@ -40,6 +40,10 @@ import java.util.Set;
  * <p>Provides common properties like the bean factory to work on
  * and the class loader to use for loading bean classes.
  *
+ * <p>抽象Bean定义阅读器(AbstractBeanDefinitionReader)
+ * 实现{@link BeanDefinitionReader}接口的bean定义读取器的抽象基类。
+ * <p>提供常用属性，如要使用的bean工厂和用于加载bean类的类装入器。
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @see BeanDefinitionReaderUtils
