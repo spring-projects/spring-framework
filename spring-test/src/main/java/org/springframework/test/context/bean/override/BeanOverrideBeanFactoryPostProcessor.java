@@ -286,9 +286,8 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		// Add matching FactoryBeans as well.
 		for (String beanName : beanFactory.getBeanNamesForType(FactoryBean.class, true, false)) {
 			beanName = BeanFactoryUtils.transformedBeanName(beanName);
-			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-			Object attribute = beanDefinition.getAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE);
-			if (resolvableType.equals(attribute) || type.equals(attribute)) {
+			Class<?> producedType = beanFactory.getType(beanName, false);
+			if (type.equals(producedType)) {
 				beanNames.add(beanName);
 			}
 		}

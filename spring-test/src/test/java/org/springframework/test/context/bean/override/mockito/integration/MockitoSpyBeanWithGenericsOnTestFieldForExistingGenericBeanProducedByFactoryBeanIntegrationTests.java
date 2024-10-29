@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.bean.override.mockito.integration;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockingDetails;
 
@@ -48,7 +47,6 @@ import static org.mockito.Mockito.mockingDetails;
  * @see MockitoSpyBeanWithGenericsOnTestFieldForExistingGenericBeanIntegrationTests
  */
 @SpringJUnitConfig
-@Disabled("Disabled until https://github.com/spring-projects/spring-boot/issues/40234 is ported to Spring Framework")
 class MockitoSpyBeanWithGenericsOnTestFieldForExistingGenericBeanProducedByFactoryBeanIntegrationTests {
 
 	@MockitoSpyBean("exampleService")
