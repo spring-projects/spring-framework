@@ -40,6 +40,7 @@ import static org.mockito.BDDMockito.then;
  * @author Sam Brannen
  * @since 6.2
  * @see MockitoBeanWithGenericsOnTestFieldForNewBeanIntegrationTests
+ * @see MockitoSpyBeanWithGenericsOnTestFieldForExistingGenericBeanProducedByFactoryBeanIntegrationTests
  */
 @SpringJUnitConfig
 class MockitoSpyBeanWithGenericsOnTestFieldForExistingGenericBeanIntegrationTests {
@@ -60,7 +61,7 @@ class MockitoSpyBeanWithGenericsOnTestFieldForExistingGenericBeanIntegrationTest
 
 	@Configuration(proxyBeanMethods = false)
 	@Import({ ExampleGenericServiceCaller.class, IntegerExampleGenericService.class })
-	static class SpyBeanOnTestFieldForExistingBeanConfig {
+	static class Config {
 
 		@Bean
 		ExampleGenericService<String> simpleExampleStringGenericService() {
@@ -68,7 +69,6 @@ class MockitoSpyBeanWithGenericsOnTestFieldForExistingGenericBeanIntegrationTest
 			// generic type instead of the actual implementation class.
 			return new StringExampleGenericService("Enigma");
 		}
-
 	}
 
 }
