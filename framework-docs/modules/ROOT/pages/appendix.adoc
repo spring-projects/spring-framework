@@ -23,6 +23,12 @@ The following table lists all currently supported Spring properties.
 |===
 | Name | Description
 
+| `spring.aop.ajc.ignore`
+| Instructs Spring to ignore ajc-compiled aspects for Spring AOP proxying, restoring traditional
+Spring behavior for scenarios where both weaving and AspectJ auto-proxying are enabled. See
+{spring-framework-api}++/aop/aspectj/annotation/AbstractAspectJAdvisorFactory.html#IGNORE_AJC_PROPERTY_NAME++[`AbstractAspectJAdvisorFactory`]
+for details.
+
 | `spring.aot.enabled`
 | Indicates the application should run with AOT generated artifacts. See
 xref:core/aot.adoc[Ahead of Time Optimizations] and 
@@ -32,7 +38,7 @@ for details.
 | `spring.beaninfo.ignore`
 | Instructs Spring to use the `Introspector.IGNORE_ALL_BEANINFO` mode when calling the
 JavaBeans `Introspector`. See
-{spring-framework-api}++/beans/StandardBeanInfoFactory.html#IGNORE_BEANINFO_PROPERTY_NAME++[`CachedIntrospectionResults`]
+{spring-framework-api}++/beans/StandardBeanInfoFactory.html#IGNORE_BEANINFO_PROPERTY_NAME++[`StandardBeanInfoFactory`]
 for details.
 
 | `spring.cache.reactivestreams.ignore`
@@ -49,15 +55,13 @@ for details.
 
 | `spring.context.checkpoint`
 | Property that specifies a common context checkpoint. See
-xref:integration/checkpoint-restore.adoc#_automatic_checkpointrestore_at_startup[Automatic
-checkpoint/restore at startup] and
+xref:integration/checkpoint-restore.adoc#_automatic_checkpointrestore_at_startup[Automatic checkpoint/restore at startup] and
 {spring-framework-api}++/context/support/DefaultLifecycleProcessor.html#CHECKPOINT_PROPERTY_NAME++[`DefaultLifecycleProcessor`]
 for details.
 
 | `spring.context.exit`
 | Property for terminating the JVM when the context reaches a specific phase. See
-xref:integration/checkpoint-restore.adoc#_automatic_checkpointrestore_at_startup[Automatic
-checkpoint/restore at startup] and
+xref:integration/checkpoint-restore.adoc#_automatic_checkpointrestore_at_startup[Automatic checkpoint/restore at startup] and
 {spring-framework-api}++/context/support/DefaultLifecycleProcessor.html#EXIT_PROPERTY_NAME++[`DefaultLifecycleProcessor`]
 for details.
 
