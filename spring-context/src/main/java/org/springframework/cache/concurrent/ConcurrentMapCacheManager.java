@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,6 +173,15 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 			cache = this.cacheMap.computeIfAbsent(name, this::createConcurrentMapCache);
 		}
 		return cache;
+	}
+
+	/**
+	 * Remove the specified cache from this cache manager.
+	 * @param name the name of the cache
+	 * @since 6.1.15
+	 */
+	public void removeCache(String name) {
+		this.cacheMap.remove(name);
 	}
 
 	private void recreateCaches() {
