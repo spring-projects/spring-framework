@@ -41,15 +41,15 @@ class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 			new ThreadPoolExecutor(1, 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("removal")
 	protected org.springframework.core.task.AsyncListenableTaskExecutor buildExecutor() {
 		concurrentExecutor.setThreadFactory(new CustomizableThreadFactory(this.threadNamePrefix));
 		return new ConcurrentTaskExecutor(concurrentExecutor);
 	}
 
-	@Override
 	@AfterEach
+	@Override
 	void shutdownExecutor() {
 		for (Runnable task : concurrentExecutor.shutdownNow()) {
 			if (task instanceof Future) {

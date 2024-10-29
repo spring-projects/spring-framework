@@ -48,8 +48,8 @@ class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 	private final AtomicBoolean taskRun = new AtomicBoolean();
 
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("removal")
 	protected org.springframework.core.task.AsyncListenableTaskExecutor buildExecutor() {
 		scheduler.setTaskDecorator(runnable -> () -> {
 			taskRun.set(true);

@@ -51,8 +51,8 @@ class ConcurrentTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 	private final AtomicBoolean taskRun = new AtomicBoolean();
 
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("removal")
 	protected org.springframework.core.task.AsyncListenableTaskExecutor buildExecutor() {
 		threadFactory.setThreadNamePrefix(this.threadNamePrefix);
 		scheduler.setTaskDecorator(runnable -> () -> {
@@ -62,8 +62,8 @@ class ConcurrentTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests {
 		return scheduler;
 	}
 
-	@Override
 	@AfterEach
+	@Override
 	void shutdownExecutor() {
 		for (Runnable task : ((ExecutorService) scheduler.getConcurrentExecutor()).shutdownNow()) {
 			if (task instanceof Future) {

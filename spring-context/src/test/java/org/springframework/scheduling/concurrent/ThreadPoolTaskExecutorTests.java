@@ -41,7 +41,7 @@ class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 
 	@Override
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	protected org.springframework.core.task.AsyncListenableTaskExecutor buildExecutor() {
 		executor.setThreadNamePrefix(this.threadNamePrefix);
 		executor.setMaxPoolSize(1);

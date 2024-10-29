@@ -44,8 +44,8 @@ class SimpleAsyncTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests 
 	private final AtomicBoolean taskRun = new AtomicBoolean();
 
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("removal")
 	protected org.springframework.core.task.AsyncListenableTaskExecutor buildExecutor() {
 		scheduler.setTaskDecorator(runnable -> () -> {
 			taskRun.set(true);
@@ -63,7 +63,6 @@ class SimpleAsyncTaskSchedulerTests extends AbstractSchedulingTaskExecutorTests 
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	@Override
 	void submitListenableRunnableWithGetAfterShutdown() {
 		// decorated Future cannot be cancelled on shutdown with SimpleAsyncTaskScheduler
