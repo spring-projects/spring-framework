@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -301,6 +301,17 @@ public class CaffeineCacheManager implements CacheManager {
 	public void registerCustomCache(String name, AsyncCache<Object, Object> cache) {
 		this.customCacheNames.add(name);
 		this.cacheMap.put(name, adaptCaffeineCache(name, cache));
+	}
+
+	/**
+	 * Remove the specified cache from this cache manager, applying to
+	 * custom caches as well as dynamically registered caches at runtime.
+	 * @param name the name of the cache
+	 * @since 6.1.15
+	 */
+	public void removeCache(String name) {
+		this.customCacheNames.remove(name);
+		this.cacheMap.remove(name);
 	}
 
 	/**
