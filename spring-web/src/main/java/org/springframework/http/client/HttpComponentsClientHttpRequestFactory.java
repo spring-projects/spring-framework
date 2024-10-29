@@ -205,7 +205,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	@Override
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")  // HttpClientContext.REQUEST_CONFIG
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpClient client = getHttpClient();
 
@@ -217,9 +217,10 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		}
 
 		// Request configuration not set in the context
-		if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
-			// Use request configuration given by the user, when available
+		if (!(context instanceof HttpClientContext clientContext && clientContext.getRequestConfig() != null) &&
+				context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
 			RequestConfig config = null;
+			// Use request configuration given by the user, when available
 			if (httpRequest instanceof Configurable configurable) {
 				config = configurable.getConfig();
 			}
@@ -227,6 +228,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				config = createRequestConfig(client);
 			}
 			if (config != null) {
+				if (context instanceof HttpClientContext clientContext) {
+					clientContext.setRequestConfig(config);
+				}
 				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
 			}
 		}
