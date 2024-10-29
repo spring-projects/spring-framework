@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,8 @@ class DefaultTransportRequest implements TransportRequest {
 	}
 
 
-	@Deprecated
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public void connect(WebSocketHandler handler,
 			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future) {
 
@@ -207,7 +208,7 @@ class DefaultTransportRequest implements TransportRequest {
 	 * to connect. Also implements {@code Runnable} to handle a scheduled timeout
 	 * callback.
 	 */
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	private class ListenableConnectCallback implements
 			org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession>, Runnable {
 

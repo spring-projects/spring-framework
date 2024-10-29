@@ -118,7 +118,8 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 	 * @return the established WebSocket session wrapped in a {@code ListenableFuture}.
 	 * @deprecated as of 6.0, in favor of {@link #executeInternal(WebSocketHandler, HttpHeaders, URI, List, List, Map)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	protected org.springframework.util.concurrent.ListenableFuture<WebSocketSession> doHandshakeInternal(
 			WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri, List<String> subProtocols,
 			List<WebSocketExtension> extensions, Map<String, Object> attributes) {

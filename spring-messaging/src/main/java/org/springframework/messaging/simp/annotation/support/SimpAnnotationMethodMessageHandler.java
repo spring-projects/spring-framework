@@ -344,7 +344,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 

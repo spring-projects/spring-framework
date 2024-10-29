@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -281,8 +281,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @param returnType the declared return type (potentially a {@link Future} variant)
 	 * @return the execution result (potentially a corresponding {@link Future} handle)
 	 */
+	@SuppressWarnings("removal")
 	@Nullable
-	@SuppressWarnings("deprecation")
 	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
 		if (CompletableFuture.class.isAssignableFrom(returnType)) {
 			return executor.submitCompletable(task);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class DeferredResultMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> type = returnType.getParameterType();
@@ -46,7 +46,7 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 				CompletionStage.class.isAssignableFrom(type));
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	@Override
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
@@ -75,7 +75,7 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(result, mavContainer);
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	private DeferredResult<Object> adaptListenableFuture(org.springframework.util.concurrent.ListenableFuture<?> future) {
 		DeferredResult<Object> result = new DeferredResult<>();
 		future.addCallback(new org.springframework.util.concurrent.ListenableFutureCallback<Object>() {

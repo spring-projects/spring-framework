@@ -571,7 +571,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	@Controller
 	@MessageMapping("listenable-future")
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	private static class ListenableFutureController {
 
 		org.springframework.util.concurrent.ListenableFutureTask<String> future;

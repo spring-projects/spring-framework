@@ -310,7 +310,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		return new Object[] {event};
 	}
 
-	@SuppressWarnings({"deprecation", "unchecked"})
+	@SuppressWarnings({"removal", "unchecked"})
 	protected void handleResult(Object result) {
 		if (reactiveStreamsPresent && new ReactiveResultHandler().subscribeToPublisher(result)) {
 			if (logger.isTraceEnabled()) {

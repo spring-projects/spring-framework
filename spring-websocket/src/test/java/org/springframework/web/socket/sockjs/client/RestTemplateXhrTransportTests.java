@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -129,26 +130,17 @@ class RestTemplateXhrTransportTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void connectFailure() {
 		final HttpServerErrorException expected = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
 		RestOperations restTemplate = mock();
 		given(restTemplate.execute(any(), eq(HttpMethod.POST), any(), any())).willThrow(expected);
 
 		final CountDownLatch latch = new CountDownLatch(1);
-		connect(restTemplate).addCallback(
-				new org.springframework.util.concurrent.ListenableFutureCallback<>() {
-					@Override
-					public void onSuccess(WebSocketSession result) {
-					}
-					@Override
-					public void onFailure(Throwable ex) {
-						if (ex == expected) {
-							latch.countDown();
-						}
-					}
-				}
-		);
+		connect(restTemplate).whenComplete((result, ex) -> {
+			if (ex == expected) {
+				latch.countDown();
+			}
+		});
 		verifyNoMoreInteractions(this.webSocketHandler);
 	}
 
@@ -178,16 +170,11 @@ class RestTemplateXhrTransportTests {
 		verify(response).close();
 	}
 
-	@SuppressWarnings("deprecation")
-	private org.springframework.util.concurrent.ListenableFuture<WebSocketSession> connect(
-			ClientHttpResponse... responses) {
+	private CompletableFuture<WebSocketSession> connect(ClientHttpResponse... responses) {
 		return connect(new TestRestTemplate(responses));
 	}
 
-	@SuppressWarnings("deprecation")
-	private org.springframework.util.concurrent.ListenableFuture<WebSocketSession> connect(
-			RestOperations restTemplate, ClientHttpResponse... responses) {
-
+	private CompletableFuture<WebSocketSession> connect(RestOperations restTemplate) {
 		RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
 		transport.setTaskExecutor(new SyncTaskExecutor());
 
@@ -197,7 +184,7 @@ class RestTemplateXhrTransportTests {
 		TransportRequest request = new DefaultTransportRequest(urlInfo, headers, headers,
 				transport, TransportType.XHR, CODEC);
 
-		return transport.connect(request, this.webSocketHandler);
+		return transport.connectAsync(request, this.webSocketHandler);
 	}
 
 	private ClientHttpResponse response(HttpStatus status, String body) throws IOException {
@@ -217,7 +204,6 @@ class RestTemplateXhrTransportTests {
 	private static class TestRestTemplate extends RestTemplate {
 
 		private Queue<ClientHttpResponse> responses = new LinkedBlockingDeque<>();
-
 
 		private TestRestTemplate(ClientHttpResponse... responses) {
 			this.responses.addAll(Arrays.asList(responses));

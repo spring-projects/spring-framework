@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.messaging.handler.invocation;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Support for {@link ListenableFuture} as a return value type.
@@ -28,22 +27,23 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @since 4.2
  * @deprecated as of 6.0, in favor of {@link CompletableFutureReturnValueHandler}
  */
-@Deprecated(since = "6.0")
+@Deprecated(since = "6.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class ListenableFutureReturnValueHandler extends AbstractAsyncReturnValueHandler {
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return ListenableFuture.class.isAssignableFrom(returnType.getParameterType());
+		return org.springframework.util.concurrent.ListenableFuture.class.isAssignableFrom(returnType.getParameterType());
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
-		return (ListenableFuture<?>) returnValue;
+	public org.springframework.util.concurrent.ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
+		return (org.springframework.util.concurrent.ListenableFuture<?>) returnValue;
 	}
 
 	@Override
 	public CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType) {
-		return ((ListenableFuture<?>) returnValue).completable();
+		return ((org.springframework.util.concurrent.ListenableFuture<?>) returnValue).completable();
 	}
+
 }

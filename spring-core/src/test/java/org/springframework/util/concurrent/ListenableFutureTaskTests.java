@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
-@SuppressWarnings({ "deprecation" })
+@SuppressWarnings("removal")
 class ListenableFutureTaskTests {
 
 	@Test

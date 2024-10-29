@@ -280,7 +280,7 @@ class AnnotationDrivenEventListenerTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	void listenableFutureReply() {
 		load(TestEventListener.class, ReplyEventListener.class);
 		org.springframework.util.concurrent.SettableListenableFuture<String> future =

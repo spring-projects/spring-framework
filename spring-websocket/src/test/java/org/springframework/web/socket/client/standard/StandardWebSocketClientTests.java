@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,38 +57,34 @@ class StandardWebSocketClientTests {
 
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void getLocalAddress() throws Exception {
 		URI uri = URI.create("ws://localhost/abc");
-		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+		WebSocketSession session = this.wsClient.execute(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session.getLocalAddress()).isNotNull();
 		assertThat(session.getLocalAddress().getPort()).isEqualTo(80);
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void getLocalAddressWss() throws Exception {
 		URI uri = URI.create("wss://localhost/abc");
-		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+		WebSocketSession session = this.wsClient.execute(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session.getLocalAddress()).isNotNull();
 		assertThat(session.getLocalAddress().getPort()).isEqualTo(443);
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void getLocalAddressNoScheme() {
 		URI uri = URI.create("localhost/abc");
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.wsClient.doHandshake(this.wsHandler, this.headers, uri));
+				this.wsClient.execute(this.wsHandler, this.headers, uri));
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void getRemoteAddress() throws Exception {
 		URI uri = URI.create("wss://localhost/abc");
-		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+		WebSocketSession session = this.wsClient.execute(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session.getRemoteAddress()).isNotNull();
 		assertThat(session.getRemoteAddress().getHostName()).isEqualTo("localhost");
@@ -96,27 +92,25 @@ class StandardWebSocketClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void handshakeHeaders() throws Exception {
 		URI uri = URI.create("ws://localhost/abc");
 		List<String> protocols = Collections.singletonList("abc");
 		this.headers.setSecWebSocketProtocol(protocols);
 		this.headers.add("foo", "bar");
 
-		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+		WebSocketSession session = this.wsClient.execute(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session.getHandshakeHeaders()).hasSize(1);
 		assertThat(session.getHandshakeHeaders().getFirst("foo")).isEqualTo("bar");
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void clientEndpointConfig() throws Exception {
 		URI uri = URI.create("ws://localhost/abc");
 		List<String> protocols = Collections.singletonList("abc");
 		this.headers.setSecWebSocketProtocol(protocols);
 
-		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+		this.wsClient.execute(this.wsHandler, this.headers, uri).get();
 
 		ArgumentCaptor<ClientEndpointConfig> captor = ArgumentCaptor.forClass(ClientEndpointConfig.class);
 		verify(this.wsContainer).connectToServer(any(Endpoint.class), captor.capture(), any(URI.class));
@@ -126,13 +120,12 @@ class StandardWebSocketClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void clientEndpointConfigWithUserProperties() throws Exception {
 		Map<String,Object> userProperties = Collections.singletonMap("foo", "bar");
 
 		URI uri = URI.create("ws://localhost/abc");
 		this.wsClient.setUserProperties(userProperties);
-		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+		this.wsClient.execute(this.wsHandler, this.headers, uri).get();
 
 		ArgumentCaptor<ClientEndpointConfig> captor = ArgumentCaptor.forClass(ClientEndpointConfig.class);
 		verify(this.wsContainer).connectToServer(any(Endpoint.class), captor.capture(), any(URI.class));
@@ -142,12 +135,11 @@ class StandardWebSocketClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void standardWebSocketClientConfiguratorInsertsHandshakeHeaders() throws Exception {
 		URI uri = URI.create("ws://localhost/abc");
 		this.headers.add("foo", "bar");
 
-		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+		this.wsClient.execute(this.wsHandler, this.headers, uri).get();
 
 		ArgumentCaptor<ClientEndpointConfig> captor = ArgumentCaptor.forClass(ClientEndpointConfig.class);
 		verify(this.wsContainer).connectToServer(any(Endpoint.class), captor.capture(), any(URI.class));
@@ -159,11 +151,10 @@ class StandardWebSocketClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void taskExecutor() throws Exception {
 		URI uri = URI.create("ws://localhost/abc");
 		this.wsClient.setTaskExecutor(new SimpleAsyncTaskExecutor());
-		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
+		WebSocketSession session = this.wsClient.execute(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session).isNotNull();
 	}

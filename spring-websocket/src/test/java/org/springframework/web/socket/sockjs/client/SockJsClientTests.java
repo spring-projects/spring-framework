@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.client;
 
 import java.net.URI;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,17 +51,15 @@ class SockJsClientTests {
 
 	private static final WebSocketHandler handler = mock();
 
-
 	private final InfoReceiver infoReceiver = mock();
 
 	private final TestTransport webSocketTransport = new TestTransport("WebSocketTestTransport");
 
 	private final XhrTestTransport xhrTransport = new XhrTestTransport("XhrTestTransport");
 
-	@SuppressWarnings("deprecation")
-	private org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession> connectCallback = mock();
+	private final BiConsumer<WebSocketSession, Throwable> connectCallback = mock();
 
-	private SockJsClient sockJsClient = new SockJsClient(List.of(this.webSocketTransport, this.xhrTransport));
+	private final SockJsClient sockJsClient = new SockJsClient(List.of(this.webSocketTransport, this.xhrTransport));
 
 
 	@BeforeEach
@@ -69,40 +68,36 @@ class SockJsClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void connectWebSocket() {
 		setupInfoRequest(true);
-		this.sockJsClient.doHandshake(handler, URL).addCallback(this.connectCallback);
+		this.sockJsClient.execute(handler, URL).whenComplete(this.connectCallback);
 		assertThat(this.webSocketTransport.invoked()).isTrue();
 		WebSocketSession session = mock();
 		this.webSocketTransport.getConnectCallback().accept(session, null);
-		verify(this.connectCallback).onSuccess(session);
+		verify(this.connectCallback).accept(session, null);
 		verifyNoMoreInteractions(this.connectCallback);
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void connectWebSocketDisabled() {
 		setupInfoRequest(false);
-		this.sockJsClient.doHandshake(handler, URL);
+		this.sockJsClient.execute(handler, URL);
 		assertThat(this.webSocketTransport.invoked()).isFalse();
 		assertThat(this.xhrTransport.invoked()).isTrue();
 		assertThat(this.xhrTransport.getRequest().getTransportUrl().toString()).endsWith("xhr_streaming");
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void connectXhrStreamingDisabled() {
 		setupInfoRequest(false);
 		this.xhrTransport.setStreamingDisabled(true);
-		this.sockJsClient.doHandshake(handler, URL).addCallback(this.connectCallback);
+		this.sockJsClient.execute(handler, URL).whenComplete(this.connectCallback);
 		assertThat(this.webSocketTransport.invoked()).isFalse();
 		assertThat(this.xhrTransport.invoked()).isTrue();
 		assertThat(this.xhrTransport.getRequest().getTransportUrl().toString()).endsWith("xhr");
 	}
 
 	@Test  // SPR-13254
-	@SuppressWarnings("deprecation")
 	void connectWithHandshakeHeaders() {
 		ArgumentCaptor<HttpHeaders> headersCaptor = setupInfoRequest(false);
 		this.xhrTransport.setStreamingDisabled(true);
@@ -110,7 +105,7 @@ class SockJsClientTests {
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.set("foo", "bar");
 		headers.set("auth", "123");
-		this.sockJsClient.doHandshake(handler, headers, URI.create(URL)).addCallback(this.connectCallback);
+		this.sockJsClient.execute(handler, headers, URI.create(URL)).whenComplete(this.connectCallback);
 
 		HttpHeaders httpHeaders = headersCaptor.getValue();
 		assertThat(httpHeaders).hasSize(2);
@@ -124,7 +119,6 @@ class SockJsClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void connectAndUseSubsetOfHandshakeHeadersForHttpRequests() {
 		ArgumentCaptor<HttpHeaders> headersCaptor = setupInfoRequest(false);
 		this.xhrTransport.setStreamingDisabled(true);
@@ -133,7 +127,7 @@ class SockJsClientTests {
 		headers.set("foo", "bar");
 		headers.set("auth", "123");
 		this.sockJsClient.setHttpHeaderNames("auth");
-		this.sockJsClient.doHandshake(handler, headers, URI.create(URL)).addCallback(this.connectCallback);
+		this.sockJsClient.execute(handler, headers, URI.create(URL)).whenComplete(this.connectCallback);
 
 		assertThat(headersCaptor.getValue()).hasSize(1);
 		assertThat(headersCaptor.getValue().getFirst("auth")).isEqualTo("123");
@@ -142,30 +136,27 @@ class SockJsClientTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void connectSockJsInfo() {
 		setupInfoRequest(true);
-		this.sockJsClient.doHandshake(handler, URL);
+		this.sockJsClient.execute(handler, URL);
 		verify(this.infoReceiver, times(1)).executeInfoRequest(any(), any());
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void connectSockJsInfoCached() {
 		setupInfoRequest(true);
-		this.sockJsClient.doHandshake(handler, URL);
-		this.sockJsClient.doHandshake(handler, URL);
-		this.sockJsClient.doHandshake(handler, URL);
+		this.sockJsClient.execute(handler, URL);
+		this.sockJsClient.execute(handler, URL);
+		this.sockJsClient.execute(handler, URL);
 		verify(this.infoReceiver, times(1)).executeInfoRequest(any(), any());
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void connectInfoRequestFailure() {
 		HttpServerErrorException exception = new HttpServerErrorException(HttpStatus.SERVICE_UNAVAILABLE);
 		given(this.infoReceiver.executeInfoRequest(any(), any())).willThrow(exception);
-		this.sockJsClient.doHandshake(handler, URL).addCallback(this.connectCallback);
-		verify(this.connectCallback).onFailure(exception);
+		this.sockJsClient.execute(handler, URL).whenComplete(this.connectCallback);
+		verify(this.connectCallback).accept(null, exception);
 		assertThat(this.webSocketTransport.invoked()).isFalse();
 		assertThat(this.xhrTransport.invoked()).isFalse();
 	}

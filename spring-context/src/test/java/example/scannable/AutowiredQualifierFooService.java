@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package example.scannable;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import jakarta.annotation.PostConstruct;
@@ -51,9 +52,8 @@ public class AutowiredQualifierFooService implements FooService {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public Future<String> asyncFoo(int id) {
-		return new org.springframework.scheduling.annotation.AsyncResult<>(this.fooDao.findFoo(id));
+		return CompletableFuture.completedFuture(this.fooDao.findFoo(id));
 	}
 
 	@Override

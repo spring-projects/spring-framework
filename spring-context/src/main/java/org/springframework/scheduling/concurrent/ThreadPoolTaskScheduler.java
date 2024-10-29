@@ -74,7 +74,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @see ThreadPoolTaskExecutor
  * @see SimpleAsyncTaskScheduler
  */
-@SuppressWarnings({"serial", "deprecation"})
+@SuppressWarnings({"serial", "removal"})
 public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, TaskScheduler {
 

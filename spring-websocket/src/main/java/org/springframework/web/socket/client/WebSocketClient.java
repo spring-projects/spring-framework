@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,11 @@ public interface WebSocketClient {
 	 * @return a future that completes when the session is available
 	 * @deprecated as of 6.0, in favor of {@link #execute(WebSocketHandler, String, Object...)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	default org.springframework.util.concurrent.ListenableFuture<WebSocketSession> doHandshake(
 			WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
+
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
 				execute(webSocketHandler, uriTemplate, uriVariables));
 	}
@@ -71,9 +73,11 @@ public interface WebSocketClient {
 	 * @return a future that completes when the session is available
 	 * @deprecated as of 6.0, in favor of {@link #execute(WebSocketHandler, WebSocketHttpHeaders, URI)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	default org.springframework.util.concurrent.ListenableFuture<WebSocketSession> doHandshake(
 			WebSocketHandler webSocketHandler, @Nullable WebSocketHttpHeaders headers, URI uri) {
+
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
 				execute(webSocketHandler, headers, uri));
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @see org.springframework.core.task.TaskExecutor
  * @see SchedulerFactoryBean#setTaskExecutor
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings("removal")
 public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor, InitializingBean, DisposableBean {
 

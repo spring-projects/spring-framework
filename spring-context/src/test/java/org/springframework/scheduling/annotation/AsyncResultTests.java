@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class AsyncResultTests {
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public void asyncResultWithCallbackAndValue() throws Exception {
 		String value = "val";
 		final Set<String> values = new HashSet<>(1);
@@ -54,7 +54,7 @@ class AsyncResultTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public void asyncResultWithCallbackAndException() {
 		IOException ex = new IOException();
 		final Set<Throwable> values = new HashSet<>(1);
@@ -79,7 +79,7 @@ class AsyncResultTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public void asyncResultWithSeparateCallbacksAndValue() throws Exception {
 		String value = "val";
 		final Set<String> values = new HashSet<>(1);
@@ -92,7 +92,7 @@ class AsyncResultTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public void asyncResultWithSeparateCallbacksAndException() {
 		IOException ex = new IOException();
 		final Set<Throwable> values = new HashSet<>(1);

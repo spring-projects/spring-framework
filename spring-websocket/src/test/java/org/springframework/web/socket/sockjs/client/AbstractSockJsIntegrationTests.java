@@ -209,24 +209,16 @@ abstract class AbstractSockJsIntegrationTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void infoRequestFailure() throws Exception {
 		TestClientHandler handler = new TestClientHandler();
 		this.testFilter.sendErrorMap.put("/info", 500);
 		CountDownLatch latch = new CountDownLatch(1);
 		initSockJsClient(createWebSocketTransport());
-		this.sockJsClient.doHandshake(handler, this.baseUrl + "/echo").addCallback(
-				new org.springframework.util.concurrent.ListenableFutureCallback<>() {
-					@Override
-					public void onSuccess(WebSocketSession result) {
-					}
-
-					@Override
-					public void onFailure(Throwable ex) {
-						latch.countDown();
-					}
-				}
-		);
+		this.sockJsClient.execute(handler, this.baseUrl + "/echo").whenComplete((result, ex) -> {
+			if (ex != null) {
+				latch.countDown();
+			}
+		});
 		assertThat(latch.await(5000, TimeUnit.MILLISECONDS)).isTrue();
 	}
 
@@ -245,14 +237,13 @@ abstract class AbstractSockJsIntegrationTests {
 
 	@Test
 	@Timeout(5)
-	@SuppressWarnings("deprecation")
 	void fallbackAfterConnectTimeout() throws Exception {
 		TestClientHandler clientHandler = new TestClientHandler();
 		this.testFilter.sleepDelayMap.put("/xhr_streaming", 10000L);
 		this.testFilter.sendErrorMap.put("/xhr_streaming", 503);
 		initSockJsClient(createXhrTransport());
 		// this.sockJsClient.setConnectTimeoutScheduler(this.wac.getBean(ThreadPoolTaskScheduler.class));
-		WebSocketSession clientSession = sockJsClient.doHandshake(clientHandler, this.baseUrl + "/echo").get();
+		WebSocketSession clientSession = sockJsClient.execute(clientHandler, this.baseUrl + "/echo").get();
 		assertThat(clientSession.getClass()).as("Fallback didn't occur").isEqualTo(XhrClientSockJsSession.class);
 		TextMessage message = new TextMessage("message1");
 		clientSession.sendMessage(message);
@@ -261,7 +252,6 @@ abstract class AbstractSockJsIntegrationTests {
 	}
 
 
-	@SuppressWarnings("deprecation")
 	private void testEcho(int messageCount, Transport transport, WebSocketHttpHeaders headers) throws Exception {
 		List<TextMessage> messages = new ArrayList<>();
 		for (int i = 0; i < messageCount; i++) {
@@ -270,7 +260,7 @@ abstract class AbstractSockJsIntegrationTests {
 		TestClientHandler handler = new TestClientHandler();
 		initSockJsClient(transport);
 		URI url = URI.create(this.baseUrl + "/echo");
-		WebSocketSession session = this.sockJsClient.doHandshake(handler, headers, url).get();
+		WebSocketSession session = this.sockJsClient.execute(handler, headers, url).get();
 		for (TextMessage message : messages) {
 			session.sendMessage(message);
 		}
@@ -282,13 +272,10 @@ abstract class AbstractSockJsIntegrationTests {
 		session.close();
 	}
 
-	@SuppressWarnings("deprecation")
-	private void testReceiveOneMessage(Transport transport, WebSocketHttpHeaders headers)
-			throws Exception {
-
+	private void testReceiveOneMessage(Transport transport, WebSocketHttpHeaders headers) throws Exception {
 		TestClientHandler clientHandler = new TestClientHandler();
 		initSockJsClient(transport);
-		this.sockJsClient.doHandshake(clientHandler, headers, URI.create(this.baseUrl + "/test")).get();
+		this.sockJsClient.execute(clientHandler, headers, URI.create(this.baseUrl + "/test")).get();
 		TestServerHandler serverHandler = this.wac.getBean(TestServerHandler.class);
 
 		assertThat(clientHandler.session).as("afterConnectionEstablished should have been called").isNotNull();

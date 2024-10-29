@@ -44,7 +44,6 @@ import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * A simple implementation of Spring's {@link TaskScheduler} interface, using
@@ -270,15 +269,15 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 		return super.submit(new DelegatingErrorHandlingCallable<>(task, this.errorHandler));
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	@Override
-	public ListenableFuture<?> submitListenable(Runnable task) {
+	public org.springframework.util.concurrent.ListenableFuture<?> submitListenable(Runnable task) {
 		return super.submitListenable(TaskUtils.decorateTaskWithErrorHandler(task, this.errorHandler, false));
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	@Override
-	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
+	public <T> org.springframework.util.concurrent.ListenableFuture<T> submitListenable(Callable<T> task) {
 		return super.submitListenable(new DelegatingErrorHandlingCallable<>(task, this.errorHandler));
 	}
 

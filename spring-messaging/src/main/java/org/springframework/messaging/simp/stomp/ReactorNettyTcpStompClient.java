@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,9 +96,11 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @return a ListenableFuture for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(StompSessionHandler)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			StompSessionHandler handler) {
+
 		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
 				connectAsync(handler));
 	}
@@ -122,9 +124,11 @@ public class ReactorNettyTcpStompClient extends StompClientSupport {
 	 * @return a ListenableFuture for access to the session when ready for use
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(StompHeaders, StompSessionHandler)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public org.springframework.util.concurrent.ListenableFuture<StompSession> connect(
 			@Nullable StompHeaders connectHeaders, StompSessionHandler handler) {
+
 		ConnectionHandlingStompSession session = createSession(connectHeaders, handler);
 		this.tcpClient.connectAsync(session);
 		return session.getSessionFuture();

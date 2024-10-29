@@ -58,7 +58,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @see org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler
  * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
  */
-@SuppressWarnings({"serial", "deprecation"})
+@SuppressWarnings({"serial", "removal"})
 public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		implements AsyncListenableTaskExecutor, Serializable, AutoCloseable {
 
