@@ -21,6 +21,7 @@ import org.springframework.web.filter.reactive.UrlHandlerFilter
 
 class UrlHandlerFilterConfiguration {
 
+	@Suppress("UNUSED_VARIABLE")
 	fun configureUrlHandlerFilter() {
 		// tag::config[]
 		val urlHandlerFilter = UrlHandlerFilter
