@@ -220,7 +220,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * @param cf the current {@link CodeFlow}
 	 * @param member the method or constructor for which arguments are being set up
 	 * @param arguments the expression nodes for the expression supplied argument values
-	 * @deprecated As of Spring Framework 6.2, in favor of
+	 * @deprecated as of 6.2, in favor of
 	 * {@link #generateCodeForArguments(MethodVisitor, CodeFlow, Executable, SpelNodeImpl[])}
 	 */
 	@Deprecated(since = "6.2")
@@ -322,7 +322,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	 * <p>This method also performs any boxing, unboxing, or check-casting
 	 * necessary to ensure that the type of the argument on the stack matches the
 	 * supplied {@code paramDesc}.
-	 * @deprecated As of Spring Framework 6.2, in favor of
+	 * @deprecated as of 6.2, in favor of
 	 * {@link CodeFlow#generateCodeForArgument(MethodVisitor, SpelNode, String)}
 	 */
 	@Deprecated(since = "6.2")
