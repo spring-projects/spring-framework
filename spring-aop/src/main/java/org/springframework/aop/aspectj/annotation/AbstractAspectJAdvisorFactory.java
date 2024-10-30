@@ -136,7 +136,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 	private static boolean compiledByAjc(Class<?> clazz) {
 		for (Field field : clazz.getDeclaredFields()) {
-			System.out.println(clazz + ": " + field.getName());
 			if (field.getName().startsWith(AJC_MAGIC)) {
 				return true;
 			}
