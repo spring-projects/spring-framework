@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.core.MethodParameter;
 
 /**
- * Support for {@link ListenableFuture} as a return value type.
+ * Support for {@link org.springframework.util.concurrent.ListenableFuture} as a return value type.
  *
  * @author Sebastien Deleuze
  * @since 4.2
