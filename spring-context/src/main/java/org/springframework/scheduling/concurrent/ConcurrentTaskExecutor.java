@@ -62,7 +62,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @see DefaultManagedTaskExecutor
  * @see ThreadPoolTaskExecutor
  */
-@SuppressWarnings("removal")
+@SuppressWarnings({"deprecation", "removal"})
 public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
 
 	private static final Executor STUB_EXECUTOR = (task -> {

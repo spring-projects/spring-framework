@@ -147,7 +147,7 @@ class DefaultTransportRequest implements TransportRequest {
 
 
 	@Deprecated(since = "6.0", forRemoval = true)
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"deprecation", "removal"})
 	public void connect(WebSocketHandler handler,
 			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future) {
 
@@ -208,7 +208,7 @@ class DefaultTransportRequest implements TransportRequest {
 	 * to connect. Also implements {@code Runnable} to handle a scheduled timeout
 	 * callback.
 	 */
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"deprecation", "removal"})
 	private class ListenableConnectCallback implements
 			org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession>, Runnable {
 

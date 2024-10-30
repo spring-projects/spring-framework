@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Mattias Severson
  * @author Juergen Hoeller
  */
-@SuppressWarnings("removal")
+@SuppressWarnings({"deprecation", "removal"})
 class SettableListenableFutureTests {
 
 	private final SettableListenableFuture<String> settableListenableFuture = new SettableListenableFuture<>();

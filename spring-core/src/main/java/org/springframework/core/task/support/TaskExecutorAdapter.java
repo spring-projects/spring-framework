@@ -43,7 +43,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @see java.util.concurrent.ExecutorService
  * @see java.util.concurrent.Executors
  */
-@SuppressWarnings("removal")
+@SuppressWarnings({"deprecation", "removal"})
 public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 
 	private final Executor concurrentExecutor;

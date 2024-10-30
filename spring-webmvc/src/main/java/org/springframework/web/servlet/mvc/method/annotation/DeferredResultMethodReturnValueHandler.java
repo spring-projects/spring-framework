@@ -37,7 +37,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class DeferredResultMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"deprecation", "removal"})
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> type = returnType.getParameterType();
@@ -46,7 +46,7 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 				CompletionStage.class.isAssignableFrom(type));
 	}
 
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"deprecation", "removal"})
 	@Override
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
@@ -75,7 +75,7 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(result, mavContainer);
 	}
 
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"deprecation", "removal"})
 	private DeferredResult<Object> adaptListenableFuture(org.springframework.util.concurrent.ListenableFuture<?> future) {
 		DeferredResult<Object> result = new DeferredResult<>();
 		future.addCallback(new org.springframework.util.concurrent.ListenableFutureCallback<Object>() {

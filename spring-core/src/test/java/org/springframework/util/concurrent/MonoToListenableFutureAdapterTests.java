@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-@SuppressWarnings("removal")
+@SuppressWarnings({"deprecation", "removal"})
 class MonoToListenableFutureAdapterTests {
 
 	@Test

@@ -125,7 +125,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "deprecation", "removal" })
 	void submitListenableRunnable() {
 		TestTask task = new TestTask(this.testName, 1);
 		// Act
@@ -156,7 +156,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "deprecation", "removal" })
 	void submitFailingListenableRunnable() {
 		TestTask task = new TestTask(this.testName, 0);
 		org.springframework.util.concurrent.ListenableFuture<?> future = executor.submitListenable(task);
@@ -185,7 +185,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "deprecation", "removal" })
 	void submitListenableRunnableWithGetAfterShutdown() throws Exception {
 		org.springframework.util.concurrent.ListenableFuture<?> future1 = executor.submitListenable(new TestTask(this.testName, -1));
 		org.springframework.util.concurrent.ListenableFuture<?> future2 = executor.submitListenable(new TestTask(this.testName, -1));
@@ -260,7 +260,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "deprecation", "removal" })
 	void submitListenableCallable() {
 		TestCallable task = new TestCallable(this.testName, 1);
 		// Act
@@ -275,7 +275,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "deprecation", "removal" })
 	void submitFailingListenableCallable() {
 		TestCallable task = new TestCallable(this.testName, 0);
 		// Act
@@ -291,7 +291,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "deprecation", "removal" })
 	void submitListenableCallableWithGetAfterShutdown() throws Exception {
 		org.springframework.util.concurrent.ListenableFuture<?> future1 = executor.submitListenable(new TestCallable(this.testName, -1));
 		org.springframework.util.concurrent.ListenableFuture<?> future2 = executor.submitListenable(new TestCallable(this.testName, -1));

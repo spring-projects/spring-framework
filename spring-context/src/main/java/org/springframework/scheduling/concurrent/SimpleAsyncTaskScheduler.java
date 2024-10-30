@@ -269,13 +269,13 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 		return super.submit(new DelegatingErrorHandlingCallable<>(task, this.errorHandler));
 	}
 
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"deprecation", "removal"})
 	@Override
 	public org.springframework.util.concurrent.ListenableFuture<?> submitListenable(Runnable task) {
 		return super.submitListenable(TaskUtils.decorateTaskWithErrorHandler(task, this.errorHandler, false));
 	}
 
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"deprecation", "removal"})
 	@Override
 	public <T> org.springframework.util.concurrent.ListenableFuture<T> submitListenable(Callable<T> task) {
 		return super.submitListenable(new DelegatingErrorHandlingCallable<>(task, this.errorHandler));

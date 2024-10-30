@@ -334,7 +334,7 @@ class AsyncTests {
 		}
 
 		@RequestMapping(params = "listenableFuture")
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings({"deprecation", "removal"})
 		org.springframework.util.concurrent.ListenableFuture<Person> getListenableFuture() {
 			org.springframework.util.concurrent.ListenableFutureTask<Person> futureTask =
 					new org.springframework.util.concurrent.ListenableFutureTask<>(() -> new Person("Joe"));

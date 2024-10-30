@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class AsyncResultTests {
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "deprecation", "removal" })
 	public void asyncResultWithCallbackAndValue() throws Exception {
 		String value = "val";
 		final Set<String> values = new HashSet<>(1);
@@ -54,7 +54,7 @@ class AsyncResultTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "deprecation", "removal" })
 	public void asyncResultWithCallbackAndException() {
 		IOException ex = new IOException();
 		final Set<Throwable> values = new HashSet<>(1);
@@ -71,15 +71,15 @@ class AsyncResultTests {
 		});
 		assertThat(values).singleElement().isSameAs(ex);
 		assertThatExceptionOfType(ExecutionException.class)
-			.isThrownBy(future::get)
-			.withCause(ex);
+				.isThrownBy(future::get)
+				.withCause(ex);
 		assertThatExceptionOfType(ExecutionException.class)
-			.isThrownBy(future.completable()::get)
-			.withCause(ex);
+				.isThrownBy(future.completable()::get)
+				.withCause(ex);
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "deprecation", "removal" })
 	public void asyncResultWithSeparateCallbacksAndValue() throws Exception {
 		String value = "val";
 		final Set<String> values = new HashSet<>(1);
@@ -92,7 +92,7 @@ class AsyncResultTests {
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "deprecation", "removal" })
 	public void asyncResultWithSeparateCallbacksAndException() {
 		IOException ex = new IOException();
 		final Set<Throwable> values = new HashSet<>(1);
@@ -100,11 +100,11 @@ class AsyncResultTests {
 		future.addCallback(result -> new AssertionError("Success callback not expected: " + result), values::add);
 		assertThat(values).singleElement().isSameAs(ex);
 		assertThatExceptionOfType(ExecutionException.class)
-			.isThrownBy(future::get)
-			.withCause(ex);
+				.isThrownBy(future::get)
+				.withCause(ex);
 		assertThatExceptionOfType(ExecutionException.class)
-			.isThrownBy(future.completable()::get)
-			.withCause(ex);
+				.isThrownBy(future.completable()::get)
+				.withCause(ex);
 	}
 
 }

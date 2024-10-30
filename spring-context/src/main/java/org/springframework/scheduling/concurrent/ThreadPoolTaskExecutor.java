@@ -80,7 +80,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @see ThreadPoolExecutorFactoryBean
  * @see ConcurrentTaskExecutor
  */
-@SuppressWarnings({"serial", "removal"})
+@SuppressWarnings({"serial", "deprecation", "removal"})
 public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
 

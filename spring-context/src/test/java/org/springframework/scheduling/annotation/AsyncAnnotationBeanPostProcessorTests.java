@@ -275,7 +275,7 @@ class AsyncAnnotationBeanPostProcessorTests {
 
 		Future<Object> failWithFuture();
 
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings({"deprecation", "removal"})
 		org.springframework.util.concurrent.ListenableFuture<Object> failWithListenableFuture();
 
 		void failWithVoid();
@@ -310,7 +310,7 @@ class AsyncAnnotationBeanPostProcessorTests {
 
 		@Async
 		@Override
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings({"deprecation", "removal"})
 		public org.springframework.util.concurrent.ListenableFuture<Object> failWithListenableFuture() {
 			throw new UnsupportedOperationException("failWithListenableFuture");
 		}
