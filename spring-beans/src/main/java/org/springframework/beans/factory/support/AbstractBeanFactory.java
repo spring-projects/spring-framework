@@ -128,7 +128,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Custom PropertyEditorRegistrars to apply to the beans of this factory.
-	 * 要应用到此工厂的bean的自定义PropertyEditorRegistors
+	 * 要应用到此工厂的bean的自定义PropertyEditorRegistrars
 	 */
 	private final Set<PropertyEditorRegistrar> propertyEditorRegistrars = new LinkedHashSet<>(4);
 

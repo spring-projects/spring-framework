@@ -24,6 +24,10 @@ import org.springframework.lang.Nullable;
  * level in a standard Spring XML bean definition document:
  * {@code default-lazy-init}, {@code default-autowire}, etc.
  *
+ * <p>文档默认值定义(DocumentDefaultsDefinition)
+ * <p>简单的JavaBean, 它在标准Spring XML bean定义文档中的{@code <beans>}级别上指定默认值：
+ * {@code default-lazy-init}、{@code default-autowire}等等。
+ *
  * @author Juergen Hoeller
  * @since 2.0.2
  */
@@ -107,6 +111,7 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 	/**
 	 * Return the default autowire-candidate pattern for the document that's currently parsed.
 	 * May also return a comma-separated list of patterns.
+	 * 返回当前解析的文档的默认自动连接候选模式。也可以返回以逗号分隔的模式列表。
 	 */
 	@Nullable
 	public String getAutowireCandidates() {

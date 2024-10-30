@@ -123,8 +123,8 @@ public interface ConfigurableListableBeanFactory extends ListableBeanFactory, Au
 	 * be castable to a more specific implementation type, if necessary.
 	 * <p><b>NOTE:</b> This method does <i>not</i> consider ancestor factories.
 	 * It is only meant for accessing local bean definitions of this factory.
-	 * 返回指定bean的注册BeanDefinition，允许访问其属性值和构造函数参数值（可以在bean工厂后期处理期间进行修改）
-	 * 返回的BeanDefinition对象不应是副本，而应是在工厂中注册的原始定义对象。这意味着，如果需要，它应该可转换为更具体的实现类型
+	 * <p>返回指定bean的注册BeanDefinition，允许访问其属性值和构造函数参数值（可以在bean工厂后期处理期间进行修改）
+	 * <p>返回的BeanDefinition对象不应是副本，而应是在工厂中注册的原始定义对象。这意味着，如果需要，它应该可转换为更具体的实现类型
 	 * <b>注意：<b>此方法不考虑祖先工厂。它只用于访问该工厂的本地bean定义。
 	 *
 	 * @param beanName the name of the bean
@@ -139,8 +139,8 @@ public interface ConfigurableListableBeanFactory extends ListableBeanFactory, Au
 	 * <p>Includes bean definition names as well as names of manually registered
 	 * singleton instances, with bean definition names consistently coming first,
 	 * analogous to how type/annotation specific retrieval of bean names works.
-	 * 返回由该工厂管理的所有bean名称的统一视图
-	 * 包括bean定义名称以及手动注册的singleton实例的名称，bean定义名称始终排在第一位，类似于bean名称的type/annotation特定检索的工作方式。
+	 * <p>返回由该工厂管理的所有bean名称的统一视图
+	 * <p>包括bean定义名称以及手动注册的singleton实例的名称，bean定义名称始终排在第一位，类似于bean名称的type/annotation特定检索的工作方式。
 	 *
 	 * @return the composite iterator for the bean names view
 	 * @see #containsBeanDefinition
@@ -157,8 +157,8 @@ public interface ConfigurableListableBeanFactory extends ListableBeanFactory, Au
 	 * <p>Typically triggered after changes to the original bean definitions,
 	 * e.g. after applying a {@link BeanFactoryPostProcessor}. Note that metadata
 	 * for beans which have already been created at this point will be kept around.
-	 * 清除合并的bean定义缓存，删除尚未被认为符合完全元数据缓存条件的bean的条目
-	 * 通常在更改原始bean定义之后触发，例如在应用{@link BeanFactoryPostProcessor}之后。请注意，此时已经创建的bean的元数据将保留下来。
+	 * <p>清除合并的bean定义缓存，删除尚未被认为符合完全元数据缓存条件的bean的条目
+	 * <p>通常在更改原始bean定义之后触发，例如在应用{@link BeanFactoryPostProcessor}之后。请注意，此时已经创建的bean的元数据将保留下来。
 	 *
 	 * @see #getBeanDefinition
 	 * @see #getMergedBeanDefinition
@@ -170,15 +170,15 @@ public interface ConfigurableListableBeanFactory extends ListableBeanFactory, Au
 	 * Freeze all bean definitions, signalling that the registered bean definitions
 	 * will not be modified or post-processed any further.
 	 * <p>This allows the factory to aggressively cache bean definition metadata.
-	 * 冻结所有bean定义，表示注册的bean定义将不会被进一步修改或后处理
-	 * 这允许工厂积极地缓存bean定义元数据。
+	 * <p>冻结所有bean定义，表示注册的bean定义将不会被进一步修改或后处理
+	 * <p>这允许工厂积极地缓存bean定义元数据。
 	 */
 	void freezeConfiguration();
 
 	/**
 	 * Return whether this factory's bean definitions are frozen,
 	 * i.e. are not supposed to be modified or post-processed any further.
-	 * 返回这个工厂的bean定义是否被冻结，即不应该被进一步修改或后处理
+	 * <p>返回这个工厂的bean定义是否被冻结，即不应该被进一步修改或后处理
 	 *
 	 * @return {@code true} if the factory's configuration is considered frozen
 	 */
@@ -188,8 +188,8 @@ public interface ConfigurableListableBeanFactory extends ListableBeanFactory, Au
 	 * Ensure that all non-lazy-init singletons are instantiated, also considering
 	 * {@link org.springframework.beans.factory.FactoryBean FactoryBeans}.
 	 * Typically invoked at the end of factory setup, if desired.
-	 * 确保所有非惰性init singleton都已实例化，同时考虑{@link org.springframework.beans.factory.FactoryBean FactoryBeans}。
-	 * 如果需要，通常在工厂设置结束时调用。
+	 * <p>确保所有非惰性init singleton都已实例化，同时考虑{@link org.springframework.beans.factory.FactoryBean FactoryBeans}。
+	 * <p>如果需要，通常在工厂设置结束时调用。
 	 *
 	 * @throws BeansException if one of the singleton beans could not be created.
 	 *                        Note: This may have left the factory with some beans already initialized!

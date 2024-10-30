@@ -393,6 +393,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Return the current bean class name of this bean definition.
+	 * 返回此bean定义的当前bean类名
 	 */
 	@Override
 	@Nullable
@@ -1141,7 +1142,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Validate this bean definition.
-	 *
+	 * 验证这个bean定义
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void validate() throws BeanDefinitionValidationException {

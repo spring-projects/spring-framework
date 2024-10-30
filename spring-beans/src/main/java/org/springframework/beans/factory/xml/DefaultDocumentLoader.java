@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
+import com.sun.org.apache.xalan.internal.xsltc.DOM;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.Nullable;
@@ -73,7 +74,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 */
 	@Override
 	public Document loadDocument(InputSource inputSource, EntityResolver entityResolver, ErrorHandler errorHandler, int validationMode, boolean namespaceAware) throws Exception {
-
+		// 创建文档生成器工厂
 		DocumentBuilderFactory factory = createDocumentBuilderFactory(validationMode, namespaceAware);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Using JAXP provider [" + factory.getClass().getName() + "]");
@@ -93,16 +94,25 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 * @throws ParserConfigurationException if we failed to build a proper DocumentBuilderFactory
 	 */
 	protected DocumentBuilderFactory createDocumentBuilderFactory(int validationMode, boolean namespaceAware) throws ParserConfigurationException {
-
+		// DocumentBuilderFactory 是 Java 标准库中 javax.xml.parsers 包下的一个类，用于创建 DocumentBuilder 对象。
+		// DocumentBuilder 用于解析 XML 文档并将其转换为DOM（Document Object Model）树结构。
+		// 创建 DocumentBuilder:
+		// DocumentBuilderFactory 提供了配置和创建 DocumentBuilder 的方法。
+		// DocumentBuilder 用于解析 XML 文档并生成 DOM 树。
+		// 配置解析器:
+		// DocumentBuilderFactory 允许你设置各种解析选项，如命名空间支持、验证等。
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(namespaceAware);
 
 		if (validationMode != XmlValidationModeDetector.VALIDATION_NONE) {
+			// 设置是否启用 XML 验证
 			factory.setValidating(true);
 			if (validationMode == XmlValidationModeDetector.VALIDATION_XSD) {
 				// Enforce namespace aware for XSD...
+				// 设置是否启用命名空间支持
 				factory.setNamespaceAware(true);
 				try {
+					// K: 用于配置模式语言以进行验证的JAXP属性  V: 指示XSD模式语言的JAXP属性值
 					factory.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
 				} catch (IllegalArgumentException ex) {
 					ParserConfigurationException pcex = new ParserConfigurationException(
@@ -132,7 +142,12 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 * @throws ParserConfigurationException if thrown by JAXP methods
 	 */
 	protected DocumentBuilder createDocumentBuilder(DocumentBuilderFactory factory, @Nullable EntityResolver entityResolver, @Nullable ErrorHandler errorHandler) throws ParserConfigurationException {
-
+		// 创建 DocumentBuilder 实例
+		// DocumentBuilder 是 Java 标准库中 javax.xml.parsers 包下的一个接口，用于解析 XML 文档并将其转换为 DOM（Document Object Model）树结构。
+		// DocumentBuilder 通常通过 DocumentBuilderFactory 创建。
+		// 解析 XML 文档：
+		// DocumentBuilder 提供了多种方法来解析 XML 文档，包括从文件、输入流、URI 等来源解析。
+		// 解析后的 XML 文档被表示为一个 Document 对象，该对象是一个 DOM 树结构。
 		DocumentBuilder docBuilder = factory.newDocumentBuilder();
 		if (entityResolver != null) {
 			docBuilder.setEntityResolver(entityResolver);
