@@ -72,10 +72,4 @@ public @interface Contract {
 	 * Contains the contract clauses describing causal relations between call arguments and the returned value.
 	 */
 	String value() default "";
-
-	/**
-	 * Specifies if this method is pure, i.e. has no visible side effects. This may be used for more precise data flow analysis, and
-	 * to check that the method's return value is actually used in the call place.
-	 */
-	boolean pure() default false;
 }
