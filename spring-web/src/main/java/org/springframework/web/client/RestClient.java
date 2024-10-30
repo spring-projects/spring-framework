@@ -44,6 +44,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.CheckReturnValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -644,6 +645,7 @@ public interface RestClient {
 		 * {@link ResponseSpec#onStatus(Predicate, ResponseSpec.ErrorHandler) onStatus} handlers.
 		 * @return {@code ResponseSpec} to specify how to decode the body
 		 */
+		@CheckReturnValue
 		ResponseSpec retrieve();
 
 		/**
