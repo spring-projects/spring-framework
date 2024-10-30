@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.bean.override.mockito.integration;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockingDetails;
@@ -27,7 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.example.ExampleGenericServiceCaller;
 import org.springframework.test.context.bean.override.example.IntegerExampleGenericService;
 import org.springframework.test.context.bean.override.example.StringExampleGenericService;
@@ -49,8 +47,6 @@ import static org.mockito.Mockito.mockingDetails;
  * @see MockitoBeanWithMultipleExistingBeansAndExplicitBeanNameIntegrationTests
  * @see MockitoBeanWithMultipleExistingBeansAndExplicitQualifierIntegrationTests
  */
-@Disabled("Disabled until @Primary is supported for BeanOverrideStrategy.REPLACE_OR_CREATE")
-@DisabledInAotMode
 @ExtendWith(SpringExtension.class)
 class MockitoBeanWithMultipleExistingBeansAndOnePrimaryIntegrationTests {
 

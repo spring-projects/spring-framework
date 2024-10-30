@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -42,6 +43,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.mock;
@@ -165,6 +167,41 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		context.refresh();
 
 		assertThat(context.getBean("counter")).isSameAs(42);
+	}
+
+	@Test  // gh-33819
+	void replaceBeanByTypeWithMultipleCandidatesAndOnePrimary() {
+		AnnotationConfigApplicationContext context = createContext(TestBeanByTypeTestCase.class);
+		context.registerBean("description1", String.class, () -> "one");
+		RootBeanDefinition beanDefinition2 = new RootBeanDefinition(String.class);
+		beanDefinition2.getConstructorArgumentValues().addIndexedArgumentValue(0, "two");
+		beanDefinition2.setPrimary(true);
+		context.registerBeanDefinition("description2", beanDefinition2);
+		context.refresh();
+
+		assertThat(context.getBean("description1", String.class)).isEqualTo("one");
+		assertThat(context.getBean("description2", String.class)).isEqualTo("overridden");
+		assertThat(context.getBean(String.class)).isEqualTo("overridden");
+	}
+
+	@Test  // gh-33819
+	void replaceBeanByTypeWithMultipleCandidatesAndMultiplePrimaryBeansFails() {
+		AnnotationConfigApplicationContext context = createContext(TestBeanByTypeTestCase.class);
+
+		RootBeanDefinition beanDefinition1 = new RootBeanDefinition(String.class);
+		beanDefinition1.getConstructorArgumentValues().addIndexedArgumentValue(0, "one");
+		beanDefinition1.setPrimary(true);
+		context.registerBeanDefinition("description1", beanDefinition1);
+
+		RootBeanDefinition beanDefinition2 = new RootBeanDefinition(String.class);
+		beanDefinition2.getConstructorArgumentValues().addIndexedArgumentValue(0, "two");
+		beanDefinition2.setPrimary(true);
+		context.registerBeanDefinition("description2", beanDefinition2);
+
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
+				.isThrownBy(context::refresh)
+				.withMessage("No qualifying bean of type 'java.lang.String' available: " +
+						"more than one 'primary' bean found among candidates: [description1, description2]");
 	}
 
 	@Test
@@ -424,6 +461,16 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		private String description;
 
 		static String descriptionBean() {
+			return "overridden";
+		}
+	}
+
+	static class TestBeanByTypeTestCase {
+
+		@TestBean
+		String description;
+
+		static String description() {
 			return "overridden";
 		}
 	}
