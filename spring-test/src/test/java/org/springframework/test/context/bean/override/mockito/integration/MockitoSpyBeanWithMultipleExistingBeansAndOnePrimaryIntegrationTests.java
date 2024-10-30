@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.example.ExampleGenericServiceCaller;
 import org.springframework.test.context.bean.override.example.IntegerExampleGenericService;
 import org.springframework.test.context.bean.override.example.StringExampleGenericService;
@@ -48,6 +49,7 @@ import static org.mockito.Mockito.mockingDetails;
  * @see MockitoSpyBeanWithMultipleExistingBeansAndExplicitQualifierIntegrationTests
  */
 @Disabled("Disabled until @Primary is supported for @MockitoSpyBean")
+@DisabledInAotMode
 @ExtendWith(SpringExtension.class)
 class MockitoSpyBeanWithMultipleExistingBeansAndOnePrimaryIntegrationTests {
 
