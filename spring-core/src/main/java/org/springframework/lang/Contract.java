@@ -23,11 +23,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Inspired from {@code org.jetbrains.annotations.Contract}, this variant has been introduce in the
- * {@code org.springframework.lang} package to avoid requiring an extra dependency, while still following the same semantics.
+ * <p>Specifies some aspects of the method behavior depending on the arguments.
+ * Can be used by tools for advanced data flow analysis. Note that this annotation
+ * just describes how the code works and doesn't add any functionality by means of
+ * code generation.
  *
- * <p>Specifies some aspects of the method behavior depending on the arguments. Can be used by tools for advanced data flow analysis.
- * Note that this annotation just describes how the code works and doesn't add any functionality by means of code generation.
+ * <p>Inspired from {@code org.jetbrains.annotations.Contract}, this variant has
+ * been introduce in the {@code org.springframework.lang} package to avoid requiring
+ * an extra dependency, while still following the same semantics.
  *
  * <p>Method contract has the following syntax:<br/>
  *  contract ::= (clause ';')* clause<br/>
@@ -39,21 +42,26 @@ import java.lang.annotation.Target;
  *
  * The constraints denote the following:<br/>
  * <ul>
- * <li> _ - any value
- * <li> null - null value
- * <li> !null - a value statically proved to be not-null
- * <li> true - true boolean value
- * <li> false - false boolean value
- * <li> fail - the method throws an exception, if the arguments satisfy argument constraints
+ * <li> <code>_</code> - any value</li>
+ * <li> <code>null</code> - null value</li>
+ * <li> <code>!null</code> - a value statically proved to be not-null</li>
+ * <li> <code>true</code> - true boolean value</li>
+ * <li> <code>false</code> - false boolean value</li>
+ * <li> <code>fail</code> - the method throws an exception, if the arguments satisfy argument
+ * constraints</li>
  * </ul>
  * <p>Examples:
- * <code>@Contract("_, null -> null")</code> - method returns null if its second argument is null<br/>
- * <code>@Contract("_, null -> null; _, !null -> !null")</code> - method returns null if its second argument is null and not-null otherwise<br/>
- * <code>@Contract("true -> fail")</code> - a typical assertFalse method which throws an exception if <code>true</code> is passed to it<br/>
+ * <code>@Contract("_, null -> null")</code> - method returns null if its second
+ * argument is null<br/>
+ * <code>@Contract("_, null -> null; _, !null -> !null")</code> - method returns
+ * null if its second argument is null and not-null otherwise<br/>
+ * <code>@Contract("true -> fail")</code> - a typical assertFalse method which
+ * throws an exception if <code>true</code> is passed to it<br/>
  *
  * @author Sebastien Deleuze
  * @since 6.2
- * @see <a href="https://github.com/uber/NullAway/wiki/Configuration#custom-contract-annotations">NullAway custom contract annotations</a>
+ * @see <a href="https://github.com/uber/NullAway/wiki/Configuration#custom-contract-annotations">
+ * NullAway custom contract annotations</a>
  */
 @Documented
 @Retention(RetentionPolicy.CLASS)
