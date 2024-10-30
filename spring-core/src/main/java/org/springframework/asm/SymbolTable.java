@@ -221,7 +221,9 @@ final class SymbolTable {
               classReader.readByte(itemOffset),
               classReader.readClass(memberRefItemOffset, charBuffer),
               classReader.readUTF8(nameAndTypeItemOffset, charBuffer),
-              classReader.readUTF8(nameAndTypeItemOffset + 2, charBuffer));
+              classReader.readUTF8(nameAndTypeItemOffset + 2, charBuffer),
+              classReader.readByte(memberRefItemOffset - 1)
+                  == Symbol.CONSTANT_INTERFACE_METHODREF_TAG);
           break;
         case Symbol.CONSTANT_DYNAMIC_TAG:
         case Symbol.CONSTANT_INVOKE_DYNAMIC_TAG:
@@ -830,14 +832,15 @@ final class SymbolTable {
       final String descriptor,
       final boolean isInterface) {
     final int tag = Symbol.CONSTANT_METHOD_HANDLE_TAG;
+    final int data = getConstantMethodHandleSymbolData(referenceKind, isInterface);
     // Note that we don't need to include isInterface in the hash computation, because it is
     // redundant with owner (we can't have the same owner with different isInterface values).
-    int hashCode = hash(tag, owner, name, descriptor, referenceKind);
+    int hashCode = hash(tag, owner, name, descriptor, data);
     Entry entry = get(hashCode);
     while (entry != null) {
       if (entry.tag == tag
           && entry.hashCode == hashCode
-          && entry.data == referenceKind
+          && entry.data == data
           && entry.owner.equals(owner)
           && entry.name.equals(name)
           && entry.value.equals(descriptor)) {
@@ -851,8 +854,7 @@ final class SymbolTable {
       constantPool.put112(
           tag, referenceKind, addConstantMethodref(owner, name, descriptor, isInterface).index);
     }
-    return put(
-        new Entry(constantPoolCount++, tag, owner, name, descriptor, referenceKind, hashCode));
+    return put(new Entry(constantPoolCount++, tag, owner, name, descriptor, data, hashCode));
   }
 
   /**
@@ -866,16 +868,36 @@ final class SymbolTable {
    * @param owner the internal name of a class of interface.
    * @param name a field or method name.
    * @param descriptor a field or method descriptor.
+   * @param isInterface whether owner is an interface or not.
    */
   private void addConstantMethodHandle(
       final int index,
       final int referenceKind,
       final String owner,
       final String name,
-      final String descriptor) {
+      final String descriptor,
+      final boolean isInterface) {
     final int tag = Symbol.CONSTANT_METHOD_HANDLE_TAG;
-    int hashCode = hash(tag, owner, name, descriptor, referenceKind);
-    add(new Entry(index, tag, owner, name, descriptor, referenceKind, hashCode));
+    final int data = getConstantMethodHandleSymbolData(referenceKind, isInterface);
+    int hashCode = hash(tag, owner, name, descriptor, data);
+    add(new Entry(index, tag, owner, name, descriptor, data, hashCode));
+  }
+
+  /**
+   * Returns the {@link Symbol#data} field for a CONSTANT_MethodHandle_info Symbol.
+   *
+   * @param referenceKind one of {@link Opcodes#H_GETFIELD}, {@link Opcodes#H_GETSTATIC}, {@link
+   *     Opcodes#H_PUTFIELD}, {@link Opcodes#H_PUTSTATIC}, {@link Opcodes#H_INVOKEVIRTUAL}, {@link
+   *     Opcodes#H_INVOKESTATIC}, {@link Opcodes#H_INVOKESPECIAL}, {@link
+   *     Opcodes#H_NEWINVOKESPECIAL} or {@link Opcodes#H_INVOKEINTERFACE}.
+   * @param isInterface whether owner is an interface or not.
+   */
+  private static int getConstantMethodHandleSymbolData(
+      final int referenceKind, final boolean isInterface) {
+    if (referenceKind > Opcodes.H_PUTSTATIC && isInterface) {
+      return referenceKind << 8;
+    }
+    return referenceKind;
   }
 
   /**

@@ -188,13 +188,14 @@ public class ClassReader {
    * @param classFileOffset the offset in byteBuffer of the first byte of the ClassFile to be read.
    * @param checkClassVersion whether to check the class version or not.
    */
+  @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
   ClassReader(
       final byte[] classFileBuffer, final int classFileOffset, final boolean checkClassVersion) {
     this.classFileBuffer = classFileBuffer;
     this.b = classFileBuffer;
     // Check the class' major_version. This field is after the magic and minor_version fields, which
     // use 4 and 2 bytes respectively.
-    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V23) {
+    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V24) {
       throw new IllegalArgumentException(
           "Unsupported class file major version " + readShort(classFileOffset + 6));
     }
@@ -340,7 +341,7 @@ public class ClassReader {
   private static int computeBufferSize(final InputStream inputStream) throws IOException {
     int expectedLength = inputStream.available();
     /*
-     * Some implementations can return 0 while holding available data (for example, new
+     * Some implementations can return 0 while holding available data (e.g. new
      * FileInputStream("/proc/a_file")). Also in some pathological cases a very small number might
      * be returned, and in this case we use a default size.
      */
@@ -2311,7 +2312,7 @@ public class ClassReader {
           {
             // A forward jump with an offset > 32767. In this case we automatically replace ASM_GOTO
             // with GOTO_W, ASM_JSR with JSR_W and ASM_IFxxx <l> with IFNOTxxx <L> GOTO_W <l> L:...,
-            // where IFNOTxxx is the "opposite" opcode of ASMS_IFxxx (for example, IFNE for ASM_IFEQ) and
+            // where IFNOTxxx is the "opposite" opcode of ASMS_IFxxx (e.g. IFNE for ASM_IFEQ) and
             // where <L> designates the instruction just after the GOTO_W.
             // First, change the ASM specific opcodes ASM_IFEQ ... ASM_JSR, ASM_IFNULL and
             // ASM_IFNONNULL to IFEQ ... JSR, IFNULL and IFNONNULL.
@@ -3601,6 +3602,20 @@ public class ClassReader {
    */
   public int readByte(final int offset) {
     return classFileBuffer[offset] & 0xFF;
+  }
+
+  /**
+   * Reads several bytes in this {@link ClassReader}. <i>This method is intended for {@link
+   * Attribute} sub classes, and is normally not needed by class generators or adapters.</i>
+   *
+   * @param offset the start offset of the bytes to be read in this {@link ClassReader}.
+   * @param length the number of bytes to read.
+   * @return the read bytes.
+   */
+  public byte[] readBytes(final int offset, final int length) {
+    byte[] result = new byte[length];
+    System.arraycopy(classFileBuffer, offset, result, 0, length);
+    return result;
   }
 
   /**

@@ -264,13 +264,7 @@ public class ClassWriter extends ClassVisitor {
     super(/* latest api = */ Opcodes.ASM9);
     this.flags = flags;
     symbolTable = classReader == null ? new SymbolTable(this) : new SymbolTable(this, classReader);
-    if ((flags & COMPUTE_FRAMES) != 0) {
-      compute = MethodWriter.COMPUTE_ALL_FRAMES;
-    } else if ((flags & COMPUTE_MAXS) != 0) {
-      compute = MethodWriter.COMPUTE_MAX_STACK_AND_LOCAL;
-    } else {
-      compute = MethodWriter.COMPUTE_NOTHING;
-    }
+    setFlags(flags);
   }
 
   // -----------------------------------------------------------------------------------------------
@@ -1018,6 +1012,28 @@ public class ClassWriter extends ClassVisitor {
    */
   public int newNameType(final String name, final String descriptor) {
     return symbolTable.addConstantNameAndType(name, descriptor);
+  }
+
+  /**
+   * Changes the computation strategy of method properties like max stack size, max number of local
+   * variables, and frames.
+   *
+   * <p><b>WARNING</b>: {@link #setFlags(int)} method changes the behavior of new method visitors
+   * returned from {@link #visitMethod(int, String, String, String, String[])}. The behavior will be
+   * changed only after the next method visitor is returned. All the previously returned method
+   * visitors keep their previous behavior.
+   *
+   * @param flags option flags that can be used to modify the default behavior of this class. Must
+   *     be zero or more of {@link #COMPUTE_MAXS} and {@link #COMPUTE_FRAMES}.
+   */
+  public final void setFlags(final int flags) {
+    if ((flags & ClassWriter.COMPUTE_FRAMES) != 0) {
+      compute = MethodWriter.COMPUTE_ALL_FRAMES;
+    } else if ((flags & ClassWriter.COMPUTE_MAXS) != 0) {
+      compute = MethodWriter.COMPUTE_MAX_STACK_AND_LOCAL;
+    } else {
+      compute = MethodWriter.COMPUTE_NOTHING;
+    }
   }
 
   // -----------------------------------------------------------------------------------------------
