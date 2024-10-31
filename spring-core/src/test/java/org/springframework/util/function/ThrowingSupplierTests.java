@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Tests for {@link ThrowingSupplier}.
  *
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 6.0
  */
 class ThrowingSupplierTests {
@@ -75,6 +77,12 @@ class ThrowingSupplierTests {
 				this::throwIOException, IllegalStateException::new);
 		assertThatIllegalStateException().isThrownBy(
 				supplier::get).withCauseInstanceOf(IOException.class);
+	}
+
+	@Test
+	void checked() {
+		ThrowingSupplier<Object> supplier = ThrowingSupplier.of(this::throwIOException).checked();
+		assertThatIOException().isThrownBy(supplier::get);
 	}
 
 	private Object throwIOException() throws IOException {

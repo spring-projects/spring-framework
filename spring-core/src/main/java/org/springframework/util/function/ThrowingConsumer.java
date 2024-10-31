@@ -19,12 +19,15 @@ package org.springframework.util.function;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+import static org.springframework.util.function.ThrowingFunction.throwAsUnchecked;
+
 /**
  * A {@link Consumer} that allows invocation of code that throws a checked
  * exception.
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 6.0
  * @param <T> the type of the input to the operation
  */
@@ -84,6 +87,32 @@ public interface ThrowingConsumer<T> extends Consumer<T> {
 			@Override
 			public void accept(T t) {
 				accept(t, exceptionWrapper);
+			}
+		};
+	}
+
+	/**
+	 * Return a new {@link ThrowingConsumer} where the {@link #accept(Object)}
+	 * method will throw original checked exceptions.
+	 * @return the replacement {@link ThrowingConsumer} instance
+	 */
+	@SuppressWarnings("NullAway")
+	default ThrowingConsumer<T> checked() {
+		ThrowingConsumer<T> consumer = this;
+		return new ThrowingConsumer<>() {
+			@Override
+			public void acceptWithException(T t) throws Exception {
+				consumer.acceptWithException(t);
+			}
+
+			@Override
+			public void accept(T t) {
+				try {
+					consumer.acceptWithException(t);
+				}
+				catch (Exception ex) {
+					throwAsUnchecked(ex);
+				}
 			}
 		};
 	}

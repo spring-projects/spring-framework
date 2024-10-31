@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Tests for {@link ThrowingFunction}.
  *
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 6.0
  */
 class ThrowingFunctionTests {
@@ -74,6 +76,12 @@ class ThrowingFunctionTests {
 				this::throwIOException, IllegalStateException::new);
 		assertThatIllegalStateException().isThrownBy(
 				() -> function.apply(this)).withCauseInstanceOf(IOException.class);
+	}
+
+	@Test
+	void checked() {
+		ThrowingFunction<Object, Object> function = ThrowingFunction.of(this::throwIOException).checked();
+		assertThatIOException().isThrownBy(() -> function.apply(this));
 	}
 
 	private Object throwIOException(Object o) throws IOException {

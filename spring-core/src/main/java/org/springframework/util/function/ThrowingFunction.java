@@ -25,6 +25,7 @@ import java.util.function.Function;
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 6.0
  * @param <T> the type of the input to the function
  * @param <R> the type of the result of the function
@@ -92,6 +93,33 @@ public interface ThrowingFunction<T, R> extends Function<T, R> {
 	}
 
 	/**
+	 * Return a new {@link ThrowingFunction} where the {@link #apply(Object)}
+	 * method will throw original checked exceptions.
+	 * @return the replacement {@link ThrowingFunction} instance
+	 */
+	@SuppressWarnings("NullAway")
+	default ThrowingFunction<T, R> checked() {
+		ThrowingFunction<T, R> function = this;
+		return new ThrowingFunction<>() {
+			@Override
+			public R applyWithException(T t) throws Exception {
+				return function.applyWithException(t);
+			}
+
+			@Override
+			public R apply(T t) {
+				try {
+					return function.applyWithException(t);
+				}
+				catch (Exception ex) {
+					throwAsUnchecked(ex);
+					return null; // Never happens
+				}
+			}
+		};
+	}
+
+	/**
 	 * Lambda friendly convenience method that can be used to create a
 	 * {@link ThrowingFunction} where the {@link #apply(Object)} method wraps
 	 * any checked exception thrown by the supplied lambda expression or method
@@ -133,6 +161,11 @@ public interface ThrowingFunction<T, R> extends Function<T, R> {
 			BiFunction<String, Exception, RuntimeException> exceptionWrapper) {
 
 		return function.throwing(exceptionWrapper);
+	}
+
+	@SuppressWarnings ("unchecked")
+	static <E extends Throwable> void throwAsUnchecked(Exception exception) throws E {
+		throw (E) exception;
 	}
 
 }

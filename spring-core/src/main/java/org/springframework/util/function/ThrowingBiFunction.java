@@ -18,12 +18,15 @@ package org.springframework.util.function;
 
 import java.util.function.BiFunction;
 
+import static org.springframework.util.function.ThrowingFunction.throwAsUnchecked;
+
 /**
  * A {@link BiFunction} that allows invocation of code that throws a checked
  * exception.
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 6.0
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
@@ -92,6 +95,33 @@ public interface ThrowingBiFunction<T, U, R> extends BiFunction<T, U, R> {
 			@Override
 			public R apply(T t, U u) {
 				return apply(t, u, exceptionWrapper);
+			}
+		};
+	}
+
+	/**
+	 * Return a new {@link ThrowingBiFunction} where the {@link #apply(Object, Object)}
+	 * method will throw original checked exceptions.
+	 * @return the replacement {@link ThrowingBiFunction} instance
+	 */
+	@SuppressWarnings("NullAway")
+	default ThrowingBiFunction<T, U, R> checked() {
+		ThrowingBiFunction<T, U, R> function = this;
+		return new ThrowingBiFunction<>() {
+			@Override
+			public R applyWithException(T t, U u) throws Exception {
+				return function.applyWithException(t, u);
+			}
+
+			@Override
+			public R apply(T t, U u) {
+				try {
+					return function.applyWithException(t, u);
+				}
+				catch (Exception ex) {
+					throwAsUnchecked(ex);
+					return null; // Never happens
+				}
 			}
 		};
 	}

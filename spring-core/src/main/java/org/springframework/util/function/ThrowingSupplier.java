@@ -19,11 +19,14 @@ package org.springframework.util.function;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import static org.springframework.util.function.ThrowingFunction.throwAsUnchecked;
+
 /**
  * A {@link Supplier} that allows invocation of code that throws a checked exception.
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 6.0
  * @param <T> the type of results supplied by this supplier
  */
@@ -82,6 +85,33 @@ public interface ThrowingSupplier<T> extends Supplier<T> {
 			@Override
 			public T get() {
 				return get(exceptionWrapper);
+			}
+		};
+	}
+
+	/**
+	 * Return a new {@link ThrowingSupplier} where the {@link #get()}
+	 * method will throw original checked exceptions.
+	 * @return the replacement {@link ThrowingSupplier} instance
+	 */
+	@SuppressWarnings("NullAway")
+	default ThrowingSupplier<T> checked() {
+		ThrowingSupplier<T> supplier = this;
+		return new ThrowingSupplier<>() {
+			@Override
+			public T getWithException() throws Exception {
+				return supplier.getWithException();
+			}
+
+			@Override
+			public T get() {
+				try {
+					return supplier.getWithException();
+				}
+				catch (Exception ex) {
+					throwAsUnchecked(ex);
+					return null; // Never happens
+				}
 			}
 		};
 	}
