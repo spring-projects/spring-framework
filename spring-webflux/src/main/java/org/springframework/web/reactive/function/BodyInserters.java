@@ -32,6 +32,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.OutputStreamHandler;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -397,10 +398,10 @@ public abstract class BodyInserters {
 	 * separate thread
 	 * @return an inserter that writes what is written to the output stream
 	 * @since 6.1
-	 * @see DataBufferUtils#outputStreamPublisher(Consumer, DataBufferFactory, Executor)
+	 * @see DataBufferUtils#outputStreamPublisher(OutputStreamHandler, DataBufferFactory, Executor)
 	 */
 	public static <T extends Publisher<DataBuffer>> BodyInserter<T, ReactiveHttpOutputMessage> fromOutputStream(
-			Consumer<OutputStream> outputStreamConsumer, Executor executor) {
+			OutputStreamHandler outputStreamConsumer, Executor executor) {
 
 		Assert.notNull(outputStreamConsumer, "OutputStreamConsumer must not be null");
 		Assert.notNull(executor, "Executor must not be null");
@@ -418,10 +419,10 @@ public abstract class BodyInserters {
 	 * @param chunkSize minimum size of the buffer produced by the publisher
 	 * @return an inserter that writes what is written to the output stream
 	 * @since 6.1
-	 * @see DataBufferUtils#outputStreamPublisher(Consumer, DataBufferFactory, Executor, int)
+	 * @see DataBufferUtils#outputStreamPublisher(OutputStreamHandler, DataBufferFactory, Executor, int)
 	 */
 	public static <T extends Publisher<DataBuffer>> BodyInserter<T, ReactiveHttpOutputMessage> fromOutputStream(
-			Consumer<OutputStream> outputStreamConsumer, Executor executor, int chunkSize) {
+			OutputStreamHandler outputStreamConsumer, Executor executor, int chunkSize) {
 
 		Assert.notNull(outputStreamConsumer, "OutputStreamConsumer must not be null");
 		Assert.notNull(executor, "Executor must not be null");

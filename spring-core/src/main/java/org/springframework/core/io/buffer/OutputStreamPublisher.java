@@ -100,17 +100,6 @@ final class OutputStreamPublisher<T> implements Publisher<T> {
 
 
 	/**
-	 * Contract to provide callback access to the {@link OutputStream}.
-	 */
-	@FunctionalInterface
-	public interface OutputStreamHandler {
-
-		void handle(OutputStream outputStream) throws Exception;
-
-	}
-
-
-	/**
 	 * Maps from bytes to byte buffers.
 	 * @param <T> the type of byte buffer to map to
 	 */

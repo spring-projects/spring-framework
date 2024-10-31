@@ -439,22 +439,22 @@ public abstract class DataBufferUtils {
 	 * @since 6.1
 	 */
 	public static Publisher<DataBuffer> outputStreamPublisher(
-			Consumer<OutputStream> consumer, DataBufferFactory bufferFactory, Executor executor) {
+			OutputStreamHandler consumer, DataBufferFactory bufferFactory, Executor executor) {
 
 		return new OutputStreamPublisher<>(
-				consumer::accept, new DataBufferMapper(bufferFactory), executor, null);
+				consumer, new DataBufferMapper(bufferFactory), executor, null);
 	}
 
 	/**
-	 * Variant of {@link #outputStreamPublisher(Consumer, DataBufferFactory, Executor)}
+	 * Variant of {@link #outputStreamPublisher(OutputStreamHandler, DataBufferFactory, Executor)}
 	 * providing control over the chunk sizes to be produced by the publisher.
 	 * @since 6.1
 	 */
 	public static Publisher<DataBuffer> outputStreamPublisher(
-			Consumer<OutputStream> consumer, DataBufferFactory bufferFactory, Executor executor, int chunkSize) {
+			OutputStreamHandler consumer, DataBufferFactory bufferFactory, Executor executor, int chunkSize) {
 
 		return new OutputStreamPublisher<>(
-				consumer::accept, new DataBufferMapper(bufferFactory), executor, chunkSize);
+				consumer, new DataBufferMapper(bufferFactory), executor, chunkSize);
 	}
 
 	/**
