@@ -110,7 +110,7 @@ public class XmlExpectationsHelper {
 
 		@Override
 		public String toString() {
-			return this.diff.toString();
+			return this.diff.fullDescription();
 		}
 
 	}

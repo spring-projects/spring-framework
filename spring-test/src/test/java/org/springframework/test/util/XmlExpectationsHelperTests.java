@@ -74,4 +74,15 @@ class XmlExpectationsHelperTests {
 			.withMessageContaining("Expected child nodelist length '3' but was '2'");
 	}
 
+	@Test
+	void assertXmlEqualExceptionWithFullDescription() {
+		String control = "<root><field1>f1</field1><field2>f2</field2></root>";
+		String test = "<root><field2>f2</field2><field3>f3</field3></root>";
+		XmlExpectationsHelper xmlHelper = new XmlExpectationsHelper();
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+						xmlHelper.assertXmlEqual(control, test))
+				.withMessageContaining("Expected child 'field1' but was 'null'")
+				.withMessageContaining("Expected child 'null' but was 'field3'");
+	}
+
 }
