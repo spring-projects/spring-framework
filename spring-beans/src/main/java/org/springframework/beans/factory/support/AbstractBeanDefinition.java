@@ -43,6 +43,10 @@ import java.util.function.Supplier;
  * {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}
  * interface.
  *
+ * <p>抽象Bean定义(AbstractBeanDefinition)
+ * <p>具体的，成熟的{@link BeanDefinition}类的基类，分解出{@link GenericBeanDefinition}, {@link RootBeanDefinition}和{@link ChildBeanDefinition}的常见属性。
+ * <p>自动连接与{@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}接口中定义的常量匹配。
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -167,6 +171,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>();
 
+	/**
+	 * 建bean实例的回调函数
+	 */
 	@Nullable
 	private Supplier<?> instanceSupplier;
 
@@ -784,6 +791,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Return a callback for creating an instance of the bean, if any.
+	 * <p>返回创建bean实例的回调函数（如果有的话）。
 	 *
 	 * @since 5.0
 	 */
@@ -867,6 +875,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Return a factory method, if any.
+	 * <p>如果有的话，返回一个工厂方法。
 	 */
 	@Override
 	@Nullable
@@ -946,7 +955,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Return if there are method overrides defined for this bean.
-	 * 如果有为此bean定义的方法重写，则返回
+	 * <p>如果有为此bean定义的方法重写，则返回
+	 *
 	 * @since 5.0.2
 	 */
 	public boolean hasMethodOverrides() {
@@ -1143,6 +1153,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Validate this bean definition.
 	 * 验证这个bean定义
+	 *
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void validate() throws BeanDefinitionValidationException {
@@ -1159,7 +1170,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Validate and prepare the method overrides defined for this bean.
 	 * Checks for existence of a method with the specified name.
-	 * 验证并准备为此bean定义的方法重写。检查是否存在具有指定名称的方法
+	 * <p>验证并准备为此bean定义的方法重写。检查是否存在具有指定名称的方法
+	 *
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
@@ -1173,7 +1185,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Validate and prepare the given method override.
 	 * Checks for existence of a method with the specified name,
 	 * marking it as not overloaded if none found.
-	 * 验证并准备给定的方法重写。检查是否存在具有指定名称的方法，如果未找到，则将其标记为未重载
+	 * <p>验证并准备给定的方法重写。检查是否存在具有指定名称的方法，如果未找到，则将其标记为未重载
+	 *
 	 * @param mo the MethodOverride object to validate
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
@@ -1204,6 +1217,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Clone this bean definition.
 	 * To be implemented by concrete subclasses.
+	 * <p>克隆Bean定义(cloneBeanDefinition)
+	 * <p>由具体的子类实现
 	 *
 	 * @return the cloned bean definition object
 	 */

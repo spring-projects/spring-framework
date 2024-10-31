@@ -1085,6 +1085,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (existingDefinition != null || containsSingleton(beanName)) {
 			// 重置BeanDefinition
 			resetBeanDefinition(beanName);
+			// 配置是否冻结
 		} else if (isConfigurationFrozen()) {
 			clearByTypeCache();
 		}

@@ -331,7 +331,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * Apply {@link BeanPostProcessor BeanPostProcessors} to the given existing bean
 	 * instance, invoking their {@code postProcessBeforeInitialization} methods.
 	 * The returned bean instance may be a wrapper around the original.
-	 * 执行给定 bean实例 的所有 BeanPostProcessor#postProcessBeforeInitialization
+	 *
+	 * <p>在初始化之前应用Bean后处理器(applyBeanPostProcessorsBeforeInitialization)
+	 * <p>执行给定 bean实例 的所有 BeanPostProcessor#postProcessBeforeInitialization
 	 *
 	 * @param existingBean the existing bean instance
 	 * @param beanName     the name of the bean, to be passed to it if necessary
@@ -350,7 +352,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * Apply {@link BeanPostProcessor BeanPostProcessors} to the given existing bean
 	 * instance, invoking their {@code postProcessAfterInitialization} methods.
 	 * The returned bean instance may be a wrapper around the original.
-	 * 执行给定 bean实例 的所有 BeanPostProcessor#postProcessAfterInitialization
+	 *
+	 * <p>初始化后应用Bean后处理器(applyBeanPostProcessorsAfterInitialization)
+	 * <p>执行给定 bean实例 的所有 BeanPostProcessor#postProcessAfterInitialization
 	 *
 	 * @param existingBean the existing bean instance
 	 * @param beanName     the name of the bean, to be passed to it if necessary
@@ -371,7 +375,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * registered {@link DestructionAwareBeanPostProcessor DestructionAwareBeanPostProcessors}.
 	 * <p>Any exception that arises during destruction should be caught
 	 * and logged instead of propagated to the caller of this method.
-	 * 销毁指定 bean实例，执行所有 DisposableBean#destory
+	 *
+	 * <p>销毁指定 bean实例，执行所有 DisposableBean#destory
 	 *
 	 * @param existingBean the bean instance to destroy
 	 */

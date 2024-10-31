@@ -72,6 +72,7 @@ import java.util.function.UnaryOperator;
  * <p>子类要实现的主要模板方法是{@link #getBeanDefinition}和{@link #createBean}，分别检索给定bean名称的bean定义和为给定bean定义创建bean实例。
  * 这些操作的默认实现可以在{@link DefaultListableBeanFactory}和{@link AbstractAutowireCapableBeanFactory｝中找到。
  * <p> 综合{@link FactoryBeanRegistrySupport}和{@link ConfigurableBeanFactory}的功能
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -332,7 +333,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (requiredType != null) {
 					beanCreation.tag("beanType", requiredType::toString);
 				}
-				// 将存储XML配置文件的GenericBeanDefinition对象转换为RootBeanDefinition对象
+				// 将存储XML配置文件的泛型Bean定义(GenericBeanDefinition)对象转换为RootBeanDefinition对象
 				// 如果指定BeanName是子bean会同时合并父类的属性 获取当前bean定义
 				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				// 检查当前bean定义是不是抽象bean  定义属性 abstract="true"
@@ -994,8 +995,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
-	 * Return the list of BeanPostProcessors that will get applied
-	 * to beans created with this factory.
+	 * Return the list of BeanPostProcessors that will get applied to beans created with this factory.
+	 * 返回将应用于此工厂创建的bean的BeanPostProcessors列表
 	 */
 	public List<BeanPostProcessor> getBeanPostProcessors() {
 		return this.beanPostProcessors;
@@ -1334,6 +1335,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * <p>The default implementation delegates to {@link #registerCustomEditors}.
 	 * Can be overridden in subclasses.
 	 *
+	 * <p>使用在此工厂中注册的自定义编辑器初始化给定的BeanWrapper。为创建和填充bean实例的BeanWrappers调用。
+	 * <p>默认的实现委托给{@link #registerCustomEditors}。可以在子类中重写。
+	 *
 	 * @param bw the BeanWrapper to initialize
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) {
@@ -1413,8 +1417,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * the parent if the given bean's definition is a child bean definition.
 	 * 如果给定的顶级bean的定义是子bean定义，则通过与父bean合并，返回给定顶级bean的RootBeanDefinition。
 	 *
-	 * @param beanName the name of the bean definition
-	 * @param bd       the original bean definition (Root/ChildBeanDefinition)
+	 * @param beanName the name of the bean definition bean定义名称
+	 * @param bd       the original bean definition (Root/ChildBeanDefinition) 原始bean定义
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
@@ -1431,6 +1435,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param bd           the original bean definition (Root/ChildBeanDefinition)
 	 * @param containingBd the containing bean definition in case of inner bean,
 	 *                     or {@code null} in case of a top-level bean
+	 *                     如果是内部bean，则包含bean定义，如果是顶级bean，则包含{@code null}
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
@@ -1439,6 +1444,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		synchronized (this.mergedBeanDefinitions) {
 			// 用于存储bd的MergedBeanDefinition，也就是该方法的结果
 			RootBeanDefinition mbd = null;
+			// 历史合并bean定义
 			RootBeanDefinition previous = null;
 
 			// Check with full lock now in order to enforce the same merged instance.
@@ -1878,7 +1884,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					// the bean... just in case some of its metadata changed in the meantime.
 					// 既然我们实际上正在创建bean, 那么让bean定义重新合并, 以防其某些元数据在此期间发生更改。
 					clearMergedBeanDefinition(beanName);
-					// 添加到已经创建的集合中
+					// 添加到已经创建的集合中, 将当前bean标记为已创建(或即将创建)
 					this.alreadyCreated.add(beanName);
 				}
 			}
@@ -1928,6 +1934,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/**
 	 * Check whether this factory's bean creation phase already started,
 	 * i.e. whether any bean has been marked as created in the meantime.
+	 * 检查这个工厂的bean创建阶段是否已经开始，即在此期间是否有任何bean被标记为已创建
 	 *
 	 * @see #markBeanAsCreated
 	 * @since 4.2.2
@@ -1939,12 +1946,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/**
 	 * Get the object for the given bean instance, either the bean
 	 * instance itself or its created object in case of a FactoryBean.
-	 * 检测当前bean是否是 FactoryBean 类型的bean 如果是 调用该bean的FactoryBean的getObject()方法 返回bean实例
-	 * <p>
-	 * ① 判断当前bean是否是 FactoryBean 类型的bean
-	 * ② 非FactoryBean类型bean不处理
-	 * ③ bean类型转换
-	 * ④ 将从FactoryBean中解析bean的工作委托给getObjectFromFactoryBean
+	 *
+	 * <p>获取Bean实例对象(getObjectForBeanInstance)
+	 * <p>检测当前bean是否是 FactoryBean 类型的bean 如果是 调用该bean的FactoryBean的getObject()方法 返回bean实例
+	 * <p>① 判断当前bean是否是 FactoryBean 类型的bean
+	 * <p>② 非FactoryBean类型bean不处理
+	 * <p>③ bean类型转换
+	 * <p>④ 将从FactoryBean中解析bean的工作委托给getObjectFromFactoryBean
 	 *
 	 * @param beanInstance   the shared bean instance
 	 * @param name           the name that may include factory dereference prefix
