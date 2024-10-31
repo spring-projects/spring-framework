@@ -152,11 +152,7 @@ class InvocableHelper {
 			logger.debug("Searching for methods to handle " + ex.getClass().getSimpleName());
 		}
 		Class<?> beanType = handlerMethod.getBeanType();
-		AbstractExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
-		if (resolver == null) {
-			resolver = this.exceptionMethodResolverFactory.apply(beanType);
-			this.exceptionHandlerCache.put(beanType, resolver);
-		}
+		AbstractExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.computeIfAbsent(beanType, this.exceptionMethodResolverFactory);
 		InvocableHandlerMethod exceptionHandlerMethod = null;
 		Method method = resolver.resolveMethod(ex);
 		if (method != null) {

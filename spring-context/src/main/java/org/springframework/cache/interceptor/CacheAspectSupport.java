@@ -342,8 +342,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			CacheOperation operation, Method method, Class<?> targetClass) {
 
 		CacheOperationCacheKey cacheKey = new CacheOperationCacheKey(operation, method, targetClass);
-		CacheOperationMetadata metadata = this.metadataCache.get(cacheKey);
-		if (metadata == null) {
+		return this.metadataCache.computeIfAbsent(cacheKey, ignored -> {
 			KeyGenerator operationKeyGenerator;
 			if (StringUtils.hasText(operation.getKeyGenerator())) {
 				operationKeyGenerator = getBean(operation.getKeyGenerator(), KeyGenerator.class);
@@ -363,11 +362,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				operationCacheResolver = getCacheResolver();
 				Assert.state(operationCacheResolver != null, "No CacheResolver/CacheManager set");
 			}
-			metadata = new CacheOperationMetadata(operation, method, targetClass,
+			return new CacheOperationMetadata(operation, method, targetClass,
 					operationKeyGenerator, operationCacheResolver);
-			this.metadataCache.put(cacheKey, metadata);
-		}
-		return metadata;
+		});
 	}
 
 	/**

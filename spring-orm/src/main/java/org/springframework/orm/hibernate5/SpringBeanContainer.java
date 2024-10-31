@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,11 +101,7 @@ public final class SpringBeanContainer implements BeanContainer {
 
 		SpringContainedBean<?> bean;
 		if (lifecycleOptions.canUseCachedReferences()) {
-			bean = this.beanCache.get(beanType);
-			if (bean == null) {
-				bean = createBean(beanType, lifecycleOptions, fallbackProducer);
-				this.beanCache.put(beanType, bean);
-			}
+			bean = this.beanCache.computeIfAbsent(beanType, ignored -> createBean(beanType, lifecycleOptions, fallbackProducer));
 		}
 		else {
 			bean = createBean(beanType, lifecycleOptions, fallbackProducer);
@@ -120,11 +116,7 @@ public final class SpringBeanContainer implements BeanContainer {
 
 		SpringContainedBean<?> bean;
 		if (lifecycleOptions.canUseCachedReferences()) {
-			bean = this.beanCache.get(name);
-			if (bean == null) {
-				bean = createBean(name, beanType, lifecycleOptions, fallbackProducer);
-				this.beanCache.put(name, bean);
-			}
+			bean = this.beanCache.computeIfAbsent(name, ignored -> createBean(name, beanType, lifecycleOptions, fallbackProducer));
 		}
 		else {
 			bean = createBean(name, beanType, lifecycleOptions, fallbackProducer);

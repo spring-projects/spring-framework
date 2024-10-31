@@ -126,13 +126,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 * Obtain the named value for the given method parameter.
 	 */
 	private NamedValueInfo getNamedValueInfo(MethodParameter parameter) {
-		NamedValueInfo namedValueInfo = this.namedValueInfoCache.get(parameter);
-		if (namedValueInfo == null) {
-			namedValueInfo = createNamedValueInfo(parameter);
-			namedValueInfo = updateNamedValueInfo(parameter, namedValueInfo);
-			this.namedValueInfoCache.put(parameter, namedValueInfo);
-		}
-		return namedValueInfo;
+		return this.namedValueInfoCache.computeIfAbsent(parameter, key -> updateNamedValueInfo(key, createNamedValueInfo(key)));
 	}
 
 	/**

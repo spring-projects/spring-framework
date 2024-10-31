@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,11 +120,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 */
 	@Nullable
 	public Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
-		Method method = this.exceptionLookupCache.get(exceptionType);
-		if (method == null) {
-			method = getMappedMethod(exceptionType);
-			this.exceptionLookupCache.put(exceptionType, method);
-		}
+		Method method = this.exceptionLookupCache.computeIfAbsent(exceptionType, this::getMappedMethod);
 		return (method != NO_MATCHING_EXCEPTION_HANDLER_METHOD ? method : null);
 	}
 

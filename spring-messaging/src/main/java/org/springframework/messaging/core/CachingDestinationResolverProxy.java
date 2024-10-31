@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,13 +86,10 @@ public class CachingDestinationResolverProxy<D> implements DestinationResolver<D
 	 */
 	@Override
 	public D resolveDestination(String name) throws DestinationResolutionException {
-		D destination = this.resolvedDestinationCache.get(name);
-		if (destination == null) {
+		return this.resolvedDestinationCache.computeIfAbsent(name, key -> {
 			Assert.state(this.targetDestinationResolver != null, "No target DestinationResolver set");
-			destination = this.targetDestinationResolver.resolveDestination(name);
-			this.resolvedDestinationCache.put(name, destination);
-		}
-		return destination;
+			return this.targetDestinationResolver.resolveDestination(key);
+		});
 	}
 
 }

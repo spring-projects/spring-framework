@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,13 +273,11 @@ public class FormattingConversionService extends GenericConversionService
 						"Expected [" + this.annotationType.getName() + "] to be present on " + sourceType);
 			}
 			AnnotationConverterKey converterKey = new AnnotationConverterKey(ann, sourceType.getObjectType());
-			GenericConverter converter = cachedPrinters.get(converterKey);
-			if (converter == null) {
+			GenericConverter converter = cachedPrinters.computeIfAbsent(converterKey, key -> {
 				Printer<?> printer = this.annotationFormatterFactory.getPrinter(
-						converterKey.getAnnotation(), converterKey.getFieldType());
-				converter = new PrinterConverter(this.fieldType, printer, FormattingConversionService.this);
-				cachedPrinters.put(converterKey, converter);
-			}
+						key.getAnnotation(), key.getFieldType());
+				return new PrinterConverter(this.fieldType, printer, FormattingConversionService.this);
+			});
 			return converter.convert(source, sourceType, targetType);
 		}
 
@@ -328,13 +326,11 @@ public class FormattingConversionService extends GenericConversionService
 						"Expected [" + this.annotationType.getName() + "] to be present on " + targetType);
 			}
 			AnnotationConverterKey converterKey = new AnnotationConverterKey(ann, targetType.getObjectType());
-			GenericConverter converter = cachedParsers.get(converterKey);
-			if (converter == null) {
+			GenericConverter converter = cachedParsers.computeIfAbsent(converterKey, key -> {
 				Parser<?> parser = this.annotationFormatterFactory.getParser(
-						converterKey.getAnnotation(), converterKey.getFieldType());
-				converter = new ParserConverter(this.fieldType, parser, FormattingConversionService.this);
-				cachedParsers.put(converterKey, converter);
-			}
+						key.getAnnotation(), key.getFieldType());
+				return new ParserConverter(this.fieldType, parser, FormattingConversionService.this);
+			});
 			return converter.convert(source, sourceType, targetType);
 		}
 

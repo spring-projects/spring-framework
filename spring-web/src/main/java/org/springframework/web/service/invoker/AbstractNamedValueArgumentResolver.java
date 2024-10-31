@@ -103,16 +103,13 @@ public abstract class AbstractNamedValueArgumentResolver implements HttpServiceA
 
 	@Nullable
 	private NamedValueInfo getNamedValueInfo(MethodParameter parameter, HttpRequestValues.Metadata requestValues) {
-		NamedValueInfo info = this.namedValueInfoCache.get(parameter);
-		if (info == null) {
-			info = createNamedValueInfo(parameter, requestValues);
-			if (info == null) {
+		return this.namedValueInfoCache.computeIfAbsent(parameter, key -> {
+			NamedValueInfo infoToUse = createNamedValueInfo(key, requestValues);
+			if (infoToUse == null) {
 				return null;
 			}
-			info = updateNamedValueInfo(parameter, info);
-			this.namedValueInfoCache.put(parameter, info);
-		}
-		return info;
+			return updateNamedValueInfo(key, infoToUse);
+		});
 	}
 
 	/**

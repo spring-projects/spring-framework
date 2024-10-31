@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.function.ThrowingFunction;
 
 /**
  * {@link SingleConnectionFactory} subclass that adds {@link Session} caching as well as
@@ -428,19 +429,13 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private MessageProducer getCachedProducer(@Nullable Destination dest) throws JMSException {
 			DestinationCacheKey cacheKey = (dest != null ? new DestinationCacheKey(dest) : null);
-			MessageProducer producer = this.cachedProducers.get(cacheKey);
-			if (producer != null) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Found cached JMS MessageProducer for destination [" + dest + "]: " + producer);
-				}
-			}
-			else {
-				producer = this.target.createProducer(dest);
+			MessageProducer producer = this.cachedProducers.computeIfAbsent(cacheKey, (ThrowingFunction<DestinationCacheKey, MessageProducer>) ignored -> {
+				MessageProducer producerToUse = this.target.createProducer(dest);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Registering cached JMS MessageProducer for destination [" + dest + "]: " + producer);
+					logger.debug("Registering cached JMS MessageProducer for destination [" + dest + "]: " + producerToUse);
 				}
-				this.cachedProducers.put(cacheKey, producer);
-			}
+				return producerToUse;
+			});
 			return new CachedMessageProducer(producer);
 		}
 
@@ -449,33 +444,28 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				@Nullable Boolean noLocal, @Nullable String subscription, boolean durable) throws JMSException {
 
 			ConsumerCacheKey cacheKey = new ConsumerCacheKey(dest, selector, noLocal, subscription, durable);
-			MessageConsumer consumer = this.cachedConsumers.get(cacheKey);
-			if (consumer != null) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Found cached JMS MessageConsumer for destination [" + dest + "]: " + consumer);
-				}
-			}
-			else {
+			MessageConsumer consumer = this.cachedConsumers.computeIfAbsent(cacheKey, (ThrowingFunction<ConsumerCacheKey, MessageConsumer>) ignored -> {
+				MessageConsumer consumerToUse;
 				if (dest instanceof Topic topic) {
 					if (noLocal == null) {
-						consumer = (durable ?
+						consumerToUse = (durable ?
 								this.target.createSharedDurableConsumer(topic, subscription, selector) :
 								this.target.createSharedConsumer(topic, subscription, selector));
 					}
 					else {
-						consumer = (durable ?
+						consumerToUse = (durable ?
 								this.target.createDurableSubscriber(topic, subscription, selector, noLocal) :
 								this.target.createConsumer(dest, selector, noLocal));
 					}
 				}
 				else {
-					consumer = this.target.createConsumer(dest, selector);
+					consumerToUse = this.target.createConsumer(dest, selector);
 				}
 				if (logger.isDebugEnabled()) {
-					logger.debug("Registering cached JMS MessageConsumer for destination [" + dest + "]: " + consumer);
+					logger.debug("Registering cached JMS MessageConsumer for destination [" + dest + "]: " + consumerToUse);
 				}
-				this.cachedConsumers.put(cacheKey, consumer);
-			}
+				return consumerToUse;
+			});
 			return new CachedMessageConsumer(consumer);
 		}
 

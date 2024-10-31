@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,17 +143,16 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 		Theme theme = this.themeCache.get(themeName);
 		if (theme == null) {
 			synchronized (this.themeCache) {
-				theme = this.themeCache.get(themeName);
-				if (theme == null) {
-					String basename = this.basenamePrefix + themeName;
+				theme = this.themeCache.computeIfAbsent(themeName, key -> {
+					String basename = this.basenamePrefix + key;
 					MessageSource messageSource = createMessageSource(basename);
-					theme = new SimpleTheme(themeName, messageSource);
-					initParent(theme);
-					this.themeCache.put(themeName, theme);
+					Theme themeToUse = new SimpleTheme(key, messageSource);
+					initParent(themeToUse);
 					if (logger.isDebugEnabled()) {
-						logger.debug("Theme created: name '" + themeName + "', basename [" + basename + "]");
+						logger.debug("Theme created: name '" + key + "', basename [" + basename + "]");
 					}
-				}
+					return themeToUse;
+				});
 			}
 		}
 		return theme;
