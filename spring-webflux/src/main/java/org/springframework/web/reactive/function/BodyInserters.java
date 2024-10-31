@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
