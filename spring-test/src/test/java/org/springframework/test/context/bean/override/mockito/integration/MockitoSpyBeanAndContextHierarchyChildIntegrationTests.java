@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @see MockitoBeanAndContextHierarchyParentIntegrationTests
  */
 @ContextHierarchy(@ContextConfiguration)
-@DisabledInAotMode // @ContextHierarchy is not supported in AOT.
+@DisabledInAotMode("@ContextHierarchy is not supported in AOT")
 public class MockitoSpyBeanAndContextHierarchyChildIntegrationTests extends
 		MockitoBeanAndContextHierarchyParentIntegrationTests {
 

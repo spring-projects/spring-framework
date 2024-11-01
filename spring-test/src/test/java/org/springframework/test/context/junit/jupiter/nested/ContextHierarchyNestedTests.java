@@ -47,7 +47,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
 @ExtendWith(SpringExtension.class)
 @ContextHierarchy(@ContextConfiguration(classes = ParentConfig.class))
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
-@DisabledInAotMode // @ContextHierarchy is not supported in AOT.
+@DisabledInAotMode("@ContextHierarchy is not supported in AOT")
 class ContextHierarchyNestedTests {
 
 	private static final String FOO = "foo";

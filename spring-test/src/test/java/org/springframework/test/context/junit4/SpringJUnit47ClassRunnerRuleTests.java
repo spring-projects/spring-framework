@@ -37,9 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @TestExecutionListeners({})
-// Since this test class does not load an ApplicationContext,
-// this test class simply is not supported for AOT processing.
-@DisabledInAotMode
+@DisabledInAotMode("Does not load an ApplicationContext and thus not supported for AOT processing")
 public class SpringJUnit47ClassRunnerRuleTests {
 
 	@Rule

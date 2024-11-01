@@ -27,7 +27,6 @@ import org.springframework.test.context.aot.DisabledInAotMode;
  * @since 4.1
  */
 @TestPropertySource("explicit.properties")
-// Since ExplicitPropertiesFileTestPropertySourceTests is disabled in AOT mode, this class must be also.
-@DisabledInAotMode
+@DisabledInAotMode("Because ExplicitPropertiesFileTestPropertySourceTests is disabled in AOT mode")
 public class ExplicitPropertiesFileInClasspathTestPropertySourceTests extends AbstractExplicitPropertiesFileTests {
 }
