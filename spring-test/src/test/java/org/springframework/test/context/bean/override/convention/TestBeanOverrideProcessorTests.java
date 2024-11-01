@@ -172,7 +172,7 @@ class TestBeanOverrideProcessorTests {
 		assertThat(overrideAnnotation).isNotNull();
 
 		assertThat(this.processor.createHandler(overrideAnnotation, clazz, field))
-				.isInstanceOf(TestBeanBeanOverrideHandler.class);
+				.isInstanceOf(TestBeanOverrideHandler.class);
 	}
 
 	@Test

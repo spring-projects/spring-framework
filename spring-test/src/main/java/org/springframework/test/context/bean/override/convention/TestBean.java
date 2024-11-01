@@ -50,7 +50,8 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * interfaces, the entire type hierarchy is searched. Alternatively, a factory
  * method in an external class can be referenced via its fully-qualified method
  * name following the syntax {@code <fully-qualified class name>#<method name>}
- * &mdash; for example, {@code "org.example.TestUtils#createCustomerRepository"}.
+ * &mdash; for example,
+ * {@code @TestBean(methodName = "org.example.TestUtils#createCustomerRepository")}.
  *
  * <p>The factory method is deduced as follows.
  *
@@ -144,7 +145,7 @@ public @interface TestBean {
 	 * <p>Alternatively, a factory method in an external class can be referenced
 	 * via its fully-qualified method name following the syntax
 	 * {@code <fully-qualified class name>#<method name>} &mdash; for example,
-	 * {@code "org.example.TestUtils#createCustomerRepository"}.
+	 * {@code @TestBean(methodName = "org.example.TestUtils#createCustomerRepository")}.
 	 * <p>If left unspecified, the name of the factory method will be detected
 	 * based either on the name of the annotated field or the name of the bean.
 	 */

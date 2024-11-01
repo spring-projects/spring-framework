@@ -42,7 +42,7 @@ import static org.springframework.test.context.bean.override.BeanOverrideStrateg
 
 /**
  * {@link BeanOverrideProcessor} implementation for {@link TestBean @TestBean}
- * support, which creates a {@link TestBeanBeanOverrideHandler} for annotated
+ * support, which creates a {@link TestBeanOverrideHandler} for annotated
  * fields in a given class and ensures that a corresponding static factory method
  * exists, according to the {@linkplain TestBean documented conventions}.
  *
@@ -54,7 +54,7 @@ import static org.springframework.test.context.bean.override.BeanOverrideStrateg
 class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 
 	@Override
-	public TestBeanBeanOverrideHandler createHandler(Annotation overrideAnnotation, Class<?> testClass, Field field) {
+	public TestBeanOverrideHandler createHandler(Annotation overrideAnnotation, Class<?> testClass, Field field) {
 		if (!(overrideAnnotation instanceof TestBean testBean)) {
 			throw new IllegalStateException("Invalid annotation passed to %s: expected @TestBean on field %s.%s"
 					.formatted(getClass().getSimpleName(), field.getDeclaringClass().getName(), field.getName()));
@@ -81,7 +81,7 @@ class TestBeanOverrideProcessor implements BeanOverrideProcessor {
 			factoryMethod = findTestBeanFactoryMethod(testClass, field.getType(), candidateMethodNames);
 		}
 
-		return new TestBeanBeanOverrideHandler(
+		return new TestBeanOverrideHandler(
 				field, ResolvableType.forField(field, testClass), beanName, strategy, factoryMethod);
 	}
 

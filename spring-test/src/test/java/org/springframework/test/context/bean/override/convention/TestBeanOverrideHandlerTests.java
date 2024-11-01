@@ -33,99 +33,102 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Tests for {@link TestBeanBeanOverrideHandler}.
+ * Tests for {@link TestBeanOverrideHandler}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
+ * @since 6.2
  */
-class TestBeanBeanOverrideHandlerTests {
+class TestBeanOverrideHandlerTests {
 
 	@Test
-	void forTestClassSetsNameToNullIfAnnotationNameIsNull() {
-		List<BeanOverrideHandler> list = BeanOverrideHandler.forTestClass(SampleOneOverride.class);
-		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isNull());
+	void setsBeanNameToNullIfAnnotationNameIsNull() {
+		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(SampleOneOverride.class);
+		assertThat(handlers).singleElement().extracting(BeanOverrideHandler::getBeanName).isNull();
 	}
 
 	@Test
-	void forTestClassSetsNameToAnnotationName() {
-		List<BeanOverrideHandler> list = BeanOverrideHandler.forTestClass(SampleOneOverrideWithName.class);
-		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isEqualTo("anotherBean"));
+	void setsBeanNameToAnnotationName() {
+		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(SampleOneOverrideWithName.class);
+		assertThat(handlers).singleElement().extracting(BeanOverrideHandler::getBeanName).isEqualTo("anotherBean");
 	}
 
 	@Test
-	void forTestClassWithMissingMethod() {
+	void failsWithMissingMethod() {
 		assertThatIllegalStateException()
-				.isThrownBy(() ->BeanOverrideHandler.forTestClass(SampleMissingMethod.class))
+				.isThrownBy(() -> BeanOverrideHandler.forTestClass(SampleMissingMethod.class))
 				.withMessage("No static method found named message() in %s with return type %s",
 						SampleMissingMethod.class.getName(), String.class.getName());
 	}
 
 	@Test
 	void isEqualToWithSameInstance() {
-		TestBeanBeanOverrideHandler handler = createBeanOverrideHandler(sampleField("message"), sampleMethod("message"));
+		TestBeanOverrideHandler handler = handlerFor(sampleField("message"), sampleMethod("message"));
 		assertThat(handler).isEqualTo(handler);
 		assertThat(handler).hasSameHashCodeAs(handler);
 	}
 
 	@Test
 	void isEqualToWithSameMetadata() {
-		TestBeanBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("message"), sampleMethod("message"));
-		TestBeanBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("message"), sampleMethod("message"));
+		TestBeanOverrideHandler handler1 = handlerFor(sampleField("message"), sampleMethod("message"));
+		TestBeanOverrideHandler handler2 = handlerFor(sampleField("message"), sampleMethod("message"));
 		assertThat(handler1).isEqualTo(handler2);
 		assertThat(handler1).hasSameHashCodeAs(handler2);
 	}
 
 	@Test
 	void isEqualToWithSameMetadataByNameLookupAndDifferentField() {
-		TestBeanBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("message3"), sampleMethod("message"));
-		TestBeanBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("message4"), sampleMethod("message"));
+		TestBeanOverrideHandler handler1 = handlerFor(sampleField("message3"), sampleMethod("message"));
+		TestBeanOverrideHandler handler2 = handlerFor(sampleField("message4"), sampleMethod("message"));
 		assertThat(handler1).isEqualTo(handler2);
 		assertThat(handler1).hasSameHashCodeAs(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataByTypeLookupAndDifferentField() {
-		TestBeanBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("message"), sampleMethod("message"));
-		TestBeanBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("message2"), sampleMethod("message"));
+		TestBeanOverrideHandler handler1 = handlerFor(sampleField("message"), sampleMethod("message"));
+		TestBeanOverrideHandler handler2 = handlerFor(sampleField("message2"), sampleMethod("message"));
 		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentBeanName() {
-		TestBeanBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("message"), sampleMethod("message"));
-		TestBeanBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("message3"), sampleMethod("message"));
+		TestBeanOverrideHandler handler1 = handlerFor(sampleField("message"), sampleMethod("message"));
+		TestBeanOverrideHandler handler2 = handlerFor(sampleField("message3"), sampleMethod("message"));
 		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentMethod() {
-		TestBeanBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("message"), sampleMethod("message"));
-		TestBeanBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("message"), sampleMethod("description"));
+		TestBeanOverrideHandler handler1 = handlerFor(sampleField("message"), sampleMethod("message"));
+		TestBeanOverrideHandler handler2 = handlerFor(sampleField("message"), sampleMethod("description"));
 		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
 	@Test
 	void isNotEqualToWithSameMetadataButDifferentAnnotations() {
-		TestBeanBeanOverrideHandler handler1 = createBeanOverrideHandler(sampleField("message"), sampleMethod("message"));
-		TestBeanBeanOverrideHandler handler2 = createBeanOverrideHandler(sampleField("message5"), sampleMethod("message"));
+		TestBeanOverrideHandler handler1 = handlerFor(sampleField("message"), sampleMethod("message"));
+		TestBeanOverrideHandler handler2 = handlerFor(sampleField("message5"), sampleMethod("message"));
 		assertThat(handler1).isNotEqualTo(handler2);
 	}
 
-	private Field sampleField(String fieldName) {
+
+	private static Field sampleField(String fieldName) {
 		Field field = ReflectionUtils.findField(Sample.class, fieldName);
 		assertThat(field).isNotNull();
 		return field;
 	}
 
-	private Method sampleMethod(String noArgMethodName) {
+	private static Method sampleMethod(String noArgMethodName) {
 		Method method = ReflectionUtils.findMethod(Sample.class, noArgMethodName);
 		assertThat(method).isNotNull();
 		return method;
 	}
 
-	private TestBeanBeanOverrideHandler createBeanOverrideHandler(Field field, Method overrideMethod) {
+	private static TestBeanOverrideHandler handlerFor(Field field, Method overrideMethod) {
 		TestBean annotation = field.getAnnotation(TestBean.class);
 		String beanName = (StringUtils.hasText(annotation.name()) ? annotation.name() : null);
-		return new TestBeanBeanOverrideHandler(
+		return new TestBeanOverrideHandler(
 				field, ResolvableType.forClass(field.getType()), beanName, BeanOverrideStrategy.REPLACE, overrideMethod);
 	}
 
@@ -137,7 +140,6 @@ class TestBeanBeanOverrideHandlerTests {
 		static String message() {
 			return "OK";
 		}
-
 	}
 
 	static class SampleOneOverrideWithName {
@@ -148,14 +150,12 @@ class TestBeanBeanOverrideHandlerTests {
 		static String message() {
 			return "OK";
 		}
-
 	}
 
 	static class SampleMissingMethod {
 
 		@TestBean
 		String message;
-
 	}
 
 
