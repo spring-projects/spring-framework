@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.bean.override.BeanOverride;
 
@@ -115,6 +116,7 @@ import org.springframework.test.context.bean.override.BeanOverride;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @BeanOverride(TestBeanOverrideProcessor.class)
+@Reflective(TestBeanReflectiveProcessor.class)
 public @interface TestBean {
 
 	/**
