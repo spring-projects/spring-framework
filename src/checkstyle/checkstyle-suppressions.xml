@@ -14,7 +14,7 @@
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="RegexpSinglelineJava" id="toLowerCaseWithoutLocale"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="RegexpSinglelineJava" id="toUpperCaseWithoutLocale"/>
-	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="RegexpSinglelineJava" id="systemOutPrintln"/>
+	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]org[\\/]springframework[\\/].+(Tests|Suite)" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="SpringJUnit5" message="should not be public"/>
 
@@ -43,7 +43,8 @@
 
 	<!-- spring-core -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/](asm|cglib|objenesis|javapoet)[\\/]" checks=".*"/>
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]aot[\\/]nativex[\\/]feature[\\/]" checks="RegexpSinglelineJava" id="systemOutPrintln"/>
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]aot[\\/]nativex[\\/]feature[\\/]" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/](core|util)[\\/](SpringProperties|SystemPropertyUtils)" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="RegexpSinglelineJava" id="packageLevelNonNullApiAnnotation" />
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="RegexpSinglelineJava" id="packageLevelNonNullFieldsAnnotation" />
@@ -66,7 +67,7 @@
 
 	<!-- spring-jcl -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]apache[\\/]commons[\\/]logging[\\/]" checks="Header|SpringNoThis|IllegalImport"/>
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]apache[\\/]commons[\\/]logging[\\/]" checks="RegexpSinglelineJava" id="systemOutPrintln"/>
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]apache[\\/]commons[\\/]logging[\\/]" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 
 	<!-- spring-jdbc -->
 	<suppress files="ResultSetWrappingSqlRowSet" checks="JavadocStyle"/>
@@ -123,6 +124,7 @@
 	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]CrossOrigin" checks="JavadocStyle"/>
 	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]RequestMethod" checks="JavadocVariable"/>
 	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]ValueConstants" checks="InterfaceIsType"/>
+	<suppress files="org[\\/]springframework[\\/]web[\\/]util[\\/]ServletContextPropertyUtils" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 	<suppress files="PatternParseException" checks="JavadocVariable"/>
 	<suppress files="web[\\/]reactive[\\/]socket[\\/]CloseStatus" checks="JavadocStyle"/>
 	<suppress files="RestClientResponseException" checks="MutableException"/>
