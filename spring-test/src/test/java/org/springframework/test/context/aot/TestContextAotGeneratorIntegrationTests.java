@@ -212,9 +212,11 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 		Stream.of(
 			// @TestExecutionListeners
 			org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests.DummyTestExecutionListener.class,
+			// Auto-registered
 			org.springframework.test.context.event.ApplicationEventsTestExecutionListener.class,
 			org.springframework.test.context.event.EventPublishingTestExecutionListener.class,
 			org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener.class,
+			org.springframework.test.context.bean.override.BeanOverrideTestExecutionListener.class,
 			org.springframework.test.context.support.DependencyInjectionTestExecutionListener.class,
 			org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener.class,
 			org.springframework.test.context.support.DirtiesContextTestExecutionListener.class,
@@ -224,6 +226,7 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 
 		// ContextCustomizerFactory
 		Stream.of(
+			"org.springframework.test.context.bean.override.BeanOverrideContextCustomizerFactory",
 			"org.springframework.test.context.support.DynamicPropertiesContextCustomizerFactory",
 			"org.springframework.test.context.web.socket.MockServerContainerContextCustomizerFactory",
 			"org.springframework.test.context.aot.samples.basic.ImportsContextCustomizerFactory"
@@ -271,8 +274,12 @@ class TestContextAotGeneratorIntegrationTests extends AbstractAotTests {
 			.accepts(runtimeHints);
 
 		// @BeanOverride(value = ...)
-		assertReflectionRegistered(runtimeHints, "org.springframework.test.context.bean.override.mockito.MockitoBeanOverrideProcessor",
-				INVOKE_DECLARED_CONSTRUCTORS);
+		Stream.of(
+			// @MockitoBean
+			"org.springframework.test.context.bean.override.mockito.MockitoBeanOverrideProcessor",
+			// @EasyMockBean
+			"org.springframework.test.context.bean.override.easymock.EasyMockBeanOverrideProcessor"
+		).forEach(type -> assertReflectionRegistered(runtimeHints, type, INVOKE_DECLARED_CONSTRUCTORS));
 
 		// GenericApplicationContext.preDetermineBeanTypes() should have registered proxy
 		// hints for the EasyMock interface-based mocks.
