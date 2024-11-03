@@ -39,7 +39,7 @@ import org.springframework.web.multipart.MultipartResolver;
  *
  * <p>If no MultipartResolver bean is found, this filter falls back to a default
  * MultipartResolver: {@link StandardServletMultipartResolver} for Servlet
- * oontainers, based on a multipart-config section in {@code web.xml}.
+ * containers, based on a multipart-config section in {@code web.xml}.
  * Note however that at present the Servlet specification only defines how to
  * enable multipart configuration on a Servlet and as a result multipart request
  * processing is likely not possible in a Filter unless the Servlet container

@@ -23,7 +23,7 @@ import org.springframework.messaging.handler.DestinationPatternsMessageCondition
 import org.springframework.messaging.handler.MessageCondition;
 
 /**
- * {@link MessageCondition} for SImple Messaging Protocols. Encapsulates the following
+ * {@link MessageCondition} for Simple Messaging Protocols. Encapsulates the following
  * request mapping conditions:
  * <ol>
  * <li>{@link SimpMessageTypeMessageCondition}
