@@ -479,8 +479,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	@Override
 	protected boolean hasCorsConfigurationSource(Object handler) {
 		return super.hasCorsConfigurationSource(handler) ||
-				(handler instanceof HandlerMethod handerMethod &&
-						this.mappingRegistry.getCorsConfiguration(handerMethod) != null);
+				(handler instanceof HandlerMethod handlerMethod &&
+						this.mappingRegistry.getCorsConfiguration(handlerMethod) != null);
 	}
 
 	@Override

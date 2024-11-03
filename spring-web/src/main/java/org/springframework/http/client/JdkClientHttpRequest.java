@@ -217,7 +217,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	/**
 	 * Temporary workaround to use instead of {@link HttpRequest.Builder#timeout(Duration)}
 	 * until <a href="https://bugs.openjdk.org/browse/JDK-8258397">JDK-8258397</a>
-	 * is fixed. Essentially, create a future wiht a timeout handler, and use it
+	 * is fixed. Essentially, create a future with a timeout handler, and use it
 	 * to close the response.
 	 * @see <a href="https://mail.openjdk.org/pipermail/net-dev/2021-October/016672.html">OpenJDK discussion thread</a>
 	 */

@@ -49,14 +49,14 @@ public interface SimpleJdbcCallOperations {
 	SimpleJdbcCallOperations withFunctionName(String functionName);
 
 	/**
-	 * Optionally, specify the name of the schema that contins the stored procedure.
+	 * Optionally, specify the name of the schema that contains the stored procedure.
 	 * @param schemaName the name of the schema
 	 * @return the instance of this SimpleJdbcCall
 	 */
 	SimpleJdbcCallOperations withSchemaName(String schemaName);
 
 	/**
-	 * Optionally, specify the name of the catalog that contins the stored procedure.
+	 * Optionally, specify the name of the catalog that contains the stored procedure.
 	 * <p>To provide consistency with the Oracle DatabaseMetaData, this is used to specify the
 	 * package name if the procedure is declared as part of a package.
 	 * @param catalogName the catalog or package name

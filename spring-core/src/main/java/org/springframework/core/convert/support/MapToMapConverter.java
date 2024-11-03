@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>First, creates a new Map of the requested targetType with a size equal to the
  * size of the source Map. Then copies each element in the source map to the target map.
- * Will perform a conversion from the source maps's parameterized K,V types to the target
+ * Will perform a conversion from the source map's parameterized K,V types to the target
  * map's parameterized types K,V if necessary.
  *
  * @author Keith Donald
