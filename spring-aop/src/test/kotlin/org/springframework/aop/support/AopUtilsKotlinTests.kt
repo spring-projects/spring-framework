@@ -31,17 +31,17 @@ import kotlin.coroutines.Continuation
  */
 class AopUtilsKotlinTests {
 
-    @Test
-    fun `Invoking suspending function should return Mono`() {
-        val value = "foo"
-        val method = ReflectionUtils.findMethod(WithoutInterface::class.java, "handle",
+	@Test
+	fun `Invoking suspending function should return Mono`() {
+		val value = "foo"
+		val method = ReflectionUtils.findMethod(WithoutInterface::class.java, "handle",
 			String::class. java, Continuation::class.java)!!
-        val continuation = Continuation<Any>(CoroutineName("test")) { }
+		val continuation = Continuation<Any>(CoroutineName("test")) { }
 		val result = AopUtils.invokeJoinpointUsingReflection(WithoutInterface(), method, arrayOf(value, continuation))
-        assertThat(result).isInstanceOfSatisfying(Mono::class.java) {
-            assertThat(it.block()).isEqualTo(value)
-        }
-    }
+		assertThat(result).isInstanceOfSatisfying(Mono::class.java) {
+			assertThat(it.block()).isEqualTo(value)
+		}
+	}
 
 	@Test
 	fun `Invoking suspending function on bridged method should return Mono`() {
@@ -54,11 +54,11 @@ class AopUtilsKotlinTests {
 		}
 	}
 
-    @Suppress("unused")
-    suspend fun suspendingFunction(value: String): String {
-        delay(1)
-        return value
-    }
+	@Suppress("unused")
+	suspend fun suspendingFunction(value: String): String {
+		delay(1)
+		return value
+	}
 
 	class WithoutInterface {
 		suspend fun handle(value: String): String {

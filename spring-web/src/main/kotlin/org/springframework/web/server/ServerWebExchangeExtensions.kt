@@ -66,4 +66,4 @@ suspend fun ServerWebExchange.awaitSession(): WebSession =
  * @since 6.1
  */
 fun ServerWebExchange.Builder.principal(supplier: suspend () -> Principal): ServerWebExchange.Builder
-        = principal(mono(Dispatchers.Unconfined) { supplier.invoke() })
+		= principal(mono(Dispatchers.Unconfined) { supplier.invoke() })

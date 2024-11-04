@@ -49,7 +49,7 @@ inline fun <reified T : Any> RestClient.ResponseSpec.body(): T? =
  * @since 6.2
  */
 inline fun <reified T : Any> RestClient.ResponseSpec.requiredBody(): T =
-    body(object : ParameterizedTypeReference<T>() {}) ?: throw NoSuchElementException("Response body is required")
+	body(object : ParameterizedTypeReference<T>() {}) ?: throw NoSuchElementException("Response body is required")
 
 /**
  * Extension for [RestClient.ResponseSpec.toEntity] providing a `toEntity<Foo>()` variant

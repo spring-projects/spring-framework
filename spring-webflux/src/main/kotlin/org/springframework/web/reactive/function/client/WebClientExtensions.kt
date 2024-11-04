@@ -102,8 +102,8 @@ suspend fun RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(): Clien
  * @since 5.3
  */
 suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(responseHandler: suspend (ClientResponse) -> T): T {
-    val context = currentCoroutineContext().minusKey(Job.Key)
-    return exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingle()
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingle()
 }
 
 /**
@@ -112,7 +112,7 @@ suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange
  * @since 5.3.8
  */
 suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchangeOrNull(responseHandler: suspend (ClientResponse) -> T?): T? {
-    val context = currentCoroutineContext().minusKey(Job.Key)
+	val context = currentCoroutineContext().minusKey(Job.Key)
 	return exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingleOrNull()
 }
 
