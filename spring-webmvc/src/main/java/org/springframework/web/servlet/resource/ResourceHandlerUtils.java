@@ -38,6 +38,7 @@ import org.springframework.web.context.support.ServletContextResource;
  * {@link ResourceHttpRequestHandler} and {@link org.springframework.web.servlet.function}.
  *
  * @author Rossen Stoyanchev
+ * @author Edoardo Patti
  * @since 6.2
  */
 public abstract class ResourceHandlerUtils {
@@ -79,6 +80,23 @@ public abstract class ResourceHandlerUtils {
 		Assert.notNull(path, "Resource location path must not be null");
 		Assert.isTrue(path.endsWith(FOLDER_SEPARATOR) || path.endsWith(WINDOWS_FOLDER_SEPARATOR),
 				"Resource location does not end with slash: " + path);
+	}
+
+	/**
+	 * Assert the given location path is not null and look for the trailing slash adding it when absent.
+	 * @return the input string if the trailing slash was already present
+	 * the input string plus the trailing slash otherwise.
+	 */
+	public static String addTrailingSlashIfAbsent(@Nullable String path) {
+		Assert.notNull(path, "Resource location path must not be null");
+		if(!path.endsWith(FOLDER_SEPARATOR) && !path.endsWith(WINDOWS_FOLDER_SEPARATOR)) {
+			logger.warn(
+					"Observed an attempting to register a resource with a location without trailing slash: '%s'. The framework will add it automatically."
+							.formatted(path));
+			var trailingSlash = path.contains(WINDOWS_FOLDER_SEPARATOR) ? WINDOWS_FOLDER_SEPARATOR : FOLDER_SEPARATOR;
+			return path.concat(trailingSlash);
+		}
+		return path;
 	}
 
 	/**
