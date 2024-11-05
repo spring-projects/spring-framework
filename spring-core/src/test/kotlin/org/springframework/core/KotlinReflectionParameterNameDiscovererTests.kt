@@ -22,4 +22,4 @@ package org.springframework.core
  * @author Sebastien Deleuze
  */
 class KotlinReflectionParameterNameDiscovererTests :
-    AbstractReflectionParameterNameDiscovererKotlinTests(KotlinReflectionParameterNameDiscoverer())
+	AbstractReflectionParameterNameDiscovererKotlinTests(KotlinReflectionParameterNameDiscoverer())
