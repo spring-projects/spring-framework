@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,11 +72,11 @@ class DynamicJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> 
 	@Override
 	public FileObject getFileForOutput(Location location, String packageName,
 			String relativeName, FileObject sibling) {
-		ResourceFile resourceFile = this.resourceFiles.get(relativeName);
-		if (resourceFile != null) {
-			return new DynamicResourceFileObject(relativeName, resourceFile.getContent());
-		}
-		return this.dynamicResourceFiles.computeIfAbsent(relativeName, DynamicResourceFileObject::new);
+		return this.dynamicResourceFiles.computeIfAbsent(relativeName, name -> {
+			ResourceFile resourceFile = this.resourceFiles.get(name);
+			return (resourceFile != null) ? new DynamicResourceFileObject(name, resourceFile.getContent()) :
+					new DynamicResourceFileObject(name);
+		});
 	}
 
 	@Override
