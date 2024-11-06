@@ -30,13 +30,16 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
@@ -62,7 +65,23 @@ import org.springframework.util.StringUtils;
  * <li>{@link #set(String, String)} sets the header value to a single string value</li>
  * </ul>
  *
- * <p>Note that {@code HttpHeaders} generally treats header names in a case-insensitive manner.
+ * <p>Note that {@code HttpHeaders} instances created by the default constructor
+ * treat header names in a case-insensitive manner. Instances created with the
+ * {@link #HttpHeaders(MultiValueMap)} constructor like those instantiated
+ * internally by the framework to adapt to existing HTTP headers data structures
+ * do guarantee per-header get/set/add operations to be case-insensitive as
+ * mandated by the HTTP specification. However, it is not necessarily the case
+ * for operations that deal with the collection as a whole (like {@code size()},
+ * {@code values()}, {@code keySet()} and {@code entrySet()}). Prefer using
+ * {@link #headerSet()} for these cases.
+ *
+ * <p>Some backing implementations can store header names in a case-sensitive
+ * manner, which will lead to duplicates during the entrySet() iteration where
+ * multiple occurrences of a header name can surface depending on letter casing
+ * but each such entry has the full {@code List} of values. &mdash; This can be
+ * problematic for example when copying headers into a new instance by iterating
+ * over the old instance's {@code entrySet()} and using
+ * {@link #addAll(String, List)} rather than {@link #put(String, List)}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -70,6 +89,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Josh Long
  * @author Sam Brannen
+ * @author Simon Baslé
  * @since 3.0
  */
 public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
@@ -417,8 +437,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	/**
-	 * Construct a new, empty instance of the {@code HttpHeaders} object.
-	 * <p>This is the common constructor, using a case-insensitive map structure.
+	 * Construct a new, empty instance of the {@code HttpHeaders} object
+	 * using an underlying case-insensitive map.
 	 */
 	public HttpHeaders() {
 		this(CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT)));
@@ -1779,11 +1799,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	// Map implementation
 
 	@Override
-	public int size() {
-		return this.headers.size();
-	}
-
-	@Override
 	public boolean isEmpty() {
 		return this.headers.isEmpty();
 	}
@@ -1825,28 +1840,80 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	@Override
+	public List<String> putIfAbsent(String key, List<String> value) {
+		return this.headers.putIfAbsent(key, value);
+	}
+
+	// Map/MultiValueMap methods that can have duplicate header names: size/keySet/values/entrySet/forEach
+
+	/**
+	 * Return the number of headers in the collection. This can be inflated,
+	 * see {@link HttpHeaders class level javadoc}.
+	 */
+	@Override
+	public int size() {
+		return this.headers.size();
+	}
+
+	/**
+	 * Return a {@link Set} view of header names. This can include multiple
+	 * casing variants of a given header name, see
+	 * {@link HttpHeaders class level javadoc}.
+	 */
+	@Override
 	public Set<String> keySet() {
 		return this.headers.keySet();
 	}
 
+	/**
+	 * Return a {@link Collection} view of all the header values, reconstructed
+	 * from iterating over the {@link #keySet()}. This can include duplicates if
+	 * multiple casing variants of a given header name are tracked, see
+	 * {@link HttpHeaders class level javadoc}.
+	 */
 	@Override
 	public Collection<List<String>> values() {
 		return this.headers.values();
 	}
 
+	/**
+	 * Return a {@link Set} views of header entries, reconstructed from
+	 * iterating over the {@link #keySet()}. This can include duplicate entries
+	 * if multiple casing variants of a given header name are tracked, see
+	 * {@link HttpHeaders class level javadoc}.
+	 * @see #headerSet()
+	 */
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
 		return this.headers.entrySet();
 	}
 
+	/**
+	 * Perform an action over each header, as when iterated via
+	 * {@link #entrySet()}. This can include duplicate entries
+	 * if multiple casing variants of a given header name are tracked, see
+	 * {@link HttpHeaders class level javadoc}.
+	 * @param action the action to be performed for each entry
+	 */
 	@Override
 	public void forEach(BiConsumer<? super String, ? super List<String>> action) {
 		this.headers.forEach(action);
 	}
 
-	@Override
-	public List<String> putIfAbsent(String key, List<String> value) {
-		return this.headers.putIfAbsent(key, value);
+	/**
+	 * Return a view of the headers as an entry {@code Set} of key-list pairs.
+	 * Both {@link Iterator#remove()} and {@link java.util.Map.Entry#setValue}
+	 * are supported and mutate the headers.
+	 * <p>This collection is guaranteed to contain one entry per header name
+	 * even if the backing structure stores multiple casing variants of names,
+	 * at the cost of first copying the names into a case-insensitive set for
+	 * filtering the iteration.
+	 * @return a {@code Set} view that iterates over all headers in a
+	 * case-insensitive manner
+	 * @since 6.1.15
+	 */
+	public Set<Entry<String, List<String>>> headerSet() {
+		return new CaseInsensitiveEntrySet(this.headers);
 	}
 
 
@@ -1909,19 +1976,30 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Helps to format HTTP header values, as HTTP header values themselves can
 	 * contain comma-separated values, can become confusing with regular
 	 * {@link Map} formatting that also uses commas between entries.
+	 * <p>Additionally, this method displays the native list of header names
+	 * with the mention {@code with native header names} if the underlying
+	 * implementation stores multiple casing variants of header names (see
+	 * {@link HttpHeaders class level javadoc}).
 	 * @param headers the headers to format
 	 * @return the headers to a String
 	 * @since 5.1.4
 	 */
 	public static String formatHeaders(MultiValueMap<String, String> headers) {
-		return headers.entrySet().stream()
-				.map(entry -> {
-					List<String> values = entry.getValue();
-					return entry.getKey() + ":" + (values.size() == 1 ?
+		Set<String> headerNames = toCaseInsensitiveSet(headers.keySet());
+		String suffix = "]";
+		if (headerNames.size() != headers.size()) {
+			suffix = "] with native header names " + headers.keySet();
+		}
+
+		return headerNames.stream()
+				.map(headerName -> {
+					List<String> values = headers.get(headerName);
+					Assert.notNull(values, "Expected at least one value for header " + headerName);
+					return headerName + ":" + (values.size() == 1 ?
 							"\"" + values.get(0) + "\"" :
 							values.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
 				})
-				.collect(Collectors.joining(", ", "[", "]"));
+				.collect(Collectors.joining(", ", "[", suffix));
 	}
 
 	/**
@@ -1972,6 +2050,105 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		Instant instant = Instant.ofEpochMilli(date);
 		ZonedDateTime time = ZonedDateTime.ofInstant(instant, GMT);
 		return DATE_FORMATTER.format(time);
+	}
+
+
+	private static Set<String> toCaseInsensitiveSet(Set<String> originalSet) {
+		final Set<String> deduplicatedSet = Collections.newSetFromMap(
+				new LinkedCaseInsensitiveMap<>(originalSet.size(), Locale.ROOT));
+		// add/addAll (put/putAll in LinkedCaseInsensitiveMap) retain the casing of the last occurrence.
+		// Here we prefer the first.
+		for (String header : originalSet) {
+			//noinspection RedundantCollectionOperation
+			if (!deduplicatedSet.contains(header)) {
+				deduplicatedSet.add(header);
+			}
+		}
+		return deduplicatedSet;
+	}
+
+
+	private static final class CaseInsensitiveEntrySet extends AbstractSet<Entry<String, List<String>>> {
+
+		private final MultiValueMap<String, String> headers;
+		private final Set<String> deduplicatedNames;
+
+		public CaseInsensitiveEntrySet(MultiValueMap<String, String> headers) {
+			this.headers = headers;
+			this.deduplicatedNames = toCaseInsensitiveSet(headers.keySet());
+		}
+
+		@Override
+		public Iterator<Map.Entry<String, List<String>>> iterator() {
+			return new CaseInsensitiveIterator(this.deduplicatedNames.iterator());
+		}
+
+		@Override
+		public int size() {
+			return this.deduplicatedNames.size();
+		}
+
+		private final class CaseInsensitiveIterator implements Iterator<Map.Entry<String, List<String>>> {
+
+			private final Iterator<String> namesIterator;
+
+			@Nullable
+			private String currentName;
+
+			private CaseInsensitiveIterator(Iterator<String> namesIterator) {
+				this.namesIterator = namesIterator;
+				this.currentName = null;
+			}
+
+			@Override
+			public boolean hasNext() {
+				return this.namesIterator.hasNext();
+			}
+
+			@Override
+			public Map.Entry<String, List<String>> next() {
+				this.currentName = this.namesIterator.next();
+				return new CaseInsensitiveEntry(this.currentName);
+			}
+
+			@Override
+			public void remove() {
+				if (this.currentName == null) {
+					throw new IllegalStateException("No current Header in iterator");
+				}
+				if (!CaseInsensitiveEntrySet.this.headers.containsKey(this.currentName)) {
+					throw new IllegalStateException("Header not present: " + this.currentName);
+				}
+				CaseInsensitiveEntrySet.this.headers.remove(this.currentName);
+			}
+		}
+
+		private final class CaseInsensitiveEntry implements Map.Entry<String, List<String>> {
+
+			private final String key;
+
+			CaseInsensitiveEntry(String key) {
+				this.key = key;
+			}
+
+			@Override
+			public String getKey() {
+				return this.key;
+			}
+
+			@Override
+			public List<String> getValue() {
+				return Objects.requireNonNull(CaseInsensitiveEntrySet.this.headers.get(this.key));
+			}
+
+			@Override
+			public List<String> setValue(List<String> value) {
+				List<String> previousValues = Objects.requireNonNull(
+						CaseInsensitiveEntrySet.this.headers.get(this.key));
+				CaseInsensitiveEntrySet.this.headers.put(this.key, value);
+				return previousValues;
+			}
+		}
 	}
 
 }
