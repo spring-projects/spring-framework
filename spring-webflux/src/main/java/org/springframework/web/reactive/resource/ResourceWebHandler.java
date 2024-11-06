@@ -379,7 +379,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			Assert.isTrue(CollectionUtils.isEmpty(this.locationResources), "Please set " +
 					"either Resource-based \"locations\" or String-based \"locationValues\", but not both.");
 			for (String location : this.locationValues) {
-				ResourceHandlerUtils.assertLocationPath(location);
+				location = ResourceHandlerUtils.initLocationPath(location);
 				result.add(this.resourceLoader.getResource(location));
 			}
 		}
