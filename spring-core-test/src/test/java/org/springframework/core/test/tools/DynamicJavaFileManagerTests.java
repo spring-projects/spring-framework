@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.test.tools;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.EnumSet;
 
@@ -152,6 +153,23 @@ class DynamicJavaFileManagerTests {
 		writeDummyResource(this.fileManager.getFileForOutput(this.location, "", "META-INF/second.properties", null));
 		assertThat(this.fileManager.getDynamicResourceFiles()).containsKeys("META-INF/first.properties",
 				"META-INF/second.properties");
+	}
+
+	@Test
+	void existingResourceFileCanBeUpdated() throws IOException {
+		try (InputStream input = getResourceOne().openInputStream()) {
+			assertThat(input).hasContent("a");
+		}
+		try (OutputStream output = getResourceOne().openOutputStream()) {
+			output.write('b');
+		}
+		try (InputStream input = getResourceOne().openInputStream()) {
+			assertThat(input).hasContent("b");
+		}
+	}
+
+	private FileObject getResourceOne() {
+		return this.fileManager.getFileForOutput(this.location, "", "com/example/one/resource.one", null);
 	}
 
 	private void writeDummyBytecode(JavaFileObject fileObject) throws IOException {
