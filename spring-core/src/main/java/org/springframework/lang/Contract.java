@@ -32,34 +32,47 @@ import java.lang.annotation.Target;
  * been introduce in the {@code org.springframework.lang} package to avoid requiring
  * an extra dependency, while still following the same semantics.
  *
- * <p>Method contract has the following syntax:<br/>
- *  contract ::= (clause ';')* clause<br/>
- *  clause ::= args '->' effect<br/>
- *  args ::= ((arg ',')* arg )?<br/>
- *  arg ::= value-constraint<br/>
- *  value-constraint ::= 'any' | 'null' | '!null' | 'false' | 'true'<br/>
- *  effect ::= value-constraint | 'fail'
+ * <p>Method contract has the following syntax:
+ * <pre>{@code
+ *  contract ::= (clause ';')* clause
+ *  clause ::= args '->' effect
+ *  args ::= ((arg ',')* arg )?
+ *  arg ::= value-constraint
+ *  value-constraint ::= '_' | 'null' | '!null' | 'false' | 'true'
+ *  effect ::= value-constraint | 'fail' | 'this' | 'new' | 'param<N>'}</pre>
  *
- * The constraints denote the following:<br/>
+ * <p>The constraints denote the following:
  * <ul>
- * <li> <code>_</code> - any value</li>
- * <li> <code>null</code> - null value</li>
- * <li> <code>!null</code> - a value statically proved to be not-null</li>
- * <li> <code>true</code> - true boolean value</li>
- * <li> <code>false</code> - false boolean value</li>
- * <li> <code>fail</code> - the method throws an exception, if the arguments satisfy argument
- * constraints</li>
+ * <li>{@code _} - any value
+ * <li>{@code null} - null value
+ * <li>{@code !null} - a value statically proved to be not-null
+ * <li>{@code true} - true boolean value
+ * <li>{@code false} - false boolean value
  * </ul>
+ *
+ * <p>The additional return values denote the following:
+ * <ul>
+ * <li>{@code fail} - the method throws an exception, if the arguments satisfy argument constraints
+ * <li>{@code new} - the method returns a non-null new object which is distinct from any other object existing in the heap prior to method execution. If method is also pure, then we can be sure that the new object is not stored to any field/array and will be lost if method return value is not used.
+ * <li>{@code this} - the method returns its qualifier value (not applicable for static methods)
+ * <li>{@code param1, param2, ...} - the method returns its first (second, ...) parameter value
+ * </ul>
+ *
  * <p>Examples:
- * <code>@Contract("_, null -> null")</code> - method returns null if its second
- * argument is null<br/>
- * <code>@Contract("_, null -> null; _, !null -> !null")</code> - method returns
- * null if its second argument is null and not-null otherwise<br/>
- * <code>@Contract("true -> fail")</code> - a typical assertFalse method which
- * throws an exception if <code>true</code> is passed to it<br/>
+ * <ul>
+ * <li>{@code @Contract("_, null -> null")} - the method returns null if its second argument is null.
+ * <li>{@code @Contract("_, null -> null; _, !null -> !null")} - the method returns null if its second argument is null and not-null otherwise.
+ * <li>{@code @Contract("true -> fail")} - a typical {@code assertFalse} method which throws an exception if {@code true} is passed to it.
+ * <li>{@code @Contract("_ -> this")} - the method always returns its qualifier (e.g. {@link StringBuilder#append(String)}).
+ * <li>{@code @Contract("null -> fail; _ -> param1")} - the method throws an exception if the first argument is null,
+ * otherwise it returns the first argument (e.g. {@code Objects.requireNonNull}).
+ * <li>{@code @Contract("!null, _ -> param1; null, !null -> param2; null, null -> fail")} - the method returns the first non-null argument,
+ * or throws an exception if both arguments are null (e.g. {@code Objects.requireNonNullElse}).
+ * </ul>
  *
  * @author Sebastien Deleuze
  * @since 6.2
+ * @see <a href="https://github.com/JetBrains/java-annotations/blob/master/src/jvmMain/java/org/jetbrains/annotations/Contract.java">org.jetbrains.annotations.Contract</a>
  * @see <a href="https://github.com/uber/NullAway/wiki/Configuration#custom-contract-annotations">
  * NullAway custom contract annotations</a>
  */
