@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,3 +67,16 @@ suspend fun <T> RowsFetchSpec<T>.awaitSingleOrNull(): T? =
  * @author Sebastien Deleuze
  */
 fun <T : Any> RowsFetchSpec<T>.flow(): Flow<T> = all().asFlow()
+
+/**
+ * Collects all rows in the result set into a list.
+ *
+ * @return A list containing all rows from the query result, or an empty list if no rows are found.
+ * This function collects all rows asynchronously and returns them as a single list,
+ * providing a convenient alternative when all results are needed at once.
+ *
+ * @author Jimin Jo
+ */
+suspend fun <T : Any> RowsFetchSpec<T>.awaitAllToList() =
+	all().collectList().awaitSingleOrNull() ?: emptyList()
+

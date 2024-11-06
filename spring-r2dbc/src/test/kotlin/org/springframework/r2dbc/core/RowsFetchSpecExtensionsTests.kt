@@ -163,4 +163,31 @@ class RowsFetchSpecExtensionsTests {
 		}
 	}
 
+	@Test
+	fun awaitSingleToListNotEmpty() {
+		val spec = mockk<RowsFetchSpec<String>>()
+		every { spec.all() } returns Flux.just("foo", "bar", "baz")
+
+		runBlocking {
+			 assertThat(spec.awaitAllToList()).contains("foo", "bar", "baz")
+		}
+
+		verify {
+			spec.all()
+		}
+	}
+
+	@Test
+	fun awaitSingleToListEmpty() {
+		val spec = mockk<RowsFetchSpec<String>>()
+		every { spec.all() } returns Flux.just()
+
+		runBlocking {
+			assertThat(spec.awaitAllToList()).isEmpty()
+		}
+		verify {
+			spec.all()
+		}
+	}
+
 }
