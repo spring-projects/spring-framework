@@ -74,6 +74,12 @@ class NamedValueArgumentResolverTests {
 		assertTestValue("value", "2022-09-16");
 	}
 
+	@Test // gh-33794
+	void dateNullValue() {
+		this.service.executeDate(null);
+		assertTestValue("value");
+	}
+
 	@Test
 	void objectTestValue() {
 		this.service.execute(Boolean.TRUE);
@@ -182,7 +188,7 @@ class NamedValueArgumentResolverTests {
 		void executeString(@TestValue String value);
 
 		@GetExchange
-		void executeDate(@TestValue @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate value);
+		void executeDate(@Nullable @TestValue(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate value);
 
 		@GetExchange
 		void execute(@TestValue Object value);
