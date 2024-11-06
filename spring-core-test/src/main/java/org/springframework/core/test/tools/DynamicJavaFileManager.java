@@ -70,11 +70,12 @@ class DynamicJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> 
 	}
 
 	@Override
-	public FileObject getFileForOutput(Location location, String packageName, String relativeName, FileObject sibling) {
+	public FileObject getFileForOutput(Location location, String packageName,
+			String relativeName, FileObject sibling) {
 		return this.dynamicResourceFiles.computeIfAbsent(relativeName, name -> {
 			ResourceFile resourceFile = this.resourceFiles.get(name);
-			return (resourceFile != null) ? new DynamicResourceFileObject(name, resourceFile.getContent())
-					: new DynamicResourceFileObject(name);
+			return (resourceFile != null) ? new DynamicResourceFileObject(name, resourceFile.getContent()) :
+					new DynamicResourceFileObject(name);
 		});
 	}
 
