@@ -16,6 +16,7 @@
 package org.springframework.r2dbc.core
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.dao.EmptyResultDataAccessException
@@ -78,5 +79,4 @@ fun <T : Any> RowsFetchSpec<T>.flow(): Flow<T> = all().asFlow()
  * @author Jimin Jo
  */
 suspend fun <T : Any> RowsFetchSpec<T>.awaitAllToList() =
-	all().collectList().awaitSingleOrNull() ?: emptyList()
-
+	all().asFlow().toList()
