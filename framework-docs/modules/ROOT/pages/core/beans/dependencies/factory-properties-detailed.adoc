@@ -102,8 +102,8 @@ following snippet:
 ----
 	<bean id="theTargetBean" class="..." />
 
-	<bean id="client" class="...">
-		<property name="targetName" value="theTargetBean"/>
+	<bean id="theClientBean" class="...">
+		<property name="targetName" ref="theTargetBean"/>
 	</bean>
 ----
 
