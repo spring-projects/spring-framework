@@ -378,6 +378,20 @@ For instance, autowiring on fields and methods will be skipped as they are handl
 
 Rather than having prototype-scoped beans created with custom arguments, we recommend a manual factory pattern where a bean is responsible for the creation of the instance.
 
+[[aot.bestpractices.circular-dependencies]]
+=== Avoid Circular Dependencies
+
+Certain use cases can result in circular dependencies between one or more beans. With the
+regular runtime, it may be possible to wire those circular dependencies via `@Autowired`
+on setter methods or fields. However, an AOT-optimized context will fail to start with
+explicit circular dependencies.
+
+In an AOT-optimized application, you should therefore strive to avoid circular
+dependencies. If that is not possible, you can use `@Lazy` injection points or
+`ObjectProvider` to lazily access or retrieve the necessary collaborating beans. See
+xref:core/beans/classpath-scanning.adoc#beans-factorybeans-annotations-lazy-injection-points[this tip]
+for further information.
+
 [[aot.bestpractices.factory-bean]]
 === FactoryBean
 
