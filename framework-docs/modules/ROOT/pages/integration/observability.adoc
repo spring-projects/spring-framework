@@ -305,6 +305,7 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 === RestClient
 
 Applications must configure an `ObservationRegistry` on the `RestClient.Builder` to enable the instrumentation; without that, observations are "no-ops".
+Spring Boot will auto-configure `RestClient.Builder` beans with the observation registry already set.
 
 Instrumentation uses the `org.springframework.http.client.observation.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
 
