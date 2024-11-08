@@ -201,7 +201,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 
 		List<PropertyAccessor> accessorsToTry =
-				AstUtils.getAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
+				AccessorUtils.getAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
 		// Go through the accessors that may be able to resolve it. If they are a cacheable accessor then
 		// get the accessor and use it. If they are not cacheable but report they can read the property
 		// then ask them to read it
@@ -259,7 +259,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 
 		List<PropertyAccessor> accessorsToTry =
-				AstUtils.getAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
+				AccessorUtils.getAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
 		try {
 			for (PropertyAccessor accessor : accessorsToTry) {
 				if (accessor.canWrite(evalContext, targetObject, name)) {
@@ -284,7 +284,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		Object targetObject = contextObject.getValue();
 		if (targetObject != null) {
 			List<PropertyAccessor> accessorsToTry =
-					AstUtils.getAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
+					AccessorUtils.getAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
 			for (PropertyAccessor accessor : accessorsToTry) {
 				try {
 					if (accessor.canWrite(evalContext, targetObject, name)) {

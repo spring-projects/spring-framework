@@ -25,13 +25,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Utility methods for use in the AST classes.
+ * Utility methods for use with property and index accessors.
  *
  * @author Andy Clement
  * @author Sam Brannen
  * @since 3.0.2
  */
-abstract class AstUtils {
+abstract class AccessorUtils {
 
 	/**
 	 * Determine the set of accessors that should be used to try to access an
