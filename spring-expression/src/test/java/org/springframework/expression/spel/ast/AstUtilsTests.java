@@ -18,7 +18,6 @@ package org.springframework.expression.spel.ast;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationContext;
@@ -79,17 +78,10 @@ class AstUtilsTests {
 	@Test
 	void exactTypeMatches() {
 		List<PropertyAccessor> accessorsToTry = getPropertyAccessorsToTry(new Cat(), accessors);
-		// We would actually expect the following.
-		// assertThat(accessorsToTry).containsExactly(
-		// 		cat1Accessor, cat2Accessor, animal1Accessor, animal2Accessor, generic1Accessor, generic2Accessor);
-		// However, prior to Spring Framework 6.2, the supertype and generic accessors are not
-		// ordered properly. So we test that the exact matches come first and in the expected order.
-		assertThat(accessorsToTry)
-				.hasSize(accessors.size())
-				.startsWith(cat1Accessor, cat2Accessor);
+		assertThat(accessorsToTry).containsExactly(
+				cat1Accessor, cat2Accessor, animal1Accessor, animal2Accessor, generic1Accessor, generic2Accessor);
 	}
 
-	@Disabled("PropertyAccessor ordering for supertype and generic matches is broken prior to Spring Framework 6.2")
 	@Test
 	void supertypeMatches() {
 		List<PropertyAccessor> accessorsToTry = getPropertyAccessorsToTry(new Dog(), accessors);
@@ -109,7 +101,7 @@ class AstUtilsTests {
 	}
 
 	private static List<PropertyAccessor> getPropertyAccessorsToTry(Object target, List<PropertyAccessor> propertyAccessors) {
-		return AstUtils.getPropertyAccessorsToTry(target.getClass(), propertyAccessors);
+		return AstUtils.getAccessorsToTry(target, propertyAccessors);
 	}
 
 
