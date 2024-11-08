@@ -26,19 +26,13 @@ import org.springframework.lang.Nullable;
  * Implementors are therefore free to access properties directly via fields,
  * through getters, or in any other way they deem appropriate.
  *
- * <p>A property accessor can optionally specify an array of target classes for
- * which it should be called. However, if it returns {@code null} from
- * {@link #getSpecificTargetClasses()}, it will be called for all property
- * references and given a chance to determine if it can read or write them.
- *
- * <p>Property accessors are considered to be ordered, and each will be called in
- * turn. The only rule that affects the call order is that any property accessor
- * which specifies explicit support for the target class via
- * {@link #getSpecificTargetClasses()} will be called first, before the generic
- * property accessors.
+ * <p>A property accessor can specify an array of
+ * {@linkplain #getSpecificTargetClasses() target classes} for which it should be
+ * called. See {@link TargetedAccessor} for details.
  *
  * @author Andy Clement
  * @since 3.0
+ * @see TargetedAccessor
  * @see IndexAccessor
  */
 public interface PropertyAccessor extends TargetedAccessor {

@@ -55,20 +55,23 @@ abstract class AstUtils {
 	/**
 	 * Determine the set of accessors that should be used to try to access an
 	 * element on the specified target type.
-	 * <p>The accessors are considered to be in an ordered list; however, in the
-	 * returned list any accessors that are exact matches for the input target
-	 * type (as opposed to 'generic' accessors that could work for any type) are
-	 * placed at the start of the list. In addition, if there are specific
-	 * accessors that exactly name the class in question and accessors that name
-	 * a specific class which is a supertype of the class in question, the latter
-	 * are put at the end of the specific accessors set and will be tried after
-	 * exactly matching accessors but before generic accessors.
+	 * <p>The supplied accessors are considered to be in an ordered list; however,
+	 * in the returned list any accessors that are exact matches for the supplied
+	 * target type are placed at the start of the list (as opposed to 'generic'
+	 * accessors that could work for any target type). In addition, if there are
+	 * accessors that claim support for the exact target type as well as accessors
+	 * that claim support for a supertype of the target type, the latter are placed
+	 * at the end of the specific accessors set and will be tried after exactly
+	 * matching accessors but before generic accessors.
+	 * <p>Only matching accessors and generic accessors will be included in the
+	 * returned list.
 	 * @param targetType the type upon which element access is being attempted
 	 * @param accessors the list of element accessors to process
 	 * @return a list of accessors that should be tried in order to access the
 	 * element on the specified target type, or an empty list if no suitable
 	 * accessor could be found
 	 * @since 6.2
+	 * @see TargetedAccessor#getSpecificTargetClasses()
 	 */
 	static <T extends TargetedAccessor> List<T> getAccessorsToTry(
 			@Nullable Class<?> targetType, List<T> accessors) {

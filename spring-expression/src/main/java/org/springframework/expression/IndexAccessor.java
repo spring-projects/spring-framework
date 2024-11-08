@@ -26,21 +26,14 @@ import org.springframework.lang.Nullable;
  * structure. Implementors are therefore free to access indexed values any way
  * they deem appropriate.
  *
- * <p>An index accessor can optionally specify an array of target classes for
- * which it should be called. However, if it returns {@code null} or an empty
- * array from {@link #getSpecificTargetClasses()}, it will be called for all
- * indexing operations and given a chance to determine if it can read from or
- * write to the indexed structure.
- *
- * <p>Index accessors are considered to be ordered, and each will be called in
- * turn. The only rule that affects the call order is that any index accessor
- * which specifies explicit support for the target class via
- * {@link #getSpecificTargetClasses()} will be called first, before other
- * generic index accessors.
+ * <p>An index accessor can specify an array of
+ * {@linkplain #getSpecificTargetClasses() target classes} for which it should be
+ * called. See {@link TargetedAccessor} for details.
  *
  * @author Jackmiking Lee
  * @author Sam Brannen
  * @since 6.2
+ * @see TargetedAccessor
  * @see PropertyAccessor
  */
 public interface IndexAccessor extends TargetedAccessor {
